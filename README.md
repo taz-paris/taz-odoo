@@ -1,2 +1,2 @@
-# tax-odoo
+# taz-odoo
 Modules Odoo pour Tasmane
