@@ -6,6 +6,7 @@
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <tree>
+          <field name="is_company" invisible="1"/>
           <field name="name"/>
           <field name="industry_id"/>
         </tree>
@@ -18,6 +19,7 @@
       <field name="arch" type="xml">
         <form>
 	  <group>
+              <field name="is_company" default="1" invisible="1"/>
               <field name="name"/>
               <field name="industry_id" options="{'no_create': True}"/>
 	      <field name="child_ids" context="{'company_id':id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
@@ -30,7 +32,7 @@
     <record model="ir.actions.act_window" id="taz-common.action_partner_company">
       <field name="name">Clients</field>
       <field name="res_model">res.partner</field>
-      <field name="context">{}</field>
+      <field name="context">{"default_is_company":True}</field>
       <field name="view_mode">tree,form,kanban</field>
 		      <field name="view_ids" eval="
                             [
@@ -50,6 +52,7 @@
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <tree>
+                        <field name="is_company" invisible="1"/>
           <field name="name"/>
           <field name="parent_id"/>
           <field name="email"/>
@@ -98,6 +101,11 @@
 			</group>
                     </group>
                     </sheet>
+		    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
         </form>
       </field>
     </record>
