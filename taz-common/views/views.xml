@@ -1,0 +1,272 @@
+<odoo>
+  <data>
+    <!-- COMPANY -->
+    <record model="ir.ui.view" id="taz-common.company_tree">
+      <field name="name">Clients</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="industry_id"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="taz-common.company_form">
+      <field name="name">Clients</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <form>
+	  <group>
+              <field name="name"/>
+              <field name="industry_id" options="{'no_create': True}"/>
+	      <field name="child_ids" context="{'company_id':id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+          </group>
+          <field name="company_type" widget="radio" invisible="1" options="{'horizontal': true}"/>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="taz-common.action_partner_company">
+      <field name="name">Clients</field>
+      <field name="res_model">res.partner</field>
+      <field name="context">{}</field>
+      <field name="view_mode">tree,form,kanban</field>
+		      <field name="view_ids" eval="
+                            [
+                            (5, 0, 0),
+                            (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),
+                            (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),
+			      ]" />
+      <field name="help" type="html">
+		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
+      </field>
+      <field name="domain">[('is_company', '=', True)]</field> 
+      <field name="filter">[('is_company', '=', True)]</field> 
+    </record>
+
+    <record model="ir.ui.view" id="taz-common.contact_tree">
+      <field name="name">Contacts</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="parent_id"/>
+          <field name="email"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="taz-common.contact_form">
+      <field name="name">Contacts</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+        <form>
+                <sheet>
+                    <div class="oe_title mb24">
+                        <field name="is_company" invisible="1"/>
+                        <field name="commercial_partner_id" invisible="1"/>
+                        <field name="active" invisible="1"/>
+                        <field name="company_id" invisible="1"/>
+                        <field name="country_code" invisible="1"/>
+                        <field name="company_type" widget="radio" invisible="1" options="{'horizontal': true}"/>
+                        <h1>
+                            <field id="company" class="text-break" name="name" default_focus="1" placeholder="e.g. Lumber Inc" attrs="{'required' : [('is_company', '=', True)], 'invisible': [('is_company','=', False)]}"/>
+                            <field id="individual" class="text-break" name="name" default_focus="1" placeholder="e.g. Brandom Freeman" attrs="{'required' : [('is_company', '=', False)], 'invisible': [('is_company','=', True)]}"/>
+                        </h1>
+                        <div class="o_row">
+                            <field name="parent_id" widget="res_partner_many2one" placeholder="Company Name..." domain="[('is_company', '=', True)]" context="{'default_is_company': True, 'show_vat': True, 'default_user_id': user_id}" attrs="{'invisible': ['|', '&amp;', ('is_company','=', True),('parent_id', '=', False),('company_name', '!=', False),('company_name', '!=', '')]}"/>
+                                <field name="company_name" attrs="{'invisible': ['|', '|', ('company_name', '=', False), ('company_name', '=', ''), ('is_company', '=', True)]}"/>
+                                <button name="create_company" icon="fa-plus-square" string="Create company" type="object" class="oe_edit_only btn-link" attrs="{'invisible': ['|', '|', ('is_company','=', True), ('company_name', '=', ''), ('company_name', '=', False)]}"/>
+                        </div>
+                    </div>
+
+                    <group>
+			<group>
+			    <field name="user_ids" invisible="1"/>
+                            <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
+                            <field name="phone" widget="phone"/>
+                            <field name="mobile" widget="phone"/>
+                            <field name="email" widget="email" context="{'gravatar_image': True}" attrs="{'required': [('user_ids','!=', [])]}"/>
+                            <field name="title" options="{&quot;no_open&quot;: True}" placeholder="e.g. Mister" attrs="{'invisible': [('is_company', '=', True)]}"/>
+                            <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
+                        </group>
+			<group>
+                                    <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
+                                    <field name="industry_id" attrs="{'invisible': [('is_company', '=', False)]}" options="{'no_create': True}"/>
+                            <field name="comment" placeholder="Internal notes..."/>
+			</group>
+                    </group>
+                    </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="taz-common.action_partner_contact">
+      <field name="name">Contacts</field>
+      <field name="res_model">res.partner</field>
+      <field name="context">{}</field>
+      <field name="view_mode">tree,form,kanban</field>
+		      <field name="view_ids" eval="
+                            [
+                            (5, 0, 0),
+                            (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),
+                            (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),
+			      ]" />
+      <field name="help" type="html">
+		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
+      </field>
+      <field name="domain">[('is_company', '=', False)]</field> 
+      <field name="filter">[('is_company', '!=', True)]</field> 
+    </record>
+
+
+    <record id="taz-common.mail_activity_action" model="ir.actions.act_window">
+        <field name="name">Activités commerciales</field>
+        <field name="res_model">mail.activity</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="taz-common.mail_activity_view_form_popup" model="ir.ui.view">
+        <field name="name">mail.activity.view.form.popup</field>
+        <field name="model">mail.activity</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <form string="Log an Activity" create="false">
+                <sheet string="Activity">
+                    <div class="oe_button_box" name="button_box" invisible="1">
+                        <button name="action_open_document" string="Voir le contact"
+                                type="object" class="oe_link" icon="fa-file-text-o"
+                                attrs="{'invisible': ['|', ('res_model', '=', False), ('res_id', '=', 0)]}"/>
+                    </div>
+                    <group invisible="1">
+                        <field name="activity_category" invisible="1" />
+                        <field name="res_model" invisible="1"/>
+                        <field name="res_model_id" invisible="1"/>
+                        <field name="res_id" invisible="1"/>
+                        <field name="chaining_type" invisible="1"/>
+                        <field name="previous_activity_type_id"/>
+                        <field name="has_recommended_activities"/>
+                    </group>
+                    <group attrs="{'invisible': [('has_recommended_activities','=',False)]}">
+                        <div class="o_row">
+                            <strong>Recommended Activities</strong>
+                            <field name="recommended_activity_type_id" widget="selection_badge"
+                                domain="[('previous_type_ids', '=', previous_activity_type_id)]"
+                                nolabel="1"/>
+                        </div>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="activity_type_id" required="1" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="summary" placeholder="e.g. Discuss proposal"/>
+                        </group>
+                        <group>
+                            <field name="date_deadline"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                    <field name="note" class="oe-bordered-editor" placeholder="Log a note..."/>
+                    <footer>
+                        <field name="id" invisible="1"/>
+                        <button id="mail_activity_schedule" string="Schedule" name="action_close_dialog" type="object" class="btn-primary"
+                            attrs="{'invisible': [('id', '!=', False)]}" data-hotkey="q"/>
+                        <button id="mail_activity_save" string="Save" name="action_close_dialog" type="object" class="btn-primary"
+                            attrs="{'invisible': [('id', '=', False)]}" data-hotkey="q"/>
+                        <button attrs="{'invisible': [('chaining_type', '=', 'trigger')]}" string="Mark as Done" name="action_done"
+                            type="object" class="btn-secondary" data-hotkey="w"
+                            context="{'mail_activity_quick_update': True}"/>
+                        <button attrs="{'invisible': [('chaining_type', '=', 'trigger')]}" string="Done &amp; Schedule Next" name="action_done_schedule_next"
+                            type="object" class="btn-secondary" data-hotkey="x"
+                            context="{'mail_activity_quick_update': True}"/>
+                        <button attrs="{'invisible': [('chaining_type', '=', 'suggest')]}" string="Done &amp; Launch Next" name="action_done_schedule_next"
+                            type="object" class="btn-secondary" data-hotkey="x"
+                            context="{'mail_activity_quick_update': True}"/>
+                        <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="z" />
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="taz-common.mail_activity_view_form" model="ir.ui.view">
+        <field name="name">mail.activity.view.form</field>
+        <field name="model">mail.activity</field>
+        <field name="priority">21</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="taz-common.mail_activity_view_form_popup"/>
+        <field name="arch" type="xml">
+            <field name="activity_type_id" position="before">
+                <field name="res_name" readonly="1" string="Document"/>
+                <field name="res_id" />
+            </field>
+            <footer position="replace"/>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="taz-common.mail_activity_view_search" model="ir.ui.view">
+        <field name="name">mail.activity.view.search</field>
+        <field name="model">mail.activity</field>
+        <field name="arch" type="xml">
+            <search string="Activity">
+                <field name="res_model"/>
+                <field name="summary"/>
+                <field name="activity_type_id"/>
+                <filter invisible="1" string="Late Activities" name="activities_overdue"
+                        domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all records which has next action date is before today"/>
+                <filter invisible="1" string="Today Activities" name="activities_today"
+                        domain="[('date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
+                        domain="[('date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Deadline" name="date_deadline" context="{'group_by': 'date_deadline'}"/>
+                    <filter string="Created By" name="createdby" context="{'group_by': 'create_uid'}"/>
+                    <filter string="Activity Type" name="activittype" context="{'group_by': 'activity_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="taz-common.mail_activity_view_tree" model="ir.ui.view">
+        <field name="name">mail.activity.view.tree</field>
+        <field name="model">mail.activity</field>
+        <field name="arch" type="xml">
+            <tree string="Next Activities"
+                    decoration-danger="date_deadline &lt; current_date"
+                    decoration-success="date_deadline == current_date"
+                    default_order="date_deadline" create="false">
+                <field name="res_name"/>
+                <field name="activity_type_id"/>
+                <field name="summary"/>
+                <field name="date_deadline"/>
+                <field name="user_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="taz-common.mail_activity_action_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="act_window_id" ref="taz-common.mail_activity_action"/>
+    </record>
+    <record id="taz-common.mail_activity_action_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="taz-common.mail_activity_view_form"/>
+        <field name="act_window_id" ref="taz-common.mail_activity_action"/>
+    </record>
+
+
+    <menuitem name="Commerce" id="taz-common.commerce"/>
+    <menuitem name="Sociétés" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
+    <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
+    <menuitem name="Actions commerciales" id="taz-common.partner_activity" parent="taz-common.commerce" action="taz-common.mail_activity_action"/>
+
+  </data>
+</odoo>
