@@ -1,0 +1,91 @@
+<odoo>
+  <data>
+
+    <record id="taz-common.mail_activity_action" model="ir.actions.act_window">
+        <field name="name">Activités commerciales</field>
+        <field name="res_model">mail.activity</field>
+        <field name="view_mode">tree,form</field>
+		<!--<field name="domain">[('res.model', '=', 'res.partner')]</field> -->
+    </record>
+
+    <record id="taz-common.mail_activity_view_form" model="ir.ui.view">
+        <field name="name">mail.activity.view.form</field>
+        <field name="model">mail.activity</field>
+        <field name="priority">11</field>
+        <field name="arch" type="xml">
+	<form>
+          <group>
+	        <field name="res_model"/>
+	        <field name="res_model_id"/>
+		<field name="res_id"/>
+                <field name="res_name" readonly="1" string="Cible"/>
+		<field name="partner_id" domain="[('is_company', '!=', 'True')]"/>
+                <field name="state" readonly="1"/>
+		<field name="is_done"/>
+	</group>
+	</form>
+        </field>
+    </record>
+
+    <!--
+    <record id="taz-common.mail_activity_view_search" model="ir.ui.view">
+        <field name="name">mail.activity.view.search</field>
+        <field name="model">mail.activity</field>
+        <field name="arch" type="xml">
+            <search string="Activity">
+                <field name="res_model"/>
+                <field name="summary"/>
+                <field name="activity_type_id"/>
+                <filter invisible="1" string="Late Activities" name="activities_overdue"
+                        domain="[('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"
+                        help="Show all records which has next action date is before today"/>
+                <filter invisible="1" string="Today Activities" name="activities_today"
+                        domain="[('date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
+                        domain="[('date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))
+                        ]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Deadline" name="date_deadline" context="{'group_by': 'date_deadline'}"/>
+                    <filter string="Created By" name="createdby" context="{'group_by': 'create_uid'}"/>
+                    <filter string="Activity Type" name="activittype" context="{'group_by': 'activity_type_id'}"/>
+                </group>
+            </search>
+        </field>
+	    </record>
+    -->
+
+    <record id="taz-common.mail_activity_view_tree" model="ir.ui.view">
+        <field name="name">mail.activity.view.tree</field>
+        <field name="model">mail.activity</field>
+        <field name="priority">12</field>
+        <field name="arch" type="xml">
+            <tree string="Next Activities"
+                    decoration-danger="date_deadline &lt; current_date"
+                    decoration-success="date_deadline == current_date"
+                    default_order="date_deadline" create="true">
+                <field name="res_name" string="Cible"/>
+                <field name="activity_type_id"/>
+                <field name="summary"/>
+                <field name="date_deadline"/>
+                <field name="user_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="taz-common.mail_activity_action_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="act_window_id" ref="taz-common.mail_activity_action"/>
+    </record>
+    <record id="taz-common.mail_activity_action_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="taz-common.mail_activity_view_form"/>
+        <field name="act_window_id" ref="taz-common.mail_activity_action"/>
+    </record>
+
+    <menuitem name="Actions commerciales" id="taz-common.partner_activity" parent="taz-common.commerce" action="taz-common.mail_activity_action"/>
+
+  </data>
+</odoo>

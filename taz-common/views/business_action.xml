@@ -1,0 +1,58 @@
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="taz-common.business_action_tree">
+      <field name="name">Actions commerciales</field>
+      <field name="model">taz.business_action</field>
+      <field name="arch" type="xml">
+        <tree editable="top">
+          <field name="parent_partner_industry_id" optional="hide"/>
+          <field name="partner_id" domain="[('is_company', '!=', True)]"/>
+          <field name="state"/>
+          <field name="user_id"/>
+          <field name="date_deadline"/>
+          <field name="name"/>
+          <field name="note"/>
+      		<button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="taz-common.business_action_form">
+      <field name="name">Actions commerciales</field>
+      <field name="model">taz.business_action</field>
+      <field name="arch" type="xml">
+        <form>
+	  <group>
+          	<field name="name"/>
+          	<field name="partner_id" domain="[('is_company', '!=', True)]"/>
+          	<field name="state"/>
+          	<field name="user_id"/>
+          	<field name="date_deadline"/>
+          	<field name="note"/>
+          	<field name="parent_partner_industry_id"/>
+          </group>
+        </form>
+      </field>
+    </record>
+
+    <record id="taz-common.business_action_action" model="ir.actions.act_window">
+        <field name="name">Activités commerciales</field>
+        <field name="res_model">taz.business_action</field>
+        <field name="view_mode">tree,form</field>
+                <!--<field name="domain">[('res.model', '=', 'res.partner')]</field> -->
+    </record>
+    <record id="taz-common.business_action_action_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="act_window_id" ref="taz-common.business_action_action"/>
+    </record>
+    <record id="taz-common.business_action_action_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="act_window_id" ref="taz-common.business_action_action"/>
+    </record>
+
+    <menuitem name="Actions commerciales" id="taz-common.business_action" parent="taz-common.commerce" action="taz-common.business_action_action"/>
+
+  </data>
+</odoo>
