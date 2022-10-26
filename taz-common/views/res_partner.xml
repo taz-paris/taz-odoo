@@ -57,6 +57,7 @@
       <field name="arch" type="xml">
         <tree>
                         <field name="is_company" invisible="1"/>
+          <field name="first_name"/>
           <field name="name"/>
           <field name="parent_id"/>
           <field name="email"/>
@@ -78,9 +79,8 @@
                         <field name="country_code" invisible="1"/>
                         <field name="company_type" widget="radio" invisible="1" options="{'horizontal': true}"/>
                         <h1>
-				<field name="name" invisible="1"/>
-				<field name="first_name" placeholder="Nom"/>
-				<field name="last_name" placeholder="Prénom"/>
+				<field name="first_name" placeholder="Prénom"/>
+				<field name="name" placeholder="Nom"/>
                         </h1>
                         <div class="o_row">
                             <field name="parent_id" widget="res_partner_many2one" placeholder="Company Name..." domain="[('is_company', '=', True)]" context="{'default_is_company': True, 'show_vat': True, 'default_user_id': user_id}" attrs="{'invisible': ['|', '&amp;', ('is_company','=', True),('parent_id', '=', False),('company_name', '!=', False),('company_name', '!=', '')]}"/>

@@ -24,8 +24,7 @@ class tazOfficePeople(models.TransientModel):
         model = self.env['res.partner']
         res = {
                     'first_name' : self.first_name,
-                    'last_name' : self.last_name,
-                    'name' : self.first_name + ' ' + self.last_name,
+                    'name' : self.last_name,
                     'email' : self.email,
                     'user_id' : self.env.user.id,
                     'parent_id' : self.parent_id.id, 
