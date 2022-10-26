@@ -10,7 +10,7 @@
           <field name="last_name" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="email" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="parent_id" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
-          <field name="odoo_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="show"/>
+          <field name="odoo_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>
 	  <field name="user_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="show" string="Vendeur"/>
       		<button string="Créer sur Odoo" name="import_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','!=', False)]}"/>
       		<button string="Éditer sur Odoo" icon="fa-eye" name="open_res_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','=', False)]}"/>

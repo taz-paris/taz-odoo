@@ -75,12 +75,15 @@ class tazOfficePeople(models.TransientModel):
         data = self.env.user._msgraph_people()
         res = []
 
+        mapping_email_id_contact = {}
+        lc = self.env['res.partner'].search([('email', '!=', False), ('is_company', '=', False)])
+        for c in lc:
+            mapping_email_id_contact[c.email.lower()] = c.id
+
         for i in data :
             for mail in i["scoredEmailAddresses"]: #S'il y a plus d'une adresse pour un contact, c'est à  l'utilisateur de choisir quel contact créer sur Odoo
                 if DOMAIN_EXCLUSION in mail["address"] :
                     continue
-                #if mail["address"].lower() in mailchimpMembersMails : #TODO ne retourner que les contacts Outlook qui ne sont pas encore dans Odoo
-                #    continue
                 # TODO couleur warning si nom / prénom existe déjà en base pour ne pas remettre des vieilles adresses email d'anciens postes
                 computed_fname = ""
                 computed_lname = ""
@@ -90,12 +93,14 @@ class tazOfficePeople(models.TransientModel):
                     computed_lname = '.'.join(l[1:]).upper()
 
                 domain_target = mail["address"].split("@")[1]
-                #m = self.pool.get('res.partner')
-                cl = self.env['res.partner'].search([('is_company', '=', 'True'),('child_mail_address_domain_list', 'like', domain_target)], order="__last_update desc")
+                partner_id = None
+                cl = self.env['res.partner'].search([('is_company', '=', 'True'),('child_mail_address_domain_list', 'like', domain_target)], order="write_date desc")
                 if cl:
-                    partner_id = cl[0].id
-                else:
-                    partner_id = None
+                    parent_id = cl[0].id
+
+                odoo_id = None
+                if mail["address"].lower() in mapping_email_id_contact.keys():
+                    odoo_id = mapping_email_id_contact[mail["address"].lower()]
 
                 res.append({
                     'display_name':i['displayName'],
@@ -103,7 +108,8 @@ class tazOfficePeople(models.TransientModel):
                     'last_name' : computed_lname,
                     'email' : mail["address"],
                     'user_id' : self.env.user.id,
-                    'parent_id' : partner_id, 
+                    'parent_id' : parent_id, 
+                    'odoo_id' : odoo_id,
                     })
         self.create(res)
 
