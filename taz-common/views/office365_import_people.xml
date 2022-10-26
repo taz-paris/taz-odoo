@@ -1,0 +1,57 @@
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="taz-common.office365_import_people_tree">
+      <field name="name">Import contacts Office365</field>
+      <field name="model">taz.office_people</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="first_name"/>
+          <field name="last_name"/>
+          <field name="display_name"/>
+          <field name="email"/>
+        </tree>
+      </field>
+    </record>
+
+	  <!--
+      		<button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
+    <record model="ir.ui.view" id="taz-common.business_action_form">
+      <field name="name">Actions commerciales</field>
+      <field name="model">taz.business_action</field>
+      <field name="arch" type="xml">
+        <form>
+	  <group>
+          	<field name="name"/>
+          	<field name="partner_id" domain="[('is_company', '!=', True)]"/>
+          	<field name="state"/>
+          	<field name="user_id"/>
+          	<field name="date_deadline"/>
+          	<field name="note"/>
+          	<field name="parent_partner_industry_id"/>
+          </group>
+        </form>
+      </field>
+    </record>
+
+	  -->
+    <record id="taz-common.office365_import_people_action" model="ir.actions.act_window">
+        <field name="name">Import contacts Office365</field>
+        <field name="res_model">taz.office_people</field>
+        <field name="view_mode">tree</field>
+    </record>
+    <!--
+    <record id="taz-common.business_action_action_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="act_window_id" ref="taz-common.business_action_action"/>
+    </record>
+    <record id="taz-common.business_action_action_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="act_window_id" ref="taz-common.business_action_action"/>
+    </record>
+    -->
+    <menuitem name="Import contacts Office365" id="taz-common.office365_import_people" parent="taz-common.commerce" action="taz-common.office365_import_people_action"/>
+
+  </data>
+</odoo>
