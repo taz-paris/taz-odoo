@@ -7,6 +7,7 @@ class tazBusinessAction(models.Model):
     _name = "taz.business_action"
     partner_id = fields.Many2one('res.partner', string="Contact", required=True) #, domain="[('is_company', '=', False)]"
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.industry_id')  #store=True
+
     #activity_type_id = fields.Many2one(
     #    'mail.activity.type', string='Activity Type',
     #    domain="['|', ('res_model', '=', False), ('res_model', '=', res_model)]", ondelete='restrict',

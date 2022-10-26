@@ -1,3 +1,4 @@
 "id","id","name","model_id/id","group_id/id","perm_read","perm_write","perm_create","perm_unlink"
 "__export__.ir_model_access_976_fd5cd51b","__export__.ir_model_access_976_fd5cd51b","taz.business_action.all","taz-common.model_taz_business_action","base.group_user","True","True","True","True"
+"__export__.ir_model_access_976_fd5cd51c","__export__.ir_model_access_976_fd5cd51c","taz.office365_import_people.all","taz-common.model_taz_office_people","base.group_user","True","True","True","True"
 

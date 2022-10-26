@@ -23,6 +23,7 @@
     'data': [
         'views/res_partner.xml',
         'views/business_action.xml',
+        'views/office365_import_people.xml',
         'security/ir.model.access.csv',
     ],
 }
