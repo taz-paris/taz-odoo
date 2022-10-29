@@ -79,6 +79,8 @@ class tazOfficePeople(models.TransientModel):
         for c in lc:
             mapping_email_id_contact[c.email.lower()] = c.id
 
+        #TODO : ajouter une vue filtre avec par défaut le masquage des gens déjà dans Odoo
+        #TODO : idée => ajouter un bouton d'exlucsion pour ne pas reproposer le contact ? => dans ce cas il ne faut pas un model Transient et il faut gérer la mise à jour en delta de ce qui vient d'Office
         for i in data :
             for mail in i["scoredEmailAddresses"]: #S'il y a plus d'une adresse pour un contact, c'est à  l'utilisateur de choisir quel contact créer sur Odoo
                 if DOMAIN_EXCLUSION in mail["address"] :

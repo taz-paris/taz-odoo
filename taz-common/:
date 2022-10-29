@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
-from odoo import _
+from odoo import models, fields, api
 
 
 class tazResPartner(models.Model):
@@ -39,7 +38,6 @@ class tazResPartner(models.Model):
 
      @api.constrains('email')
      def _check_email(self):
-         count_email = self.search_count([('email', '=', self.email), ('is_company', '=', False)])
+         count_email = self.search_count([('email', '=', self.email)])
          if count_email > 1 and self.email is not False:
-             raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact. Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
-
+             raise ValidationError('The email already registered, please use another email!')

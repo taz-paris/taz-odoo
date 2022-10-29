@@ -1,58 +1,5 @@
 <odoo>
   <data>
-    <!-- COMPANY -->
-    <record model="ir.ui.view" id="taz-common.company_tree">
-      <field name="name">Clients</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="is_company" invisible="1"/>
-          <field name="name"/>
-          <field name="industry_id"/>
-        </tree>
-      </field>
-    </record>
-
-    <record model="ir.ui.view" id="taz-common.company_form">
-      <field name="name">Clients</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <form>
-	  <group>
-              <field name="is_company" default="1" invisible="1"/>
-              <field name="name"/>
-              <field name="industry_id" options="{'no_create': True}"/>
-
-	      <field name="child_ids" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}" />
-	      <!--
-	      <field name="child_ids" options="{'no_create': True, 'no_create_edit':True}"/>
-	      -->
-          	<field name="child_mail_address_domain_list"/>
-          </group>
-        </form>
-      </field>
-    </record>
-
-    <record model="ir.actions.act_window" id="taz-common.action_partner_company">
-      <field name="name">Clients</field>
-      <field name="res_model">res.partner</field>
-      <field name="context">{"default_is_company":True}</field>
-      <field name="view_mode">tree,form,kanban</field>
-		      <field name="view_ids" eval="
-                            [
-                            (5, 0, 0),
-                            (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),
-                            (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),
-			      ]" />
-      <field name="help" type="html">
-		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
-      </field>
-      <field name="domain">[('is_company', '=', True)]</field> 
-      <field name="filter">[('is_company', '=', True)]</field> 
-    </record>
-
-
-    <!-- CONTACTS -->
     <record model="ir.ui.view" id="taz-common.contact_tree">
       <field name="name">Contacts</field>
       <field name="model">res.partner</field>
@@ -97,18 +44,7 @@
                     </group>
 		    <notebook>
 			<page string="Actions commerciales">
-<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': active_id}">
-	<tree editable="top">
-	  <field name="name"/>
-	  <field name="partner_id" optional="hide"/>
-	  <field name="parent_partner_industry_id" optional="hide"/>
-	  <field name="state"/>
-	  <field name="user_id"/>
-	  <field name="date_deadline"/>
-	  <field name="note"/>
-		<button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
-	</tree> 
-</field>
+				<field name="business_action_ids" string="Actions commerciales" context="{'search_default_partner_id': active_id, 'default_partner_id': active_id, 'partner_id':active_id, 'default_note':active_id}"/>
 			</page>
 			<page string="Coordonnées">
 				<group>
@@ -145,14 +81,11 @@
       <field name="help" type="html">
 		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
       </field>
+
       <field name="domain">[('is_company', '=', False)]</field> 
       <field name="filter">[('is_company', '!=', True)]</field> 
     </record>
 
-
-    <menuitem name="Commerce" id="taz-common.commerce"/>
-    <menuitem name="Sociétés" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
-    <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
-
-  </data>
+	    <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
+   </data>
 </odoo>
