@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo import _
 
 import logging
@@ -138,11 +138,10 @@ class tazResUsers(models.Model):
             # DOCUMENTATION : https://docs.microsoft.com/fr-fr/graph/people-example
             endpoint = self.oauth_provider_id.data_endpoint + '/people?$top='+str(MSGRAPH_PAGE_SIZE)+'&select=displayName,scoredEmailAddresses&skip='+str(offset)
             graphdata = self._auth_oauth_rpc(endpoint, tk)
-            #headers = {'SdkVersion': 'sample-python-flask',
-            #           'x-client-SKU': 'sample-python-flask',
-            #           'client-request-id': str(uuid.uuid4()),
-            #           'return-client-request-id': 'true'}
-            #graphdata = MSGRAPH.get(endpoint, headers=headers).data
+            if "value" not in graphdata.keys():
+                #TODO : pourquoi lorsque je lève l'exception suivante, le front plante au lieu d'afficher le message ?
+                #raise AccessError(_('Jeton Office 365 périmé. Merci de vous déconnecter d\'Odoo et de vous y reconnecter via Office 365'))
+                return []
             contacts.extend(graphdata["value"])
             if (len(graphdata["value"]) < MSGRAPH_PAGE_SIZE):
                 break

@@ -145,7 +145,7 @@
       <field name="help" type="html">
 		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
       </field>
-      <field name="domain">[('is_company', '=', False)]</field> 
+      <field name="domain">[('is_company', '=', False),('user_ids', '=', False)]</field> 
       <field name="filter">[('is_company', '!=', True)]</field> 
     </record>
 

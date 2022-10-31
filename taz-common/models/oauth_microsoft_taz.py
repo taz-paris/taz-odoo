@@ -16,7 +16,7 @@ base.models.res_users.USER_PRIVATE_FIELDS.append('oauth_access_token')
 import logging
 _logger = logging.getLogger(__name__)
 
-class ResUsers(models.Model):
+class OAuthResUsers(models.Model):
     _inherit = 'res.users'
 
     @api.model

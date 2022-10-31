@@ -82,13 +82,6 @@ class tazResPartner(models.Model):
 
 
 
-
-class tazResUsers(models.Model):
-     _inherit = "res.users"
-
-     def name_get(self):
-         res = []
-         for rec in self:
-            res.append((rec.id, "%s %s" % (rec.first_name or "", rec.name or "")))
-         return res
-
+#Wizzard de fusion / déduplication :
+    #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/odoo/addons/base/wizard/base_partner_merge.py
+    #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/odoo/addons/base/wizard/base_partner_merge_views.xml
