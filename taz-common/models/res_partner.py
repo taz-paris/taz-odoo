@@ -59,21 +59,20 @@ class tazResPartner(models.Model):
 
      @api.onchange('first_name', 'name')
      def _onchange_name(self):
-         _logger.info("A")
          if (self.first_name and self.name):
-             _logger.info("B")
              if (self.is_company == False and self.type=='contact'):
-                 _logger.info("C")
-                 count_name = self.search_count([('first_name', '=ilike', self.first_name), ('name', '=ilike', self.name), ('is_company', '=', False), ('type', '=', 'contact')])
-                 _logger.info(count_name)
-                 if count_name > 0:
-                     _logger.info("E")
-                     return {
+                 count_name = self.search([('first_name', '=ilike', self.first_name), ('name', '=ilike', self.name), ('is_company', '=', False), ('type', '=', 'contact')])
+                 if len(count_name) > 0:
+                    liste_match = []
+                    for i in count_name :
+                         match = _("ID = %s, Entreprise = %s" % (str(i.id), i.parent_id.name or ""))
+                         liste_match.append(match)
+                    return {
                         'warning': {
                             'title': _("Attention : possibilité de doublons !"),
-                            'message': _("%s autre(s) contact(s) a(ont) le même nom et le même prénom, vérifiez bien que vous n'êtes pas en train de créer un contact en doublon ! \n    => S'il s'agit d'un réel homonyme, vous pouvez continuer. \n    => S'il s'agit d'un doublon, merci de cliquer sur le bouton d'annulation (en haut de l'écran, à droit de 'Nouveau')." % (str(count_name)))
+                            'message': _("%s autre(s) contact(s) a(ont) le même nom et le même prénom, vérifiez bien que vous n'êtes pas en train de créer un contact en doublon ! \n    => S'il s'agit d'un réel homonyme, vous pouvez continuer. \n    => S'il s'agit d'un doublon, merci de cliquer sur le bouton d'annulation (en haut de l'écran, à droit de 'Nouveau') \n\n\nListe des contacts :\n%s" % (str(count_name), '\n'.join(liste_match) or ""))
                                   }
-                    }
+                    } 
 
      #@api.model
      #def create(self, vals):
