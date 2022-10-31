@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.exceptions import UserError, ValidationError
+from odoo import _
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -16,7 +18,8 @@ class tazOfficePeople(models.TransientModel):
      display_name = fields.Char(string="Office display name")
      parent_id = fields.Many2one('res.partner', string="Société") #, domain="[('is_company', '=', False)]"
      odoo_id = fields.Char(string="Contact") #, domain="[('is_company', '=', False)]"
-     user_id = fields.Many2one('res.users', string="Utilisateur", required=True) #, domain="[('is_company', '=', False)]"
+     user_id = fields.Many2one('res.users', string="Vendeur", required=True) #, domain="[('is_company', '=', False)]"
+     origin_user_id = fields.Many2one('res.users', string="Utilisateur", required=True, readonly=True, help="Utilisateur Odoo du compte Office 365 qui a importé le contact - utilisé pour filtré") 
      email = fields.Char(string="email")
      #user_id vendeur 
 
@@ -109,6 +112,7 @@ class tazOfficePeople(models.TransientModel):
                     'last_name' : computed_lname,
                     'email' : mail["address"],
                     'user_id' : self.env.user.id,
+                    'origin_user_id': self.env.user.id,
                     'parent_id' : parent_id, 
                     'odoo_id' : odoo_id,
                     })
@@ -123,6 +127,8 @@ class tazResUsers(models.Model):
     def _msgraph_people(self):
         tk = self.oauth_access_token
         if not self.oauth_provider_id or not tk or 'microsoft' not in self.oauth_provider_id.data_endpoint:
+            #TODO : pourquoi lorsque je lève l'exception suivante, le front plante au lieu d'afficher le message ?
+            #raise ValidationError(_('Vous ne vous êtes pas connecté à Odoo avec le SSO Office 365 ou votre compte utilisateur est mal configuré. Nous ne pouvons pas lire les contacts auprès de l\'API Microsoft.'))
             return []
         #TODO : forcer le rafraichissment du token
 

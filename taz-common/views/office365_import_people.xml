@@ -11,6 +11,7 @@
           <field name="email" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="parent_id" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="odoo_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>
+          <field name="origin_user_id" optional="hide"/>
 	  <field name="user_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="show" string="Vendeur"/>
       		<button string="Créer sur Odoo" name="import_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','!=', False)]}"/>
       		<button string="Éditer sur Odoo" icon="fa-eye" name="open_res_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','=', False)]}"/>
@@ -43,7 +44,7 @@
         <field name="name">Import contacts Office365</field>
         <field name="res_model">taz.office_people</field>
         <field name="view_mode">tree</field>
-	<field name="domain">[('user_id', '=', uid)]</field>	
+	<field name="domain">[('origin_user_id', '=', uid)]</field>	
     </record>
     <!--
     <record id="taz-common.business_action_action_view_tree" model="ir.actions.act_window.view">

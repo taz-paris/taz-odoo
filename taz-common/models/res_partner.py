@@ -32,7 +32,7 @@ class tazResPartner(models.Model):
          res = []
          for rec in self:
              if (rec.is_company == False):
-                 res.append((rec.id, "%s %s (%s)" % (rec.first_name, rec.name or "", rec.parent_id.name or "")))
+                 res.append((rec.id, "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")))
              else:
                  res.append((rec.id, "%s" % rec.name))
          return res
@@ -42,4 +42,22 @@ class tazResPartner(models.Model):
          count_email = self.search_count([('email', '=', self.email), ('is_company', '=', False)])
          if count_email > 1 and self.email is not False:
              raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact. Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
+
+     #@api.model
+     #def create(self, vals):
+     #   if not vals.get("parent_id"):
+     #       vals["parent_id"] = self._context.get("default_parent_id")
+     #   return super().create(vals)
+
+
+
+
+class tazResUsers(models.Model):
+     _inherit = "res.users"
+
+     def name_get(self):
+         res = []
+         for rec in self:
+            res.append((rec.id, "%s %s" % (rec.first_name or "", rec.name or "")))
+         return res
 
