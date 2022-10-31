@@ -2,7 +2,7 @@
   <data>
     <!-- COMPANY -->
     <record model="ir.ui.view" id="taz-common.company_tree">
-      <field name="name">Clients</field>
+      <field name="name">Entreprises</field>
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <tree>
@@ -14,7 +14,7 @@
     </record>
 
     <record model="ir.ui.view" id="taz-common.company_form">
-      <field name="name">Clients</field>
+      <field name="name">Entreprises</field>
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <form>
@@ -33,10 +33,28 @@
       </field>
     </record>
 
+    <record model="ir.ui.view" id="taz-common.company_search">
+        <field name="name">res.partner.company.search</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+           <search string="Entreprises">
+		<field name="name" string="Nom"/>
+		<field name="industry_id" string="Business Domain"/>
+            <separator/>
+            <group expand="0" string="Group By">
+            	<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
+            </group>
+        </search>
+        </field>
+    </record>
+
     <record model="ir.actions.act_window" id="taz-common.action_partner_company">
       <field name="name">Clients</field>
       <field name="res_model">res.partner</field>
       <field name="context">{"default_is_company":True}</field>
+      <field name="search_view_id" ref="taz-common.company_search"/>
+      <!--
+      -->
       <field name="view_mode">tree,form,kanban</field>
 		      <field name="view_ids" eval="
                             [
@@ -97,18 +115,18 @@
                     </group>
 		    <notebook>
 			<page string="Actions commerciales">
-<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': active_id}">
-	<tree editable="top">
-	  <field name="name"/>
-	  <field name="partner_id" optional="hide"/>
-	  <field name="parent_partner_industry_id" optional="hide"/>
-	  <field name="state"/>
-	  <field name="user_id"/>
-	  <field name="date_deadline"/>
-	  <field name="note"/>
-		<button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
-	</tree> 
-</field>
+				<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': active_id}">
+					<tree editable="top">
+					  <field name="name"/>
+					  <field name="partner_id" optional="hide"/>
+					  <field name="parent_partner_industry_id" optional="hide"/>
+					  <field name="state"/>
+					  <field name="user_id"/>
+					  <field name="date_deadline"/>
+					  <field name="note"/>
+						<button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
+					</tree> 
+				</field>
 			</page>
 			<page string="Coordonnées">
 				<group>
@@ -131,10 +149,38 @@
       </field>
     </record>
 
+
+
+    <record model="ir.ui.view" id="taz-common.contact_search">
+        <field name="name">res.partner.contact.search</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+           <search string="Contacts">
+                <field name="name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('name', 'ilike', self)]"/>
+		<field name="industry_id" string="Business Domain"/>
+            <filter string="Mes contacts" name="assigned_to_me"
+                domain="[('user_id', '=', uid)]"
+                help="Contacts qui m'ont été assignés en vendeur principal"/>
+            <separator/>
+            <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
+            <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
+            <filter name="no_user_id" string="Sans vendeur" domain="[('user_id', '=', False)]"/>
+            <separator/>
+            <group expand="0" string="Group By">
+            	<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
+            	<filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
+            </group>
+        </search>
+        </field>
+    </record>
+
     <record model="ir.actions.act_window" id="taz-common.action_partner_contact">
       <field name="name">Contacts</field>
       <field name="res_model">res.partner</field>
-      <field name="context">{}</field>
+      <field name="context">{
+                    'search_default_assigned_to_me': 1,
+            }</field>
+      <field name="search_view_id" ref="taz-common.contact_search"/>
       <field name="view_mode">tree,form,kanban</field>
 		      <field name="view_ids" eval="
                             [

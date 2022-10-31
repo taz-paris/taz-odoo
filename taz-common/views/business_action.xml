@@ -5,13 +5,14 @@
       <field name="model">taz.business_action</field>
       <field name="arch" type="xml">
         <tree editable="top">
-          <field name="parent_partner_industry_id" optional="hide"/>
-      <field name="partner_id" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+          <field name="partner_id" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
           <field name="state"/>
           <field name="user_id"/>
           <field name="date_deadline"/>
           <field name="name"/>
           <field name="note"/>
+          <field name="parent_partner_id" optional="hide"/>
+          <field name="parent_partner_industry_id" optional="hide"/>
               <button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
         </tree>
       </field>
@@ -22,13 +23,14 @@
       <field name="model">taz.business_action</field>
       <field name="arch" type="xml">
         <form>
-      <group>
+      	   <group>
               <field name="name"/>
-          <field name="partner_id" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+              <field name="partner_id" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
               <field name="state"/>
               <field name="user_id"/>
               <field name="date_deadline"/>
               <field name="note"/>
+              <field name="parent_partner_id"/>
               <field name="parent_partner_industry_id"/>
           </group>
         </form>
@@ -51,19 +53,15 @@
             <separator/>
             <filter name="filter_deadline_date" date="date_deadline"/>
             <separator/>
-	    <!--
-            <filter string="A/B Tests" name="filter_ab_test" domain="[('ab_testing_enabled', '=', True)]"/>
-            <filter string="A/B Tests to review" name="filter_ab_test_to_review"
-            domain="[('ab_testing_enabled', '=', True), ('ab_testing_winner_selection', '=', 'manual'), ('ab_testing_completed', '=', False)]"/>
             <separator/>
-            <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+            <filter name="state_not_done" string="Non terminées" domain="[('state', '!=', 'done')]"/>
             <group expand="0" string="Group By">
-            <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
-            <filter string="Sent By" name="sent_by" domain="[]" context="{'group_by': 'email_from'}"/>
-            <separator/>
-            <filter string="Sent Period" name="sent_date" domain="[]" context="{'group_by': 'sent_date'}"/>
+            	<filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
+            	<separator/>
+            	<filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
+            	<filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
+            	<filter string="Business domain" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
             </group>
-	    -->
         </search>
         </field>
     </record>
