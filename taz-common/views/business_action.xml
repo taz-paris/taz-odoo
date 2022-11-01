@@ -65,6 +65,17 @@
       </field>
     </record>
 
+    <record model="ir.ui.view" id="taz-common.business_action_graph">
+      <field name="name">Actions commerciales</field>
+      <field name="model">taz.business_action</field>
+      <field name="arch" type="xml">
+	<graph type="line" string="Actions commerciales">
+	    <field name="date_deadline" interval="month"/>
+	    <field name="user_id"/>
+	</graph>
+      </field>
+    </record>
+
     <record model="ir.ui.view" id="taz-common.business_action_search">
         <field name="name">taz.business_action.search</field>
         <field name="model">taz.business_action</field>
@@ -136,7 +147,7 @@
     <record id="taz-common.business_action_action" model="ir.actions.act_window">
         <field name="name">Activités commerciales</field>
         <field name="res_model">taz.business_action</field>
-        <field name="view_mode">tree,form,calendar,kanban,pivot</field>
+        <field name="view_mode">tree,form,calendar,kanban,pivot,graph</field>
                 <!--<field name="domain">[('res.model', '=', 'res.partner')]</field> -->
         <field name="context">{
                     'search_default_assigned_to_me': 1,
