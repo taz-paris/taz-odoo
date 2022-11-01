@@ -4,16 +4,18 @@
       <field name="name">Actions commerciales</field>
       <field name="model">taz.business_action</field>
       <field name="arch" type="xml">
-        <tree editable="top">
-          <field name="partner_id" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
-          <field name="state"/>
-          <field name="user_id"/>
-          <field name="date_deadline"/>
-          <field name="name"/>
-          <field name="note"/>
-          <field name="parent_partner_id" optional="hide"/>
-          <field name="parent_partner_industry_id" optional="hide"/>
-              <button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
+	  <tree editable="top"
+		decoration-info="state == 'wait'"
+		decoration-danger="state == 'todo' and today > date_deadline">
+		  <field name="partner_id" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+		  <field name="state"/>
+		  <field name="user_id"/>
+		  <field name="date_deadline"/>
+		  <field name="name"/>
+		  <field name="note"/>
+		  <field name="parent_partner_id" optional="hide"/>
+		  <field name="parent_partner_industry_id" optional="hide"/>
+		      <button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
         </tree>
       </field>
     </record>
@@ -50,35 +52,44 @@
     </record>
 
 
+    <record model="ir.ui.view" id="taz-common.business_action_pivot">
+      <field name="name">Actions commerciales</field>
+      <field name="model">taz.business_action</field>
+      <field name="arch" type="xml">
+	<pivot string="Actions commerciales">
+	    <field name="date_deadline" interval="month" type="row"/>
+	    <field name="partner_id"/>
+	    <field name="user_id" type="col"/>
+            <field name="state" type="col"/>
+	</pivot>
+      </field>
+    </record>
+
     <record model="ir.ui.view" id="taz-common.business_action_search">
         <field name="name">taz.business_action.search</field>
         <field name="model">taz.business_action</field>
         <field name="arch" type="xml">
            <search string="Actions commerciales">
-		   <!--
-            <field name="name" string="Action" filter_domain="['|', ('name', 'ilike', self), ('subject', 'ilike', self)]"/>
-		   -->
-		<field name="parent_partner_industry_id" string="Business Domain"/>
-            <field name="partner_id" string="Contact"/>
-            <filter string="Mes actions commerciales" name="assigned_to_me"
-                domain="[('user_id', '=', uid)]"
-                help="Actions commerciales qui m'ont été assignées"/>
-            <separator/>
-            <filter name="filter_deadline_date" date="date_deadline"/>
-            <separator/>
-            <separator/>
-            <filter name="state_not_done" string="Non terminées" domain="[('state', '!=', 'done')]"/>
-            <group expand="0" string="Group By">
-            	<filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
-            	<separator/>
-            	<filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
-            	<filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
-            	<filter string="Business domain" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
-            </group>
-        </search>
+		    <field name="parent_partner_industry_id" string="Business Domain"/>
+		    <field name="partner_id" string="Contact"/>
+		    <filter string="Mes actions commerciales" name="assigned_to_me"
+			domain="[('user_id', '=', uid)]"
+			help="Actions commerciales qui m'ont été assignées"/>
+		    <separator/>
+		    <filter name="filter_deadline_date" date="date_deadline"/>
+		    <separator/>
+		    <separator/>
+		    <filter name="state_not_done" string="Non terminées" domain="[('state', '!=', 'done')]"/>
+		    <group expand="0" string="Group By">
+			<filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
+			<separator/>
+			<filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
+			<filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
+			<filter string="Business domain" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
+		    </group>
+           </search>
         </field>
     </record>
-
 
     <record model="ir.ui.view" id="taz-common.business_action_kanban">
         <field name="name">taz.business_action.kanban</field>
@@ -120,86 +131,12 @@
 		</kanban>
         </field>
     </record>
-    <!--
-		    <kanban default_group_by="state" class="o_kanban_small_column o_opportunity_kanban" on_create="quick_create" quick_create_view="" archivable="false" sample="1" js_class="crm_kanban">
-			    <field name="stage_id" options="{&quot;group_by_tooltip&quot;: {&quot;requirements&quot;: &quot;Description&quot;}}"/>
-			    <field name="probability"/>
-			    <field name="color"/>
-			    <field name="priority"/>
-			    <field name="expected_revenue"/>
-			    <field name="kanban_state"/>
-			    <field name="activity_date_deadline"/>
-			    <field name="user_id"/>
-			    <field name="partner_id"/>
-			    <field name="activity_summary"/>
-			    <field name="active"/>
-			    <field name="company_currency"/>
-			    <field name="activity_state"/>
-			    <field name="activity_ids"/>
-			    <field name="recurring_revenue_monthly"/>
-			    <progressbar field="activity_state" colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}" sum_field="expected_revenue" recurring_revenue_sum_field="recurring_revenue_monthly" help="This bar allows to filter the opportunities based on scheduled activities."/>
-			    <templates>
-				<t t-name="kanban-box">
-				    <t t-set="lost_ribbon" t-value="!record.active.raw_value and record.probability and record.probability.raw_value == 0"/>
-				    <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''} #{lost_ribbon ? 'oe_kanban_card_ribbon' : ''} oe_kanban_global_click oe_kanban_card d-flex flex-column">
-					<div class="ribbon ribbon-top-right" attrs="{'invisible': ['|', ('probability', '&gt;', 0), ('active', '=', True)]}">
-					    <span class="bg-danger">Lost</span>
-					</div>
 
-					<div class="o_dropdown_kanban dropdown">
-					    <a class="dropdown-toggle o-no-caret btn" role="button" data-bs-toggle="dropdown" data-bs-display="static" href="#" aria-label="Dropdown menu" title="Dropdown menu">
-						<span class="fa fa-ellipsis-v"/>
-					    </a>
-					    <div class="dropdown-menu" role="menu">
-						<t t-if="widget.editable"><a role="menuitem" type="edit" class="dropdown-item">Edit</a></t>
-						<t t-if="widget.deletable"><a role="menuitem" type="delete" class="dropdown-item">Delete</a></t>
-						<ul class="oe_kanban_colorpicker" data-field="color"/>
-					    </div>
-					</div>
-					<div class="oe_kanban_content flex-grow-1">
-					    <div class="o_kanban_record_title oe_kanban_details">
-						<strong><field name="name"/></strong>
-					    </div>
-					    <div class="o_kanban_record_subtitle">
-						<t t-if="record.expected_revenue.raw_value">
-						    <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
-						    <span t-if="record.recurring_revenue and record.recurring_revenue.raw_value" groups="crm.group_use_recurring_revenues"> + </span>
-						</t>
-						<t t-if="record.recurring_revenue and record.recurring_revenue.raw_value">
-						    <field name="recurring_revenue" widget="monetary" options="{'currency_field': 'company_currency'}" groups="crm.group_use_recurring_revenues"/>
-						    <field name="recurring_plan" groups="crm.group_use_recurring_revenues"/>
-						</t>
-					    </div>
-					    <div>
-						<span class="o_text_overflow" t-if="record.partner_id.value" t-esc="record.partner_id.value"/>
-					    </div>
-					    <div>
-						<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-					    </div>
-					</div>
-					<div class="oe_kanban_footer">
-					    <div class="o_kanban_record_bottom">
-						<div class="oe_kanban_bottom_left">
-						    <field name="priority" widget="priority" groups="base.group_user"/>
-						    <field name="activity_ids" widget="kanban_activity"/>
-						</div>
-						<div class="oe_kanban_bottom_right">
-						    <field name="user_id" widget="many2one_avatar_user"/>
-						</div>
-					    </div>
-					</div>
-					<div class="clearfix"/>
-				    </div>
-				</t>
-			    </templates>
-			</kanban>
-
-    i-->
 
     <record id="taz-common.business_action_action" model="ir.actions.act_window">
         <field name="name">Activités commerciales</field>
         <field name="res_model">taz.business_action</field>
-        <field name="view_mode">tree,form,calendar,kanban</field>
+        <field name="view_mode">tree,form,calendar,kanban,pivot</field>
                 <!--<field name="domain">[('res.model', '=', 'res.partner')]</field> -->
         <field name="context">{
                     'search_default_assigned_to_me': 1,
