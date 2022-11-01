@@ -14,6 +14,7 @@
 	      <field name="period_futur_book" optional="show" widget='monetary'/>
 	      <field name="period_landing" optional="show" widget='monetary'/>
 	      <field name="period_delta" optional="show" widget='monetary'/>
+	      <field name="period_ratio" optional="show" widget="progressbar" />
 	      <field name="comment" optional="hide"/>
         </tree>
       </field>

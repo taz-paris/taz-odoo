@@ -60,12 +60,16 @@ class tazCustomerBookFollowup(models.Model):
         ('book_date_uniq', 'UNIQUE (customer_book_goal_id, date_update)',  "Impossible d'avoir suivis d'objectifs différents pour le même jour.")
     ]
 
+    @api.depends('customer_book_goal_id', 'date_update', 'period_book', 'period_futur_book')
     @api.model
     def landing(self):
-        self.period_landing = self.period_book + self.period_futur_book
-        self.period_delta = self.period_goal - self.period_landing
-        #if (self.period_landing and self.period_landing != 0):
-        #    self.period_ratio = self.period_landing / self.period_goal
+        for record in self:
+            record.period_landing = record.period_book + record.period_futur_book
+            record.period_delta = record.period_goal - record.period_landing
+            if (record.period_landing and record.period_landing != 0.0):
+                record.period_ratio = (record.period_landing / record.period_goal)*100.0
+            else :
+                record.period_ratio = 0.0
 
     @api.model
     def date_default(self):
@@ -78,7 +82,7 @@ class tazCustomerBookFollowup(models.Model):
             bgl = self.env['taz.customer_book_goal'].search([('partner_id', '=', partner_default)], order="reference_period desc")
             if len(bgl)>0:
                 return bgl[0].id
-        return False #TODO si j'ajoute une ligne depuis la fiche entreprise, passer l'id partner en contexte et récupérer l'objet customer_book_goal_id le plus récent
+        return False 
 
     @api.depends('partner_id', 'date_update')
     def _compute_name(self):
@@ -96,7 +100,7 @@ class tazCustomerBookFollowup(models.Model):
 
     period_landing = fields.Float("Atterissage annuel", compute=landing)
     period_delta = fields.Float("Delta aterrissage vs objectif", compute=landing)
-    #period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing)
+    period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing)
     comment = fields.Text("Commentaire")
     #TODO : ajouter des champ de delta par rapport au mois précédent
 
