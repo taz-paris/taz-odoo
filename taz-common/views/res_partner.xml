@@ -22,17 +22,34 @@
               <field name="is_company" default="1" invisible="1"/>
               <field name="name"/>
               <field name="industry_id" options="{'no_create': True}"/>
-
-	      <field name="child_ids" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}" />
-	      <!--
-	      <field name="child_ids" options="{'no_create': True, 'no_create_edit':True}"/>
-	      -->
-          	<field name="child_mail_address_domain_list"/>
           </group>
 	  <notebook>
-		  <page string="Objectif commercial">
-			  <field name="customer_book_goal_ids" string="Objectifs annuels"/>
-			  <field name="customer_book_followup_ids" string="Suivi des objectifs annuels"/>
+		  <page string="Contacts">
+	      		<field name="child_ids" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
+				<tree>
+				  <field name="is_company" invisible="1"/>
+				  <field name="first_name"/>
+				  <field name="name"/>
+				  <field name="email"/>
+			  	</tree>
+			</field>
+		  </page>
+		  <page string="Objectifs commerciaux">
+			<group>
+			  <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_partner_id': active_id}">
+				<tree editable="top">
+				  <field name="partner_id" optional="hide"/>
+				  <field name="reference_period" optional="show"/>
+				  <field name="period_goal" optional="show"/>
+				</tree> 
+			  </field>
+			  <field name="customer_book_followup_ids" string="Suivi des objectifs annuels" context="{'default_partner_id': active_id}"/>
+			</group>
+		  </page>
+		  <page string="Autres informations">
+			<group>
+          			<field name="child_mail_address_domain_list"/>
+			</group>
 		  </page>
 	  </notebook>
         </form>

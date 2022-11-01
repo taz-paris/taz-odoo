@@ -9,8 +9,14 @@ import datetime
 class tazCustomerBookGoal(models.Model):
     _name = "taz.customer_book_goal"
     _sql_constraints = [
-        ('partner_year_uniq', 'UNIQUE (partner_id, reference_period)',  "Impossible d'avoir deux objectifs différent pour la même entreprise et la même année.")
+        ('partner_year_uniq', 'UNIQUE (partner_id, reference_period)',  "Impossible d'avoir deux objectifs différents pour la même entreprise et la même année.")
     ]
+
+    @api.model
+    def create(self, vals):
+        if not vals.get("partner_id"):
+            vals["partner_id"] = self._context.get("default_partner_id")
+        return super().create(vals)
 
     @api.model
     def year_selection(self):
@@ -23,7 +29,10 @@ class tazCustomerBookGoal(models.Model):
     
     @api.model
     def year_default(self):
-        return datetime.date.today().year
+        y = datetime.date.today().year
+        _logger.info(y)
+        #self.reference_period = datetime.date.today().year
+        return str(y)
 
     @api.depends('partner_id', 'reference_period')
     def _compute_name(self):
@@ -35,16 +44,21 @@ class tazCustomerBookGoal(models.Model):
         year_selection,
         string="Année de référence",
         default=year_default, # as a default value it would be 2019
+        size=4
         )
     name = fields.Char("Entreprise - Période", compute=_compute_name)
 
     book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi du book")
 
     period_goal = fields.Float("Objectif annuel")
+    #TODO remonter les valeur du customer_book_followup le plus réceent
 
 
 class tazCustomerBookFollowup(models.Model):
     _name = "taz.customer_book_followup"
+    _sql_constraints = [
+        ('book_date_uniq', 'UNIQUE (customer_book_goal_id, date_update)',  "Impossible d'avoir suivis d'objectifs différents pour le même jour.")
+    ]
 
     @api.model
     def landing(self):
@@ -59,6 +73,11 @@ class tazCustomerBookFollowup(models.Model):
 
     @api.model
     def book_goal_id_default(self):
+        partner_default = self._context.get("default_partner_id")
+        if partner_default:
+            bgl = self.env['taz.customer_book_goal'].search([('partner_id', '=', partner_default)], order="reference_period desc")
+            if len(bgl)>0:
+                return bgl[0].id
         return False #TODO si j'ajoute une ligne depuis la fiche entreprise, passer l'id partner en contexte et récupérer l'objet customer_book_goal_id le plus récent
 
     @api.depends('partner_id', 'date_update')
@@ -76,7 +95,8 @@ class tazCustomerBookFollowup(models.Model):
     period_futur_book = fields.Float("Intime conviction", help="Montant que l'on estime pouvoir book en plus d'ici la fin de l'année.")
 
     period_landing = fields.Float("Atterissage annuel", compute=landing)
-    period_delta = fields.Float("Delta", compute=landing)
+    period_delta = fields.Float("Delta aterrissage vs objectif", compute=landing)
     #period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing)
     comment = fields.Text("Commentaire")
+    #TODO : ajouter des champ de delta par rapport au mois précédent
 
