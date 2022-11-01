@@ -1,0 +1,36 @@
+<odoo>
+   <data>
+
+    <record model="ir.ui.view" id="taz-common.customer_book_followup_action_tree">
+      <field name="name">Suivi du book</field>
+      <field name="model">taz.customer_book_followup</field>
+      <field name="arch" type="xml">
+	 <tree editable="top">
+	      <field name="customer_book_goal_id" optional="show"/>
+	      <field name="period_goal" optional="hide"/>
+	      <field name="partner_id" optional="hide" context="{'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+	      <field name="date_update" optional="show"/>
+	      <field name="period_book" optional="show" widget='monetary'/>
+	      <field name="period_futur_book" optional="show" widget='monetary'/>
+	      <field name="period_landing" optional="show" widget='monetary'/>
+	      <field name="period_delta" optional="show" widget='monetary'/>
+	      <field name="comment" optional="hide"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="taz-common.customer_book_goal_action" model="ir.actions.act_window">
+        <field name="name">Objectif commercial</field>
+        <field name="res_model">taz.customer_book_goal</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+    <record id="taz-common.customer_book_followup_action" model="ir.actions.act_window">
+        <field name="name">Suivi objectif commercial</field>
+        <field name="res_model">taz.customer_book_followup</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+
+    <menuitem name="Suivi objectif commerial" id="taz-common.customer_book_followup" parent="taz-common.commerce" action="taz-common.customer_book_followup_action"/>
+
+  </data>
+</odoo>

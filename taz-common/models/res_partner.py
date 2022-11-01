@@ -28,6 +28,8 @@ class tazResPartner(models.Model):
      business_action_ids = fields.One2many('taz.business_action', 'partner_id') 
      child_mail_address_domain_list = fields.Char('Liste domaines mail', compute=_compute_child_mail_address_domain_list, store=True)
 
+     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'partner_id')  
+     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'partner_id')  
 
      def name_get(self):
          res = []

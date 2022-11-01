@@ -29,6 +29,12 @@
 	      -->
           	<field name="child_mail_address_domain_list"/>
           </group>
+	  <notebook>
+		  <page string="Objectif commercial">
+			  <field name="customer_book_goal_ids" string="Objectifs annuels"/>
+			  <field name="customer_book_followup_ids" string="Suivi des objectifs annuels"/>
+		  </page>
+	  </notebook>
         </form>
       </field>
     </record>
