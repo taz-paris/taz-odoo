@@ -1,6 +1,18 @@
 <odoo>
    <data>
 
+    <record model="ir.ui.view" id="taz-common.customer_book_goal_tree">
+      <field name="name">Objectif de book</field>
+      <field name="model">taz.customer_book_goal</field>
+      <field name="arch" type="xml">
+	 <tree editable="top">
+		  <field name="partner_id" optional="show"/>
+		  <field name="reference_period" optional="show"/>
+		  <field name="period_goal" optional="show"/>
+        </tree>
+      </field>
+    </record>
+
     <record model="ir.ui.view" id="taz-common.customer_book_followup_tree">
       <field name="name">Suivi du book</field>
       <field name="model">taz.customer_book_followup</field>
@@ -70,6 +82,7 @@
     </record>
 
     <menuitem name="Suivi objectif commerial" id="taz-common.customer_book_followup" parent="taz-common.commerce" action="taz-common.customer_book_followup_action"/>
+    <menuitem name="Objectif commerial" id="taz-common.customer_book_goal" parent="taz-common.commerce" action="taz-common.customer_book_goal_action"/>
 
   </data>
 </odoo>

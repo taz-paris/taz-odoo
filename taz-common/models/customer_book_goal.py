@@ -36,7 +36,8 @@ class tazCustomerBookGoal(models.Model):
 
     @api.depends('partner_id', 'reference_period')
     def _compute_name(self):
-        self.name =  "%s - %s" % (self.partner_id.name or "", self.reference_period or "") 
+        for rec in self :
+            rec.name =  "%s - %s" % (rec.partner_id.name or "", rec.reference_period or "") 
 
     partner_id = fields.Many2one('res.partner', string="Entreprise", domain="[('is_company', '=', True)]") #, required=True
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.industry_id')  #store=True
@@ -66,7 +67,7 @@ class tazCustomerBookFollowup(models.Model):
         for record in self:
             record.period_landing = record.period_book + record.period_futur_book
             record.period_delta = record.period_goal - record.period_landing
-            if (record.period_landing and record.period_landing != 0.0):
+            if (record.period_goal and record.period_goal != 0.0):
                 record.period_ratio = (record.period_landing / record.period_goal)*100.0
             else :
                 record.period_ratio = 0.0
@@ -86,7 +87,8 @@ class tazCustomerBookFollowup(models.Model):
 
     @api.depends('partner_id', 'date_update')
     def _compute_name(self):
-        self.name = "%s - %s" % (self.partner_id.name or "", self.date_update or "") 
+        for record in self:
+            record.name = "%s - %s" % (record.partner_id.name or "", record.date_update or "") 
 
     name = fields.Char("Nom", compute=_compute_name)
 
