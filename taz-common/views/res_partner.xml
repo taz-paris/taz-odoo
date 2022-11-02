@@ -75,10 +75,11 @@
            <search string="Entreprises">
 		<field name="name" string="Nom"/>
 		<field name="industry_id" string="Business Domain"/>
-            <separator/>
-            <group expand="0" string="Group By">
-            	<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
-            </group>
+            	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
+		<separator/>
+		<group expand="0" string="Group By">
+			<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
+		</group>
         </search>
         </field>
     </record>

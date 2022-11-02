@@ -70,7 +70,7 @@ class tazResPartner(models.Model):
              if self.email:
                  domain = self.email.split("@")[1] 
                  lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
-                 #Mise à jour des _compute_child_mail_address_domain_list
+                 #TODO Mise à jour des _compute_child_mail_address_domain_list
                  #self._origin.parent_id._compute_child_mail_address_domain_list()
                  #self.parent_id._compute_child_mail_address_domain_list()
                  if len(lc) > 0:
