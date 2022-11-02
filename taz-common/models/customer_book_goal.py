@@ -93,14 +93,15 @@ class tazCustomerBookFollowup(models.Model):
     customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, default=book_goal_id_default)
     period_goal = fields.Float("Montant obj", related="customer_book_goal_id.period_goal", store=True)
     partner_id = fields.Many2one(string="Entreprise", related="customer_book_goal_id.partner_id", store=True)
+    partner_industry_id = fields.Many2one(related="customer_book_goal_id.partner_id.industry_id", store=True)
 
     date_update = fields.Date("Date de valeur", default=date_default)
     period_book = fields.Float("Book à date")
     period_futur_book = fields.Float("Intime conviction", help="Montant que l'on estime pouvoir book en plus d'ici la fin de l'année.")
 
-    period_landing = fields.Float("Atterissage annuel", compute=landing)
-    period_delta = fields.Float("Delta aterrissage vs objectif", compute=landing)
-    period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing)
+    period_landing = fields.Float("Atterissage annuel", compute=landing, store=True)
+    period_delta = fields.Float("Delta aterrissage vs objectif", compute=landing, store=True)
+    period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing, store=True)
     comment = fields.Text("Commentaire")
     #TODO : ajouter des champ de delta par rapport au mois précédent
 

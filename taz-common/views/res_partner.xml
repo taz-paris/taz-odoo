@@ -9,9 +9,22 @@
           <field name="is_company" invisible="1"/>
           <field name="name"/>
           <field name="industry_id"/>
+          <field name="child_mail_address_domain_list" optional="hide"/>
         </tree>
       </field>
     </record>
+
+    <!--
+   <record model="ir.actions.server" id="taz-common.company_refresh_child_mail_address_domain_list_action">
+       <field name="name">MAJ forcée de la liste des domain mail</field>
+       <field name="model_id" ref="res.partner"/>
+       <field name="binding_model_id" ref="taz-common.company_tree"/>
+       <field name="state">code</field>
+       <field name="code">
+           action = records.action_update_invoice_date()
+       </field>
+   </record>
+    -->
 
     <record model="ir.ui.view" id="taz-common.company_form">
       <field name="name">Entreprises</field>
@@ -30,7 +43,6 @@
 				  <field name="is_company" invisible="1"/>
 				  <field name="first_name"/>
 				  <field name="name"/>
-				  <field name="email"/>
 			  	</tree>
 			</field>
 		  </page>
@@ -125,7 +137,8 @@
                     </div>
                     <group>
 			<group>
-			    <field name="parent_id" widget="res_partner_many2one" placeholder="Company Name..." domain="[('is_company', '=', True)]" context="{'default_is_company': True}"/>
+			    <field name="email"/>
+			    <field name="parent_id" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Company Name..." domain="[('is_company', '=', True)]" />
                             <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
                             <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
 			    <field name="parent_industry_id" />
@@ -180,6 +193,7 @@
         <field name="arch" type="xml">
            <search string="Contacts">
                 <field name="name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('name', 'ilike', self)]"/>
+                <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
 		<field name="industry_id" string="Business Domain"/>
             <filter string="Mes contacts" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"
