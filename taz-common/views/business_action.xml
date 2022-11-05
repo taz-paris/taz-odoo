@@ -9,7 +9,7 @@
 		decoration-danger="state == 'todo' and today > date_deadline">
 		  <field name="partner_id" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
 		  <field name="state"/>
-		  <field name="user_ids"/>
+		  <field name="user_ids" widget="many2many_avatar_user"/>
 		  <field name="date_deadline"/>
 		  <field name="name"/>
 		  <field name="note"/>

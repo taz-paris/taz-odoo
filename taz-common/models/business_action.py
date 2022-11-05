@@ -29,14 +29,15 @@ class tazBusinessAction(models.Model):
             vals["partner_id"] = self._context.get("default_partner_id")
         res = super().create(vals)
         if res :
-            res.create_update_ms_planner_task()
+            res.create_update_ms_planner_task([])
         return res
 
     def write(self, vals):
         _logger.info(vals)
+        old_user_ids = self.user_ids
         res = super().write(vals)
         if res :
-            self.create_update_ms_planner_task()
+            self.create_update_ms_planner_task(old_user_ids)
         return res
 
     def get_ms_planner_plan_id(self):
@@ -51,7 +52,7 @@ class tazBusinessAction(models.Model):
         return self.parent_partner_industry_id.ms_planner_plan_id
 
     @api.model
-    def create_update_ms_planner_task(self):
+    def create_update_ms_planner_task(self, old_user_ids):
         _logger.info(self._context)
         if self._context.get('send_planner_req') == False :
             _logger.info('Ne pas envoyer la requete au planner')
@@ -69,6 +70,16 @@ class tazBusinessAction(models.Model):
             else :
                 raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
         #TODO : suppresion d'un assignee
+            _logger.info("Anciens assignees %s" % old_user_ids)
+            _logger.info("Actuels %s" % self.sudo().user_ids)
+            for u in old_user_ids:
+                if u not in self.sudo().user_ids:
+                    if u.sudo().oauth_uid != False :
+                        planner_assignments[u.sudo().oauth_uid] = None
+                    else :
+                        raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur anciennement affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
+
+
 
         task = {
             "planId": plan_id,
