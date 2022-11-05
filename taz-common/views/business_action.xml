@@ -34,6 +34,7 @@
               <field name="note"/>
               <field name="parent_partner_id"/>
               <field name="parent_partner_industry_id"/>
+              <field name="ms_planner_task_data"/>
           </group>
         </form>
       </field>

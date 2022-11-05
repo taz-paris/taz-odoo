@@ -235,7 +235,7 @@
 
 
     <menuitem name="Commerce" id="taz-common.commerce"/>
-    <menuitem name="Sociétés" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
+    <menuitem name="Entreprises" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
     <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
 
   </data>

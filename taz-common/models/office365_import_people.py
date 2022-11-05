@@ -118,32 +118,3 @@ class tazOfficePeople(models.TransientModel):
                     })
         self.create(res)
 
-       
- 
-class tazResUsers(models.Model):
-    _inherit = "res.users"
-
-    @api.model
-    def _msgraph_people(self):
-        tk = self.oauth_access_token
-        if not self.oauth_provider_id or not tk or 'microsoft' not in self.oauth_provider_id.data_endpoint:
-            #TODO : pourquoi lorsque je lève l'exception suivante, le front plante au lieu d'afficher le message ?
-            #raise ValidationError(_('Vous ne vous êtes pas connecté à Odoo avec le SSO Office 365 ou votre compte utilisateur est mal configuré. Nous ne pouvons pas lire les contacts auprès de l\'API Microsoft.'))
-            return []
-        #TODO : forcer le rafraichissment du token
-
-        contacts = []
-        offset = 0
-        while (True) :
-            # DOCUMENTATION : https://docs.microsoft.com/fr-fr/graph/people-example
-            endpoint = self.oauth_provider_id.data_endpoint + '/people?$top='+str(MSGRAPH_PAGE_SIZE)+'&select=displayName,scoredEmailAddresses&skip='+str(offset)
-            graphdata = self._auth_oauth_rpc(endpoint, tk)
-            if "value" not in graphdata.keys():
-                #TODO : pourquoi lorsque je lève l'exception suivante, le front plante au lieu d'afficher le message ?
-                #raise AccessError(_('Jeton Office 365 périmé. Merci de vous déconnecter d\'Odoo et de vous y reconnecter via Office 365'))
-                return []
-            contacts.extend(graphdata["value"])
-            if (len(graphdata["value"]) < MSGRAPH_PAGE_SIZE):
-                break
-            offset = offset + MSGRAPH_PAGE_SIZE
-        return contacts

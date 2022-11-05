@@ -8,6 +8,7 @@ import datetime
 
 class tazCustomerBookGoal(models.Model):
     _name = "taz.customer_book_goal"
+    _order = "reference_period desc"
     _sql_constraints = [
         ('partner_year_uniq', 'UNIQUE (partner_id, reference_period)',  "Impossible d'avoir deux objectifs différents pour la même entreprise et la même année.")
     ]
@@ -39,6 +40,7 @@ class tazCustomerBookGoal(models.Model):
         for rec in self :
             rec.name =  "%s - %s" % (rec.partner_id.name or "", rec.reference_period or "") 
 
+
     partner_id = fields.Many2one('res.partner', string="Entreprise", domain="[('is_company', '=', True)]") #, required=True
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.industry_id')  #store=True
     reference_period = fields.Selection(
@@ -57,14 +59,16 @@ class tazCustomerBookGoal(models.Model):
 
 class tazCustomerBookFollowup(models.Model):
     _name = "taz.customer_book_followup"
+    _order = "date_update desc"
     _sql_constraints = [
         ('book_date_uniq', 'UNIQUE (customer_book_goal_id, date_update)',  "Impossible d'avoir suivis d'objectifs différents pour le même jour.")
     ]
 
-    @api.depends('customer_book_goal_id', 'date_update', 'period_book', 'period_futur_book')
+    @api.depends('customer_book_goal_id', 'date_update', 'period_book', 'period_futur_book', 'period_goal')
     @api.model
     def landing(self):
         for record in self:
+            _logger.info('==> LANDING')
             record.period_landing = record.period_book + record.period_futur_book
             record.period_delta = record.period_goal - record.period_landing
             if (record.period_goal and record.period_goal != 0.0):

@@ -25,6 +25,7 @@
         'views/business_action.xml',
         'views/office365_import_people.xml',
         'views/customer_book_goal.xml',
+        'views/res_industry.xml',
         'security/ir.model.access.csv',
     ],
 }
