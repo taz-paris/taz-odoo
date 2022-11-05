@@ -29,35 +29,36 @@ class tazBusinessAction(models.Model):
             vals["partner_id"] = self._context.get("default_partner_id")
         res = super().create(vals)
         if res :
-            self.create_update_ms_planner_task(res)
+            res.create_update_ms_planner_task()
         return res
 
     def write(self, vals):
+        _logger.info(vals)
         res = super().write(vals)
         if res :
-            self.create_update_ms_planner_task(self)
+            self.create_update_ms_planner_task()
         return res
 
-    def get_ms_planner_plan_id(self, res):
-        if not res.partner_id :
+    def get_ms_planner_plan_id(self):
+        if not self.partner_id :
             raise ValidationError(_("Impossible de créer la tâche dans Microsoft Planner : vous n'avez pas asocié de contact à cette action commerciale."))
-        if not res.parent_partner_id :
+        if not self.parent_partner_id :
             raise ValidationError(_("Impossible de créer la tâche dans Microsoft Planner : le contact associé à cette action commerciale n'est rattaché à aucune entreprise."))
-        if not res.parent_partner_industry_id :
+        if not self.parent_partner_industry_id :
             raise ValidationError(_("Impossible de créer la tâche dans Microsoft Planner : l'entreprise du contact associé à cette action commerciale n'est rattaché à aucun Business Domain."))
-        if not res.parent_partner_industry_id.ms_planner_plan_id :
+        if not self.parent_partner_industry_id.ms_planner_plan_id :
             raise ValidationError(_("Impossible de créer la tâche dans Microsoft Planner : le Business domaine de l'entreprise du contact associé à cette action commerciale n'au aucun ID de plan de rattachement."))
-        return res.parent_partner_industry_id.ms_planner_plan_id
+        return self.parent_partner_industry_id.ms_planner_plan_id
 
-    def create_update_ms_planner_task(self, res):
+    def create_update_ms_planner_task(self):
         _logger.info(self._context)
         if self._context.get('send_planner_req') == False :
             _logger.info('Ne pas envoyer la requete au planner')
             return False
-        plan_id = self.get_ms_planner_plan_id(res)
+        plan_id = self.get_ms_planner_plan_id()
         task = {
             "planId": plan_id,
-            "title": res.name,
+            "title": self.name,
             "assignments": {}
         }
 
