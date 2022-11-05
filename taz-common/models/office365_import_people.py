@@ -8,7 +8,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 DOMAIN_EXCLUSION = "@tasmane.com"
-MSGRAPH_PAGE_SIZE = 500
     
 class tazOfficePeople(models.TransientModel):
      _name = 'taz.office_people'

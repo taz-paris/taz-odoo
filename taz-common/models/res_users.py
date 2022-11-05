@@ -4,9 +4,12 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
 import requests
+import datetime
 
 import logging
 _logger = logging.getLogger(__name__)
+
+MSGRAPH_PAGE_SIZE = 500
 
 
 class tazResUsers(models.Model):
@@ -18,15 +21,47 @@ class tazResUsers(models.Model):
             res.append((rec.id, "%s %s" % (rec.first_name or "", rec.name or "")))
          return res
 
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        args = args or []
+        recs = self.browse()
+        if not recs:
+            recs = self.search(['|', ('first_name', operator, name), ('name', operator, name)] + args, limit=limit)
+        return recs.name_get()
+
     
+    @api.model
     def _get_valid_access_token(self):
         #TODO : tester la date de fin de validité du token
             # si dépassée, tenter de le raffraichir avec le refresh token
-        return self.oauth_access_token
+            _logger.info('Nom %s' % self.name)
+            _logger.info('Access token %s' % self.oauth_access_token)
+            return self.sudo().oauth_access_token
+            d = datetime.datetime.now().isoformat()
+            if d > self.oauth_token_expires_at:
+                raise ValidationError(_('Token de session Microsoft invalide : veuillez vous déconnecter puis vous reconnecter en SSO'))
+                """
+                data = {
+                    'grant_type': 'refresh_token',
+                    'refresh_token': self.oauth_refresh_token,
+                    'client_id': self.oauth_provider.client_id,
+                    #'client_secret': MSGRAPH.consumer_secret
+                }
+                response = requests.post(self.oauth_provider.validation_endpoint, data=data)
+                credentials = response.json()
+                self.oauth_access_token = credentials['access_token']
+                d2 = datetime.datetime.now() + datetime.timedelta(seconds=int(credentials['expires_in']))#ADU
+                expire_date = d2.isoformat()#ADU
+                self.oauth_token_expires_at = expire_date
+                """
+            return self.oauth_access_token
 
-    def _magraph_post(self, endpoint, data):
+    @api.model
+    def _msgraph_post(self, endpoint, data):
         _logger.info('Envoi requete POST à %s avec le corps %s' % (endpoint, data))
         access_token = self._get_valid_access_token()
+        _logger.info('Access token2 %s' % self.oauth_access_token)
+        _logger.info('Access token3 %s' % access_token)
         req = requests.post(endpoint, json=data, headers={'Authorization': 'Bearer %s' % access_token}, timeout=10) 
         _logger.info(req.text)
         if req.ok:
@@ -35,9 +70,12 @@ class tazResUsers(models.Model):
             _logger.info(req.text)
 
 
-    def _magraph_patch(self, endpoint, data, ifmatch):
+    @api.model
+    def _msgraph_patch(self, endpoint, data, ifmatch):
         _logger.info('Envoi requete PATCH à %s le corps %s avec le header ifMatch %s' % (endpoint, data, ifmatch))
         access_token = self._get_valid_access_token()
+        _logger.info('Access token2 %s' % self.oauth_access_token)
+        _logger.info('Access token3 %s' % access_token)
         req = requests.patch(endpoint, json=data, headers={'Authorization': 'Bearer %s' % access_token, 'If-Match' : ifmatch, 'Prefer' : 'return=representation'}, timeout=10) 
         _logger.info(req.text)
         if req.ok:

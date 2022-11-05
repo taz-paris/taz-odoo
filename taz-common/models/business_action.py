@@ -50,21 +50,34 @@ class tazBusinessAction(models.Model):
             raise ValidationError(_("Impossible de créer la tâche dans Microsoft Planner : le Business domaine de l'entreprise du contact associé à cette action commerciale n'au aucun ID de plan de rattachement."))
         return self.parent_partner_industry_id.ms_planner_plan_id
 
+    @api.model
     def create_update_ms_planner_task(self):
         _logger.info(self._context)
         if self._context.get('send_planner_req') == False :
             _logger.info('Ne pas envoyer la requete au planner')
             return False
         plan_id = self.get_ms_planner_plan_id()
+
+        planner_assignments = {}
+        #ajout d'un assignee
+
+        for user in self.sudo().user_ids:
+        #    _logger.info(user)
+        #    _logger.info(user.oauth_uid)
+            if user.oauth_uid != False :
+                planner_assignments[user.oauth_uid] = dict({"@odata.type": "microsoft.graph.plannerAssignment", "orderHint": ' !'})
+            else :
+                raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
+        #TODO : suppresion d'un assignee
+
         task = {
             "planId": plan_id,
             "title": self.name,
-            "assignments": {}
+            "assignments": planner_assignments,
+            "dueDateTime": str(self.date_deadline)
         }
-
         endpoint = "https://graph.microsoft.com/v1.0/planner/tasks"
         if self.ms_planner_task_data:
-            _logger.info(self.ms_planner_task_data)
             #update the task
             task_id = None
             try :
@@ -73,13 +86,16 @@ class tazBusinessAction(models.Model):
                 raise ValidationError(_("Impossible de mettre à jour la task sur planner : le champ ms_planner_task_data est défini mais mal formé"))
             endpoint+="/"+task_id
             ifmatch = json.loads(self.ms_planner_task_data)['@odata.etag'].replace("'W/", "").replace("'", "")
-            req = self.env.user._magraph_patch(endpoint, task, ifmatch)
+            req = self.env.user._msgraph_patch(endpoint, task, ifmatch)
         else :
             #create the task
-            req = self.env.user._magraph_post(endpoint, task)
-        #self.write({'ms_planner_task_data':json.dumps(req)}).with_context(send_planner_req=False)
-        self.with_context(send_planner_req=False).ms_planner_task_data=json.dumps(req)
+            req = self.env.user._msgraph_post(endpoint, task)
+        reponse = json.dumps(req)
+        if reponse != 'null':
+            self.with_context(send_planner_req=False).ms_planner_task_data=reponse
             
+
+    #def get_ms_planner_task_delete(self):
 
     #def get_ms_planner_task_list(self):
     #    data = self.engtv.user._msgraph_get_planner_tasks(self.parent_partner_industry_id.ms_planner_plan_id)
@@ -92,10 +108,16 @@ class tazBusinessAction(models.Model):
     name = fields.Char('Titre')
     note = fields.Text('Note')
     date_deadline = fields.Date('Echéance', index=True, required=True, default=fields.Date.context_today)
-    user_id = fields.Many2one(
-        'res.users', 'Assigned to',
+    user_ids = fields.Many2many(
+        'res.users',
+        'business_action_user_rel',
+        'business_action_id',
+        'user_id',
+        string = 'Affectée à',
         default=lambda self: self.env.user,
-        index=True, required=True)
+        index=True,
+        required=True,
+        )
     state = fields.Selection([
         ('todo', 'À faire'),
         ('done', 'Fait'),

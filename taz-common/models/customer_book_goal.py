@@ -47,7 +47,6 @@ class tazCustomerBookGoal(models.Model):
         year_selection,
         string="Année de référence",
         default=year_default, # as a default value it would be 2019
-        size=4
         )
     name = fields.Char("Entreprise - Période", compute=_compute_name)
 
