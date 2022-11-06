@@ -195,6 +195,7 @@
            <search string="Contacts">
                 <field name="name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('name', 'ilike', self)]"/>
                 <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
+		<field name="category_id" string="Étiquette" />
 		<field name="industry_id" string="Business Domain"/>
             <filter string="Mes contacts" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"

@@ -39,6 +39,15 @@ class tazResPartner(models.Model):
              else:
                  res.append((rec.id, "%s" % rec.name))
          return res
+     
+     #@api.model
+     #def fields_get(self, allfields=None, attributes=None):
+     #   res = super().fields_get(allfields, attributes=attributes)
+     #   fields_to_ignore_in_search = ['has_message']
+     #   for field in fields_to_ignore_in_search:
+     #       if res.get(field):
+     #          res.get(field)['searchable'] = False
+     #   return res
 
      @api.constrains('email')
      def _check_email(self):
@@ -108,7 +117,7 @@ class tazResPartner(models.Model):
 
 
      @api.onchange('parent_id')
-     def onchange_parent_id(self):
+     def onchange_parent_id(self): #REMPLACE LA FONCTION DE BASE POUR NE PLUS CONSEILLER DE CREER UNE NOUVELLE FICHE CONTACT SI LE CONTACT CHANGE D'ENTREPRISE
         _logger.info('TRIGGER onchange_parent_id')
         # return values in result, as this method is used by _fields_sync()
         if not self.parent_id:
