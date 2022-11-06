@@ -34,9 +34,6 @@ class tazResUsers(models.Model):
     def _get_valid_access_token(self):
         #TODO : tester la date de fin de validité du token
             # si dépassée, tenter de le raffraichir avec le refresh token
-            _logger.info('Nom %s' % self.name)
-            _logger.info('Access token %s' % self.oauth_access_token)
-            return self.sudo().oauth_access_token
             d = datetime.datetime.now().isoformat()
             if d > self.oauth_token_expires_at:
                 raise ValidationError(_('Token de session Microsoft invalide : veuillez vous déconnecter puis vous reconnecter en SSO'))
@@ -59,9 +56,8 @@ class tazResUsers(models.Model):
     @api.model
     def _msgraph_post(self, endpoint, data):
         _logger.info('Envoi requete POST à %s avec le corps %s' % (endpoint, data))
+        self.flush_model()
         access_token = self._get_valid_access_token()
-        _logger.info('Access token2 %s' % self.oauth_access_token)
-        _logger.info('Access token3 %s' % access_token)
         req = requests.post(endpoint, json=data, headers={'Authorization': 'Bearer %s' % access_token}, timeout=10) 
         _logger.info(req.text)
         if req.ok:
@@ -73,9 +69,8 @@ class tazResUsers(models.Model):
     @api.model
     def _msgraph_patch(self, endpoint, data, ifmatch):
         _logger.info('Envoi requete PATCH à %s le corps %s avec le header ifMatch %s' % (endpoint, data, ifmatch))
+        self.flush_model()
         access_token = self._get_valid_access_token()
-        _logger.info('Access token2 %s' % self.oauth_access_token)
-        _logger.info('Access token3 %s' % access_token)
         req = requests.patch(endpoint, json=data, headers={'Authorization': 'Bearer %s' % access_token, 'If-Match' : ifmatch, 'Prefer' : 'return=representation'}, timeout=10) 
         _logger.info(req.text)
         if req.ok:

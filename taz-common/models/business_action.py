@@ -33,7 +33,6 @@ class tazBusinessAction(models.Model):
         return res
 
     def write(self, vals):
-        _logger.info(vals)
         old_user_ids = self.user_ids
         res = super().write(vals)
         if res :
@@ -59,27 +58,23 @@ class tazBusinessAction(models.Model):
             return False
         plan_id = self.get_ms_planner_plan_id()
 
+
         planner_assignments = {}
         #ajout d'un assignee
-
         for user in self.sudo().user_ids:
-        #    _logger.info(user)
-        #    _logger.info(user.oauth_uid)
             if user.oauth_uid != False :
                 planner_assignments[user.oauth_uid] = dict({"@odata.type": "microsoft.graph.plannerAssignment", "orderHint": ' !'})
             else :
                 raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
         #TODO : suppresion d'un assignee
-            _logger.info("Anciens assignees %s" % old_user_ids)
-            _logger.info("Actuels %s" % self.sudo().user_ids)
-            for u in old_user_ids:
-                if u not in self.sudo().user_ids:
-                    if u.sudo().oauth_uid != False :
-                        planner_assignments[u.sudo().oauth_uid] = None
-                    else :
-                        raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur anciennement affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
-
-
+        _logger.info("Anciens assignees %s" % old_user_ids)
+        _logger.info("Actuels %s" % self.sudo().user_ids)
+        for u in old_user_ids:
+            if u not in self.user_ids:
+                if u.oauth_uid != False :
+                    planner_assignments[u.oauth_uid] = None
+                else :
+                    raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur anciennement affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
 
         task = {
             "planId": plan_id,
