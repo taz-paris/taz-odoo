@@ -39,6 +39,10 @@ class tazBusinessAction(models.Model):
             self.create_update_ms_planner_task(old_user_ids)
         return res
 
+    def unlink(self):
+        self.delete_ms_planner_task()
+        res = super().unlink()
+
     def get_ms_planner_plan_id(self):
         if not self.partner_id :
             raise ValidationError(_("Impossible de créer la tâche dans Microsoft Planner : vous n'avez pas asocié de contact à cette action commerciale."))
@@ -50,7 +54,19 @@ class tazBusinessAction(models.Model):
             raise ValidationError(_("Impossible de créer la tâche dans Microsoft Planner : le Business domaine de l'entreprise du contact associé à cette action commerciale n'au aucun ID de plan de rattachement."))
         return self.parent_partner_industry_id.ms_planner_plan_id
 
-    @api.model
+    def delete_ms_planner_task(self):
+        endpoint = "https://graph.microsoft.com/v1.0/planner/tasks"
+        if self.ms_planner_task_data:
+            task_id = None
+            try :
+                task_id = json.loads(self.ms_planner_task_data)['id']
+            except TypeError:
+                raise ValidationError(_("Impossible de supprimer la tâche sur planner : le champ ms_planner_task_data est défini mais mal formé"))
+            endpoint+="/"+task_id
+            ifmatch = json.loads(self.ms_planner_task_data)['@odata.etag'].replace("'W/", "").replace("'", "")
+            req = self.env.user._msgraph_delete(endpoint, ifmatch)
+
+
     def create_update_ms_planner_task(self, old_user_ids):
         _logger.info(self._context)
         if self._context.get('send_planner_req') == False :
@@ -61,14 +77,14 @@ class tazBusinessAction(models.Model):
 
         planner_assignments = {}
         #ajout d'un assignee
-        for user in self.sudo().user_ids:
+        for user in self.user_ids:
             if user.oauth_uid != False :
                 planner_assignments[user.oauth_uid] = dict({"@odata.type": "microsoft.graph.plannerAssignment", "orderHint": ' !'})
             else :
                 raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
         #TODO : suppresion d'un assignee
         _logger.info("Anciens assignees %s" % old_user_ids)
-        _logger.info("Actuels %s" % self.sudo().user_ids)
+        _logger.info("Actuels %s" % self.user_ids)
         for u in old_user_ids:
             if u not in self.user_ids:
                 if u.oauth_uid != False :
@@ -89,7 +105,7 @@ class tazBusinessAction(models.Model):
             try :
                 task_id = json.loads(self.ms_planner_task_data)['id']
             except TypeError:
-                raise ValidationError(_("Impossible de mettre à jour la task sur planner : le champ ms_planner_task_data est défini mais mal formé"))
+                raise ValidationError(_("Impossible de mettre à jour la tâche sur planner : le champ ms_planner_task_data est défini mais mal formé"))
             endpoint+="/"+task_id
             ifmatch = json.loads(self.ms_planner_task_data)['@odata.etag'].replace("'W/", "").replace("'", "")
             req = self.env.user._msgraph_patch(endpoint, task, ifmatch)
