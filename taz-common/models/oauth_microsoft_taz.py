@@ -25,24 +25,15 @@ class OAuthResUsers(models.Model):
     oauth_token_expires_at = fields.Char("Date d'expiration du token") #ADU
     oauth_refresh_token = fields.Char("Refresh token") #ADU
 
-    def _read(self, fields):
-        #_logger.info('USER _read 1')
+    def _read(self, fields): #Localisation de la fonction remplacée /usr/lib/python3/dist-packages/odoo/addons/base/models/res_users.py
         super(models.Model, self)._read(fields)
-        #_logger.info('USER _read 2')
         if set(base.models.res_users.USER_PRIVATE_FIELDS).intersection(fields):
-            #_logger.info('USER _read 3')
             if self.check_access_rights('write', raise_exception=False):
-                #_logger.info('USER _read 4')
                 return
             for record in self:
                 if self.env.user.id == record.id: #ADU #un utilsateur a le droit de lire son propre access_tocken
                     continue #ADU
-                #for a, b in record._cache.items():
-                #    _logger.info('USER _read 5 %s %s ' % (a, b))
-                #_logger.info('demandeur %s' % self.env.user.name)
-                #_logger.info('USER _read 5 login  %s ' % record._cache['login'])
                 for f in base.models.res_users.USER_PRIVATE_FIELDS:
-                    #_logger.info('USER _read 6 field = %s' % f)
                     try:
                         record._cache[f]
                         record._cache[f] = '********'

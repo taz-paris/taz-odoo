@@ -83,8 +83,6 @@ class tazBusinessAction(models.Model):
             else :
                 raise ValidationError(_("Impossible d'enresgitrer la tâche : l'ID utilisateur Office365 de l'utilisateur affecté à cette tâche est inconnu (il ne s'est jamais connecté à Odoo via le SSO Office 365)."))
         #TODO : suppresion d'un assignee
-        _logger.info("Anciens assignees %s" % old_user_ids)
-        _logger.info("Actuels %s" % self.user_ids)
         for u in old_user_ids:
             if u not in self.user_ids:
                 if u.oauth_uid != False :
@@ -127,7 +125,7 @@ class tazBusinessAction(models.Model):
     parent_partner_id = fields.Many2one('res.partner', string="Entreprise", related='partner_id.parent_id', store=True)
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.parent_industry_id', store=True)
 
-    name = fields.Char('Titre')
+    name = fields.Char('Titre', required=True)
     note = fields.Text('Note')
     date_deadline = fields.Date('Echéance', index=True, required=True, default=fields.Date.context_today)
     user_ids = fields.Many2many(
@@ -139,6 +137,7 @@ class tazBusinessAction(models.Model):
         default=lambda self: self.env.user,
         index=True,
         required=True,
+        domain=[('oauth_uid', '!=', False)]
         )
     state = fields.Selection([
         ('todo', 'À faire'),
