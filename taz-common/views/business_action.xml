@@ -44,14 +44,14 @@
       <field name="name">Actions commerciales</field>
       <field name="model">taz.business_action</field>
       <field name="arch" type="xml">
-        <calendar string="Actions commerciales" create="1" mode="month" date_start="date_deadline" color="user_ids" hide_time="true" event_limit="5">
-	    <field name="partner_id" avatar_field="avatar_128"/>
-	    <field name="user_ids" filters="1" invisible="1"/>
+        <calendar string="Actions commerciales" create="1" mode="month" date_start="date_deadline" hide_time="true" event_limit="5">
+		<!-- color="user_ids"-->
+	    <field name="partner_id" />
+				    <!-- <field name="user_ids" filters="1" invisible="1"/> => Il y a une errreur coté client pour les utilisateurs non admin si on ajouter le user_ids -->
             <field name="state"/>
 	</calendar>
       </field>
     </record>
-
 
     <record model="ir.ui.view" id="taz-common.business_action_pivot">
       <field name="name">Actions commerciales</field>

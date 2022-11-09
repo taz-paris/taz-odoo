@@ -96,6 +96,19 @@ class tazBusinessAction(models.Model):
             "assignments": planner_assignments,
             "dueDateTime": str(self.date_deadline)
         }
+        #task_detail = {
+        #    'description' : self.note
+        #}
+
+        #action_id = Get action id opening your form
+        #base_url = Url from system parameters
+        #product_id = Id of product you want to get link to
+        #link = '%s:8069/web/webclient/home#id=%s&view_type=form&title=Products&model=product.product&action_id=%s' % (base_url, product_id, action_id)
+
+        #from odoo.http import request
+        #check out/print:
+        #request.httprequest.url
+
         endpoint = "https://graph.microsoft.com/v1.0/planner/tasks"
         if self.ms_planner_task_data:
             #update the task
@@ -107,6 +120,8 @@ class tazBusinessAction(models.Model):
             endpoint+="/"+task_id
             ifmatch = json.loads(self.ms_planner_task_data)['@odata.etag'].replace("'W/", "").replace("'", "")
             req = self.env.user._msgraph_patch(endpoint, task, ifmatch)
+            #endpoint+="/details"
+            #req_detail = self.env.user._msgraph_patch(endpoint, task_detail, ifmatch)
         else :
             #create the task
             req = self.env.user._msgraph_post(endpoint, task)
@@ -114,8 +129,6 @@ class tazBusinessAction(models.Model):
         if reponse != 'null':
             self.with_context(send_planner_req=False).ms_planner_task_data=reponse
             
-
-    #def get_ms_planner_task_delete(self):
 
     #def get_ms_planner_task_list(self):
     #    data = self.engtv.user._msgraph_get_planner_tasks(self.parent_partner_industry_id.ms_planner_plan_id)
