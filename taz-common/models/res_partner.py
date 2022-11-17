@@ -85,7 +85,15 @@ class tazResPartner(models.Model):
              _logger.info(self._origin.parent_id)
              _logger.info(self.parent_id)
              #_compute_child_mail_address_domain_list()
-             if self.email:
+             if self.email and "@" in self.email :
+                 l = self.email.split("@")[0].split('.')
+                 #pré-remplissage du nom/prénom s'ils ne sont pas déjà remplis
+                 if not(self.first_name):
+                    self.first_name = l[0].title()
+                 if (len(l) > 1):
+                    if not(self.name) :
+                        self.name = '.'.join(l[1:]).upper()
+
                  domain = self.email.split("@")[1] 
                  lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
                  #TODO Mise à jour des _compute_child_mail_address_domain_list
