@@ -34,6 +34,7 @@
 	  <group>
               <field name="is_company" default="1" invisible="1"/>
               <field name="name"/>
+              <field name="long_company_name"/>
               <field name="industry_id" options="{'no_create': True}"/>
           </group>
 	  <notebook>
@@ -61,6 +62,7 @@
 		  <page string="Autres informations">
 			<group>
           			<field name="child_mail_address_domain_list"/>
+          			<field name="ref"/>
 			</group>
 		  </page>
 	  </notebook>
@@ -169,10 +171,8 @@
 				<group>
                             <field name="phone" widget="phone"/>
                             <field name="mobile" widget="phone"/>
-                            <field name="email" widget="email" context="{'gravatar_image': True}" attrs="{'required': [('user_ids','!=', [])]}"/>
+          			<field name="mailchimp_status"/>
 			    	    <field name="user_ids" invisible="1"/>
-		    <!--
-		    !-->
 				</group>
 			</page>
 		    </notebook>

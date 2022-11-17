@@ -7,6 +7,8 @@ from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
 
+import re
+
 class tazResPartner(models.Model):
      _inherit = "res.partner"
      
@@ -23,6 +25,7 @@ class tazResPartner(models.Model):
          self.child_mail_address_domain_list = ','.join(domain_list)
 
      first_name = fields.Char(string="Prénom")
+     long_company_name = fields.Char(string="Libellé long de société")
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
 
      business_action_ids = fields.One2many('taz.business_action', 'partner_id') 
@@ -30,6 +33,8 @@ class tazResPartner(models.Model):
 
      customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'partner_id')  
      customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'partner_id')  
+
+     mailchimp_status = fields.Selection([('cleaned', 'cleaned'), ('nonsubscribed', 'nonsubscribed'), ('subscribed', 'subscribed'), ('unsubscribed', 'unsubscribed')], "Statut Mailchimp lors de l'import")
 
      def name_get(self):
          res = []
@@ -54,6 +59,11 @@ class tazResPartner(models.Model):
          count_email = self.search_count([('email', '=', self.email), ('is_company', '=', False), ('type', '=', 'contact')])
          if count_email > 1 and self.email is not False:
              raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact. Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
+        
+         if self.email:
+             regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
+             if not(re.fullmatch(regex, self.email)):
+                 raise ValidationError(_('Cette adresse email est invalide : %s' % self.email))
 
      @api.constrains('first_name')
      def _check_firstname(self):
@@ -66,8 +76,7 @@ class tazResPartner(models.Model):
          if (self.is_company == True and self.type=='contact'):
              count_name = self.search_count([('name', '=ilike', self.name), ('is_company', '=', True), ('type', '=', 'contact')])
              if count_name > 1 and self.name is not False:
-                raise ValidationError(_('Cette nom est déjà utilisé sur une autre fiche entreprise. Enregistrement impossible (il ne faudrait pas créer des doublons d\'entreprises ;-)) !'))
-
+                 raise ValidationError(_('%s : ce nom est déjà utilisé sur une autre fiche entreprise. Enregistrement impossible (il ne faudrait pas créer des doublons d\'entreprises ;-)) !' % self.name))
 
      @api.onchange('email', 'parent_id')
      def _onchange_email_parent_id(self):
