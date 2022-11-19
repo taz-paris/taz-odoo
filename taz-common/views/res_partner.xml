@@ -9,6 +9,7 @@
           <field name="is_company" invisible="1"/>
           <field name="name"/>
           <field name="industry_id"/>
+          <field name="parent_id"/>
           <field name="child_mail_address_domain_list" optional="hide"/>
         </tree>
       </field>
@@ -36,10 +37,21 @@
               <field name="name"/>
               <field name="long_company_name"/>
               <field name="industry_id" options="{'no_create': True}"/>
+	      <field name="parent_id" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
           </group>
 	  <notebook>
-		  <page string="Contacts">
-	      		<field name="child_ids" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
+		  <page string="Entreprises du groupe">
+			<field name="child_ids_company" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
+				<tree>
+				  <field name="is_company" invisible="1"/>
+				  <field name="name"/>
+				  <field name="long_company_name"/>
+				</tree>
+			</field>
+		  </page>
+
+		  <page string="Contacts de cette entreprise">
+	      		<field name="child_ids_contact" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
 				<tree>
 				  <field name="is_company" invisible="1"/>
 				  <field name="first_name"/>
@@ -87,7 +99,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="taz-common.action_partner_company">
-      <field name="name">Clients</field>
+      <field name="name">Entreprises</field>
       <field name="res_model">res.partner</field>
       <field name="context">{"default_is_company":True}</field>
       <field name="search_view_id" ref="taz-common.company_search"/>
@@ -141,7 +153,7 @@
                     </div>
                     <group>
 			<group>
-			    <field name="parent_id" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Company Name..." domain="[('is_company', '=', True)]" />
+			    <field name="parent_id" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
                             <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
                             <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
 			    <field name="parent_industry_id" />
@@ -169,10 +181,27 @@
 			</page>
 			<page string="Coordonnées">
 				<group>
-                            <field name="phone" widget="phone"/>
-                            <field name="mobile" widget="phone"/>
-          			<field name="mailchimp_status"/>
-			    	    <field name="user_ids" invisible="1"/>
+					<group>
+						<field name="phone" widget="phone"/>
+						<field name="mobile" widget="phone"/>
+						<field name="mailchimp_status"/>
+						<field name="user_ids" invisible="1"/>
+					</group>
+					<group string="Adresse postale">
+					    <span class="o_form_label o_td_label" name="address_name">
+						<field name="type" attrs="{'invisible': [('is_company','=', True)], 'required': [('is_company','!=', True)], 'readonly': [('user_ids', '!=', [])]}" class="fw-bold"/>
+						<b attrs="{'invisible': [('is_company', '=', False)]}">Address</b>
+					    </span>
+					    <div class="o_address_format">
+						<field name="street" placeholder="Rue..." class="o_address_street" />
+						<field name="street2" placeholder="Rue 2..." class="o_address_street"/>
+						<field name="zip" placeholder="Code postal" class="o_address_zip" />
+						<field name="city" placeholder="Vlle" class="o_address_city" />
+						<div name="partner_address_country" class="d-flex justify-content-between">
+							<field name="country_id" placeholder="Pays" class="o_address_country" options="{'no_open': True, 'no_quick_create': True}" />
+						</div>
+					    </div>
+					</group>
 				</group>
 			</page>
 		    </notebook>

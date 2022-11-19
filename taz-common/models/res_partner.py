@@ -27,6 +27,8 @@ class tazResPartner(models.Model):
      first_name = fields.Char(string="Prénom")
      long_company_name = fields.Char(string="Libellé long de société")
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
+     child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
+     child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
 
      business_action_ids = fields.One2many('taz.business_action', 'partner_id') 
      child_mail_address_domain_list = fields.Char('Liste domaines mail', compute=_compute_child_mail_address_domain_list, store=True)
@@ -130,8 +132,23 @@ class tazResPartner(models.Model):
                             'title': _("Attention : possibilité de doublons !"),
                             'message': _("%s autre(s) contact(s) a(ont) le même nom et le même prénom, vérifiez bien que vous n'êtes pas en train de créer un contact en doublon ! \n    => S'il s'agit d'un réel homonyme, vous pouvez continuer. \n    => S'il s'agit d'un doublon, merci de cliquer sur le bouton d'annulation (en haut de l'écran, à droit de 'Nouveau') \n\n\nListe des contacts :\n%s" % (str(count_name), '\n'.join(liste_match) or ""))
                                   }
-                    } 
+                    }
+                 self.first_name = self.first_name.strip().title()
+                 self.name = self.name.strip().upper()
+                 _logger.info('onchange first_name, name')
 
+
+     @api.onchange('street')
+     def onchange_street(self):
+         self.street = self.street.strip().upper()
+
+     @api.onchange('street2')
+     def onchange_street2(self):
+         self.street2 = self.street2.strip().upper()
+
+     @api.onchange('city')
+     def onchange_city(self):
+         self.city = self.city.strip().upper()
 
      @api.onchange('parent_id')
      def onchange_parent_id(self): #REMPLACE LA FONCTION DE BASE POUR NE PLUS CONSEILLER DE CREER UNE NOUVELLE FICHE CONTACT SI LE CONTACT CHANGE D'ENTREPRISE
