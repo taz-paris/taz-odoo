@@ -9,7 +9,7 @@
           <field name="is_company" invisible="1"/>
           <field name="name"/>
           <field name="industry_id"/>
-          <field name="parent_id"/>
+          <field name="parent_id" string="Groupe"/>
           <field name="child_mail_address_domain_list" optional="hide"/>
         </tree>
       </field>
@@ -37,7 +37,7 @@
               <field name="name"/>
               <field name="long_company_name"/>
               <field name="industry_id" options="{'no_create': True}"/>
-	      <field name="parent_id" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
+	      <field name="parent_id" string="Groupe" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
           </group>
 	  <notebook>
 		  <page string="Entreprises du groupe">
@@ -146,7 +146,8 @@
                         <field name="active" invisible="1"/>
                         <field name="company_id" invisible="1"/>
                         <h1>
-			    	<field name="email" placeholder="Adresse email"/>
+			    	<field name="email" placeholder="Adresse email" widget="email"/>
+				<field name="title" options="{&quot;no_open&quot;: True}" placeholder="e.g. Monsieur / Madame"/>
 				<field name="first_name" placeholder="Prénom"/>
 				<field name="name" placeholder="Nom"/>
                         </h1>
@@ -161,7 +162,6 @@
 			<group>
                                     <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
                                     <field name="industry_id" attrs="{'invisible': [('is_company', '=', False)]}" options="{'no_create': True}"/>
-                            <field name="comment" placeholder="Internal notes..."/>
 			</group>
                     </group>
 		    <notebook>
@@ -182,14 +182,20 @@
 			<page string="Coordonnées">
 				<group>
 					<group>
+						<field name="mailchimp_status"/>
 						<field name="phone" widget="phone"/>
 						<field name="mobile" widget="phone"/>
-						<field name="mailchimp_status"/>
+			    			<field name="assistant"/>
+						<field name="personal_phone" widget="phone"/>
+						<field name="personal_email" widget="email"/>
+						<field name="linkedin_url" widget="url"/>
 						<field name="user_ids" invisible="1"/>
 					</group>
 					<group string="Adresse postale">
 					    <span class="o_form_label o_td_label" name="address_name">
+						    <!--
 						<field name="type" attrs="{'invisible': [('is_company','=', True)], 'required': [('is_company','!=', True)], 'readonly': [('user_ids', '!=', [])]}" class="fw-bold"/>
+						    -->
 						<b attrs="{'invisible': [('is_company', '=', False)]}">Address</b>
 					    </span>
 					    <div class="o_address_format">
@@ -203,6 +209,9 @@
 					    </div>
 					</group>
 				</group>
+			</page>
+			<page string = "Notes">
+                            <field name="comment"/>
 			</page>
 		    </notebook>
 		
@@ -226,7 +235,7 @@
                 <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
 		<field name="category_id" string="Étiquette" />
 		<field name="industry_id" string="Business Domain"/>
-            <filter string="Mes contacts" name="assigned_to_me"
+            <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"
                 help="Contacts qui m'ont été assignés en vendeur principal"/>
             <separator/>
@@ -246,7 +255,7 @@
       <field name="name">Contacts</field>
       <field name="res_model">res.partner</field>
       <field name="context">{
-                    'search_default_assigned_to_me': 1,
+                    'search_default_assigned_to_me': 0,
             }</field>
       <field name="search_view_id" ref="taz-common.contact_search"/>
       <field name="view_mode">tree,form,kanban</field>

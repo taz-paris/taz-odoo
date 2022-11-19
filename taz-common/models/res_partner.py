@@ -30,6 +30,13 @@ class tazResPartner(models.Model):
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
 
+     assistant = fields.Html('Assistant(e)')
+     user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
+
+     personal_phone = fields.Char("Tel personnel", unaccent=False)
+     personal_email = fields.Char("Email personnel")
+     linkedin_url = fields.Char("LinkedIn")
+
      business_action_ids = fields.One2many('taz.business_action', 'partner_id') 
      child_mail_address_domain_list = fields.Char('Liste domaines mail', compute=_compute_child_mail_address_domain_list, store=True)
 
@@ -50,6 +57,7 @@ class tazResPartner(models.Model):
      #@api.model
      #def fields_get(self, allfields=None, attributes=None):
      #   res = super().fields_get(allfields, attributes=attributes)
+     # ## SI l'utilisateur n'est pas un administrateur alors :
      #   fields_to_ignore_in_search = ['has_message']
      #   for field in fields_to_ignore_in_search:
      #       if res.get(field):
@@ -67,6 +75,8 @@ class tazResPartner(models.Model):
              if not(re.fullmatch(regex, self.email)):
                  raise ValidationError(_('Cette adresse email est invalide : %s' % self.email))
 
+
+
      @api.constrains('first_name')
      def _check_firstname(self):
          if (self.is_company == False and self.type=='contact'):
@@ -83,6 +93,8 @@ class tazResPartner(models.Model):
      @api.onchange('email', 'parent_id')
      def _onchange_email_parent_id(self):
          _logger.info('TRIGGER onchange_email_parent_id')
+         if (self.email):
+             self.email = self.email.strip().lower()
          if (self.is_company == False and self.type=='contact'):
              _logger.info(self._origin.parent_id)
              _logger.info(self.parent_id)
