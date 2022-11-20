@@ -15,10 +15,10 @@ class tazOfficePeople(models.TransientModel):
      first_name = fields.Char(string="Prénom")
      last_name = fields.Char(string="Nom")
      display_name = fields.Char(string="Office display name")
-     parent_id = fields.Many2one('res.partner', string="Société") #, domain="[('is_company', '=', False)]"
-     odoo_id = fields.Char(string="Contact") #, domain="[('is_company', '=', False)]"
+     parent_id = fields.Many2one('res.partner', string="Société", domain="[('is_company', '!=', False)]")
+     odoo_id = fields.Char(string="Contact")
      already_in_odoo = fields.Boolean("Déjà sur Odoo")
-     user_id = fields.Many2one('res.users', string="Vendeur", required=True) #, domain="[('is_company', '=', False)]"
+     user_id = fields.Many2one('res.users', string="Propriétaire", required=True)
      origin_user_id = fields.Many2one('res.users', string="Utilisateur", required=True, readonly=True, help="Utilisateur Odoo du compte Office 365 qui a importé le contact - utilisé pour filtré") 
      email = fields.Char(string="email")
      category_id = fields.Many2many('res.partner.category', column1='taz_office_people_id',
