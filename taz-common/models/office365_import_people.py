@@ -17,6 +17,7 @@ class tazOfficePeople(models.TransientModel):
      display_name = fields.Char(string="Office display name")
      parent_id = fields.Many2one('res.partner', string="Société") #, domain="[('is_company', '=', False)]"
      odoo_id = fields.Char(string="Contact") #, domain="[('is_company', '=', False)]"
+     already_in_odoo = fields.Boolean("Déjà sur Odoo")
      user_id = fields.Many2one('res.users', string="Vendeur", required=True) #, domain="[('is_company', '=', False)]"
      origin_user_id = fields.Many2one('res.users', string="Utilisateur", required=True, readonly=True, help="Utilisateur Odoo du compte Office 365 qui a importé le contact - utilisé pour filtré") 
      email = fields.Char(string="email")
@@ -26,6 +27,15 @@ class tazOfficePeople(models.TransientModel):
 
      def import_partner(self):
         model = self.env['res.partner']
+        #Le passage par contexte permet de récupérer les valeurs du champ qui était en cours d'éditition lorsque l'utilisatuer a cliqué sur le bouton "Créer sur Odoo"
+            # ça évite de perdre la
+        self.category_id = self.env.context.get('category_id')
+        self.parent_id = self.env.context.get('parent_id')
+        self.first_name = self.env.context.get('first_name')
+        self.last_name = self.env.context.get('last_name')
+        self.user_id = self.env.context.get('user_id')
+
+        #Créer le partner Odoo
         res = {
                     'first_name' : self.first_name,
                     'name' : self.last_name,
@@ -60,7 +70,8 @@ class tazOfficePeople(models.TransientModel):
                 'context': {},
                 # if you want to open the form in edit mode direclty
                 'flags': {'initial_mode': 'edit'},
-                'target': 'current',
+                'target': 'new',
+                #'target': 'current',
             }
 
      @api.model
@@ -108,6 +119,10 @@ class tazOfficePeople(models.TransientModel):
                 if mail["address"].lower() in mapping_email_id_contact.keys():
                     odoo_id = mapping_email_id_contact[mail["address"].lower()]
 
+                already_in_odoo = False
+                if odoo_id :
+                    already_in_odoo = True
+
                 res.append({
                     'display_name':i['displayName'],
                     'first_name' : computed_fname,
@@ -117,6 +132,7 @@ class tazOfficePeople(models.TransientModel):
                     'origin_user_id': self.env.user.id,
                     'parent_id' : parent_id, 
                     'odoo_id' : odoo_id,
+                    'already_in_odoo' : already_in_odoo,
                     })
         self.create(res)
 

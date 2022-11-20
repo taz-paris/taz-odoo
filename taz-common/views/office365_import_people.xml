@@ -8,14 +8,15 @@
           <field name="display_name" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>
           <field name="first_name" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="last_name" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
-          <field name="email" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
+          <field name="email" readonly="1"/>
           <field name="parent_id" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="category_id" widget="many2many_tags"  attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="odoo_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>
-          <field name="origin_user_id" optional="hide"/>
+          <field name="origin_user_id" optional="hide" readonly="1"/>
 	  <field name="user_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="show" string="Vendeur"/>
-      		<button string="Créer sur Odoo" name="import_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','!=', False)]}"/>
-      		<button string="Éditer sur Odoo" icon="fa-eye" name="open_res_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','=', False)]}"/>
+	  <button string="Créer sur Odoo" name="import_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','!=', False)]}" 
+		  context="{'category_id' : category_id, 'first_name' : first_name, 'last_name' : last_name, 'parent_id' : parent_id, 'user_id' : user_id}"/>
+      	  <button string="Éditer sur Odoo" icon="fa-eye" name="open_res_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_id','=', False)]}"/>
         </tree>
       </field>
     </record>
@@ -28,9 +29,9 @@
                 <field name="first_name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('last_name', 'ilike', self)]"/>
                 <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
                 <field name="category_id" string="Étiquette" />
-            <filter string="Contacts absents d'Odoo" name="contacts_not_in_odoo"
-                domain="[('odoo_id', '=', False)]"
-                help="N'afficher que les contacts qui ne sont pas encore sur Odoo"/>
+            <filter string="Contacts absents d'Odoo lors de l'import" name="contacts_not_in_odoo"
+                domain="[('already_in_odoo', '=', False)]"
+                help="N'afficher que les contacts qui ne sont pas encore sur Odoo lors de l'appel à l'API Office"/>
             <separator/>
             <group expand="0" string="Group By">
                 <filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
