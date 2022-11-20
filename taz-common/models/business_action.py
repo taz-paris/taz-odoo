@@ -8,6 +8,8 @@ _logger = logging.getLogger(__name__)
 
 import json
 
+INTEGRATION_MS_PLANNER_ACTIVE = False
+
 class tazBusinessAction(models.Model):
     _name = "taz.business_action"
 
@@ -29,18 +31,21 @@ class tazBusinessAction(models.Model):
             vals["partner_id"] = self._context.get("default_partner_id")
         res = super().create(vals)
         if res :
-            res.create_update_ms_planner_task([])
+            if INTEGRATION_MS_PLANNER_ACTIVE :
+                res.create_update_ms_planner_task([])
         return res
 
     def write(self, vals):
         old_user_ids = self.user_ids
         res = super().write(vals)
         if res :
-            self.create_update_ms_planner_task(old_user_ids)
+            if INTEGRATION_MS_PLANNER_ACTIVE :
+                self.create_update_ms_planner_task(old_user_ids)
         return res
 
     def unlink(self):
-        self.delete_ms_planner_task()
+        if INTEGRATION_MS_PLANNER_ACTIVE :
+            self.delete_ms_planner_task()
         res = super().unlink()
 
     def get_ms_planner_plan_id(self):
@@ -140,7 +145,7 @@ class tazBusinessAction(models.Model):
 
     name = fields.Char('Titre', required=True)
     note = fields.Text('Note')
-    date_deadline = fields.Date('Echéance', index=True, required=True, default=fields.Date.context_today)
+    date_deadline = fields.Date('Échéance', index=True, required=False, default=fields.Date.context_today)
     user_ids = fields.Many2many(
         'res.users',
         'business_action_user_rel',
@@ -154,10 +159,25 @@ class tazBusinessAction(models.Model):
         )
     state = fields.Selection([
         ('todo', 'À faire'),
+        ('planned', 'Plannifié'),
         ('done', 'Fait'),
-        ('wait', 'En attente')], 'Statut', default='todo')
+        ('cancelled', 'Annulé'),
+        ('wait', 'À replannifier')], 'Statut', default='todo')
+    conclusion = fields.Selection([
+        ('real_need', 'Besoin concret'),
+        ('relation', 'Mise en relation'),
+        ('next_rdv', 'Revoyure'),
+        ('topic_identified', 'Sujet d\'intérêt identifié'),
+        ('noting', 'Aucune suite à donner')
+        ], "Conclusion")
+    action_type = fields.Selection([
+        ('first_meeting', 'Prise de connaissance'),
+        ('deepening', 'Approfondissement')
+        ], "Type")
 
     ms_planner_task_data = fields.Char("Data de la tâche M$ Planner")
+    is_rdv_taken_by_assistant = fields.Boolean("RDV pris par Executive Access")
+    is_priority_target = fields.Boolean('Compte à ouvrir', related='partner_id.is_priority_target', store=True)
 
     def open_record(self):
         # first you need to get the id of your record

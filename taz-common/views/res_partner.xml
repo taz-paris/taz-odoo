@@ -42,7 +42,7 @@
 		  </group>
 		  <group>
 		      <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-		      <field name="priority_company"/>
+		      <field name="is_priority_target"/>
 		      <field name="industry_id" options="{'no_create': True}"/>
 		  </group>
 		</group>
@@ -143,6 +143,7 @@
           <field name="first_name"/>
           <field name="name"/>
           <field name="parent_id"/>
+	  <field name="date_last_business_action"/>
           <field name="email"/>
         </tree>
       </field>
@@ -170,11 +171,11 @@
 			    <field name="parent_id" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
                             <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
                             <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
-			    <field name="parent_industry_id" />
                         </group>
 			<group>
-                                    <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-                                    <field name="industry_id" attrs="{'invisible': [('is_company', '=', False)]}" options="{'no_create': True}"/>
+                            <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
+			    <field name="parent_industry_id" />
+			    <field name="date_last_business_action"/>
 			</group>
                     </group>
 		    <notebook>
@@ -182,12 +183,15 @@
 				<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': active_id}">
 					<tree editable="top">
 					  <field name="name"/>
-					  <field name="partner_id" optional="hide"/>
-					  <field name="parent_partner_industry_id" optional="hide"/>
 					  <field name="state"/>
-					  <field name="user_ids"/>
-					  <field name="date_deadline"/>
-					  <field name="note"/>
+					  <field name="user_ids" widget="many2many_avatar_user"/>
+					  <field name="date_deadline" optional="show"/>
+					  <field name="note" optional="hide"/>
+					  <field name="action_type" optional="show"/>
+					  <field name="conclusion" optional="show"/>
+					  <field name="is_rdv_taken_by_assistant" optional="show"/>
+					  <field name="parent_partner_id" optional="hide"/>
+					  <field name="parent_partner_industry_id" optional="hide"/>
 						<button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
 					</tree> 
 				</field>

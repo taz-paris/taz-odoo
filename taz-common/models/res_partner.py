@@ -24,15 +24,25 @@ class tazResPartner(models.Model):
                      domain_list.append(domain)
          self.child_mail_address_domain_list = ','.join(domain_list)
 
+     @api.depends('business_action_ids')
+     def _compute_date_last_business_action(self):
+         res = None
+         for action in self.business_action_ids:
+             if action.state == 'done' :
+                 if res == None or action.date_deadline < res:
+                     res = action.date_deadline
+         self.date_last_business_action = res
+
      first_name = fields.Char(string="Prénom")
      long_company_name = fields.Char(string="Libellé long de société")
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
-     priority_company = fields.Boolean("Compte à ouvrir")
+     is_priority_target = fields.Boolean("Compte à ouvrir")
 
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
+     date_last_business_action = fields.Date('Date du dernier RDV', compute=_compute_date_last_business_action, store=True)
 
      personal_phone = fields.Char("Tel personnel", unaccent=False)
      personal_email = fields.Char("Email personnel")

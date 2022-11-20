@@ -5,11 +5,12 @@
       <field name="model">taz.office_people</field>
       <field name="arch" type="xml">
         <tree create="false" editable="top">
-          <field name="display_name" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="show"/>
+          <field name="display_name" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>
           <field name="first_name" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="last_name" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="email" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="parent_id" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
+          <field name="category_id" widget="many2many_tags"  attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="odoo_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>
           <field name="origin_user_id" optional="hide"/>
 	  <field name="user_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="show" string="Vendeur"/>
@@ -19,32 +20,33 @@
       </field>
     </record>
 
-	  <!--
-      		<button icon="fa-eye" name="open_record" type="object" class="oe_highlight"/>
-    <record model="ir.ui.view" id="taz-common.business_action_form">
-      <field name="name">Actions commerciales</field>
-      <field name="model">taz.business_action</field>
-      <field name="arch" type="xml">
-        <form>
-	  <group>
-          	<field name="name"/>
-          	<field name="partner_id" domain="[('is_company', '!=', True)]"/>
-          	<field name="state"/>
-          	<field name="user_id"/>
-          	<field name="date_deadline"/>
-          	<field name="note"/>
-          	<field name="parent_partner_industry_id"/>
-          </group>
-        </form>
-      </field>
+    <record model="ir.ui.view" id="taz-common.office365_import_people_search">
+        <field name="name">taz.office_people_search</field>
+        <field name="model">taz.office_people</field>
+        <field name="arch" type="xml">
+           <search string="Import contacts Office365">
+                <field name="first_name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('last_name', 'ilike', self)]"/>
+                <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
+                <field name="category_id" string="Étiquette" />
+            <filter string="Contacts absents d'Odoo" name="contacts_not_in_odoo"
+                domain="[('odoo_id', '=', False)]"
+                help="N'afficher que les contacts qui ne sont pas encore sur Odoo"/>
+            <separator/>
+            <group expand="0" string="Group By">
+                <filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
+            </group>
+        </search>
+        </field>
     </record>
 
-	  -->
     <record id="taz-common.office365_import_people_action" model="ir.actions.act_window">
         <field name="name">Import contacts Office365</field>
         <field name="res_model">taz.office_people</field>
         <field name="view_mode">tree</field>
 	<field name="domain">[('origin_user_id', '=', uid)]</field>	
+        <field name="context">{
+                    'search_default_contacts_not_in_odoo': 1, 
+            }</field>
     </record>
     <!--
     <record id="taz-common.business_action_action_view_tree" model="ir.actions.act_window.view">

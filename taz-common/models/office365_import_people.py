@@ -20,6 +20,8 @@ class tazOfficePeople(models.TransientModel):
      user_id = fields.Many2one('res.users', string="Vendeur", required=True) #, domain="[('is_company', '=', False)]"
      origin_user_id = fields.Many2one('res.users', string="Utilisateur", required=True, readonly=True, help="Utilisateur Odoo du compte Office 365 qui a importé le contact - utilisé pour filtré") 
      email = fields.Char(string="email")
+     category_id = fields.Many2many('res.partner.category', column1='taz_office_people_id',
+                                    column2='category_id', string='Étiquettes clients')
      #user_id vendeur 
 
      def import_partner(self):
@@ -31,6 +33,7 @@ class tazOfficePeople(models.TransientModel):
                     'user_id' : self.env.user.id,
                     'parent_id' : self.parent_id.id, 
                     'is_company' : False,
+                    'category_id' : self.category_id,
                     }
         r = model.create(res)
         _logger.info(r)
