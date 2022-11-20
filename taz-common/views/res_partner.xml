@@ -259,8 +259,11 @@
             <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
             <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
             <filter name="no_user_id" string="Sans vendeur" domain="[('user_id', '=', False)]"/>
-            <separator/>
-	    <filter name="no_action_3months" string="Pas vus depuis > 3 mois" domain="[('date_last_business_action','&lt;=', (context_today()-datetime.timedelta(months=3)).strftime('%%Y-%%m-%%d'))]"/>
+	    <separator/>
+		    <!-- ATTENTION : timedelta doesn't accept MONTHS nore YEAR arguments -->
+	    <filter name="no_action_3months" string="Pas vus depuis > 3 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
+	    <filter name="no_action_3months" string="Pas vus depuis > 6 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=182)).strftime('%%Y-%%m-%%d')))]"/>
+	    <filter name="no_action_3months" string="Pas vus depuis > 12 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
             <separator/>
             <group expand="0" string="Group By">
             	<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
