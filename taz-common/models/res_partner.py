@@ -29,6 +29,7 @@ class tazResPartner(models.Model):
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
+     priority_company = fields.Boolean("Compte à ouvrir")
 
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
