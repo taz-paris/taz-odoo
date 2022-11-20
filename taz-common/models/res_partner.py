@@ -163,15 +163,18 @@ class tazResPartner(models.Model):
 
      @api.onchange('street')
      def onchange_street(self):
-         self.street = self.street.strip().upper()
+         if self.street :
+            self.street = self.street.strip().upper()
 
      @api.onchange('street2')
      def onchange_street2(self):
-         self.street2 = self.street2.strip().upper()
+         if self.street2 :
+            self.street2 = self.street2.strip().upper()
 
      @api.onchange('city')
      def onchange_city(self):
-         self.city = self.city.strip().upper()
+         if self.city :
+            self.city = self.city.strip().upper()
 
      @api.onchange('parent_id')
      def onchange_parent_id(self): #REMPLACE LA FONCTION DE BASE POUR NE PLUS CONSEILLER DE CREER UNE NOUVELLE FICHE CONTACT SI LE CONTACT CHANGE D'ENTREPRISE
