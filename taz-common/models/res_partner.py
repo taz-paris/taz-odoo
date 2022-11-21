@@ -59,11 +59,27 @@ class tazResPartner(models.Model):
      def name_get(self):
          res = []
          for rec in self:
+             display_name = ""
              if (rec.is_company == False):
-                 res.append((rec.id, "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")))
+                 display_name += "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")
              else:
-                 res.append((rec.id, "%s" % rec.name))
+                 display_name += rec.name
+                 if (rec.long_company_name):
+                     display_name += " - %s" % rec.long_company_name or ""
+                 if (rec.parent_id):
+                     display_name += " (%s)" % rec.parent_id.name or ""
+             res.append((rec.id, display_name))
+         _logger.info(res)
          return res
+
+     #@def name_search(self, name, args=None, operator='ilike', limit=100):
+     #    args = args or []
+     #    recs = self.browse()
+     #    _logger.info("uuuuuuuuuuuu")
+     #    if not recs:
+     #        recs = self.search(['|', '|', ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)] + args, limit=limit)
+     #        _logger.info("uuuuuiiiiiiiiiiiiiiiiiiiiiiiuuuuuuu")
+     #    return recs.name_get()
      
      #@api.model
      #def fields_get(self, allfields=None, attributes=None):

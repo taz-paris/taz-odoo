@@ -8,6 +8,7 @@
         <tree>
           <field name="is_company" invisible="1"/>
           <field name="name"/>
+	  <field name="long_company_name"/>
           <field name="industry_id"/>
           <field name="parent_id" string="Groupe"/>
           <field name="child_mail_address_domain_list" optional="hide"/>
@@ -38,7 +39,7 @@
 		      <field name="is_company" default="1" invisible="1"/>
 		      <field name="name"/>
 		      <field name="long_company_name"/>
-		      <field name="parent_id" string="Groupe" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
+		      <field name="parent_id" string="Groupe" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 		  </group>
 		  <group>
 		      <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
@@ -82,6 +83,11 @@
 				<group>
 					<field name="child_mail_address_domain_list"/>
 					<field name="ref"/>
+					<!--
+						<field name="company_registry" on_change="1" modifiers="{&quot;invisible&quot;: [[&quot;parent_id&quot;, &quot;!=&quot;, false]]}"/>
+                    <field name="siret" modifiers="{&quot;invisible&quot;: [[&quot;is_company&quot;, &quot;=&quot;, false]]}"/>
+						<field name="siret" attrs="{'invisible': [('is_company', '=', False)]}"/>
+					-->
 				</group>
 			  </page>
 		  </notebook>
@@ -100,9 +106,11 @@
         <field name="model">res.partner</field>
         <field name="arch" type="xml">
            <search string="Entreprises">
-		<field name="name" string="Nom"/>
+                <field name="name" string="Nom ou libellé long de l'entreprise" filter_domain="['|', ('long_company_name', 'ilike', self), ('name', 'ilike', self)]"/>
 		<field name="industry_id" string="Business Domain"/>
             	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
+            	<filter name="no_industry_id" string="Sans business domain" domain="[('industry_id', '=', False)]"/>
+            	<filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
 		<separator/>
 		<group expand="0" string="Group By">
 			<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
@@ -155,24 +163,21 @@
       <field name="arch" type="xml">
         <form>
                 <sheet>
-                    <div class="oe_title mb24">
-                        <field name="is_company" invisible="1"/>
-                        <field name="active" invisible="1"/>
-                        <field name="company_id" invisible="1"/>
-                        <h1>
-			    	<field name="email" default_focus="1" placeholder="Adresse email" widget="email"/>
+                    <group>
+			<group>
+				<field name="is_company" invisible="1"/>
+				<field name="active" invisible="1"/>
+				<field name="company_id" invisible="1"/>
+				<field name="email" default_focus="1" placeholder="Adresse email" widget="email"/>
 				<field name="title" default_focus="0" placeholder="Madame / Monsieur"/>
 				<field name="first_name" placeholder="Prénom"/>
 				<field name="name" placeholder="Nom"/>
-                        </h1>
-                    </div>
-                    <group>
-			<group>
-			    <field name="parent_id" widget="res_partner_many2one" context="{'default_parent_id':active_id, 'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
-                            <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
-                            <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
+
+			    <field name="parent_id" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
                         </group>
 			<group>
+                            <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
+                            <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
                             <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
 			    <field name="parent_industry_id" />
 			    <field name="date_last_business_action"/>
