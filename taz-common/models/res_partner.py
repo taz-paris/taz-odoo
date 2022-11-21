@@ -12,6 +12,26 @@ import re
 class tazResPartner(models.Model):
      _inherit = "res.partner"
      
+     def write(self, vals):
+        # il est nécessaire de forcer le recacul des noms de domaine de l'ancien parent_id
+        old_parent_id = None
+        if 'parent_id' in vals.keys():
+            old_parent_id = self.parent_id
+        res = super().write(vals)
+        if old_parent_id: 
+            old_parent_id._compute_child_mail_address_domain_list()
+        return res
+
+     def unlink(self):
+        # il est nécessaire de forcer le recacul des noms de domaine de l'ancien parent_id
+        old_parent_id = None
+        if self.parent_id:
+            old_parent_id = self.parent_id
+        res = super().unlink()
+        if old_parent_id: 
+            old_parent_id._compute_child_mail_address_domain_list()
+        return res
+
      @api.depends('child_ids','child_ids.email')
      def _compute_child_mail_address_domain_list(self):
          _logger.info("DEBUT _compute_child_mail_address_domain_list")# %s %s" % (self.name, self.child_mail_address_domain_list))
@@ -25,7 +45,6 @@ class tazResPartner(models.Model):
                      domain_list.append(domain)
          self.child_mail_address_domain_list = ','.join(domain_list)
          _logger.info("FIN _compute_child_mail_address_domain_list")
-         #_logger.info("_compute_child_mail_address_domain_list %s %s" % (self.name, self.child_mail_address_domain_list))
 
      @api.depends('business_action_ids')
      def _compute_date_last_business_action(self):
@@ -152,7 +171,6 @@ class tazResPartner(models.Model):
      @api.onchange('parent_id')
      def _onchange_parent_id(self):
          if (self.is_company == False and self.type=='contact'):
-             pass
              if self.parent_id and self.email and "@" in self.email:
                  consistency = self._test_parent_id_email_consistency()
                  if consistency:
@@ -162,9 +180,6 @@ class tazResPartner(models.Model):
          _logger.info("_test_parent_id_email_consistency")
          domain = self.email.split("@")[1] 
          lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
-         #TODO Mise à jour des _compute_child_mail_address_domain_list
-         #self._origin.parent_id._compute_child_mail_address_domain_list()
-         #self.parent_id._compute_child_mail_address_domain_list()
          coherent = False
          if len(lc) > 0:
              for c in lc:
