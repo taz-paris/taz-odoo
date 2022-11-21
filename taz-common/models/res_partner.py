@@ -12,7 +12,7 @@ import re
 class tazResPartner(models.Model):
      _inherit = "res.partner"
      
-     @api.depends('child_ids')
+     @api.depends('child_ids','child_ids.email')
      def _compute_child_mail_address_domain_list(self):
          _logger.info("DEBUT _compute_child_mail_address_domain_list")# %s %s" % (self.name, self.child_mail_address_domain_list))
          domain_list = []
@@ -24,7 +24,7 @@ class tazResPartner(models.Model):
                  if domain and domain not in domain_list:
                      domain_list.append(domain)
          self.child_mail_address_domain_list = ','.join(domain_list)
-         _logger.info("FIN _compute_child_mail_address_domain_list %s" % self.child_mail_address_domain_list)# %s %s" % (self.name, self.child_mail_address_domain_list))
+         _logger.info("FIN _compute_child_mail_address_domain_list")
          #_logger.info("_compute_child_mail_address_domain_list %s %s" % (self.name, self.child_mail_address_domain_list))
 
      @api.depends('business_action_ids')
@@ -72,7 +72,6 @@ class tazResPartner(models.Model):
                  if (rec.parent_id):
                      display_name += " (%s)" % rec.parent_id.name or ""
              res.append((rec.id, display_name))
-         #_logger.info(res)
          return res
 
      #@def name_search(self, name, args=None, operator='ilike', limit=100):
@@ -120,8 +119,8 @@ class tazResPartner(models.Model):
              if count_name > 1 and self.name is not False:
                  raise ValidationError(_('%s : ce nom est déjà utilisé sur une autre fiche entreprise. Enregistrement impossible (il ne faudrait pas créer des doublons d\'entreprises ;-)) !' % self.name))
 
-     @api.onchange('email', 'parent_id')
-     def _onchange_email_parent_id(self):
+     @api.onchange('email')
+     def _onchange_email(self):
          _logger.info('TRIGGER onchange_email_parent_id')
          if (self.email):
              self.email = self.email.strip().lower()
@@ -137,27 +136,52 @@ class tazResPartner(models.Model):
                     if not(self.name) :
                         self.name = '.'.join(l[1:]).upper()
 
-                 domain = self.email.split("@")[1] 
-                 lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
-                 #TODO Mise à jour des _compute_child_mail_address_domain_list
-                 #self._origin.parent_id._compute_child_mail_address_domain_list()
-                 #self.parent_id._compute_child_mail_address_domain_list()
-                 if len(lc) > 0:
-                     if self.parent_id:
-                         coherent = False
-                         for c in lc:
-                            if self.parent_id == c:
-                                coherent = True
-                         if coherent == False :
-                            return {
-                                'warning': {
-                                    'title': _("Attention : est-ce la bonne entreprise ?"),
-                                    'message': _("Le domaine de l'adresse email est présent dans les contacts d'une autre entreprise... mais pas celle sélectionnée. N'y aurait-il pas un soucis quelque part ?")
-                                    }
-                                }
-                     else:
-                         if not(self._origin.parent_id) : #si on est en train de supprimer la société d'une fiche contact, il ne faut pas la réintégrer au regard du mail !
-                            self.parent_id = lc[0].id
+                 if self.parent_id:
+                     #vérification de la cohérence entre le mail et l'entreprise
+                     consistency = self._test_parent_id_email_consistency()
+                     if consistency:
+                        return consistency
+                 else :
+                     #pré-remplissage de l'entreprise
+                     domain = self.email.split("@")[1] 
+                     lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
+                     if len(lc) > 0:
+                        self.parent_id = lc[0].id #on pré-rempli avec l'entreprise qui a le nom de domaine et qui a été mise à jour en dernier
+                     
+
+     @api.onchange('parent_id')
+     def _onchange_parent_id(self):
+         if (self.is_company == False and self.type=='contact'):
+             pass
+             if self.parent_id and self.email and "@" in self.email:
+                 consistency = self._test_parent_id_email_consistency()
+                 if consistency:
+                    return consistency
+                
+     def _test_parent_id_email_consistency(self):
+         _logger.info("_test_parent_id_email_consistency")
+         domain = self.email.split("@")[1] 
+         lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
+         #TODO Mise à jour des _compute_child_mail_address_domain_list
+         #self._origin.parent_id._compute_child_mail_address_domain_list()
+         #self.parent_id._compute_child_mail_address_domain_list()
+         coherent = False
+         if len(lc) > 0:
+             for c in lc:
+                if self.parent_id == c:
+                    coherent = True
+         if coherent == False :
+             return {
+                'warning': {
+                    'title': _("Attention : est-ce la bonne entreprise ?"),
+                    'message': _("Le domaine de l'adresse email est présent dans les contacts d'une autre entreprise... mais pas celle sélectionnée. N'y aurait-il pas un soucis quelque part ?")
+                    }
+             }
+
+    #def refresh_all_company_mail_address_domain_list(self):
+         #p = self.search([('is_company', '=', True)])
+         #for par in p:
+         #    par._compute_child_mail_address_domain_list()
 
      @api.onchange('first_name', 'name')
      def _onchange_name(self):

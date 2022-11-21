@@ -19,11 +19,10 @@
     <!--
    <record model="ir.actions.server" id="taz-common.company_refresh_child_mail_address_domain_list_action">
        <field name="name">MAJ forcée de la liste des domain mail</field>
-       <field name="model_id" ref="res.partner"/>
-       <field name="binding_model_id" ref="taz-common.company_tree"/>
+       <field name="model_id" ref="model_res_partner"/>
        <field name="state">code</field>
        <field name="code">
-           action = records.action_update_invoice_date()
+           action = records._compute_child_mail_address_domain_list()
        </field>
    </record>
     -->
