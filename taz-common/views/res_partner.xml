@@ -176,7 +176,7 @@
 			    <field name="parent_id" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
                         </group>
 			<group>
-                            <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
+                            <field name="function" attrs="{'invisible': [('is_company','=', True)]}"/>
                             <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
                             <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
 			    <field name="parent_industry_id" />

@@ -93,6 +93,7 @@ class tazResUsers(models.Model):
 
     @api.model
     def _msgraph_people(self):
+        _logger.info("=========== _msgraph_people pour l'utilisateur %s %s" % (self.env.user.id, self.env.user.name))
         tk = self._get_valid_access_token()
         if not self.oauth_provider_id or not tk or 'microsoft' not in self.oauth_provider_id.data_endpoint:
             #TODO : pourquoi lorsque je lève l'exception suivante, le front plante au lieu d'afficher le message ?

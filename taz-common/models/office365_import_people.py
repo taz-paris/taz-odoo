@@ -77,6 +77,7 @@ class tazOfficePeople(models.TransientModel):
      @api.model
      def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None, **read_kwargs):
         #s'il n'y a aucun enregistrement pour l'utilisateur appeler get_office365_people
+        _logger.info("=========== Search read pour l'utilisateur %s %s" % (self.env.user.id, self.env.user.name))
         if self.search([('user_id', '=', self.env.user.id)], count=True) == 0 :
             self.get_office365_people()
         return super().search_read(domain=domain, fields=fields, offset=offset, limit=limit, order=order, **read_kwargs)
@@ -87,7 +88,9 @@ class tazOfficePeople(models.TransientModel):
          #self.get_office365_people()
 
      def get_office365_people(self):
+        _logger.info("=========== get_office365_people pour l'utilisateur %s %s" % (self.env.user.id, self.env.user.name))
         data = self.env.user._msgraph_people()
+        _logger.info("=========== Nombre d'email retournés %s %s %s" % (str(len(data)), self.env.user.id, self.env.user.name))
         res = []
 
         mapping_email_id_contact = {}

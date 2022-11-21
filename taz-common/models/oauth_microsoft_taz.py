@@ -126,6 +126,7 @@ class OAuthResUsers(models.Model):
             expire_date = d.isoformat()#ADU
             oauth_user.write({
                 'oauth_access_token': params['access_token'], 
+                'oauth_provider_id' : provider, #ADU
                 'oauth_uid':oauth_uid, 
                 'oauth_token_expires_at' : expire_date,
                 #'oauth_refresh_token' : params['refresh_token'], #MS ne retourne pas de refresh_token si offline_access n'est pas intégré au scope
