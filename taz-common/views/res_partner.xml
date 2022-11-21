@@ -152,6 +152,7 @@
           <field name="parent_id" options="{'no_quick_create': True}"/>
 	  <field name="date_last_business_action"/>
           <field name="email"/>
+          <field name="category_id" widget="many2many_tags" optional="show"/>
         </tree>
       </field>
     </record>
@@ -303,6 +304,44 @@
     <menuitem name="Commerce" id="taz-common.commerce"/>
     <menuitem name="Entreprises" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
     <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
+
+
+    <menuitem id="taz-common.res_partner_menu_config"
+        name="Configuration"
+        parent="taz-common.commerce"
+        groups="base.group_system"
+        sequence="100"/>
+
+    <menuitem id="taz-common.menu_partner_category_form"
+        action="base.action_partner_category_form"
+        name="Contact Tags"
+        sequence="1" parent="taz-common.res_partner_menu_config"/>
+
+    <menuitem id="taz-common.menu_partner_title_contact"
+        action="base.action_partner_title_contact"
+        name="Contact Titles" parent="taz-common.res_partner_menu_config"
+        sequence="3"/>
+
+    <menuitem id="taz-common.res_partner_industry_menu" name="Industries"
+        action="base.res_partner_industry_action" parent="taz-common.res_partner_menu_config"
+        sequence="4"/>
+
+    <menuitem id="taz-common.menu_localisation" name="Localization"
+        parent="taz-common.res_partner_menu_config" sequence="5"/>
+
+    <menuitem id="taz-common.menu_country_partner"
+        action="base.action_country" parent="taz-common.menu_localisation"
+        sequence="1"/>
+
+    <menuitem id="taz-common.menu_country_group"
+        action="base.action_country_group"
+        name="Country Group" parent="taz-common.menu_localisation"
+        sequence="3"/>
+
+    <menuitem id="taz-common.menu_country_state_partner"
+        action="base.action_country_state"
+        parent="taz-common.menu_localisation"
+        sequence="2"/>
 
   </data>
 </odoo>
