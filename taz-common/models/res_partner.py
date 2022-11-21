@@ -93,14 +93,17 @@ class tazResPartner(models.Model):
              res.append((rec.id, display_name))
          return res
 
-     #@def name_search(self, name, args=None, operator='ilike', limit=100):
-     #    args = args or []
-     #    recs = self.browse()
-     #    _logger.info("uuuuuuuuuuuu")
-     #    if not recs:
-     #        recs = self.search(['|', '|', ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)] + args, limit=limit)
-     #        _logger.info("uuuuuiiiiiiiiiiiiiiiiiiiiiiiuuuuuuu")
-     #    return recs.name_get()
+     @api.model
+     def name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+         args = args or []
+         recs = self.browse()
+         if not recs:
+             recs = self.search(['|', '|', ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)] + args, limit=limit)
+         return recs.name_get()
+
+     #     args = args or []
+     #     args = ['|', '|', ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)] + args
+     #     return self._search(args, limit=limit, access_rights_uid=name_get_uid)
      
      #@api.model
      #def fields_get(self, allfields=None, attributes=None):
