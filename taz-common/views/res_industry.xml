@@ -1,0 +1,32 @@
+<odoo>
+   <data>
+
+	<record id="res_partner_industry_view_form_inherit" model="ir.ui.view">
+            <field name="name">Industry</field>
+            <field name="model">res.partner.industry</field>
+	    <field name="inherit_id" ref="base.res_partner_industry_view_form"/>
+            <field name="arch" type="xml">
+		<field name="active" position="after">
+			<field name="ms_planner_plan_id"/>
+			<field name="pillar_id"/>
+			<field name="user_id"/>
+		</field>
+            </field>
+        </record>
+
+        <record id="res_partner_industry_view_tree_inherit" model="ir.ui.view">
+            <field name="name">Industry</field>
+            <field name="model">res.partner.industry</field>
+	    <field name="inherit_id" ref="base.res_partner_industry_view_tree"/>
+            <field eval="6" name="priority"/>
+            <field name="arch" type="xml">
+		<field name="active" position="after">
+			<field name="ms_planner_plan_id"/>
+			<field name="pillar_id"/>
+			<field name="user_id"/>
+		</field>
+            </field>
+        </record>
+
+   </data>
+</odoo>
