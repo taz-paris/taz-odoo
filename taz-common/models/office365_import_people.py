@@ -113,7 +113,7 @@ class tazOfficePeople(models.TransientModel):
                     computed_lname = '.'.join(l[1:]).upper()
 
                 domain_target = mail["address"].split("@")[1]
-                partner_id = None
+                parent_id = None
                 cl = self.env['res.partner'].search([('is_company', '=', 'True'),('child_mail_address_domain_list', 'like', domain_target)], order="write_date desc")
                 if cl:
                     parent_id = cl[0].id

@@ -14,6 +14,7 @@ class tazResPartner(models.Model):
      
      @api.depends('child_ids')
      def _compute_child_mail_address_domain_list(self):
+         _logger.info("DEBUT _compute_child_mail_address_domain_list")# %s %s" % (self.name, self.child_mail_address_domain_list))
          domain_list = []
          for child in self.child_ids:
              if child.email:
@@ -23,6 +24,8 @@ class tazResPartner(models.Model):
                  if domain and domain not in domain_list:
                      domain_list.append(domain)
          self.child_mail_address_domain_list = ','.join(domain_list)
+         _logger.info("FIN _compute_child_mail_address_domain_list %s" % self.child_mail_address_domain_list)# %s %s" % (self.name, self.child_mail_address_domain_list))
+         #_logger.info("_compute_child_mail_address_domain_list %s %s" % (self.name, self.child_mail_address_domain_list))
 
      @api.depends('business_action_ids')
      def _compute_date_last_business_action(self):
@@ -69,7 +72,7 @@ class tazResPartner(models.Model):
                  if (rec.parent_id):
                      display_name += " (%s)" % rec.parent_id.name or ""
              res.append((rec.id, display_name))
-         _logger.info(res)
+         #_logger.info(res)
          return res
 
      #@def name_search(self, name, args=None, operator='ilike', limit=100):
@@ -125,7 +128,6 @@ class tazResPartner(models.Model):
          if (self.is_company == False and self.type=='contact'):
              _logger.info(self._origin.parent_id)
              _logger.info(self.parent_id)
-             #_compute_child_mail_address_domain_list()
              if self.email and "@" in self.email :
                  l = self.email.split("@")[0].split('.')
                  #pré-remplissage du nom/prénom s'ils ne sont pas déjà remplis
@@ -154,7 +156,8 @@ class tazResPartner(models.Model):
                                     }
                                 }
                      else:
-                         self.parent_id = lc[0].id
+                         if not(self._origin.parent_id) : #si on est en train de supprimer la société d'une fiche contact, il ne faut pas la réintégrer au regard du mail !
+                            self.parent_id = lc[0].id
 
      @api.onchange('first_name', 'name')
      def _onchange_name(self):
@@ -216,6 +219,7 @@ class tazResPartner(models.Model):
                 def convert(value):
                     return value.id if isinstance(value, models.BaseModel) else value
                 result['value'] = {key: convert(self.parent_id[key]) for key in address_fields}
+        _logger.info('FIN TRIGGER onchange_parent_id')
         return result
 
      #@api.model

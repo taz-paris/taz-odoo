@@ -6,9 +6,9 @@
       <field name="arch" type="xml">
         <tree create="false" editable="top">
           <field name="display_name" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>
+          <field name="email" readonly="1"/>
           <field name="first_name" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="last_name" attrs="{'readonly': [('odoo_id','!=', False)]}"/>
-          <field name="email" readonly="1"/>
           <field name="parent_id" attrs="{'readonly': [('odoo_id','!=', False)]}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
           <field name="category_id" widget="many2many_tags"  attrs="{'readonly': [('odoo_id','!=', False)]}"/>
           <field name="odoo_id" attrs="{'readonly': [('odoo_id','!=', False)]}" optional="hide"/>

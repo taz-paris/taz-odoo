@@ -169,7 +169,7 @@
 				<field name="active" invisible="1"/>
 				<field name="company_id" invisible="1"/>
 				<field name="email" default_focus="1" placeholder="Adresse email" widget="email"/>
-				<field name="title" default_focus="0" placeholder="Madame / Monsieur"/>
+				<field name="title" string="Civilité" default_focus="0" placeholder="Madame / Monsieur"/>
 				<field name="first_name" placeholder="Prénom"/>
 				<field name="name" placeholder="Nom"/>
 
@@ -255,6 +255,7 @@
            <search string="Contacts">
                 <field name="name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('name', 'ilike', self)]"/>
                 <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
+                <field name="email" string="Email" filter_domain="[('email', 'ilike', self)]"/>
 		<field name="category_id" string="Étiquette" />
 		<field name="industry_id" string="Business Domain"/>
             <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
@@ -263,7 +264,7 @@
             <separator/>
             <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
             <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
-            <filter name="no_user_id" string="Sans vendeur" domain="[('user_id', '=', False)]"/>
+            <filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
 	    <separator/>
 		    <!-- ATTENTION : timedelta doesn't accept MONTHS nore YEAR arguments https://docs.python.org/2/library/datetime.html#datetime.timedelta -->
 	    <filter name="no_action_3months" string="Pas vus depuis > 3 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
