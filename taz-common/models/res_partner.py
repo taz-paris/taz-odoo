@@ -184,9 +184,13 @@ class tazResPartner(models.Model):
          domain = self.email.split("@")[1] 
          lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
          coherent = False
+         _logger.info("========= nb"+str(len(lc)))
          if len(lc) > 0:
              for c in lc:
-                if self.parent_id == c:
+                _logger.info("Nom boite "+str(c.name))
+                _logger.info(str(self.parent_id.id)+"==="+str(c.id))
+                if str(self.parent_id.id).replace('NewId_','') == str(c.id): #quand on passer par l'entreprise, et que l'on ouvre la popup de modification d'un contact lié, l'id parent est en mémoire, et il est préfixé par "NewID"
+                    _logger.info('      > coherent = True')
                     coherent = True
          if coherent == False :
              return {

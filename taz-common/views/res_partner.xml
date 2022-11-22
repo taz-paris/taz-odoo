@@ -53,6 +53,7 @@
 					  <field name="is_company" invisible="1"/>
 					  <field name="name"/>
 					  <field name="long_company_name"/>
+					  <field name="industry_id"/>
 					</tree>
 				</field>
 			  </page>
@@ -63,6 +64,7 @@
 					  <field name="is_company" invisible="1"/>
 					  <field name="first_name"/>
 					  <field name="name"/>
+          				<field name="email" optional="show"/>
 					</tree>
 				</field>
 			  </page>
@@ -149,9 +151,10 @@
                         <field name="is_company" invisible="1"/>
           <field name="first_name"/>
           <field name="name"/>
-          <field name="parent_id" options="{'no_quick_create': True}"/>
-	  <field name="date_last_business_action"/>
-          <field name="email"/>
+          <field name="parent_id" options="{'no_quick_create': True}" optional="show"/>
+	  <field name="date_last_business_action" optional="show"/>
+          <field name="email" optional="show"/>
+	  <field name="parent_industry_id" optional="show"/> <!-- multi_edit="1" -->
           <field name="category_id" widget="many2many_tags" optional="show"/>
         </tree>
       </field>
@@ -268,11 +271,12 @@
 	    <separator/>
 		    <!-- ATTENTION : timedelta doesn't accept MONTHS nore YEAR arguments https://docs.python.org/2/library/datetime.html#datetime.timedelta -->
 	    <filter name="no_action_3months" string="Pas vus depuis > 3 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
-	    <filter name="no_action_3months" string="Pas vus depuis > 6 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=182)).strftime('%%Y-%%m-%%d')))]"/>
-	    <filter name="no_action_3months" string="Pas vus depuis > 12 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
+	    <filter name="no_action_6months" string="Pas vus depuis > 6 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=182)).strftime('%%Y-%%m-%%d')))]"/>
+	    <filter name="no_action_12months" string="Pas vus depuis > 12 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
             <separator/>
+	    <filter name="no_update_12months" string="Pas MAJ depuis > 12 mois" domain="[('write_date','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
             <group expand="0" string="Group By">
-            	<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
+            	<filter string="Business domain" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
             	<filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
             </group>
         </search>
