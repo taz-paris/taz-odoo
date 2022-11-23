@@ -146,9 +146,9 @@ class tazResPartner(models.Model):
                  if not(re.fullmatch(regex, mail)):
                      raise ValidationError(_('Cette adresse email est invalide : %s' % mail))
 
-             count_email = self.search_count(['|', ('email', '=', mail), ('personal_email', '=', mail), ('is_company', '=', False), ('type', '=', 'contact')])
+             count_email = self.search_count(['|', '|', ('email', '=', mail), ('personal_email', '=', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact')])
              if count_email > 1 and mail is not False:
-                 raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
+                 raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel ou anciennes adresses email). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
 
 
      @api.constrains('first_name')
