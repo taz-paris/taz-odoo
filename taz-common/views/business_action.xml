@@ -46,7 +46,7 @@
 		      <field name="conclusion"/>
 		      <field name="report_url" widget="url"/>
 		      <field name="note"/>
-		      <field name="ms_planner_task_data"/>
+		      <field name="ms_planner_task_data" groups="base.system"/>
 		  </group>
           </group>
         </form>
@@ -102,6 +102,7 @@
 			help="Actions commerciales qui m'ont été assignées"/>
 		    <separator/>
 		    <filter name="filter_deadline_date" date="date_deadline"/>
+            	    <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
 		    <separator/>
 		    <separator/>
 		    <filter name="state_not_done" string="Non terminées" domain="[('state', '!=', 'done')]"/>
