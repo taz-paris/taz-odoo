@@ -174,6 +174,7 @@ class tazBusinessAction(models.Model):
         ('first_meeting', 'Prise de connaissance'),
         ('deepening', 'Approfondissement')
         ], "Type")
+    report_url = fields.Char("URL vers le CR OneNote")
 
     ms_planner_task_data = fields.Char("Data de la tâche M$ Planner")
     is_rdv_taken_by_assistant = fields.Boolean("RDV pris par Executive Access")
