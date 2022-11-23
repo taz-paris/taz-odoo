@@ -17,9 +17,30 @@ class tazResPartner(models.Model):
         old_parent_id = None
         if 'parent_id' in vals.keys():
             old_parent_id = self.parent_id
+
+        old_personal_email = self.personal_email
+        old_email = self.email
+
         res = super().write(vals)
+
         if old_parent_id: 
             old_parent_id._compute_child_mail_address_domain_list()
+
+        if self._context.get('save_forme_address') != False :
+            former = []
+            if self.former_email_address:
+                former = self.former_email_address.split(',')
+            if old_email :
+                if old_email != self.email and old_email != self.personal_email:
+                    if old_email not in former :
+                        former.append(old_email)
+            if old_personal_email :
+                if old_personal_email != self.email and old_personal_email != self.personal_email:
+                    if old_personal_email not in former :
+                        former.append(old_personal_email)
+            if len(former) > 0:
+                self.with_context(save_forme_address=False).former_email_address = ','.join(former)
+
         return res
 
      def unlink(self):
@@ -56,17 +77,13 @@ class tazResPartner(models.Model):
          self.date_last_business_action = res
 
 
-     @api.onchange('is_company')
-     def default_user_id(self):
-        user_id = self.env.user
-
      first_name = fields.Char(string="Prénom")
      long_company_name = fields.Char(string="Libellé long de société")
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
      is_priority_target = fields.Boolean("Compte à ouvrir")
-
+     former_email_address = fields.Char("Anciennes adresses email", readonly=True)
 
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
@@ -121,17 +138,17 @@ class tazResPartner(models.Model):
      #          res.get(field)['searchable'] = False
      #   return res
 
-     @api.constrains('email')
+     @api.constrains('email', 'personal_email')
      def _check_email(self):
-         count_email = self.search_count([('email', '=', self.email), ('is_company', '=', False), ('type', '=', 'contact')])
-         if count_email > 1 and self.email is not False:
-             raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact. Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
-        
-         if self.email:
-             regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
-             if not(re.fullmatch(regex, self.email)):
-                 raise ValidationError(_('Cette adresse email est invalide : %s' % self.email))
+         for mail in [self.email, self.personal_email]:
+             if mail:
+                 regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
+                 if not(re.fullmatch(regex, mail)):
+                     raise ValidationError(_('Cette adresse email est invalide : %s' % mail))
 
+             count_email = self.search_count(['|', ('email', '=', mail), ('personal_email', '=', mail), ('is_company', '=', False), ('type', '=', 'contact')])
+             if count_email > 1 and mail is not False:
+                 raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
 
 
      @api.constrains('first_name')
@@ -146,6 +163,11 @@ class tazResPartner(models.Model):
              count_name = self.search_count([('name', '=ilike', self.name), ('is_company', '=', True), ('type', '=', 'contact')])
              if count_name > 1 and self.name is not False:
                  raise ValidationError(_('%s : ce nom est déjà utilisé sur une autre fiche entreprise. Enregistrement impossible (il ne faudrait pas créer des doublons d\'entreprises ;-)) !' % self.name))
+
+     @api.onchange('personal_email')
+     def _onchange_personal_email(self):
+         if (self.personal_email):
+             self.personal_email = self.personal_email.strip().lower()
 
      @api.onchange('email')
      def _onchange_email(self):
@@ -200,7 +222,7 @@ class tazResPartner(models.Model):
              return {
                 'warning': {
                     'title': _("Attention : est-ce la bonne entreprise ?"),
-                    'message': _("Le domaine de l'adresse email est présent dans les contacts d'au moins une autre entreprise... mais pas celle sélectionnée. N'y aurait-il pas un soucis ?  \n\n\nListe des entreprises dont au moins un contact a une adresse email avec ce nom de domaine(%s) : %s" % (domain, '\n'.join(liste_match) or ""))
+                    'message': _("Le domaine de l'adresse email est présent dans les contacts d'au moins une autre entreprise... mais pas celle sélectionnée. N'y aurait-il pas un soucis ?  \n\n\nListe des entreprises dont au moins un contact a une adresse email avec ce nom de domaine(%s) : \n%s" % (domain, '\n'.join(list_match) or ""))
                     }
              }
 

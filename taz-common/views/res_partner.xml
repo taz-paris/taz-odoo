@@ -234,6 +234,8 @@
 						</div>
 					    </div>
 					</group>
+					<label for="former_email_address" string="Anciennes adresses email"/>
+					<field name="former_email_address"/>
 				</group>
 			</page>
 		    </notebook>

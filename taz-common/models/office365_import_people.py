@@ -94,9 +94,15 @@ class tazOfficePeople(models.TransientModel):
         res = []
 
         mapping_email_id_contact = {}
-        lc = self.env['res.partner'].search([('email', '!=', False), ('is_company', '=', False)])
+        lc = self.env['res.partner'].search(['|', '|', ('email', '!=', False), ('personal_email', '!=', False), ('former_email_address', '!=', False), ('is_company', '=', False)])
         for c in lc:
-            mapping_email_id_contact[c.email.lower()] = c.id
+            if c.email:
+                mapping_email_id_contact[c.email.lower()] = c.id
+            if c.personal_email:
+                mapping_email_id_contact[c.personal_email.lower()] = c.id
+            if c.former_email_address:
+                for mail in c.former_email_address.split(','):
+                    mapping_email_id_contact[mail.lower()] = c.id
 
         #TODO : ajouter une vue filtre avec par défaut le masquage des gens déjà dans Odoo
         #TODO : idée => ajouter un bouton d'exlucsion pour ne pas reproposer le contact ? => dans ce cas il ne faut pas un model Transient et il faut gérer la mise à jour en delta de ce qui vient d'Office
