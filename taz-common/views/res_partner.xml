@@ -33,6 +33,9 @@
       <field name="arch" type="xml">
         <form>
 	   <sheet>
+
+		   <field name="active" invisible="1"/>
+		   <widget name="web_ribbon" title="Archivée" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
 		<group>
 		  <group>
 		      <field name="is_company" default="1" invisible="1"/>
@@ -42,7 +45,7 @@
 		  </group>
 		  <group>
 		      <field name="user_id" options="{'no_create': True, 'no_create_edit':True}" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-		      <field name="is_priority_target"/>
+		      <field name="is_priority_target"/>/
 		      <field name="industry_id" options="{'no_create': True, 'no_create_edit':True}"/>
 		  </group>
 		</group>
@@ -112,6 +115,7 @@
             	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
             	<filter name="no_industry_id" string="Sans business domain" domain="[('industry_id', '=', False)]"/>
             	<filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
+		<filter string="Archivée" name="inactive" domain="[('active', '=', False)]"/>
 		<separator/>
 		<group expand="0" string="Group By">
 			<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
@@ -166,6 +170,8 @@
       <field name="arch" type="xml">
         <form>
                 <sheet>
+		   <widget name="web_ribbon" title="Archivé" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+		   <field name="active" invisible="1"/>
                     <group>
 			<group>
 				<field name="is_company" invisible="1"/>
@@ -264,6 +270,7 @@
             <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"
                 help="Contacts qui m'ont été assignés en vendeur principal"/>
+	    <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
             <separator/>
             <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
             <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
@@ -311,6 +318,11 @@
 	<!--
         <field name="category_id" ref="ng_office_technology.module_category_ng_office_technology"/>
 	-->
+    </record>
+
+    <record id="taz-basic" model="res.groups">
+        <field name="name">TAZ-Basic</field>
+        <field name="comment">Basic rights.</field>
     </record>
 
     <!-- Masquer les modules de base, sauf poru le super admin -->

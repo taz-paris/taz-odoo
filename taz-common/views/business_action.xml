@@ -46,7 +46,7 @@
 		      <field name="conclusion"/>
 		      <field name="report_url" widget="url"/>
 		      <field name="note"/>
-		      <field name="ms_planner_task_data" groups="base.system"/>
+		      <field name="ms_planner_task_data" groups="base.group_system"/>
 		  </group>
           </group>
         </form>
