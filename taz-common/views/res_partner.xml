@@ -68,7 +68,7 @@
 					</tree>
 				</field>
 			  </page>
-			  <page string="Objectifs commerciaux">
+			  <page string="Objectifs commerciaux" groups="taz-common.taz-admin">
 				<group>
 				  <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_partner_id': active_id}">
 					<tree editable="top">
@@ -184,6 +184,8 @@
                             <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
 			    <field name="parent_industry_id" options="{'no_create': True, 'no_create_edit':True}" />
 			    <field name="date_last_business_action"/>
+			    <field name="linkedin_url" widget="url"/>
+                            <field name="comment"/>
 			</group>
                     </group>
 		    <notebook>
@@ -213,7 +215,6 @@
 			    			<field name="assistant"/>
 						<field name="personal_phone" widget="phone"/>
 						<field name="personal_email" widget="email"/>
-						<field name="linkedin_url" widget="url"/>
 						<field name="user_ids" invisible="1"/>
 					</group>
 					<group string="Adresse postale">
@@ -234,9 +235,6 @@
 					    </div>
 					</group>
 				</group>
-			</page>
-			<page string = "Notes">
-                            <field name="comment"/>
 			</page>
 		    </notebook>
 		
@@ -304,16 +302,28 @@
       <field name="filter">[('is_company', '!=', True)]</field> 
     </record>
 
+    <record id="taz-admin" model="res.groups">
+        <field name="name">TAZ-Admin</field>
+        <field name="comment">Administrator for TAZ* modules.</field>
+	<!--
+        <field name="category_id" ref="ng_office_technology.module_category_ng_office_technology"/>
+	-->
+    </record>
+
+    <!-- Masquer les modules de base, sauf poru le super admin -->
+    <menuitem id="mail.menu_root_discuss" groups="base.group_system"/>
+    <menuitem id="calendar.mail_menu_calendar" groups="base.group_system"/>
+    <menuitem id="contacts.menu_contacts" groups="base.group_system"/>
 
     <menuitem name="Commerce" id="taz-common.commerce"/>
     <menuitem name="Entreprises" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
     <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
 
-
+    
     <menuitem id="taz-common.res_partner_menu_config"
         name="Configuration"
         parent="taz-common.commerce"
-        groups="base.group_system"
+        groups="taz-common.taz-admin"
         sequence="100"/>
 
     <menuitem id="taz-common.menu_partner_category_form"

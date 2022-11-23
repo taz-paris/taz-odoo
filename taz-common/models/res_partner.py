@@ -184,19 +184,17 @@ class tazResPartner(models.Model):
          domain = self.email.split("@")[1] 
          lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
          coherent = False
-         _logger.info("========= nb"+str(len(lc)))
+         list_match = []
          if len(lc) > 0:
              for c in lc:
-                _logger.info("Nom boite "+str(c.name))
-                _logger.info(str(self.parent_id.id)+"==="+str(c.id))
+                list_match.append(c.name)
                 if str(self.parent_id.id).replace('NewId_','') == str(c.id): #quand on passer par l'entreprise, et que l'on ouvre la popup de modification d'un contact lié, l'id parent est en mémoire, et il est préfixé par "NewID"
-                    _logger.info('      > coherent = True')
                     coherent = True
          if coherent == False :
              return {
                 'warning': {
                     'title': _("Attention : est-ce la bonne entreprise ?"),
-                    'message': _("Le domaine de l'adresse email est présent dans les contacts d'une autre entreprise... mais pas celle sélectionnée. N'y aurait-il pas un soucis quelque part ?")
+                    'message': _("Le domaine de l'adresse email est présent dans les contacts d'au moins une autre entreprise... mais pas celle sélectionnée. N'y aurait-il pas un soucis ?  \n\n\nListe des entreprises dont au moins un contact a une adresse email avec ce nom de domaine(%s) : %s" % (domain, '\n'.join(liste_match) or ""))
                     }
              }
 

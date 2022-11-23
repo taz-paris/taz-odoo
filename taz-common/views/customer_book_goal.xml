@@ -105,8 +105,8 @@
 	-->
     </record>
 
-    <menuitem name="Suivi des objectifs commerciaux" id="taz-common.customer_book_followup" parent="taz-common.commerce" action="taz-common.customer_book_followup_action"/>
-    <menuitem name="Objectifs commerciaux" id="taz-common.customer_book_goal" parent="taz-common.commerce" action="taz-common.customer_book_goal_action"/>
+    <menuitem name="Suivi des objectifs commerciaux" id="taz-common.customer_book_followup" parent="taz-common.commerce" action="taz-common.customer_book_followup_action" groups="taz-common.taz-admin"/>
+    <menuitem name="Objectifs commerciaux" id="taz-common.customer_book_goal" parent="taz-common.commerce" action="taz-common.customer_book_goal_action" groups="taz-common.taz-admin"/>
 
   </data>
 </odoo>
