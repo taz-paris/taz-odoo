@@ -55,12 +55,18 @@ class tazResPartner(models.Model):
                      res = action.date_deadline
          self.date_last_business_action = res
 
+
+     @api.onchange('is_company')
+     def default_user_id(self):
+        user_id = self.env.user
+
      first_name = fields.Char(string="Prénom")
      long_company_name = fields.Char(string="Libellé long de société")
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
      is_priority_target = fields.Boolean("Compte à ouvrir")
+
 
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
