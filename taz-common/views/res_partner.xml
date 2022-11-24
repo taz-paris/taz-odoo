@@ -95,6 +95,15 @@
 				</group>
 			  </page>
 		  </notebook>
+
+		<group>
+			<group>
+				<field name="write_date"/>
+			</group>
+			<group>
+				<field name="create_date"/>
+			</group>
+		</group>
 	   </sheet>
 
 	    <div class="oe_chatter">
@@ -244,7 +253,15 @@
 					<field name="former_email_address"/>
 				</group>
 			</page>
-		    </notebook>
+		</notebook>
+		<group>
+			<group>
+				<field name="write_date"/>
+			</group>
+			<group>
+				<field name="create_date"/>
+			</group>
+		</group>
 		
                     </sheet>
 		    <div class="oe_chatter">

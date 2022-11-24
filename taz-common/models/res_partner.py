@@ -146,10 +146,13 @@ class tazResPartner(models.Model):
                  if not(re.fullmatch(regex, mail)):
                      raise ValidationError(_('Cette adresse email est invalide : %s' % mail))
 
-             count_email = self.search_count(['|', '|', ('email', '=', mail), ('personal_email', '=', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact')])
-             if count_email > 1 and mail is not False:
-                 raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel ou anciennes adresses email). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) !'))
-
+             email_list = self.search(['|', '|', ('email', '=ilike', mail), ('personal_email', '=ilike', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact')])
+             list_match = []
+             for e in email_list :
+                 if str(e.id) != str(self.id).replace("New_", ""):
+                    list_match.append("%s [id = %s]" % (e.name_get()[0][1], str(e.id)))
+             if len(email_list) > 1 and mail is not False:
+                 raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel ou anciennes adresses email). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) ! \n\nContact concerné : %s' % ('\n'.join(list_match) or "")))
 
      @api.constrains('first_name')
      def _check_firstname(self):
