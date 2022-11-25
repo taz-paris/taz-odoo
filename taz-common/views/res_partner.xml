@@ -292,6 +292,9 @@
             <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
             <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
             <filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
+	    <!--
+	    <filter name="duplicates_first_name_name" string="Homonymes ou doublons prénom/nom" domain="filter_name_duplicate()"/>
+	    -->
 	    <separator/>
 		    <!-- ATTENTION : timedelta doesn't accept MONTHS nore YEAR arguments https://docs.python.org/2/library/datetime.html#datetime.timedelta -->
 	    <filter name="no_action_3months" string="Pas vus depuis > 3 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
@@ -322,12 +325,28 @@
                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),
                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),
 			      ]" />
-      <field name="help" type="html">
-		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
-      </field>
       <field name="domain">[('is_company', '=', False),('user_ids', '=', False)]</field> 
       <field name="filter">[('is_company', '!=', True)]</field> 
     </record>
+
+    <!--
+    <record model="ir.actions.act_window" id="taz-common.action_partner_contact_duplicate">
+	    <field name="name">Contacts en doublons ou homonymes nom/prénom</field>
+      <field name="res_model">res.partner</field>
+      <field name="context">{
+	      	    'default_user_id' : uid,
+            }</field>
+      <field name="search_view_id" ref="taz-common.contact_search"/>
+      <field name="view_mode">tree,form,kanban</field>
+		      <field name="view_ids" eval="
+                            [
+                            (5, 0, 0),
+                            (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),
+                            (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),
+			      ]" />
+      <field name="domain">self.filter_name_duplicate()</field> 
+    </record>
+    -->
 
     <record id="taz-admin" model="res.groups">
         <field name="name">TAZ-Admin</field>
@@ -348,8 +367,9 @@
     <menuitem id="contacts.menu_contacts" groups="base.group_system"/>
 
     <menuitem name="Commerce" id="taz-common.commerce"/>
-    <menuitem name="Entreprises" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
-    <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
+    <menuitem name="Contacts" sequence="10" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
+    <menuitem name="Entreprises" sequence="20" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
+    <menuitem name="Contacts doublons" sequence="10" id="taz-common.partner_contact_duplicates" parent="taz-common.commerce" action="action_server_list_name_duplicates"/>
 
     
     <menuitem id="taz-common.res_partner_menu_config"
@@ -388,6 +408,14 @@
         action="base.action_country_state"
         parent="taz-common.menu_localisation"
         sequence="2"/>
+
+<record id="action_server_list_name_duplicates" model="ir.actions.server">
+          <field name="name">Duplicats de noms</field>
+          <field name="model_id" ref="model_res_partner"/>
+          <field name="binding_model_id" ref="model_res_partner"/>
+          <field name="state">code</field>
+          <field name="code">action =  env.get('res.partner').filter_name_duplicate()</field>
+ </record>
 
   </data>
 </odoo>

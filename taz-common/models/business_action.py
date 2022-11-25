@@ -159,7 +159,7 @@ class tazBusinessAction(models.Model):
         )
     state = fields.Selection([
         ('todo', 'À faire'),
-        ('planned', 'Plannifié'),
+        ('planned', 'Planifié'),
         ('done', 'Fait'),
         ('cancelled', 'Annulé'),
         ('wait', 'À replannifier')], 'Statut', default='todo')

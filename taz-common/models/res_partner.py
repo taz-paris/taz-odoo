@@ -30,6 +30,10 @@ class tazResPartner(models.Model):
             former = []
             if self.former_email_address:
                 former = self.former_email_address.split(',')
+                if self.persona_email in former:
+                    former.remove(self.personal_email)
+                if self.email in former:
+                    former.remove(self.email)
             if old_email :
                 if old_email != self.email and old_email != self.personal_email:
                     if old_email not in former :
@@ -138,7 +142,7 @@ class tazResPartner(models.Model):
      #          res.get(field)['searchable'] = False
      #   return res
 
-     @api.constrains('email', 'personal_email')
+     @api.constrains('email', 'personal_email', 'active')
      def _check_email(self):
          for mail in [self.email, self.personal_email]:
              if mail:
@@ -146,7 +150,7 @@ class tazResPartner(models.Model):
                  if not(re.fullmatch(regex, mail)):
                      raise ValidationError(_('Cette adresse email est invalide : %s' % mail))
 
-             email_list = self.search(['|', '|', ('email', '=ilike', mail), ('personal_email', '=ilike', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact')])
+             email_list = self.search(['|', '|', ('email', '=ilike', mail), ('personal_email', '=ilike', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact'), ('active', '=', True)])
              list_match = []
              for e in email_list :
                  if str(e.id) != str(self.id).replace("New_", ""):
@@ -163,7 +167,7 @@ class tazResPartner(models.Model):
      @api.constrains('name')
      def _check_name(self):
          if (self.is_company == True and self.type=='contact'):
-             count_name = self.search_count([('name', '=ilike', self.name), ('is_company', '=', True), ('type', '=', 'contact')])
+             count_name = self.search_count([('name', '=ilike', self.name), ('is_company', '=', True), ('type', '=', 'contact'), ('active', '=', True)])
              if count_name > 1 and self.name is not False:
                  raise ValidationError(_('%s : ce nom est déjà utilisé sur une autre fiche entreprise. Enregistrement impossible (il ne faudrait pas créer des doublons d\'entreprises ;-)) !' % self.name))
 
@@ -197,7 +201,7 @@ class tazResPartner(models.Model):
                  else :
                      #pré-remplissage de l'entreprise
                      domain = self.email.split("@")[1] 
-                     lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
+                     lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True), ('active', '=', True)], order="write_date desc")
                      if len(lc) > 0:
                         self.parent_id = lc[0].id #on pré-rempli avec l'entreprise qui a le nom de domaine et qui a été mise à jour en dernier
                      
@@ -213,7 +217,7 @@ class tazResPartner(models.Model):
      def _test_parent_id_email_consistency(self):
          _logger.info("_test_parent_id_email_consistency")
          domain = self.email.split("@")[1] 
-         lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True)], order="write_date desc")
+         lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True), ('active', '=', True)], order="write_date desc")
          coherent = False
          list_match = []
          if len(lc) > 0:
@@ -269,6 +273,38 @@ class tazResPartner(models.Model):
      def onchange_city(self):
          if self.city :
             self.city = self.city.strip().upper()
+     
+     def filter_name_duplicate(self):
+        _logger.info('=========== filter_name_duplicate')
+        contacts = self.search([('is_company', '=', False), ('type', '=', 'contact'), ('user_ids', '=', False)])
+        count = {}
+        for c in contacts:
+            nom = c.first_name.strip().title() + ' ' + c.name.strip().upper()
+            if nom not in count.keys():
+                count[nom] = []
+            count[nom].append(c)
+        res = []
+        for nom, partner_ids in count.items():
+            if len(partner_ids) > 1:
+                for p in partner_ids:
+                    res.append(p.id)
+                _logger.info('     => %s est présent %s fois' % (nom, str(len(partner_ids))))
+        domain = [('id', 'in', res)]
+
+        form_id = self.env.ref("taz-common.contact_tree")
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Contacts - homonymes nom/prénom ou doublons',
+                'res_model': 'res.partner',
+                'view_type': 'tree',
+                'view_mode': 'tree',
+                'view_id': form_id.id,
+                'context': {},
+                'domain':domain,
+                # if you want to open the form in edit mode direclty
+                'target': 'current',
+            }
+ 
 
      @api.onchange('parent_id')
      def onchange_parent_id(self): #REMPLACE LA FONCTION DE BASE POUR NE PLUS CONSEILLER DE CREER UNE NOUVELLE FICHE CONTACT SI LE CONTACT CHANGE D'ENTREPRISE
@@ -296,14 +332,6 @@ class tazResPartner(models.Model):
                 result['value'] = {key: convert(self.parent_id[key]) for key in address_fields}
         _logger.info('FIN TRIGGER onchange_parent_id')
         return result
-
-     #@api.model
-     #def create(self, vals):
-     #   if not vals.get("parent_id"):
-     #       vals["parent_id"] = self._context.get("default_parent_id")
-     #   return super().create(vals)
-
-
 
 #Wizzard de fusion / déduplication :
     #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/odoo/addons/base/wizard/base_partner_merge.py
