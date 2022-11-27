@@ -224,25 +224,22 @@ class tazResPartner(models.Model):
          _logger.info("_test_parent_id_email_consistency")
          domain = self.email.split("@")[1] 
          lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True), ('active', '=', True)], order="write_date desc")
-         coherent = False
-         list_match = []
          if len(lc) > 0:
+             coherent = False
+             list_match = []
              for c in lc:
-                list_match.append(c.name)
-                if str(self.parent_id.id).replace('NewId_','') == str(c.id): #quand on passer par l'entreprise, et que l'on ouvre la popup de modification d'un contact lié, l'id parent est en mémoire, et il est préfixé par "NewID"
+                list_match.append("%s [ID=%s]" % (c.name, str(c.id)))
+                if str(self.parent_id.id).replace('NewId_','') == str(c.id): #quand on passe par l'entreprise, et que l'on ouvre la popup de modification d'un contact lié, l'id parent est en mémoire, et il est préfixé par "NewID"
                     coherent = True
-         if coherent == False :
-             return {
-                'warning': {
-                    'title': _("Attention : est-ce la bonne entreprise ?"),
-                    'message': _("Le domaine de l'adresse email est présent dans les contacts d'au moins une autre entreprise... mais pas celle sélectionnée. N'y aurait-il pas un soucis ?  \n\n\nListe des entreprises dont au moins un contact a une adresse email avec ce nom de domaine(%s) : \n%s" % (domain, '\n'.join(list_match) or ""))
-                    }
-             }
+             if coherent == False :
+                 return {
+                    'warning': {
+                        'title': _("Attention : est-ce la bonne entreprise ?"),
+                        'message': _("Le domaine de l'adresse email est présent dans les contacts de %s autre(s) entreprise(s)... mais pas celle sélectionnée. N'y aurait-il pas un soucis ?  \n\n\nListe des entreprises dont au moins un contact a une adresse email avec ce nom de domaine(%s) : \n%s" % (len(list_match), domain, '\n'.join(list_match) or ""))
+                        }
+                 }
+         return False
 
-    #def refresh_all_company_mail_address_domain_list(self):
-         #p = self.search([('is_company', '=', True)])
-         #for par in p:
-         #    par._compute_child_mail_address_domain_list()
 
      @api.onchange('first_name', 'name')
      def _onchange_name(self):
@@ -336,7 +333,7 @@ class tazResPartner(models.Model):
          domain = [('id', 'in', res)]
          return {
                 'type': 'ir.actions.act_window',
-                'name': 'Entreprises qui partagent au moins un nom de domain mail avec une autre entreprise (non archivée)',
+                'name': 'Entreprises qui partagent au moins un nom de domaine email avec une autre entreprise (non archivée)',
                 'res_model': 'res.partner',
                 'view_type': 'tree',
                 'view_mode': 'tree,form',
@@ -365,7 +362,7 @@ class tazResPartner(models.Model):
             self.city = self.city.strip().upper()
 
      @api.onchange('parent_id')
-     def onchange_parent_id(self): #REMPLACE LA FONCTION DE BASE POUR NE PLUS CONSEILLER DE CREER UNE NOUVELLE FICHE CONTACT SI LE CONTACT CHANGE D'ENTREPRISE
+     def onchange_parent_id(self): #REMPLACE LA FONCTION NATIVE ODOO POUR NE PLUS CONSEILLER DE CREER UNE NOUVELLE FICHE CONTACT SI LE CONTACT CHANGE D'ENTREPRISE
         _logger.info('TRIGGER onchange_parent_id')
         # return values in result, as this method is used by _fields_sync()
         if not self.parent_id:
