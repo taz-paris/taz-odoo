@@ -12,6 +12,7 @@ DOMAIN_EXCLUSION = "@tasmane.com"
 class tazOfficePeople(models.TransientModel):
      _name = 'taz.office_people'
      _rec_name = 'display_name'
+     _description = "Transient object for Office 365 contact import  (with the /people Microsoft graph API)"
      first_name = fields.Char(string="Prénom")
      last_name = fields.Char(string="Nom")
      display_name = fields.Char(string="Office display name")

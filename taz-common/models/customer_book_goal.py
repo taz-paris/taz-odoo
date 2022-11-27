@@ -8,6 +8,7 @@ import datetime
 
 class tazCustomerBookGoal(models.Model):
     _name = "taz.customer_book_goal"
+    _description = "Customer book goal"
     _order = "reference_period desc"
     _sql_constraints = [
         ('partner_year_uniq', 'UNIQUE (partner_id, reference_period)',  "Impossible d'avoir deux objectifs différents pour la même entreprise et la même année.")
@@ -58,6 +59,7 @@ class tazCustomerBookGoal(models.Model):
 
 class tazCustomerBookFollowup(models.Model):
     _name = "taz.customer_book_followup"
+    _description = "Customer book evolution"
     _order = "date_update desc"
     _sql_constraints = [
         ('book_date_uniq', 'UNIQUE (customer_book_goal_id, date_update)',  "Impossible d'avoir suivis d'objectifs différents pour le même jour.")

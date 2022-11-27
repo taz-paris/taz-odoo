@@ -12,6 +12,7 @@ INTEGRATION_MS_PLANNER_ACTIVE = False
 
 class tazBusinessAction(models.Model):
     _name = "taz.business_action"
+    _description = "Record the futur and past business actions"
 
     #@api.model
     #def default_get(self, fields):
