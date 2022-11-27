@@ -29,6 +29,8 @@ class resPartnerMassCategory(models.TransientModel):
              if c in self.add_category_ids:
                 raise ValidationError(_('Opération impossible. Le tag %s est présent dans la liste des tags à ajouter et celle des tags à supprimer. Ce n\'est pas cohérent.' % c.name))
          for partner in self.partner_ids:
+            if partner.is_company:
+                raise ValidationError(_('Une entreprise est sélectionnée. Opération impossible.'))
             for tag2add in self.add_category_ids:
                 if tag2add not in partner.category_id:
                     _logger.info('>>> Ajout tag %s sur le partner %s' % (tag2add, partner.name))

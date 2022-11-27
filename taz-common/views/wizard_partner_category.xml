@@ -1,7 +1,7 @@
 <odoo>
 	<data>
 	    <record model="ir.ui.view" id="taz-common.wizard_partner_category_form">
-	      <field name="name">Assistant d'ajout de tags en masse</field>
+		    <field name="name">Assistant d'ajout/suppression de tags en masse</field>
 	      <field name="model">taz.res_partner_mass_category</field>
 	      <field name="arch" type="xml">
 		<form>
@@ -29,7 +29,7 @@
 	    </record>
 		
 	<record id="launch_wizard_partner_category" model="ir.actions.act_window">
-	    <field name="name">Assistant d'ajout de tags en masse</field>
+		<field name="name">Assistant d'ajout/suppression de tags en masse</field>
 	    <field name="res_model">taz.res_partner_mass_category</field>
 	    <field name="view_mode">form</field>
 	    <field name="target">new</field>
