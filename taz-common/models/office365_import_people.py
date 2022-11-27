@@ -31,8 +31,8 @@ class tazOfficePeople(models.TransientModel):
             # ça évite de perdre la
         self.category_id = self.env.context.get('category_id')
         self.parent_id = self.env.context.get('parent_id')
-        self.first_name = self.env.context.get('first_name')
-        self.last_name = self.env.context.get('last_name')
+        self.first_name = self.env.context.get('first_name').strip().title()
+        self.last_name = self.env.context.get('last_name').strip().upper()
         self.user_id = self.env.context.get('user_id')
 
         #Créer le partner Odoo

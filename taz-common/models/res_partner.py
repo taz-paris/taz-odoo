@@ -19,7 +19,11 @@ class tazResPartner(models.Model):
             old_parent_id = self.parent_id
 
         old_personal_email = self.personal_email
+        if old_personal_email:
+            old_personal_email = old_personal_email.strip().lower()
         old_email = self.email
+        if old_email:
+            old_email = old_email.strip().lower()
 
         res = super().write(vals)
 
@@ -30,7 +34,7 @@ class tazResPartner(models.Model):
             former = []
             if self.former_email_address:
                 former = self.former_email_address.split(',')
-                if self.persona_email in former:
+                if self.personal_email in former:
                     former.remove(self.personal_email)
                 if self.email in former:
                     former.remove(self.email)
@@ -44,6 +48,8 @@ class tazResPartner(models.Model):
                         former.append(old_personal_email)
             if len(former) > 0:
                 self.with_context(save_forme_address=False).former_email_address = ','.join(former)
+            else : 
+                self.with_context(save_forme_address=False).former_email_address = False
 
         return res
 
@@ -307,6 +313,22 @@ class tazResPartner(models.Model):
                 'target': 'current',
             }
  
+     @api.model
+     def normalize_partner_casse(self):
+        if self.first_name :
+            self.first_name = self.first_name.strip().title()
+        if self.name :
+            self.name = self.name.strip().upper()
+        if self.email :
+            self.email = self.email.strip().lower()
+        if self.personal_email :
+            self.personal_email = self.personal_email.strip().lower()
+        if self.street :
+            self.street = self.street.strip().upper()
+        if self.street2 :
+            self.street2 = self.street2.strip().upper()
+        if self.city :
+            self.city = self.city.strip().upper()
 
      @api.onchange('parent_id')
      def onchange_parent_id(self): #REMPLACE LA FONCTION DE BASE POUR NE PLUS CONSEILLER DE CREER UNE NOUVELLE FICHE CONTACT SI LE CONTACT CHANGE D'ENTREPRISE
