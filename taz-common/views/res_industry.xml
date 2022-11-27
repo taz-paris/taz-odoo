@@ -10,6 +10,14 @@
 			<field name="ms_planner_plan_id"/>
 			<field name="pillar_id"/>
 			<field name="user_id"/>
+			<field colspan="3" name="partner_ids" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
+				<tree>
+				  <field name="is_company" invisible="1"/>
+				  <field name="name"/>
+				  <field name="long_company_name"/>
+				  <field name="parent_id" options="{'no_quick_create': True}" string="Groupe"/>
+				</tree>
+			</field>
 		</field>
             </field>
         </record>
@@ -24,6 +32,7 @@
 			<field name="ms_planner_plan_id"/>
 			<field name="pillar_id"/>
 			<field name="user_id"/>
+			<field name="partner_ids"/>
 		</field>
             </field>
         </record>
