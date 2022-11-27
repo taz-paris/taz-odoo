@@ -17,7 +17,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','mail', 'auth_oauth'],
+    'depends': ['base','mail', 'auth_oauth', 'web'],
 
     # always loaded
     'data': [

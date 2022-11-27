@@ -8,3 +8,4 @@ from . import oauth_microsoft_taz
 from . import customer_book_goal
 from . import res_industry
 from . import res_partner_industry_pillar
+from . import controller

@@ -291,14 +291,13 @@ class tazResPartner(models.Model):
                 _logger.info('     => %s est présent %s fois' % (nom, str(len(partner_ids))))
         domain = [('id', 'in', res)]
 
-        form_id = self.env.ref("taz-common.contact_tree")
         return {
                 'type': 'ir.actions.act_window',
                 'name': 'Contacts - homonymes nom/prénom ou doublons',
                 'res_model': 'res.partner',
                 'view_type': 'tree',
-                'view_mode': 'tree',
-                'view_id': form_id.id,
+                'view_mode': 'tree,form',
+                'view_id': [self.env.ref("taz-common.contact_tree").id, self.env.ref("taz-common.contact_form").id],
                 'context': {},
                 'domain':domain,
                 # if you want to open the form in edit mode direclty
