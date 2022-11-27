@@ -16,7 +16,7 @@ class tazOfficePeople(models.TransientModel):
      last_name = fields.Char(string="Nom")
      display_name = fields.Char(string="Office display name")
      parent_id = fields.Many2one('res.partner', string="Société", domain="[('is_company', '!=', False)]")
-     odoo_id = fields.Char(string="Contact")
+     odoo_contact_id = fields.Many2one('res.partner', string="Contact", domain="[('is_company', '=', False)]")
      already_in_odoo = fields.Boolean("Déjà sur Odoo")
      user_id = fields.Many2one('res.users', string="Propriétaire", required=True)
      origin_user_id = fields.Many2one('res.users', string="Utilisateur", required=True, readonly=True, help="Utilisateur Odoo du compte Office 365 qui a importé le contact - utilisé pour filtré") 
@@ -47,13 +47,13 @@ class tazOfficePeople(models.TransientModel):
                     }
         r = model.create(res)
         _logger.info(r)
-        self.odoo_id = r.id
+        self.odoo_contact_id = r
 
 
      def open_res_partner(self):
         # first you need to get the id of your record
         # you didn't specify what you want to edit exactly
-        rec_id = int(self.odoo_id)
+        rec_id = int(self.odoo_contact_id.id)
         _logger.info(rec_id)
         # then if you have more than one form view then specify the form id
         form_id = self.env.ref("taz-common.contact_form")
@@ -97,12 +97,14 @@ class tazOfficePeople(models.TransientModel):
         lc = self.env['res.partner'].search(['|', '|', ('email', '!=', False), ('personal_email', '!=', False), ('former_email_address', '!=', False), ('is_company', '=', False)])
         for c in lc:
             if c.email:
-                mapping_email_id_contact[c.email.lower()] = c.id
+                mapping_email_id_contact[c.email.lower()] = c
             if c.personal_email:
-                mapping_email_id_contact[c.personal_email.lower()] = c.id
+                mapping_email_id_contact[c.personal_email.lower()] = c
             if c.former_email_address:
                 for mail in c.former_email_address.split(','):
-                    mapping_email_id_contact[mail.lower()] = c.id
+                    mapping_email_id_contact[mail.lower()] = c
+
+        #_logger.info(">>>>>>>>>>>"+str(mapping_email_id_contact['dfeldman@dfcpartners.fr']))
 
         #TODO : ajouter une vue filtre avec par défaut le masquage des gens déjà dans Odoo
         #TODO : idée => ajouter un bouton d'exlucsion pour ne pas reproposer le contact ? => dans ce cas il ne faut pas un model Transient et il faut gérer la mise à jour en delta de ce qui vient d'Office
@@ -124,12 +126,14 @@ class tazOfficePeople(models.TransientModel):
                 if cl:
                     parent_id = cl[0].id
 
-                odoo_id = None
+                odoo_contact_id = None
                 if mail["address"].lower() in mapping_email_id_contact.keys():
-                    odoo_id = mapping_email_id_contact[mail["address"].lower()]
+                    odoo_contact_id = mapping_email_id_contact[mail["address"].lower()].id
+                #if mail["address"] == "dfeldman@dfcpartners.fr":
+                #    _logger.info(str(odoo_contact_id))
 
                 already_in_odoo = False
-                if odoo_id :
+                if odoo_contact_id :
                     already_in_odoo = True
 
                 res.append({
@@ -140,7 +144,7 @@ class tazOfficePeople(models.TransientModel):
                     'user_id' : self.env.user.id,
                     'origin_user_id': self.env.user.id,
                     'parent_id' : parent_id, 
-                    'odoo_id' : odoo_id,
+                    'odoo_contact_id' : odoo_contact_id,
                     'already_in_odoo' : already_in_odoo,
                     })
         self.create(res)
