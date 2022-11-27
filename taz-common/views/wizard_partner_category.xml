@@ -9,7 +9,7 @@
 				<group>
 					<field name="add_category_ids" widget="many2many_tags"/>
 					<field name="remove_category_ids" widget="many2many_tags"/>
-					<field name="partner_ids" colspan="3">
+					<field name="partner_ids" colspan="3" readonly="1">
 						<tree>
 						  <field name="first_name"/>
 						  <field name="name"/>
