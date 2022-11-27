@@ -9,3 +9,4 @@ from . import customer_book_goal
 from . import res_industry
 from . import res_partner_industry_pillar
 from . import controller
+from . import wizard_partner_category

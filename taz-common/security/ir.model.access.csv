@@ -5,3 +5,4 @@
 "__export__.ir_model_access_976_fd5cd51e","__export__.ir_model_access_976_fd5cd51e","taz.customer_book_followup.all","taz-common.model_taz_customer_book_followup","base.group_user","True","True","True","True"
 "__export__.ir_model_access_976_fd5cd51f","__export__.ir_model_access_976_fd5cd51f","res_partner_industry_pillar.all","taz-common.model_res_partner_industry_pillar","base.group_user","True","True","True","True"
 "taz_basic_res_partner","taz_basic_res_partner","taz_basic_res_partner","base.model_res_partner","taz-basic","True","True","True","False"
+"taz-common.access_taz_res_partner_mass_category","taz-common.access_taz_res_partner_mass_category","access_taz_res_partner_mass_category","taz-common.model_taz_res_partner_mass_category","base.group_user","True","True","True","True"
