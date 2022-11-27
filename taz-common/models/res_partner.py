@@ -285,7 +285,7 @@ class tazResPartner(models.Model):
      
      def filter_name_duplicate(self):
         _logger.info('=========== filter_name_duplicate')
-        contacts = self.search([('is_company', '=', False), ('type', '=', 'contact'), ('user_ids', '=', False)])
+        contacts = self.search([('is_company', '=', False), ('active','=',True), ('type', '=', 'contact'), ('user_ids', '=', False)])
         count = {}
         for c in contacts:
             nom = c.first_name.strip().title() + ' ' + c.name.strip().upper()
@@ -296,7 +296,8 @@ class tazResPartner(models.Model):
         for nom, partner_ids in count.items():
             if len(partner_ids) > 1:
                 for p in partner_ids:
-                    res.append(p.id)
+                    if p.id not in res :
+                        res.append(p.id)
                 _logger.info('     => %s est présent %s fois' % (nom, str(len(partner_ids))))
         domain = [('id', 'in', res)]
 
@@ -313,6 +314,39 @@ class tazResPartner(models.Model):
                 'target': 'current',
             }
  
+     def filter_company_shared_email_domain(self):
+         _logger.info('=========== filter_company_shared_email_domain')
+         companies = self.search([('is_company', '=', True), ('active','=',True), ('user_ids', '=', False)])
+         #for c in companies:
+         #    c._compute_child_mail_address_domain_list()
+         count = {}
+         for c in companies:
+             if c.child_mail_address_domain_list:
+                 list_domain = c.child_mail_address_domain_list.split(',')
+                 for domain in list_domain:
+                     if domain not in count.keys():
+                         count[domain] = []
+                     count[domain].append(c)
+         res = []
+         for domain, partner_ids in count.items():
+             if len(partner_ids) > 1:
+                for p in partner_ids:
+                    if p.id not in res :
+                        res.append(p.id)
+         domain = [('id', 'in', res)]
+         return {
+                'type': 'ir.actions.act_window',
+                'name': 'Entreprises qui partagent au moins un nom de domain mail avec une autre entreprise (non archivée)',
+                'res_model': 'res.partner',
+                'view_type': 'tree',
+                'view_mode': 'tree,form',
+                'view_id': [self.env.ref("taz-common.company_tree").id, self.env.ref("taz-common.company_form").id],
+                'context': {},
+                'domain':domain,
+                # if you want to open the form in edit mode direclty
+                'target': 'current',
+            }
+
      @api.model
      def normalize_partner_casse(self):
         if self.first_name :
