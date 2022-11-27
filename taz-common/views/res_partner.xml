@@ -409,15 +409,21 @@
         parent="taz-common.menu_localisation"
         sequence="2"/>
 
-<record id="action_server_list_name_duplicates" model="ir.actions.server">
+    <record id="action_server_list_name_duplicates" model="ir.actions.server">
           <field name="name">Duplicats de noms</field>
           <field name="model_id" ref="model_res_partner"/>
-	  <!--
-          <field name="binding_model_id" ref="model_res_partner"/>
-	  -->
+          <field name="binding_model_id" eval="False"/>
           <field name="state">code</field>
           <field name="code">action =  env.get('res.partner').filter_name_duplicate()</field>
- </record>
+     </record>
+
+	<record id="mail.action_partner_mass_mail" model="ir.actions.act_window">
+            <field name="binding_model_id" eval="False"/>
+        </record>
+
+        <record id="portal.partner_wizard_action_create_and_open" model="ir.actions.server">
+            <field name="binding_model_id" eval="False"/>
+        </record>
 
   </data>
 </odoo>
