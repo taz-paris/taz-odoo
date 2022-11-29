@@ -11,7 +11,7 @@
 			<field name="pillar_id"/>
 			<field name="user_id"/>
 			<field colspan="3" name="partner_ids" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
-				<tree>
+				<tree delete="false">
 				  <field name="is_company" invisible="1"/>
 				  <field name="name"/>
 				  <field name="long_company_name"/>

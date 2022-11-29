@@ -8,7 +8,7 @@
             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'
         />
 	    -->
-	<div class="page" style="font-size: 12px !important;">
+	<div class="page" style="font-size: 10px !important;">
 		<div t-if="record.parent_id.long_company_name"> <div t-field="record.parent_id.long_company_name"/> </div>
 		<div t-if="not record.parent_id.long_company_name"> <div t-field="record.parent_id.name"/> </div>
 		<div class="row">

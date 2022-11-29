@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 import re
 
 from odoo.addons import base
-base.models.res_partner.ADDRESS_FIELDS += ('street3',)
+#base.models.res_partner.ADDRESS_FIELDS += ('street3',)
 
 class tazResPartner(models.Model):
      _inherit = "res.partner"
