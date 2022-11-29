@@ -11,11 +11,18 @@
 	<div class="page" style="font-size: 12px !important;">
 		<div t-if="record.parent_id.long_company_name"> <div t-field="record.parent_id.long_company_name"/> </div>
 		<div t-if="not record.parent_id.long_company_name"> <div t-field="record.parent_id.name"/> </div>
-		<div class="col-xs-6">À l'attention de <div t-field="record.first_name"/> <div t-field="record.name"/></div>
+		<div class="row">
+			À l'attention de 
+			<span t-field="record.first_name"/>
+			<span t-field="record.name"/>
+		</div>
 		<div t-field="record.street"/>
 		<div t-field="record.street2"/>
 		<div t-field="record.street3"/>
-		<div><div t-field="record.zip"/> <div t-field="record.city"/></div>
+		<div class="row">
+			<span t-field="record.zip"/>
+			<span t-field="record.city"/>
+		</div>
 		<div t-field="record.country_id.name"/>
 	</div>
     </template>

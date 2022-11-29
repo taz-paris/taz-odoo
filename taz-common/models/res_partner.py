@@ -283,6 +283,11 @@ class tazResPartner(models.Model):
          if self.street2 :
             self.street2 = self.street2.strip().upper()
 
+     @api.onchange('street3')
+     def onchange_street3(self):
+         if self.street3 :
+            self.street3 = self.street3.strip().upper()
+
      @api.onchange('city')
      def onchange_city(self):
          if self.city :
@@ -366,6 +371,8 @@ class tazResPartner(models.Model):
             self.street = self.street.strip().upper()
         if self.street2 :
             self.street2 = self.street2.strip().upper()
+        if self.street3 :
+            self.street3 = self.street3.strip().upper()
         if self.city :
             self.city = self.city.strip().upper()
 
