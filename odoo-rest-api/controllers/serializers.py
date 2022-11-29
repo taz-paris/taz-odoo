@@ -4,7 +4,9 @@ from itertools import chain
 
 from .parser import Parser
 from .exceptions import QueryFormatError
-
+from odoo import http, _, exceptions
+import logging
+_logger = logging.getLogger(__name__)
 
 class Serializer(object):
     def __init__(self, record, query="{*}", many=False):
@@ -42,29 +44,33 @@ class Serializer(object):
         if field_name not in all_fields:
             msg = "'%s' field is not found" % field_name
             raise LookupError(msg)
-        field_type = rec.fields_get(field_name).get(field_name).get('type')
-        if field_type in ['one2many', 'many2many']:
-            return {
-                field_name: [record.id for record in rec[field_name]]
-            }
-        elif field_type in ['many2one']:
-            return {field_name: rec[field_name].id}
-        elif field_type == 'datetime' and rec[field_name]:
-            return {
-                field_name: rec[field_name].strftime("%Y-%m-%d-%H-%M")
-            }
-        elif field_type == 'date' and rec[field_name]:
-            return {
-                field_name: rec[field_name].strftime("%Y-%m-%d")
-            }
-        elif field_type == 'time' and rec[field_name]:
-            return {
-                field_name: rec[field_name].strftime("%H-%M-%S")
-            }
-        elif field_type == "binary" and isinstance(rec[field_name], bytes) and rec[field_name]:
-            return {field_name: rec[field_name].decode("utf-8")}
-        else:
-            return {field_name: rec[field_name]}
+        try :
+            field_type = rec.fields_get(field_name).get(field_name).get('type')
+            if field_type in ['one2many', 'many2many']:
+                return {
+                    field_name: [record.id for record in rec[field_name]]
+                }
+            elif field_type in ['many2one']:
+                return {field_name: rec[field_name].id}
+            elif field_type == 'datetime' and rec[field_name]:
+                return {
+                    field_name: rec[field_name].strftime("%Y-%m-%d-%H-%M")
+                }
+            elif field_type == 'date' and rec[field_name]:
+                return {
+                    field_name: rec[field_name].strftime("%Y-%m-%d")
+                }
+            elif field_type == 'time' and rec[field_name]:
+                return {
+                    field_name: rec[field_name].strftime("%H-%M-%S")
+                }
+            elif field_type == "binary" and isinstance(rec[field_name], bytes) and rec[field_name]:
+                return {field_name: rec[field_name].decode("utf-8")}
+            else:
+                return {field_name: rec[field_name]}
+        except Exception  as e:
+            _logger.info('>>> %s' % field_name)
+            return {field_name:False}
 
     @classmethod
     def build_nested_field(cls, rec, field_name, nested_parsed_query):

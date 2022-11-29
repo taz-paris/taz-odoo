@@ -156,7 +156,7 @@ class tazBusinessAction(models.Model):
         default=lambda self: self.env.user,
         index=True,
         required=True,
-        domain=[('oauth_uid', '!=', False)]
+        #domain=[('oauth_uid', '!=', False)]
         )
     state = fields.Selection([
         ('todo', 'À faire'),

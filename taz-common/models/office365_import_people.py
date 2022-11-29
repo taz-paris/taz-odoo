@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-from odoo.exceptions import UserError, ValidationError, AccessError
+from odoo.exceptions import AccessDenied, UserError, ValidationError, AccessError
 from odoo import _
 
 import logging
@@ -36,6 +36,13 @@ class tazOfficePeople(models.TransientModel):
         self.last_name = self.env.context.get('last_name').strip().upper()
         self.user_id = self.env.context.get('user_id')
 
+        count_name = model.search([('active', '=', True), ('first_name', '=ilike', self.first_name), ('name', '=ilike', self.last_name), ('is_company', '=', False), ('type', '=', 'contact')])
+        if (len(count_name) >0):
+            liste_match = []
+            for i in count_name :
+                 match = _("ID = %s, Entreprise = %s, Email=%s" % (str(i.id), i.parent_id.name or "", i.email or ""))
+                 liste_match.append(match)
+            raise ValidationError(_("%s autre(s) contact(s) a(ont) le même prénom (%s) et le même nom (%s). Il n'est pas possible de l'importer, mais vous pouvez le créer à la main si c'est un pur homonyme ou mettre à jour son email le cas échéant, en passant par le menu de gestion des contacts.\n\n\nListe des contacts :\n%s" % (str(len(count_name)),self.first_name, self.last_name, '\n'.join(liste_match) or "")))
         #Créer le partner Odoo
         res = {
                     'first_name' : self.first_name,
@@ -80,6 +87,7 @@ class tazOfficePeople(models.TransientModel):
         #s'il n'y a aucun enregistrement pour l'utilisateur appeler get_office365_people
         _logger.info("=========== Search read pour l'utilisateur %s %s" % (self.env.user.id, self.env.user.name))
         if self.search([('user_id', '=', self.env.user.id)], count=True) == 0 :
+            #raise AccessDenied(_('Token de session Microsoft invalide : veuillez vous déconnecter puis vous reconnecter en SSO'))
             self.get_office365_people()
         return super().search_read(domain=domain, fields=fields, offset=offset, limit=limit, order=order, **read_kwargs)
      

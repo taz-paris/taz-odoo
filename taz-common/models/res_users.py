@@ -35,7 +35,7 @@ class tazResUsers(models.Model):
         #TODO : tester la date de fin de validité du token
             # si dépassée, tenter de le raffraichir avec le refresh token
         d = datetime.datetime.now().isoformat()
-        if d > self.oauth_token_expires_at:
+        if not(self.oauth_token_expires_at) or (d > self.oauth_token_expires_at):
             raise ValidationError(_('Token de session Microsoft invalide : veuillez vous déconnecter puis vous reconnecter en SSO'))
             """
             data = {
