@@ -2,24 +2,46 @@
 <odoo>
 
     <template id="label_template_partner_address" name="Partner Label: Address">
+	    <!--
         <address
             t-field="record.self"
             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'
         />
+	    -->
+	<div class="page" style="font-size: 12px !important;">
+		<div t-if="record.parent_id.long_company_name"> <div t-field="record.parent_id.long_company_name"/> </div>
+		<div t-if="not record.parent_id.long_company_name"> <div t-field="record.parent_id.name"/> </div>
+		<div class="col-xs-6">À l'attention de <div t-field="record.first_name"/> <div t-field="record.name"/></div>
+		<div t-field="record.street"/>
+		<div t-field="record.street2"/>
+		<div t-field="record.street3"/>
+		<div><div t-field="record.zip"/> <div t-field="record.city"/></div>
+		<div t-field="record.country_id.name"/>
+	</div>
     </template>
 
     <record
         id="report_paperformat_label_partner_address"
         model="report.paperformat.label"
     >
-        <field name="name">Partner Label</field>
+        <field name="name">Étiquettes adresses</field>
         <field name="format">A4</field>
+	<field name="orientation">Portrait</field>
+	<field name="margin_top" eval="1" />
+	<field name="margin_right" eval="1" />
+	<field name="margin_bottom" eval="1" />
+	<field name="margin_left" eval="1" />
+	<field name="dpi" eval="82" />
         <field name="label_height" eval="42.3" />
-        <field name="label_width" eval="60" />
-        <field name="label_padding_top" eval="5" />
-        <field name="label_padding_right" eval="5" />
-        <field name="label_padding_bottom" eval="5" />
-        <field name="label_padding_left" eval="5" />
+        <field name="label_width" eval="65" />
+        <field name="label_padding_top" eval="2" />
+        <field name="label_padding_right" eval="2" />
+        <field name="label_padding_bottom" eval="2" />
+        <field name="label_padding_left" eval="2" />
+	<field name="label_margin_top" eval="1" />
+	<field name="label_margin_right" eval="1" />
+	<field name="label_margin_bottom" eval="1" />
+	<field name="label_margin_left" eval="1" />
     </record>
 
     <record id="actions_server_label_partner_address" model="ir.actions.server">
