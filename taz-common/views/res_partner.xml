@@ -243,6 +243,7 @@
 					    <div class="o_address_format">
 						<field name="street" placeholder="Rue..." class="o_address_street" />
 						<field name="street2" placeholder="Rue 2..." class="o_address_street"/>
+						<field name="street3" placeholder="Rue 3..." class="o_address_street"/>
 						<field name="zip" placeholder="Code postal" class="o_address_zip" />
 						<field name="city" placeholder="Vlle" class="o_address_city" />
 						<div name="partner_address_country" class="d-flex justify-content-between">

@@ -14,6 +14,9 @@ class tazBusinessAction(models.Model):
     _name = "taz.business_action"
     _description = "Record the futur and past business actions"
     _order = "date_deadline desc"
+    _sql_constraints = [
+        ('date_partner_uniq', 'UNIQUE (partner_id, date_deadline)',  "Impossible d'enregistrer deux actions commerciales le même jour pour le même client.")
+    ]
 
     #@api.model
     #def default_get(self, fields):

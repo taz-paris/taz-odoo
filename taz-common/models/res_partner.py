@@ -9,9 +9,15 @@ _logger = logging.getLogger(__name__)
 
 import re
 
+from odoo.addons import base
+base.models.res_partner.ADDRESS_FIELDS += ('street3',)
+
 class tazResPartner(models.Model):
      _inherit = "res.partner"
      
+     def _get_default_address_format(self):
+        return "%(street)s\n%(street2)s\n%(street3)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s"
+
      def write(self, vals):
         # il est nécessaire de forcer le recacul des noms de domaine de l'ancien parent_id
         old_parent_id = None
@@ -98,6 +104,8 @@ class tazResPartner(models.Model):
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
      date_last_business_action = fields.Date('Date du dernier RDV', compute=_compute_date_last_business_action, store=True)
+
+     street3 = fields.Char()
 
      personal_phone = fields.Char("Tel personnel", unaccent=False)
      personal_email = fields.Char("Email personnel")
