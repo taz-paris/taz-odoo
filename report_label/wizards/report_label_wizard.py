@@ -74,6 +74,7 @@ class ReportLabelWizard(models.TransientModel):
     def print_report(self):
         self.ensure_one()
         report = self.env.ref("report_label.report_label")
+        #data, data_format = report.sudo()._render_qweb_pdf(data=self._prepare_report_data())
         action = report.report_action(self, data=self._prepare_report_data())
         action["context"] = {
             "paperformat_id": self.label_paperformat_id.paperformat_id.id,

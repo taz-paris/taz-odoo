@@ -8,7 +8,7 @@
             t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'
         />
 	    -->
-	<div class="page" style="font-size: 10px !important;">
+	<div class="page" style="font-size: 10px !important; line-height: 120%;" >
 		<div t-if="record.parent_id.long_company_name"> <div t-field="record.parent_id.long_company_name"/> </div>
 		<div t-if="not record.parent_id.long_company_name"> <div t-field="record.parent_id.name"/> </div>
 		<div class="row">
@@ -31,24 +31,27 @@
         id="report_paperformat_label_partner_address"
         model="report.paperformat.label"
     >
+    <!--wkhtmltopdf doesn't always respect dpi, and mm measures don't match. For this matter, it's recommended to use this module along with report_wkhtmltopdf_param and enable - -disable-smart-shrinking.
+    This module depends on base_automation only because this module extends  -->
         <field name="name">Étiquettes adresses</field>
         <field name="format">A4</field>
 	<field name="orientation">Portrait</field>
-	<field name="margin_top" eval="1" />
-	<field name="margin_right" eval="1" />
-	<field name="margin_bottom" eval="1" />
-	<field name="margin_left" eval="1" />
-	<field name="dpi" eval="82" />
-        <field name="label_height" eval="42.3" />
-        <field name="label_width" eval="65" />
-        <field name="label_padding_top" eval="2" />
+	<field name="margin_top" eval="4.5" />
+	<field name="margin_bottom" eval="4.5" />
+	<field name="margin_right" eval="0" />
+	<field name="margin_left" eval="0" />
+	<field name="dpi" eval="96" />
+	<field name="custom_params" eval="[(0, 0, {'name':'--disable-smart-shrinking'})]" />
+	<field name="label_height" eval="36" />
+        <field name="label_width" eval="67" />
+        <field name="label_padding_top" eval="5" />
+        <field name="label_padding_left" eval="5" />
         <field name="label_padding_right" eval="2" />
         <field name="label_padding_bottom" eval="2" />
-        <field name="label_padding_left" eval="2" />
-	<field name="label_margin_top" eval="1" />
-	<field name="label_margin_right" eval="1" />
-	<field name="label_margin_bottom" eval="1" />
-	<field name="label_margin_left" eval="1" />
+	<field name="label_margin_top" eval="0" />
+	<field name="label_margin_right" eval="0" />
+	<field name="label_margin_bottom" eval="0" />
+	<field name="label_margin_left" eval="0" />
     </record>
 
     <record id="actions_server_label_partner_address" model="ir.actions.server">
