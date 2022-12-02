@@ -114,12 +114,28 @@ class OAuthResUsers(models.Model):
             This method can be overridden to add alternative signin methods.
         """
         oauth_uid = validation['user_id']
+        _logger.info("====== _auth_oauth_signin")
         _logger.info(validation)
         try:
-            oauth_user = self.search([("oauth_uid", "=", oauth_uid), ('oauth_provider_id', '=', provider)])
+            oauth_user = False 
+            #oauth_user = self.search([("oauth_uid", "=", oauth_uid), ('oauth_provider_id', '=', provider)])
+            #_logger.info("==== ZZZZ")
             if not oauth_user:#ADU
-                oauth_user = self.search([("email", "=", validation['mail'])]) #ADU
+            #    _logger.info("==== AAAA")
+                oauth_user = self.search([("email", "=", str(validation['mail']))]) #ADU
+            # POURQUOI POUR CERTAINS UTILISATEURS L'OPÉRATEUR "=" FONCTIONNE ET POUR D'AUTRE NON ALORS QUE LA COMPARAISON PYTHON FONCTIONNE ????
+            #if not oauth_user:
+            #    _logger.info(oauth_user)
+            #    _logger.info("==== CCC")
+            #    _logger.info(validation['mail'])
+            #    _logger.info('>'+validation['mail']+'<')
+            #    for u in self.search([]):
+                    #_logger.info(">"+u.login+"<")
+                    #_logger.info(u.login==validation['mail'])
+            #        if (u.login==validation['mail']):
+            #            oauth_user = u
             if not oauth_user:
+                _logger.info("==== BBB")
                 raise AccessDenied()
             assert len(oauth_user) == 1
             d = datetime.datetime.now() + datetime.timedelta(seconds=int(params['expires_in']))#ADU
