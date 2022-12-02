@@ -167,7 +167,7 @@ class tazBusinessAction(models.Model):
         ('planned', 'Planifié'),
         ('done', 'Fait'),
         ('cancelled', 'Annulé'),
-        ('wait', 'À replannifier')], 'Statut', default='todo')
+        ('wait', 'À replanifier')], 'Statut', default='todo', help="L'état doit être manuellement passé à Terminé une fois le client vu.")
     conclusion = fields.Selection([
         ('real_need', 'Besoin concret'),
         ('relation', 'Mise en relation'),

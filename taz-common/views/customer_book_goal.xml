@@ -6,7 +6,7 @@
       <field name="model">taz.customer_book_goal</field>
       <field name="arch" type="xml">
 	 <tree editable="top">
-		  <field name="partner_id" optional="show"/>
+		  <field name="partner_id" required="1" optional="show"/>
 		  <field name="reference_period" optional="show"/>
 		  <field name="period_goal" optional="show"/>
         </tree>

@@ -214,8 +214,8 @@
 					  <field name="date_deadline" optional="show"/>
 					  <field name="note" optional="hide"/>
 					  <field name="action_type" optional="show"/>
-					  <field name="conclusion" optional="show"/>
-					  <field name="is_rdv_taken_by_assistant" optional="show"/>
+					  <field name="conclusion" optional="hide"/>
+					  <field name="is_rdv_taken_by_assistant" optional="hide"/>
 					  <field name="parent_partner_id" options="{'no_create': True, 'no_create_edit':True}" optional="hide"/>
 					  <field name="parent_partner_industry_id" options="{'no_create': True, 'no_create_edit':True}" optional="hide"/>
 						<button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
