@@ -188,7 +188,7 @@
 				<field name="active" invisible="1"/>
 				<field name="company_id" invisible="1"/>
 				<field name="email" default_focus="1" placeholder="Adresse email" widget="email"/>
-				<field name="title" options="{'no_create': True, 'no_create_edit':True}" string="Civilité" default_focus="0" placeholder="Madame / Monsieur"/>
+				<field name="title" options="{'no_create': True, 'no_create_edit':True}" default_focus="0" placeholder="Madame / Monsieur"/>
 				<field name="first_name" placeholder="Prénom"/>
 				<field name="name" placeholder="Nom"/>
 
