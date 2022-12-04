@@ -107,6 +107,7 @@ class tazResPartner(models.Model):
 
      street3 = fields.Char('Rue3')
      title = fields.Many2one(string="Civilité")
+     function = fields.Char(tracking=True)
 
      personal_phone = fields.Char("Tel personnel", unaccent=False)
      personal_email = fields.Char("Email personnel")

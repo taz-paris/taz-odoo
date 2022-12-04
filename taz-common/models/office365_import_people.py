@@ -68,8 +68,8 @@ class tazOfficePeople(models.TransientModel):
         r = model.create(res)
         _logger.info(r)
         self.odoo_contact_id = r
-        self.first_name = ""
-        self.last_name = ""
+        self.first_name = "déjà importé"
+        self.last_name = "dans la base contacts"
         self.parent_id = False
         self.user_id = False
         self.category_id = [(6,0,[])]
