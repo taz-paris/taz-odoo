@@ -39,7 +39,7 @@ class tazCustomerBookGoal(models.Model):
     @api.depends('partner_id', 'reference_period')
     def _compute_name(self):
         for rec in self :
-            rec.name =  "%s - %s" % (rec.partner_id.name or "", rec.reference_period or "") 
+            rec.name =  "%s - %s" % (rec.reference_period or "", rec.partner_id.name or "") 
 
 
     partner_id = fields.Many2one('res.partner', string="Entreprise", domain="[('is_company', '=', True)]") #, required=True

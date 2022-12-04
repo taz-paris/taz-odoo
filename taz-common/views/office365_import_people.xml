@@ -11,7 +11,7 @@
           <field name="last_name" attrs="{'readonly': [('odoo_contact_id','!=', False)]}"/>
           <field name="parent_id" attrs="{'readonly': [('odoo_contact_id','!=', False)]}" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
           <field name="category_id" widget="many2many_tags"  attrs="{'readonly': [('odoo_contact_id','!=', False)]}"/>
-          <field name="odoo_contact_id" attrs="{'readonly': [('odoo_contact_id','!=', False)]}" optional="hide"/>
+          <field name="odoo_contact_id" readonly="1" optional="hide"/>
           <field name="origin_user_id" optional="hide" readonly="1"/>
 	  <field name="user_id" attrs="{'readonly': [('odoo_contact_id','!=', False)]}" optional="show"/>
 	  <button string="Importer" name="import_partner" type="object" class="oe_highlight"  attrs="{'invisible': [('odoo_contact_id','!=', False)]}" 

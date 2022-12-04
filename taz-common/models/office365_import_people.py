@@ -19,12 +19,23 @@ class tazOfficePeople(models.TransientModel):
      parent_id = fields.Many2one('res.partner', string="Société", domain="[('is_company', '!=', False)]")
      odoo_contact_id = fields.Many2one('res.partner', string="Contact", domain="[('is_company', '=', False)]")
      already_in_odoo = fields.Boolean("Déjà sur Odoo")
-     user_id = fields.Many2one('res.users', string="Propriétaire", required=True)
+     user_id = fields.Many2one('res.users', string="Propriétaire")
      origin_user_id = fields.Many2one('res.users', string="Utilisateur", required=True, readonly=True, help="Utilisateur Odoo du compte Office 365 qui a importé le contact - utilisé pour filtré") 
      email = fields.Char(string="email")
      category_id = fields.Many2many('res.partner.category', column1='taz_office_people_id',
                                     column2='category_id', string='Étiquettes clients')
-     #user_id vendeur 
+
+     #def write(self, vals):
+     #   res = super().write(vals)
+     #   if self._context.get('change_parent_id') != False :
+     #       if 'parent_id' in vals.keys():
+     #           domain_target = self.email.split("@")[1]
+     #           liste = self.search([('already_in_odoo', '=', False), ('origin_user_id', '=', self.env.user.id), ('email', 'like', domain_target)])
+     #           for li in liste :
+     #               if li.id != self.id:
+     #                   _logger.info('change : '+li.email)
+     #                   li.with_context(change_parent_id=False).parent_id = vals['parent_id']
+
 
      def import_partner(self):
         model = self.env['res.partner']
@@ -48,14 +59,24 @@ class tazOfficePeople(models.TransientModel):
                     'first_name' : self.first_name,
                     'name' : self.last_name,
                     'email' : self.email,
-                    'user_id' : self.env.user.id,
                     'parent_id' : self.parent_id.id, 
                     'is_company' : False,
                     'category_id' : self.category_id,
                     }
+        if self.user_id:
+            res['user_id'] = self.user_id.id
         r = model.create(res)
         _logger.info(r)
         self.odoo_contact_id = r
+        self.first_name = ""
+        self.last_name = ""
+        self.parent_id = False
+        self.user_id = False
+        self.category_id = [(6,0,[])]
+        #return {
+        #       'type': 'ir.actions.client',
+        #       'tag': 'reload',
+        #    }
 
 
      def open_res_partner(self):
@@ -121,36 +142,39 @@ class tazOfficePeople(models.TransientModel):
             for mail in i["scoredEmailAddresses"]: #S'il y a plus d'une adresse pour un contact, c'est à  l'utilisateur de choisir quel contact créer sur Odoo
                 if DOMAIN_EXCLUSION in mail["address"] :
                     continue
-                # TODO couleur warning si nom / prénom existe déjà en base pour ne pas remettre des vieilles adresses email d'anciens postes
-                computed_fname = ""
-                computed_lname = ""
-                l = mail["address"].split("@")[0].split('.')
-                computed_fname = l[0].title()
-                if (len(l) > 1):
-                    computed_lname = '.'.join(l[1:]).upper()
-
-                domain_target = mail["address"].split("@")[1]
-                parent_id = None
-                cl = self.env['res.partner'].search([('is_company', '=', 'True'),('child_mail_address_domain_list', 'like', domain_target)], order="write_date desc")
-                if cl:
-                    parent_id = cl[0].id
 
                 odoo_contact_id = None
                 if mail["address"].lower() in mapping_email_id_contact.keys():
                     odoo_contact_id = mapping_email_id_contact[mail["address"].lower()].id
-                #if mail["address"] == "dfeldman@dfcpartners.fr":
-                #    _logger.info(str(odoo_contact_id))
 
                 already_in_odoo = False
                 if odoo_contact_id :
                     already_in_odoo = True
+
+                # TODO couleur warning si nom / prénom existe déjà en base pour ne pas remettre des vieilles adresses email d'anciens postes
+                computed_fname = ""
+                computed_lname = ""
+                parent_id = False
+                user_id = False
+
+                if not already_in_odoo :
+                    l = mail["address"].split("@")[0].split('.')
+                    computed_fname = l[0].title()
+                    if (len(l) > 1):
+                        computed_lname = '.'.join(l[1:]).upper()
+
+                    domain_target = mail["address"].split("@")[1]
+                    cl = self.env['res.partner'].search([('is_company', '=', 'True'),('child_mail_address_domain_list', 'like', domain_target)], order="write_date desc")
+                    if cl:
+                        parent_id = cl[0].id
+                    user_id = self.env.user.id
 
                 res.append({
                     'display_name':i['displayName'],
                     'first_name' : computed_fname,
                     'last_name' : computed_lname,
                     'email' : mail["address"],
-                    'user_id' : self.env.user.id,
+                    'user_id' : user_id,
                     'origin_user_id': self.env.user.id,
                     'parent_id' : parent_id, 
                     'odoo_contact_id' : odoo_contact_id,

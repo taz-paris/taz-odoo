@@ -166,7 +166,8 @@ class tazResPartner(models.Model):
         for field in hide:
             #res[field]['sortable'] = False // To Hide Field From Group by
             #res[field]['exportable'] = False // To Hide Field From Export List
-            res[field]['searchable'] = False
+            if field in res.keys():
+                res[field]['searchable'] = False
         return res
 
      @api.constrains('email', 'personal_email', 'active')
