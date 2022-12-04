@@ -345,6 +345,12 @@
     <menuitem id="mail.menu_root_discuss" groups="base.group_system"/>
     <menuitem id="calendar.mail_menu_calendar" groups="base.group_system"/>
     <menuitem id="contacts.menu_contacts" groups="base.group_system"/>
+    <record  id="account.menu_finance" model="ir.ui.menu">
+	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+    <record  id="hr_holidays.menu_hr_holidays_root" model="ir.ui.menu">
+	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
 
     <menuitem name="Commerce" id="taz-common.commerce"/>
     <menuitem name="Contacts" sequence="10" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>

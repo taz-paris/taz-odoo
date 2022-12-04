@@ -27,6 +27,7 @@
         <field name="arch" type="xml">
            <search string="Importer mes contacts Office365 personnels">
                 <field name="first_name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('last_name', 'ilike', self)]"/>
+                <field name="email" string="email" filter_domain="[('email', 'ilike', self)]"/>
                 <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
                 <field name="category_id" string="Étiquette" />
             <filter string="Contacts absents de notre base lors de l'import" name="contacts_not_in_odoo"
