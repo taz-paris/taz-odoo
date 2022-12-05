@@ -1,0 +1,75 @@
+<odoo>
+  <data>
+   <record model="ir.ui.view" id="staffing.need_tree">
+      <field name="name">Besoins de staffing</field>
+      <field name="model">staffing.need</field>
+      <field name="arch" type="xml">
+        <tree editable="top">
+          <field name="name" optional="hide"/>
+          <field name="project_id" options="{'no_quick_create': True}"/>
+	  <field name="job_id" optional="show"/>
+	  <field name="skill_id" optional="show"/>
+	  <field name="considered_employee_ids" optional="show" widget="many2many_tags"/>
+	  <field name="begin_date" optional="show"/>
+	  <field name="end_date" optional="show"/>
+	  <field name="percent_needed" optional="show"/>
+	  <field name="state" optional="show"/>
+          <field name="staffed_employee_id" optional="hide"/>
+		<button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
+        </tree>
+      </field>
+    </record>
+
+   <record model="ir.ui.view" id="staffing.need_form">
+      <field name="name">Besoins de staffing</field>
+      <field name="model">staffing.need</field>
+      <field name="arch" type="xml">
+        <form>
+		<group>
+                  <group>
+			  <field name="name"/>
+			  <field name="project_id" options="{'no_quick_create': True}"/>
+			  <field name="job_id"/>
+			  <field name="skill_id"/>
+			  <field name="considered_employee_ids">
+				  <tree>
+					  <field name="name"/>
+					  <field name="job_id"/>
+				</tree>
+			  </field>
+  		  </group>
+		  <group>
+			  <field name="begin_date"/>
+			  <field name="end_date"/>
+			  <field name="percent_needed"/>
+			  <field name="state"/>
+			  <field name="staffed_employee_id"/>
+		  </group>
+		</group>
+			  <field name="staffing_proposal_ids" readonly="1">
+				  <tree>
+					  <field name="employee_id"/>
+					  <field name="employee_job_id"/>
+					  <field name="employee_skill_ids"/>
+					  <field name="ranked_proposal"/>
+					  <field name="ranked_employee_availability" optional="hide"/>
+					  <field name="ranked_employee_skill" optional="hide"/>
+					  <field name="ranked_employee_explicit_voluntary" optional="hide"/>
+					  <field name="ranked_employee_worked_on_proposal" optional="hide"/>
+					  <field name="ranked_employee_wished_on_need" optional="hide"/>
+				</tree>
+			  </field>
+        </form>
+      </field>
+    </record>
+
+    <record id="staffing.need" model="ir.actions.act_window">
+        <field name="name">Besoins de staffing</field>
+        <field name="res_model">staffing.need</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Staffing" id="staffing.staffing_root" groups="staffing_admin"/> 
+    <menuitem name="Besoins de staffing" id="staffing.staffing_need" parent="staffing.staffing_root" action="staffing.need"/> 
+  </data>
+</odoo>

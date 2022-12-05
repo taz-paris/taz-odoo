@@ -1,0 +1,8 @@
+<odoo>
+  <data>
+	<record id="staffing_admin" model="res.groups">
+        	<field name="name">Staffing admin</field>
+        	<field name="comment">Staffing administration</field>
+	</record>
+  </data>
+</odoo>

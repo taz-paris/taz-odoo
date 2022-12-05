@@ -1,0 +1,116 @@
+<odoo>
+	<data>
+	   <record model="ir.ui.view" id="staffing.project_tree">
+	      <field name="name">Project</field>
+	      <field name="model">project.project</field>
+	      <field name="arch" type="xml">
+		<tree>
+		  <field name="name"/>
+		  <field name="stage_id"/>
+		</tree>
+	      </field>
+	    </record>
+
+	   <record model="ir.ui.view" id="staffing.project_form">
+	      <field name="name">Project</field>
+	      <field name="model">project.project</field>
+	      <field name="arch" type="xml">
+		<form>
+			<field name="company_id" invisible="1"/>
+			<field name="analytic_account_id" invisible="1"/>
+			<sheet string="Project">
+				<widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+				<field name="active" invisible="1"/>
+				<div class="oe_title">
+					<h1 class="d-flex flex-row">
+				    		<field name="number" readonly="1" nolabel="1" class="me-2"/>
+				    		<field name="name" class="o_text_overflow" placeholder="e.g. Office Party"/>
+					</h1>
+                    		</div>
+				    <group>
+					<group>
+					    <field name="partner_id"/>
+					    <field name="stage_id"/>
+					    <field name="order_amount"/>
+					    <field name="margin_target"/>
+					    <field name="is_purchase_order_received"/>
+					    <field name="outsourcing"/>
+					    <!--
+					    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+					    -->
+					</group>
+					<group>
+					    <field name="user_id" string="Directeur de mission" widget="many2one_avatar_user" attrs="{'readonly':[('active','=',False)]}" domain="[('share', '=', False)]"/>
+					    <label for="date_start" string="Dates de début/fin"/>
+					    <div name="dates" class="o_row">
+						<field name="date_start" widget="daterange" options="{&quot;related_end_date&quot;: &quot;date&quot;}"/>
+						<i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
+						<i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow" attrs="{'invisible': [('date_start', '=', False), ('date', '=', False)]}"/>
+						<field name="date" widget="daterange" options="{&quot;related_start_date&quot;: &quot;date_start&quot;}"/>
+					    </div>
+					</group>
+				   </group>
+				<notebook>
+					<page string="Besoins/staffing">
+						<field name="staffing_need_ids" context="{'default_project_id':active_id}">
+							<tree editable="top">
+								  <field name="name" optional="hide"/>
+								  <field name="job_id" optional="show"/>
+								  <field name="skill_id" optional="show"/>
+								  <field name="considered_employee_ids" optional="show" widget="many2many_tags"/>
+								  <field name="begin_date" optional="show"/>
+								  <field name="end_date" optional="show"/>
+								  <field name="percent_needed" optional="show"/>
+								  <field name="state" optional="show"/>
+								  <field name="staffed_employee_id" optional="hide"/>
+									<button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
+							</tree>
+						</field>
+					</page>
+					<page name="description" string="Description">
+					    <field name="description" options="{'resizable': false}" placeholder="Description du projet..."/>
+					</page>
+					<page string="Jalons de facturation">
+						<field name="milestone_ids" context="{'default_project_id':active_id}" >
+							<tree decoration-danger="is_deadline_exceeded">
+								<field name="can_be_marked_as_done" invisible="1"/>
+								<field name="name"/>
+								<field name="deadline"/>
+								<field name="is_reached"/>
+								<field name="reached_date"/>
+								<field name="is_deadline_exceeded" invisible="1"/>
+							</tree>
+						</field>
+					</page>
+				</notebook>
+			</sheet>
+		</form>
+	      </field>
+	    </record>
+
+	<record id="seq_project" model="ir.sequence">
+		<field name="name">Preject number sequence<field/>
+		<field name="code">project.project</field>
+		<field name="active">True</field>
+		<field name="prefixe">%(y)s</field>
+		<field name="number_increment">1</field>
+		<field name="number_next">1</field>
+		<field name="pagging">5</field>
+		<field name="implementation">standard</field>
+	</record>
+
+    <record id="staffing.project_action" model="ir.actions.act_window">
+        <field name="name">Projets</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">tree,form</field>
+	<field name="view_ids" eval="
+                            [
+                            (5, 0, 0),
+                            (0, 0, {'view_mode': 'tree', 'view_id': ref('staffing.project_tree')}),
+                            (0, 0, {'view_mode': 'form', 'view_id': ref('staffing.project_form')}),
+                              ]" />
+    </record>
+
+    <menuitem name="Projets" id="staffing.project_menu" parent="staffing.staffing_root" action="staffing.project_action"/>
+	</data>
+</odoo>
