@@ -12,16 +12,17 @@ from odoo.addons import base
 class staffingProject(models.Model):
     _inherit = "project.project"
 
+    @api.model
     def create(self, vals):
         if vals.get('number', 'New') == 'New':
-                vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or 'New' 
-        res = super().write(vals)
-        return res
+                vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or 'New'
+        res = super().create(vals)
+        return res
 
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
     order_amount = fields.Float('Montant commande')
     margin_target = fields.Float('Objectif de marge (%)') #TODO : contrôler que c'est positif et <= 100
-    number = field.Char('Numéro', readonly=True, required=True, copy=False, default='New')
+    number = fields.Char('Numéro', readonly=True, required=True, copy=False, default='New')
     is_purchase_order_received = fields.Boolean('Bon de commande reçu')
     outsourcing = fields.Selection([
             ('no-outsourcing', 'Sans sous-traitance'),
