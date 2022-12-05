@@ -23,7 +23,7 @@ class staffingNeed(models.Model):
 
     name = fields.Char("Nom", compute=_compute_name)
 
-    project_id = fields.Many2one('project.project')
+    project_id = fields.Many2one('project.project', ondelete="restrict")
     job_id = fields.Many2one('hr.job')
     skill_id = fields.Many2one('hr.skill') #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
     considered_employee_ids = fields.Many2many('hr.employee')
@@ -77,7 +77,7 @@ class staffingProposal(models.Model):
     name = fields.Char("Nom", compute=_compute_name)
     is_chosen = fields.Boolean('Choisie')
     #Ajouter un lien vers les autres staffing proposal en concurrence (même personne, même période avec une quotité totale de temps > 100%)
-    staffing_need_id = fields.Many2one('satffing.need')
+    staffing_need_id = fields.Many2one('satffing.need', ondelete="cascade")
     employee_id = fields.Many2one('hr.employee')
 
     employee_job_id = fields.Many2one(related='employee_id.job_id')

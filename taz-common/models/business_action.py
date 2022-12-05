@@ -144,7 +144,7 @@ class tazBusinessAction(models.Model):
     #    data = self.engtv.user._msgraph_get_planner_tasks(self.parent_partner_industry_id.ms_planner_plan_id)
 
             
-    partner_id = fields.Many2one('res.partner', string="Contact", domain="[('is_company', '!=', True)]") #, required=True  
+    partner_id = fields.Many2one('res.partner', string="Contact", domain="[('is_company', '!=', True)]", ondelete='restrict') #, required=True  
     parent_partner_id = fields.Many2one('res.partner', string="Entreprise", related='partner_id.parent_id', store=True)
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.parent_industry_id', store=True)
 

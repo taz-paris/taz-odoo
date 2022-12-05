@@ -42,7 +42,7 @@ class tazCustomerBookGoal(models.Model):
             rec.name =  "%s - %s" % (rec.reference_period or "", rec.partner_id.name or "") 
 
 
-    partner_id = fields.Many2one('res.partner', string="Entreprise", domain="[('is_company', '=', True)]") #, required=True
+    partner_id = fields.Many2one('res.partner', string="Entreprise", domain="[('is_company', '=', True)]", ondelete='restrict') #, required=True
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.industry_id')  #store=True
     reference_period = fields.Selection(
         year_selection,
@@ -97,7 +97,7 @@ class tazCustomerBookFollowup(models.Model):
 
     name = fields.Char("Nom", compute=_compute_name)
 
-    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, default=book_goal_id_default)
+    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, default=book_goal_id_default, ondelete='restrict')
     period_goal = fields.Float("Montant obj", related="customer_book_goal_id.period_goal", store=True)
     partner_id = fields.Many2one(string="Entreprise", related="customer_book_goal_id.partner_id", store=True)
     partner_industry_id = fields.Many2one(related="customer_book_goal_id.partner_id.industry_id", store=True)

@@ -14,11 +14,19 @@ class staffingProject(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('number', 'New') == 'New':
-                vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or 'New'
+        if vals.get('number', '') == '':
+                vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''
         res = super().create(vals)
         return res
 
+    def name_get(self):
+        res = []
+        for rec in self:
+            display_name = "%s %s (%s)" % (rec.number or "", rec.name or "", rec.partner_id.name or "")
+            res.append((rec.id, display_name))
+        return res
+
+    partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
     order_amount = fields.Float('Montant commande')
     margin_target = fields.Float('Objectif de marge (%)') #TODO : contrôler que c'est positif et <= 100
