@@ -22,7 +22,6 @@
 				 <group>
 					  <field name="first_name"/>
 					  <field name="name"/>
-					  <field name="fitnet_id"/>
 			  	</group>
 	  		</group>
 		  </sheet>

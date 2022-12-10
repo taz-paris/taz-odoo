@@ -20,6 +20,18 @@
             </field>
         </record>
 
+
+        <record id="hr_employee_fitnet_view_form_inherit" model="ir.ui.view">
+            <field name="name">Équipage</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="staffing.employee_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                        <field name="fitnet_id"/>
+                </field>
+            </field>
+        </record>
+
         <record id="res_project_fitnet_view_form_inherit" model="ir.ui.view">
             <field name="name">Project</field>
             <field name="model">project.project</field>
