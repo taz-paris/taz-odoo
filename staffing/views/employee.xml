@@ -1,0 +1,47 @@
+<odoo>
+        <data>
+           <record model="ir.ui.view" id="staffing.employee_tree">
+              <field name="name">Équipage</field>
+              <field name="model">hr.employee</field>
+              <field name="arch" type="xml">
+                <tree>
+                  <field name="first_name"/>
+                  <field name="name"/>
+                </tree>
+              </field>
+            </record>
+
+
+           <record model="ir.ui.view" id="staffing.employee_form">
+              <field name="name">Équipage</field>
+              <field name="model">hr.employee</field>
+              <field name="arch" type="xml">
+                <form>
+		  <sheet string="Project">
+			  <group>
+				 <group>
+					  <field name="first_name"/>
+					  <field name="name"/>
+					  <field name="fitnet_id"/>
+			  	</group>
+	  		</group>
+		  </sheet>
+                </form>
+              </field>
+            </record>
+
+	    <record id="staffing.employee_action" model="ir.actions.act_window">
+		<field name="name">Équipage</field>
+		<field name="res_model">hr.employee</field>
+		<field name="view_mode">tree,form</field>
+		<field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'tree', 'view_id': ref('staffing.employee_tree')}),
+				    (0, 0, {'view_mode': 'form', 'view_id': ref('staffing.employee_form')}),
+				      ]" />
+	    </record>
+
+	    <menuitem name="Equipage" id="staffing.employee_menu" parent="staffing.staffing_root" action="staffing.employee_action"/>
+        </data>
+</odoo>

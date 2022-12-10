@@ -22,6 +22,7 @@ class staffingProject(models.Model):
             res.append((rec.id, display_name))
         return res
 
+    name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
     order_amount = fields.Float('Montant commande')

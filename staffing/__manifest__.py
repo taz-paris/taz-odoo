@@ -27,5 +27,6 @@
         'views/staffing.xml',
         'views/project.xml',
         'views/synchroFitnet.xml',
+        'views/employee.xml',
     ],
 }
