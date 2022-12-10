@@ -88,7 +88,9 @@ class fitnetProject(models.Model):
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
         self.sync_customers(client)
+        #TODO self.sync_prospect(client)
         self.sync_contracts(client)
+        self.sync_employees(client)
 
     def sync_customers(self, client):
         _logger.info('---- sync_customers')
@@ -112,12 +114,39 @@ class fitnetProject(models.Model):
                         _logger.info("Aucun res.partner Odoo pour FitnetID=%s / Fitnet name=%s" % (customer['clientId'], customer['name']))
                         continue
                 #get FitnetID
-                if odoo_customer.fitnet_id != customer['clientId']:
-                    odoo_customer.fitnet_id = customer['clientId']
-                    _logger.info("Intégration de l'ID Fitnet pour le res.partner : Odoo ID=%s / Odoo name=%s / FitnetID=%s / Fitnet name=%s" % (odoo_customer.id, odoo_customer.name, customer['clientId'], customer['name']))
+                odoo_customer.fitnet_id = customer['clientId']
+                _logger.info("Intégration de l'ID Fitnet pour le res.partner : Odoo ID=%s / Odoo name=%s / FitnetID=%s / Fitnet name=%s" % (odoo_customer.id, odoo_customer.name, customer['clientId'], customer['name']))
 
             #TODO : importer les autres champs de fitnet
                
+    def sync_employees(self, client):
+        _logger.info('--- synch_employees')
+        employees = client.get_api("employees/1")
+        for employee in employees:
+            if employee['email'] not in ['aurelien.dumaine@tasmnae.com']:
+                continue
+            odoo_employee = self.env['hr.employee'].search([('fitnet_id','=',employee['employee_id'])])
+            if len(odoo_employee) > 1 :
+                #_logger.info("Plus d'un res.partner pour cet id client fitnet")
+                continue
+            if len(odoo_employee) == 0:
+                #intégrer l'ID Fitnet au hr.employee
+                odoo_employee = self.env['hr.employee'].search([('email','=',employee['email']), ('fitnet_id', '=', False)])
+                if len(odoo_employee) > 1 :
+                    continue
+                if len(odoo_employee) == 0:
+                    #créer l'employé Odoo s'il existe un user Odoo qui porte le même identifiant
+                    odoo_user = self.env['res.users'].search([('login','=',employee['employee_email']), ('employee_id','=',False)])
+                    if len(odoo_user) == 1:
+                        odoo_user.action_create_employee()
+                        _logger.info("Création de l'employée depuis l'utilsiateur avec le login=%s" % odoo_user.login)
+                        odoo_employee = odoo_user.employee_id
+                    else :
+                        _logger.info("Aucun hr.employee Odoo pour FitnetID=%s / Fitnet email=%s" % (employee['employee_id'],employee['email']))
+                        continue
+                odoo_employee.fitnet_id = employee['employee_id']
+                _logger.info("Intégration de l'ID Fitnet pour le hr.employee :  Odoo ID=%s / Odoo name=%s / FitnetID=%s / Fitnet name=%s" % (odoo_employee.id, odoo_employee.name, customer['clientId'], customer['name']))
+
 
     def sync_contracts(self, client):
         _logger.info('---- sync_contracts')
@@ -132,7 +161,7 @@ class fitnetProject(models.Model):
 
     def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname) :
         _logger.info('--- create_overide_by_fitnet_values')
-        fitnet_objects = [fitnet_objects[0]]
+        #fitnet_objects = [fitnet_objects[0]]
         for fitnet_object in fitnet_objects: 
             #### chercher l'objet et le créer s'il n'existe pas
             fitnet_id = fitnet_object[fitnet_id_fieldname]
@@ -151,7 +180,6 @@ class fitnetProject(models.Model):
             #    continue
 
             models = self.env['ir.model'].search([('model','=',odoo_model_name)])
-            _logger.info(len(models))
             if len(models) != 1:
                 _logger.info("Objet non trouvé %s." % odoo_model_name)
                 continue
@@ -160,7 +188,7 @@ class fitnetProject(models.Model):
             #### mise à jour depuis Fitnet
             res = {}
             for fitnet_field_name, odoo_dic in mapping_fields.items():
-                _logger.info('fitnet_field_name %s' % fitnet_field_name)
+                #_logger.info('fitnet_field_name %s' % fitnet_field_name)
                 odoo_field_name = odoo_dic['odoo_field']
                 odoo_field = self.env['ir.model.fields'].search([('model_id', '=', model.id), ('name', '=', odoo_field_name)])[0]
                 odoo_value = None
@@ -170,16 +198,18 @@ class fitnetProject(models.Model):
                         res[odoo_field_name] = odoo_value
                 if odoo_field.ttype == "many2one" :
                     target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_object[fitnet_field_name])])
+                    if len(target_objects) > 1 :
+                        _logger.info("Plusieurs objets Odoo %s ont le fitnet_id %s" % (odoo_field.relation, fitnet_object[fitnet_field_name]))
                     if len(target_objects) == 1 :
                         target_object = target_objects[0]
+                        odoo_value = target_object.id
                         if c[odoo_field_name] != target_object:
-                            odoo_value = target_object.id
                             res[odoo_field_name] = odoo_value
                     if len(target_object) == 0 :
                         _logger.info("Erreur : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_object[fitnet_field_name]))
                 #écraser la valeur Odoo par la valeur Fitent si elles sont différentes
                 if odoo_value is None:
-                    _logger.info("Type non géré")
+                    _logger.info("Type non géré pour le champ Fitnet %s = %s" % (fitnet_field_name, fitnet_object[fitnet_field_name]))
                     continue
 
             if len(res) > 0:
