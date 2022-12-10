@@ -4,7 +4,7 @@
       <field name="name">Besoins de staffing</field>
       <field name="model">staffing.need</field>
       <field name="arch" type="xml">
-        <tree editable="top">
+        <tree editable="top" expand="1">
           <field name="name" optional="hide"/>
           <field name="project_id" options="{'no_quick_create': True}"/>
 	  <field name="job_id" optional="show"/>
@@ -31,12 +31,7 @@
 			  <field name="project_id" options="{'no_quick_create': True}"/>
 			  <field name="job_id"/>
 			  <field name="skill_id"/>
-			  <field name="considered_employee_ids">
-				  <tree>
-					  <field name="name"/>
-					  <field name="job_id"/>
-				</tree>
-			  </field>
+			  <field name="considered_employee_ids" widget="many2many_tags"/>
   		  </group>
 		  <group>
 			  <field name="begin_date"/>
@@ -52,6 +47,7 @@
 					  <field name="employee_job_id"/>
 					  <field name="employee_skill_ids"/>
 					  <field name="ranked_proposal"/>
+					  <field name="employee_last_evaluation" optional="show"/>
 					  <field name="ranked_employee_availability" optional="hide"/>
 					  <field name="ranked_employee_skill" optional="hide"/>
 					  <field name="ranked_employee_explicit_voluntary" optional="hide"/>
@@ -63,10 +59,39 @@
       </field>
     </record>
 
+
+    <record model="ir.ui.view" id="staffing.need_search">
+        <field name="name">staffing.need.search</field>
+        <field name="model">staffing.need</field>
+        <field name="arch" type="xml">
+           <search string="Besoins de staffing">
+                    <field name="project_id" string="Projet"/>
+                    <field name="state" string="Statut"/>
+		    <!--
+                    <filter string="Mes actions commerciales" name="assigned_to_me"
+                        domain="[('user_ids', 'in', uid)]"
+                        help="Actions commerciales qui m'ont été assignées"/>
+			  </field>
+			-->
+                    <separator/>
+                    <filter name="state_open" string="Besoins ouverts" domain="[('state', '=', 'open')]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
+                        <separator/>
+                        <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
+                    </group>
+           </search>
+        </field>
+    </record>
+
     <record id="staffing.need" model="ir.actions.act_window">
         <field name="name">Besoins de staffing</field>
         <field name="res_model">staffing.need</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{
+                    'search_default_state_open': 1,
+                    'search_default_group_project' : 1,
+            }</field>
     </record>
 
     <menuitem name="Staffing" id="staffing.staffing_root" groups="staffing_admin"/> 

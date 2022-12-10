@@ -26,5 +26,6 @@
         'security/ir.model.access.csv',
         'views/staffing.xml',
         'views/project.xml',
+        'views/synchroFitnet.xml',
     ],
 }

@@ -60,7 +60,7 @@ class staffingNeed(models.Model):
                 'context': {},
                 # if you want to open the form in edit mode direclty
                 'flags': {'initial_mode': 'edit'},
-                'target': 'current',
+                'target': 'new',
             }
 
 class staffingProposal(models.Model):
@@ -82,7 +82,7 @@ class staffingProposal(models.Model):
 
     employee_job_id = fields.Many2one(related='employee_id.job_id')
     employee_skill_ids = fields.One2many(related='employee_id.employee_skill_ids')
-    #employee_last_evaluation =
+    employee_last_evaluation = fields.Char("Synthèse COD") #TODO mettre un champ related sur le dernier COD
     #employee_availability = 
 
     ranked_proposal = fields.Float('Note globale')

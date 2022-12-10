@@ -5,10 +5,6 @@ from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
 
-import re
-
-from odoo.addons import base
-
 class staffingProject(models.Model):
     _inherit = "project.project"
 
@@ -41,4 +37,5 @@ class staffingProject(models.Model):
         ], string="Type de sous-traitance")
     #TODO : ajouter un type (notamment pour les accords cadre) ? ou bien utiliser les tags ?
     #TODO : ajouter les personnes intéressées pour bosser sur le projet
-    #TODO : ajouter les personnes qui ont travaillé sur la propale
+    #TODO : ajouter les personnes qui ont travaillé sur la propale + double book
+    #TODO : ajouter un sur-objet "group project"
