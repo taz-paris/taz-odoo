@@ -2,6 +2,7 @@ import requests
 import zlib
 import os
 import json
+import datetime
 
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
@@ -87,10 +88,10 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+        self.sync_employees(client)
         self.sync_customers(client)
         #TODO self.sync_prospect(client)
         self.sync_contracts(client)
-        self.sync_employees(client)
 
     def sync_customers(self, client):
         _logger.info('---- sync_customers')
@@ -159,11 +160,28 @@ class fitnetProject(models.Model):
         mapping_fields = {
             'title' : {'odoo_field' : 'name'},
             'customerId' : {'odoo_field' : 'partner_id'},
+            'beginDate' : {'odoo_field' : 'date_start'},
+            'endDate' : {'odoo_field' : 'date'},
+            'contractNumber' : {'odoo_field' : 'number'},
+            'contractAmount' : {'odoo_field' : 'order_amount'},
+            'is_purchase_order_received' : {'odoo_field' : 'is_purchase_order_received'},
             }
         odoo_model_name = 'project.project'
         fitnet_objects = client.get_api("contracts/1")
+        for obj in fitnet_objects:
+            if self.get_proprieteOnDemand_by_id(obj, "zone_13_key_P_1-S_1")  == "Reçu":
+                obj['is_purchase_order_received'] = True
+            else:
+                obj['is_purchase_order_received'] = False
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'contractId')
 
+
+    def get_proprieteOnDemand_by_id(self, fitnet_object, prop_id):
+        res = None
+        for prop in fitnet_object['proprieteOnDemand']:
+            if prop['id'] == prop_id:
+                res = prop['value']
+        return res
 
     def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname) :
         _logger.info('--- create_overide_by_fitnet_values')
@@ -201,14 +219,38 @@ class fitnetProject(models.Model):
                 odoo_field_name = odoo_dic['odoo_field']
                 odoo_field = self.env['ir.model.fields'].search([('model_id', '=', model.id), ('name', '=', odoo_field_name)])[0]
                 odoo_value = None
-                if odoo_field.ttype in ["char", "date", "float", "html", "integer", "text"]  :
-                    odoo_value = fitnet_object[fitnet_field_name]
+
+                if fitnet_field_name in fitnet_object.keys():
+                    fitnet_value = fitnet_object[fitnet_field_name]
+                else : 
+                    onDemand = self.get_proprieteOnDemand_by_id(fitnet_object, fitnet_field_name)
+                    if onDemand is not None:
+                        fitnet_value = onDemand
+                    else :
+                        _logger("Champ inexistant dans l'objet dans l'objet Fitnet %s" % fitnet_field_name)
+
+                if odoo_field.ttype in ["char", "html", "text", "date", "float", "integer", "boolean"]  :
+                    odoo_value = fitnet_value
+
+                    if odoo_field.ttype in ["date"]  :
+                        odoo_value = datetime.datetime.strptime(fitnet_value, '%d/%m/%Y').date()
+
+                    if odoo_field.ttype in ["float"] :
+                        odoo_value = float(fitnet_value)
+
+                    if odoo_field.ttype in ["integer"] :
+                        odoo_value = int(fitnet_value)
+
+                    if odoo_field.ttype in ["boolean"] :
+                        odoo_value = bool(fitnet_value)
+
                     if odoo_object[odoo_field_name] != odoo_value:
                         res[odoo_field_name] = odoo_value
+
                 if odoo_field.ttype == "many2one" :
-                    target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_object[fitnet_field_name])])
+                    target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_value)])
                     if len(target_objects) > 1 :
-                        _logger.info("Plusieurs objets Odoo %s ont le fitnet_id %s" % (odoo_field.relation, fitnet_object[fitnet_field_name]))
+                        _logger.info("Plusieurs objets Odoo %s ont le fitnet_id %s" % (odoo_field.relation, fitnet_value))
                         continue
                     if len(target_objects) == 1 :
                         target_object = target_objects[0]
@@ -216,11 +258,11 @@ class fitnetProject(models.Model):
                         if odoo_object[odoo_field_name] != target_object:
                             res[odoo_field_name] = odoo_value
                     if len(target_objects) == 0 :
-                        _logger.info("Erreur : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_object[fitnet_field_name]))
+                        _logger.info("Erreur : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_value))
                         continue
                 #écraser la valeur Odoo par la valeur Fitent si elles sont différentes
                 if odoo_value is None:
-                    _logger.info("Type non géré pour le champ Fitnet %s = %s" % (fitnet_field_name, fitnet_object[fitnet_field_name]))
+                    _logger.info("Type non géré pour le champ Fitnet %s = %s" % (fitnet_field_name, fitnet_value))
                     continue
 
             if len(res) > 0:

@@ -8,12 +8,12 @@ _logger = logging.getLogger(__name__)
 class staffingProject(models.Model):
     _inherit = "project.project"
 
-    @api.model
-    def create(self, vals):
-        if vals.get('number', '') == '':
-                vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''
-        res = super().create(vals)
-        return res
+    #@api.model
+    #def create(self, vals):
+    #    if vals.get('number', '') == '':
+    #            vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''
+    #    res = super().create(vals)
+    #    return res
 
     def name_get(self):
         res = []
