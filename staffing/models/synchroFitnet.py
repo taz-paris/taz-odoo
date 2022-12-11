@@ -85,6 +85,13 @@ class fitnetEmployee(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
+class fitnetNeed(models.Model):
+    _inherit = "staffing.need"
+    _sql_constraints = [
+        ('fitnet_id_uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objets avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
 class fitnetProject(models.Model):
     _inherit = "project.project"
     _sql_constraints = [
@@ -101,6 +108,23 @@ class fitnetProject(models.Model):
         #TODO self.sync_prospect(client)
         #TODO self.sync_project(client)
         self.sync_contracts(client)
+        self.sync_assignments(client)
+
+    def sync_assignments(self, client):
+        _logger.info('---- sync_assignments')
+        fitnet_objects = client.get_api("assignments?companyId=1&startDate=01-01-2018&endDate=31-12-2040")
+        for obj in fitnet_objects:
+            obj['status'] = 'done'
+
+        mapping_fields = {
+            'assignmentStartDate' : {'odoo_field' : 'begin_date'},
+            'assignmentEndDate' : {'odoo_field' : 'end_date'},
+            'contractID' : {'odoo_field' : 'project_id'}, 
+            'employeeID' : {'odoo_field' : 'staffed_employee_id'}, 
+            'status' : {'odoo_field' : 'state', 'selection_mapping' : {'done' : 'done'}},
+            }
+        odoo_model_name = 'staffing.need'
+        self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'assignmentOnContractID')
 
     def sync_customers(self, client):
         _logger.info('---- sync_customers')

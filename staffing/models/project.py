@@ -5,6 +5,7 @@ from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
 
+
 class staffingProject(models.Model):
     _inherit = "project.project"
 

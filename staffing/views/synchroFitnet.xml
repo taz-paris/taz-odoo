@@ -21,6 +21,17 @@
         </record>
 
 
+        <record id="staffing_need_fitnet_view_form_inherit" model="ir.ui.view">
+            <field name="name">Besoin de staffing</field>
+            <field name="model">staffing.need</field>
+            <field name="inherit_id" ref="staffing.need_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                        <field name="fitnet_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
         <record id="hr_employee_fitnet_view_form_inherit" model="ir.ui.view">
             <field name="name">Équipage</field>
             <field name="model">hr.employee</field>
