@@ -168,12 +168,6 @@ class fitnetProject(models.Model):
     def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname) :
         _logger.info('--- create_overide_by_fitnet_values')
 
-        models = self.env['ir.model'].search([('model','=',odoo_model_name)])
-        if len(models) != 1:
-            _logger.info("Objet non trouvé %s." % odoo_model_name)
-            return False
-        model = models[0]
-
         for fitnet_object in fitnet_objects: 
             #### chercher l'objet et le créer s'il n'existe pas
             fitnet_id = fitnet_object[fitnet_id_fieldname]
@@ -190,11 +184,17 @@ class fitnetProject(models.Model):
                 _logger.info("Create Odoo instance of %s object for fitnet %s=%s" % (odoo_model_name, fitnet_id_fieldname, fitnet_id))
             #if not c:
             #    continue
-            self.update_from_fitnet_values(model, fitnet_object, mapping_fields, odoo_object)
+            self.update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
 
 
-    def update_from_fitnet_values(self, model, fitnet_object, mapping_fields, odoo_object) :
+    def update_from_fitnet_values(self, odoo_model_name, fitnet_object, mapping_fields, odoo_object) :
             #### mise à jour depuis Fitnet
+            models = self.env['ir.model'].search([('model','=',odoo_model_name)])
+            if len(models) != 1:
+                _logger.info("Objet non trouvé %s." % odoo_model_name)
+                return False
+            model = models[0]
+
             res = {}
             for fitnet_field_name, odoo_dic in mapping_fields.items():
                 #_logger.info('fitnet_field_name %s' % fitnet_field_name)
@@ -209,6 +209,7 @@ class fitnetProject(models.Model):
                     target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_object[fitnet_field_name])])
                     if len(target_objects) > 1 :
                         _logger.info("Plusieurs objets Odoo %s ont le fitnet_id %s" % (odoo_field.relation, fitnet_object[fitnet_field_name]))
+                        continue
                     if len(target_objects) == 1 :
                         target_object = target_objects[0]
                         odoo_value = target_object.id
@@ -216,11 +217,12 @@ class fitnetProject(models.Model):
                             res[odoo_field_name] = odoo_value
                     if len(target_objects) == 0 :
                         _logger.info("Erreur : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_object[fitnet_field_name]))
+                        continue
                 #écraser la valeur Odoo par la valeur Fitent si elles sont différentes
                 if odoo_value is None:
                     _logger.info("Type non géré pour le champ Fitnet %s = %s" % (fitnet_field_name, fitnet_object[fitnet_field_name]))
                     continue
 
             if len(res) > 0:
-                _logger.info(str(odoo_object.id) + str(res))
+                _logger.info("Mise à jour de l'objet %s ID= %s avec les valeurs de Fitent %s" % (model.model, str(odoo_object.id), str(res)))
                 odoo_object.write(res)
