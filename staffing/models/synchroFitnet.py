@@ -192,16 +192,54 @@ class fitnetProject(models.Model):
             'billedAmount' : {'odoo_field' : 'billed_amount'},
             'payedAmount' : {'odoo_field' : 'payed_amount'},
             'status' : {'odoo_field' : 'stage_id'},
+            'project_director_employee_id' : {'odoo_field' : 'project_director_employee_id'},
+            'commercialStatusID' : {
+                'odoo_field' : 'probability', 
+                'selection_mapping':
+                    { 
+                        '0' : False,
+                        '2' : '30',
+                        '3' : '70',
+                        '5' : '100',
+                        '9' : '0',
+                    },
+                },
             }
         odoo_model_name = 'project.project'
         fitnet_objects = client.get_api("contracts/1")
 
         for obj in fitnet_objects:
+            # Transco de la liste déroulante Bon de commmande reçu en un booléen sur Odoo
             if self.get_proprieteOnDemand_by_id(obj, "zone_13_key_P_1-S_1")  == "Reçu":
                 obj['is_purchase_order_received'] = True
             else:
                 obj['is_purchase_order_received'] = False
         
+
+            # Recherche du res.user Odoo qui correspond au DM de la mission
+            comList = obj['affectedCommercialsList']
+            fitnet_employee_id = False
+            if len(comList) == 1 :
+                fitnet_employee_id = comList[0]['employeeId'] 
+            else :
+                if len(comList) > 1 :
+                    for commercial in comList:
+                        if commercial['fullName'] == obj['contractCreator']:
+                            fitnet_employee_id = commercial['employeeId']
+                    if fitnet_employee_id == False :
+                        fitnet_employee_id = comList[0]['employeeId']
+            obj['project_director_employee_id'] = fitnet_employee_id
+            #if fitnet_employee_id :
+            #    odoo_employees = self.env['hr.employee'].search([('fitnet_id','=',fitnet_employee_id)])
+            #    if len(odoo_employees) == 1:
+            #        odoo_user = odoo_employees[0].user_id
+            #        if odoo_user :
+            #            odoo_user_id = odoo_user.id
+            #            obj['DM_odoo_user_id']
+            #        else :
+            #            _logger.info("Le DM de la mission a bien un hr.employee mais cette emplyee n'a pas de d'utilisateur Odoo associé : OdooEmployee = %s", odoo_employees[0].name)
+            #    if len(odoo_employees) == 0:
+            #        _logger.info("Impossible de trouver un hr.employee avec ce FitnetID=%s" % fitnet_employee_id)
 
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'contractId')
 
@@ -305,6 +343,10 @@ class fitnetProject(models.Model):
                         res[odoo_field_name] = odoo_value
 
                 if odoo_field.ttype == "many2one" :
+                    if fitnet_value == False :
+                        if odoo_object[odoo_field_name] != fitnet_value:
+                            res[odoo_field_name] = fitnet_value
+                            continue
                     target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_value)])
                     if len(target_objects) > 1 :
                         _logger.info("Plusieurs objets Odoo %s ont le fitnet_id %s" % (odoo_field.relation, fitnet_value))

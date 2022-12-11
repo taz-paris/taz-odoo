@@ -24,7 +24,14 @@ class staffingProject(models.Model):
 
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
+    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", default=lambda self: self.env.user.employee_id) #TODO : synchroniser cette valeur avec user_id avec un oneChange
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
+    probability = fields.Selection([
+            ('0', '0 %'),
+            ('30', '30 %'),
+            ('70', '70 %'),
+            ('100', '100 %'),
+        ], string='Probabilité')
     order_amount = fields.Float('Montant commande')
     billed_amount = fields.Float('Montant facturé', readonly=True)
     payed_amount = fields.Float('Montant payé', readonly=True)

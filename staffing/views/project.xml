@@ -36,9 +36,10 @@
 					    <field name="stage_id"/>
 					    <field name="order_amount"/>
 					    <field name="margin_target"/>
+					    <field name="probability"/>
 					</group>
 					<group>
-					    <field name="user_id" string="Directeur de mission" widget="many2one_avatar_user" attrs="{'readonly':[('active','=',False)]}" domain="[('share', '=', False)]"/>
+					    <field name="project_director_employee_id" attrs="{'readonly':[('active','=',False)]}" />
 					    <label for="date_start" string="Dates de début/fin"/>
 					    <div name="dates" class="o_row">
 						<field name="date_start" widget="daterange" options="{&quot;related_end_date&quot;: &quot;date&quot;}"/>
