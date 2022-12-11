@@ -15,6 +15,21 @@ MSGRAPH_PAGE_SIZE = 500
 class tazResUsers(models.Model):
     _inherit = "res.users"
 
+
+    first_name = fields.Char(related='partner_id.first_name', inherited=True, readonly=False)
+
+    #@property
+    #def SELF_READABLE_FIELDS(self):
+    #    res = super().SELF_READABLE_FIELDS()
+    #    res.append('first_name')
+    #    return res
+    
+    #@property
+    #def SELF_WRITEABLE_FIELDS(self):
+    #    res = super().SELF_WRITEABLE_FIELDS()
+    #    res.append('first_name')
+    #    return res
+        
     def name_get(self):
          res = []
          for rec in self:

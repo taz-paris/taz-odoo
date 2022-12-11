@@ -22,6 +22,7 @@
 				 <group>
 					  <field name="first_name"/>
 					  <field name="name"/>
+					  <field name="work_email"/>
 			  	</group>
 	  		</group>
 		  </sheet>

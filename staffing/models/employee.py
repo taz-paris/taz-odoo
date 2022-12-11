@@ -9,12 +9,24 @@ class staffingEmployee(models.Model):
     _inherit = "hr.employee"
 
     def _sync_user(self, user, employee_has_image=False):
-        _logger.info('_sync_user')
         vals  = super()._sync_user(user, employee_has_image) 
-        _logger.info('_sync_user AFTER')
         if user.first_name :
-            _logger.info('first_name' + str(user.first_name))
             vals['first_name'] = user.first_name
+        if user.partner_id:
+            vals['work_contact_id'] = user.partner_id.id
+
+        if not vals['work_email']:
+            if '@' in user.login:
+                vals['work_email'] = user.login
+        return vals
+
+
+    def action_create_user(self):
+        vals = super().action_create_user()
+        if self.first_name:
+            vals['context']['default_first_name'] = self.first_name
+        if self.work_contact_id:
+            vals['context']['default_partner_id'] = self.work_contact_id
         return vals
 
 

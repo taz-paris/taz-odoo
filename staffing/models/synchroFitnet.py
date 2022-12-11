@@ -122,30 +122,36 @@ class fitnetProject(models.Model):
     def sync_employees(self, client):
         _logger.info('--- synch_employees')
         employees = client.get_api("employees/1")
+        _logger.info('nb employees ' + str(len(employees)))
         for employee in employees:
-            if employee['email'] not in ['aurelien.dumaine@tasmnae.com']:
-                continue
+            #if employee['email'] not in ['audrey.leymarie@tasmane.com','aurelien.dumaine@tasmane.com','isabelle.bedeau@tasmane.com']:
+            #    continue
             odoo_employee = self.env['hr.employee'].search([('fitnet_id','=',employee['employee_id'])])
             if len(odoo_employee) > 1 :
                 #_logger.info("Plus d'un res.partner pour cet id client fitnet")
                 continue
-            if len(odoo_employee) == 0:
+            if len(odoo_employee) == 0 :
+                _logger.info(employee['name'])
+                _logger.info(employee['email'])
+                if not employee['email']:
+                    _logger.info("Pas d'email sur Fitnet")
+                    continue
                 #intégrer l'ID Fitnet au hr.employee
-                odoo_employee = self.env['hr.employee'].search([('email','=',employee['email']), ('fitnet_id', '=', False)])
+                odoo_employee = self.env['hr.employee'].search([('work_email','=',employee['email']), ('fitnet_id', '=', False)])
                 if len(odoo_employee) > 1 :
                     continue
                 if len(odoo_employee) == 0:
                     #créer l'employé Odoo s'il existe un user Odoo qui porte le même identifiant
-                    odoo_user = self.env['res.users'].search([('login','=',employee['employee_email']), ('employee_id','=',False)])
+                    odoo_user = self.env['res.users'].search([('login','=',employee['email']), ('employee_id','=',False)])
                     if len(odoo_user) == 1:
                         odoo_user.action_create_employee()
                         _logger.info("Création de l'employée depuis l'utilsiateur avec le login=%s" % odoo_user.login)
                         odoo_employee = odoo_user.employee_id
                     else :
-                        _logger.info("Aucun hr.employee Odoo pour FitnetID=%s / Fitnet email=%s" % (employee['employee_id'],employee['email']))
+                        _logger.info("Aucun hr.employee ni res.users Odoo pour FitnetID=%s / Fitnet email=%s" % (employee['employee_id'],employee['email']))
                         continue
                 odoo_employee.fitnet_id = employee['employee_id']
-                _logger.info("Intégration de l'ID Fitnet pour le hr.employee :  Odoo ID=%s / Odoo name=%s / FitnetID=%s / Fitnet name=%s" % (odoo_employee.id, odoo_employee.name, customer['clientId'], customer['name']))
+                _logger.info("Intégration de l'ID Fitnet pour le hr.employee :  Odoo ID=%s / Odoo name=%s / FitnetID=%s / Fitnet name=%s" % (odoo_employee.id, odoo_employee.name, employee['employee_id'], employee['name']))
 
 
     def sync_contracts(self, client):
@@ -161,30 +167,33 @@ class fitnetProject(models.Model):
 
     def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname) :
         _logger.info('--- create_overide_by_fitnet_values')
-        #fitnet_objects = [fitnet_objects[0]]
+
+        models = self.env['ir.model'].search([('model','=',odoo_model_name)])
+        if len(models) != 1:
+            _logger.info("Objet non trouvé %s." % odoo_model_name)
+            return False
+        model = models[0]
+
         for fitnet_object in fitnet_objects: 
             #### chercher l'objet et le créer s'il n'existe pas
             fitnet_id = fitnet_object[fitnet_id_fieldname]
             odoo_objects = self.env[odoo_model_name].search([('fitnet_id', '=', fitnet_id)])
-            c = False
+            odoo_object = False
             if len(odoo_objects) > 1:
                 continue
             if len(odoo_objects) == 1 :
-                c = odoo_objects[0]
+                odoo_object = odoo_objects[0]
             if len(odoo_objects) == 0 :
                 dic = {}
                 dic['fitnet_id'] = fitnet_id
-                c = self.env[odoo_model_name].create(dic)
+                odoo_object = self.env[odoo_model_name].create(dic)
                 _logger.info("Create Odoo instance of %s object for fitnet %s=%s" % (odoo_model_name, fitnet_id_fieldname, fitnet_id))
             #if not c:
             #    continue
+            self.update_from_fitnet_values(model, fitnet_object, mapping_fields, odoo_object)
 
-            models = self.env['ir.model'].search([('model','=',odoo_model_name)])
-            if len(models) != 1:
-                _logger.info("Objet non trouvé %s." % odoo_model_name)
-                continue
-            model = models[0]
 
+    def update_from_fitnet_values(self, model, fitnet_object, mapping_fields, odoo_object) :
             #### mise à jour depuis Fitnet
             res = {}
             for fitnet_field_name, odoo_dic in mapping_fields.items():
@@ -194,7 +203,7 @@ class fitnetProject(models.Model):
                 odoo_value = None
                 if odoo_field.ttype in ["char", "date", "float", "html", "integer", "text"]  :
                     odoo_value = fitnet_object[fitnet_field_name]
-                    if c[odoo_field_name] != odoo_value:
+                    if odoo_object[odoo_field_name] != odoo_value:
                         res[odoo_field_name] = odoo_value
                 if odoo_field.ttype == "many2one" :
                     target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_object[fitnet_field_name])])
@@ -203,9 +212,9 @@ class fitnetProject(models.Model):
                     if len(target_objects) == 1 :
                         target_object = target_objects[0]
                         odoo_value = target_object.id
-                        if c[odoo_field_name] != target_object:
+                        if odoo_object[odoo_field_name] != target_object:
                             res[odoo_field_name] = odoo_value
-                    if len(target_object) == 0 :
+                    if len(target_objects) == 0 :
                         _logger.info("Erreur : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_object[fitnet_field_name]))
                 #écraser la valeur Odoo par la valeur Fitent si elles sont différentes
                 if odoo_value is None:
@@ -213,5 +222,5 @@ class fitnetProject(models.Model):
                     continue
 
             if len(res) > 0:
-                _logger.info(str(c.id) + str(res))
-                c.write(res)
+                _logger.info(str(odoo_object.id) + str(res))
+                odoo_object.write(res)

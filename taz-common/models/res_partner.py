@@ -164,6 +164,8 @@ class tazResPartner(models.Model):
         #par déduction, champs restant au 03/12/2022 : 'mailchimp_status’, 'is_priority_target', 'former_email_address', 'assistant', 'date_last_business_action', 'street3', 'personal_phone', 'personal_email', 'linkedin_url', 'business_action_ids', 'child_mail_address_domain_list', 'customer_book_goal_ids', 'customer_book_followup_ids, 'first_name', 'long_company_name', 'parent_industry_id', 'id', '__last_update', 'create_uid', 'create_date', 'write_uid', 'write_date', 'email','phone', 'mobile', 'is_company', 'is_public', 'industry_id', 'function', 'type', 'street', 'street2', 'zip', 'city', 'state_id', 'country_id', 'country_code’, 'website', 'comment', 'category_id', 'active',  'title', 'parent_id', 'parent_name', 'child_ids', 'ref', 
         #_logger.info(res.keys())
         res = super().fields_get()
+        if self.env.user.has_group('base.group_system'):
+            return res
         for field in hide:
             #res[field]['sortable'] = False // To Hide Field From Group by
             #res[field]['exportable'] = False // To Hide Field From Export List
