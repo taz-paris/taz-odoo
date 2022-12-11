@@ -26,9 +26,13 @@ class staffingProject(models.Model):
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
     order_amount = fields.Float('Montant commande')
+    billed_amount = fields.Float('Montant facturé', readonly=True)
+    payed_amount = fields.Float('Montant payé', readonly=True)
     margin_target = fields.Float('Objectif de marge (%)') #TODO : contrôler que c'est positif et <= 100
     number = fields.Char('Numéro', readonly=True, required=True, copy=False, default='New')
     is_purchase_order_received = fields.Boolean('Bon de commande reçu')
+    purchase_order_number = fields.Char('Numéro du bon de commande')
+    remark = fields.Text("Remarques")
     outsourcing = fields.Selection([
             ('no-outsourcing', 'Sans sous-traitance'),
             ('co-sourcing', 'Avec Co-traitance'),

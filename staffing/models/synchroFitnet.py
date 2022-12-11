@@ -3,6 +3,7 @@ import zlib
 import os
 import json
 import datetime
+from lxml import etree, html
 
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
@@ -66,14 +67,21 @@ class ClientRestFitnetManager:
 class fitnetPartner(models.Model):
     _inherit = "res.partner"
     _sql_constraints = [
-        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objets avec le même Fitnet ID.")
+        ('fitnet_id_uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objets avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+class fitnetProjectStage(models.Model):
+    _inherit = "project.project.stage"
+    _sql_constraints = [
+        ('fitnet_id_uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objets avec le même Fitnet ID.")
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
 class fitnetEmployee(models.Model):
     _inherit = "hr.employee"
     _sql_constraints = [
-        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objets avec le même Fitnet ID.")
+        ('fitnet_id_uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objets avec le même Fitnet ID.")
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
@@ -91,6 +99,7 @@ class fitnetProject(models.Model):
         self.sync_employees(client)
         self.sync_customers(client)
         #TODO self.sync_prospect(client)
+        #TODO self.sync_project(client)
         self.sync_contracts(client)
 
     def sync_customers(self, client):
@@ -165,14 +174,35 @@ class fitnetProject(models.Model):
             'contractNumber' : {'odoo_field' : 'number'},
             'contractAmount' : {'odoo_field' : 'order_amount'},
             'is_purchase_order_received' : {'odoo_field' : 'is_purchase_order_received'},
+            'contractCategoryId' : {
+                'odoo_field' : 'outsourcing', 
+                'selection_mapping':
+                    {
+                        '0' : False,
+                        '1' : 'no-outsourcing', #Sans Sous-Traitance
+                        '2' : 'direct-paiement-outsourcing', #Sous-Traitance paiement direct
+                        '3' : 'outsourcing', #Sous-Traitance paiement Tasmane
+                        '4' : 'direct-paiement-outsourcing-company', #Sous-Traitance paiement direct + Tasmane
+                        '5' : 'co-sourcing', #Avec Cotraitance
+                    },
+                },
+            'remark' : {'odoo_field' : 'remark'},
+            'description' : {'odoo_field' : 'description'},
+            'orderNumber' : {'odoo_field' : 'purchase_order_number'},
+            'billedAmount' : {'odoo_field' : 'billed_amount'},
+            'payedAmount' : {'odoo_field' : 'payed_amount'},
+            'status' : {'odoo_field' : 'stage_id'},
             }
         odoo_model_name = 'project.project'
         fitnet_objects = client.get_api("contracts/1")
+
         for obj in fitnet_objects:
             if self.get_proprieteOnDemand_by_id(obj, "zone_13_key_P_1-S_1")  == "Reçu":
                 obj['is_purchase_order_received'] = True
             else:
                 obj['is_purchase_order_received'] = False
+        
+
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'contractId')
 
 
@@ -229,7 +259,9 @@ class fitnetProject(models.Model):
                     else :
                         _logger("Champ inexistant dans l'objet dans l'objet Fitnet %s" % fitnet_field_name)
 
-                if odoo_field.ttype in ["char", "html", "text", "date", "float", "integer", "boolean"]  :
+                if odoo_field.ttype in ["char", "html", "text", "date", "float", "integer", "boolean", "selection"]  :
+                    if fitnet_value == None:
+                        fitnet_value = False
                     odoo_value = fitnet_value
 
                     if odoo_field.ttype in ["date"]  :
@@ -244,7 +276,32 @@ class fitnetProject(models.Model):
                     if odoo_field.ttype in ["boolean"] :
                         odoo_value = bool(fitnet_value)
 
+                    if odoo_field.ttype in ["selection"] :
+                        odoo_value = odoo_dic['selection_mapping'][str(fitnet_value)]
+
+                    if odoo_field.ttype in ["html"] :
+                        if fitnet_value and len(fitnet_value.strip())>0: 
+                            #TODO : cette conversion ne donne pas le bon encodage => les commentaires avect des accent sont toujours raffraichis, même si Odoo a déjà la bonne valeur
+                            html_fitnet = html.tostring(html.fromstring(fitnet_value)).decode('utf-8')
+                            #_logger.info(html_fitnet)
+                            odoo_value = html_fitnet
+
+                            #html_fitnet5 = html.tostring(html.fromstring(fitnet_value.encode('utf-8'))).decode('utf-8')
+                            #_logger.info(html_fitnet5)
+                            #html_fitnet4 = html.tostring(html.fromstring(fitnet_value.encode('utf-8')), encoding='utf-8').decode('utf-8')
+                            #_logger.info(html_fitnet4)
+                            #html_fitnet3 = html.tostring(html.fromstring(fitnet_value, parser=html.HTMLParser(encoding='utf-8'))).decode('utf-8')
+                            #_logger.info(html_fitnet3)
+                            #html_fitnet2 = html.tostring(html.fromstring(fitnet_value))
+                            #_logger.info(html_fitnet2)
+
+                            #html_odoo =  html.tostring(odoo_object[odoo_field_name])
+                            #if html_fitnet == html_odoo:
+                            #    odoo_value = odoo_object[odoo_field_name]
+
                     if odoo_object[odoo_field_name] != odoo_value:
+                        #_logger.info(odoo_object[odoo_field_name])
+                        #_logger.info(odoo_value)
                         res[odoo_field_name] = odoo_value
 
                 if odoo_field.ttype == "many2one" :

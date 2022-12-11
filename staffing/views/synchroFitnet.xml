@@ -43,6 +43,16 @@
             </field>
         </record>
 
+        <record id="res_project_stage_fitnet_view_form_inherit" model="ir.ui.view">
+            <field name="name">Project stage</field>
+            <field name="model">project.project.stage</field>
+            <field name="inherit_id" ref="project.project_project_stage_view_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                        <field name="fitnet_id" readonly="0"/>
+                </field>
+            </field>
+        </record>
 
    </data>
 </odoo>
