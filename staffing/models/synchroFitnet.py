@@ -280,17 +280,6 @@ class fitnetProject(models.Model):
                     if fitnet_employee_id == False :
                         fitnet_employee_id = comList[0]['employeeId']
             obj['project_director_employee_id'] = fitnet_employee_id
-            #if fitnet_employee_id :
-            #    odoo_employees = self.env['hr.employee'].search([('fitnet_id','=',fitnet_employee_id)])
-            #    if len(odoo_employees) == 1:
-            #        odoo_user = odoo_employees[0].user_id
-            #        if odoo_user :
-            #            odoo_user_id = odoo_user.id
-            #            obj['DM_odoo_user_id']
-            #        else :
-            #            _logger.info("Le DM de la mission a bien un hr.employee mais cette emplyee n'a pas de d'utilisateur Odoo associé : OdooEmployee = %s", odoo_employees[0].name)
-            #    if len(odoo_employees) == 0:
-            #        _logger.info("Impossible de trouver un hr.employee avec ce FitnetID=%s" % fitnet_employee_id)
 
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'contractId')
 
