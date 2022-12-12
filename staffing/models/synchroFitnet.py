@@ -117,14 +117,49 @@ class fitnetProject(models.Model):
         #TODO           self.sync_project(client)
 
         #self.sync_contracts(client)
-        #self.sync_assignments(client)
 
-        self.sync_forecastedActivities(client)
+        #self.sync_assignments(client)
+        #self.sync_forecastedActivities(client)
+        self.sync_timesheets(client)
+
         #TODO           self.sync_assignmentsoffContract(client)
+        #TODO           self.sync_offContractActivities(client)
+
+
+    def sync_timesheets(self, client):
+        _logger.info('---- sync_timesheets')
+        #fitnet_objects = client.get_api("activities/getActivitiesOnContract/1/01-01-2018/01-01-2050") #=> endpoint unitile : il ne comporte pas l'assignementID
+        fitnet_objects = client.get_api("timesheet/timesheetAssignment?companyId=1&startDate=01-01-2018&endDate=01-06-2032")
+        fitnet_filtered = []
+        for obj in fitnet_objects:
+            if obj['amount'] == 0.0 : 
+                continue
+            if obj['activityType'] != 1:
+                #Activity type: 1:Contracted activity, 2:Off-Contract activity, 3:Training 
+                #TODO : réintégrer les types 2 quand self.sync_assignmentsoffContract sera implémentée
+                continue
+
+            #TODO : comment exclure les pointages des semaines non validées, pour éviter de cumuler pointages non validés et forecast sur une même semaine
+            obj['category'] = 'project_employee_validated'
+            obj['fitnet_id'] = 'timesheet_' + str(obj['timesheetAssignmentID'])
+            fitnet_filtered.append(obj)
+
+        _logger.info(len(fitnet_objects))
+        _logger.info(len(fitnet_filtered))
+
+        odoo_model_name = 'account.analytic.line'
+
+        mapping_fields = {
+            'assignmentID' : {'odoo_field' : 'staffing_need_id'},
+            'assignmentDate' : {'odoo_field' : 'date'},
+            'amount' : {'odoo_field' : 'unit_amount'},
+            'category' : {'odoo_field' : 'category', 'selection_mapping' : {'project_employee_validated' : 'project_employee_validated'}},
+            }
+        self.create_overide_by_fitnet_values(odoo_model_name, fitnet_filtered, mapping_fields, 'fitnet_id')
 
     def sync_forecastedActivities(self, client):
         _logger.info('---- sync_forecastedActivities')
-        fitnet_objects = client.get_api("forecastedActivities")
+        fitnet_objects = client.get_api("forecastedActivities") #TODO : pour éviter les risques d'incohérence utiliser la même ressourcque que sync_timesheets et moduler le filtre
         for obj in fitnet_objects:
             obj['category'] = 'project_forecast'
             obj['fitnet_id'] = 'forecastedActivityAssigment_' + str(obj['forecastedActivityAssigmentId'])
@@ -294,7 +329,12 @@ class fitnetProject(models.Model):
     def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname) :
         _logger.info('--- create_overide_by_fitnet_values')
 
+        count_last_sql_commit = 0
         for fitnet_object in fitnet_objects: 
+            count_last_sql_commit += 1 
+            if count_last_sql_commit % 1000 == 0:
+                _logger.info('######## SQL COMMIT')
+                self.env.cr.commit()
             #### chercher l'objet et le créer s'il n'existe pas
             fitnet_id = fitnet_object[fitnet_id_fieldname]
             odoo_objects = self.env[odoo_model_name].search([('fitnet_id', '=', fitnet_id)])
@@ -311,9 +351,11 @@ class fitnetProject(models.Model):
                 dic = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields)
                 dic['fitnet_id'] = fitnet_id
                 odoo_object = self.env[odoo_model_name].create(dic)
-                _logger.info("Create Odoo instance of %s object for fitnet %s=%s" % (odoo_model_name, fitnet_id_fieldname, fitnet_id))
+                _logger.info("Create Odoo instance of %s object for fitnet %s=%s with values %s" % (odoo_model_name, fitnet_id_fieldname, fitnet_id, str(dic)))
             #if not c:
             #    continue
+        _logger.info('######## FINAL SQL COMMIT')
+        self.env.cr.commit()
 
 
     def prepare_update_from_fitnet_values(self, odoo_model_name, fitnet_object, mapping_fields, odoo_object=False) :

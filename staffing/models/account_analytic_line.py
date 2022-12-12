@@ -20,14 +20,14 @@ class staffingAnalyticLine(models.Model):
         super().create(res)
 
     def _sync_project(self, vals):
-        _logger.info(vals)
+        #_logger.info(vals)
         #TODO : si le projet change, changer le staffing_need_id
         if 'staffing_need_id' in vals.keys():
             need = self.env['staffing.need'].browse([vals['staffing_need_id']])[0]
             vals['project_id'] = need.project_id.id
             vals['account_id'] = need.project_id.analytic_account_id.id
             vals['employee_id'] =  need.staffed_employee_id.id
-        _logger.info(vals)
+        #_logger.info(vals)
         return vals
 
 
