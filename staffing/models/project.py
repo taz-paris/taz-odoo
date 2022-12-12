@@ -23,6 +23,13 @@ class staffingProject(models.Model):
             res.append((rec.id, display_name))
         return res
 
+    #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
+    #@api.depends('project_director_employee_id')
+    #def _compute_user_id(self):
+    #    for line in self:
+    #        line.user_id = line.project_director_employee_id.user_id if line.project_director_employee_id else self._default_user()
+
+
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", default=lambda self: self.env.user.employee_id) #TODO : synchroniser cette valeur avec user_id avec un oneChange

@@ -77,7 +77,7 @@ class staffingProposal(models.Model):
     name = fields.Char("Nom", compute=_compute_name)
     is_chosen = fields.Boolean('Choisie')
     #Ajouter un lien vers les autres staffing proposal en concurrence (même personne, même période avec une quotité totale de temps > 100%)
-    staffing_need_id = fields.Many2one('satffing.need', ondelete="cascade")
+    staffing_need_id = fields.Many2one('staffing.need', ondelete="cascade")
     employee_id = fields.Many2one('hr.employee')
 
     employee_job_id = fields.Many2one(related='employee_id.job_id')

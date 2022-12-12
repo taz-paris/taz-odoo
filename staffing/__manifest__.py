@@ -28,5 +28,6 @@
         'views/project.xml',
         'views/synchroFitnet.xml',
         'views/employee.xml',
+        'views/account_analytic_line.xml',
     ],
 }
