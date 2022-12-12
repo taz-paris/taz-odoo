@@ -193,6 +193,7 @@
 				<field name="name" placeholder="Nom"/>
 
 			    <field name="parent_id" options="{'no_quick_create': True}" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
+				<field name="is_followed"/>
                         </group>
 			<group>
                             <field name="function" attrs="{'invisible': [('is_company','=', True)]}"/>
@@ -286,6 +287,7 @@
                 <field name="email" string="Email" filter_domain="[('email', 'ilike', self)]"/>
 		<field name="category_id" string="Étiquette" />
 		<field name="parent_industry_id" string="Business Domain"/>
+	    <filter string="Contact à suivre en BDM" name="is_followed" domain="[('is_followed', '=', True)]"/>
             <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"
                 help="Contacts qui m'ont été assignés en vendeur principal"/>

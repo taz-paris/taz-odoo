@@ -52,9 +52,10 @@ class ClientRestFitnetManager:
             #'Connection': 'Keep-Alive',
             'User-Agent': '007',
         }
+        _logger.info("Calling "+ self.url_appel_api+target_action)
         response = requests.get(self.url_appel_api+target_action, headers=headers)
         response_code = response.status_code
-        _logger.info("Code retour :" + str(response_code))
+        _logger.info("HTTP return code :" + str(response_code))
         #res = response.content.decode('utf-8')
         #j = json.load(res)
         res = response.json()
@@ -106,6 +107,13 @@ class fitnetProject(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
+class fitnetLeave(models.Model):
+    _inherit = "hr.leave"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
     def synchAllFitnet(self):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
@@ -120,10 +128,44 @@ class fitnetProject(models.Model):
 
         #self.sync_assignments(client)
         #self.sync_forecastedActivities(client)
-        self.sync_timesheets(client)
+        #self.sync_timesheets(client)
+        self.sync_holidays(client)
 
         #TODO           self.sync_assignmentsoffContract(client)
         #TODO           self.sync_offContractActivities(client)
+
+
+    def sync_holidays(self, client):
+        _logger.info('---- sync_holydays')
+        odoo_model_name = 'hr.leave'
+        for year in range(2020, 2024):
+            for month in range(1,13):
+                _logger.info('Get leaves for %s/%s' % (str(month), str(year)))
+                fitnet_objects = client.get_api('leaves/getLeavesWithRepartition/1/%s/%s' % (month, year))
+                #_logger.info(len(fitnet_objects))
+                _logger.info(fitnet_objects)
+                if fitnet_objects is list : #this id False when there is no leaves for a month
+                    fitnet_leave_contents = []
+                    for obj in fitnet_objects:
+                        for leaveType in obj['leaveTypes']:
+                            leaveType['master_fitnet_leave_id'] = obj['leaveId']
+                            leaveType['designation'] = obj['designation']
+                            leaveType['employeeId'] = obj['employeeId']
+                            leaveType['status'] = obj['status']
+                            fitnet_leave_contents.append(leaveType)
+
+                    mapping_fields = {
+                        'designation' : {'odoo_field' : 'name'},
+                        'employeeId' : {'odoo_field' : 'employee_id'},
+                    #    'typeId' : {'odoo_field' : 'holiday_status_id'}, #TODO : créer le fitente_id sur le type Odoo
+                        'beginDate' : {'odoo_field' : 'date_from'},
+                        'endDate' : {'odoo_field' : 'date_to'},
+                    #    'startMidday' : {'odoo_field' : ''},
+                    #    'endMidday' : {'odoo_field' : ''},
+                        'status' : {'odoo_field' : 'state', 'selection_mapping' : {"Demande accordée" : 'validate'}},
+                        }
+                    #self.create_overide_by_fitnet_values(odoo_model_name, fitnet_leave_contents, mapping_fields, 'id')
+
 
 
     def sync_timesheets(self, client):

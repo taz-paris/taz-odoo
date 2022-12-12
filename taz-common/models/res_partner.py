@@ -100,6 +100,7 @@ class tazResPartner(models.Model):
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
      is_priority_target = fields.Boolean("Compte à ouvrir")
      former_email_address = fields.Char("Anciennes adresses email", readonly=True)
+     is_followed = fields.Boolean("Contact à suivre en BDM")
 
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
