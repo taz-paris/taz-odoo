@@ -182,7 +182,7 @@ class tazResPartner(models.Model):
                  if not(re.fullmatch(regex, mail)):
                      raise ValidationError(_('Cette adresse email est invalide : %s' % mail))
 
-             email_list = self.search(['|', '|', ('email', '=ilike', mail), ('personal_email', '=ilike', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact'), ('active', '=', True)])
+             email_list = self.search(['|', '|', ('email', '=ilike', mail), ('personal_email', '=ilike', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact'), ('active', '=', True),('user_id','=',False), ('employee_ids', '=', False)])
              list_match = []
              for e in email_list :
                  if str(e.id) != str(self.id).replace("New_", ""):

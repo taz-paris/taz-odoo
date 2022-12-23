@@ -277,12 +277,12 @@ class fitnetProject(models.Model):
         _logger.info('--- synch_employees')
         employees = client.get_api("employees/1")
         _logger.info('nb employees ' + str(len(employees)))
+
+        #Intégrer l'id Fitnet aux hr.employee si on peut le trouver via l'email du hr.employee ou bien d'un res_users (et dans ce cas création du hr.employee à la volée)
         for employee in employees:
-            #if employee['email'] not in ['audrey.leymarie@tasmane.com','aurelien.dumaine@tasmane.com','isabelle.bedeau@tasmane.com']:
-            #    continue
             odoo_employee = self.env['hr.employee'].search([('fitnet_id','=',employee['employee_id'])])
             if len(odoo_employee) > 1 :
-                #_logger.info("Plus d'un res.partner pour cet id client fitnet")
+                _logger.info("Plus d'un hr.employee a cet id fitnet %s" % str(employee['employee_id']))
                 continue
             if len(odoo_employee) == 0 :
                 _logger.info(employee['name'])
@@ -293,6 +293,7 @@ class fitnetProject(models.Model):
                 #intégrer l'ID Fitnet au hr.employee
                 odoo_employee = self.env['hr.employee'].search([('work_email','=',employee['email']), ('fitnet_id', '=', False)])
                 if len(odoo_employee) > 1 :
+                    _logger.info("Erreur : plusieurs hr.employee on ce work_email : %s" % employee['email'])
                     continue
                 if len(odoo_employee) == 0:
                     #créer l'employé Odoo s'il existe un user Odoo qui porte le même identifiant
@@ -306,6 +307,27 @@ class fitnetProject(models.Model):
                         continue
                 odoo_employee.fitnet_id = employee['employee_id']
                 _logger.info("Intégration de l'ID Fitnet pour le hr.employee :  Odoo ID=%s / Odoo name=%s / FitnetID=%s / Fitnet name=%s" % (odoo_employee.id, odoo_employee.name, employee['employee_id'], employee['name']))
+        
+        #Pour les employee qui existent sur Fitnet mais pas sur Odoo (exemple : anciens tasmaniens) : on crée le hr.employee mais sans res_user associé
+            #TODO : créer le res_user associé si la date d'entrée fitnet > date du jour et que date de sortie non défini ou > date du jour
+        # ... puis mettre à jour les valeurs des employés Odoo
+        mapping_fields = {
+            'name' : {'odoo_field' : 'name'},
+            'surname' : {'odoo_field' : 'first_name'},
+            'email' : {'odoo_field' : 'work_email'},
+            'gender' : {'odoo_field' : 'gender', 'selection_mapping' : {'Male' : 'male', 'Female' : 'female'}},
+            #registration_id
+            #hiringDate => attribut du hr.contract
+            #leavingDate => attribut du hr.contract
+            #foreignEmployee
+            #address
+            #zone_23_key_P_1-S_1 #Champ onDemande pour l'email personnel
+            #zone_23_key_P_268-S_1 #Champ onDemande pour le mobile personnel
+            }
+        odoo_model_name = 'hr.employee'
+        self.create_overide_by_fitnet_values(odoo_model_name, employees, mapping_fields, 'employee_id')
+
+
 
 
     def sync_contracts(self, client):
@@ -331,7 +353,7 @@ class fitnetProject(models.Model):
                     },
                 },
             'remark' : {'odoo_field' : 'remark'},
-            #'description' : {'odoo_field' : 'description'},
+        #    'description' : {'odoo_field' : 'description'},
             'orderNumber' : {'odoo_field' : 'purchase_order_number'},
             'billedAmount' : {'odoo_field' : 'billed_amount'},
             'payedAmount' : {'odoo_field' : 'payed_amount'},
