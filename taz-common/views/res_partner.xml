@@ -170,6 +170,12 @@
           <field name="email" optional="show"/>
 	  <field name="parent_industry_id" optional="show"/> <!-- multi_edit="1" -->
           <field name="category_id" widget="many2many_tags" optional="show"/>
+	<field name="street" optional="hide"/>
+	<field name="street2" optional="hide"/>
+	<field name="street3" optional="hide"/>
+	<field name="zip" optional="hide"/>
+	<field name="city" optional="hide"/>
+	<field name="country_id" optional="hide"/>
         </tree>
       </field>
     </record>
@@ -347,9 +353,11 @@
     <menuitem id="mail.menu_root_discuss" groups="base.group_system"/>
     <menuitem id="calendar.mail_menu_calendar" groups="base.group_system"/>
     <menuitem id="contacts.menu_contacts" groups="base.group_system"/>
+    <!--
     <record  id="account.menu_finance" model="ir.ui.menu">
 	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
     </record>
+	    -->
     <record  id="hr_holidays.menu_hr_holidays_root" model="ir.ui.menu">
 	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
     </record>

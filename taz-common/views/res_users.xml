@@ -1,0 +1,31 @@
+<odoo>
+   <data>
+
+        <record id="res_users_view_tree_inherit" model="ir.ui.view">
+            <field name="name">User</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                        <field name="first_name"/>
+		</field>
+            </field>
+        </record>
+
+        <record id="res_users_view_form_inherit" model="ir.ui.view">
+            <field name="name">User</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//label[@for='name']" position="before">
+			<label for="first_name"/>
+                        <h1><field name="first_name" required="1"/></h1>
+		</xpath>
+		<field name="oauth_access_token" position="after">
+			<field name="oauth_token_expires_at"/>
+		</field>
+            </field>
+        </record>
+
+   </data>
+</odoo>

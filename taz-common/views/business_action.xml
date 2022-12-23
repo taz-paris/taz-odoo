@@ -95,8 +95,8 @@
         <field name="model">taz.business_action</field>
         <field name="arch" type="xml">
            <search string="Actions commerciales">
-		    <field name="parent_partner_industry_id" string="Business Domain"/>
 		    <field name="partner_id" string="Contact"/>
+		    <field name="parent_partner_industry_id" string="Business Domain"/>
 		    <filter string="Mes actions commerciales" name="assigned_to_me"
 			domain="[('user_ids', 'in', uid)]"
 			help="Actions commerciales qui m'ont été assignées"/>

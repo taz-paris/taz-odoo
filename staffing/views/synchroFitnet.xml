@@ -32,6 +32,17 @@
             </field>
         </record>
 
+        <record id="hr_leave_type_fitnet_view_form_inherit" model="ir.ui.view">
+            <field name="name">Type de congés</field>
+            <field name="model">hr.leave.type</field>
+            <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
+            <field name="arch" type="xml">
+                <field name="icon_id" position="after">
+                        <field name="fitnet_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
         <record id="hr_leave_fitnet_view_form_inherit" model="ir.ui.view">
             <field name="name">Congés</field>
             <field name="model">hr.leave</field>

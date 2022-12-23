@@ -100,15 +100,22 @@ class fitnetNeed(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
-class fitnetProject(models.Model):
-    _inherit = "project.project"
+class fitnetLeave(models.Model):
+    _inherit = "hr.leave"
     _sql_constraints = [
         ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
-class fitnetLeave(models.Model):
-    _inherit = "hr.leave"
+class fitnetLeaveType(models.Model):
+    _inherit = "hr.leave.type"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+class fitnetProject(models.Model):
+    _inherit = "project.project"
     _sql_constraints = [
         ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
     ]
@@ -157,7 +164,7 @@ class fitnetLeave(models.Model):
                     mapping_fields = {
                         'designation' : {'odoo_field' : 'name'},
                         'employeeId' : {'odoo_field' : 'employee_id'},
-                    #    'typeId' : {'odoo_field' : 'holiday_status_id'}, #TODO : créer le fitente_id sur le type Odoo
+                        'typeId' : {'odoo_field' : 'holiday_status_id'},
                         'beginDate' : {'odoo_field' : 'date_from'},
                         'endDate' : {'odoo_field' : 'date_to'},
                     #    'startMidday' : {'odoo_field' : ''},
