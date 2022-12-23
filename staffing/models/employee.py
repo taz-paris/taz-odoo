@@ -15,7 +15,7 @@ class staffingEmployee(models.Model):
         if user.partner_id:
             vals['work_contact_id'] = user.partner_id.id
 
-        if not vals['work_email']:
+        if not 'work_email' in vals.keys():
             if '@' in user.login:
                 vals['work_email'] = user.login
         return vals

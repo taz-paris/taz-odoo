@@ -131,12 +131,13 @@ class fitnetProject(models.Model):
         #TODO           self.sync_prospect(client)
         #TODO           self.sync_project(client)
 
-        #self.sync_contracts(client)
+        self.sync_contracts(client)
 
         #self.sync_assignments(client)
         #self.sync_forecastedActivities(client)
         #self.sync_timesheets(client)
-        self.sync_holidays(client)
+        
+        #self.sync_holidays(client)
 
         #TODO           self.sync_assignmentsoffContract(client)
         #TODO           self.sync_offContractActivities(client)
@@ -159,6 +160,14 @@ class fitnetProject(models.Model):
                             leaveType['designation'] = obj['designation']
                             leaveType['employeeId'] = obj['employeeId']
                             leaveType['status'] = obj['status']
+                            if leaveType['startMidday'] == True:
+                                leaveType['request_date_from_period'] = 'pm'
+                            else :
+                                leaveType['request_date_from_period'] = 'am'
+                            if leaveType['endMidday'] == True:
+                                leaveType['request_date_to_period'] = 'am'
+                            else :
+                                leaveType['request_date_to_period'] = 'pm'
                             fitnet_leave_contents.append(leaveType)
 
                     mapping_fields = {
@@ -167,8 +176,8 @@ class fitnetProject(models.Model):
                         'typeId' : {'odoo_field' : 'holiday_status_id'},
                         'beginDate' : {'odoo_field' : 'date_from'},
                         'endDate' : {'odoo_field' : 'date_to'},
-                    #    'startMidday' : {'odoo_field' : ''},
-                    #    'endMidday' : {'odoo_field' : ''},
+                        'request_date_from_period' : {'odoo_field' : 'request_date_from_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
+                        'request_date_to_period' : {'odoo_field' : 'request_date_to_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
                         'status' : {'odoo_field' : 'state', 'selection_mapping' : {"Demande accordée" : 'validate'}},
                         }
                     #self.create_overide_by_fitnet_values(odoo_model_name, fitnet_leave_contents, mapping_fields, 'id')
@@ -322,7 +331,7 @@ class fitnetProject(models.Model):
                     },
                 },
             'remark' : {'odoo_field' : 'remark'},
-            'description' : {'odoo_field' : 'description'},
+            #'description' : {'odoo_field' : 'description'},
             'orderNumber' : {'odoo_field' : 'purchase_order_number'},
             'billedAmount' : {'odoo_field' : 'billed_amount'},
             'payedAmount' : {'odoo_field' : 'payed_amount'},
@@ -353,7 +362,7 @@ class fitnetProject(models.Model):
 
             # Recherche du res.user Odoo qui correspond au DM de la mission
             comList = obj['affectedCommercialsList']
-            fitnet_employee_id = False
+            fitnet_employee_id = None
             if len(comList) == 1 :
                 fitnet_employee_id = comList[0]['employeeId'] 
             else :
@@ -361,7 +370,7 @@ class fitnetProject(models.Model):
                     for commercial in comList:
                         if commercial['fullName'] == obj['contractCreator']:
                             fitnet_employee_id = commercial['employeeId']
-                    if fitnet_employee_id == False :
+                    if fitnet_employee_id == None :
                         fitnet_employee_id = comList[0]['employeeId']
             obj['project_director_employee_id'] = fitnet_employee_id
 
@@ -394,7 +403,7 @@ class fitnetProject(models.Model):
                 odoo_object = odoo_objects[0]
                 res = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
                 if len(res) > 0:
-                    _logger.info("Mise à jour de l'objet %s ID= %s avec les valeurs de Fitent %s" % (odoo_model_name, str(odoo_object.id), str(res)))
+                    _logger.info("Mise à jour de l'objet %s ID= %s avec les valeurs de Fitnet %s" % (odoo_model_name, str(odoo_object.id), str(res)))
                     odoo_object.write(res)
             if len(odoo_objects) == 0 :
                 dic = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields)
@@ -482,14 +491,14 @@ class fitnetProject(models.Model):
 
 
                 if odoo_field.ttype == "many2one" :
-                    if fitnet_value == False :
+                    if fitnet_value == None : #le champ manu2one était valorisé sur Fitnet, mais a été remis à blanc sur Fitnet
                         if odoo_object :
-                            if odoo_object[odoo_field_name] != fitnet_value:
-                                res[odoo_field_name] = fitnet_value
-                                continue
+                            if odoo_object[odoo_field_name] :
+                                res[odoo_field_name] = False
+                                _logger.info('AAAAA '+str(fitnet_value)+"  "+str(type(odoo_object[odoo_field_name])))
                         else:
-                            res[odoo_field_name] = fitnet_value
-                            continue
+                            res[odoo_field_name] = False
+                        continue
 
                     target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_value)])
                     if len(target_objects) > 1 :
@@ -506,7 +515,7 @@ class fitnetProject(models.Model):
                     if len(target_objects) == 0 :
                         _logger.info("Erreur : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_value))
                         continue
-                #écraser la valeur Odoo par la valeur Fitent si elles sont différentes
+                #écraser la valeur Odoo par la valeur Fitnet si elles sont différentes
                 if odoo_value is None:
                     _logger.info("Type non géré pour le champ Fitnet %s = %s" % (fitnet_field_name, fitnet_value))
                     continue

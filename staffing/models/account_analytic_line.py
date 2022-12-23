@@ -30,8 +30,6 @@ class staffingAnalyticLine(models.Model):
         #_logger.info(vals)
         return vals
 
-
-
     category = fields.Selection(selection_add=[
             ('project_forecast', 'Prévisionnel'), 
             ('project_draft', 'Pointage brouillon'),
