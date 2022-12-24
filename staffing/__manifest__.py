@@ -18,7 +18,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'hr', 'hr_skills', 'taz-common'],
+    'depends': ['base', 'project', 'hr', 'hr_holidays', 'project_timesheet_holidays', 'hr_skills', 'taz-common'],
 
     # always loaded
     'data': [

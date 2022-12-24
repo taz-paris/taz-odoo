@@ -188,6 +188,8 @@ class fitnetProject(models.Model):
             'designation' : {'odoo_field' : 'notes'},
             'employeeId' : {'odoo_field' : 'employee_id'},
             'typeId' : {'odoo_field' : 'holiday_status_id'},
+            'beginDate' : {'odoo_field' : 'request_date_from'},
+            'endDate' : {'odoo_field' : 'request_date_to'},
             'beginDateTime' : {'odoo_field' : 'date_from'},
             'endDateTime' : {'odoo_field' : 'date_to'},
             'numberOfDays' : {'odoo_field' : 'number_of_days'},
