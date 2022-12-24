@@ -3,6 +3,7 @@ import zlib
 import os
 import json
 import datetime
+import pytz
 from lxml import etree, html
 
 from odoo import models, fields, api
@@ -125,19 +126,22 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
-        self.sync_employees(client)
-        self.sync_customers(client)
+        #self.sync_employees(client)
+        #self.sync_customers(client)
 
         #TODO           self.sync_prospect(client)
         #TODO           self.sync_project(client)
 
-        self.sync_contracts(client)
+        #self.sync_contracts(client)
 
         #self.sync_assignments(client)
         #self.sync_forecastedActivities(client)
         #self.sync_timesheets(client)
+
+        #Correctif à passer de manière exceptionnelle
+        #self.analytic_line_employee_correction()
         
-        #self.sync_holidays(client)
+        self.sync_holidays(client)
 
         #TODO           self.sync_assignmentsoffContract(client)
         #TODO           self.sync_offContractActivities(client)
@@ -146,41 +150,53 @@ class fitnetProject(models.Model):
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')
         odoo_model_name = 'hr.leave'
-        for year in range(2020, 2024):
+        fitnet_leave_contents = {}
+        for year in range(2020, 2025):
             for month in range(1,13):
                 _logger.info('Get leaves for %s/%s' % (str(month), str(year)))
                 fitnet_objects = client.get_api('leaves/getLeavesWithRepartition/1/%s/%s' % (month, year))
-                #_logger.info(len(fitnet_objects))
-                _logger.info(fitnet_objects)
-                if fitnet_objects is list : #this id False when there is no leaves for a month
-                    fitnet_leave_contents = []
+                #_logger.info(fitnet_objects)
+                #_logger.info(type(fitnet_objects))
+                if isinstance(fitnet_objects, list) : #this id False when there is no leaves for a month
+                    _logger.info("Nombre de congés au moins en partie sur ce mois : %s" % len(fitnet_objects))
                     for obj in fitnet_objects:
                         for leaveType in obj['leaveTypes']:
-                            leaveType['master_fitnet_leave_id'] = obj['leaveId']
+                            if leaveType['id'] not in [992]: #992 : 3.5 RTT de Takoua a partir du 28/12/202
+                                continue
+                            _logger.info("Adding leaveType ID=%s" % str(leaveType['id']))
+                            #leaveType['master_fitnet_leave_id'] = obj['leaveId']
                             leaveType['designation'] = obj['designation']
                             leaveType['employeeId'] = obj['employeeId']
                             leaveType['status'] = obj['status']
                             if leaveType['startMidday'] == True:
                                 leaveType['request_date_from_period'] = 'pm'
+                                beginHour = '13:00:00'
                             else :
                                 leaveType['request_date_from_period'] = 'am'
+                                beginHour = '00:00:01'
                             if leaveType['endMidday'] == True:
                                 leaveType['request_date_to_period'] = 'am'
+                                endHour = '13:00:00'
                             else :
                                 leaveType['request_date_to_period'] = 'pm'
-                            fitnet_leave_contents.append(leaveType)
+                                endHour = '23:59:59'
+                            leaveType['beginDateTime'] = leaveType['beginDate'] + ' ' + beginHour
+                            leaveType['endDateTime'] = leaveType['endDate'] + ' ' + endHour
+                            fitnet_leave_contents[leaveType['id']] = leaveType
 
-                    mapping_fields = {
-                        'designation' : {'odoo_field' : 'name'},
-                        'employeeId' : {'odoo_field' : 'employee_id'},
-                        'typeId' : {'odoo_field' : 'holiday_status_id'},
-                        'beginDate' : {'odoo_field' : 'date_from'},
-                        'endDate' : {'odoo_field' : 'date_to'},
-                        'request_date_from_period' : {'odoo_field' : 'request_date_from_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
-                        'request_date_to_period' : {'odoo_field' : 'request_date_to_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
-                        'status' : {'odoo_field' : 'state', 'selection_mapping' : {"Demande accordée" : 'validate'}},
-                        }
-                    #self.create_overide_by_fitnet_values(odoo_model_name, fitnet_leave_contents, mapping_fields, 'id')
+        mapping_fields = {
+            'designation' : {'odoo_field' : 'notes'},
+            'employeeId' : {'odoo_field' : 'employee_id'},
+            'typeId' : {'odoo_field' : 'holiday_status_id'},
+            'beginDateTime' : {'odoo_field' : 'date_from'},
+            'endDateTime' : {'odoo_field' : 'date_to'},
+            'numberOfDays' : {'odoo_field' : 'number_of_days'},
+            'request_date_from_period' : {'odoo_field' : 'request_date_from_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
+            'request_date_to_period' : {'odoo_field' : 'request_date_to_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
+            'status' : {'odoo_field' : 'state', 'selection_mapping' : {"Demande accordée" : 'validate'}},
+            }
+        _logger.info(fitnet_leave_contents.values())
+        self.create_overide_by_fitnet_values(odoo_model_name, fitnet_leave_contents.values(), mapping_fields, 'id')
 
 
 
@@ -214,6 +230,19 @@ class fitnetProject(models.Model):
             'category' : {'odoo_field' : 'category', 'selection_mapping' : {'project_employee_validated' : 'project_employee_validated'}},
             }
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_filtered, mapping_fields, 'fitnet_id')
+
+    def analytic_line_employee_correction(self):
+        #Corriger les affectations d'employee si les hr.employee sont créé a posteriori
+        lines = self.env['account.analytic.line'].search([('staffing_need_id', '!=', False)])
+        count_last_sql_commit = 0
+        for line in lines :
+            count_last_sql_commit += 1 
+            if count_last_sql_commit % 1000 == 0:
+                _logger.info('######## SQL COMMIT')
+                self.env.cr.commit()
+            line.employee_id =  line.staffing_need_id.staffed_employee_id.id
+        _logger.info('######## FINAL SQL COMMIT')
+        self.env.cr.commit()
 
     def sync_forecastedActivities(self, client):
         _logger.info('---- sync_forecastedActivities')
@@ -463,13 +492,23 @@ class fitnetProject(models.Model):
                     else :
                         _logger("Champ inexistant dans l'objet dans l'objet Fitnet %s" % fitnet_field_name)
 
-                if odoo_field.ttype in ["char", "html", "text", "date", "float", "integer", "boolean", "selection"]  :
+                if odoo_field.ttype in ["char", "html", "text", "date", "datetime", "float", "integer", "boolean", "selection"]  :
                     if fitnet_value == None:
                         fitnet_value = False
                     odoo_value = fitnet_value
 
                     if odoo_field.ttype in ["date"]  :
                         odoo_value = datetime.datetime.strptime(fitnet_value, '%d/%m/%Y').date()
+
+                    if odoo_field.ttype in ["datetime"]  :
+                        #Fitnet dates are implicitly  in Paris Timezone
+                        #Odoo expects dates in UTC format without timezone
+                        odoo_value = datetime.datetime.strptime(fitnet_value, '%d/%m/%Y %H:%M:%S')
+                        local = pytz.timezone("Europe/Paris")
+                        local_dt = local.localize(odoo_value, is_dst=None)
+                        odoo_value = local_dt.astimezone(pytz.utc)
+                        odoo_value = odoo_value.replace(tzinfo=None)
+
 
                     if odoo_field.ttype in ["float"] :
                         odoo_value = float(fitnet_value)
@@ -539,7 +578,7 @@ class fitnetProject(models.Model):
                         continue
                 #écraser la valeur Odoo par la valeur Fitnet si elles sont différentes
                 if odoo_value is None:
-                    _logger.info("Type non géré pour le champ Fitnet %s = %s" % (fitnet_field_name, fitnet_value))
+                    _logger.info("Type %s non géré pour le champ Fitnet %s = %s" % (odoo_field.ttype, fitnet_field_name, fitnet_value))
                     continue
 
             return res
