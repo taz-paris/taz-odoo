@@ -107,6 +107,7 @@ class fitnetLeave(models.Model):
         ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
     ]
     fitnet_id = fields.Char("Fitnet ID")
+    state = fields.Selection(selection_add=[('canceled', 'Annulée')])
 
 class fitnetLeaveType(models.Model):
     _inherit = "hr.leave.type"
@@ -141,7 +142,7 @@ class fitnetProject(models.Model):
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
         
-        self.sync_holidays(client)
+        self.sync_holidays(client) #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
 
         #TODO           self.sync_assignmentsoffContract(client)
         #TODO           self.sync_offContractActivities(client)
@@ -161,8 +162,8 @@ class fitnetProject(models.Model):
                     _logger.info("Nombre de congés au moins en partie sur ce mois : %s" % len(fitnet_objects))
                     for obj in fitnet_objects:
                         for leaveType in obj['leaveTypes']:
-                            if leaveType['id'] not in [992]: #992 : 3.5 RTT de Takoua a partir du 28/12/202
-                                continue
+                            #if leaveType['id'] not in [992]: #992 : 3.5 RTT de Takoua a partir du 28/12/202
+                            #    continue
                             _logger.info("Adding leaveType ID=%s" % str(leaveType['id']))
                             #leaveType['master_fitnet_leave_id'] = obj['leaveId']
                             leaveType['designation'] = obj['designation']
@@ -195,10 +196,13 @@ class fitnetProject(models.Model):
             'numberOfDays' : {'odoo_field' : 'number_of_days'},
             'request_date_from_period' : {'odoo_field' : 'request_date_from_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
             'request_date_to_period' : {'odoo_field' : 'request_date_to_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
-            'status' : {'odoo_field' : 'state', 'selection_mapping' : {"Demande accordée" : 'validate'}},
+            'status' : {'odoo_field' : 'state', 'selection_mapping' : {'Demande accordée' : 'validate', 'Demande annulée' : 'canceled', 'Demande refusée' : 'refuse', 'False' : 'draft', '900':'confirm'}},
             }
-        _logger.info(fitnet_leave_contents.values())
-        self.create_overide_by_fitnet_values(odoo_model_name, fitnet_leave_contents.values(), mapping_fields, 'id')
+        _logger.info(len(fitnet_leave_contents.values()))
+        with open('/tmp/old_all_leaves', 'w', encoding='utf-8') as f:
+            json.dump(fitnet_leave_contents, f, indent=4)
+        values = fitnet_leave_contents.values()
+        self.create_overide_by_fitnet_values(odoo_model_name, values, mapping_fields, 'id',context={'leave_skip_date_check':True})
 
 
 
@@ -437,7 +441,7 @@ class fitnetProject(models.Model):
                 res = prop['value']
         return res
 
-    def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname) :
+    def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname, context={}) :
         _logger.info('--- create_overide_by_fitnet_values')
 
         count_last_sql_commit = 0
@@ -457,12 +461,14 @@ class fitnetProject(models.Model):
                 res = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
                 if len(res) > 0:
                     _logger.info("Mise à jour de l'objet %s ID= %s avec les valeurs de Fitnet %s" % (odoo_model_name, str(odoo_object.id), str(res)))
-                    odoo_object.write(res)
+                    odoo_object.with_context(context).write(res)
             if len(odoo_objects) == 0 :
                 dic = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields)
                 dic['fitnet_id'] = fitnet_id
-                odoo_object = self.env[odoo_model_name].create(dic)
-                _logger.info("Create Odoo instance of %s object for fitnet %s=%s with values %s" % (odoo_model_name, fitnet_id_fieldname, fitnet_id, str(dic)))
+                _logger.info("Creating Odoo instance of %s object for fitnet %s=%s with values %s" % (odoo_model_name, fitnet_id_fieldname, fitnet_id, str(dic)))
+                odoo_object = self.env[odoo_model_name].with_context(context).create(dic)
+                #_logger.info("Odoo object created, Odoo ID=%s state=%s" % (str(odoo_object.id), odoo_object.state))
+                _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
             #if not c:
             #    continue
         _logger.info('######## FINAL SQL COMMIT')
