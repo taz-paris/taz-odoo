@@ -31,7 +31,8 @@ class staffingNeed(models.Model):
     staffed_employee_id = fields.Many2one('hr.employee', string='Personne satffée')
     begin_date = fields.Date('Date début')
     end_date = fields.Date('Date fin')
-    percent_needed = fields.Float('Pourcentage besoin')
+    nb_days_needed = fields.Float('Nb de jours')
+    #percent_needed = fields.Float('Pourcentage besoin')
 
     state = fields.Selection([
         ('open', 'Ouvert'),

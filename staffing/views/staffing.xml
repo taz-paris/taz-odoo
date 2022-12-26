@@ -12,7 +12,7 @@
 	  <field name="considered_employee_ids" optional="show" widget="many2many_tags"/>
 	  <field name="begin_date" optional="show"/>
 	  <field name="end_date" optional="show"/>
-	  <field name="percent_needed" optional="show"/>
+	  <field name="nb_days_needed" optional="show"/>
 	  <field name="state" optional="show"/>
           <field name="staffed_employee_id" optional="hide"/>
 		<button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
@@ -36,7 +36,7 @@
 		  <group>
 			  <field name="begin_date"/>
 			  <field name="end_date"/>
-			  <field name="percent_needed"/>
+			  <field name="nb_days_needed"/>
 			  <field name="state"/>
 			  <field name="staffed_employee_id"/>
 		  </group>

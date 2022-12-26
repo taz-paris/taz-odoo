@@ -1,3 +1,4 @@
 "id","name","model_id/id","group_id/id","perm_read","perm_write","perm_create","perm_unlink"
 "staffing_need_admin","staffing_need_admin","staffing.model_staffing_need","staffing_admin","True","True","True","True"
 "staffing_proposal_admin","staffing_proposal_admin","staffing.model_staffing_proposal","staffing_admin","True","True","True","True"
+"hr_cost_admin","hr_cost_admin","staffing.model_hr_cost","staffing_admin","True","True","True","True"

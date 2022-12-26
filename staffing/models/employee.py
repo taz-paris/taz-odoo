@@ -46,6 +46,11 @@ class staffingEmployee(models.Model):
             recs = self.search(['|', ('first_name', operator, name), ('name', operator, name)] + args, limit=limit)
         return recs.name_get()     
 
+    def _get_daily_cost(self, date):
+        if self.job_id :
+            return self.job_id._get_daily_cost(date)
+        else :  
+            return False
 
 
 class staffingUsers(models.Model):

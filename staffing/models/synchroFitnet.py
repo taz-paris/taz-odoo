@@ -107,10 +107,23 @@ class fitnetLeave(models.Model):
         ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
     ]
     fitnet_id = fields.Char("Fitnet ID")
-    state = fields.Selection(selection_add=[('canceled', 'Annulée')])
 
 class fitnetLeaveType(models.Model):
     _inherit = "hr.leave.type"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+class fitnetAccountMove(models.Model):
+    _inherit = "account.move"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+class fitnetAccountMoveLine(models.Model):
+    _inherit = "account.move.line"
     _sql_constraints = [
         ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
     ]
@@ -142,11 +155,42 @@ class fitnetProject(models.Model):
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
         
-        self.sync_holidays(client) #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
+        #self.sync_holidays(client) 
+        #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
+
+        #self.sync_customer_invoices(client)
+        #TODO           self.sync_supplier_invoices(client)
 
         #TODO           self.sync_assignmentsoffContract(client)
         #TODO           self.sync_offContractActivities(client)
 
+        #TODO : supprimer les objets qui ont un FitnetId et qui ne sont plus dans les retours API Fitnet intégrals (ou plus dispo par GET initaire sur l'ID)
+
+    def sync_customer_invoices(self, client):
+        _logger.info('---- sync_customer_invoices')
+        fitnet_objects = client.get_api('invoices/v2/1/0/01-01-2018/31-12-2050')
+        mapping_fields_invoice = {
+            'invoiceNumber' : {'odoo_field' : 'name'},
+            'customerId' : {'odoo_field' : 'partner_id'},
+            'billingDate' : {'odoo_field' : 'invoice_date'},
+        }
+        mapping_fields_invoice_line = {
+            'inoviceId' : {'odoo_field' : 'account_move_id'},
+        }
+        invoices_list = []
+        invoices_lines_list = []
+        for invoice in fitnet_objects:
+            if invoice['invoiceId'] not in [1492]:
+                continue
+            if invoice['bTaxBilling'] < 0:
+                continue #avoir
+            invoices_list.append(invoice)
+            for line in invoice['invoiceLines']:
+                line[inoviceId] = invoice['invoiceId']
+                invoices_lines_list.append(line)
+        #TODO : gérer les avoir
+        #self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
+        #self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
 
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')
@@ -202,6 +246,8 @@ class fitnetProject(models.Model):
         with open('/tmp/old_all_leaves', 'w', encoding='utf-8') as f:
             json.dump(fitnet_leave_contents, f, indent=4)
         values = fitnet_leave_contents.values()
+
+        #TODO : bizarre : quand on passer un state qui n'est pas validate, à la création il est surchargé par validate... alors qu'il est bien remplacé par le statut demandé si execute à nouveau le script
         self.create_overide_by_fitnet_values(odoo_model_name, values, mapping_fields, 'id',context={'leave_skip_date_check':True})
 
 
@@ -274,6 +320,7 @@ class fitnetProject(models.Model):
         mapping_fields = {
             'assignmentStartDate' : {'odoo_field' : 'begin_date'},
             'assignmentEndDate' : {'odoo_field' : 'end_date'},
+            'initialBudget' : {'odoo_field' : 'nb_days_needed'},
             'contractID' : {'odoo_field' : 'project_id'}, 
             'employeeID' : {'odoo_field' : 'staffed_employee_id'}, 
             'status' : {'odoo_field' : 'state', 'selection_mapping' : {'done' : 'done'}},
