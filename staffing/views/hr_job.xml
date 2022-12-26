@@ -1,0 +1,23 @@
+<odoo>
+  <data>
+        <record id="view_hr_job_form_inherit" model="ir.ui.view">
+            <field name="name">Poste</field>
+            <field name="model">hr.job</field>
+            <field name="inherit_id" ref="hr.view_hr_job_form"/>
+            <field name="arch" type="xml">
+		<xpath expr="//notebook" position="inside">
+			<page string="CJM/TJM">
+				<field name="cost_ids" context="{'default_job_id':active_id}">
+					<tree editable="top">
+						<field name="job_id" invisible="0" optional="hide"/>
+						<field name="begin_date"/>
+						<field name="cost"/>
+						<field name="revenue"/>
+					</tree>
+				</field>
+			</page>
+		</xpath>
+            </field>
+        </record>
+  </data>
+</odoo>
