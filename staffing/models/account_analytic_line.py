@@ -37,6 +37,7 @@ class staffingAnalyticLine(models.Model):
         ])
 
     staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")
+    hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
 
 
     #override to deal with uom in days
@@ -51,7 +52,7 @@ class staffingAnalyticLine(models.Model):
         result = {id_: {} for id_ in self.ids}
         sudo_self = self.sudo()  # this creates only one env for all operation that required sudo()
         # (re)compute the amount (depending on unit_amount, employee_id for the cost, and account_id for currency)
-        if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'account_id', 'encoding_uom_id', 'holiday_id']):
+        if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'account_id', 'encoding_uom_id', 'holiday_id', 'hr_cost_id']):
             for timesheet in sudo_self:
                 if timesheet.holiday_id :
                     continue
@@ -59,8 +60,10 @@ class staffingAnalyticLine(models.Model):
                 encoding_uom_id = self.env.company.timesheet_encode_uom_id
                 if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
                     cost = timesheet._hourly_cost()
+                    cost_line = False
                 elif encoding_uom_id == self.env.ref("uom.product_uom_day"):
-                    cost = timesheet.employee_id._get_daily_cost(timesheet.date) 
+                    cost_line = timesheet.employee_id._get_daily_cost(timesheet.date) 
+                    cost = cost_line.cost
                     if not cost :
                         raise ValidationError(_("Dayily cost not defined for this employee at this date."))
                 else : 
@@ -71,6 +74,7 @@ class staffingAnalyticLine(models.Model):
                     amount, timesheet.account_id.currency_id or timesheet.currency_id, self.env.company, timesheet.date)
                 result[timesheet.id].update({
                     'amount': amount_converted,
+                    'hr_cost_id' : cost_line,
                 })
         return result
 
