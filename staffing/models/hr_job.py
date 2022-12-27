@@ -23,14 +23,6 @@ class HrJob(models.Model):
 
         return res.cost
 
-    """
-    def default_get(self, fields):
-        #BUG ODOO ?!
-        if 'default_job_id' in self.env.context:
-            fields += ['job_id']
-            return default_get(fields)
-    """
-
     cost_ids = fields.One2many('hr.cost', 'job_id', string="CJM / TJM historisés")
 
 
@@ -44,11 +36,22 @@ class HrCost(models.Model):
     ]
 
     def write(self, vals):
-        res = super().write(vals)
-        for account_analytic_line in account_analytic_line_ids:
-            account_analytic_line.hr_cost_id = False #Cela va déclencher un recalcul de hr_cost_id et in fine du montant de la ligne
+        if 'job_id' in vals.keys():
+            raise ValidationError(_("Il est interdit de changer le poste d'une ligne de coût après sa création."))
 
-    job_id = fields.Many2one('hr.job', string="Poste", required=True)
+        res = super().write(vals)
+
+        if 'cost' in vals.keys():
+            for account_analytic_line in account_analytic_line_ids:
+                account_analytic_line.hr_cost_id = False #Cela va déclencher un recalcul de hr_cost_id et in fine du montant de la ligne
+
+    ##TODO : ça ne suffit pas... notamment si on intercale une ligne de cout entre deux existantes...
+            # si le job_id change : interdit, il est en readonly (simplificateur et pas génant fonctionellement) => OK
+            # si cost change : recalculer toutes les account_analytics => OK
+            # si la date change : reclaculer toutes ls account_analytics qui ont une date >= à la nouvelle date => TODO
+            # à la création d'un HrCost : si la begin_date est antérieure à la begin_date d'un des hr_cost préexistant pour le job_id : reclaculer toutes ls account_alaitycs qui ont une date >= à la nouvelle date => TODO
+
+    job_id = fields.Many2one('hr.job', string="Poste", required=True, readonly=True)
     begin_date = fields.Date("Date d'effet", required=True)
     cost = fields.Float("CJM", help="Coût journalier moyen imputé sur les lignes de pointage.", required=True)
     revenue = fields.Float("TJM", help="Taux journalier moyen HT vendu au client (prix catalogue).", required=True)
