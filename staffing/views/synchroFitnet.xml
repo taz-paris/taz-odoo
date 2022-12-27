@@ -119,5 +119,17 @@
                 </field>
             </field>
         </record>
+
+        <record id="hr_contract_view_form_inherit" model="ir.ui.view">
+            <field name="name">Contrat</field>
+            <field name="model">hr.contract</field>
+            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+            <field name="arch" type="xml">
+                <field name="hr_responsible_id" position="after">
+                        <field name="fitnet_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
    </data>
 </odoo>

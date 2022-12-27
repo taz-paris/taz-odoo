@@ -42,6 +42,6 @@
 				      ]" />
 	    </record>
 
-	    <menuitem name="Equipage" id="staffing.employee_menu" parent="staffing.staffing_root" action="staffing.employee_action"/>
+	    <menuitem name="Équipage" id="staffing.employee_menu" parent="staffing.staffing_root" action="staffing.employee_action"/>
         </data>
 </odoo>

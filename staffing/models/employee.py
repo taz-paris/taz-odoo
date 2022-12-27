@@ -46,9 +46,14 @@ class staffingEmployee(models.Model):
             recs = self.search(['|', ('first_name', operator, name), ('name', operator, name)] + args, limit=limit)
         return recs.name_get()     
 
+    def _get_job_id(self, date):
+        ## TODO : il faut aussi historiser les passages de grade sur fiches des candidats !
+        return self.job_id
+
     def _get_daily_cost(self, date):
-        if self.job_id :
-            return self.job_id._get_daily_cost(date)
+        job_id = self._get_job_id(date)
+        if job_id :
+            return job_id._get_daily_cost(date)
         else :  
             return False
 

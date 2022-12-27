@@ -3,6 +3,7 @@ import zlib
 import os
 import json
 import datetime
+import datetime
 import pytz
 from lxml import etree, html
 
@@ -150,6 +151,13 @@ class fitnetJob(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
+class fitnetHrContract(models.Model):
+    _inherit = "hr.contract"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
 
 
 
@@ -169,6 +177,7 @@ class fitnetProject(models.Model):
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
         self.sync_employees(client)
+        self.sync_employees_contracts(client)
         #self.sync_customers(client)
 
         #TODO           self.sync_prospect(client)
@@ -430,6 +439,47 @@ class fitnetProject(models.Model):
                 _logger.info("Mise à jour du res.partnet client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
                 odoo_customer.write(res)
 
+    def sync_employees_contracts(self, client):
+        _logger.info('--- synch_employees_contracts')
+        employee_contracts = client.get_api("employmentContracts")
+
+        for contract in employee_contracts:
+            contract['name'] = contract['employeeName'] + " - " + contract['effective_date']
+            contract['wage'] = 0.0
+
+            contract['leaving_date_previous_day'] = False
+            if contract['leaving_date']:
+                if contract['effective_date'] == contract['leaving_date']:
+                    contract['leaving_date_previous_day'] = contract['leaving_date']
+                else:
+                    leaving_date_previous_day = datetime.datetime.strptime(contract['leaving_date'], '%d/%m/%Y').date() - datetime.timedelta(days=1)
+                    contract['leaving_date_previous_day'] = leaving_date_previous_day.strftime("%d/%m/%Y")
+
+            if contract['leaving_date']:
+                contract['state'] = 'close'
+            else :
+                contract['state'] = 'open'
+            #il n'y a pas de statut de contrat dans l'API Fitnet, donc pas d'équivalent au statut annulé
+            #TODO : pour les contrat avec une effective_date dans le futur, mettre un statut = draft
+
+        mapping_fields = {
+            'name' : {'odoo_field' : 'name'},
+            'employee_id' : {'odoo_field' : 'employee_id'},
+            'state' : {'odoo_field' : 'state', 'selection_mapping' : {'open' : 'open', 'close' : 'close'}},
+            'effective_date' : {'odoo_field' : 'date_start'},
+            'leaving_date_previous_day' : {'odoo_field' : 'date_end'},
+            'collaboratorProfileId' : {'odoo_field' : 'job_id'},
+            'wage' : {'odoo_field' : 'wage'},
+            #contract_type_id
+            #qualification
+            #positionName
+            #coefficientSituationName
+            #end_date_of_trial_period
+            #nb_days_per_year
+            #part_time
+            }
+        odoo_model_name = 'hr.contract'
+        self.create_overide_by_fitnet_values(odoo_model_name, employee_contracts, mapping_fields, 'employment_contract_id')
                
     def sync_employees(self, client):
         _logger.info('--- synch_employees')
@@ -623,27 +673,29 @@ class fitnetProject(models.Model):
                     if onDemand is not None:
                         fitnet_value = onDemand
                     else :
-                        _logger("Champ inexistant dans l'objet dans l'objet Fitnet %s" % fitnet_field_name)
+                        _logger.info("Champ inexistant dans l'objet dans l'objet Fitnet %s" % fitnet_field_name)
 
-                if odoo_field.ttype in ["char", "html", "text", "date", "datetime", "float", "integer", "boolean", "selection"]  :
+                if odoo_field.ttype in ["char", "html", "text", "date", "datetime", "float", "integer", "boolean", "selection", "monetary"]  :
                     if fitnet_value == None:
                         fitnet_value = False
                     odoo_value = fitnet_value
 
                     if odoo_field.ttype in ["date"]  :
-                        odoo_value = datetime.datetime.strptime(fitnet_value, '%d/%m/%Y').date()
+                        if fitnet_value :
+                            odoo_value = datetime.datetime.strptime(fitnet_value, '%d/%m/%Y').date()
 
                     if odoo_field.ttype in ["datetime"]  :
                         #Fitnet dates are implicitly  in Paris Timezone
                         #Odoo expects dates in UTC format without timezone
-                        odoo_value = datetime.datetime.strptime(fitnet_value, '%d/%m/%Y %H:%M:%S')
-                        local = pytz.timezone("Europe/Paris")
-                        local_dt = local.localize(odoo_value, is_dst=None)
-                        odoo_value = local_dt.astimezone(pytz.utc)
-                        odoo_value = odoo_value.replace(tzinfo=None)
+                        if fitnet_value:
+                            odoo_value = datetime.datetime.strptime(fitnet_value, '%d/%m/%Y %H:%M:%S')
+                            local = pytz.timezone("Europe/Paris")
+                            local_dt = local.localize(odoo_value, is_dst=None)
+                            odoo_value = local_dt.astimezone(pytz.utc)
+                            odoo_value = odoo_value.replace(tzinfo=None)
 
 
-                    if odoo_field.ttype in ["float"] :
+                    if odoo_field.ttype in ["float", "monetary"] :
                         odoo_value = float(fitnet_value)
 
                     if odoo_field.ttype in ["integer"] :

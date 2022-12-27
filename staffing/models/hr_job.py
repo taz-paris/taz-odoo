@@ -36,6 +36,12 @@ class HrCost(models.Model):
     ]
 
 
+    def unlink(self):
+        account_analytic_line_ids = self.account_analytic_line_ids
+        super().unlink()
+        for line in account_analytic_line_ids:
+            line.refresh_amount()
+
     def create(self, vals):
         res = super().create(vals)
         for job in res:
@@ -52,7 +58,7 @@ class HrCost(models.Model):
 
         if 'cost' in vals.keys():
             for account_analytic_line in account_analytic_line_ids:
-                account_analytic_line.refresh_amount
+                account_analytic_line.refresh_amount()
 
         if 'begin_date' in vals.keys():
             self.on_date_change(self.begin_date, old_begin_date)
@@ -64,7 +70,6 @@ class HrCost(models.Model):
             # si la date change : reclaculer toutes ls account_analytics qui ont une date >= à la nouvelle date
             # à la création d'un HrCost : si la begin_date est antérieure à la begin_date d'un des hr_cost préexistant pour le job_id : reclaculer toutes ls account_alaitycs qui ont une date >= à la nouvelle date
 
-    ## TODO : il faut aussi historiser les passages de grade sur fiches des candidats !
 
     def on_date_change(self, new_date, former_date=False):
         _logger.info("--- on_date_change")
@@ -78,7 +83,7 @@ class HrCost(models.Model):
         _logger.info(len(lines))
         #on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
         for line in lines:
-            if line.employee_id.job_id.id == self.job_id.id:
+            if line.employee_id._get_job_id(line.date).id == self.job_id.id:
                 line.refresh_amount()
             
 
