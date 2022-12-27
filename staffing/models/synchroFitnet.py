@@ -129,6 +129,33 @@ class fitnetAccountMoveLine(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
+class fitnetAccountPaymentTerm(models.Model):
+    _inherit = "account.payment.term"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+class fitnetBankAccount(models.Model):
+    _inherit = "res.partner.bank"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+class fitnetJob(models.Model):
+    _inherit = "hr.job"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+
+
+
+
+
+
 class fitnetProject(models.Model):
     _inherit = "project.project"
     _sql_constraints = [
@@ -136,11 +163,12 @@ class fitnetProject(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
+
     def synchAllFitnet(self):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
-        #self.sync_employees(client)
+        self.sync_employees(client)
         #self.sync_customers(client)
 
         #TODO           self.sync_prospect(client)
@@ -173,9 +201,16 @@ class fitnetProject(models.Model):
             'invoiceNumber' : {'odoo_field' : 'name'},
             'customerId' : {'odoo_field' : 'partner_id'},
             'billingDate' : {'odoo_field' : 'invoice_date'},
+            'expectedPaymentDate' : {'odoo_field' : 'invoice_date_due'},
+            'ibanId' : {'odoo_field' : 'partner_bank_id'},
+            'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'out_invoice' : 'out_invoice', 'out_refund':'out_refund'}},
         }
         mapping_fields_invoice_line = {
             'inoviceId' : {'odoo_field' : 'account_move_id'},
+            'designation' : {'odoo_field' : 'name'},
+            'amountBTax' : {'odoo_field' : 'price_unit'},
+            'quantity' : {'odoo_field' : 'quantity'},
+            'contractId' : {'odoo_field' : ''},
         }
         invoices_list = []
         invoices_lines_list = []
@@ -184,10 +219,19 @@ class fitnetProject(models.Model):
                 continue
             if invoice['bTaxBilling'] < 0:
                 continue #avoir
+                #invoice['move_type'] = 'out_refund'
+            else :
+                invoice['move_type'] = 'out_invoice'
             invoices_list.append(invoice)
             for line in invoice['invoiceLines']:
-                line[inoviceId] = invoice['invoiceId']
+                line['inoviceId'] = invoice['invoiceId']
+                line['contractId'] = invoice['contractId']
+                line['quantity'] = 1.00
                 invoices_lines_list.append(line)
+                #if line['vatRate'] != 20.0:
+                #    raise ValidationError(_("Taux de TVA != 20%"))
+        #TODO generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
+        #TODO générer le paiement dans Odoo (date du paiement = actualPaymentDate dans le modèle fitnet)
         #TODO : gérer les avoir
         #self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
         #self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
@@ -353,7 +397,39 @@ class fitnetProject(models.Model):
                 odoo_customer.fitnet_id = customer['clientId']
                 _logger.info("Intégration de l'ID Fitnet pour le res.partner : Odoo ID=%s / Odoo name=%s / FitnetID=%s / Fitnet name=%s" % (odoo_customer.id, odoo_customer.name, customer['clientId'], customer['name']))
 
-            #TODO : importer les autres champs de fitnet
+            #on appelle pas directement create_overide_by_fitnet_values car on ne veut pas créer le client automatiquement (risque de doublonner) s'il n'a pas pu être mappé sur le nom ou la ref 
+                # Dans ce cas on veut le le client soit créé manuellement par Denis ou Margaux
+            customer['paymentTermsId'] = customer['companyCustomerLink'][0]['paymentTermsId']
+            if customer['siret']:
+                customer['siret'] = customer['siret'].replace(' ', '')
+            if customer['vatNumber']:
+                customer['vatNumber'] = customer['vatNumber'].replace(' ', '').replace('.', '')
+            if customer['phone']:
+                customer['phone'] = customer['phone'].replace(' ', '')
+            if customer['email']:
+                customer['email'] = customer['email'].replace(' ', '')
+            if customer['clientCode']:
+                customer['clientCode'] = customer['clientCode'].replace(' ', '')
+
+            mapping_fields = {
+                'vatNumber' : {'odoo_field' : 'vat'},
+               # 'siret' : {'odoo_field' : 'siret'},
+                'clientCode' : {'odoo_field' : 'ref'},
+                'phone' : {'odoo_field' : 'phone'},
+                'email' : {'odoo_field' : 'email'},
+                'paymentTermsId' : {'odoo_field' : 'property_payment_term_id'},
+                #adresse par defaut
+                #adresse de facturation
+                #compte bancaire
+                #compte comptable
+                #customerGroupId => on ne la synchronise pas car Odoo doit rester maître
+                #segmentId => on ne la synchronise pas car Odoo doit rester maître sur le Business Domain (plus à jour que Fitnet)
+            }
+            res = self.prepare_update_from_fitnet_values('res.partner', customer, mapping_fields, odoo_customer)
+            if len(res) > 0:
+                _logger.info("Mise à jour du res.partnet client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
+                odoo_customer.write(res)
+
                
     def sync_employees(self, client):
         _logger.info('--- synch_employees')
@@ -395,6 +471,7 @@ class fitnetProject(models.Model):
         # ... puis mettre à jour les valeurs des employés Odoo
         mapping_fields = {
             'name' : {'odoo_field' : 'name'},
+            'profile_id' : {'odoo_field' : 'job_id'},
             'surname' : {'odoo_field' : 'first_name'},
             'email' : {'odoo_field' : 'work_email'},
             'gender' : {'odoo_field' : 'gender', 'selection_mapping' : {'Male' : 'male', 'Female' : 'female'}},
@@ -436,6 +513,7 @@ class fitnetProject(models.Model):
                 },
             'remark' : {'odoo_field' : 'remark'},
         #    'description' : {'odoo_field' : 'description'},
+        #   TODO : ajouter le contractType qui porte les accords cadre sur Fitnet
             'orderNumber' : {'odoo_field' : 'purchase_order_number'},
             'billedAmount' : {'odoo_field' : 'billed_amount'},
             'payedAmount' : {'odoo_field' : 'payed_amount'},
@@ -611,7 +689,6 @@ class fitnetProject(models.Model):
                         if odoo_object :
                             if odoo_object[odoo_field_name] :
                                 res[odoo_field_name] = False
-                                _logger.info('AAAAA '+str(fitnet_value)+"  "+str(type(odoo_object[odoo_field_name])))
                         else:
                             res[odoo_field_name] = False
                         continue

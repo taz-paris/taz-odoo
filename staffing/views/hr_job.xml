@@ -16,6 +16,9 @@
 					</tree>
 				</field>
 			</page>
+			<page string="Équipage">
+				<field name="employee_ids"/>
+			</page>
 		</xpath>
             </field>
         </record>

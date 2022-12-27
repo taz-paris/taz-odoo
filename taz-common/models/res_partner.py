@@ -18,46 +18,48 @@ class tazResPartner(models.Model):
      def _get_default_address_format(self):
         return "%(street)s\n%(street2)s\n%(street3)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s"
 
-     def write(self, vals):
-        # il est nécessaire de forcer le recacul des noms de domaine de l'ancien parent_id
-        old_parent_id = None
-        if 'parent_id' in vals.keys():
-            old_parent_id = self.parent_id
+     def write(self_list, vals):
+        res_dic = {}
+        for self in self_list:
+            # il est nécessaire de forcer le recacul des noms de domaine de l'ancien parent_id
+            old_parent_id = None
+            if 'parent_id' in vals.keys():
+                old_parent_id = self.parent_id
 
-        old_personal_email = self.personal_email
-        if old_personal_email:
-            old_personal_email = old_personal_email.strip().lower()
-        old_email = self.email
-        if old_email:
-            old_email = old_email.strip().lower()
+            old_personal_email = self.personal_email
+            if old_personal_email:
+                old_personal_email = old_personal_email.strip().lower()
+            old_email = self.email
+            if old_email:
+                old_email = old_email.strip().lower()
 
-        res = super().write(vals)
+            res = super().write(vals)
 
-        if old_parent_id: 
-            old_parent_id._compute_child_mail_address_domain_list()
+            if old_parent_id: 
+                old_parent_id._compute_child_mail_address_domain_list()
 
-        if self._context.get('save_forme_address') != False :
-            former = []
-            if self.former_email_address:
-                former = self.former_email_address.split(',')
-                if self.personal_email in former:
-                    former.remove(self.personal_email)
-                if self.email in former:
-                    former.remove(self.email)
-            if old_email :
-                if old_email != self.email and old_email != self.personal_email:
-                    if old_email not in former :
-                        former.append(old_email)
-            if old_personal_email :
-                if old_personal_email != self.email and old_personal_email != self.personal_email:
-                    if old_personal_email not in former :
-                        former.append(old_personal_email)
-            if len(former) > 0:
-                self.with_context(save_forme_address=False).former_email_address = ','.join(former)
-            else : 
-                self.with_context(save_forme_address=False).former_email_address = False
-
-        return res
+            if self._context.get('save_forme_address') != False :
+                former = []
+                if self.former_email_address:
+                    former = self.former_email_address.split(',')
+                    if self.personal_email in former:
+                        former.remove(self.personal_email)
+                    if self.email in former:
+                        former.remove(self.email)
+                if old_email :
+                    if old_email != self.email and old_email != self.personal_email:
+                        if old_email not in former :
+                            former.append(old_email)
+                if old_personal_email :
+                    if old_personal_email != self.email and old_personal_email != self.personal_email:
+                        if old_personal_email not in former :
+                            former.append(old_personal_email)
+                if len(former) > 0:
+                    self.with_context(save_forme_address=False).former_email_address = ','.join(former)
+                else : 
+                    self.with_context(save_forme_address=False).former_email_address = False
+            res_dic[self.id] = res
+        return res_dic
 
      def unlink(self):
         # il est nécessaire de forcer le recacul des noms de domaine de l'ancien parent_id
@@ -149,16 +151,6 @@ class tazResPartner(models.Model):
      #     args = ['|', '|', ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)] + args
      #     return self._search(args, limit=limit, access_rights_uid=name_get_uid)
      
-     #@api.model
-     #def fields_get(self, allfields=None, attributes=None):
-     #   res = super().fields_get(allfields, attributes=attributes)
-     # ## SI l'utilisateur n'est pas un administrateur alors :
-     #   fields_to_ignore_in_search = ['has_message']
-     #   for field in fields_to_ignore_in_search:
-     #       if res.get(field):
-     #          res.get(field)['searchable'] = False
-     #   return res
-
      @api.model
      def fields_get(self, allfields=None, attributes=None):
         hide = ['message_is_follower', 'message_follower_ids', 'message_partner_ids', 'message_ids', 'has_message', 'message_needaction', 'message_needaction_counter', 'message_has_error', 'message_has_error_counter', 'message_attachment_count', 'message_main_attachment_id', 'website_message_ids', 'email_normalized', 'is_blacklisted', 'message_bounce', 'activity_ids', 'activity_state', 'activity_user_id', 'activity_type_id', 'activity_type_icon', 'activity_date_deadline', 'my_activity_date_deadline', 'activity_summary', 'activity_exception_decoration', 'activity_exception_icon', 'activity_calendar_event_id', 'image_1920', 'image_1024', 'image_512', 'image_256', 'image_128', 'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128', 'name', 'display_name', 'date', 'lang', 'active_lang_count', 'tz', 'tz_offset', 'user_id', 'vat', 'same_vat_partner_id', 'same_company_registry_partner_id', 'company_registry', 'bank_ids', 'employee', 'partner_latitude', 'partner_longitude','email_formatted', 'is_public', 'company_type', 'company_id', 'color', 'user_ids', 'partner_share', 'contact_address', 'commercial_partner_id', 'commercial_company_name', 'company_name', 'barcode','im_status', 'channel_ids', 'signup_token', 'signup_type', 'signup_expiration', 'signup_valid', 'signup_url', 'meeting_count', 'meeting_ids', 'calendar_last_notif_ack', 'employee_ids', 'employees_count', 'property_product_pricelist', 'team_id', 'certifications_count', 'certifications_company_count', 'event_count', 'payment_token_ids', 'payment_token_count', 'child_ids_company', 'child_ids_contact', 'credit', 'credit_limit', 'use_partner_credit_limit', 'show_credit_limit', 'debit', 'debit_limit', 'total_invoiced', 'currency_id', 'journal_item_count', 'property_account_payable_id', 'property_account_receivable_id', 'property_account_position_id', 'property_payment_term_id', 'property_supplier_payment_term_id', 'ref_company_ids', 'has_unreconciled_entries', 'last_time_entries_checked', 'invoice_ids', 'contract_ids', 'bank_account_count', 'trust', 'invoice_warn', 'invoice_warn_msg', 'supplier_rank', 'customer_rank', 'duplicated_bank_account_partners_count', 'opportunity_ids', 'opportunity_count', 'task_ids', 'task_count', 'property_purchase_currency_id', 'purchase_order_count', 'supplier_invoice_count', 'purchase_warn', 'purchase_warn_msg', 'receipt_reminder_email', 'reminder_date_before_receipt', 'siret']

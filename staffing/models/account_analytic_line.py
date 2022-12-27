@@ -53,7 +53,7 @@ class staffingAnalyticLine(models.Model):
         sudo_self = self.sudo()  # this creates only one env for all operation that required sudo()
         # (re)compute the amount (depending on unit_amount, employee_id for the cost, and account_id for currency)
         if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'account_id', 'encoding_uom_id', 'holiday_id', 'hr_cost_id']):
-            for timesheet in sudo_self:
+            for timesheet in sudo_self: #TODO : utiliser la catégorie pour ne cibler que les lignes de pointage ?
                 if timesheet.holiday_id :
                     continue
 
@@ -76,5 +76,6 @@ class staffingAnalyticLine(models.Model):
                     'amount': amount_converted,
                     'hr_cost_id' : cost_line,
                 })
+        _logger.info(result)
         return result
 
