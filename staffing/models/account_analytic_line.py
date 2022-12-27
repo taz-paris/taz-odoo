@@ -9,7 +9,10 @@ class staffingAnalyticLine(models.Model):
 
 
     def write(self, vals):
-        vals = self._sync_project(vals)
+        #if not self._context.get('stop_sync_project') :
+        _logger.info(vals)
+        if 'staffing_need_id' in vals.keys():
+            vals = self._sync_project(vals)
         super().write(vals)
 
     def create(self, vals):
@@ -22,11 +25,10 @@ class staffingAnalyticLine(models.Model):
     def _sync_project(self, vals):
         #_logger.info(vals)
         #TODO : si le projet change, changer le staffing_need_id
-        if 'staffing_need_id' in vals.keys():
-            need = self.env['staffing.need'].browse([vals['staffing_need_id']])[0]
-            vals['project_id'] = need.project_id.id
-            vals['account_id'] = need.project_id.analytic_account_id.id
-            vals['employee_id'] =  need.staffed_employee_id.id
+        need = self.env['staffing.need'].browse([vals['staffing_need_id']])[0]
+        vals['project_id'] = need.project_id.id
+        vals['account_id'] = need.project_id.analytic_account_id.id
+        vals['employee_id'] =  need.staffed_employee_id.id
         #_logger.info(vals)
         return vals
 
@@ -52,30 +54,60 @@ class staffingAnalyticLine(models.Model):
         result = {id_: {} for id_ in self.ids}
         sudo_self = self.sudo()  # this creates only one env for all operation that required sudo()
         # (re)compute the amount (depending on unit_amount, employee_id for the cost, and account_id for currency)
-        if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'account_id', 'encoding_uom_id', 'holiday_id', 'hr_cost_id']):
-            for timesheet in sudo_self: #TODO : utiliser la catégorie pour ne cibler que les lignes de pointage ?
-                if timesheet.holiday_id :
+        _logger.info('-- _timesheet_postprocess_values')
+        if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'account_id', 'encoding_uom_id', 'holiday_id']):
+            if 'amount' in values or 'hr_cost_id' in values:
+                return result #sinon boucle infinie
+
+            for timesheet in sudo_self:
+                amount_converted, cost_line = timesheet.compute_amount()
+                if not amount_converted:
                     continue
-
-                encoding_uom_id = self.env.company.timesheet_encode_uom_id
-                if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
-                    cost = timesheet._hourly_cost()
-                    cost_line = False
-                elif encoding_uom_id == self.env.ref("uom.product_uom_day"):
-                    cost_line = timesheet.employee_id._get_daily_cost(timesheet.date) 
-                    cost = cost_line.cost
-                    if not cost :
-                        raise ValidationError(_("Dayily cost not defined for this employee at this date."))
-                else : 
-                    raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
-
-                amount = -timesheet.unit_amount * cost
-                amount_converted = timesheet.employee_id.currency_id._convert(
-                    amount, timesheet.account_id.currency_id or timesheet.currency_id, self.env.company, timesheet.date)
                 result[timesheet.id].update({
                     'amount': amount_converted,
                     'hr_cost_id' : cost_line,
                 })
         _logger.info(result)
         return result
+    
 
+
+
+    def compute_amount(self):
+        timesheet = self
+
+        #TODO : utiliser la catégorie pour ne cibler que les lignes de pointage ?
+
+        if timesheet.holiday_id :
+            return False,False
+
+        encoding_uom_id = self.env.company.timesheet_encode_uom_id
+        if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
+            cost = timesheet._hourly_cost()
+            cost_line = False
+        elif encoding_uom_id == self.env.ref("uom.product_uom_day"):
+            cost_line = timesheet.employee_id._get_daily_cost(timesheet.date) 
+            if not cost_line :
+                _logger.info(_("Dayily cost not defined for this employee at this date : %s, %s." % (timesheet.employee_id.name, timesheet.date)))
+                return False,False
+            cost = cost_line.cost
+        else : 
+            raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
+
+        _logger.info(cost)
+        amount = -timesheet.unit_amount * cost
+        amount_converted = timesheet.employee_id.currency_id._convert(
+            amount, timesheet.account_id.currency_id or timesheet.currency_id, self.env.company, timesheet.date)
+
+        _logger.info(amount_converted) 
+        return amount_converted, cost_line
+
+
+    def refresh_amount(self):
+        _logger.info("---- refresh_amount")
+        amount_converted, cost_line = self.compute_amount()
+        if not amount_converted:
+            return False
+        self.amount = amount_converted
+        self.hr_cost_id =  cost_line
+        _logger.info(self.amount) 

@@ -21,7 +21,7 @@ class HrJob(models.Model):
         if res == False :
             return False
 
-        return res.cost
+        return res
 
     cost_ids = fields.One2many('hr.cost', 'job_id', string="CJM / TJM historisés")
 
@@ -52,8 +52,7 @@ class HrCost(models.Model):
 
         if 'cost' in vals.keys():
             for account_analytic_line in account_analytic_line_ids:
-
-                account_analytic_line.hr_cost_id = False #Cela va déclencher un recalcul de hr_cost_id et in fine du montant de la ligne
+                account_analytic_line.refresh_amount
 
         if 'begin_date' in vals.keys():
             self.on_date_change(self.begin_date, old_begin_date)
@@ -68,17 +67,19 @@ class HrCost(models.Model):
     ## TODO : il faut aussi historiser les passages de grade sur fiches des candidats !
 
     def on_date_change(self, new_date, former_date=False):
+        _logger.info("--- on_date_change")
         date_oldest = new_date
         if former_date : #s'il on est en train de créer un hr.cost, aucune former_date n'est fournie
             if former_date < date_oldest:
                 date_oldest = former_date
 
         _logger.info(date_oldest)
-        lines = self.env['account.analytic.line'].search([('date', '>=', date_oldest)])
+        lines = self.env['account.analytic.line'].search([('date', '>=', date_oldest), ('project_id', '!=', False)])
+        _logger.info(len(lines))
         #on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
         for line in lines:
             if line.employee_id.job_id.id == self.job_id.id:
-                line.hr_cost_id = False #Cela va déclencher un recalcul de hr_cost_id et in fine du montant de la ligne
+                line.refresh_amount()
             
 
 
