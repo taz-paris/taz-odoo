@@ -66,7 +66,7 @@ class staffingNeed(models.Model):
     def create(self, vals):
         needs = super().create(vals)
         for need in needs:
-            if need.status == 'open':
+            if need.state == 'open':
                 need.generate_staffing_proposal()
         return needs
 

@@ -74,28 +74,46 @@ class staffingEmployee(models.Model):
         _logger.info('number_days_available_period %s' % self.name)
         if date_start > date_end :
             raise ValidationError(_("Start date should be <= end date"))
-        return self.number_work_days_period(date_start, date_end) - self.number_not_available_period(date_start, date_end)
+        res = self.number_work_days_period(date_start, date_end) - self.number_not_available_period(date_start, date_end)
+        _logger.info('Availability : %s' % str(res))
+        return res
 
     def number_not_available_period(self, date_start, date_end):
         _logger.info('numbers_not_available_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
-        count = 0
-        timesheets = self.env['account.analytic.line'].search([('date', '>=', date_start), ('date', '<=', date_end), ('employee_id', '=', self.id)])
+        count = 0.0
+        timesheets = self.env['account.analytic.line'].search([('date', '>=', date_start), ('date', '<=', date_end), ('employee_id', '=', self.id), ('category', '!=', 'project_draft')])
         for timesheet in timesheets:
             if timesheet.encoding_uom_id == self.env.ref("uom.product_uom_day"):
                 _logger.info("%s du %s categ=%s nb_jours=%s" % (timesheet.name, timesheet.date, timesheet.category, timesheet.unit_amount))
-                count += timesheet.unit_amount
-            #TODO ne pas compter les prévisionnels si au moins un pointage est validé sur la semaine
+                if timesheet.category == 'project_forecast':
+                    #Exclure les prévisionnels si au moins un pointage validé ou un congés existe sur la semaine
+                    project_employee_validated = False
+                    d = timesheet.date
+                    monday =  d - timedelta(days=d.weekday())
+                    sunday = monday + timedelta(days=6)
+                    #_logger.info("Date : %s => Semaine du lundi %s au dimanche %s" % (str(d), str(monday), str(sunday)))
+                    for t in timesheets:
+                        if t.date >= monday and t.date <= sunday and t.category != 'project_forecast': #si vacances ou pointage validé sur cette semaine, on exclut
+                            project_employee_validated = True
+                            _logger.info('          ==> Exclue')
+                    if not project_employee_validated :
+                        count += timesheet.unit_amount
+                else : 
+                    count += timesheet.unit_amount
+        _logger.info("       > %s" % str(count))
         return count
 
     def number_work_days_period(self, date_start, date_end):
         _logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
-        count = 0
+        count = 0.0
         date = date_start
         while (date <= date_end):
             public_holidays = self.env['resource.calendar.leaves'].search_count([('resource_id', '=', False), ('date_from', '>=', date_start), ('date_to', '<=', date_end)])
             if public_holidays ==  0:
-                count +=1
+                if date.strftime('%A') not in ['Saturday', 'Sunday']:
+                    count +=1.0
             date = date + timedelta(days = 1)
+        _logger.info("       > %s" % str(count))
         return count
 
 
