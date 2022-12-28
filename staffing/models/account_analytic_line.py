@@ -9,8 +9,6 @@ class staffingAnalyticLine(models.Model):
 
 
     def write(self, vals):
-        #if not self._context.get('stop_sync_project') :
-        _logger.info(vals)
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
         super().write(vals)
@@ -94,20 +92,17 @@ class staffingAnalyticLine(models.Model):
         else : 
             raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
 
-        _logger.info(cost)
         amount = -timesheet.unit_amount * cost
         amount_converted = timesheet.employee_id.currency_id._convert(
             amount, timesheet.account_id.currency_id or timesheet.currency_id, self.env.company, timesheet.date)
 
-        _logger.info(amount_converted) 
         return amount_converted, cost_line
 
 
     def refresh_amount(self):
-        _logger.info("---- refresh_amount")
+        #_logger.info("---- refresh_amount")
         amount_converted, cost_line = self.compute_amount()
         if not amount_converted:
             return False
         self.amount = amount_converted
         self.hr_cost_id =  cost_line
-        _logger.info(self.amount) 

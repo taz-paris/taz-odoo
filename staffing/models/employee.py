@@ -46,9 +46,20 @@ class staffingEmployee(models.Model):
             recs = self.search(['|', ('first_name', operator, name), ('name', operator, name)] + args, limit=limit)
         return recs.name_get()     
 
+    def _get_contract(self, date):
+        res = False
+        for contract in self.contract_ids:
+            if contract.date_start <= date and contract.state =='open':
+                if contract.date_end and contract.date_end < date:
+                    continue
+                res = contract
+        return res
+
     def _get_job_id(self, date):
-        ## TODO : il faut aussi historiser les passages de grade sur fiches des candidats !
-        return self.job_id
+        contract = self._get_contract(date)
+        if contract :
+            return contract.job_id
+        return False
 
     def _get_daily_cost(self, date):
         job_id = self._get_job_id(date)

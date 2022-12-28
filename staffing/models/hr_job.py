@@ -71,6 +71,7 @@ class HrCost(models.Model):
             # à la création d'un HrCost : si la begin_date est antérieure à la begin_date d'un des hr_cost préexistant pour le job_id : reclaculer toutes ls account_alaitycs qui ont une date >= à la nouvelle date
 
 
+    #TODO décliner la logique on_date_change sur l'objet hr.contract => à la création du contrat, au changement de contract.job_id ou au changement de date de début/fin du contrat => recalculer les lignes
     def on_date_change(self, new_date, former_date=False):
         _logger.info("--- on_date_change")
         date_oldest = new_date
@@ -83,7 +84,10 @@ class HrCost(models.Model):
         _logger.info(len(lines))
         #on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
         for line in lines:
-            if line.employee_id._get_job_id(line.date).id == self.job_id.id:
+            job = line.employee_id._get_job_id(line.date)
+            if not job:
+                continue
+            if job.id == self.job_id.id:
                 line.refresh_amount()
             
 
