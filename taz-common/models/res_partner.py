@@ -33,7 +33,7 @@ class tazResPartner(models.Model):
             if old_email:
                 old_email = old_email.strip().lower()
 
-            res = super().write(vals)
+            res = super().write(vals) #TODO : ça ne devrait pas être vals[self.id] ?
 
             if old_parent_id: 
                 old_parent_id._compute_child_mail_address_domain_list()

@@ -3,7 +3,6 @@ import zlib
 import os
 import json
 import datetime
-import datetime
 import pytz
 from lxml import etree, html
 
@@ -39,8 +38,8 @@ class ClientRestFitnetManager:
         _logger.info("ClientRestFitnetManager : " + self.url_appel_api)
 
     def get_api(self, target_action, read_cache=True):
+        path = os.path.join(cache_folder, target_action.replace('/','_'))
         if cache_mode :
-            path = os.path.join(cache_folder, target_action.replace('/','_'))
             if read_cache :
                 if os.path.exists(path):
                     with open(path, 'r', encoding='utf-8') as cf:
@@ -61,9 +60,8 @@ class ClientRestFitnetManager:
         #res = response.content.decode('utf-8')
         #j = json.load(res)
         res = response.json()
-        if cache_mode :
-            with open(path, 'w', encoding='utf-8') as f:
-                json.dump(res, f, indent=4)
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(res, f, indent=4)
         return res
 
 
@@ -183,11 +181,11 @@ class fitnetProject(models.Model):
         #TODO           self.sync_prospect(client)
         #TODO           self.sync_project(client)
 
-        #self.sync_contracts(client)
+        self.sync_contracts(client)
 
-        #self.sync_assignments(client)
+        self.sync_assignments(client)
         #self.sync_forecastedActivities(client)
-        #self.sync_timesheets(client)
+        self.sync_timesheets(client)
 
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()

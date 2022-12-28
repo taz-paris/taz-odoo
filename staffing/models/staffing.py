@@ -10,12 +10,9 @@ _logger = logging.getLogger(__name__)
 class staffingNeed(models.Model):
     _name = "staffing.need"
     _description = "Record the staffing need"
-    #_order = "date_deadline desc"
-    #_sql_constraints = [
-    #    ('date_partner_uniq', 'UNIQUE (partner_id, date_deadline)',  "Impossible d'enregistrer deux actions commerciales le même jour pour le même client.")
-    #]
-
            
+    #TODO : interdire de pointer hors de la période d'affectation
+
     @api.depends('project_id')
     def _compute_name(self):
         for record in self:
@@ -23,15 +20,16 @@ class staffingNeed(models.Model):
 
     name = fields.Char("Nom", compute=_compute_name)
 
-    project_id = fields.Many2one('project.project', ondelete="restrict")
-    job_id = fields.Many2one('hr.job')
+    project_id = fields.Many2one('project.project', ondelete="restrict", required=True)
+    job_id = fields.Many2one('hr.job') #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
     skill_id = fields.Many2one('hr.skill') #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
     considered_employee_ids = fields.Many2many('hr.employee')
     #Pour le moment le, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
     staffed_employee_id = fields.Many2one('hr.employee', string='Personne satffée')
-    begin_date = fields.Date('Date début')
-    end_date = fields.Date('Date fin')
-    nb_days_needed = fields.Float('Nb de jours')
+    begin_date = fields.Date('Date début', required=True) #TODO : mettre par defaut la date de début du projet
+    end_date = fields.Date('Date fin', required=True) #TODO : mettre par defaut la date de fin du projet
+    nb_days_needed = fields.Float('Nb de jours') #TODO : mettre par défaut un temps plein entre les 2 dates si vide
+    ##TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui ont un budget jour initial à 0
     #percent_needed = fields.Float('Pourcentage besoin')
 
     state = fields.Selection([
@@ -64,10 +62,53 @@ class staffingNeed(models.Model):
                 'target': 'new',
             }
 
+    @api.model
+    def create(self, vals):
+        needs = super().create(vals)
+        for need in needs:
+            if need.status == 'open':
+                need.generate_staffing_proposal()
+        return needs
+
+    def generate_staffing_proposal(self):
+        employees = self.env['hr.employee'].search([])
+        for employee in employees:
+            employee_job = employee._get_job_id(self.begin_date)
+            if not employee_job:
+                continue
+            if employee_job.id != self.job_id.id: #TODO : remplacer cette ligne par une conditin de recherche lorsque la job_id aura été transformé en fonction
+                continue
+            _logger.info("generate_staffing_proposal %s" % employee.name)
+            needs = self.env['staffing.proposal'].search([('staffing_need_id', '=', self.id),('employee_id', '=', employee.id)])
+            if len(needs) == 0:
+                dic = {}
+                dic['employee_id'] = employee.id
+                dic['staffing_need_id'] = self.id
+                self.env['staffing.proposal'].create(dic)
+                break
+        #TODO supprimer les propositions qui ne sont pas sur ces employés (cas de changement de grade de la demande)
+
+    #TODO : lorsqu'une affectation est validée, créer les prévisionnels
+
+
 class staffingProposal(models.Model):
     _name = "staffing.proposal"
     _description = "Computed staffing proposal"
     _order = "ranked_proposal desc"
+
+    _sql_constraints = [
+        ('need_employee_uniq', 'UNIQUE (staffing_need_id, employee_id)',  "Impossible d'enregistrer deux propositions de staffing pour le même besoin et le même consultant.")
+    ]
+
+    #@api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id')
+    @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id')
+    def compute(self):
+        _logger.info('staffingProposal compute %s' % self.employee_id.name)
+        #TODO : relancer cette fonction si les timesheet évoluent sur cette période
+        need = self.staffing_need_id
+        self.employee_availability = self.employee_id.number_days_available_period(need.begin_date, need.end_date)
+        self.ranked_employee_availability = self.employee_availability / need.nb_days_needed
+        self.ranked_proposal = self.ranked_employee_availability
 
 
     @api.depends('staffing_need_id', 'employee_id')
@@ -81,15 +122,15 @@ class staffingProposal(models.Model):
     staffing_need_id = fields.Many2one('staffing.need', ondelete="cascade")
     employee_id = fields.Many2one('hr.employee')
 
-    employee_job_id = fields.Many2one(related='employee_id.job_id')
-    employee_skill_ids = fields.One2many(related='employee_id.employee_skill_ids')
-    employee_last_evaluation = fields.Char("Synthèse COD") #TODO mettre un champ related sur le dernier COD
-    #employee_availability = 
+    employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id') #TODO : remplacer le hr.employee.job_id par une fonction qui retourne get_job_id()
+    employee_skill_ids = fields.One2many(string="Compétences", related='employee_id.employee_skill_ids')
+    employee_last_evaluation = fields.Html(string="Souhaits de staffing COD", related='employee_id.staffing_wishes')
+    employee_availability = fields.Float("Dispo sur la période", compute='compute', store=True)
 
-    ranked_proposal = fields.Float('Note globale')
-    ranked_employee_availability = fields.Float('Note disponibilité')
-    ranked_employee_skill = fields.Float('Note adéquation compétences')
-    ranked_employee_explicit_voluntary = fields.Float('A explicitement demandé à être sur cette misison')
-    ranked_employee_worked_on_proposal = fields.Float('A travaillé sur la proposition commerciale')
-    ranked_employee_wished_on_need = fields.Float('Envisagé dans la desciption du besoin')
+    ranked_proposal = fields.Float('Note globale', compute='compute', store=True)
+    ranked_employee_availability = fields.Float('Note disponibilité', compute='compute', store=True)
+    ranked_employee_skill = fields.Float('Note adéquation compétences', compute='compute', store=True)
+    ranked_employee_explicit_voluntary = fields.Float('A explicitement demandé à être sur cette misison', compute='compute', store=True)
+    ranked_employee_worked_on_proposal = fields.Float('A travaillé sur la proposition commerciale', compute='compute', store=True)
+    ranked_employee_wished_on_need = fields.Float('Envisagé dans la desciption du besoin', compute='compute', store=True)
 

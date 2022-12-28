@@ -11,19 +11,27 @@ class staffingAnalyticLine(models.Model):
     def write(self, vals):
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
-        super().write(vals)
+        return super().write(vals)
 
     def create(self, vals):
-        res = []
-        for val in vals:
-            val = self._sync_project(val)
-            res.append(val)
-        super().create(res)
+        #res = []
+        #_logger.info(vals)
+        #for val in vals:
+        #    _logger.info(val)
+        #    val = self._sync_project(val)
+        #    res.append(val)
+        #super().create(res)
+        res = self._sync_project(vals)
+        return super().create(res)
 
     def _sync_project(self, vals):
         #_logger.info(vals)
         #TODO : si le projet change, changer le staffing_need_id
-        need = self.env['staffing.need'].browse([vals['staffing_need_id']])[0]
+        _logger.info(vals)
+        need_id = vals['staffing_need_id']
+        needs = self.env['staffing.need'].browse([need_id])
+        need = needs[0]
+
         vals['project_id'] = need.project_id.id
         vals['account_id'] = need.project_id.analytic_account_id.id
         vals['employee_id'] =  need.staffed_employee_id.id
@@ -52,7 +60,7 @@ class staffingAnalyticLine(models.Model):
         result = {id_: {} for id_ in self.ids}
         sudo_self = self.sudo()  # this creates only one env for all operation that required sudo()
         # (re)compute the amount (depending on unit_amount, employee_id for the cost, and account_id for currency)
-        _logger.info('-- _timesheet_postprocess_values')
+        #_logger.info('-- _timesheet_postprocess_values')
         if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'account_id', 'encoding_uom_id', 'holiday_id']):
             if 'amount' in values or 'hr_cost_id' in values:
                 return result #sinon boucle infinie
@@ -65,7 +73,7 @@ class staffingAnalyticLine(models.Model):
                     'amount': amount_converted,
                     'hr_cost_id' : cost_line,
                 })
-        _logger.info(result)
+        #_logger.info(result)
         return result
     
 
@@ -79,7 +87,8 @@ class staffingAnalyticLine(models.Model):
         if timesheet.holiday_id :
             return False,False
 
-        encoding_uom_id = self.env.company.timesheet_encode_uom_id
+        encoding_uom_id = self.encoding_uom_id
+        #self.env.company.timesheet_encode_uom_id
         if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
             cost = timesheet._hourly_cost()
             cost_line = False

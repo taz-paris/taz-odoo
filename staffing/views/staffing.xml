@@ -44,9 +44,10 @@
 			  <field name="staffing_proposal_ids" readonly="1">
 				  <tree>
 					  <field name="employee_id"/>
-					  <field name="employee_job_id"/>
-					  <field name="employee_skill_ids"/>
-					  <field name="ranked_proposal"/>
+					  <field name="employee_job_id" optional="hide"/>
+					  <field name="employee_availability" optional="show"/>
+					  <field name="employee_skill_ids"  widget="many2many_tags" optional="show"/>
+					  <field name="ranked_proposal" optional="show"/>
 					  <field name="employee_last_evaluation" optional="show"/>
 					  <field name="ranked_employee_availability" optional="hide"/>
 					  <field name="ranked_employee_skill" optional="hide"/>

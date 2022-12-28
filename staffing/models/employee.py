@@ -1,6 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
+from datetime import datetime, timedelta
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class staffingEmployee(models.Model):
 
 
     first_name = fields.Char(string="Prénom")
+    staffing_wishes = fields.Html("Souhaits de staffing COD")
 
     def name_get(self):
          res = []
@@ -67,6 +69,34 @@ class staffingEmployee(models.Model):
             return job_id._get_daily_cost(date)
         else :  
             return False
+
+    def number_days_available_period(self, date_start, date_end):
+        _logger.info('number_days_available_period %s' % self.name)
+        if date_start > date_end :
+            raise ValidationError(_("Start date should be <= end date"))
+        return self.number_work_days_period(date_start, date_end) - self.number_not_available_period(date_start, date_end)
+
+    def number_not_available_period(self, date_start, date_end):
+        _logger.info('numbers_not_available_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
+        count = 0
+        timesheets = self.env['account.analytic.line'].search([('date', '>=', date_start), ('date', '<=', date_end), ('employee_id', '=', self.id)])
+        for timesheet in timesheets:
+            if timesheet.encoding_uom_id == self.env.ref("uom.product_uom_day"):
+                _logger.info("%s du %s categ=%s nb_jours=%s" % (timesheet.name, timesheet.date, timesheet.category, timesheet.unit_amount))
+                count += timesheet.unit_amount
+            #TODO ne pas compter les prévisionnels si au moins un pointage est validé sur la semaine
+        return count
+
+    def number_work_days_period(self, date_start, date_end):
+        _logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
+        count = 0
+        date = date_start
+        while (date <= date_end):
+            public_holidays = self.env['resource.calendar.leaves'].search_count([('resource_id', '=', False), ('date_from', '>=', date_start), ('date_to', '<=', date_end)])
+            if public_holidays ==  0:
+                count +=1
+            date = date + timedelta(days = 1)
+        return count
 
 
 class staffingUsers(models.Model):
