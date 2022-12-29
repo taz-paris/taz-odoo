@@ -41,9 +41,9 @@ class staffingNeed(models.Model):
     project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True)
     job_id = fields.Many2one('hr.job', string="Grade souhaité") #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
     skill_id = fields.Many2one('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
-    considered_employee_ids = fields.Many2many('hr.employee', string="Equipier envisagée")
+    considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)")
     #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
-    staffed_employee_id = fields.Many2one('hr.employee', string='Personne satffée')
+    staffed_employee_id = fields.Many2one('hr.employee', string='Équipier satffé')
     begin_date = fields.Date('Date début', required=True)
     end_date = fields.Date('Date fin', required=True)
     nb_days_needed = fields.Float('Nb jours')
@@ -147,15 +147,37 @@ class staffingProposal(models.Model):
             record.name = "%s - %s" % (record.staffing_need_id.name or "", record.employee_id.name or "")
 
     @api.depends('staffing_need_id', 'staffing_need_id.staffed_employee_id', 'employee_id')
-    def _compute_is_chosen(self):
+    def _compute_is_staffed(self):
         for record in self:
             res = False
             if record.staffing_need_id.staffed_employee_id.id == record.employee_id.id:
                 res = True
-            record.is_chosen = res
+            record.is_staffed = res
+
+    @api.depends('staffing_need_id', 'staffing_need_id.considered_employee_ids', 'employee_id')
+    def _compute_is_considered(self):
+        for record in self:
+            res = False
+            if record.staffing_need_id.considered_employee_ids.id == record.employee_id.id:
+                res = True
+            record.is_considered = res
+
+    def action_staff_employee(self):
+        for record in self:
+            record.staffing_need_id.staffed_employee_id = record.employee_id.id
+
+    def action_consider_employee(self):
+        for record in self:
+            record.staffing_need_id.considered_employee_ids = [(4,record.employee_id.id)]
+
+    def action_unconsider_employee(self):
+        for record in self:
+            if record.employee_id in record.staffing_need_id.considered_employee_ids:
+                record.staffing_need_id.considered_employee_ids = [(3,record.employee_id.id)]
 
     name = fields.Char("Nom", compute=_compute_name)
-    is_chosen = fields.Boolean('Choisie', compute=_compute_is_chosen, store=True)
+    is_staffed = fields.Boolean('Staffé', compute=_compute_is_staffed, store=True)
+    is_considered = fields.Boolean('Envisagé', compute=_compute_is_considered, store=True)
     #Ajouter un lien vers les autres staffing proposal en concurrence (même personne, même période avec une quotité totale de temps > 100%)
     staffing_need_id = fields.Many2one('staffing.need', ondelete="cascade")
     staffing_need_state = fields.Selection(related='staffing_need_id.state')
@@ -176,5 +198,6 @@ class staffingProposal(models.Model):
     #Champs related pour le Kanban
     employee_image = fields.Binary(related="employee_id.image_128")
     employee_job = fields.Many2one(related="employee_id.job_id")
+    employee_coach = fields.Many2one(related="employee_id.coach_id")
     staffing_need_nb_days_needed = fields.Float(related="staffing_need_id.nb_days_needed")
 
