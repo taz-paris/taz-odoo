@@ -13,6 +13,7 @@ class staffingAnalyticLine(models.Model):
             vals = self._sync_project(vals)
         return super().write(vals)
 
+    @api.model
     def create(self, vals):
         #res = []
         #_logger.info(vals)

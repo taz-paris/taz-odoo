@@ -10,6 +10,7 @@ _logger = logging.getLogger(__name__)
 class staffingNeed(models.Model):
     _name = "staffing.need"
     _description = "Record the staffing need"
+    _order = 'project_id'
            
     #TODO : interdire de pointer hors de la période d'affectation
 
@@ -20,18 +21,33 @@ class staffingNeed(models.Model):
             if record.staffed_employee_id:
                 record.name = "%s - %s %s" % (record.project_id.name or "", record.staffed_employee_id.first_name or "", record.staffed_employee_id.name or "")
 
+    @api.onchange('project_id')
+    def onchange_project_id(self):
+        if self.project_id:
+            self.begin_date = self.project_id.date_start
+            self.end_date = self.project_id.date
+
+    @api.onchange('begin_date', 'end_date')
+    def onchnage_dates(self):
+        #if not self.nb_days_needed:
+        if self.begin_date and self.end_date:
+            nb = self.env['hr.employee'].number_work_days_period(self.begin_date, self.end_date)
+            #_logger.info("onchange_project_id NB jours : %s" % str(nb))
+            self.nb_days_needed = nb
+
 
     name = fields.Char("Nom", compute=_compute_name)
 
     project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True)
-    job_id = fields.Many2one('hr.job', string="Grade") #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
-    skill_id = fields.Many2one('hr.skill', string="Compétences demandées") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
-    considered_employee_ids = fields.Many2many('hr.employee', string="Equipier souhaité")
-    #Pour le moment le, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
+    job_id = fields.Many2one('hr.job', string="Grade souhaité") #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
+    skill_id = fields.Many2one('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
+    considered_employee_ids = fields.Many2many('hr.employee', string="Equipier envisagée")
+    #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
     staffed_employee_id = fields.Many2one('hr.employee', string='Personne satffée')
-    begin_date = fields.Date('Date début', required=True) #TODO : mettre par defaut la date de début du projet
-    end_date = fields.Date('Date fin', required=True) #TODO : mettre par defaut la date de fin du projet
-    nb_days_needed = fields.Float('Nb de jours demandés') #TODO : mettre par défaut un temps plein entre les 2 dates si vide
+    begin_date = fields.Date('Date début', required=True)
+    end_date = fields.Date('Date fin', required=True)
+    nb_days_needed = fields.Float('Nb jours')
+    description = fields.Text("Description du besoin")
     ##TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui ont un budget jour initial à 0
     #percent_needed = fields.Float('Pourcentage besoin')
 
@@ -103,7 +119,7 @@ class staffingNeed(models.Model):
                 self.env['staffing.proposal'].create(dic)
         #TODO supprimer les propositions qui ne sont pas sur ces employés (cas de changement de grade de la demande)
 
-    #TODO : lorsqu'une affectation est validée, créer les prévisionnels ET RECALCULER LES prorposals
+    #TODO : lorsqu'une affectation est validée, créer les prévisionnels ET RECALCULER LES autres prorposals de l'employee
 
 
 class staffingProposal(models.Model):
@@ -130,10 +146,19 @@ class staffingProposal(models.Model):
         for record in self:
             record.name = "%s - %s" % (record.staffing_need_id.name or "", record.employee_id.name or "")
 
+    @api.depends('staffing_need_id', 'staffing_need_id.staffed_employee_id', 'employee_id')
+    def _compute_is_chosen(self):
+        for record in self:
+            res = False
+            if record.staffing_need_id.staffed_employee_id.id == record.employee_id.id:
+                res = True
+            record.is_chosen = res
+
     name = fields.Char("Nom", compute=_compute_name)
-    is_chosen = fields.Boolean('Choisie')
+    is_chosen = fields.Boolean('Choisie', compute=_compute_is_chosen, store=True)
     #Ajouter un lien vers les autres staffing proposal en concurrence (même personne, même période avec une quotité totale de temps > 100%)
     staffing_need_id = fields.Many2one('staffing.need', ondelete="cascade")
+    staffing_need_state = fields.Selection(related='staffing_need_id.state')
     employee_id = fields.Many2one('hr.employee')
 
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id') #TODO : remplacer le hr.employee.job_id par une fonction qui retourne get_job_id()

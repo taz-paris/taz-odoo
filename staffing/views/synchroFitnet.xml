@@ -70,7 +70,7 @@
             <field name="model">project.project</field>
             <field name="inherit_id" ref="staffing.project_form"/>
             <field name="arch" type="xml">
-                <field name="tag_ids" position="after">
+                <field name="analytic_account_id" position="after">
                         <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>

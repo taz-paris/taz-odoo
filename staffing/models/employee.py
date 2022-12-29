@@ -108,7 +108,7 @@ class staffingEmployee(models.Model):
         count = 0.0
         date = date_start
         while (date <= date_end):
-            public_holidays = self.env['resource.calendar.leaves'].search_count([('resource_id', '=', False), ('date_from', '>=', date_start), ('date_to', '<=', date_end)])
+            public_holidays = self.env['resource.calendar.leaves'].search_count([('resource_id', '=', False), ('date_from', '>=', date), ('date_to', '<=', date)])
             if public_holidays ==  0:
                 if date.strftime('%A') not in ['Saturday', 'Sunday']:
                     count +=1.0

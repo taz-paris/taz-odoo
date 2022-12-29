@@ -6,7 +6,8 @@
       <field name="arch" type="xml">
         <tree editable="top" expand="1">
           <field name="name" optional="hide"/>
-          <field name="project_id" options="{'no_quick_create': True}"/>
+          <field name="project_id" options="{'no_quick_create': True}" context="{'tree_view_ref':'staffing.project_tree', 'form_view_ref':'staffing.project_form'}"/>
+	  <field name="description" optional="show"/>
 	  <field name="job_id" optional="show"/>
 	  <field name="skill_id" optional="show"/>
 	  <field name="considered_employee_ids" optional="show" widget="many2many_tags"/>
@@ -34,7 +35,8 @@
 		<group>
                   <group>
 			  <field name="name"/>
-			  <field name="project_id" modifiers="{'no_quick_create': True, &quot;readonly&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
+			  <field name="description"/>
+			  <field name="project_id" context="{'tree_view_ref':'staffing.project_tree', 'form_view_ref':'staffing.project_form'}" modifiers="{'no_quick_create': True, &quot;readonly&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
 			  <field name="job_id" modifiers="{&quot;readonly&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
 			  <field name="skill_id" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
 			  <field name="considered_employee_ids" widget="many2many_tags" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
