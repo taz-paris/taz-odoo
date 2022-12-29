@@ -55,6 +55,11 @@
 					  <field name="id"/>
 					  <field name="employee_id"/>
 					<templates>
+						<t t-name='kanban-tooltip'>
+							<div class="oe_kanban_tooltip">
+								<field name="employee_staffing_wishes" />
+							</div>
+						</t>
 						<t t-name="kanban-box">
 							<div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
                             					<field name="employee_image" class="o_kanban_image_fill_left d-block" preview_image="employee_image" widget="background_image" options="{'zoom': true, 'zoom_delay': 1000}"/>
@@ -80,7 +85,7 @@
 					  <field name="employee_availability" optional="show"/>
 					  <field name="employee_skill_ids"  widget="many2many_tags" optional="show"/>
 					  <field name="ranked_proposal" optional="show"/>
-					  <field name="employee_last_evaluation" optional="show"/>
+					  <field name="employee_staffing_wishes" optional="show"/>
 					  <field name="ranked_employee_availability" optional="hide"/>
 					  <field name="ranked_employee_skill" optional="hide"/>
 					  <field name="ranked_employee_explicit_voluntary" optional="hide"/>

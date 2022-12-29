@@ -138,7 +138,7 @@ class staffingProposal(models.Model):
 
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id') #TODO : remplacer le hr.employee.job_id par une fonction qui retourne get_job_id()
     employee_skill_ids = fields.One2many(string="Compétences", related='employee_id.employee_skill_ids')
-    employee_last_evaluation = fields.Html(string="Souhaits de staffing COD", related='employee_id.staffing_wishes')
+    employee_staffing_wishes = fields.Html(string="Souhaits de staffing COD", related='employee_id.staffing_wishes')
     employee_availability = fields.Float("Dispo sur la période", compute='compute', store=True)
 
     ranked_proposal = fields.Float('Note globale', compute='compute', store=True)

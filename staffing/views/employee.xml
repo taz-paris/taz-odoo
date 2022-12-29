@@ -107,6 +107,7 @@
 					  <field name="name"/>
 					  <field name="work_email"/>
 					  <field name="coach_id" can_create="true" can_write="true"/>
+					  <field name="staffing_wishes"/>
 			  	</group>
 	  		</group>
 			<notebook>
