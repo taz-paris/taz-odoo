@@ -26,7 +26,7 @@
             <field name="model">staffing.need</field>
             <field name="inherit_id" ref="staffing.need_form"/>
             <field name="arch" type="xml">
-                <field name="name" position="after">
+                <field name="staffing_proposal_ids" position="after">
                         <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>

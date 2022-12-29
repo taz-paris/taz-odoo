@@ -31,4 +31,10 @@
         'views/account_analytic_line.xml',
         'views/hr_job.xml',
     ],
+
+    #'assets': {
+    #    'web.assets_backend': [
+    #        'staffing/static/src/css/style.css',
+    #    ],
+    #}
 }

@@ -17,26 +17,30 @@ class staffingNeed(models.Model):
     def _compute_name(self):
         for record in self:
             record.name = "%s - %s" % (record.project_id.name or "", record.job_id.name or "")
+            if record.staffed_employee_id:
+                record.name = "%s - %s %s" % (record.project_id.name or "", record.staffed_employee_id.first_name or "", record.staffed_employee_id.name or "")
+
 
     name = fields.Char("Nom", compute=_compute_name)
 
-    project_id = fields.Many2one('project.project', ondelete="restrict", required=True)
-    job_id = fields.Many2one('hr.job') #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
-    skill_id = fields.Many2one('hr.skill') #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
-    considered_employee_ids = fields.Many2many('hr.employee')
+    project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True)
+    job_id = fields.Many2one('hr.job', string="Grade") #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
+    skill_id = fields.Many2one('hr.skill', string="Compétences demandées") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
+    considered_employee_ids = fields.Many2many('hr.employee', string="Equipier souhaité")
     #Pour le moment le, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
     staffed_employee_id = fields.Many2one('hr.employee', string='Personne satffée')
     begin_date = fields.Date('Date début', required=True) #TODO : mettre par defaut la date de début du projet
     end_date = fields.Date('Date fin', required=True) #TODO : mettre par defaut la date de fin du projet
-    nb_days_needed = fields.Float('Nb de jours') #TODO : mettre par défaut un temps plein entre les 2 dates si vide
+    nb_days_needed = fields.Float('Nb de jours demandés') #TODO : mettre par défaut un temps plein entre les 2 dates si vide
     ##TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui ont un budget jour initial à 0
     #percent_needed = fields.Float('Pourcentage besoin')
 
     state = fields.Selection([
+        ('wait', 'En attente'),
         ('open', 'Ouvert'),
         ('done', 'Staffé'),
-        ('cancelled', 'Annulé'),
-        ('wait', 'En attente')], 'Statut', default='open')
+        ('canceled', 'Annulé'),
+        ], 'Statut', default='open')
 
     staffing_proposal_ids = fields.One2many('staffing.proposal', 'staffing_need_id')
 
@@ -59,18 +63,30 @@ class staffingNeed(models.Model):
                 'context': {},
                 # if you want to open the form in edit mode direclty
                 'flags': {'initial_mode': 'edit'},
-                'target': 'new',
+                'target': 'current',
             }
 
     @api.model
     def create(self, vals):
         needs = super().create(vals)
         for need in needs:
-            if need.state == 'open':
-                need.generate_staffing_proposal()
+            need.generate_staffing_proposal()
         return needs
 
+    def write(self, vals):
+        res = super().write(vals)
+        self.generate_staffing_proposal()
+        if "staffed_employee_id" in vals:
+            if vals["staffed_employee_id"] :
+                self.state = 'done'
+            else :
+                self.state = 'open'
+        return res
+
     def generate_staffing_proposal(self):
+        if self.state != 'open':
+            return
+
         employees = self.env['hr.employee'].search([])
         for employee in employees:
             employee_job = employee._get_job_id(self.begin_date)
@@ -85,10 +101,9 @@ class staffingNeed(models.Model):
                 dic['employee_id'] = employee.id
                 dic['staffing_need_id'] = self.id
                 self.env['staffing.proposal'].create(dic)
-                break
         #TODO supprimer les propositions qui ne sont pas sur ces employés (cas de changement de grade de la demande)
 
-    #TODO : lorsqu'une affectation est validée, créer les prévisionnels
+    #TODO : lorsqu'une affectation est validée, créer les prévisionnels ET RECALCULER LES prorposals
 
 
 class staffingProposal(models.Model):
@@ -100,14 +115,13 @@ class staffingProposal(models.Model):
         ('need_employee_uniq', 'UNIQUE (staffing_need_id, employee_id)',  "Impossible d'enregistrer deux propositions de staffing pour le même besoin et le même consultant.")
     ]
 
-    #@api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id')
     @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id')
     def compute(self):
         _logger.info('staffingProposal compute %s' % self.employee_id.name)
         #TODO : relancer cette fonction si les timesheet évoluent sur cette période
         need = self.staffing_need_id
         self.employee_availability = self.employee_id.number_days_available_period(need.begin_date, need.end_date)
-        self.ranked_employee_availability = self.employee_availability / need.nb_days_needed
+        self.ranked_employee_availability = self.employee_availability / need.nb_days_needed * 100
         self.ranked_proposal = self.ranked_employee_availability
 
 
@@ -133,4 +147,9 @@ class staffingProposal(models.Model):
     ranked_employee_explicit_voluntary = fields.Float('A explicitement demandé à être sur cette misison', compute='compute', store=True)
     ranked_employee_worked_on_proposal = fields.Float('A travaillé sur la proposition commerciale', compute='compute', store=True)
     ranked_employee_wished_on_need = fields.Float('Envisagé dans la desciption du besoin', compute='compute', store=True)
+
+    #Champs related pour le Kanban
+    employee_image = fields.Binary(related="employee_id.image_128")
+    employee_job = fields.Many2one(related="employee_id.job_id")
+    staffing_need_nb_days_needed = fields.Float(related="staffing_need_id.nb_days_needed")
 
