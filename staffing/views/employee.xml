@@ -6,6 +6,7 @@
 		<field name="model">account.analytic.line</field>
 		<field name="arch" type="xml">
 		    <pivot string="Analytic Items" sample="1">
+			<field name="date" type="col" interval="month"/>
 			<field name="date" type="col" interval="week"/>
 			<field name="category" type="col" />
 			<field name="project_id" type="row"/>

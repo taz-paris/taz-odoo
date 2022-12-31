@@ -25,7 +25,9 @@
 		<field name="model">account.analytic.line</field>
 		<field name="arch" type="xml">
 		    <pivot string="Analytic Items" sample="1">
+			<field name="date" type="col" interval="month"/>
 			<field name="date" type="col" interval="week"/>
+			<field name="category" type="col" />
 			<field name="employee_id" type="row"/>
 			<field name="unit_amount" type="measure"/>
 			<field name="amount" type="measure"/>
@@ -185,7 +187,15 @@
                               ]" />
     </record>
 
+     <record id="forecast_action" model="ir.actions.server">
+          <field name="name">Forecast</field>
+          <field name="model_id" ref="model_project_project"/>
+          <field name="state">code</field>
+          <field name="code">action =  env.get('project.project').open_forecast_pivot_timesheets()</field>
+     </record>
+
     <menuitem name="Projets" id="staffing.project_menu" parent="staffing.staffing_root" action="staffing.project_action"/>
+    <menuitem name="Plan de charge à 3 mois" id="staffing.forecast_menu" parent="staffing.staffing_root" action="staffing.forecast_action"/>
 
 
 	</data>
