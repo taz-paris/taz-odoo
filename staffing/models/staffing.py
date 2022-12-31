@@ -11,8 +11,6 @@ class staffingNeed(models.Model):
     _name = "staffing.need"
     _description = "Record the staffing need"
     _order = 'project_id'
-           
-    #TODO : interdire de pointer hors de la période d'affectation
 
     @api.depends('project_id')
     def _compute_name(self):
@@ -133,12 +131,13 @@ class staffingProposal(models.Model):
 
     @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id')
     def compute(self):
-        _logger.info('staffingProposal compute %s' % self.employee_id.name)
-        #TODO : relancer cette fonction si les timesheet évoluent sur cette période
-        need = self.staffing_need_id
-        self.employee_availability = self.employee_id.number_days_available_period(need.begin_date, need.end_date)
-        self.ranked_employee_availability = self.employee_availability / need.nb_days_needed * 100
-        self.ranked_proposal = self.ranked_employee_availability
+        for rec in self :
+            _logger.info('staffingProposal compute %s' % rec.employee_id.name)
+            #TODO : relancer cette fonction si les timesheet évoluent sur cette période
+            need = rec.staffing_need_id
+            rec.employee_availability = rec.employee_id.number_days_available_period(need.begin_date, need.end_date)
+            rec.ranked_employee_availability = rec.employee_availability / need.nb_days_needed * 100
+            rec.ranked_proposal = rec.ranked_employee_availability
 
 
     @api.depends('staffing_need_id', 'employee_id')
@@ -158,7 +157,7 @@ class staffingProposal(models.Model):
     def _compute_is_considered(self):
         for record in self:
             res = False
-            if record.staffing_need_id.considered_employee_ids.id == record.employee_id.id:
+            if record.employee_id in record.staffing_need_id.considered_employee_ids :
                 res = True
             record.is_considered = res
 
@@ -174,6 +173,23 @@ class staffingProposal(models.Model):
         for record in self:
             if record.employee_id in record.staffing_need_id.considered_employee_ids:
                 record.staffing_need_id.considered_employee_ids = [(3,record.employee_id.id)]
+
+    def action_open_employee(self):
+        rec_id = self.employee_id.id
+        form_id = self.env.ref("staffing.employee_form")
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Employee',
+                'res_model': 'hr.employee',
+                'res_id': rec_id,
+                'view_type': 'form',
+                'view_mode': 'form',
+                'view_id': form_id.id,
+                'context': {},
+                # if you want to open the form in edit mode direclty
+                'flags': {'initial_mode': 'edit'},
+                'target': 'current',
+            }
 
     name = fields.Char("Nom", compute=_compute_name)
     is_staffed = fields.Boolean('Staffé', compute=_compute_is_staffed, store=True)

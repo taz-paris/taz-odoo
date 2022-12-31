@@ -1,12 +1,31 @@
 <odoo>
         <data>
-           <record model="ir.ui.view" id="staffing.employee_tree">
+
+	    <record id="view_employee_pivot" model="ir.ui.view">
+		<field name="name">account.analytic.line.pivot</field>
+		<field name="model">account.analytic.line</field>
+		<field name="arch" type="xml">
+		    <pivot string="Analytic Items" sample="1">
+			<field name="date" type="col" interval="week"/>
+			<field name="category" type="col" />
+			<field name="project_id" type="row"/>
+			<field name="unit_amount" type="measure"/>
+			<field name="amount" type="measure"/>
+		    </pivot>
+		</field>
+	    </record>
+
+	   <record model="ir.ui.view" id="staffing.employee_tree">
               <field name="name">Équipage</field>
               <field name="model">hr.employee</field>
               <field name="arch" type="xml">
                 <tree>
                   <field name="first_name"/>
                   <field name="name"/>
+                  <field name="job_id"/>
+		  <!--
+                  <field name="availability_4_weeks" widget="progressbar"/>
+		  -->
                 </tree>
               </field>
             </record>
@@ -63,11 +82,23 @@
 					</span>
 				    </div>
 				</button>
-				<button class="oe_stat_button" type="action" name="%(hr_timesheet.timesheet_action_from_employee)d" icon="fa-calendar" groups="hr_timesheet.group_hr_timesheet_user">
+                                    <button class="oe_stat_button" type="object" name="open_employee_pivot_timesheets" icon="fa-calendar">
+                                        <div class="o_form_field o_stat_info">
+                                           <span class="o_stat_text">Pointage/prévisionnel</span>
+                                            <!--
+                                            <span class="o_stat_value">
+                                                <field name="balance" widget='monetary'/>
+                                            </span>
+                                            -->
+                                        </div>
+                                    </button>
+				<!--
+				<button class="oe_stat_button" type="action" name="new_timesheet_action_from_employee" icon="fa-calendar" groups="hr_timesheet.group_hr_timesheet_user">
 				    <div class="o_stat_info">
 					<span class="o_stat_text">Pointage</span>
 				    </div>
 			    	</button>
+				-->
 				<field name="contract_warning" invisible="1"/>
 				<field name="employee_type" invisible="1"/>
 				<button name="action_open_contract_history"
@@ -106,10 +137,18 @@
 					  <field name="first_name"/>
 					  <field name="name"/>
 					  <field name="work_email"/>
+			  	</group>
+				<group>
 					  <field name="coach_id" can_create="true" can_write="true"/>
 					  <field name="staffing_wishes"/>
-			  	</group>
+					  <field name="availability_4_weeks" widget="progressbar" />
+				</group>
 	  		</group>
+			<!--
+				<div>
+				    <field name="availability_4_weeks_graph" widget="bokeh_chart" readonly="1" nolabel="1"/>
+				</div>
+			-->
 			<notebook>
 				<page name="public" string="Expérience">
 				    <div class="row">

@@ -1,34 +1,37 @@
 <odoo>
 	<data>
+	    <record id="view_project_pivot_search" model="ir.ui.view">
+		<field name="name">account.analytic.line.select</field>
+		<field name="model">account.analytic.line</field>
+		<field name="priority">1</field>
+		<field name="arch" type="xml">
+		    <search string="Search Analytic Lines">
+			<field name="employee_id"/>
+			<field name="date"/>
+			<field name="project_id"/>
+			<filter string="Date" name="week" date="date"/>
+			<filter name="mine" string="My Timesheets" domain="[('user_id', '=', uid)]"/>
+			<filter name="history_3months" string="Hstorique de 3 mois" domain="[('date','&gt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
+			<group string="Group By..." expand="0" name="groupby">
+			    <filter string="Category" name="group_category" context="{'group_by': 'category'}"/>
+			    <filter string="Date (par semaine)" name="group_date" context="{'group_by': 'date:week'}"/>
+			</group>
+		    </search>
+		</field>
+	    </record>
 
-    <record model="ir.actions.act_window" id="staffing_account_analytic_line_action">
-        <field name="domain">[('account_id','=', active_id.analytic_account_id.id)]</field>
-        <field name="name">Gross Margin</field>
-        <field name="res_model">account.analytic.line</field>
-        <field name="view_mode">pivot,tree,form,graph</field>
-	<!--
-        <field name="context">{'search_default_group_date': 1, 'default_account_id': active_id.analytic_account_id.id}</field>
-        <field name="view_id" ref="analytic.view_account_analytic_line_tree"/>
-        <field name="search_view_id" ref="analytic.view_account_analytic_line_filter"/>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_empty_folder">
-                No activity yet on this account
-            </p><p>
-                In Odoo, sales orders and projects are implemented using
-                analytic accounts. You can track costs and revenues to analyse
-                your margins easily.
-            </p><p>
-                Costs will be created automatically when you register supplier
-                invoices, expenses or timesheets.
-            </p><p>
-                Revenues will be created automatically when you create customer
-                invoices. Customer invoices can be created based on sales orders
-                (fixed price invoices), on timesheets (based on the work done) or
-                on expenses (e.g. reinvoicing of travel costs).
-            </p>
-        </field>
-	-->
-     </record>
+	    <record id="view_project_pivot" model="ir.ui.view">
+		<field name="name">account.analytic.line.pivot</field>
+		<field name="model">account.analytic.line</field>
+		<field name="arch" type="xml">
+		    <pivot string="Analytic Items" sample="1">
+			<field name="date" type="col" interval="week"/>
+			<field name="employee_id" type="row"/>
+			<field name="unit_amount" type="measure"/>
+			<field name="amount" type="measure"/>
+		    </pivot>
+		</field>
+	    </record>
 
 	   <record model="ir.ui.view" id="staffing.project_tree">
 	      <field name="name">Project</field>
@@ -53,9 +56,9 @@
 			<field name="analytic_account_id" invisible="1"/>
 			<sheet string="Project">
 				<div class="oe_button_box" name="button_box">
-				    <button class="oe_stat_button" type="action" name="%(staffing_account_analytic_line_action)d" icon="fa-euro">
+				    <button class="oe_stat_button" type="object" name="open_project_pivot_timesheets" icon="fa-calendar">
 					<div class="o_form_field o_stat_info">
-					    <span class="o_stat_text">Marge brute</span>
+					   <span class="o_stat_text">Pointage/prévisionnel</span>
 					    <!--
 					    <span class="o_stat_value">
 						<field name="balance" widget='monetary'/>
@@ -77,9 +80,11 @@
 					<group>
 					    <field name="partner_id"/>
 					    <field name="stage_id"/>
+					    <field name="probability"/>
 					    <field name="order_amount"/>
 					    <field name="margin_target"/>
-					    <field name="probability"/>
+					    <field name="margin_landing" widget="progressbar"/>
+					    <field name="margin_text"/>
 					</group>
 					<group>
 					    <field name="project_director_employee_id" attrs="{'readonly':[('active','=',False)]}" />

@@ -18,7 +18,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'project_timesheet_holidays', 'hr_skills', 'taz-common'],
+    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'project_timesheet_holidays', 'hr_skills', 'taz-common', 'web_widget_bokeh_chart'],
 
     # always loaded
     'data': [
@@ -31,6 +31,13 @@
         'views/account_analytic_line.xml',
         'views/hr_job.xml',
     ],
+
+
+    #"assets": {
+    #    "web.assets_backend": [
+    #        "web_widget_bokeh_chart/static/src/js/web_widget_bokeh_chart.esm.js",
+    #    ],
+    #},
 
     #'assets': {
     #    'web.assets_backend': [

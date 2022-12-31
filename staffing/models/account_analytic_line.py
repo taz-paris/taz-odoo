@@ -4,6 +4,8 @@ from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
 
+from datetime import datetime, timedelta
+
 class staffingAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
@@ -49,6 +51,104 @@ class staffingAnalyticLine(models.Model):
     hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
 
 
+
+    def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):
+        # Usage de cette fonction :
+        #   - Calculer le temps pointé / prévisionnel d'un consultant
+        #   - Calculer la disponibilité d'un consultant sur une période (passé, présente ou future)
+
+        dic = [('category', '!=', 'project_draft')]
+
+        date_start_substracted_days = 0.0
+        if date_start:
+            date_start_substracted_days = date_start.weekday()
+            date_start_monday = date_start - timedelta(days=date_start_substracted_days)
+            dic.append(('date', '>=', date_start_monday))
+        date_end_added_days = 0.0
+        if date_end :
+            date_end_added_days = 6-date_end.weekday()
+            date_end_sunday = date_end + timedelta(days=date_end_added_days)
+            dic.append(('date', '<', date_end))
+
+        if filters:
+            for condition in filters:
+                if condition[0] in ['category', 'date']:
+                    raise ValidationError(_('Valeur interdite dans le filtre : %s' % condition[0]))
+                dic.append(condition)
+        timesheets = self.env['account.analytic.line'].search(dic)
+        _logger.info(dic)
+        _logger.info(timesheets)
+
+        previsional_timesheet_ids = []
+        validated_timesheet_ids = []
+        holiday_timesheet_ids = []
+
+        # Modèle de données :
+        #   - La base de données stock des lignes analytic différentes pour le pointage réalisé et le prévisionnel, qui sont conservées en parallèle dans le temps
+        #   - Le prévisionnel est exprimé à la semaine : le prévisionnel de la semaine est sur une ligne analytic (voire 2 si cession entre 2 mois au cour de la semaine)
+        #   - Le pointé peut être exprimé par jour ou à la semaine
+        # Conséquence : la date pivot qui sert à catégoriser et filtrer les lignes doit être exprimée en début de semaine, sinon on risque de compter du prévisionnel ET du pointé pour la même semaine
+
+        #TODO : interdire de modifier le prévisionnel après la fin de la semaine
+        #TODO : interdire d'avoir plus d'une ligne d'une catégorie, d'un projet / tesk et d'un employé par date
+        #TODO : passer le pointage à validé pour toute la semaine et tous les projets en même temps
+           
+        #TODO : interdire les affectations hors de la période du projet => ATTENTION : c'est autorisé sur Fitnet donc risque de blocage
+        #TODO : interdire de pointer hors de la période d'affectation => ATTENTION : c'est autorisé sur Fitnet donc risque de blocage
+
+        monday_pivot_date =  pivot_date - timedelta(days=pivot_date.weekday())
+        monday_pivot_date = monday_pivot_date.date()
+
+        for timesheet in timesheets:
+            if timesheet.encoding_uom_id != self.env.ref("uom.product_uom_day"):
+                continue
+            if timesheet.category == 'project_employee_validated':
+                if timesheet.date < monday_pivot_date:
+                    validated_timesheet_ids.append(timesheet)
+            elif timesheet.category == 'project_forecast':
+                if timesheet.date >= monday_pivot_date:
+                    previsional_timesheet_ids.append(timesheet)
+                # TODO : est-ce qu'on garde les prévisionnels antérieurs à la date pivot si rien n'a été pointé ?
+                    # => Ou alors on retourne un indicateur montrant qu'il y a un manque de pointage sur une période antéireure à la date pivot
+            elif timesheet.holiday_id:
+                holiday_timesheet_ids.append(timesheet)
+                # TODO : en théorie, le prévisionnel devrait être diminumé des congés par le consultant, mais ça peut ne pas être le cas 
+                    # => pour une semaine calendaire donnée :
+                        # si antérieur à monday_pivot => alors rien à faire : le pointage validé tient forcément compte des comgés, on ne peut structurellement pas compter 2 fois
+                            # ==> ... sauf si la période de congés est enregistrée après la validation du pointage de la semaine considérée ==> le contrôle de jour max de pointage devrait empêcher la validation du congés tant que le pointage validé n'est pas corrigé => vérifier que le message d'erreur lors de la tentative de validation du congés après la vidation du poointage est compréhensible
+                        # si postérieur ou égal à monday_pivot => si la somme congés+previsionnel pour une semaine > nb jours ouvrés de la semaine (aleternative : si (congés+previsionel) > (nb jour pointage max par semaine - nb jours férié sur les jours ouvrés de la semaine) : diminuer le prévisionnel de la différence
+                            # ... ou alors on ajoute un contrôle lors de la pose des congés par le salarié (recontrôlé à la validation par Denis) pour que congés+prévisionnel ne dépasse pas nb jour ouvré sur la semaine ===> mais ça ne peut fonctionner que si la demande de congés est gérée dans Odoo => tant qu'on importe de Fitnet il peut y avoir des cas où congés+prévisionel > nb jours ouvrés
+
+        validated_timesheet_amount = 0.0
+        validated_timesheet_unit_amount = 0.0
+        for line in validated_timesheet_ids:
+            validated_timesheet_amount += line.amount
+            validated_timesheet_unit_amount += line.unit_amount
+
+        previsional_timesheet_amount = 0.0
+        previsional_timesheet_unit_amount = 0.0
+        for line in previsional_timesheet_ids:
+            previsional_timesheet_amount += line.amount
+            previsional_timesheet_unit_amount += line.unit_amount
+
+        holiday_timesheet_unit_amount = 0.0
+        for line in holiday_timesheet_ids:
+            holiday_timesheet_unit_amount += line.unit_amount
+
+        res = {
+                'monday_pivot_date' : monday_pivot_date,
+                'previsional_timesheet_ids' : previsional_timesheet_ids, 
+                'validated_timesheet_ids' : validated_timesheet_ids,
+                'validated_timesheet_amount' : validated_timesheet_amount,
+                'validated_timesheet_unit_amount' : validated_timesheet_unit_amount,
+                'previsional_timesheet_amount' : previsional_timesheet_amount,
+                'previsional_timesheet_unit_amount' : previsional_timesheet_unit_amount,
+                'holiday_timesheet_ids' : holiday_timesheet_ids,
+                'holiday_timesheet_unit_amount' : holiday_timesheet_unit_amount,
+                }
+        _logger.info(res)
+        return res
+
     #override to deal with uom in days
     #odoo/addons/hr_timesheet/models/hr_timesheet.py
     def _timesheet_postprocess_values(self, values):
@@ -74,7 +174,7 @@ class staffingAnalyticLine(models.Model):
                     'amount': amount_converted,
                     'hr_cost_id' : cost_line,
                 })
-        #_logger.info(result)
+        _logger.info(result)
         return result
     
 
@@ -84,7 +184,6 @@ class staffingAnalyticLine(models.Model):
         timesheet = self
 
         #TODO : utiliser la catégorie pour ne cibler que les lignes de pointage ?
-
         if timesheet.holiday_id :
             return False,False
 
@@ -100,7 +199,7 @@ class staffingAnalyticLine(models.Model):
                 return False,False
             cost = cost_line.cost
         else : 
-            raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
+            raise ValidationError(_("Timesheet encoding uom should be either Hours or Days."))
 
         amount = -timesheet.unit_amount * cost
         amount_converted = timesheet.employee_id.currency_id._convert(
