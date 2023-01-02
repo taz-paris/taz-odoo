@@ -14,6 +14,8 @@
 			<filter name="history_3months" string="Hstorique de 3 mois" domain="[('date','&gt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
 			<group string="Group By..." expand="0" name="groupby">
 			    <filter string="Category" name="group_category" context="{'group_by': 'category'}"/>
+			    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+			    <filter string="Project" name="group_project" context="{'group_by': 'project_id'}"/>
 			    <filter string="Date (par semaine)" name="group_date" context="{'group_by': 'date:week'}"/>
 			</group>
 		    </search>
@@ -29,10 +31,24 @@
 			<field name="date" type="col" interval="week"/>
 			<field name="category" type="col" />
 			<field name="employee_id" type="row"/>
-			<field name="unit_amount" type="measure"/>
+			<field name="unit_amount" type="measure" string="Jours"/>
 			<field name="amount" type="measure"/>
 		    </pivot>
 		</field>
+	    </record>
+
+            <record id="view_forecast_pivot" model="ir.ui.view">
+                <field name="name">account.analytic.line.pivot</field>
+                <field name="model">account.analytic.line</field>
+                <field name="arch" type="xml">
+                    <pivot string="Analytic Items" sample="1">
+                        <field name="date" type="col" interval="month"/>
+                        <field name="date" type="col" interval="week"/>
+                        <field name="project_id" type="row"/>
+                        <field name="unit_amount" type="measure" string="Jours"/>
+                        <field name="amount" type="measure"/>
+                    </pivot>
+                </field>
 	    </record>
 
 	   <record model="ir.ui.view" id="staffing.project_tree">

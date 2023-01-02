@@ -30,6 +30,7 @@
         'views/employee.xml',
         'views/account_analytic_line.xml',
         'views/hr_job.xml',
+        'views/timesheets.xml',
     ],
 
 

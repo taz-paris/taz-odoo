@@ -10,7 +10,7 @@
 			<field name="date" type="col" interval="week"/>
 			<field name="category" type="col" />
 			<field name="project_id" type="row"/>
-			<field name="unit_amount" type="measure"/>
+			<field name="unit_amount" type="measure" string="Jours"/>
 			<field name="amount" type="measure"/>
 		    </pivot>
 		</field>

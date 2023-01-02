@@ -8,6 +8,13 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+class timesheetNavigator(models.TransientModel):
+    _name = 'timesheet.navigator'
+
+    user_id = fields.Many2one('res.users', string="Who looks") 
+    employee_id = fields.Many2one('hr.employee', string="Which employee is looked")
+    begin_date = fields.Date("Begin date of the week looked")
+
 class staffingProject(models.Model):
     _inherit = "project.project"
 
@@ -65,17 +72,61 @@ class staffingProject(models.Model):
         for i in rec_ids:
             rec_id.append(i.id)
 
-        view_id = self.env.ref("staffing.view_employee_pivot")
+        view_id = self.env.ref("staffing.view_forecast_pivot")
         return {
                 'type': 'ir.actions.act_window',
-                'name': 'Pointage',
+                'name': 'Forecast',
                 'res_model': 'account.analytic.line',
                 #'res_id': rec_id,
                 'view_type': 'pivot',
                 'view_mode': 'pivot',
                 'view_id': view_id.id,
                 'domain' : [('id', 'in', rec_id)],
-                'context': {},
+                'context': {'pivot_measures': ['unit_amount']},
+                'target': 'current',
+            }
+
+    def open_timesheet_navigate_weeks(self, sens):
+        view_id = self.env.ref("staffing.view_timesheets_tree")
+        #Impossible to send context to a server action from a menuItem, so we use a dédicated transient model
+        # TODO : LIMITS : if the user has 2 web browser tabs opened, the navigation will have conflicts 
+        navigators = self.env['timesheet.navigator'].search([('user_id', '=', self.env.user.id)])
+        if len(navigators) == 1:
+            navigator = navigators[0]
+            timesheet_current_monday = navigator.begin_date 
+            if sens == 'next':
+                new_current_monday = timesheet_current_monday + timedelta(days=7)
+            elif sens == 'previous' :
+                new_current_monday = timesheet_current_monday - timedelta(days=7)
+            employ = navigator.employee_id
+            navigator.begin_date = new_current_monday
+        else :
+            d = datetime.today()
+            new_current_monday = d - timedelta(days=d.weekday())
+            new_current_monday = new_current_monday.date()
+            employ = self.env.user.employee_id
+            if employ :
+                self.env['timesheet.navigator'].create({'user_id' : self.env.user.id, 'begin_date' : new_current_monday, 'employee_id': employ.id})
+
+        sunday = new_current_monday + timedelta(days=6)
+
+        #TODO : si employ == False : ouvrir le wizzard de sélection de l'emplpoyee/date
+        date = datetime.today()
+        timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=datetime.today(), date_end=date+timedelta(days=90), filters=[('employee_id', '=', employ.id)])
+        rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids'] + timesheets_data['holiday_timesheet_ids']
+        rec_id = []
+        for i in rec_ids:
+            rec_id.append(i.id)
+        domain = [('date', '>=', new_current_monday), ('date', '<=', sunday), ('id', 'in', rec_id)]
+
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Pointage semaine du '+str(new_current_monday)+' au '+str(sunday),
+                'res_model': 'account.analytic.line',
+                'view_type': 'tree',
+                'view_mode': 'tree',
+                'view_id': view_id.id,
+                'domain' : domain,
                 'target': 'current',
             }
 
@@ -87,7 +138,7 @@ class staffingProject(models.Model):
 
     def margin_landing_date(self, date):
         if not self.order_amount or self.order_amount == 0.0:
-            return 0.0
+            return 0.0, ""
        
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=None, date_end=None, filters=[('project_id', '=', self.id)])
         _logger.info(timesheets_data)
@@ -97,7 +148,7 @@ class staffingProject(models.Model):
 
         margin_landing_date = (self.order_amount + negative_total_costs) / self.order_amount * 100
         #margin_text = "Au %s :\n    - %s jours pointés (%s €)\n   - % jours prévisionnels (%s €)" % (timesheets_data['monday_pivot_date'], timesheets_data['validated_timesheet_unit_amount'], timesheets_data['validated_timesheet_amount'], timesheets_data['previsional_timesheet_unit_amount'], timesheets_data['previsional_timesheet_amount'])
-        margin_text = "Projection à terminaison en date du %(monday_pivot_date)s :\n    - %(validated_timesheet_unit_amount).2f jours pointés (%(validated_timesheet_amount).2f €)\n   - %(previsional_timesheet_unit_amount).2f jours prévisionnels (%(previsional_timesheet_amount).2f €)" % timesheets_data
+        margin_text = "Projection à terminaison en date du %(monday_pivot_date)s :\n    - %(validated_timesheet_unit_amount).2f jours pointés (%(validated_timesheet_amount).2f €)\n    - %(previsional_timesheet_unit_amount).2f jours prévisionnels (%(previsional_timesheet_amount).2f €)" % timesheets_data
         return margin_landing_date, margin_text
 
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet

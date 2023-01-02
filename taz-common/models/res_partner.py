@@ -167,20 +167,21 @@ class tazResPartner(models.Model):
         return res
 
      @api.constrains('email', 'personal_email', 'active')
-     def _check_email(self):
-         for mail in [self.email, self.personal_email]:
-             if mail:
-                 regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
-                 if not(re.fullmatch(regex, mail)):
-                     raise ValidationError(_('Cette adresse email est invalide : %s' % mail))
+     def _check_email(self_list):
+         for self in self_list :
+             for mail in [self.email, self.personal_email]:
+                 if mail:
+                     regex = re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
+                     if not(re.fullmatch(regex, mail)):
+                         raise ValidationError(_('Cette adresse email est invalide : %s' % mail))
 
-             email_list = self.search(['|', '|', ('email', '=ilike', mail), ('personal_email', '=ilike', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact'), ('active', '=', True),('user_id','=',False), ('employee_ids', '=', False)])
-             list_match = []
-             for e in email_list :
-                 if str(e.id) != str(self.id).replace("New_", ""):
-                    list_match.append("%s [id = %s]" % (e.name_get()[0][1], str(e.id)))
-             if len(email_list) > 1 and mail is not False:
-                 raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel ou anciennes adresses email). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) ! \n\nContact concerné : %s' % ('\n'.join(list_match) or "")))
+                 email_list = self.search(['|', '|', ('email', '=ilike', mail), ('personal_email', '=ilike', mail), ('former_email_address', 'ilike', mail), ('is_company', '=', False), ('type', '=', 'contact'), ('active', '=', True),('user_id','=',False), ('employee_ids', '=', False)])
+                 list_match = []
+                 for e in email_list :
+                     if str(e.id) != str(self.id).replace("New_", ""):
+                        list_match.append("%s [id = %s]" % (e.name_get()[0][1], str(e.id)))
+                 if len(email_list) > 1 and mail is not False:
+                     raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel ou anciennes adresses email). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) ! \n\nContact concerné : %s' % ('\n'.join(list_match) or "")))
 
      @api.constrains('first_name')
      def _check_firstname(self):
