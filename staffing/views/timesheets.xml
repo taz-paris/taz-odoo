@@ -1,0 +1,69 @@
+<odoo>
+	<data>
+	   <record id="view_timesheets_tree" model="ir.ui.view">
+                <field name="name">account.analytic.line.pivot</field>
+                <field name="model">account.analytic.line</field>
+                <field name="arch" type="xml">
+			<tree editable="top" default_order='date' create="false">
+				<field name="employee_id" optional="hide" readonly="1"/>
+				<field name="project_id" optional="show" readonly="1"/>
+				<field name="staffing_need_id" optional="hide" readonly="1" domain="[('staffed_employee_id', '=', context.get('employee_id'))]"/>
+				<field name="date" readonly="1"/>
+                    		<field name="category" optional="show" readonly="1"/>
+				<field name="unit_amount" sum="Total" decoration-danger="unit_amount &gt; 5 or unit_amount &lt; 0"/>
+				<!--
+				<field name="unit_amount" widget="timesheet_uom" sum="Total" readonly="1"/>
+				-->
+				<field name="encoding_uom_id" optional="show" readonly="1"/>
+			</tree>
+                </field>
+            </record>
+	
+	   <record id="view_timesheets_wizard" model="ir.ui.view">
+                <field name="name">timesheets_wizard</field>
+                <field name="model">timesheet.navigator</field>
+                <field name="arch" type="xml">
+			<form>
+				<group>
+					<field name="begin_date"/>
+					<field name="employee_id" groups="staffing.admin"/>
+				</group>
+				<footer>
+            				<button name="validate" string="Valider" type="object" />
+          			</footer>
+			</form>
+                </field>
+            </record>
+
+    <record id="timesheet_choose_week_action" model="ir.actions.server">
+          <field name="name">timesheet_choose_week_action</field>
+          <field name="model_id" ref="model_timesheet_navigator"/>
+	  <field name="type">ir.actions.server</field>
+          <field name="state">code</field>
+	  <field name="code">action =  model.open_timesheet_navigator()</field>
+     </record>
+
+    <record id="timesheet_previous_week_action" model="ir.actions.server">
+          <field name="name">timesheet_previous_week_action</field>
+          <field name="model_id" ref="model_project_project"/>
+	  <field name="type">ir.actions.server</field>
+          <field name="state">code</field>
+	  <field name="code">action =  model.open_timesheet_navigate_weeks('previous')</field>
+     </record>
+
+    <record id="timesheet_next_week_action" model="ir.actions.server">
+          <field name="name">timesheet_next_week_action</field>
+          <field name="model_id" ref="model_project_project"/>
+	  <field name="type">ir.actions.server</field>
+          <field name="state">code</field>
+          <field name="code">action =  model.open_timesheet_navigate_weeks('next')</field>
+     </record>
+
+		<menuitem name="Pointage" id="staffing.timesheet_menu"/>
+		<menuitem name="Semaine précédente" id="staffing.timesheet_previous_week_menu" parent="staffing.timesheet_menu" action="staffing.timesheet_previous_week_action"/>
+
+		<menuitem name="Sélection semaine/consultant" id="staffing.timesheet_chooser_menu" parent="staffing.timesheet_menu" action="staffing.timesheet_choose_week_action"/>
+
+		<menuitem name="Semaine suivante" id="staffing.timesheet_next_week_menu" parent="staffing.timesheet_menu" action="staffing.timesheet_next_week_action"/>
+	</data>
+</odoo>
