@@ -133,6 +133,11 @@
 				    </div>
 				</button>
 			  </div>
+			    <div class="alert alert-warning mb-0" role="alert" attrs="{'invisible': [('is_late_validated_timesheet', '=', False)]}">
+				Pointage en retard
+				<button name="send_email_timesheet_late" type="object" string="Envoyer un email de rappel" class="btn btn-link p-0"/>
+			    </div>
+
 			  <group>
 				 <group>
 					  <field name="first_name"/>
@@ -142,6 +147,8 @@
 				<group>
 					  <field name="coach_id" can_create="true" can_write="true"/>
 					  <field name="staffing_wishes"/>
+					  <field name="last_validated_timesheet_date"/>
+					  <field name="is_late_validated_timesheet"/>
 					  <field name="availability_4_weeks" widget="progressbar" />
 				</group>
 	  		</group>
@@ -151,6 +158,16 @@
 				</div>
 			-->
 			<notebook>
+				<page string="Affectations validées">
+					<field name="staffing_need_ids" readonly="1" domain="[('state', '=', 'done')]">
+						<tree default_order='begin_date desc'>
+							<field name="project_id"/>
+							<field name="begin_date"/>
+							<field name="end_date"/>
+							<field name="nb_days_needed"/>
+						</tree>
+					</field>
+				</page>
 				<page name="public" string="Expérience">
 				    <div class="row">
 					<div class="o_hr_skills_editable o_hr_skills_group o_group_resume col-lg-7 d-flex flex-column">

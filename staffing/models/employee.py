@@ -74,11 +74,46 @@ class staffingEmployee(models.Model):
             script, div = components(p, wrap_script=False)
             rec.availability_4_weeks_graph = json.dumps({"div": div, "script": script})
         """
+    
+    
+    def last_validated_timesheet_date(self):
+        for rec in self:
+            timesheets = self.env['account.analytic.line'].search([('employee_id', '=', rec.id),('category', '=', 'project_employee_validated')], order='date desc')
+            if len(timesheets)>0 :
+                lvt = timesheets[0].date
+                rec.last_validated_timesheet_date = lvt
+                #monday2weeks = datetime.today() - datetime.timedelta(days = datetime.today().weekday() + 7)
+                #if lvt < monday2weeks :
+                #    rec.is_last_validated_timesheet = True
+                #else : 
+                #    rec.is_last_validated_timesheet = False
+            else :
+                rec.last_validated_timesheet_date = False
+
+    @api.depends('last_validated_timesheet_date')
+    def is_late_validated_timesheet(self):
+        for rec in self:
+                lvt = rec.last_validated_timesheet_date
+                if lvt :
+                    monday2weeks = datetime.today() - timedelta(days = datetime.today().weekday() + 7)
+                    if lvt < monday2weeks.date() :
+                        rec.is_late_validated_timesheet = True
+                    else :
+                        rec.is_late_validated_timesheet = False
+                else :
+                    rec.is_late_validated_timesheet = False
+
+    def send_email_timesheet_late(self):
+        for rec in self:
+            pass #TODO
 
     first_name = fields.Char(string="Prénom")
     staffing_wishes = fields.Html("Souhaits de staffing COD")
+    staffing_need_ids = fields.One2many('staffing.need', 'staffed_employee_id', string="Affectations")
     availability_4_weeks = fields.Float("% dispo S+4", help="%age de dispo entre le lundi de cette semaine et celui 28 jours après)", compute=availability_4_weeks)
     availability_4_weeks_graph = fields.Char("Graph dispo S+4", compute=availability_4_weeks_graph)
+    last_validated_timesheet_date = fields.Date("Date du dernier pointage validé", compute=last_validated_timesheet_date)
+    is_late_validated_timesheet = fields.Boolean("Pointage en retard", compute=is_late_validated_timesheet)
 
     def name_get(self):
          res = []

@@ -12,8 +12,33 @@ class timesheetNavigator(models.TransientModel):
     _name = 'timesheet.navigator'
 
     user_id = fields.Many2one('res.users', string="Who looks") 
-    employee_id = fields.Many2one('hr.employee', string="Which employee is looked")
-    begin_date = fields.Date("Begin date of the week looked")
+    employee_id = fields.Many2one('hr.employee', string="Consultant")
+    begin_date = fields.Date("Semaine du")
+
+    def open_timesheet_navigator(self):
+        navigators = self.env['timesheet.navigator'].search([('user_id', '=', self.env.user.id)])
+        if len(navigators) == 1:
+            rec = navigators[0]
+        else :
+            d = datetime.today()
+            new_current_monday = d - timedelta(days=d.weekday())
+            new_current_monday = new_current_monday.date()
+            employ = self.env.user.employee_id
+            if employ :
+                rec = self.env['timesheet.navigator'].create({'user_id' : self.env.user.id, 'begin_date' : new_current_monday, 'employee_id': employ.id})
+        return {                
+                'type': 'ir.actions.act_window',
+                'name': 'Sélection de la semaine et du consultant',
+                'res_model': 'timesheet.navigator',
+                'res_id': rec.id,
+                'view_type': 'form',
+                'view_mode': 'form',
+                'target': 'new',
+            }
+
+    def validate(self):
+        return self.env['project.project'].open_timesheet_navigate_weeks('no-change', target='main')
+
 
 class staffingProject(models.Model):
     _inherit = "project.project"
@@ -86,18 +111,25 @@ class staffingProject(models.Model):
                 'target': 'current',
             }
 
-    def open_timesheet_navigate_weeks(self, sens):
+
+
+
+
+    def open_timesheet_navigate_weeks(self, sens, target='current'):
         view_id = self.env.ref("staffing.view_timesheets_tree")
         #Impossible to send context to a server action from a menuItem, so we use a dédicated transient model
         # TODO : LIMITS : if the user has 2 web browser tabs opened, the navigation will have conflicts 
         navigators = self.env['timesheet.navigator'].search([('user_id', '=', self.env.user.id)])
         if len(navigators) == 1:
             navigator = navigators[0]
-            timesheet_current_monday = navigator.begin_date 
+            bd = navigator.begin_date 
+            timesheet_current_monday = bd - timedelta(days=bd.weekday())
             if sens == 'next':
                 new_current_monday = timesheet_current_monday + timedelta(days=7)
             elif sens == 'previous' :
                 new_current_monday = timesheet_current_monday - timedelta(days=7)
+            elif sens == 'no-change' :
+                new_current_monday = timesheet_current_monday
             employ = navigator.employee_id
             navigator.begin_date = new_current_monday
         else :
@@ -110,9 +142,12 @@ class staffingProject(models.Model):
 
         sunday = new_current_monday + timedelta(days=6)
 
+        #TODO : créer à la volée les lignes de prévisionel/pointage manquante (pour tous les staffing qui ont une date début < sunday et une date de fin > monday)
+            # ça permettra d'être ceinture et bretelle, notamment pour les lignes de projets interne, formation etc.
+
         #TODO : si employ == False : ouvrir le wizzard de sélection de l'emplpoyee/date
         date = datetime.today()
-        timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=datetime.today(), date_end=date+timedelta(days=90), filters=[('employee_id', '=', employ.id)])
+        timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=new_current_monday, date_end=sunday, filters=[('employee_id', '=', employ.id)])
         rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids'] + timesheets_data['holiday_timesheet_ids']
         rec_id = []
         for i in rec_ids:
@@ -121,13 +156,14 @@ class staffingProject(models.Model):
 
         return {
                 'type': 'ir.actions.act_window',
-                'name': 'Pointage semaine du '+str(new_current_monday)+' au '+str(sunday),
+                'name': 'Pointage semaine du '+str(new_current_monday.strftime('%d/%m/%Y'))+' au '+str(sunday.strftime('%d/%m/%Y') + ' de ' + employ.first_name + ' ' + employ.name),
                 'res_model': 'account.analytic.line',
                 'view_type': 'tree',
                 'view_mode': 'tree',
                 'view_id': view_id.id,
                 'domain' : domain,
-                'target': 'current',
+                'target': target,
+                'context' : {'employee_id' : employe.id},
             }
 
     def margin_landing_now(self):
@@ -151,6 +187,13 @@ class staffingProject(models.Model):
         margin_text = "Projection à terminaison en date du %(monday_pivot_date)s :\n    - %(validated_timesheet_unit_amount).2f jours pointés (%(validated_timesheet_amount).2f €)\n    - %(previsional_timesheet_unit_amount).2f jours prévisionnels (%(previsional_timesheet_amount).2f €)" % timesheets_data
         return margin_landing_date, margin_text
 
+
+    def write(self, vals):
+        if 'stage_id' in vals.keys():
+            vals['state_last_change_date'] = datetime.today()
+        return super().write(vals)
+
+    
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", default=lambda self: self.env.user.employee_id) #TODO : synchroniser cette valeur avec user_id avec un oneChange
@@ -167,6 +210,7 @@ class staffingProject(models.Model):
     margin_target = fields.Float('Objectif de marge (%)') #TODO : contrôler que c'est positif et <= 100
     margin_landing = fields.Float('Marge à terminaison (%)', compute=margin_landing_now)
     margin_text = fields.Text('Détail de la marge', compute=margin_landing_now)
+    state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
 
     number = fields.Char('Numéro', readonly=True, required=True, copy=False, default='New')
     is_purchase_order_received = fields.Boolean('Bon de commande reçu')
