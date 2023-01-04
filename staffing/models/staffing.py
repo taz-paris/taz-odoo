@@ -33,6 +33,13 @@ class staffingNeed(models.Model):
             #_logger.info("onchange_project_id NB jours : %s" % str(nb))
             self.nb_days_needed = nb
 
+    def staffing_proposal_ids(self):
+        for rec in self :
+            rec.staffing_proposal_ids = self.env['staffing.proposal'].search([('employee_job', '=', rec.job_id.id), ('staffing_need_id', '=', rec.id)])
+
+    def staffing_proposal_other_job_ids(self):
+        for rec in self :
+            rec.staffing_proposal_other_job_ids = self.env['staffing.proposal'].search([('employee_job', '!=', rec.job_id.id), ('staffing_need_id', '=', rec.id)])
 
     name = fields.Char("Nom", compute=_compute_name)
 
@@ -56,8 +63,8 @@ class staffingNeed(models.Model):
         ('canceled', 'Annulé'),
         ], 'Statut', default='open')
 
-    staffing_proposal_ids = fields.One2many('staffing.proposal', 'staffing_need_id')
-
+    staffing_proposal_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_ids)
+    staffing_proposal_other_job_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_other_job_ids)
     def open_record(self):
         # first you need to get the id of your record
         # you didn't specify what you want to edit exactly
@@ -101,12 +108,10 @@ class staffingNeed(models.Model):
         if self.state != 'open':
             return
 
-        employees = self.env['hr.employee'].search([])
+        employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : montrer ceux qui seront présent à date de début de la mission mais pas encore chez Tasmane
         for employee in employees:
             employee_job = employee._get_job_id(self.begin_date)
             if not employee_job:
-                continue
-            if employee_job.id != self.job_id.id: #TODO : remplacer cette ligne par une conditin de recherche lorsque la job_id aura été transformé en fonction
                 continue
             _logger.info("generate_staffing_proposal %s" % employee.name)
             needs = self.env['staffing.proposal'].search([('staffing_need_id', '=', self.id),('employee_id', '=', employee.id)])
@@ -213,7 +218,7 @@ class staffingProposal(models.Model):
 
     #Champs related pour le Kanban
     employee_image = fields.Binary(related="employee_id.image_128")
-    employee_job = fields.Many2one(related="employee_id.job_id")
+    employee_job = fields.Many2one(related="employee_id.job_id") #TODO : remplacer cette ligne par une conditin de recherche lorsque la job_id aura été transformé en fonction
     employee_coach = fields.Many2one(related="employee_id.coach_id")
     staffing_need_nb_days_needed = fields.Float(related="staffing_need_id.nb_days_needed")
 

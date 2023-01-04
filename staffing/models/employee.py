@@ -14,6 +14,7 @@ import json
 
 class staffingEmployee(models.Model):
     _inherit = "hr.employee"
+    _order = "first_name, name"
 
     def _sync_user(self, user, employee_has_image=False):
         vals  = super()._sync_user(user, employee_has_image) 

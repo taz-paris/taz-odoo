@@ -26,7 +26,7 @@
 			<form>
 				<group>
 					<field name="begin_date"/>
-					<field name="employee_id" groups="staffing.admin"/>
+					<field name="employee_id" groups="staffing.staffing_admin" domain="[('active', '=', True)]"/>
 				</group>
 				<footer>
             				<button name="validate" string="Valider" type="object" />

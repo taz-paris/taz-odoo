@@ -163,7 +163,7 @@ class staffingProject(models.Model):
                 'view_id': view_id.id,
                 'domain' : domain,
                 'target': target,
-                'context' : {'employee_id' : employe.id},
+                'context' : {'employee_id' : employ.id},
             }
 
     def margin_landing_now(self):

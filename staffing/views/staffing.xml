@@ -55,6 +55,8 @@
 			  <field name="staffed_employee_id" widget="many2one_avatar_employee"/>
 		  </group>
 		</group>
+		<notebook>
+		    <page string = "Consultant sur le grade">
 			  <field name="staffing_proposal_ids" mode="kanban" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}">
 				  <kanban>
 					  <field name="id"/>
@@ -99,20 +101,57 @@
 						</t>
 					</templates>
 				  </kanban>
-				  <tree>
-					  <field name="employee_id"/>
-					  <field name="employee_job_id" optional="hide"/>
-					  <field name="employee_availability" optional="show"/>
-					  <field name="employee_skill_ids"  widget="many2many_tags" optional="show"/>
-					  <field name="ranked_proposal" optional="show"/>
-					  <field name="employee_staffing_wishes" optional="show"/>
-					  <field name="ranked_employee_availability" optional="hide"/>
-					  <field name="ranked_employee_skill" optional="hide"/>
-					  <field name="ranked_employee_explicit_voluntary" optional="hide"/>
-					  <field name="ranked_employee_worked_on_proposal" optional="hide"/>
-					  <field name="ranked_employee_wished_on_need" optional="hide"/>
-				</tree>
 			  </field>
+		</page>
+
+		    <page string = "Autres consultants">
+			  <field name="staffing_proposal_other_job_ids"  mode="kanban" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}">
+				  <kanban>
+					  <field name="id"/>
+					  <field name="employee_id"/>
+					  <field name="is_considered"/>
+					  <field name="is_staffed"/>
+					  <field name="employee_coach"/>
+					<templates>
+						<t t-name='kanban-tooltip'>
+							<div class="oe_kanban_tooltip">
+								<field name="employee_staffing_wishes" />
+							</div>
+						</t>
+						<t t-name="kanban-box">
+							<div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
+                            					<field name="employee_image" class="o_kanban_image_fill_left d-block" preview_image="employee_image" widget="background_image" options="{'zoom': true, 'zoom_delay': 1000}"></field>
+                            <div class="oe_kanban_details">
+                               <div class="o_kanban_record_top">
+                                   <div class="o_kanban_record_headings">
+                                       <strong class="o_kanban_record_title">
+                                                <div class="float-end">
+							<button name="action_open_employee" class="fa fa-user" type="object" string="" />
+                                                </div>
+					       <field name="employee_id"/>
+					</strong>
+					<!--
+					<field name="employee_job" class="o_kanban_record_subtitle"/>
+					-->
+					<div class="o_kanban_record_subtitle">
+						Mentor : <t t-esc="record.employee_coach.value"/>
+					</div>
+				   </div>
+				</div>
+				<span>Dispo : <field name="employee_availability"/> j. / <field name="staffing_need_nb_days_needed"/></span>
+				<field name="ranked_proposal" widget="progressbar" class="o_progressbar_complete.o_progress_blue"/>
+				<br/>
+				<button name="action_consider_employee" class="oe_highlight" type="object" string="Envisager" modifiers="{&quot;invisible&quot;: [[&quot;is_considered&quot;, &quot;=&quot;, true]]}"/>
+				<button name="action_unconsider_employee" class="oe_highlight" type="object" string="Ne plus envisager" modifiers="{&quot;invisible&quot;: [[&quot;is_considered&quot;, &quot;!=&quot;, true]]}"/>
+				<button name="action_staff_employee" class="oe_highlight" type="object" string="Staffer" />
+			    </div>
+							</div>
+						</t>
+					</templates>
+				  </kanban>
+			  </field>
+		</page>
+		</notebook>
         </form>
       </field>
     </record>
