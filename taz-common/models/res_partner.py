@@ -73,7 +73,7 @@ class tazResPartner(models.Model):
 
      @api.depends('child_ids','child_ids.email')
      def _compute_child_mail_address_domain_list(self):
-         _logger.info("DEBUT _compute_child_mail_address_domain_list")# %s %s" % (self.name, self.child_mail_address_domain_list))
+         #_logger.info("DEBUT _compute_child_mail_address_domain_list")# %s %s" % (self.name, self.child_mail_address_domain_list))
          domain_list = []
          for child in self.child_ids:
              if child.email:
@@ -82,8 +82,11 @@ class tazResPartner(models.Model):
                      continue
                  if domain and domain not in domain_list:
                      domain_list.append(domain)
-         self.child_mail_address_domain_list = ','.join(domain_list)
-         _logger.info("FIN _compute_child_mail_address_domain_list")
+         liste = ','.join(domain_list)
+         if self.child_mail_address_domain_list != liste:
+             _logger.info("mise à jour de la liste pour des noms de domaine pour l'entreprise %s : %s" % (self.name or "", self.child_mail_address_domain_list or ""))
+             self.child_mail_address_domain_list = liste
+         #_logger.info("FIN _compute_child_mail_address_domain_list")
 
      @api.depends('business_action_ids')
      def _compute_date_last_business_action(self):
@@ -153,7 +156,7 @@ class tazResPartner(models.Model):
      
      @api.model
      def fields_get(self, allfields=None, attributes=None):
-        hide = ['message_is_follower', 'message_follower_ids', 'message_partner_ids', 'message_ids', 'has_message', 'message_needaction', 'message_needaction_counter', 'message_has_error', 'message_has_error_counter', 'message_attachment_count', 'message_main_attachment_id', 'website_message_ids', 'email_normalized', 'is_blacklisted', 'message_bounce', 'activity_ids', 'activity_state', 'activity_user_id', 'activity_type_id', 'activity_type_icon', 'activity_date_deadline', 'my_activity_date_deadline', 'activity_summary', 'activity_exception_decoration', 'activity_exception_icon', 'activity_calendar_event_id', 'image_1920', 'image_1024', 'image_512', 'image_256', 'image_128', 'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128', 'name', 'display_name', 'date', 'lang', 'active_lang_count', 'tz', 'tz_offset', 'user_id', 'vat', 'same_vat_partner_id', 'same_company_registry_partner_id', 'company_registry', 'bank_ids', 'employee', 'partner_latitude', 'partner_longitude','email_formatted', 'is_public', 'company_type', 'company_id', 'color', 'user_ids', 'partner_share', 'contact_address', 'commercial_partner_id', 'commercial_company_name', 'company_name', 'barcode','im_status', 'channel_ids', 'signup_token', 'signup_type', 'signup_expiration', 'signup_valid', 'signup_url', 'meeting_count', 'meeting_ids', 'calendar_last_notif_ack', 'employee_ids', 'employees_count', 'property_product_pricelist', 'team_id', 'certifications_count', 'certifications_company_count', 'event_count', 'payment_token_ids', 'payment_token_count', 'child_ids_company', 'child_ids_contact', 'credit', 'credit_limit', 'use_partner_credit_limit', 'show_credit_limit', 'debit', 'debit_limit', 'total_invoiced', 'currency_id', 'journal_item_count', 'property_account_payable_id', 'property_account_receivable_id', 'property_account_position_id', 'property_payment_term_id', 'property_supplier_payment_term_id', 'ref_company_ids', 'has_unreconciled_entries', 'last_time_entries_checked', 'invoice_ids', 'contract_ids', 'bank_account_count', 'trust', 'invoice_warn', 'invoice_warn_msg', 'supplier_rank', 'customer_rank', 'duplicated_bank_account_partners_count', 'opportunity_ids', 'opportunity_count', 'task_ids', 'task_count', 'property_purchase_currency_id', 'purchase_order_count', 'supplier_invoice_count', 'purchase_warn', 'purchase_warn_msg', 'receipt_reminder_email', 'reminder_date_before_receipt', 'siret']
+        hide = ['message_is_follower', 'message_follower_ids', 'message_partner_ids', 'message_ids', 'has_message', 'message_needaction', 'message_needaction_counter', 'message_has_error', 'message_has_error_counter', 'message_attachment_count', 'message_main_attachment_id', 'website_message_ids', 'email_normalized', 'is_blacklisted', 'message_bounce', 'activity_ids', 'activity_state', 'activity_user_id', 'activity_type_id', 'activity_type_icon', 'activity_date_deadline', 'my_activity_date_deadline', 'activity_summary', 'activity_exception_decoration', 'activity_exception_icon', 'activity_calendar_event_id', 'image_1920', 'image_1024', 'image_512', 'image_256', 'image_128', 'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128', 'display_name', 'date', 'lang', 'active_lang_count', 'tz', 'tz_offset', 'user_id', 'vat', 'same_vat_partner_id', 'same_company_registry_partner_id', 'company_registry', 'bank_ids', 'employee', 'partner_latitude', 'partner_longitude','email_formatted', 'is_public', 'company_type', 'company_id', 'color', 'user_ids', 'partner_share', 'contact_address', 'commercial_partner_id', 'commercial_company_name', 'company_name', 'barcode','im_status', 'channel_ids', 'signup_token', 'signup_type', 'signup_expiration', 'signup_valid', 'signup_url', 'meeting_count', 'meeting_ids', 'calendar_last_notif_ack', 'employee_ids', 'employees_count', 'property_product_pricelist', 'team_id', 'certifications_count', 'certifications_company_count', 'event_count', 'payment_token_ids', 'payment_token_count', 'child_ids_company', 'child_ids_contact', 'credit', 'credit_limit', 'use_partner_credit_limit', 'show_credit_limit', 'debit', 'debit_limit', 'total_invoiced', 'currency_id', 'journal_item_count', 'property_account_payable_id', 'property_account_receivable_id', 'property_account_position_id', 'property_payment_term_id', 'property_supplier_payment_term_id', 'ref_company_ids', 'has_unreconciled_entries', 'last_time_entries_checked', 'invoice_ids', 'contract_ids', 'bank_account_count', 'trust', 'invoice_warn', 'invoice_warn_msg', 'supplier_rank', 'customer_rank', 'duplicated_bank_account_partners_count', 'opportunity_ids', 'opportunity_count', 'task_ids', 'task_count', 'property_purchase_currency_id', 'purchase_order_count', 'supplier_invoice_count', 'purchase_warn', 'purchase_warn_msg', 'receipt_reminder_email', 'reminder_date_before_receipt', 'siret']
         #par déduction, champs restant au 03/12/2022 : 'mailchimp_status’, 'is_priority_target', 'former_email_address', 'assistant', 'date_last_business_action', 'street3', 'personal_phone', 'personal_email', 'linkedin_url', 'business_action_ids', 'child_mail_address_domain_list', 'customer_book_goal_ids', 'customer_book_followup_ids, 'first_name', 'long_company_name', 'parent_industry_id', 'id', '__last_update', 'create_uid', 'create_date', 'write_uid', 'write_date', 'email','phone', 'mobile', 'is_company', 'is_public', 'industry_id', 'function', 'type', 'street', 'street2', 'zip', 'city', 'state_id', 'country_id', 'country_code’, 'website', 'comment', 'category_id', 'active',  'title', 'parent_id', 'parent_name', 'child_ids', 'ref', 
         #_logger.info(res.keys())
         res = super().fields_get()
@@ -309,7 +312,13 @@ class tazResPartner(models.Model):
         contacts = self.search([('is_company', '=', False), ('active','=',True), ('type', '=', 'contact'), ('user_ids', '=', False)])
         count = {}
         for c in contacts:
-            nom = c.first_name.strip().title() + ' ' + c.name.strip().upper()
+            nom = ''
+            if c.first_name : 
+                nom += c.first_name.strip().title()
+            if c.name :
+                if nom != '':
+                    nom += ' '
+                nom += c.name.strip().upper()
             if nom not in count.keys():
                 count[nom] = []
             count[nom].append(c)
@@ -338,8 +347,9 @@ class tazResPartner(models.Model):
      def filter_company_shared_email_domain(self):
          _logger.info('=========== filter_company_shared_email_domain')
          companies = self.search([('is_company', '=', True), ('active','=',True), ('user_ids', '=', False)])
-         #for c in companies:
+         #for c in companies: 
          #    c._compute_child_mail_address_domain_list()
+         # Dernière exécution de cette fonction le 4 janvier 2023 à 19h30 => 4 cas corrigés (ANTENJ, Agence publique pour l'immobilier de la justice, CDC, CHRISTIAN DIOR COUTURE, DDT de la Vienne, DGAC, DGAMPA, FONDATION DE FRANCE) => donc il n'y a plus d'entreprise avec une child_mail_address_domain_list incohérente
          count = {}
          for c in companies:
              if c.child_mail_address_domain_list:

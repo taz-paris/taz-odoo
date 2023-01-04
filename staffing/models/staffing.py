@@ -21,12 +21,10 @@ class staffingNeed(models.Model):
 
     @api.onchange('project_id')
     def onchange_project_id(self):
-        _logger.info('onchange_project_id')
         if self.project_id:
             need_ids = self.env['staffing.need'].search([('project_id', '=', self.project_id.id), ('state', 'in', ['waitt', 'open'])])
             if len(need_ids) > 0 :
                 need = need_ids[0]
-                _logger.info(need.name)
                 self.begin_date = need.begin_date
                 self.end_date = need.end_date
             else: 
