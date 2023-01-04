@@ -21,9 +21,17 @@ class staffingNeed(models.Model):
 
     @api.onchange('project_id')
     def onchange_project_id(self):
+        _logger.info('onchange_project_id')
         if self.project_id:
-            self.begin_date = self.project_id.date_start
-            self.end_date = self.project_id.date
+            need_ids = self.env['staffing.need'].search([('project_id', '=', self.project_id.id), ('state', 'in', ['waitt', 'open'])])
+            if len(need_ids) > 0 :
+                need = need_ids[0]
+                _logger.info(need.name)
+                self.begin_date = need.begin_date
+                self.end_date = need.end_date
+            else: 
+                self.begin_date = self.project_id.date_start
+                self.end_date = self.project_id.date
 
     @api.onchange('begin_date', 'end_date')
     def onchnage_dates(self):
@@ -44,6 +52,7 @@ class staffingNeed(models.Model):
     name = fields.Char("Nom", compute=_compute_name)
 
     project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True)
+    project_stage = fields.Many2one(related='project_id.stage_id')
     job_id = fields.Many2one('hr.job', string="Grade souhaité") #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
     skill_id = fields.Many2one('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
     considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)")
@@ -113,7 +122,7 @@ class staffingNeed(models.Model):
             employee_job = employee._get_job_id(self.begin_date)
             if not employee_job:
                 continue
-            _logger.info("generate_staffing_proposal %s" % employee.name)
+            #_logger.info("generate_staffing_proposal %s" % employee.name)
             needs = self.env['staffing.proposal'].search([('staffing_need_id', '=', self.id),('employee_id', '=', employee.id)])
             if len(needs) == 0:
                 dic = {}
@@ -137,7 +146,7 @@ class staffingProposal(models.Model):
     @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id')
     def compute(self):
         for rec in self :
-            _logger.info('staffingProposal compute %s' % rec.employee_id.name)
+            #_logger.info('staffingProposal compute %s' % rec.employee_id.name)
             #TODO : relancer cette fonction si les timesheet évoluent sur cette période
             need = rec.staffing_need_id
             rec.employee_availability = rec.employee_id.number_days_available_period(need.begin_date, need.end_date)
@@ -207,8 +216,8 @@ class staffingProposal(models.Model):
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id') #TODO : remplacer le hr.employee.job_id par une fonction qui retourne get_job_id()
     employee_skill_ids = fields.One2many(string="Compétences", related='employee_id.employee_skill_ids')
     employee_staffing_wishes = fields.Html(string="Souhaits de staffing COD", related='employee_id.staffing_wishes')
-    employee_availability = fields.Float("Dispo sur la période", compute='compute', store=True)
 
+    employee_availability = fields.Float("Dispo sur la période", compute='compute', store=True)
     ranked_proposal = fields.Float('Note globale', compute='compute', store=True)
     ranked_employee_availability = fields.Float('Note disponibilité', compute='compute', store=True)
     ranked_employee_skill = fields.Float('Note adéquation compétences', compute='compute', store=True)

@@ -161,12 +161,12 @@ class staffingEmployee(models.Model):
         return res
 
     def number_not_available_period(self, date_start, date_end):
-        _logger.info("number_not_available_period")
+        #_logger.info("number_not_available_period")
         dic = [('employee_id', '=', self.id)]
         pivot_date = datetime.today()
         lines = self.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_start=date_start, date_end=date_end, filters=dic)
         c = lines['validated_timesheet_unit_amount'] + lines['previsional_timesheet_unit_amount'] + lines['holiday_timesheet_unit_amount']
-        _logger.info("       > %s" % str(c))
+        #_logger.info("       > %s" % str(c))
         return c
         """
         #_logger.info('numbers_not_available_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
