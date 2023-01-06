@@ -114,7 +114,7 @@
       </field>
     </record>
 
-    <record model="ir.ui.view" id="taz-common.company_search">
+    <record model="ir.ui.view" id="company_search">
         <field name="name">res.partner.company.search</field>
         <field name="model">res.partner</field>
         <field name="arch" type="xml">
@@ -138,7 +138,7 @@
       <field name="name">Entreprises</field>
       <field name="res_model">res.partner</field>
       <field name="context">{"default_is_company":True}</field>
-      <field name="search_view_id" ref="taz-common.company_search"/>
+      <field name="search_view_id" ref="company_search"/>
       <!--
       -->
       <field name="view_mode">tree,form,kanban</field>

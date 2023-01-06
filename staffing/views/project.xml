@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="project.project_project_stage_view_tree"/>
             <field name="arch" type="xml">
                 <field name="fold" position="after">
-                        <field name="is_part_of_booking"/>
+                        <field name="is_part_of_booking" readonly="1"/>
                 </field>
             </field>
         </record>
