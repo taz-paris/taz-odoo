@@ -8,6 +8,12 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+class staffingProjectStage(models.Model):
+    _inherit = "project.project.stage"
+
+    is_part_of_booking = fields.Boolean('Compte dans le book', help="Les projects qui sont à cette étape comptent dans le book.")
+
+
 class timesheetNavigator(models.TransientModel):
     _name = 'timesheet.navigator'
 
@@ -42,6 +48,7 @@ class timesheetNavigator(models.TransientModel):
 
 class staffingProject(models.Model):
     _inherit = "project.project"
+    _order = "number desc"
 
     #@api.model
     #def create(self, vals):
@@ -66,22 +73,24 @@ class staffingProject(models.Model):
 
     def open_project_pivot_timesheets(self):
         date = datetime.today()
+        rec_id = []
+
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=None, date_end=None, filters=[('project_id', '=', self.id)])
         rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids']
 
-        rec_id = []
         for i in rec_ids:
             rec_id.append(i.id)
 
-        view_id = self.env.ref("staffing.view_project_pivot")
+        pivot_view_id = self.env.ref("staffing.view_project_pivot")
+        tree_view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
         return {
                 'type': 'ir.actions.act_window',
                 'name': 'Pointage',
                 'res_model': 'account.analytic.line',
                 #'res_id': rec_id,
                 'view_type': 'pivot',
-                'view_mode': 'pivot',
-                'view_id': view_id.id,
+                'view_mode': 'pivot,tree',
+                'view_id': [pivot_view_id.id, tree_view_id.id],
                 'domain' : [('id', 'in', rec_id)],
                 'context': {},
                 'target': 'current',
@@ -116,6 +125,7 @@ class staffingProject(models.Model):
 
 
     def open_timesheet_navigate_weeks(self, sens, target='current'):
+        _logger.info('--open_timesheet_navigate_weeks')
         view_id = self.env.ref("staffing.view_timesheets_tree")
         #Impossible to send context to a server action from a menuItem, so we use a dédicated transient model
         # TODO : LIMITS : if the user has 2 web browser tabs opened, the navigation will have conflicts 
@@ -156,7 +166,7 @@ class staffingProject(models.Model):
 
         return {
                 'type': 'ir.actions.act_window',
-                'name': 'Pointage semaine du '+str(new_current_monday.strftime('%d/%m/%Y'))+' au '+str(sunday.strftime('%d/%m/%Y') + ' de ' + employ.first_name + ' ' + employ.name),
+                'name': 'Pointage semaine du %s au %s de %s %s ' % (new_current_monday.strftime('%d/%m/%Y'), str(sunday.strftime('%d/%m/%Y')), employ.first_name or ' ', employ.name or ''),
                 'res_model': 'account.analytic.line',
                 'view_type': 'tree',
                 'view_mode': 'tree',
@@ -180,7 +190,9 @@ class staffingProject(models.Model):
         _logger.info(timesheets_data)
         timesheet_total_amount = timesheets_data['validated_timesheet_amount'] + timesheets_data['previsional_timesheet_amount']
 
+        partner_id = fields.Many2one(required=True, ondelete="restrict")
         negative_total_costs = timesheet_total_amount
+        date = fields.Date(string="Date de fin")
 
         margin_landing_date = (self.order_amount + negative_total_costs) / self.order_amount * 100
         #margin_text = "Au %s :\n    - %s jours pointés (%s €)\n   - % jours prévisionnels (%s €)" % (timesheets_data['monday_pivot_date'], timesheets_data['validated_timesheet_unit_amount'], timesheets_data['validated_timesheet_amount'], timesheets_data['previsional_timesheet_unit_amount'], timesheets_data['previsional_timesheet_amount'])
@@ -195,6 +207,7 @@ class staffingProject(models.Model):
 
     
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
+    stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", default=lambda self: self.env.user.employee_id) #TODO : synchroniser cette valeur avec user_id avec un oneChange
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')

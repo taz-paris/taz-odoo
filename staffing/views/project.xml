@@ -1,5 +1,17 @@
 <odoo>
 	<data>
+
+        <record id="res_project_stage_tree_inherit" model="ir.ui.view">
+            <field name="name">Project stage</field>
+            <field name="model">project.project.stage</field>
+            <field name="inherit_id" ref="project.project_project_stage_view_tree"/>
+            <field name="arch" type="xml">
+                <field name="fold" position="after">
+                        <field name="is_part_of_booking"/>
+                </field>
+            </field>
+        </record>
+
 	    <record id="view_project_pivot_search" model="ir.ui.view">
 		<field name="name">account.analytic.line.select</field>
 		<field name="model">account.analytic.line</field>
@@ -123,9 +135,11 @@
 				   </group>
 				<notebook>
 					<page string="Besoins/staffing">
-						<field name="staffing_need_ids" context="{'default_project_id':active_id}">
+						<field name="id" invisible="1"/>
+						<field name="staffing_need_ids" context="{'default_project_id': id}">
 							<tree editable="top">
 								  <field name="name" optional="hide"/>
+								  <field name="project_id" optional="show"/>
 								  <field name="job_id" optional="show"/>
 								  <field name="skill_id" optional="show"/>
 								  <field name="considered_employee_ids" optional="show" widget="many2many_tags"/>

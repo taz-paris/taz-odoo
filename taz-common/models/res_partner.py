@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
@@ -63,6 +61,7 @@ class tazResPartner(models.Model):
 
      def unlink(self):
         # il est nécessaire de forcer le recacul des noms de domaine de l'ancien parent_id
+        # TODO : il faudrait aussi le faire quand on archive un contact ?
         old_parent_id = None
         if self.parent_id:
             old_parent_id = self.parent_id
@@ -72,30 +71,32 @@ class tazResPartner(models.Model):
         return res
 
      @api.depends('child_ids','child_ids.email')
-     def _compute_child_mail_address_domain_list(self):
-         #_logger.info("DEBUT _compute_child_mail_address_domain_list")# %s %s" % (self.name, self.child_mail_address_domain_list))
-         domain_list = []
-         for child in self.child_ids:
-             if child.email:
-                 domain = child.email.split("@")[1]
-                 if ',' in domain :
-                     continue
-                 if domain and domain not in domain_list:
-                     domain_list.append(domain)
-         liste = ','.join(domain_list)
-         if self.child_mail_address_domain_list != liste:
-             _logger.info("mise à jour de la liste pour des noms de domaine pour l'entreprise %s : %s" % (self.name or "", self.child_mail_address_domain_list or ""))
-             self.child_mail_address_domain_list = liste
-         #_logger.info("FIN _compute_child_mail_address_domain_list")
+     def _compute_child_mail_address_domain_list(self_list):
+         for self in self_list:
+             #_logger.info("DEBUT _compute_child_mail_address_domain_list")# %s %s" % (self.name, self.child_mail_address_domain_list))
+             domain_list = []
+             for child in self.child_ids:
+                 if child.email:
+                     domain = child.email.split("@")[1]
+                     if ',' in domain :
+                         continue
+                     if domain and domain not in domain_list:
+                         domain_list.append(domain)
+             liste = ','.join(domain_list)
+             if self.child_mail_address_domain_list != liste:
+                 _logger.info("mise à jour de la liste pour des noms de domaine pour l'entreprise %s : %s" % (self.name or "", self.child_mail_address_domain_list or ""))
+                 self.child_mail_address_domain_list = liste
+             #_logger.info("FIN _compute_child_mail_address_domain_list")
 
      @api.depends('business_action_ids')
-     def _compute_date_last_business_action(self):
-         res = None
-         for action in self.business_action_ids:
-             if action.state == 'done' :
-                 if res == None or action.date_deadline < res:
-                     res = action.date_deadline
-         self.date_last_business_action = res
+     def _compute_date_last_business_action(self_list):
+         for self in self_list :
+             res = None
+             for action in self.business_action_ids:
+                 if action.state == 'done' :
+                     if res == None or action.date_deadline < res:
+                         res = action.date_deadline
+             self.date_last_business_action = res
 
 
      first_name = fields.Char(string="Prénom")

@@ -31,6 +31,7 @@
         'views/account_analytic_line.xml',
         'views/hr_job.xml',
         'views/timesheets.xml',
+        'views/res_partner.xml',
     ],
 
 
