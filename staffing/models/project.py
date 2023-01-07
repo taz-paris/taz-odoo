@@ -212,8 +212,13 @@ class staffingProject(models.Model):
             vals['state_last_change_date'] = datetime.today()
         return super().write(vals)
 
+    @api.model
+    def create(self, vals):
+        vals['state_last_change_date'] = datetime.today()
+        return super().create(vals)
     
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
+    favorite_user_ids = fields.Many2many(string="Intéressés par ce projet")
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", default=lambda self: self.env.user.employee_id) #TODO : synchroniser cette valeur avec user_id avec un oneChange

@@ -23,6 +23,7 @@
                     <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
                     <field name="stage_id" groups="project.group_project_stages"/>
                     <filter string="Les projets dont je suis DM" name="own_projects" domain="[('user_id', '=', uid)]"/>
+                    <filter string="Projets ayant changé de statut depuis 7 jours" name="recent_project_changed" domain="[('state_last_change_date', '&gt;=', ((context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')))]"/>
                     <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
                     <filter string="Date de fin" name="end_date" date="date"/>
@@ -156,6 +157,7 @@
 						<i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow" attrs="{'invisible': [('date_start', '=', False), ('date', '=', False)]}"/>
 						<field name="date" widget="daterange" options="{&quot;related_start_date&quot;: &quot;date_start&quot;}"/>
 					    </div>
+					    <field name="favorite_user_ids" widget="many2many_tags"/>
 					</group>
 				   </group>
 				<notebook>
@@ -209,6 +211,7 @@
 							<group>
 					    			<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
 					    			<field name="analytic_account_id"/>
+								<field name="state_last_change_date"/>
 							</group>
 						</group>
 					</page>
@@ -247,7 +250,76 @@
                             (0, 0, {'view_mode': 'form', 'view_id': ref('staffing.project_form')}),
                               ]" />
     </record>
-
+   <record model="ir.ui.view" id="staffing.project_kanban">
+      <field name="name">Project</field>
+      <field name="model">project.project</field>
+      <field name="arch" type="xml">
+	      <kanban default_group_by="stage_id" class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" on_create="project.open_create_project" action="staffing.project_action" type="action" sample="1" default_order="sequence, name, id">
+                    <field name="display_name"/>
+                    <field name="partner_id"/>
+                    <field name="commercial_partner_id"/>
+                    <field name="color"/>
+                    <field name="task_count"/>
+                    <field name="milestone_count_reached"/>
+                    <field name="milestone_count"/>
+                    <field name="allow_milestones"/>
+                    <field name="label_tasks"/>
+                    <field name="alias_id"/>
+                    <field name="alias_name"/>
+                    <field name="alias_domain"/>
+                    <field name="is_favorite"/>
+                    <field name="rating_count"/>
+                    <field name="rating_avg"/>
+                    <field name="rating_status"/>
+                    <field name="rating_active"/>
+                    <field name="analytic_account_id"/>
+                    <field name="date"/>
+                    <field name="privacy_visibility"/>
+                    <field name="last_update_color"/>
+                    <field name="last_update_status"/>
+                    <field name="tag_ids"/>
+                    <field name="sequence" widget="handle"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon oe_kanban_content oe_kanban_card">
+                                <div class="o_project_kanban_main ">
+				    <span>
+                                       <field name="is_favorite" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                    </span>
+                                    <div class="o_kanban_card_content mw-100">
+                                        <div class="o_kanban_primary_left">
+                                            <div class="o_primary">
+                                                <span class="o_text_overflow" t-att-title="record.display_name.value"><t t-esc="record.display_name.value"/></span>
+                                                <span class="o_text_overflow text-muted" t-if="record.partner_id.value">
+                                                    <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_id.value"/>
+                                                </span>
+                                                <div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted o_row">
+                                                    <span class="fa fa-clock-o me-2" title="Dates"/><field name="date_start"/>
+                                                    <i t-if="record.date.raw_value and record.date_start.raw_value" class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
+                                                    <field name="date"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+				</div>:
+			    </div>
+                        </t>
+                    </templates>
+                </kanban>
+      </field>
+   </record>
+	
+    <record id="staffing.recent_project_action" model="ir.actions.act_window">
+        <field name="name">Projets</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">kanban</field>
+	<field name="context">{'search_default_recent_project_changed' : 1}</field>
+	<field name="view_ids" eval="
+                            [
+                            (5, 0, 0),
+                            (0, 0, {'view_mode': 'kanban', 'view_id': ref('staffing.project_kanban')}),
+                              ]" />
+    </record>
      <record id="forecast_action" model="ir.actions.server">
           <field name="name">Forecast</field>
           <field name="model_id" ref="model_project_project"/>
@@ -257,6 +329,7 @@
 
     <menuitem name="Projets" id="staffing.project_menu" parent="staffing.staffing_root" action="staffing.project_action"/>
     <menuitem name="Plan de charge à 3 mois" id="staffing.forecast_menu" parent="staffing.staffing_root" action="staffing.forecast_action"/>
+    <menuitem name="News escale" id="staffing.project_news_menu" parent="staffing.staffing_root" action="staffing.recent_project_action"/>
 
 
 	</data>
