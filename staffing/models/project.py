@@ -16,6 +16,7 @@ class staffingProjectStage(models.Model):
 
 class timesheetNavigator(models.TransientModel):
     _name = 'timesheet.navigator'
+    _description = "Technical object for storing navigation session data."
 
     user_id = fields.Many2one('res.users', string="Who looks") 
     employee_id = fields.Many2one('hr.employee', string="Consultant")

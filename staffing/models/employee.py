@@ -132,6 +132,12 @@ class staffingEmployee(models.Model):
     availability_4_weeks_graph = fields.Char("Graph dispo S+4", compute=availability_4_weeks_graph)
     last_validated_timesheet_date = fields.Date("Date du dernier pointage validé", compute=last_validated_timesheet_date)
     is_late_validated_timesheet = fields.Boolean("Pointage en retard", compute=is_late_validated_timesheet)
+    is_associate = fields.Boolean("Est associé")
+    mentee_ids = fields.One2many('hr.employee', 'coach_id', string="Mentees")
+    sector_ids = fields.Many2many('res.partner.industry', string="Business Domain")
+    annual_evaluator_id = fields.Many2one('res.partner', string="En charge de l'EA")
+    cv_link = fields.Char('Lien CV')
+    vcard_link = fields.Char('Lien VCard') #TODO : générer la VCARD depuis les données Odoo
 
     def name_get(self):
          res = []

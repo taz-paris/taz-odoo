@@ -143,9 +143,14 @@
 					  <field name="first_name"/>
 					  <field name="name"/>
 					  <field name="work_email"/>
+					  <field name="is_associate"/>
+					  <field name="sector_ids" widget="many2many_tags"/>
+					  <field name="cv_link" widget="url"/>
+					  <field name="vcard_link" widget="url"/>
 			  	</group>
 				<group>
 					  <field name="coach_id" can_create="true" can_write="true"/>
+					  <field name="mentee_ids" widget="many2many_tags"/>
 					  <field name="staffing_wishes"/>
 					  <field name="last_validated_timesheet_date"/>
 					  <field name="is_late_validated_timesheet"/>

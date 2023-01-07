@@ -92,6 +92,7 @@
 	   <record model="ir.ui.view" id="staffing.project_tree">
 	      <field name="name">Project</field>
 	      <field name="model">project.project</field>
+	      <field name="priority">5</field>
 	      <field name="arch" type="xml">
 		<tree>
 		  <field name="number"/>
@@ -105,7 +106,7 @@
 	   <record model="ir.ui.view" id="staffing.project_form">
 	      <field name="name">Project</field>
 	      <field name="model">project.project</field>
-	      <field name="priority">55</field>
+	      <field name="priority">5</field>
 	      <field name="arch" type="xml">
 		<form string="Project" class="o_form_project_project" js_class="project_form">
 			<header>
