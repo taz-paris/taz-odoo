@@ -64,11 +64,18 @@ class staffingProject(models.Model):
             res.append((rec.id, display_name))
         return res
 
+    def name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        args = args or []
+        recs = self.browse()
+        if not recs:
+            recs = self.search(['|', '|', ('number', operator, name), ('name', operator, name)] + args, limit=limit)
+        return recs.name_get()
+
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
-    #@api.depends('project_director_employee_id')
-    #def _compute_user_id(self):
-    #    for line in self:
-    #        line.user_id = line.project_director_employee_id.user_id if line.project_director_employee_id else self._default_user()
+    @api.depends('project_director_employee_id')
+    def _compute_user_id(self):
+        for rec in self:
+            rec.user_id = rec.project_director_employee_id.user_id if rec.project_director_employee_id else False
 
 
     def open_project_pivot_timesheets(self):

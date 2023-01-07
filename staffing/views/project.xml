@@ -12,6 +12,31 @@
             </field>
         </record>
 
+        <record id="view_project_search" model="ir.ui.view">
+            <field name="name">Project</field>
+            <field name="model">project.project</field>
+	    <field name="priority">5</field>
+            <field name="arch" type="xml">
+		<search string="Search Project">
+                    <field name="name" string="N° ou nom du projet" filter_domain="['|', ('number', 'ilike', self), ('name', 'ilike', self)]"/>
+                    <field name="user_id" string="Directeur de mission"/>
+                    <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
+                    <field name="stage_id" groups="project.group_project_stages"/>
+                    <filter string="Les projets dont je suis DM" name="own_projects" domain="[('user_id', '=', uid)]"/>
+                    <separator/>
+                    <filter string="Date de début" name="start_date" date="date_start"/>
+                    <filter string="Date de fin" name="end_date" date="date"/>
+                    <separator/>
+                    <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Directeur de mission" name="Manager" context="{'group_by': 'user_id'}"/>
+                        <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
 	    <record id="view_project_pivot_search" model="ir.ui.view">
 		<field name="name">account.analytic.line.select</field>
 		<field name="model">account.analytic.line</field>

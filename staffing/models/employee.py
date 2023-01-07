@@ -106,7 +106,24 @@ class staffingEmployee(models.Model):
 
     def send_email_timesheet_late(self):
         for rec in self:
-            pass #TODO
+            if not rec.work_email:
+                continue
+            body = 'Bonjour</br>Votre dernier pointage date du %s.</br>Merci de compléter votre saisie au plus vite.</br>Cordialement.' % (rec.last_validated_timesheet_date.strftime('%d/%m/%Y'))
+            subject = 'Notification de saisie incomplète'
+            email_from = self.env['ir.mail_server'].search([('id','=',1)])
+            email_to = rec.work_email
+            values = {
+                'res_id' : rec.id,
+                'email_from' : email_from.smtp_user,
+                'email_to' : email_to,
+                'auto_delete' : False,
+                'model' : 'hr.employee',
+                'body_html' : body,
+                'subject' : subject,
+                }
+
+            send_mail = self.env['mail.mail'].sudo().create(values)
+            send_mail.send()
 
     first_name = fields.Char(string="Prénom")
     staffing_wishes = fields.Html("Souhaits de staffing COD")
