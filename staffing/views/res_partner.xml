@@ -1,0 +1,40 @@
+<odoo>
+  <data>
+        <record id="company_search_inherit" model="ir.ui.view">
+            <field name="name">res.partner.company.search</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="taz-common.company_search"/>
+            <field name="arch" type="xml">
+                <filter name="inactive" position="after">
+                        <filter string="Projet débuté sur cette année civile" name="book_this_year" domain="[('has_project_started_this_year', '=', True)]"/>
+                </filter>
+            </field>
+    	</record> 
+
+        <record id="res_partner_staffing_view_form_inherit" model="ir.ui.view">
+            <field name="name">Partner</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="taz-common.company_form"/>
+            <field name="arch" type="xml">
+		<xpath expr='//notebook' position="inside">
+			<page string="Projets">
+				<group>
+					<group>
+						<field name="has_project_started_this_year"/>
+					</group>
+				</group>
+				<field name="project_ids" readonly="1">
+					<tree>
+						<field name="number"/>
+						<field name="name"/>
+						<field name="stage_id"/>
+						<field name="date_start"/>
+						<field name="date" string="Date de fin"/>
+					</tree>
+				</field>
+			</page>
+                </xpath>
+            </field>
+        </record>
+  </data>
+</odoo>

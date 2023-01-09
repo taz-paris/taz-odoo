@@ -32,6 +32,7 @@
         'views/hr_job.xml',
         'views/timesheets.xml',
         'views/res_partner.xml',
+        'data/ir_cron_data.xml',
     ],
 
 

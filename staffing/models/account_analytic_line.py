@@ -30,6 +30,10 @@ class staffingAnalyticLine(models.Model):
     def _sync_project(self, vals):
         #_logger.info(vals)
         #TODO : si le projet change, changer le staffing_need_id
+        if 'staffing_need_id' not in vals:
+            #Notamment dans le cas de la créetion d'une ligne issue d'un congés
+            return vals
+
         _logger.info(vals)
         need_id = vals['staffing_need_id']
         needs = self.env['staffing.need'].browse([need_id])

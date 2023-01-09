@@ -77,18 +77,36 @@ class tazCustomerBookFollowup(models.Model):
             else :
                 record.period_ratio = 0.0
 
-    @api.model
-    def date_default(self):
-        return datetime.date.today()
+    #@api.model
+    #def date_default(self):
+    #    return datetime.date.today()
 
     @api.model
-    def book_goal_id_default(self):
-        partner_default = self._context.get("default_partner_id")
-        if partner_default:
-            bgl = self.env['taz.customer_book_goal'].search([('partner_id', '=', partner_default)], order="reference_period desc")
+    def default_get(self, fields):
+        res = super().default_get(fields)
+        _logger.info(fields)
+
+        res['date_update'] = datetime.date.today()
+
+        partner_default_id = self._context.get("default_partner_id")
+        if partner_default_id:
+            partner_default = self.env['res.partner'].search([('id', '=', partner_default_id)])[0]
+            bgl = self.env['taz.customer_book_goal'].search([('partner_id', '=', partner_default.id)], order="reference_period desc")
             if len(bgl)>0:
-                return bgl[0].id
-        return False 
+                bg_last = bgl[0]
+                res['customer_book_goal_id'] = bg_last.id
+                res['period_book'] = partner_default.get_book_by_year(int(bg_last.reference_period))
+
+        return res
+
+    #@api.model
+    #def book_goal_id_default(self):
+    #    partner_default = self._context.get("default_partner_id")
+    #    if partner_default:
+    #        bgl = self.env['taz.customer_book_goal'].search([('partner_id', '=', partner_default)], order="reference_period desc")
+    #        if len(bgl)>0:
+    #            return bgl[0].id
+    #    return False 
 
     @api.depends('partner_id', 'date_update')
     def _compute_name(self):
@@ -97,12 +115,12 @@ class tazCustomerBookFollowup(models.Model):
 
     name = fields.Char("Nom", compute=_compute_name)
 
-    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, default=book_goal_id_default, ondelete='restrict')
+    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, ondelete='restrict')
     period_goal = fields.Float("Montant obj", related="customer_book_goal_id.period_goal", store=True)
     partner_id = fields.Many2one(string="Entreprise", related="customer_book_goal_id.partner_id", store=True)
     partner_industry_id = fields.Many2one(related="customer_book_goal_id.partner_id.industry_id", store=True)
 
-    date_update = fields.Date("Date de valeur", default=date_default)
+    date_update = fields.Date("Date de valeur")
     period_book = fields.Float("Book à date")
     period_futur_book = fields.Float("Intime conviction", help="Montant que l'on estime pouvoir book en plus d'ici la fin de l'année.")
 

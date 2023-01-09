@@ -10,6 +10,8 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
           
+from dateutil.relativedelta import relativedelta
+
 import logging
 _logger = logging.getLogger(__name__)
           
@@ -21,7 +23,7 @@ proto = "https://"
 host = "tasmane.fitnetmanager.com"
 api_root = "/FitnetManager/rest/"
 
-cache_mode = True
+cache_mode = False
 cache_folder = '/tmp/'
 
 ##################################################################
@@ -37,13 +39,12 @@ class ClientRestFitnetManager:
         self.url_appel_api = url_appel_api
         _logger.info("ClientRestFitnetManager : " + self.url_appel_api)
 
-    def get_api(self, target_action, read_cache=True):
+    def get_api(self, target_action):
         path = os.path.join(cache_folder, target_action.replace('/','_'))
         if cache_mode :
-            if read_cache :
-                if os.path.exists(path):
-                    with open(path, 'r', encoding='utf-8') as cf:
-                        return json.loads(cf.read())
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as cf:
+                    return json.loads(cf.read())
 
         headers = {
             'Accept-Encoding': 'gzip, deflate, br',
@@ -57,8 +58,6 @@ class ClientRestFitnetManager:
         response = requests.get(self.url_appel_api+target_action, headers=headers)
         response_code = response.status_code
         _logger.info("HTTP return code :" + str(response_code))
-        #res = response.content.decode('utf-8')
-        #j = json.load(res)
         res = response.json()
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(res, f, indent=4)
@@ -171,12 +170,13 @@ class fitnetProject(models.Model):
 
 
     def synchAllFitnet(self):
+        _logger.info(' ############## Début de la synchro Fitnet')
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
         self.sync_employees(client)
         self.sync_employees_contracts(client)
-        #self.sync_customers(client)
+        self.sync_customers(client)
 
         #TODO           self.sync_prospect(client)
         #TODO           self.sync_project(client)
@@ -184,13 +184,13 @@ class fitnetProject(models.Model):
         self.sync_contracts(client)
 
         self.sync_assignments(client)
-        #self.sync_forecastedActivities(client)
+        self.sync_forecastedActivities(client)
         self.sync_timesheets(client)
 
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
         
-        #self.sync_holidays(client) 
+        self.sync_holidays(client) 
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
 
         #self.sync_customer_invoices(client)
@@ -200,6 +200,7 @@ class fitnetProject(models.Model):
         #TODO           self.sync_offContractActivities(client)
 
         #TODO : supprimer les objets qui ont un FitnetId et qui ne sont plus dans les retours API Fitnet intégrals (ou plus dispo par GET initaire sur l'ID)
+        _logger.info(' ############## Fin de la synchro Fitnet')
 
     def sync_customer_invoices(self, client):
         _logger.info('---- sync_customer_invoices')
@@ -247,8 +248,18 @@ class fitnetProject(models.Model):
         _logger.info('---- sync_holydays')
         odoo_model_name = 'hr.leave'
         fitnet_leave_contents = {}
-        for year in range(2020, 2025):
-            for month in range(1,13):
+
+        period_list = []
+
+        #for year in range(2020, 2025):
+        #    for month in range(1,13):
+        #       period_list.append((month, year))
+
+        for i in [-1, 0, 1, 2, 3, 4, 5, 6]: #on synchronise les congés du mois précédent, du mois en cours et des 6 prochain moins
+            t = datetime.datetime.today() + relativedelta(months=i)
+            period_list.append((t.month, t.year))
+
+        for month, year in period_list :
                 _logger.info('Get leaves for %s/%s' % (str(month), str(year)))
                 fitnet_objects = client.get_api('leaves/getLeavesWithRepartition/1/%s/%s' % (month, year))
                 #_logger.info(fitnet_objects)
@@ -259,7 +270,7 @@ class fitnetProject(models.Model):
                         for leaveType in obj['leaveTypes']:
                             #if leaveType['id'] not in [992]: #992 : 3.5 RTT de Takoua a partir du 28/12/202
                             #    continue
-                            _logger.info("Adding leaveType ID=%s" % str(leaveType['id']))
+                            #_logger.info("Adding leaveType ID=%s" % str(leaveType['id']))
                             #leaveType['master_fitnet_leave_id'] = obj['leaveId']
                             leaveType['designation'] = obj['designation']
                             leaveType['employeeId'] = obj['employeeId']
@@ -291,7 +302,7 @@ class fitnetProject(models.Model):
             'numberOfDays' : {'odoo_field' : 'number_of_days'},
             'request_date_from_period' : {'odoo_field' : 'request_date_from_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
             'request_date_to_period' : {'odoo_field' : 'request_date_to_period', 'selection_mapping' : {'am' : 'am', 'pm':'pm'}},
-            'status' : {'odoo_field' : 'state', 'selection_mapping' : {'Demande accordée' : 'validate', 'Demande annulée' : 'canceled', 'Demande refusée' : 'refuse', 'False' : 'draft', '900':'confirm'}},
+            'status' : {'odoo_field' : 'state', 'selection_mapping' : {'Demande accordée' : 'validate', 'Demande annulée' : 'canceled', 'Demande refusée' : 'refuse', 'False' : 'draft', '900':'confirm', 'Demande' : 'validate'}},
             }
         _logger.info(len(fitnet_leave_contents.values()))
         with open('/tmp/old_all_leaves', 'w', encoding='utf-8') as f:
@@ -306,7 +317,7 @@ class fitnetProject(models.Model):
     def sync_timesheets(self, client):
         _logger.info('---- sync_timesheets')
         #fitnet_objects = client.get_api("activities/getActivitiesOnContract/1/01-01-2018/01-01-2050") #=> endpoint unitile : il ne comporte pas l'assignementID
-        fitnet_objects = client.get_api("timesheet/timesheetAssignment?companyId=1&startDate=01-01-2018&endDate=01-06-2032")
+        fitnet_objects = client.get_api("timesheet/timesheetAssignment?companyId=1&startDate=01-01-2018&endDate=01-06-2050")
         fitnet_filtered = []
         for obj in fitnet_objects:
             if obj['amount'] == 0.0 : 
@@ -316,13 +327,12 @@ class fitnetProject(models.Model):
                 #TODO : réintégrer les types 2 quand self.sync_assignmentsoffContract sera implémentée
                 continue
 
-            #TODO : comment exclure les pointages des semaines non validées, pour éviter de cumuler pointages non validés et forecast sur une même semaine
             obj['category'] = 'project_employee_validated'
             obj['fitnet_id'] = 'timesheet_' + str(obj['timesheetAssignmentID'])
             fitnet_filtered.append(obj)
 
-        _logger.info(len(fitnet_objects))
-        _logger.info(len(fitnet_filtered))
+        #_logger.info(len(fitnet_objects))
+        #_logger.info(len(fitnet_filtered))
 
         odoo_model_name = 'account.analytic.line'
 
@@ -408,7 +418,7 @@ class fitnetProject(models.Model):
                 # Dans ce cas on veut le le client soit créé manuellement par Denis ou Margaux
             customer['paymentTermsId'] = customer['companyCustomerLink'][0]['paymentTermsId']
             if customer['siret']:
-                customer['siret'] = customer['siret'].replace(' ', '')
+                customer['siret'] = customer['siret'].replace(' ', '').replace('.', '')
             if customer['vatNumber']:
                 customer['vatNumber'] = customer['vatNumber'].replace(' ', '').replace('.', '')
             if customer['phone']:
@@ -418,13 +428,20 @@ class fitnetProject(models.Model):
             if customer['clientCode']:
                 customer['clientCode'] = customer['clientCode'].replace(' ', '')
 
+            #if customer['vatNumber'] in ['FR59542051180']:
+                # TODO : Le numéro TVA intracom de TotalEnergie FR59542051180 produit une boucle infinie lors de l'enregistrement
+                    #https://github.com/odoo/odoo/blob/c5be51a5f02471e745543b3acea4f39664f8a820/addons/base_vat/models/res_partner.py#L635    
+            #   del customer['vatNumber']
+
             mapping_fields = {
-                'vatNumber' : {'odoo_field' : 'vat'},
-               # 'siret' : {'odoo_field' : 'siret'},
+                'vatNumber' : {'odoo_field' : 'vat'}, 
                 'clientCode' : {'odoo_field' : 'ref'},
                 'phone' : {'odoo_field' : 'phone'},
                 'email' : {'odoo_field' : 'email'},
                 'paymentTermsId' : {'odoo_field' : 'property_payment_term_id'},
+
+
+                'siret' : {'odoo_field' : 'siret'},
                 #adresse par defaut
                 #adresse de facturation
                 #compte bancaire
@@ -434,8 +451,9 @@ class fitnetProject(models.Model):
             }
             res = self.prepare_update_from_fitnet_values('res.partner', customer, mapping_fields, odoo_customer)
             if len(res) > 0:
-                _logger.info("Mise à jour du res.partnet client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
+                _logger.info("Mise à jour du res.partner client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
                 odoo_customer.write(res)
+        _logger.info('---- END sync_customers')
 
     def sync_employees_contracts(self, client):
         _logger.info('--- synch_employees_contracts')
@@ -486,7 +504,7 @@ class fitnetProject(models.Model):
 
         #Intégrer l'id Fitnet aux hr.employee si on peut le trouver via l'email du hr.employee ou bien d'un res_users (et dans ce cas création du hr.employee à la volée)
         for employee in employees:
-            odoo_employee = self.env['hr.employee'].search([('fitnet_id','=',employee['employee_id'])])
+            odoo_employee = self.env['hr.employee'].search([('fitnet_id','=',employee['employee_id']), ('active', 'in', [True, False])])
             if len(odoo_employee) > 1 :
                 _logger.info("Plus d'un hr.employee a cet id fitnet %s" % str(employee['employee_id']))
                 continue
@@ -532,7 +550,7 @@ class fitnetProject(models.Model):
             #zone_23_key_P_268-S_1 #Champ onDemande pour le mobile personnel
             }
         odoo_model_name = 'hr.employee'
-        self.create_overide_by_fitnet_values(odoo_model_name, employees, mapping_fields, 'employee_id')
+        self.create_overide_by_fitnet_values(odoo_model_name, employees, mapping_fields, 'employee_id', filters=[('active', 'in', [True, False])])
 
 
 
@@ -614,7 +632,7 @@ class fitnetProject(models.Model):
                 res = prop['value']
         return res
 
-    def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname, context={}) :
+    def create_overide_by_fitnet_values(self, odoo_model_name, fitnet_objects, mapping_fields, fitnet_id_fieldname, context={}, filters=[]) :
         _logger.info('--- create_overide_by_fitnet_values')
 
         count_last_sql_commit = 0
@@ -625,7 +643,8 @@ class fitnetProject(models.Model):
                 self.env.cr.commit()
             #### chercher l'objet et le créer s'il n'existe pas
             fitnet_id = fitnet_object[fitnet_id_fieldname]
-            odoo_objects = self.env[odoo_model_name].search([('fitnet_id', '=', fitnet_id)])
+            filter_list = [('fitnet_id', '=', fitnet_id)] + filters
+            odoo_objects = self.env[odoo_model_name].search(filter_list)
             odoo_object = False
             if len(odoo_objects) > 1:
                 continue
@@ -742,8 +761,11 @@ class fitnetProject(models.Model):
                         else:
                             res[odoo_field_name] = False
                         continue
-
-                    target_objects = self.env[odoo_field.relation].search([('fitnet_id','=',fitnet_value)])
+                    filter_list = [('fitnet_id','=',fitnet_value)]
+                    if odoo_field.relation in ['hr.employee']:
+                        tup = ('active', 'in', [True, False])
+                        filter_list.append(tup)
+                    target_objects = self.env[odoo_field.relation].search(filter_list)
                     if len(target_objects) > 1 :
                         _logger.info("Plusieurs objets Odoo %s ont le fitnet_id %s" % (odoo_field.relation, fitnet_value))
                         continue
