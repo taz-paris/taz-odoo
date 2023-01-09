@@ -231,7 +231,7 @@
 			<page string="Actions commerciales">
 				<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': active_id}">
 					<tree editable="top">
-					  <field name="name"/>
+					  <field name="name" widget="text" />
 					  <field name="state"/>
 					  <field name="user_ids" widget="many2many_avatar_user"/>
 					  <field name="date_deadline" optional="show"/>
