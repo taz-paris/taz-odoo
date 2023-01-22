@@ -34,7 +34,7 @@ class staffingAnalyticLine(models.Model):
             #Notamment dans le cas de la créetion d'une ligne issue d'un congés
             return vals
 
-        _logger.info(vals)
+        #_logger.info(vals)
         need_id = vals['staffing_need_id']
         needs = self.env['staffing.need'].browse([need_id])
         need = needs[0]
@@ -80,8 +80,8 @@ class staffingAnalyticLine(models.Model):
                     raise ValidationError(_('Valeur interdite dans le filtre : %s' % condition[0]))
                 dic.append(condition)
         timesheets = self.env['account.analytic.line'].search(dic)
-        _logger.info(dic)
-        _logger.info(timesheets)
+        #_logger.info(dic)
+        #_logger.info(timesheets)
 
         previsional_timesheet_ids = []
         validated_timesheet_ids = []
@@ -98,7 +98,7 @@ class staffingAnalyticLine(models.Model):
         #TODO : passer le pointage à validé pour toute la semaine et tous les projets en même temps
            
         #TODO : interdire les affectations hors de la période du projet => ATTENTION : c'est autorisé sur Fitnet donc risque de blocage
-        #TODO : interdire de pointer hors de la période d'affectation => ATTENTION : c'est autorisé sur Fitnet donc risque de blocage
+                # En revanche : laisser la possibilité de pointer après la date de fin de l'affectation initiale, sinon ça ne sera pas pratique
 
         monday_pivot_date =  pivot_date - timedelta(days=pivot_date.weekday())
         monday_pivot_date = monday_pivot_date.date()
@@ -112,16 +112,19 @@ class staffingAnalyticLine(models.Model):
             elif timesheet.category == 'project_forecast':
                 if timesheet.date >= monday_pivot_date:
                     previsional_timesheet_ids.append(timesheet)
-                # TODO : est-ce qu'on garde les prévisionnels antérieurs à la date pivot si rien n'a été pointé ?
-                    # => Ou alors on retourne un indicateur montrant qu'il y a un manque de pointage sur une période antéireure à la date pivot
+                # Est-ce qu'on garde les prévisionnels antérieurs à la date pivot si rien n'a été pointé ? => NON, on ne bidouille pas : le consultant n'avait qu'à pointer.
+                    # => OPTION :  on retourne un indicateur montrant qu'il y a un manque de pointage sur une période antéireure à la date pivot
             elif timesheet.holiday_id:
                 holiday_timesheet_ids.append(timesheet)
-                # TODO : en théorie, le prévisionnel devrait être diminumé des congés par le consultant, mais ça peut ne pas être le cas 
+                # En théorie, le prévisionnel devrait être diminumé des congés par le consultant ou le manager, mais ça peut ne pas être le cas 
                     # => pour une semaine calendaire donnée :
-                        # si antérieur à monday_pivot => alors rien à faire : le pointage validé tient forcément compte des comgés, on ne peut structurellement pas compter 2 fois
+                        # si ***antérieur à monday_pivot*** => alors rien à faire : le pointage validé tient forcément compte des comgés, on ne peut structurellement pas compter 2 fois
                             # ==> ... sauf si la période de congés est enregistrée après la validation du pointage de la semaine considérée ==> le contrôle de jour max de pointage devrait empêcher la validation du congés tant que le pointage validé n'est pas corrigé => vérifier que le message d'erreur lors de la tentative de validation du congés après la vidation du poointage est compréhensible
-                        # si postérieur ou égal à monday_pivot => si la somme congés+previsionnel pour une semaine > nb jours ouvrés de la semaine (aleternative : si (congés+previsionel) > (nb jour pointage max par semaine - nb jours férié sur les jours ouvrés de la semaine) : diminuer le prévisionnel de la différence
+
+
+                        # si ***postérieur ou égal à monday_pivot*** => si la somme congés+previsionnel pour une semaine > nb jours ouvrés de la semaine (aleternative : si (congés+previsionel) > (nb jour pointage max par semaine - nb jours férié sur les jours ouvrés de la semaine) : diminuer le prévisionnel de la différence ==> Bof : pas terrible de faire des choses automatiquement dans le dos du consultant, en plus ça n'est pas pédagogique
                             # ... ou alors on ajoute un contrôle lors de la pose des congés par le salarié (recontrôlé à la validation par Denis) pour que congés+prévisionnel ne dépasse pas nb jour ouvré sur la semaine ===> mais ça ne peut fonctionner que si la demande de congés est gérée dans Odoo => tant qu'on importe de Fitnet il peut y avoir des cas où congés+prévisionel > nb jours ouvrés
+                            # TODO une fois la synchro Fitnet terminée : déclencher un wizzard à la validation du congès par le consultant qui lui affiche son prévisionnel et lui demande de l'ajuster
 
         validated_timesheet_amount = 0.0
         validated_timesheet_unit_amount = 0.0
@@ -186,6 +189,9 @@ class staffingAnalyticLine(models.Model):
 
     def compute_amount(self):
         timesheet = self
+
+        if self.employee_id:
+            self.employee_id.availability()
 
         #TODO : utiliser la catégorie pour ne cibler que les lignes de pointage ?
         if timesheet.holiday_id :

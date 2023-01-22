@@ -26,13 +26,14 @@
         'security/ir.model.access.csv',
         'views/staffing.xml',
         'views/project.xml',
-        'views/synchroFitnet.xml',
         'views/employee.xml',
         'views/account_analytic_line.xml',
         'views/hr_job.xml',
         'views/timesheets.xml',
         'views/res_partner.xml',
-        'data/ir_cron_data.xml',
+        'data/cron_fitnet_sync.xml',
+        'data/cron_employee_availability.xml',
+        'views/synchroFitnet.xml',
     ],
 
 

@@ -49,7 +49,7 @@ class staffingNeed(models.Model):
 
     project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True)
     project_stage = fields.Many2one(related='project_id.stage_id')
-    job_id = fields.Many2one('hr.job', string="Grade souhaité") #TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui n'ont pas de job_i
+    job_id = fields.Many2one('hr.job', string="Grade souhaité") #TODO : impossible de le mettre en required dans le modèle car la synchro fitnet importe des assignments qui n'ont pas de job_id
     skill_id = fields.Many2one('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
     considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)")
     #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
@@ -102,7 +102,7 @@ class staffingNeed(models.Model):
     def write(self, vals):
         res = super().write(vals)
         self.generate_staffing_proposal()
-        if "staffed_employee_id" in vals:
+        if "staffed_employee_id" in vals: #TODO ne vaudrait-il pas mieux avoir une action manuelle ou un statut en plus pour publier l'affecation (la rendre visible au consultant)
             if vals["staffed_employee_id"] :
                 self.state = 'done'
             else :
@@ -119,15 +119,15 @@ class staffingNeed(models.Model):
             if not employee_job:
                 continue
             #_logger.info("generate_staffing_proposal %s" % employee.name)
-            needs = self.env['staffing.proposal'].search([('staffing_need_id', '=', self.id),('employee_id', '=', employee.id)])
-            if len(needs) == 0:
+            proposals = self.env['staffing.proposal'].search([('staffing_need_id', '=', self.id),('employee_id', '=', employee.id)])
+            if len(proposals) == 0:
                 dic = {}
                 dic['employee_id'] = employee.id
                 dic['staffing_need_id'] = self.id
                 self.env['staffing.proposal'].create(dic)
         #TODO supprimer les propositions qui ne sont pas sur ces employés (cas de changement de grade de la demande)
 
-    #TODO : lorsqu'une affectation est validée, créer les prévisionnels ET RECALCULER LES autres prorposals de l'employee
+    #TODO : lorsqu'une affectation est validée, créer les prévisionnels (??) ET RECALCULER LES autres prorposals de l'employee
 
 
 class staffingProposal(models.Model):

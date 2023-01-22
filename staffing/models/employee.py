@@ -37,14 +37,41 @@ class staffingEmployee(models.Model):
             vals['context']['default_partner_id'] = self.work_contact_id
         return vals
 
-    def availability_4_weeks(self):
+
+    def availability_week(self, monday):
+        sunday = monday + timedelta(days=6)
+        res = self.number_days_available_period(monday, sunday) #/ self.number_work_days_period(monday, sunday) * 100
+        return res
+
+    def refresh_availability_all_employees(self):
+        employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : rafraichir aussi ceux dont le contrat n'a pas encore commencé
+        employees.availability()
+
+    def availability(self):
         d = datetime.now()
-        monday =  d - timedelta(days=d.weekday())
-        end = monday + timedelta(days=(4*7)-1)
+        curent_monday =  d - timedelta(days=d.weekday())
+
+        work_days_prev_period_4_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-4*7)), curent_monday + timedelta(days=-1))
+        work_days_next_period_5_weeks = self.number_work_days_period(curent_monday, curent_monday + timedelta(days=(1*7)*5))
 
         for rec in self:
-            res = rec.number_days_available_period(monday, end) / rec.number_work_days_period(monday, end) * 100
-            rec.availability_4_weeks = res
+            _logger.info('--refresh availability employee %s' % rec.name)
+            rec.availability_prev_week_4 = rec.availability_week(curent_monday + timedelta(days=(-4*7)))
+            rec.availability_prev_week_3 = rec.availability_week(curent_monday + timedelta(days=(-3*7)))
+            rec.availability_prev_week_2 = rec.availability_week(curent_monday + timedelta(days=(-2*7)))
+            rec.availability_prev_week_1 = rec.availability_week(curent_monday + timedelta(days=(-1*7)))
+            rec.availability_current_week = rec.availability_week(curent_monday)
+            rec.availability_next_week_1 = rec.availability_week(curent_monday + timedelta(days=(1*7)))
+            rec.availability_next_week_2 = rec.availability_week(curent_monday + timedelta(days=(2*7)))
+            rec.availability_next_week_3 = rec.availability_week(curent_monday + timedelta(days=(3*7)))
+            rec.availability_next_week_4 = rec.availability_week(curent_monday + timedelta(days=(4*7)))
+
+            rec.availability_prev_period_4_weeks = (rec.availability_prev_week_4 + rec.availability_prev_week_3 + rec.availability_prev_week_2 + rec.availability_prev_week_1)/work_days_prev_period_4_weeks * 100
+            rec.availability_next_period_5_weeks = (rec.availability_current_week + rec.availability_next_week_1 + rec.availability_next_week_2 + rec.availability_next_week_3 + rec.availability_next_week_4)/work_days_next_period_5_weeks * 100
+            proposals = self.env['staffing.proposal'].search([('employee_id', '=', rec.id), ('staffing_need_state', 'in', ['wait', 'open'])])
+            proposals.compute()
+            #TODO : un changmenet de public_holidays pourrait aussi changer la dispo au niveau employé et proposal
+
 
     def availability_4_weeks_graph(self):
         pass
@@ -128,7 +155,20 @@ class staffingEmployee(models.Model):
     first_name = fields.Char(string="Prénom")
     staffing_wishes = fields.Html("Souhaits de staffing COD")
     staffing_need_ids = fields.One2many('staffing.need', 'staffed_employee_id', string="Affectations")
-    availability_4_weeks = fields.Float("% dispo S+4", help="%age de dispo entre le lundi de cette semaine et celui 28 jours après)", compute=availability_4_weeks)
+    availability_prev_week_4 = fields.Float("J. dispo S-4", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-4", compute=availability, store=True)
+    availability_prev_week_3 = fields.Float("J. dispo S-3", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-3", compute=availability, store=True)
+    availability_prev_week_2 = fields.Float("J. dispo S-2", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-2", compute=availability, store=True)
+    availability_prev_week_1 = fields.Float("J. dispo S-1", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-1", compute=availability, store=True)
+    availability_prev_period_4_weeks = fields.Float("% dispo 4 dernières semaines", help="%age de dispo entre le lundi de la semaine S-4 et le dimanche de la semaine S-1", compute=availability, store=True, group_operator='avg')
+    availability_current_week = fields.Float("J. dispo semaine courante", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine courante", compute=availability, store=True)
+    availability_next_week_1 = fields.Float("J. dispo S+1", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+1", compute=availability, store=True)
+    availability_next_week_2 = fields.Float("J. dispo S+2", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+2", compute=availability, store=True)
+    availability_next_week_3 = fields.Float("J. dispo S+3", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+3", compute=availability, store=True)
+    availability_next_week_4 = fields.Float("J. dispo S+4", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+4", compute=availability, store=True)
+    availability_next_period_5_weeks = fields.Float("% dispo semaine en cours et 4 prochaines semaines", help="%age de dispo entre le lundi de la semaine en cours et le dimanche de la semaine S+4 (5 semaines au total)", compute=availability, store=True, group_operator='avg')
+
+
+
     availability_4_weeks_graph = fields.Char("Graph dispo S+4", compute=availability_4_weeks_graph)
     last_validated_timesheet_date = fields.Date("Date du dernier pointage validé", compute=last_validated_timesheet_date)
     is_late_validated_timesheet = fields.Boolean("Pointage en retard", compute=is_late_validated_timesheet)
@@ -138,6 +178,7 @@ class staffingEmployee(models.Model):
     annual_evaluator_id = fields.Many2one('res.partner', string="En charge de l'EA")
     cv_link = fields.Char('Lien CV')
     vcard_link = fields.Char('Lien VCard') #TODO : générer la VCARD depuis les données Odoo
+    #most_recent_contract = fields.Many2one('hr.contract', 'employee_id', string="Contract le plus récent (ou à venir)", compute=most_recent_contract)
 
     def name_get(self):
          res = []

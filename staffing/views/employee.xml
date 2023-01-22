@@ -25,8 +25,18 @@
                   <field name="name"/>
                   <field name="job_id"/>
 		  <!--
-                  <field name="availability_4_weeks" widget="progressbar"/>
 		  -->
+                  <field name="availability_prev_week_4" optional="show" sum="Total S-4"/>
+                  <field name="availability_prev_week_3" optional="show" sum="Total S-3"/>
+                  <field name="availability_prev_week_2" optional="show" sum="Total S-2"/>
+                  <field name="availability_prev_week_1" optional="show" sum="Total S-1"/>
+                  <field name="availability_prev_period_4_weeks" widget="progressbar" optional="show" />
+                  <field name="availability_current_week" optional="show" sum="Total S"/>
+                  <field name="availability_next_week_1" optional="show" sum="Total S+1"/>
+                  <field name="availability_next_week_2" optional="show" sum="Total S+2"/>
+                  <field name="availability_next_week_3" optional="show" sum="Total S+3"/>
+                  <field name="availability_next_week_4" optional="show" sum="Total S+4"/>
+                  <field name="availability_next_period_5_weeks" widget="progressbar" optional="show" />
                 </tree>
               </field>
             </record>
@@ -154,10 +164,10 @@
 					  <field name="staffing_wishes"/>
 					  <field name="last_validated_timesheet_date"/>
 					  <field name="is_late_validated_timesheet"/>
-					  <field name="availability_4_weeks" widget="progressbar" />
 				</group>
 	  		</group>
 			<!--
+				<field name="availability_4_weeks" widget="progressbar" />
 				<div>
 				    <field name="availability_4_weeks_graph" widget="bokeh_chart" readonly="1" nolabel="1"/>
 				</div>
