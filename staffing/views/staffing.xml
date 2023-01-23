@@ -13,7 +13,7 @@
 	  <field name="skill_id" optional="show"/>
 	  <field name="considered_employee_ids" optional="show" widget="many2many_tags"/>
 	  <field name="begin_date" optional="show"/>
-	  <field name="end_date" optional="show"/>
+	  <field name="end_date" optional="show" required="1"/>
 	  <field name="nb_days_needed" optional="show"/>
 	  <field name="state" optional="show"/>
           <field name="staffed_employee_id" optional="hide"/>
@@ -44,7 +44,7 @@
 					    <div name="dates" class="o_row">
 						    <field name="begin_date" widget="daterange" options="{'related_end_date': 'end_date'}" />
 						<i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
-						<field name="end_date" widget="daterange" options="{'related_start_date': 'begin_date'}" />
+						<field name="end_date" widget="daterange" options="{'related_start_date': 'begin_date'}" required="1"/>
 					    </div>
 			  <field name="nb_days_needed" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
 			  <field name="job_id" modifiers="{&quot;readonly&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />

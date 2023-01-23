@@ -53,6 +53,7 @@ class staffingAnalyticLine(models.Model):
 
     staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")
     hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
+    employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
 
 
 
@@ -106,6 +107,10 @@ class staffingAnalyticLine(models.Model):
         for timesheet in timesheets:
             if timesheet.encoding_uom_id != self.env.ref("uom.product_uom_day"):
                 continue
+            if timesheet.project_id.id == 1147 :
+                #ne pas compter les pointage sur "Complément pour soumettre"
+                #TODO : pas propre de hardoder l'ID : soit avoir un booléen des lignes à exclure ... soit supprimer ce projet, les staffing.need et les analytics account.line qui vont avec !
+                continue
             if timesheet.category == 'project_employee_validated':
                 if timesheet.date < monday_pivot_date:
                     validated_timesheet_ids.append(timesheet)
@@ -153,7 +158,7 @@ class staffingAnalyticLine(models.Model):
                 'holiday_timesheet_ids' : holiday_timesheet_ids,
                 'holiday_timesheet_unit_amount' : holiday_timesheet_unit_amount,
                 }
-        _logger.info(res)
+        #_logger.info(res)
         return res
 
     #override to deal with uom in days
@@ -181,7 +186,7 @@ class staffingAnalyticLine(models.Model):
                     'amount': amount_converted,
                     'hr_cost_id' : cost_line,
                 })
-        _logger.info(result)
+        #_logger.info(result)
         return result
     
 
@@ -190,10 +195,12 @@ class staffingAnalyticLine(models.Model):
     def compute_amount(self):
         timesheet = self
 
-        if self.employee_id:
-            self.employee_id.availability()
+        if not self.employee_id :
+            return False,False
+        
+        self.employee_id.availability()
+        #TODO : surcharger unlink pour recalculer l'availability
 
-        #TODO : utiliser la catégorie pour ne cibler que les lignes de pointage ?
         if timesheet.holiday_id :
             return False,False
 

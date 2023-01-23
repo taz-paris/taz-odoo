@@ -44,6 +44,25 @@ class staffingEmployee(models.Model):
         return res
 
     def refresh_availability_all_employees(self):
+        # TODO : correct the flow (so that the timesheet will be deleted on hr.leave cancelation) and then remove thoses lines
+        leaves = self.env['hr.leave'].search([('state', '=', 'canceled')])
+        for leave in leaves :
+            if leave.timesheet_ids :
+                _logger.info("Leave cancelled for %s - duration %s" % (leave.employee_id.name, str(leave.number_of_days)))
+            for timesheet in leave.timesheet_ids:
+                _logger.info("      > Deleting timesheet ID=%d because the related hr.leave has been cancelled" % timesheet.id)
+                timesheet.sudo().holiday_id = False
+                timesheet.unlink()
+
+        leaves = self.env['hr.leave'].search([('state', '=', 'refuse')])
+        for leave in leaves :
+            if leave.timesheet_ids :
+                _logger.info("Leave refused for %s - duration %s" % (leave.employee_id.name, str(leave.number_of_days)))
+            for timesheet in leave.timesheet_ids:
+                _logger.info("      > Deleting timesheet ID=%d because the related hr.leave has been refused" % timesheet.id)
+                timesheet.sudo().holiday_id = False
+                timesheet.unlink()
+
         employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : rafraichir aussi ceux dont le contrat n'a pas encore commencé
         employees.availability()
 
@@ -52,7 +71,9 @@ class staffingEmployee(models.Model):
         curent_monday =  d - timedelta(days=d.weekday())
 
         work_days_prev_period_4_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-4*7)), curent_monday + timedelta(days=-1))
-        work_days_next_period_5_weeks = self.number_work_days_period(curent_monday, curent_monday + timedelta(days=(1*7)*5))
+        _logger.info(work_days_prev_period_4_weeks)
+        work_days_next_period_5_weeks = self.number_work_days_period(curent_monday, curent_monday + timedelta(days=(5*7)-1))
+        _logger.info(work_days_next_period_5_weeks)
 
         for rec in self:
             _logger.info('--refresh availability employee %s' % rec.name)
@@ -232,31 +253,6 @@ class staffingEmployee(models.Model):
         c = lines['validated_timesheet_unit_amount'] + lines['previsional_timesheet_unit_amount'] + lines['holiday_timesheet_unit_amount']
         #_logger.info("       > %s" % str(c))
         return c
-        """
-        #_logger.info('numbers_not_available_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
-        count = 0.0
-        timesheets = self.env['account.analytic.line'].search([('date', '>=', date_start), ('date', '<', date_end), ('employee_id', '=', self.id), ('category', '!=', 'project_draft')])
-        for timesheet in timesheets:
-            if timesheet.encoding_uom_id == self.env.ref("uom.product_uom_day"):
-                #_logger.info("%s du %s categ=%s nb_jours=%s" % (timesheet.name, timesheet.date, timesheet.category, timesheet.unit_amount))
-                if timesheet.category == 'project_forecast':
-                    #Exclure les prévisionnels si au moins un pointage validé ou un congés existe sur la semaine
-                    project_employee_validated = False
-                    d = timesheet.date
-                    monday =  d - timedelta(days=d.weekday())
-                    sunday = monday + timedelta(days=6)
-                    #_logger.info("Date : %s => Semaine du lundi %s au dimanche %s" % (str(d), str(monday), str(sunday)))
-                    for t in timesheets:
-                        if t.date >= monday and t.date <= sunday and t.category != 'project_forecast': #si vacances ou pointage validé sur cette semaine, on exclut
-                            project_employee_validated = True
-                            #_logger.info('          ==> Exclue')
-                    if not project_employee_validated :
-                        count += timesheet.unit_amount
-                else : 
-                    count += timesheet.unit_amount
-        _logger.info("       > %s" % str(count))
-        return count
-        """
 
     def number_work_days_period(self, date_start, date_end):
         #_logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))

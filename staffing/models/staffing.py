@@ -55,7 +55,7 @@ class staffingNeed(models.Model):
     #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
     staffed_employee_id = fields.Many2one('hr.employee', string='Équipier satffé')
     begin_date = fields.Date('Date début', required=True)
-    end_date = fields.Date('Date fin', required=True)
+    end_date = fields.Date('Date fin', required=False) #La date de fin n'est pas requise car pour les activités hors mission on a pas à mettre de date de fin
     nb_days_needed = fields.Float('Nb jours')
     description = fields.Text("Description du besoin")
     ##TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui ont un budget jour initial à 0

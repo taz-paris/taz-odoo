@@ -168,12 +168,74 @@ class fitnetProject(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
+    def import_grille_competences(self):
+        file_path = '/home/ubuntu/230122_Grille_competences.csv'
+        with open(file_path, 'r', encoding="utf-8") as f :
+            import csv
+            csvreader = csv.DictReader(f, delimiter=';')
+            for row in csvreader:
+                #print(row)
+                employees = self.env['hr.employee'].search([('first_name', '=', row['prénom']), ('name', '=', row['Nom']), ('work_email', '!=', False)])
+                if len(employees) != 1:
+                    print("Erreur pour trouver l'employee %s" % row['Nom'])
+                    print(employees)
+                    continue
+                employee = employees[0]
+                print('--- Compétences de l\'employee %s' % row['Nom'])
+
+                for skill_name, skill_value in row.items():
+                    if skill_name in ["", "Nom", "prénom", "Date de mise à jour"]:
+                        continue
+                    skills = self.env['hr.skill'].search([('name', '=', skill_name)])
+                    if len(skills) != 1:
+                        print("Erreur pour trouver la skill %s" % skill_name)
+                        print(skills)
+                        continue
+                    skill = skills[0]
+
+                    if skill_value == '':
+                        skill_level_name = "Je ne connais pas du tout"
+                    elif skill_value in ['x', 'X']:
+                        skill_level_name = 'OUI'
+                    elif skill_value in ['1', '2', '3', '4']:
+                        skill_level_name = 'Niveau %s' % skill_value
+                    else :
+                        print("Erreur : donnée inatendue dans la grille Excel pour le niveau %s pour la compétence %s" % (skill_value, skill_name))
+                        continue
+                    levels = self.env['hr.skill.level'].search([('skill_type_id', '=', skill.skill_type_id.id), ('name', '=', skill_level_name)])
+                    if len(levels) != 1:
+                        print("Erreur pour trouver le niveau %s pour la compétence %s" % (skill_value, skill_name))
+                        print(levels)
+                        continue
+                    level = levels[0]
+
+
+                    employee_skills = self.env['hr.employee.skill'].search([('employee_id', '=', employee.id), ('skill_id', '=', skill.id)])
+                    if len(employee_skills) > 1:
+                        print("Erreur : il y a plus d'une hr.employee.skill pour la compétence %s pour %s" % (skill.id, employee.name))
+                        print(employee_skills)
+                    elif len(employee_skills) == 1:
+                        #mise à jour
+                        employee_skill = employee_skills[0]
+                        if employee_skill.skill_level_id.id != level.id :
+                            print("Mise a jour de la compétence %s au niveau %s pour %s" % (skill.name, level.name, employee.name))
+                            employee_skill.skill_level_id = level.id
+                    else :
+                        #creation
+                        print("Créaion de la compétence %s au niveau %s pour %s" % (skill.name, level.name, employee.name))
+                        self.env['hr.employee.skill'].create({'employee_id' : employee.id, 'skill_id' : skill.id, 'skill_level_id' : level.id, 'skill_type_id' : skill.skill_type_id.id})
+
+
 
     def synchAllFitnet(self):
         _logger.info(' ############## Début de la synchro Fitnet')
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+
+        #return self.import_grille_competences()
+
+        """
         self.sync_employees(client)
         self.sync_employees_contracts(client)
         self.sync_customers(client)
@@ -183,21 +245,24 @@ class fitnetProject(models.Model):
 
         self.sync_contracts(client)
 
+        """
         self.sync_assignments(client)
-        self.sync_forecastedActivities(client)
+        self.sync_assignmentsoffContract(client)
         self.sync_timesheets(client)
+        """
+        self.sync_forecastedActivities(client)
+
 
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
         
         self.sync_holidays(client) 
+        """
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
 
         #self.sync_customer_invoices(client)
         #TODO           self.sync_supplier_invoices(client)
 
-        #TODO           self.sync_assignmentsoffContract(client)
-        #TODO           self.sync_offContractActivities(client)
 
         #TODO : supprimer les objets qui ont un FitnetId et qui ne sont plus dans les retours API Fitnet intégrals (ou plus dispo par GET initaire sur l'ID)
         _logger.info(' ############## Fin de la synchro Fitnet')
@@ -322,10 +387,12 @@ class fitnetProject(models.Model):
         for obj in fitnet_objects:
             if obj['amount'] == 0.0 : 
                 continue
-            if obj['activityType'] != 1:
+            if obj['activityType'] == 3:
                 #Activity type: 1:Contracted activity, 2:Off-Contract activity, 3:Training 
-                #TODO : réintégrer les types 2 quand self.sync_assignmentsoffContract sera implémentée
                 continue
+
+            if obj['activityType'] == 2:
+                obj['assignmentID'] = 'assignmentOffContractID_'+str(obj['assignmentID'])
 
             obj['category'] = 'project_employee_validated'
             obj['fitnet_id'] = 'timesheet_' + str(obj['timesheetAssignmentID'])
@@ -388,6 +455,26 @@ class fitnetProject(models.Model):
             }
         odoo_model_name = 'staffing.need'
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'assignmentOnContractID')
+
+    def sync_assignmentsoffContract(self, client):
+        _logger.info('---- sync_assignmentsOffContract')
+        fitnet_objects = client.get_api("assignments/offContract/1")
+        for obj in fitnet_objects:
+            obj['status'] = 'done'
+            obj['assignmentOffContractID'] = 'assignmentOffContractID_'+str(obj['assignmentOffContractID'])
+            obj['offContractActivityID'] = 'offContractActivityID_'+str(obj['offContractActivityID'])
+            obj['assignmentStartDate'] = '01/01/2020'
+
+        mapping_fields = {
+            'assignmentStartDate' : {'odoo_field' : 'begin_date'},
+            #'assignmentEndDate' : {'odoo_field' : 'end_date'},
+            #'initialBudget' : {'odoo_field' : 'nb_days_needed'},
+            'offContractActivityID' : {'odoo_field' : 'project_id'},
+            'employeeID' : {'odoo_field' : 'staffed_employee_id'},
+            'status' : {'odoo_field' : 'state', 'selection_mapping' : {'done' : 'done'}},
+            }
+        odoo_model_name = 'staffing.need'
+        self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'assignmentOffContractID')
 
     def sync_customers(self, client):
         _logger.info('---- sync_customers')

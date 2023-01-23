@@ -16,6 +16,22 @@
 		</field>
 	    </record>
 
+        <record id="view_employee_filter_inherit" model="ir.ui.view">
+            <field name="name">Employee</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_filter"/>
+	    <field name="priority">5</field>
+	    <field name="arch" type="xml">
+		<xpath expr='//searchpanel' position="replace">
+		   <!--
+			<field name="company_id" groups="base.group_multi_company" icon="fa-building" enable_counters="1"/>
+                        <field name="job_id" icon="fa-users" enable_counters="1"/>
+		-->
+		</xpath>
+	    </field>
+	</record>
+
+
 	   <record model="ir.ui.view" id="staffing.employee_tree">
               <field name="name">Équipage</field>
               <field name="model">hr.employee</field>
@@ -212,6 +228,9 @@
 						    <field name="level_progress" widget="progressbar" modifiers="{&quot;readonly&quot;: true}"/>
 						</tree>
 					    </field>
+					    <!--
+					    <field mode="tree" nolabel="1" name="employee_skill_ids" widget="one2many_list" context="{'group_by':'skill_type_id'}"/>
+					    -->
 					</div>
 				</div>
 					<group string="Éducation">
@@ -238,6 +257,8 @@
 		<field name="name">Équipage</field>
 		<field name="res_model">hr.employee</field>
 		<field name="view_mode">tree,form</field>
+		<field name="domain">[('contract_warning', '=', False)]</field>
+		<field name="context">{'search_default_group_job' : 1}</field>
 		<field name="view_ids" eval="
 				    [
 				    (5, 0, 0),
