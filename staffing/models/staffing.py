@@ -50,7 +50,7 @@ class staffingNeed(models.Model):
     project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True)
     project_stage = fields.Many2one(related='project_id.stage_id')
     job_id = fields.Many2one('hr.job', string="Grade souhaité") #TODO : impossible de le mettre en required dans le modèle car la synchro fitnet importe des assignments qui n'ont pas de job_id
-    skill_id = fields.Many2one('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
+    skill_ids = fields.Many2many('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
     considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)")
     #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
     staffed_employee_id = fields.Many2one('hr.employee', string='Équipier satffé')
@@ -139,7 +139,7 @@ class staffingProposal(models.Model):
         ('need_employee_uniq', 'UNIQUE (staffing_need_id, employee_id)',  "Impossible d'enregistrer deux propositions de staffing pour le même besoin et le même consultant.")
     ]
 
-    @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id')
+    @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id', 'staffing_need_id.skill_ids', 'employee_id.employee_skill_ids')
     def compute(self):
         for rec in self :
             #_logger.info('staffingProposal compute %s' % rec.employee_id.name)
@@ -148,6 +148,13 @@ class staffingProposal(models.Model):
             rec.employee_availability = rec.employee_id.number_days_available_period(need.begin_date, need.end_date)
             rec.ranked_employee_availability = rec.employee_availability / need.nb_days_needed * 100
             rec.ranked_proposal = rec.ranked_employee_availability
+
+            for employee_skill in rec.employee_id.employee_skill_ids: #TODO doit être mise à jour si les compétences de l'employee évoluent
+                if employee_skill.skill_id in rec.staffing_need_id.skill_ids:
+                    _logger.info(employee_skill.skill_id.id)
+                    rec.employee_skill_need_match_ids = (4,employee_skill.skill_id.id)
+
+            rec.ranked_employee_skill = len(rec.staffing_need_id.skill_ids)/rec.employee_skill_need_match_ids
 
 
     @api.depends('staffing_need_id', 'employee_id')
@@ -210,16 +217,18 @@ class staffingProposal(models.Model):
     employee_id = fields.Many2one('hr.employee')
 
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id') #TODO : remplacer le hr.employee.job_id par une fonction qui retourne get_job_id()
-    employee_skill_ids = fields.One2many(string="Compétences", related='employee_id.employee_skill_ids')
+    #employee_skill_ids = fields.One2many(string="Compétences", related='employee_id.employee_skill_ids')
     employee_staffing_wishes = fields.Html(string="Souhaits de staffing COD", related='employee_id.staffing_wishes')
 
     employee_availability = fields.Float("Dispo sur la période", compute='compute', store=True)
+    employee_skill_need_match_ids = fields.Many2many('hr.skill', string="Compétences du consultant qui matchent avec le besoin", compute='compute', store=True)
     ranked_proposal = fields.Float('Note globale', compute='compute', store=True)
     ranked_employee_availability = fields.Float('Note disponibilité', compute='compute', store=True)
     ranked_employee_skill = fields.Float('Note adéquation compétences', compute='compute', store=True)
     ranked_employee_explicit_voluntary = fields.Float('A explicitement demandé à être sur cette misison', compute='compute', store=True)
     ranked_employee_worked_on_proposal = fields.Float('A travaillé sur la proposition commerciale', compute='compute', store=True)
     ranked_employee_wished_on_need = fields.Float('Envisagé dans la desciption du besoin', compute='compute', store=True)
+    #souhait de rotation
 
     #Champs related pour le Kanban
     employee_image = fields.Binary(related="employee_id.image_128")

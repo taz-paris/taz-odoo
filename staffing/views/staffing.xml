@@ -10,7 +10,7 @@
 	  <field name="project_stage" optional="show"/>
 	  <field name="description" optional="show"/>
 	  <field name="job_id" optional="show"/>
-	  <field name="skill_id" optional="show"/>
+	  <field name="skill_ids" widget="many2many_tags" optional="show"/>
 	  <field name="considered_employee_ids" optional="show" widget="many2many_tags"/>
 	  <field name="begin_date" optional="show"/>
 	  <field name="end_date" optional="show" required="1"/>
@@ -48,7 +48,7 @@
 					    </div>
 			  <field name="nb_days_needed" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
 			  <field name="job_id" modifiers="{&quot;readonly&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
-			  <field name="skill_id" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
+			  <field name="skill_ids" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
 			  <field name="considered_employee_ids" widget="many2many_avatar_employee" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
 			  <!--
 			  <field name="considered_employee_ids" widget="many2many_tags" modifiers="{&quot;invisible&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}" />
@@ -90,6 +90,10 @@
 				   </div>
 				</div>
 				<span>Dispo : <field name="employee_availability"/> j. / <field name="staffing_need_nb_days_needed"/></span>
+				<field name="employee_skill_need_match_ids" widget="many2many_tags"/>
+				<!--
+				<div class="fa-star" modifiers="{&quot;invisible&quot;: [[&quot;is_considered&quot;, &quot;=&quot;, true]]}"/>
+				-->
 				<field name="ranked_proposal" widget="progressbar" class="o_progressbar_complete.o_progress_blue"/>
 				<br/>
 				<button name="action_consider_employee" class="oe_highlight" type="object" string="Envisager" modifiers="{&quot;invisible&quot;: [[&quot;is_considered&quot;, &quot;=&quot;, true]]}"/>
@@ -136,6 +140,7 @@
 				   </div>
 				</div>
 				<span>Dispo : <field name="employee_availability"/> j. / <field name="staffing_need_nb_days_needed"/></span>
+				<field name="employee_skill_need_match_ids" widget="many2many_tags"/>
 				<field name="ranked_proposal" widget="progressbar" class="o_progressbar_complete.o_progress_blue"/>
 				<br/>
 				<button name="action_consider_employee" class="oe_highlight" type="object" string="Envisager" modifiers="{&quot;invisible&quot;: [[&quot;is_considered&quot;, &quot;=&quot;, true]]}"/>
