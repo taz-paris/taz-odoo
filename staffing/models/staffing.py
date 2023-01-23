@@ -154,7 +154,7 @@ class staffingProposal(models.Model):
                     _logger.info(employee_skill.skill_id.id)
                     rec.employee_skill_need_match_ids = (4,employee_skill.skill_id.id)
 
-            rec.ranked_employee_skill = len(rec.staffing_need_id.skill_ids)/rec.employee_skill_need_match_ids
+            rec.ranked_employee_skill = len(rec.employee_skill_need_match_ids) / len(rec.staffing_need_id.skill_ids)
 
 
     @api.depends('staffing_need_id', 'employee_id')

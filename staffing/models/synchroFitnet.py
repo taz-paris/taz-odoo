@@ -156,6 +156,14 @@ class fitnetHrContract(models.Model):
     fitnet_id = fields.Char("Fitnet ID")
 
 
+class fitnetProjectGroup(models.Model):
+    _inherit = "project.group"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+
 
 
 
@@ -241,15 +249,14 @@ class fitnetProject(models.Model):
         self.sync_customers(client)
 
         #TODO           self.sync_prospect(client)
-        #TODO           self.sync_project(client)
-
-        self.sync_contracts(client)
-
         """
+        self.sync_project(client)
+        self.sync_contracts(client)
+        """
+
         self.sync_assignments(client)
         self.sync_assignmentsoffContract(client)
         self.sync_timesheets(client)
-        """
         self.sync_forecastedActivities(client)
 
 
@@ -640,12 +647,23 @@ class fitnetProject(models.Model):
         self.create_overide_by_fitnet_values(odoo_model_name, employees, mapping_fields, 'employee_id', filters=[('active', 'in', [True, False])])
 
 
+    def sync_project(self, client):
+        _logger.info('--- synch projects')
+        projects = client.get_api("projects/1")
+        mapping_fields = {
+            'title' : {'odoo_field' : 'name'},
+            'customer' : {'odoo_field' : 'partner_id'},
+            }
+        odoo_model_name = 'project.group'
+        self.create_overide_by_fitnet_values(odoo_model_name, projects, mapping_fields, 'projectId')
+
 
 
     def sync_contracts(self, client):
         _logger.info('---- sync_contracts')
         mapping_fields = {
             'title' : {'odoo_field' : 'name'},
+            'projectId' : {'odoo_field' : 'project_group_id'},
             'customerId' : {'odoo_field' : 'partner_id'},
             'beginDate' : {'odoo_field' : 'date_start'},
             'endDate' : {'odoo_field' : 'date'},

@@ -13,6 +13,45 @@ class staffingProjectStage(models.Model):
 
     is_part_of_booking = fields.Boolean('Compte dans le book', help="Les projects qui sont à cette étape comptent dans le book.")
 
+class projectGroup(models.Model):
+    _name = 'project.group'
+    _description = 'A project group is use for data consolidation purpose'
+
+    def compute(self):
+        for rec in self:
+            order_amount = 0.0
+            billed_amount = 0.0
+            payed_amount = 0.0
+            group_negative_total_costs = 0.0
+            for project in rec.project_ids:
+                 if project.order_amount :
+                     order_amount += project.order_amount
+                 if project.billed_amount :
+                     billed_amount += project.billed_amount
+                 if project.payed_amount :
+                     payed_amount += project.payed_amount
+                 negative_total_costs, margin_landing_rate, margin_text = project.margin_landing_date(datetime.today())
+                 group_negative_total_costs += negative_total_costs
+            rec.order_amount = order_amount
+            rec.billed_amount = billed_amount
+            rec.payed_amount = payed_amount
+            rec.negative_total_costs = group_negative_total_costs
+            rec.margin_landing = (order_amount + group_negative_total_costs) / order_amount * 100
+
+
+
+    #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
+    name = fields.Char('Nom', required=True)
+    partner_id = fields.Many2one('res.partner', string="Client", required=True, domain=[('is_company', '=', True), ('active', '=', True)])
+    #TODO pré-remplir le partner_id avec celui du project lorsqu'on crée le project.group à partir du project
+    project_ids = fields.One2many('project.project', 'project_group_id', string="Projets")
+    description = fields.Html("Description")
+    order_amount = fields.Float('Montant commande', compute=compute)
+    billed_amount = fields.Float('Montant facturé', compute=compute)
+    payed_amount = fields.Float('Montant payé', compute=compute)
+    negative_total_costs = fields.Float('Pointage (réal. ou prév.)', compute=compute)
+    margin_landing = fields.Float('Marge à terminaison (%)', compute=compute)
+
 
 class timesheetNavigator(models.TransientModel):
     _name = 'timesheet.navigator'
@@ -186,26 +225,25 @@ class staffingProject(models.Model):
 
     def margin_landing_now(self):
         for rec in self :
-            margin_landing_date, margin_text = rec.margin_landing_date(datetime.today())
-            rec.margin_landing = margin_landing_date
+            negative_total_costs, margin_landing_rate, margin_text = rec.margin_landing_date(datetime.today())
+            rec.margin_landing = margin_landing_rate
             rec.margin_text = margin_text
 
     def margin_landing_date(self, date):
         if not self.order_amount or self.order_amount == 0.0:
-            return 0.0, ""
+            return 0.0, 0.0, ""
        
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=None, date_end=None, filters=[('project_id', '=', self.id)])
         _logger.info(timesheets_data)
         timesheet_total_amount = timesheets_data['validated_timesheet_amount'] + timesheets_data['previsional_timesheet_amount']
 
-        partner_id = fields.Many2one(required=True, ondelete="restrict")
+        #partner_id = fields.Many2one(required=True, ondelete="restrict")
         negative_total_costs = timesheet_total_amount
         date = fields.Date(string="Date de fin")
 
-        margin_landing_date = (self.order_amount + negative_total_costs) / self.order_amount * 100
-        #margin_text = "Au %s :\n    - %s jours pointés (%s €)\n   - % jours prévisionnels (%s €)" % (timesheets_data['monday_pivot_date'], timesheets_data['validated_timesheet_unit_amount'], timesheets_data['validated_timesheet_amount'], timesheets_data['previsional_timesheet_unit_amount'], timesheets_data['previsional_timesheet_amount'])
+        margin_landing_rate = (self.order_amount + negative_total_costs) / self.order_amount * 100
         margin_text = "Projection à terminaison en date du %(monday_pivot_date)s :\n    - %(validated_timesheet_unit_amount).2f jours pointés (%(validated_timesheet_amount).2f €)\n    - %(previsional_timesheet_unit_amount).2f jours prévisionnels (%(previsional_timesheet_amount).2f €)" % timesheets_data
-        return margin_landing_date, margin_text
+        return negative_total_costs, margin_landing_rate, margin_text
 
 
     def write(self, vals):
@@ -219,6 +257,8 @@ class staffingProject(models.Model):
         return super().create(vals)
     
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
+    project_group_id = fields.Many2one('project.group', string='Groupe de projets', domain="[('partner_id', '=', partner_id)]")
+        #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
     favorite_user_ids = fields.Many2many(string="Intéressés par ce projet")
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
