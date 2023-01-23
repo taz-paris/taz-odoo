@@ -23,10 +23,10 @@
 	    <field name="priority">5</field>
 	    <field name="arch" type="xml">
 		<xpath expr='//searchpanel' position="replace">
-		   <!--
+			<searchpanel view_types="list,graph" >
 			<field name="company_id" groups="base.group_multi_company" icon="fa-building" enable_counters="1"/>
                         <field name="job_id" icon="fa-users" enable_counters="1"/>
-		-->
+			</searchpanel>
 		</xpath>
 	    </field>
 	</record>
@@ -57,6 +57,25 @@
               </field>
             </record>
 
+	   <record model="ir.ui.view" id="staffing.employee_analysis_3_past_week_tree">
+              <field name="name">3 dernières semaines</field>
+              <field name="model">hr.employee</field>
+              <field name="arch" type="xml">
+                <tree>
+                  <field name="first_name"/>
+                  <field name="name"/>
+                  <field name="job_id"/>
+		  <!--
+		  -->
+                  <field name="prev_3_weeks_workdays" optional="show" sum="Total"/>
+                  <field name="prev_3_weeks_hollidays" optional="show" sum="Total"/>
+                  <field name="prev_3_weeks_activity_days" optional="show" sum="Total"/>
+                  <field name="prev_3_weeks_learning_internal_days" optional="show" sum="Total"/>
+                  <field name="prev_3_weeks_project_days" optional="show" sum="Total"/>
+                  <field name="prev_3_weeks_activity_rate" widget="progressbar" avg="Moyenne" optional="show" />
+                </tree>
+              </field>
+            </record>
 
            <record model="ir.ui.view" id="staffing.employee_form">
               <field name="name">Équipage</field>
@@ -267,6 +286,32 @@
 				      ]" />
 	    </record>
 
+    <record model="ir.ui.view" id="staffing.employee_analysis_3_past_week_graph">
+      <field name="name">Équipage - Activité des 3 dernières semaines</field>
+      <field name="model">hr.employee</field>
+      <field name="arch" type="xml">
+	<graph type="bar" string="Activité des 3 dernières semaines" order="desc" >
+	    <field name="name"/>
+	    <field name="prev_3_weeks_activity_rate" type="measure" />
+	</graph>
+      </field>
+    </record>
+
+            <record id="staffing.employee_analysis_3_past_week_action" model="ir.actions.act_window">
+                <field name="name">Équipage - Activité des 3 dernières semaines</field>
+                <field name="res_model">hr.employee</field>
+                <field name="view_mode">tree,form,graph</field>
+		<field name="domain">[('contract_warning', '=', False)]</field>
+                <field name="view_ids" eval="
+                                    [
+                                    (5, 0, 0),
+                                    (0, 0, {'view_mode': 'tree', 'view_id': ref('staffing.employee_analysis_3_past_week_tree')}),
+                                    (0, 0, {'view_mode': 'form', 'view_id': ref('staffing.employee_form')}),
+                                    (0, 0, {'view_mode': 'graph', 'view_id': ref('staffing.employee_analysis_3_past_week_graph')}),
+                                      ]" />
+	</record>
+
 	    <menuitem name="Équipage" id="staffing.employee_menu" parent="staffing.staffing_root" action="staffing.employee_action"/>
+	    <menuitem name="Analyse activité 3 denières s." id="staffing.employee_analysis_3_past_week_menu" parent="staffing.staffing_root" action="staffing.employee_analysis_3_past_week_action"/>
         </data>
 </odoo>

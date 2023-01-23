@@ -149,12 +149,13 @@ class staffingProposal(models.Model):
             rec.ranked_employee_availability = rec.employee_availability / need.nb_days_needed * 100
             rec.ranked_proposal = rec.ranked_employee_availability
 
-            for employee_skill in rec.employee_id.employee_skill_ids: #TODO doit être mise à jour si les compétences de l'employee évoluent
-                if employee_skill.skill_id in rec.staffing_need_id.skill_ids:
-                    _logger.info(employee_skill.skill_id.id)
-                    rec.employee_skill_need_match_ids = (4,employee_skill.skill_id.id)
-
-            rec.ranked_employee_skill = len(rec.employee_skill_need_match_ids) / len(rec.staffing_need_id.skill_ids)
+            #for employee_skill in rec.employee_id.employee_skill_ids: #TODO doit être mise à jour si les compétences de l'employee évoluent
+            #    if employee_skill.skill_id in rec.staffing_need_id.skill_ids:
+            #        _logger.info(employee_skill.skill_id.id)
+            #        rec.employee_skill_need_match_ids = (4,employee_skill.skill_id.id)
+            
+            #test pour éviter la division par zéro
+            #rec.ranked_employee_skill = len(rec.employee_skill_need_match_ids) / len(rec.staffing_need_id.skill_ids)
 
 
     @api.depends('staffing_need_id', 'employee_id')

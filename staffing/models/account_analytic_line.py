@@ -61,6 +61,9 @@ class staffingAnalyticLine(models.Model):
         # Usage de cette fonction :
         #   - Calculer le temps pointé / prévisionnel d'un consultant
         #   - Calculer la disponibilité d'un consultant sur une période (passé, présente ou future)
+        if date_start and date_end :
+            if date_start > date_end :
+                raise ValidationError(_("Start date should be <= end date"))
 
         dic = [('category', '!=', 'project_draft')]
 
@@ -111,7 +114,13 @@ class staffingAnalyticLine(models.Model):
                 #ne pas compter les pointage sur "Complément pour soumettre"
                 #TODO : pas propre de hardoder l'ID : soit avoir un booléen des lignes à exclure ... soit supprimer ce projet, les staffing.need et les analytics account.line qui vont avec !
                 continue
-            if timesheet.category == 'project_employee_validated':
+            elif timesheet.project_id.id == 1148 : #Formation dont K4M
+                continue
+            elif timesheet.project_id.id == 1134 : #23004 TAZ_AVT pour les Experts => ce temps est compté dans leurs objectifs perso mais il ne doit pas être compté comme de l'activité dans Odoo
+                continue
+            elif timesheet.project_id.id == 1146 : #Autre absence
+                holiday_timesheet_ids.append(timesheet)
+            elif timesheet.category == 'project_employee_validated':
                 if timesheet.date < monday_pivot_date:
                     validated_timesheet_ids.append(timesheet)
             elif timesheet.category == 'project_forecast':

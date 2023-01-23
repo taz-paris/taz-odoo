@@ -35,6 +35,11 @@ class staffingLeave(models.Model):
                 leave.date_from,
                 leave.date_to)
 
+            _logger.info(leave.date_from)
+            _logger.info(leave.date_to)
+            _logger.info(work_hours_data)
+
+
             encoding_uom_id = self.env.company.timesheet_encode_uom_id
             if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
                 for index, (day_date, work_hours_count) in enumerate(work_hours_data):
@@ -46,6 +51,9 @@ class staffingLeave(models.Model):
                         work_days_count += -0.5
                     if index == len(work_hours_data)-1 and leave.request_date_to_period == "am":
                         work_days_count += -0.5
+                    _logger.info(index)
+                    _logger.info(day_date)
+                    _logger.info(work_days_count)
                     vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_days_count))
             else : 
                 raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))

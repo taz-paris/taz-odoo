@@ -24,6 +24,8 @@ class projectGroup(models.Model):
             payed_amount = 0.0
             group_negative_total_costs = 0.0
             for project in rec.project_ids:
+                 if not project.stage_id.is_part_of_booking:
+                     continue
                  if project.order_amount :
                      order_amount += project.order_amount
                  if project.billed_amount :
@@ -36,7 +38,10 @@ class projectGroup(models.Model):
             rec.billed_amount = billed_amount
             rec.payed_amount = payed_amount
             rec.negative_total_costs = group_negative_total_costs
-            rec.margin_landing = (order_amount + group_negative_total_costs) / order_amount * 100
+            if order_amount == 0:
+                rec.margin_landing = False
+            else :
+                rec.margin_landing = (order_amount + group_negative_total_costs) / order_amount * 100
 
 
 
@@ -46,11 +51,11 @@ class projectGroup(models.Model):
     #TODO pré-remplir le partner_id avec celui du project lorsqu'on crée le project.group à partir du project
     project_ids = fields.One2many('project.project', 'project_group_id', string="Projets")
     description = fields.Html("Description")
-    order_amount = fields.Float('Montant commande', compute=compute)
-    billed_amount = fields.Float('Montant facturé', compute=compute)
-    payed_amount = fields.Float('Montant payé', compute=compute)
-    negative_total_costs = fields.Float('Pointage (réal. ou prév.)', compute=compute)
-    margin_landing = fields.Float('Marge à terminaison (%)', compute=compute)
+    order_amount = fields.Float('Montant commande', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
+    billed_amount = fields.Float('Montant facturé', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
+    payed_amount = fields.Float('Montant payé', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
+    negative_total_costs = fields.Float('Pointage (réal. ou prév.)', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
+    margin_landing = fields.Float('Marge à terminaison (%)', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
 
 
 class timesheetNavigator(models.TransientModel):

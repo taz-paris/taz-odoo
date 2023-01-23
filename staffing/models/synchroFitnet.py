@@ -243,16 +243,13 @@ class fitnetProject(models.Model):
 
         #return self.import_grille_competences()
 
-        """
         self.sync_employees(client)
         self.sync_employees_contracts(client)
         self.sync_customers(client)
 
         #TODO           self.sync_prospect(client)
-        """
         self.sync_project(client)
         self.sync_contracts(client)
-        """
 
         self.sync_assignments(client)
         self.sync_assignmentsoffContract(client)
@@ -264,7 +261,6 @@ class fitnetProject(models.Model):
         #self.analytic_line_employee_correction()
         
         self.sync_holidays(client) 
-        """
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
 
         #self.sync_customer_invoices(client)
