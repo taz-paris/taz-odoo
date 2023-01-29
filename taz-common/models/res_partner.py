@@ -104,7 +104,10 @@ class tazResPartner(models.Model):
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False)]) 
-     is_priority_target = fields.Boolean("Compte à ouvrir")
+     business_priority = fields.Selection([
+         ('not_tracked', 'Non suivi'),
+         ('tracked', 'Compte suivi en BDM'),
+         ('priority_target', 'Compte à ouvrir')], "Niveau de priorité", default='not_tracked')
      former_email_address = fields.Char("Anciennes adresses email", readonly=True)
      is_followed = fields.Boolean("Contact à suivre en BDM")
 

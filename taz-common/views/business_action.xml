@@ -41,7 +41,7 @@
 		  </group>
 		  <group>
 		      <field name="is_rdv_taken_by_assistant"/>
-		      <field name="is_priority_target"/>
+		      <field name="business_priority"/>
 		      <field name="action_type"/>
 		      <field name="conclusion"/>
 		      <field name="report_url" widget="url"/>

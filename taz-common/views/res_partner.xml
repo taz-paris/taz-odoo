@@ -45,7 +45,7 @@
 		  </group>
 		  <group>
 		      <field name="user_id" options="{'no_create': True, 'no_create_edit':True}" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-		      <field name="is_priority_target"/>/
+		      <field name="business_priority"/>
 		      <field name="industry_id" options="{'no_create': True, 'no_create_edit':True}"/>
 		  </group>
 		</group>
@@ -140,7 +140,7 @@
             	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
             	<filter name="no_industry_id" string="Sans business domain" domain="[('industry_id', '=', False)]"/>
             	<filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
-            	<filter name="priority_target" string="Comptes à ouvrir" domain="[('is_priority_target', '=', True)]"/>
+            	<filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
 		<filter string="Archivée" name="inactive" domain="[('active', '=', False)]"/>
 		<separator/>
 		<group expand="0" string="Group By">
