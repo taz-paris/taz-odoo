@@ -242,7 +242,7 @@ class fitnetProject(models.Model):
 
 
         #return self.import_grille_competences()
-
+        """
         self.sync_employees(client)
         self.sync_employees_contracts(client)
         self.sync_customers(client)
@@ -253,7 +253,10 @@ class fitnetProject(models.Model):
 
         self.sync_assignments(client)
         self.sync_assignmentsoffContract(client)
+        """
         self.sync_timesheets(client)
+    
+        """
         self.sync_forecastedActivities(client)
 
 
@@ -261,6 +264,7 @@ class fitnetProject(models.Model):
         #self.analytic_line_employee_correction()
         
         self.sync_holidays(client) 
+        """
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
 
         #self.sync_customer_invoices(client)
@@ -398,7 +402,7 @@ class fitnetProject(models.Model):
                 obj['assignmentID'] = 'assignmentOffContractID_'+str(obj['assignmentID'])
 
             obj['category'] = 'project_employee_validated'
-            obj['fitnet_id'] = 'timesheet_' + str(obj['timesheetAssignmentID'])
+            obj['fitnet_id'] = 'timesheet_' + str(obj['activityType']) + '_' + str(obj['timesheetAssignmentID'])
             fitnet_filtered.append(obj)
 
         #_logger.info(len(fitnet_objects))
@@ -751,10 +755,19 @@ class fitnetProject(models.Model):
                 continue
             if len(odoo_objects) == 1 :
                 odoo_object = odoo_objects[0]
-                res = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
-                if len(res) > 0:
-                    _logger.info("Mise à jour de l'objet %s ID= %s avec les valeurs de Fitnet %s" % (odoo_model_name, str(odoo_object.id), str(res)))
-                    odoo_object.with_context(context).write(res)
+                dict_dif = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
+                if len(dict_dif) > 0:
+                    import copy
+                    old_dict_dif = copy.copy(dict_dif)
+                    dic_old_values = odoo_object.with_context(context).read()[0]
+                    _logger.info("Fitnet object : %s" % str(fitnet_object))
+                    _logger.info("Mise à jour de l'objet %s ID= %s (fitnet_id = %s) avec les valeurs de Fitnet %s" % (odoo_model_name, str(odoo_object.id), str(fitnet_id), str(dict_dif)))
+                    odoo_object.with_context(context).write(dict_dif)
+                    dic_new_values = odoo_object.with_context(context).read()[0]
+                    _logger.info("Changements apportés :")
+                    for field in old_dict_dif.keys() :
+                        _logger.info("          > %s : %s => %s" %(field, dic_old_values[field], dic_new_values[field]))
+                    #return False
             if len(odoo_objects) == 0 :
                 dic = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields)
                 dic['fitnet_id'] = fitnet_id

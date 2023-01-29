@@ -3,6 +3,7 @@
 	   <record id="view_timesheets_tree" model="ir.ui.view">
                 <field name="name">account.analytic.line.pivot</field>
                 <field name="model">account.analytic.line</field>
+		<field name="priority">1</field>
                 <field name="arch" type="xml">
 			<tree editable="top" default_order='date' create="false">
 				<field name="employee_id" optional="hide" readonly="1"/>
@@ -15,6 +16,8 @@
 				<field name="unit_amount" widget="timesheet_uom" sum="Total" readonly="1"/>
 				-->
 				<field name="encoding_uom_id" optional="show" readonly="1"/>
+				<field name="fitnet_id" optional="show" readonly="1"/>
+				<field name="id" optional="show" readonly="1"/>
 			</tree>
                 </field>
             </record>

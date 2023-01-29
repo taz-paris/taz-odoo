@@ -13,6 +13,7 @@ class staffingAnalyticLine(models.Model):
     def write(self, vals):
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
+        _logger.info(vals)
         return super().write(vals)
 
     @api.model
@@ -42,7 +43,6 @@ class staffingAnalyticLine(models.Model):
         vals['project_id'] = need.project_id.id
         vals['account_id'] = need.project_id.analytic_account_id.id
         vals['employee_id'] =  need.staffed_employee_id.id
-        #_logger.info(vals)
         return vals
 
     category = fields.Selection(selection_add=[
@@ -189,8 +189,8 @@ class staffingAnalyticLine(models.Model):
 
             for timesheet in sudo_self:
                 amount_converted, cost_line = timesheet.compute_amount()
-                if not amount_converted:
-                    continue
+                #if not amount_converted:
+                #    continue
                 result[timesheet.id].update({
                     'amount': amount_converted,
                     'hr_cost_id' : cost_line,
@@ -207,7 +207,7 @@ class staffingAnalyticLine(models.Model):
         if not self.employee_id :
             return False,False
         
-        self.employee_id.availability()
+        #self.employee_id.availability()
         #TODO : surcharger unlink pour recalculer l'availability
 
         if timesheet.holiday_id :
