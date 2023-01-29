@@ -242,7 +242,6 @@ class fitnetProject(models.Model):
 
 
         #return self.import_grille_competences()
-        """
         self.sync_employees(client)
         self.sync_employees_contracts(client)
         self.sync_customers(client)
@@ -253,18 +252,13 @@ class fitnetProject(models.Model):
 
         self.sync_assignments(client)
         self.sync_assignmentsoffContract(client)
-        """
         self.sync_timesheets(client)
     
-        """
-        self.sync_forecastedActivities(client)
-
-
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
         
-        self.sync_holidays(client) 
-        """
+        #self.sync_holidays(client) 
+
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
 
         #self.sync_customer_invoices(client)
@@ -392,31 +386,44 @@ class fitnetProject(models.Model):
         fitnet_objects = client.get_api("timesheet/timesheetAssignment?companyId=1&startDate=01-01-2018&endDate=01-06-2050")
         fitnet_filtered = []
         for obj in fitnet_objects:
-            if obj['amount'] == 0.0 : 
-                continue
             if obj['activityType'] == 3:
                 #Activity type: 1:Contracted activity, 2:Off-Contract activity, 3:Training 
                 continue
 
+            assignmentID = obj['assignmentID']
             if obj['activityType'] == 2:
-                obj['assignmentID'] = 'assignmentOffContractID_'+str(obj['assignmentID'])
+                assignmentID = 'assignmentOffContractID_'+str(obj['assignmentID'])
 
-            obj['category'] = 'project_employee_validated'
-            obj['fitnet_id'] = 'timesheet_' + str(obj['activityType']) + '_' + str(obj['timesheetAssignmentID'])
-            fitnet_filtered.append(obj)
 
-        #_logger.info(len(fitnet_objects))
-        #_logger.info(len(fitnet_filtered))
+            if obj['amount'] != 0.0 : 
+                validated_line = {
+                        'assignmentID' : assignmentID,
+                        'category' : 'project_employee_validated',
+                        'amount' : obj['amount'],
+                        'assignmentDate' : obj['assignmentDate'],
+                        'fitnet_id' : 'validated_timesheet_' + str(obj['activityType']) + '_' + str(obj['timesheetAssignmentID']),
+                        }
+                fitnet_filtered.append(validated_line)
+
+            if obj['forecastedAmount'] != 0.0 :
+                forecast_line = {
+                        'assignmentID' : assignmentID,
+                        'category' : 'project_forecast',
+                        'amount' : obj['forecastedAmount'],
+                        'assignmentDate' : obj['assignmentDate'],
+                        'fitnet_id' : 'forecast_timesheet_' + str(obj['activityType']) + '_' + str(obj['timesheetAssignmentID']),
+                        }
+                fitnet_filtered.append(forecast_line)
 
         odoo_model_name = 'account.analytic.line'
-
         mapping_fields = {
             'assignmentID' : {'odoo_field' : 'staffing_need_id'},
-            'assignmentDate' : {'odoo_field' : 'date'},
+            'category' : {'odoo_field' : 'category', 'selection_mapping' : {'project_employee_validated' : 'project_employee_validated', 'project_forecast' : 'project_forecast'}},
             'amount' : {'odoo_field' : 'unit_amount'},
-            'category' : {'odoo_field' : 'category', 'selection_mapping' : {'project_employee_validated' : 'project_employee_validated'}},
+            'assignmentDate' : {'odoo_field' : 'date'},
             }
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_filtered, mapping_fields, 'fitnet_id')
+
 
     def analytic_line_employee_correction(self):
         #Corriger les affectations d'employee si les hr.employee sont créé a posteriori
@@ -430,21 +437,6 @@ class fitnetProject(models.Model):
             line.employee_id =  line.staffing_need_id.staffed_employee_id.id
         _logger.info('######## FINAL SQL COMMIT')
         self.env.cr.commit()
-
-    def sync_forecastedActivities(self, client):
-        _logger.info('---- sync_forecastedActivities')
-        fitnet_objects = client.get_api("forecastedActivities") #TODO : pour éviter les risques d'incohérence utiliser la même ressourcque que sync_timesheets et moduler le filtre
-        for obj in fitnet_objects:
-            obj['category'] = 'project_forecast'
-            obj['fitnet_id'] = 'forecastedActivityAssigment_' + str(obj['forecastedActivityAssigmentId'])
-        odoo_model_name = 'account.analytic.line'
-        mapping_fields = {
-            'assigmentId' : {'odoo_field' : 'staffing_need_id'},
-            'date' : {'odoo_field' : 'date'},
-            'forecastedAmount' : {'odoo_field' : 'unit_amount'},
-            'category' : {'odoo_field' : 'category', 'selection_mapping' : {'project_forecast' : 'project_forecast'}},
-            }
-        self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'fitnet_id')
 
     def sync_assignments(self, client):
         _logger.info('---- sync_assignments')
@@ -547,7 +539,6 @@ class fitnetProject(models.Model):
             if len(res) > 0:
                 _logger.info("Mise à jour du res.partner client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
                 odoo_customer.write(res)
-        _logger.info('---- END sync_customers')
 
     def sync_employees_contracts(self, client):
         _logger.info('--- synch_employees_contracts')
@@ -757,17 +748,16 @@ class fitnetProject(models.Model):
                 odoo_object = odoo_objects[0]
                 dict_dif = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
                 if len(dict_dif) > 0:
-                    import copy
-                    old_dict_dif = copy.copy(dict_dif)
-                    dic_old_values = odoo_object.with_context(context).read()[0]
-                    _logger.info("Fitnet object : %s" % str(fitnet_object))
+                    #import copy
+                    #old_dict_dif = copy.copy(dict_dif)
+                    #dic_old_values = odoo_object.with_context(context).read()[0]
+                    #_logger.info("Fitnet object : %s" % str(fitnet_object))
                     _logger.info("Mise à jour de l'objet %s ID= %s (fitnet_id = %s) avec les valeurs de Fitnet %s" % (odoo_model_name, str(odoo_object.id), str(fitnet_id), str(dict_dif)))
                     odoo_object.with_context(context).write(dict_dif)
-                    dic_new_values = odoo_object.with_context(context).read()[0]
-                    _logger.info("Changements apportés :")
-                    for field in old_dict_dif.keys() :
-                        _logger.info("          > %s : %s => %s" %(field, dic_old_values[field], dic_new_values[field]))
-                    #return False
+                    #dic_new_values = odoo_object.with_context(context).read()[0]
+                    #_logger.info("Changements apportés :")
+                    #for field in old_dict_dif.keys() :
+                    #    _logger.info("          > %s : %s => %s" %(field, dic_old_values[field], dic_new_values[field]))
             if len(odoo_objects) == 0 :
                 dic = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields)
                 dic['fitnet_id'] = fitnet_id
