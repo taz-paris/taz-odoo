@@ -141,8 +141,12 @@
             	<filter name="no_industry_id" string="Sans business domain" domain="[('industry_id', '=', False)]"/>
             	<filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
             	<filter name="no_child" string="Sans contact" domain="[('child_ids_contact', '=', False)]"/>
-            	<filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
 		<filter string="Archivée" name="inactive" domain="[('active', '=', False)]"/>
+		<separator/>
+            	    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
+            	    <filter name="not_tracked" string="Comptes non suivis" domain="[('business_priority', '=', 'not_tracked')]"/>
+            	    <filter name="priority_target" string="Comptes suivis en BDM" domain="[('business_priority', '=', 'tracked')]"/>
+		<separator/>
 		<separator/>
 		<group expand="0" string="Group By">
 			<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
