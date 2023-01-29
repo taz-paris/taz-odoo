@@ -70,6 +70,7 @@ class staffingEmployee(models.Model):
         d = datetime.now()
         curent_monday =  d - timedelta(days=d.weekday())
 
+        work_days_prev_period_1_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-1*7)), curent_monday + timedelta(days=-1))
         work_days_prev_period_4_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-4*7)), curent_monday + timedelta(days=-1))
         work_days_prev_period_3_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-3*7)), curent_monday + timedelta(days=-1))
         work_days_next_period_5_weeks = self.number_work_days_period(curent_monday, curent_monday + timedelta(days=(5*7)-1))
@@ -89,14 +90,12 @@ class staffingEmployee(models.Model):
             rec.availability_prev_period_4_weeks = (rec.availability_prev_week_4 + rec.availability_prev_week_3 + rec.availability_prev_week_2 + rec.availability_prev_week_1)/work_days_prev_period_4_weeks * 100
             rec.availability_next_period_5_weeks = (rec.availability_current_week + rec.availability_next_week_1 + rec.availability_next_week_2 + rec.availability_next_week_3 + rec.availability_next_week_4)/work_days_next_period_5_weeks * 100
 
-            #self.number_days_available_period(current_monday, curent_monday + timedelta(days=(-3*7)))
             dic = [('employee_id', '=', rec.id)]
             pivot_date = datetime.today()
-            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-3*7)), filters=dic)
-            _logger.info(dic)
-            _logger.info(lines)
-            c = lines['validated_timesheet_unit_amount'] + lines['previsional_timesheet_unit_amount'] + lines['holiday_timesheet_unit_amount']
 
+
+            ####### Stat sur les 3 dernières semaines
+            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-3*7)), filters=dic)
 
             rec.prev_3_weeks_hollidays = lines['holiday_timesheet_unit_amount']
             rec.prev_3_weeks_workdays = work_days_prev_period_3_weeks
@@ -107,6 +106,43 @@ class staffingEmployee(models.Model):
                 rec.prev_3_weeks_activity_rate = rec.prev_3_weeks_project_days / rec.prev_3_weeks_activity_days * 100
             else : 
                 rec.prev_3_weeks_activity_rate = 0.0
+
+            
+            ####### Stat sur les 4 dernières semaines
+            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-4*7)), filters=dic)
+
+            rec.prev_4_weeks_hollidays = lines['holiday_timesheet_unit_amount']
+            rec.prev_4_weeks_workdays = work_days_prev_period_4_weeks
+            rec.prev_4_weeks_activity_days = work_days_prev_period_4_weeks - rec.prev_4_weeks_hollidays
+            rec.prev_4_weeks_project_days = lines['validated_timesheet_unit_amount'] 
+            rec.prev_4_weeks_learning_internal_days = rec.prev_4_weeks_activity_days - rec.prev_4_weeks_project_days
+            if rec.prev_4_weeks_activity_days :
+                rec.prev_4_weeks_activity_rate = rec.prev_4_weeks_project_days / rec.prev_4_weeks_activity_days * 100
+            else : 
+                rec.prev_4_weeks_activity_rate = 0.0
+
+            ####### Stat sur la dernière semaine
+            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-1*7)), filters=dic)
+
+            rec.prev_1_weeks_hollidays = lines['holiday_timesheet_unit_amount']
+            rec.prev_1_weeks_workdays = work_days_prev_period_1_weeks
+            rec.prev_1_weeks_activity_days = work_days_prev_period_1_weeks - rec.prev_1_weeks_hollidays
+            rec.prev_1_weeks_project_days = lines['validated_timesheet_unit_amount'] 
+            rec.prev_1_weeks_learning_internal_days = rec.prev_1_weeks_activity_days - rec.prev_1_weeks_project_days
+            if rec.prev_1_weeks_activity_days :
+                rec.prev_1_weeks_activity_rate = rec.prev_1_weeks_project_days / rec.prev_1_weeks_activity_days * 100
+            else : 
+                rec.prev_1_weeks_activity_rate = 0.0
+
+
+            
+            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date + timedelta(days=(-1*7)), date_end=curent_monday, date_start=curent_monday + timedelta(days=(-1*7)), filters=dic)
+            act = work_days_prev_period_1_weeks - lines['holiday_timesheet_unit_amount']
+            if act :
+                rec.prev_1_weeks_activity_previsionnal_rate = lines['previsional_timesheet_unit_amount'] / act * 100
+            else :
+                rec.prev_1_weeks_activity_previsionnal_rate = 0.0
+
 
             proposals = self.env['staffing.proposal'].search([('employee_id', '=', rec.id), ('staffing_need_state', 'in', ['wait', 'open'])])
             proposals.compute()
@@ -214,6 +250,21 @@ class staffingEmployee(models.Model):
     prev_3_weeks_project_days = fields.Float("Jours imputés 3 dernières semaines", compute=availability, store=True)
     prev_3_weeks_activity_rate = fields.Float("Taux d'activité 3 dernières semaines", compute=availability, store=True, group_operator='avg')
 
+    prev_4_weeks_hollidays = fields.Float("Congés 4 dernières semaines", compute=availability, store=True)
+    prev_4_weeks_workdays = fields.Float("Jours ouvrés 4 dernières semaines", compute=availability, store=True)
+    prev_4_weeks_activity_days = fields.Float("Jours facturables 4 dernières semaines", compute=availability, store=True)
+    prev_4_weeks_learning_internal_days = fields.Float("Jours internes + formation 4 dernières semaines", compute=availability, store=True)
+    prev_4_weeks_project_days = fields.Float("Jours imputés 4 dernières semaines", compute=availability, store=True)
+    prev_4_weeks_activity_rate = fields.Float("Taux d'activité 4 dernières semaines", compute=availability, store=True, group_operator='avg')
+
+    prev_1_weeks_hollidays = fields.Float("Congés dernière semaine", compute=availability, store=True)
+    prev_1_weeks_workdays = fields.Float("Jours ouvrés dernière semaine", compute=availability, store=True)
+    prev_1_weeks_activity_days = fields.Float("Jours facturables dernière semaine", compute=availability, store=True)
+    prev_1_weeks_learning_internal_days = fields.Float("Jours internes + formation dernière semaine", compute=availability, store=True)
+    prev_1_weeks_project_days = fields.Float("Jours imputés dernière semaine", compute=availability, store=True)
+    prev_1_weeks_activity_rate = fields.Float("Taux d'activité dernière semaine", compute=availability, store=True, group_operator='avg')
+    prev_1_weeks_activity_previsionnal_rate = fields.Float("Taux d'activité prévisionnel dernière semaine", compute=availability, store=True, group_operator='avg')
+
     availability_4_weeks_graph = fields.Char("Graph dispo S+4", compute=availability_4_weeks_graph)
 
 
@@ -287,7 +338,7 @@ class staffingEmployee(models.Model):
         #TODO : en théorie on ne devrait pas compter les jours au cours desquels le salarié n'était pas encore / plus en contrat avec Tasmne
                 #Cependant s'il on fait ça, on fait dépendre le retour de cette fonction du salarié sur lequel on l'applique... et on ne pourra plus mutualiser
         #_logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
-        count = self.list_work_days_period(date_start, date_end)
+        count = len(self.list_work_days_period(date_start, date_end))
         return count
 
     def list_work_days_period(self, date_start, date_end):

@@ -119,7 +119,12 @@ class staffingAnalyticLine(models.Model):
             elif timesheet.project_id.id == 1134 : #23004 TAZ_AVT pour les Experts => ce temps est compté dans leurs objectifs perso mais il ne doit pas être compté comme de l'activité dans Odoo
                 continue
             elif timesheet.project_id.id == 1146 : #Autre absence
-                holiday_timesheet_ids.append(timesheet)
+                if timesheet.category == 'project_employee_validated':
+                    if timesheet.date < monday_pivot_date:
+                        holiday_timesheet_ids.append(timesheet)
+                if timesheet.category == 'project_forecast':
+                    if timesheet.date >= monday_pivot_date:
+                        holiday_timesheet_ids.append(timesheet)
             elif timesheet.category == 'project_employee_validated':
                 if timesheet.date < monday_pivot_date:
                     validated_timesheet_ids.append(timesheet)
