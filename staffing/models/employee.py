@@ -287,16 +287,22 @@ class staffingEmployee(models.Model):
         #TODO : en théorie on ne devrait pas compter les jours au cours desquels le salarié n'était pas encore / plus en contrat avec Tasmne
                 #Cependant s'il on fait ça, on fait dépendre le retour de cette fonction du salarié sur lequel on l'applique... et on ne pourra plus mutualiser
         #_logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
-        count = 0.0
+        count = self.list_work_days_period(date_start, date_end)
+        return count
+
+    def list_work_days_period(self, date_start, date_end):
+        res = []
+
         date = date_start
         while (date <= date_end):
             public_holidays = self.env['resource.calendar.leaves'].search_count([('resource_id', '=', False), ('date_from', '>=', date), ('date_to', '<=', date)])
             if public_holidays ==  0:
                 if date.strftime('%A') not in ['Saturday', 'Sunday']:
-                    count +=1.0
+                    res.append(date)
             date = date + timedelta(days = 1)
         #_logger.info("       > %s" % str(count))
-        return count
+        return res
+
 
     def open_employee_pivot_timesheets(self):
         date = datetime.today()

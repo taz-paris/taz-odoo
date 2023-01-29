@@ -243,6 +243,9 @@ class fitnetProject(models.Model):
 
         #return self.import_grille_competences()
         self.sync_employees(client)
+
+        self.sync_holidays(client) 
+
         self.sync_employees_contracts(client)
         self.sync_customers(client)
 
@@ -254,10 +257,10 @@ class fitnetProject(models.Model):
         self.sync_assignmentsoffContract(client)
         self.sync_timesheets(client)
     
+
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
         
-        #self.sync_holidays(client) 
 
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
 
@@ -312,6 +315,14 @@ class fitnetProject(models.Model):
 
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')
+
+        # RESET analytics lines
+        #leaves = self.env['hr.leave'].search([])
+        #for l in  leaves:
+        #    if l.state not in ['refuse', 'canceled'] :
+        #        l._validate_leave_request()
+        #return False
+
         odoo_model_name = 'hr.leave'
         fitnet_leave_contents = {}
 

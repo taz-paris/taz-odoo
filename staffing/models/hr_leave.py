@@ -3,6 +3,8 @@ from odoo.exceptions import AccessDenied, UserError, ValidationError
 from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
+from datetime import datetime, timedelta
+import pytz
 
 
 class HrEmployeeBase(models.AbstractModel):
@@ -31,30 +33,43 @@ class staffingLeave(models.Model):
         for leave in self:
             if not leave.employee_id:
                 continue
-            work_hours_data = leave.employee_id.list_work_time_per_day(
-                leave.date_from,
-                leave.date_to)
-
             _logger.info(leave.date_from)
             _logger.info(leave.date_to)
-            _logger.info(work_hours_data)
+            """
+            work_hours_data = leave.employee_id.list_work_time_per_day(
+                leave.date_from,
+                leave.date_to) 
+                #BUG : la fonction list_work_time_per_day ne retourne pas le 2 janvier 2023 alors que c'est un lundi 
+                    # pour un congés du 2023-01-01 23:00:01 au 2023-01-06 22:59:59
+                    # [(datetime.date(2023, 1, 3), 7.0), (datetime.date(2023, 1, 4), 7.0), (datetime.date(2023, 1, 5), 7.0), (datetime.date(2023, 1, 6), 7.0)] 
 
+
+            _logger.info(work_hours_data)
+            """
 
             encoding_uom_id = self.env.company.timesheet_encode_uom_id
             if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
-                for index, (day_date, work_hours_count) in enumerate(work_hours_data):
-                    vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count))
+                return super()._timesheet_create_lines()
+                #for index, (day_date, work_hours_count) in enumerate(work_hours_data):
+                #    vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count))
             if encoding_uom_id == self.env.ref("uom.product_uom_day"):
-                for index, (day_date, work_hours_count) in enumerate(work_hours_data):
+
+                user_tz = self.env.user.tz or pytz.utc
+                local = pytz.timezone(user_tz)
+                date_start = leave.date_from.astimezone(local)
+                date_end = leave.date_to.astimezone(local)
+                list_work_days = self.env['hr.employee'].list_work_days_period(date_start, date_end) 
+
+                for index, (day_date) in enumerate(list_work_days):
                     work_days_count = 1.0
                     if index == 0 and leave.request_date_from_period == "pm":
                         work_days_count += -0.5
-                    if index == len(work_hours_data)-1 and leave.request_date_to_period == "am":
+                    if index == len(list_work_days)-1 and leave.request_date_to_period == "am":
                         work_days_count += -0.5
                     _logger.info(index)
                     _logger.info(day_date)
                     _logger.info(work_days_count)
-                    vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_days_count))
+                    vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_date, work_days_count))
             else : 
                 raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
 
