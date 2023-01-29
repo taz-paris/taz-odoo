@@ -270,6 +270,7 @@ class staffingEmployee(models.Model):
 
 
     last_validated_timesheet_date = fields.Date("Date du dernier pointage validé", compute=last_validated_timesheet_date)
+    is_consultant = fields.Boolean("Est consultant", default="True")
     is_late_validated_timesheet = fields.Boolean("Pointage en retard", compute=is_late_validated_timesheet)
     is_associate = fields.Boolean("Est associé")
     mentee_ids = fields.One2many('hr.employee', 'coach_id', string="Mentees")

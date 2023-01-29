@@ -104,6 +104,7 @@
 		    <separator/>
 		    <filter name="filter_deadline_date" date="date_deadline"/>
             	    <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
+            	    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
 		    <separator/>
 		    <separator/>
 		    <filter name="state_not_done" string="Non terminées" domain="[('state', '!=', 'done')]"/>
