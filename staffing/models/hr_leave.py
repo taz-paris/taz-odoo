@@ -54,7 +54,7 @@ class staffingLeave(models.Model):
                 #    vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count))
             if encoding_uom_id == self.env.ref("uom.product_uom_day"):
 
-                user_tz = self.env.user.tz or pytz.utc
+                user_tz = self.env.user.tz or str(pytz.utc)
                 local = pytz.timezone(user_tz)
                 date_start = leave.date_from.astimezone(local).date() #Ne garder que date sinon, pour le congés de Gaëlle avant le changement d'heure d'octobre on téiat en GMT+2... et en janvier en GMT+1 et donc on avait toujours le 25/01/2023 car ajouter un jour à GMT+2 restait e GMT+2 même si on passait le 31/10
                 date_end = leave.date_to.astimezone(local).date()

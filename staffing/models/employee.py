@@ -344,7 +344,6 @@ class staffingEmployee(models.Model):
 
     def list_work_days_period(self, date_start, date_end):
         res = []
-
         date = date_start
         while (date <= date_end):
             public_holidays = self.env['resource.calendar.leaves'].search_count([('resource_id', '=', False), ('date_from', '>=', date), ('date_to', '<=', date)])
