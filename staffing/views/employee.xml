@@ -382,7 +382,8 @@
                 <tree>
                   <field name="first_name"/>
                   <field name="name"/>
-                  <field name="job_id"/>
+                  <field name="job_id" optional="show" />
+                  <field name="is_late_validated_timesheet" optional="show" string="Retard pointage"/>
 		  <!--
 		  -->
                   <field name="prev_1_weeks_workdays" optional="show" sum="Total"/>
@@ -390,8 +391,8 @@
                   <field name="prev_1_weeks_activity_days" optional="show" sum="Total"/>
                   <field name="prev_1_weeks_learning_internal_days" optional="show" sum="Total"/>
                   <field name="prev_1_weeks_project_days" optional="show" sum="Total"/>
-                  <field name="prev_1_weeks_activity_rate" widget="progressbar" avg="Moyenne" optional="show" string="% Pointé" />
-                  <field name="prev_1_weeks_activity_previsionnal_rate" widget="progressbar" avg="Moyenne" optional="show" string="% Prévisionnel"/>
+                  <field name="prev_1_weeks_activity_rate" widget="progressbar" avg="Moyenne" optional="show" />
+                  <field name="prev_1_weeks_activity_previsionnal_rate" widget="progressbar" avg="Moyenne" optional="show" />
                 </tree>
               </field>
             </record>

@@ -257,13 +257,13 @@ class staffingEmployee(models.Model):
     prev_4_weeks_project_days = fields.Float("Jours imputés 4 dernières semaines", compute=availability, store=True)
     prev_4_weeks_activity_rate = fields.Float("Taux d'activité 4 dernières semaines", compute=availability, store=True, group_operator='avg')
 
-    prev_1_weeks_hollidays = fields.Float("Congés dernière semaine", compute=availability, store=True)
-    prev_1_weeks_workdays = fields.Float("Jours ouvrés dernière semaine", compute=availability, store=True)
-    prev_1_weeks_activity_days = fields.Float("Jours facturables dernière semaine", compute=availability, store=True)
-    prev_1_weeks_learning_internal_days = fields.Float("Jours internes + formation dernière semaine", compute=availability, store=True)
-    prev_1_weeks_project_days = fields.Float("Jours imputés dernière semaine", compute=availability, store=True)
-    prev_1_weeks_activity_rate = fields.Float("Taux d'activité dernière semaine", compute=availability, store=True, group_operator='avg')
-    prev_1_weeks_activity_previsionnal_rate = fields.Float("Taux d'activité prévisionnel dernière semaine", compute=availability, store=True, group_operator='avg')
+    prev_1_weeks_hollidays = fields.Float("Congés", help="Congés dernière semaine", compute=availability, store=True)
+    prev_1_weeks_workdays = fields.Float("J. ouvrés", help="Jours ouvrés dernière semaine", compute=availability, store=True)
+    prev_1_weeks_activity_days = fields.Float("J. facturables", help="Jours facturables dernière semaine", compute=availability, store=True)
+    prev_1_weeks_learning_internal_days = fields.Float("j. internes+fomations", help="Jours internes + formation dernière semaine", compute=availability, store=True)
+    prev_1_weeks_project_days = fields.Float("J. imputés", help="Jours imputés dernière semaine", compute=availability, store=True)
+    prev_1_weeks_activity_rate = fields.Float("% pointé", help="Taux d'activité dernière semaine", compute=availability, store=True, group_operator='avg')
+    prev_1_weeks_activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel dernière semaine", compute=availability, store=True, group_operator='avg')
 
     availability_4_weeks_graph = fields.Char("Graph dispo S+4", compute=availability_4_weeks_graph)
 
@@ -351,7 +351,7 @@ class staffingEmployee(models.Model):
             if public_holidays ==  0:
                 if date.strftime('%A') not in ['Saturday', 'Sunday']:
                     res.append(date)
-            date = date + timedelta(days = 1)
+            date = date + timedelta(days = 1) #TODO : ajouter 24h au lieu d'un jour => impact lorsque lors du changement d'heure ? (garder la même heure en passant de GMT +2 à +1 ... ou bien changer d'heure en gardant le même offste ce qui reveint au même pour les comparaisons)
         #_logger.info("       > %s" % str(count))
         return res
 
