@@ -105,7 +105,7 @@ class staffingEmployee(models.Model):
             if rec.prev_3_weeks_activity_days :
                 rec.prev_3_weeks_activity_rate = rec.prev_3_weeks_project_days / rec.prev_3_weeks_activity_days * 100
             else : 
-                rec.prev_3_weeks_activity_rate = False
+                rec.prev_3_weeks_activity_rate = None
 
             
             ####### Stat sur les 4 dernières semaines
@@ -119,7 +119,7 @@ class staffingEmployee(models.Model):
             if rec.prev_4_weeks_activity_days :
                 rec.prev_4_weeks_activity_rate = rec.prev_4_weeks_project_days / rec.prev_4_weeks_activity_days * 100
             else : 
-                rec.prev_4_weeks_activity_rate = False
+                rec.prev_4_weeks_activity_rate = None
 
             ####### Stat sur la dernière semaine
             lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-1*7)), filters=dic)
@@ -132,7 +132,7 @@ class staffingEmployee(models.Model):
             if rec.prev_1_weeks_activity_days :
                 rec.prev_1_weeks_activity_rate = rec.prev_1_weeks_project_days / rec.prev_1_weeks_activity_days * 100
             else : 
-                rec.prev_1_weeks_activity_rate = False
+                rec.prev_1_weeks_activity_rate = None
 
 
             
@@ -141,7 +141,7 @@ class staffingEmployee(models.Model):
             if act :
                 rec.prev_1_weeks_activity_previsionnal_rate = lines['previsional_timesheet_unit_amount'] / act * 100
             else :
-                rec.prev_1_weeks_activity_previsionnal_rate = False
+                rec.prev_1_weeks_activity_previsionnal_rate = None
 
 
             proposals = self.env['staffing.proposal'].search([('employee_id', '=', rec.id), ('staffing_need_state', 'in', ['wait', 'open'])])
