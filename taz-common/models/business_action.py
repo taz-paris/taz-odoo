@@ -191,7 +191,8 @@ class tazBusinessAction(models.Model):
     report_url = fields.Char("URL vers le CR OneNote")
 
     ms_planner_task_data = fields.Char("Data de la tâche M$ Planner")
-    is_rdv_taken_by_assistant = fields.Boolean("RDV pris par Executive Access")
+    is_rdv_to_be_taken_by_assistant = fields.Boolean("RDV à planifier par Executive Access")
+    is_rdv_taken_by_assistant = fields.Boolean("RDV planifié par Executive Access")
     business_priority = fields.Selection('Niveau de priorité', related='parent_partner_id.business_priority', store=False)
 
     def open_record(self):
