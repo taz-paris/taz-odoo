@@ -311,7 +311,7 @@
                 <field name="name">Équipage - Activité des 3 dernières semaines échues</field>
                 <field name="res_model">hr.employee</field>
                 <field name="view_mode">tree,form,graph</field>
-		<field name="domain">[('contract_warning', '=', False), ('is_consultant', '=', True), ('prev_4_weeks_activity_days', '!=', 0)]</field>
+		<field name="domain">[('contract_warning', '=', False), ('is_consultant', '=', True)]</field>
                 <field name="view_ids" eval="
                                     [
                                     (5, 0, 0),
@@ -361,7 +361,7 @@
                 <field name="name">Équipage - Activité des 4 dernières semaines échues</field>
                 <field name="res_model">hr.employee</field>
                 <field name="view_mode">tree,form,graph</field>
-		<field name="domain">[('contract_warning', '=', False), ('is_consultant', '=', True), ('prev_4_weeks_activity_days', '!=', 0)]</field>
+		<field name="domain">[('contract_warning', '=', False), ('is_consultant', '=', True)]</field>
                 <field name="view_ids" eval="
                                     [
                                     (5, 0, 0),
@@ -414,7 +414,7 @@
                 <field name="name">Équipage - Activité des 1 dernières semaines échues</field>
                 <field name="res_model">hr.employee</field>
                 <field name="view_mode">tree,form,graph</field>
-		<field name="domain">[('contract_warning', '=', False), ('is_consultant', '=', True), ('prev_1_weeks_activity_days', '!=', 0)]</field>
+		<field name="domain">[('contract_warning', '=', False), ('is_consultant', '=', True)]</field>
                 <field name="view_ids" eval="
                                     [
                                     (5, 0, 0),

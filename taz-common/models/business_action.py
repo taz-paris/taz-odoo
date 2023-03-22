@@ -30,6 +30,14 @@ class tazBusinessAction(models.Model):
         #    res['partner_id'] = self._context.get('default_partner_id')
     #    return res
 
+
+# INITIALISATION du champ owner_id à partir du user_ids sur le stock d'actions
+#        actions = self.env["taz.business_action"].search([])
+#        for a in actions:
+#            if len(a.user_ids) == 1:
+#                a.owner_id = a.user_ids[0]
+
+
     @api.model
     def create(self, vals):
         if not vals.get("partner_id"):
@@ -151,12 +159,13 @@ class tazBusinessAction(models.Model):
     name = fields.Char('Titre', required=True)
     note = fields.Text('Note')
     date_deadline = fields.Date('Échéance', index=True, required=False, default=fields.Date.context_today)
+    owner_id = fields.Many2one('res.users', string='Affecté à', default=lambda self: self.env.user)
     user_ids = fields.Many2many(
         'res.users',
         'business_action_user_rel',
         'business_action_id',
         'user_id',
-        string = 'Affectée à',
+        string = 'Participants',
         default=lambda self: self.env.user,
         index=True,
         required=True,
