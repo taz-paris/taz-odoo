@@ -6,6 +6,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 import re
+import unicodedata
 
 from odoo.addons import base
 #base.models.res_partner.ADDRESS_FIELDS += ('street3',)
@@ -314,17 +315,29 @@ class tazResPartner(models.Model):
             self.city = self.city.strip().upper()
      
      def filter_name_duplicate(self):
+
+        def normalizer(string):
+            res = string
+            res = res.strip().lower()
+            res = unicodedata.normalize('NFKD', res).encode('ascii', 'ignore').decode('utf8')
+            regex = re.compile('[^a-zA-Z]')
+            #First parameter is the replacement, second parameter is your input string
+            res = regex.sub('', res)
+            return res
+
         _logger.info('=========== filter_name_duplicate')
         contacts = self.search([('is_company', '=', False), ('active','=',True), ('type', '=', 'contact'), ('user_ids', '=', False)])
         count = {}
         for c in contacts:
             nom = ''
             if c.first_name : 
-                nom += c.first_name.strip().title()
+                #nom += c.first_name.strip().title()
+                nom += normalizer(c.first_name)
             if c.name :
                 if nom != '':
                     nom += ' '
-                nom += c.name.strip().upper()
+                #nom += c.name.strip().upper()
+                nom += normalizer(c.name)
             if nom not in count.keys():
                 count[nom] = []
             count[nom].append(c)
