@@ -165,7 +165,7 @@ class tazBusinessAction(models.Model):
         'business_action_user_rel',
         'business_action_id',
         'user_id',
-        string = 'Participants',
+        string = 'Participants Tasmane',
         default=lambda self: self.env.user,
         index=True,
         required=True,

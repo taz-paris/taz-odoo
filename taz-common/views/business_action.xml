@@ -195,7 +195,7 @@
         <field name="act_window_id" ref="taz-common.business_action_action"/>
     </record>
 
-    <menuitem name="Actions commerciales" id="taz-common.business_action" parent="taz-common.commerce" action="taz-common.business_action_action"/>
+    <menuitem name="Actions commerciales" sequence="40" id="taz-common.business_action" parent="taz-common.commerce" action="taz-common.business_action_action"/>
      
 
 

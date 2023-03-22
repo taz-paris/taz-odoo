@@ -94,7 +94,7 @@ class tazResPartner(models.Model):
              res = None
              for action in self.business_action_ids:
                  if action.state == 'done' :
-                     if res == None or action.date_deadline < res:
+                     if res == None or action.date_deadline > res:
                          res = action.date_deadline
              self.date_last_business_action = res
 
@@ -130,6 +130,8 @@ class tazResPartner(models.Model):
      customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'partner_id')  
 
      mailchimp_status = fields.Selection([('cleaned', 'cleaned'), ('nonsubscribed', 'nonsubscribed'), ('subscribed', 'subscribed'), ('unsubscribed', 'unsubscribed')], "Statut Mailchimp lors de l'import")
+
+     contact_user_link_ids = fields.One2many("taz.contact_user_link", 'partner_id', string="Liens contacts-utilisateurs")
 
      def name_get(self):
          res = []
@@ -431,3 +433,24 @@ class tazResPartner(models.Model):
 #Wizzard de fusion / déduplication :
     #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/odoo/addons/base/wizard/base_partner_merge.py
     #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/odoo/addons/base/wizard/base_partner_merge_views.xml
+
+
+     def open_my_partner_intimity(self):
+        contact_user_link_ids = self.env['taz.contact_user_link'].search([('user_id', '=', self.env.user.id)])
+
+        rec_id = []
+        for contact_user_link_id in contact_user_link_ids :
+            if contact_user_link_id.partner_id.active == True:
+                rec_id.append(contact_user_link_id.partner_id.id)
+
+        return {
+                'type': 'ir.actions.act_window',
+                'name': "Contacts de mon plan d'intimité",
+                'res_model': 'res.partner',
+                'view_type': 'tree',
+                'view_mode': 'tree,form',
+                'view_id': [self.env.ref("taz-common.contact_tree").id, self.env.ref("taz-common.contact_form").id],
+                'context': {},
+                'domain' : [('id', 'in', rec_id)],
+                'target': 'current',
+            }

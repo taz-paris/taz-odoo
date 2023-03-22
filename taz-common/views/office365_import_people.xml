@@ -50,7 +50,7 @@
                     'search_default_contacts_not_in_odoo': 1, 
             }</field>
     </record>
-    <menuitem name="Import contacts Office365" id="taz-common.office365_import_people" parent="taz-common.commerce" action="taz-common.office365_import_people_action"/>
+    <menuitem name="Import contacts Office365" sequence="30" id="taz-common.office365_import_people" parent="taz-common.commerce" action="taz-common.office365_import_people_action"/>
 
   </data>
 </odoo>

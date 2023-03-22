@@ -250,6 +250,9 @@
 					</tree> 
 				</field>
 			</page>
+			<page string="Tasmaniens en contact">
+				<field name="contact_user_link_ids" context="{'default_partner_id': active_id}"/>
+			</page>
 			<page string="Coordonnées">
 				<group>
 					<group>
@@ -385,7 +388,7 @@
 
     <menuitem name="Commerce" id="taz-common.commerce"/>
     <menuitem name="Contacts" sequence="10" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
-    <menuitem name="Entreprises" sequence="20" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
+    <menuitem name="Entreprises" sequence="70" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
 
     
     <menuitem id="taz-common.res_partner_menu_config"
@@ -446,7 +449,7 @@ if records:
           <field name="state">code</field>
           <field name="code">action =  env.get('res.partner').filter_name_duplicate()</field>
      </record>
-    <menuitem name="Contacts en doublons ?" sequence="10" id="taz-common.partner_contact_duplicates" parent="taz-common.commerce" action="action_server_list_name_duplicates"/>
+    <menuitem name="Contacts en doublons ?" sequence="90" id="taz-common.partner_contact_duplicates" parent="taz-common.commerce" action="action_server_list_name_duplicates"/>
 	
     <record id="action_server_list_company_shared_email_domain" model="ir.actions.server">
           <field name="name">Entreprises qui partage au moins un nom de domain email</field>
@@ -455,7 +458,7 @@ if records:
           <field name="state">code</field>
           <field name="code">action =  env.get('res.partner').filter_company_shared_email_domain()</field>
      </record>
-    <menuitem name="Entreprises partageant au moins un nom de domaine mail" sequence="21" id="taz-common.company_shared_email_domain" parent="taz-common.commerce" action="action_server_list_company_shared_email_domain"/>
+    <menuitem name="Entreprises partageant au moins un nom de domaine mail" sequence="80" id="taz-common.company_shared_email_domain" parent="taz-common.commerce" action="action_server_list_company_shared_email_domain"/>
 
 	<record id="mail.action_partner_mass_mail" model="ir.actions.act_window">
             <field name="binding_model_id" eval="False"/>
@@ -464,6 +467,15 @@ if records:
         <record id="portal.partner_wizard_action_create_and_open" model="ir.actions.server">
             <field name="binding_model_id" eval="False"/>
         </record>
+
+    <record id="action_server_list_my_partner_intimity" model="ir.actions.server">
+          <field name="name">Contacts de mon plan d'intimité</field>
+          <field name="model_id" ref="model_res_partner"/>
+          <field name="binding_model_id" eval="False"/>
+          <field name="state">code</field>
+          <field name="code">action =  env.get('res.partner').open_my_partner_intimity()</field>
+     </record>
+    <menuitem name="Contacts de mon plan d'intimité" id="taz-common.my_partner_intimity" sequence="20" parent="taz-common.commerce" action="taz-common.action_server_list_my_partner_intimity"/>
 
   </data>
 </odoo>
