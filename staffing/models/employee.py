@@ -375,10 +375,6 @@ class staffingEmployee(models.Model):
                 'view_id': view_id.id,
                 'domain' : [('id', 'in', rec_id)],
                 'context': {'search_default_history_3months' : 1},
-                #'res_id': rec_id,
-                #'views': [(view_id.id,'pivot'), (self.env.ref('staffing.view_project_pivot_search').id, 'search')],
-                #'search_view_id' : self.env.ref('staffing.view_project_pivot_search').id,
-                #'filter' : [('date', '>' , datetime.today()-timedelta(days=91))],
                 'target': 'current',
             }
 

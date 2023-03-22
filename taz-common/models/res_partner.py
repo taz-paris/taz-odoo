@@ -344,6 +344,7 @@ class tazResPartner(models.Model):
                 'view_type': 'tree',
                 'view_mode': 'tree,form',
                 'view_id': [self.env.ref("taz-common.contact_tree").id, self.env.ref("taz-common.contact_form").id],
+                'search_view_id' : (self.env.ref("taz-common.contact_search").id,),
                 'context': {},
                 'domain':domain,
                 # if you want to open the form in edit mode direclty
@@ -378,6 +379,7 @@ class tazResPartner(models.Model):
                 'view_type': 'tree',
                 'view_mode': 'tree,form',
                 'view_id': [self.env.ref("taz-common.company_tree").id, self.env.ref("taz-common.company_form").id],
+                'search_view_id' : (self.env.ref("taz-common.company_search").id, ),
                 'context': {},
                 'domain':domain,
                 # if you want to open the form in edit mode direclty
@@ -450,6 +452,7 @@ class tazResPartner(models.Model):
                 'view_type': 'tree',
                 'view_mode': 'tree,form',
                 'view_id': [self.env.ref("taz-common.contact_tree").id, self.env.ref("taz-common.contact_form").id],
+                'search_view_id' : (self.env.ref("taz-common.contact_search").id,),
                 'context': {},
                 'domain' : [('id', 'in', rec_id)],
                 'target': 'current',
