@@ -22,8 +22,34 @@ class staffingLeave(models.Model):
     #TODO : contrôler que si date_from = date_to on ne peut pas avoir request_date_from_period=pm ET request_date_to_period==am
 
     state = fields.Selection(selection_add=[('canceled', 'Annulée')])
+        #TODO : le coeur Odoo gère l'annulation avec un booléen active et non pas un statut
+            #eave_sudo.with_context(from_cancel_wizard=True).active = False
+            #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_holidays/models/hr_leave.py#L1359
 
 
+    def write(self, vals):
+        old_state = self.state
+        if old_state == "validate":
+            #TODO : avec cette fonction on met bien à jour les timesheet, mais on ne corrige pas les 'resource.calendar.leaves' associés au congés
+            if any(x in ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to', 'date_from', 'date_to', 'number_of_days', 'request_date_from_period', 'request_date_to_period', 'state'] for x in vals.keys()):
+                holidays = self.filtered(
+                    lambda l: l.holiday_type == 'employee' and
+                    l.holiday_status_id.timesheet_project_id and
+                    l.holiday_status_id.timesheet_task_id and
+                    l.holiday_status_id.timesheet_project_id.sudo().company_id == (l.holiday_status_id.company_id or self.env.company))
+
+                # Unlink previous timesheets do avoid doublon
+                old_timesheets = holidays.sudo().timesheet_ids
+                if old_timesheets:
+                    old_timesheets.holiday_id = False
+                    old_timesheets.unlink()
+
+                # create the timesheet on the vacation project
+                holidays._timesheet_create_lines()
+
+        res = super().write(vals)
+
+        return res
 
 
     #override to deal with uom in days and request_date_to_period
