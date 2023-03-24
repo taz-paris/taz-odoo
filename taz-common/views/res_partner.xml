@@ -238,6 +238,7 @@
 					<tree editable="top">
 					  <field name="name" widget="text" />
 					  <field name="state"/>
+					  <field name="owner_id"/>
 					  <field name="user_ids" widget="many2many_avatar_user"/>
 					  <field name="date_deadline" optional="show"/>
 					  <field name="note" optional="hide"/>
@@ -251,6 +252,8 @@
 				</field>
 			</page>
 			<page string="Tasmaniens en contact">
+				<label for="inhouse_influence_level" string="Niveau d'influence chez le client"/>
+				<field name="inhouse_influence_level"/>
 				<field name="contact_user_link_ids" context="{'default_partner_id': active_id}"/>
 			</page>
 			<page string="Coordonnées">
@@ -285,6 +288,22 @@
 					<label for="former_email_address" string="Anciennes adresses email"/>
 					<field name="former_email_address"/>
 				</group>
+			</page>
+			<page string="Inscriptions aux évènements" groups="event.group_event_user, event.group_event_registration_desk, event.group_event_manager">
+				<field name="event_registration_ids">
+				   <tree string="Registration" sample="1" expand="1" default_order="create_date desc" class="o_event_registration_view_tree">
+					<field name="active" invisible="1"/>
+					<field name="email" optional="show"/>
+					<field name="event_id" invisible="context.get('default_event_id')"/>
+					<field name="state" decoration-info="state in ('draft', 'open')" decoration-success="state == 'done'" decoration-muted="state == 'cancel'" widget="badge"/>
+					<field name="company_id" groups="base.group_multi_company" optional="hide"/>
+					<field name="message_needaction" invisible="1"/>
+					<button name="action_confirm" string="Confirm" type="object" icon="fa-check" attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'draft')]}"/>
+					<button name="action_set_done" string="Mark as Attending" type="object" icon="fa-level-down" attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'open')]}"/>
+					<button name="action_cancel" string="Cancel" type="object" class="o_btn_cancel_registration" icon="fa-times" attrs="{'invisible': ['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'draft')]}"/>
+					<field name="activity_exception_decoration" widget="activity_exception"/>
+				    </tree>
+				</field>
 			</page>
 		</notebook>
 		<group>

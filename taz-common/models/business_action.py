@@ -37,6 +37,8 @@ class tazBusinessAction(models.Model):
 #            if len(a.user_ids) == 1:
 #                a.owner_id = a.user_ids[0]
 
+# RE-CALCUL de la date de dernière action faite des res.partner
+#        partner_ids = self.env['res.partner'].search([('active', '=', True), ('is_company', '=', False), ('type', '=', 'contact')])._compute_date_last_business_action()
 
     @api.model
     def create(self, vals):

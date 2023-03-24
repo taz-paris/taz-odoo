@@ -89,7 +89,7 @@ class tazResPartner(models.Model):
                  self.child_mail_address_domain_list = liste
              #_logger.info("FIN _compute_child_mail_address_domain_list")
 
-     @api.depends('business_action_ids')
+     @api.depends('business_action_ids.date_deadline', 'business_action_ids.state')
      def _compute_date_last_business_action(self_list):
          for self in self_list :
              res = None
@@ -115,6 +115,12 @@ class tazResPartner(models.Model):
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
      date_last_business_action = fields.Date('Date du dernier RDV', compute=_compute_date_last_business_action, store=True)
+     inhouse_influence_level = fields.Selection([
+         ('1', "Réseau - pas de lien direct"),
+         ('2', "Eclaireur - peut donner de l'information sur un compte à potentiel"),
+         ('3', "Prescripteur - peut pousser Tasmane vers un interlocuteur décideur"),
+         ('4', "Décideur -  peut décider par lui-même"),
+         ], string="Niveau d'influence chez le client")
 
      street3 = fields.Char('Rue3')
      title = fields.Many2one(string="Civilité")
@@ -133,6 +139,7 @@ class tazResPartner(models.Model):
      mailchimp_status = fields.Selection([('cleaned', 'cleaned'), ('nonsubscribed', 'nonsubscribed'), ('subscribed', 'subscribed'), ('unsubscribed', 'unsubscribed')], "Statut Mailchimp lors de l'import")
 
      contact_user_link_ids = fields.One2many("taz.contact_user_link", 'partner_id', string="Liens contacts-utilisateurs")
+     event_registration_ids = fields.One2many('event.registration', 'partner_id')
 
      def name_get(self):
          res = []

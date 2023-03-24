@@ -255,8 +255,8 @@ class fitnetProject(models.Model):
 
         self.sync_assignments(client)
         self.sync_assignmentsoffContract(client)
-        self.sync_timesheets(client)
     
+        self.sync_timesheets(client)
 
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
@@ -433,6 +433,7 @@ class fitnetProject(models.Model):
             'amount' : {'odoo_field' : 'unit_amount'},
             'assignmentDate' : {'odoo_field' : 'date'},
             }
+        self.delete_not_found_fitnet_object(odoo_model_name, fitnet_filtered, 'fitnet_id')
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_filtered, mapping_fields, 'fitnet_id')
 
 
@@ -780,6 +781,25 @@ class fitnetProject(models.Model):
             #    continue
         _logger.info('######## FINAL SQL COMMIT')
         self.env.cr.commit()
+
+    def delete_not_found_fitnet_object(self, odoo_model_name, fitnet_objects, fitnet_id_fieldname, context={}, filters=[]) :
+        _logger.info('--- delete_not_found_fitnet_object')
+
+        fitnet_id_list = []
+        for fitnet_object in fitnet_objects:
+            fitnet_id = fitnet_object[fitnet_id_fieldname]
+            fitnet_id_list.append(fitnet_id)
+
+        filter_list = [('fitnet_id', '!=', None), ('fitnet_id', 'not in', fitnet_id_list)] + filters
+        odoo_objects = self.env[odoo_model_name].search(filter_list)
+        _logger.info("Nombre d'objets %s qui portent un ID Fitnet qui n'est plus retourné par l'API Fitnet : %s" % (odoo_model_name, str(len(odoo_objects))))
+        for odoo_objet in odoo_objects:
+            _logger.info(odoo_objet.read())
+            odoo_objet.unlink()
+            _logger.info("      > Instance supprimée")
+
+        #odoo_objects_all = self.env[odoo_model_name].search([('fitnet_id', '!=', None)])
+        #_logger.info(len(odoo_objects_all))
 
 
     def prepare_update_from_fitnet_values(self, odoo_model_name, fitnet_object, mapping_fields, odoo_object=False) :
