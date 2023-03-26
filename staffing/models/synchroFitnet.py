@@ -240,6 +240,9 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+        self.sync_customer_invoices(client)
+        #TODO           self.sync_supplier_invoices(client)
+
 
         #return self.import_grille_competences()
         self.sync_employees(client)
@@ -263,12 +266,6 @@ class fitnetProject(models.Model):
         
 
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
-
-        #self.sync_customer_invoices(client)
-        #TODO           self.sync_supplier_invoices(client)
-
-
-        #TODO : supprimer les objets qui ont un FitnetId et qui ne sont plus dans les retours API Fitnet intégrals (ou plus dispo par GET initaire sur l'ID)
         _logger.info(' ############## Fin de la synchro Fitnet')
 
     def sync_customer_invoices(self, client):
@@ -283,11 +280,11 @@ class fitnetProject(models.Model):
             'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'out_invoice' : 'out_invoice', 'out_refund':'out_refund'}},
         }
         mapping_fields_invoice_line = {
-            'inoviceId' : {'odoo_field' : 'account_move_id'},
+            'inoviceId' : {'odoo_field' : 'move_id'},
             'designation' : {'odoo_field' : 'name'},
             'amountBTax' : {'odoo_field' : 'price_unit'},
             'quantity' : {'odoo_field' : 'quantity'},
-            'contractId' : {'odoo_field' : ''},
+            'contractId_json' : {'odoo_field' : 'analytic_distribution'},
         }
         invoices_list = []
         invoices_lines_list = []
@@ -295,23 +292,33 @@ class fitnetProject(models.Model):
             if invoice['invoiceId'] not in [1492]:
                 continue
             if invoice['bTaxBilling'] < 0:
+                _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
                 continue #avoir
                 #invoice['move_type'] = 'out_refund'
             else :
                 invoice['move_type'] = 'out_invoice'
             invoices_list.append(invoice)
+
             for line in invoice['invoiceLines']:
                 line['inoviceId'] = invoice['invoiceId']
-                line['contractId'] = invoice['contractId']
+                odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
+                line['contractId_json'] = {odoo_analytic_ccount_id_project : 100} 
                 line['quantity'] = 1.00
                 invoices_lines_list.append(line)
                 #if line['vatRate'] != 20.0:
                 #    raise ValidationError(_("Taux de TVA != 20%"))
+
+        self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
+        _logger.info('%%%%%%%%%')
+        _logger.info(str(invoices_lines_list))
+        _logger.info('%%%%%%%%%')
+        self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
+        _logger.info('%%%%%%%%%')
+
+        #TODO : générer l'adresse de facturation du partner si différente de celle déjà connue (ou MAJ de la fiche partenaire si l'adresse postale est vide
         #TODO generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
         #TODO générer le paiement dans Odoo (date du paiement = actualPaymentDate dans le modèle fitnet)
         #TODO : gérer les avoir
-        #self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
-        #self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
 
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')
@@ -827,7 +834,7 @@ class fitnetProject(models.Model):
                     else :
                         _logger.info("Champ inexistant dans l'objet dans l'objet Fitnet %s" % fitnet_field_name)
 
-                if odoo_field.ttype in ["char", "html", "text", "date", "datetime", "float", "integer", "boolean", "selection", "monetary"]  :
+                if odoo_field.ttype in ["char", "html", "text", "date", "datetime", "float", "integer", "boolean", "selection", "monetary", "json"]  :
                     if fitnet_value == None:
                         fitnet_value = False
                     odoo_value = fitnet_value
