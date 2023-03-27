@@ -2,6 +2,8 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
 from datetime import datetime, timedelta
+import pytz
+
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -346,8 +348,19 @@ class staffingEmployee(models.Model):
         res = []
         date = date_start
         while (date <= date_end):
-            public_holidays = self.env['resource.calendar.leaves'].search_count([('resource_id', '=', False), ('date_from', '>=', date), ('date_to', '<=', date)])
-            if public_holidays ==  0:
+            user_tz = self.env.user.tz or str(pytz.utc)
+            local = pytz.timezone(user_tz)
+            search_public_holiday_begin = datetime(date.year, date.month, date.day, 0, 0, 0)
+            search_public_holiday_begin = local.localize(search_public_holiday_begin, is_dst=None)
+            search_public_holiday_begin = search_public_holiday_begin.astimezone()
+
+            search_public_holiday_end = datetime(date.year, date.month, date.day, 23, 59, 59)
+            search_public_holiday_end = local.localize(search_public_holiday_end, is_dst=None)
+            search_public_holiday_end = search_public_holiday_end.astimezone()
+
+            public_holidays = self.env['resource.calendar.leaves'].search([('resource_id', '=', False), ('time_type', '=', 'leave'), ('date_from', '>=', search_public_holiday_begin), ('date_to', '<=', search_public_holiday_end)])
+            #_logger.info('Date begin = %s / date end = %s / Public holidays : %s' % (str(search_public_holiday_begin), str(search_public_holiday_end),  str(public_holidays.read())))
+            if len(public_holidays) ==  0:
                 if date.strftime('%A') not in ['Saturday', 'Sunday']:
                     res.append(date)
             date = date + timedelta(days = 1) #TODO : ajouter 24h au lieu d'un jour => impact lorsque lors du changement d'heure ? (garder la même heure en passant de GMT +2 à +1 ... ou bien changer d'heure en gardant le même offste ce qui reveint au même pour les comparaisons)

@@ -146,7 +146,10 @@ class staffingProposal(models.Model):
             #TODO : relancer cette fonction si les timesheet évoluent sur cette période
             need = rec.staffing_need_id
             rec.employee_availability = rec.employee_id.number_days_available_period(need.begin_date, need.end_date)
-            rec.ranked_employee_availability = rec.employee_availability / need.nb_days_needed * 100
+            if (need.nb_days_needed == 0):
+                rec.ranked_employee_availability = 0.0
+            else :
+                rec.ranked_employee_availability = rec.employee_availability / need.nb_days_needed * 100
             rec.ranked_proposal = rec.ranked_employee_availability
 
             #for employee_skill in rec.employee_id.employee_skill_ids: #TODO doit être mise à jour si les compétences de l'employee évoluent

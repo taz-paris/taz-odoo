@@ -240,6 +240,7 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+        self.correct_leave_timesheet_stock(client)
         self.sync_customer_invoices(client)
         #TODO           self.sync_supplier_invoices(client)
 
@@ -268,6 +269,21 @@ class fitnetProject(models.Model):
         #TODO : gérer les mises à jour de congés (via sudo() ?) avec des demandes au statut validé
         _logger.info(' ############## Fin de la synchro Fitnet')
 
+    def correct_leave_timesheet_stock(self, client):
+        _logger.info('---- correct_leave_timesheet_stock')
+        leaves = self.env['hr.leave'].search([('fitnet_id', '!=', None)]) 
+        for leave in leaves:
+            count = 0.0
+            timesheets = self.env['account.analytic.line'].search([('holiday_id', '=', leave.id)])
+            for timesheet in timesheets:
+                count += timesheet.unit_amount
+            if count != leave.number_of_days:
+                _logger.info('Incohérence : leave_id=%s pour %s => duréee =%s alors que total des timesheet=%s. Debut le %s' % (str(leave.id), leave.employee_id.name, str(leave.number_of_days), str(count), str(leave.request_date_from)))
+                _logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
+                #leave.number_of_days = leave.number_of_days
+                #_logger.info('      Corrigé')
+
+
     def sync_customer_invoices(self, client):
         _logger.info('---- sync_customer_invoices')
         fitnet_objects = client.get_api('invoices/v2/1/0/01-01-2018/31-12-2050')
@@ -278,6 +294,7 @@ class fitnetProject(models.Model):
             'expectedPaymentDate' : {'odoo_field' : 'invoice_date_due'},
             'ibanId' : {'odoo_field' : 'partner_bank_id'},
             'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'out_invoice' : 'out_invoice', 'out_refund':'out_refund'}},
+            'referenceInvoiceId' : {'odoo_field' : 'invoice_origin'},
         }
         mapping_fields_invoice_line = {
             'inoviceId' : {'odoo_field' : 'move_id'},
@@ -286,15 +303,22 @@ class fitnetProject(models.Model):
             'quantity' : {'odoo_field' : 'quantity'},
             'contractId_json' : {'odoo_field' : 'analytic_distribution'},
         }
+        mapping_fields_payment = {
+            'partner_id' : {'odoo_field' : 'partner_id'},
+            'amount' : {'odoo_field' : 'amount'},
+            'date' : {'odoo_field' : 'date'},
+            'payment_type' : {'odoo_field' :'payment_type'},
+            'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
+        }
         invoices_list = []
         invoices_lines_list = []
+        payment_list = []
         for invoice in fitnet_objects:
-            if invoice['invoiceId'] not in [1492]:
+            if invoice['invoiceId'] not in [1492, 1493]:
                 continue
             if invoice['bTaxBilling'] < 0:
                 _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
-                continue #avoir
-                #invoice['move_type'] = 'out_refund'
+                invoice['move_type'] = 'out_refund'
             else :
                 invoice['move_type'] = 'out_invoice'
             invoices_list.append(invoice)
@@ -308,17 +332,33 @@ class fitnetProject(models.Model):
                 #if line['vatRate'] != 20.0:
                 #    raise ValidationError(_("Taux de TVA != 20%"))
 
+            if invoice['actualPaymentDate'] != "" :
+                payment = {
+                        'paymentId' : 'payment_' + str(invoice['invoiceId']),
+                        'inoviceId' : invoice['invoiceId'],
+                        'partner_id' : invoice['customerId'],
+                        'amount' : invoice['wTaxBilling'],
+                        'date' : invoice['actualPaymentDate'],
+                    }
+                if invoice['move_type'] == 'out_invoice' : 
+                    payment['payment_type'] = 'inbound'
+                elif invoice['move_type'] == 'out_refound' :
+                    payment['payment_type'] = 'oubound'
+                #payment['journal_id'] = 
+                payment['partner_bank_id'] = invoice['ibanId']
+                payment_list.append(payment)
+
         self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
-        _logger.info('%%%%%%%%%')
-        _logger.info(str(invoices_lines_list))
-        _logger.info('%%%%%%%%%')
         self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
-        _logger.info('%%%%%%%%%')
+        #self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'paymentId',context={})
 
         #TODO : générer l'adresse de facturation du partner si différente de celle déjà connue (ou MAJ de la fiche partenaire si l'adresse postale est vide
+            # attribut billingAdress de l'objet invoice Fitnet
+        #TODO : mettre à jour les statuts des factures/paiements
+        #TODO : intégrer les bons comptes comptables (1 part partenaire)
         #TODO generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
         #TODO générer le paiement dans Odoo (date du paiement = actualPaymentDate dans le modèle fitnet)
-        #TODO : gérer les avoir
+        #TODO : gérer les factures et avoirs fournisseurs (ie de nos sous-traitants) ==> Pas sur que ces factures soient structurées sur Fitnet
 
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')

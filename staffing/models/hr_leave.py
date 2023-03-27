@@ -90,6 +90,8 @@ class staffingLeave(models.Model):
 
                 list_work_days = self.env['hr.employee'].list_work_days_period(date_start, date_end) 
 
+                _logger.info(list_work_days)
+
                 for index, (day_date) in enumerate(list_work_days):
                     work_days_count = 1.0
                     if index == 0 and leave.request_date_from_period == "pm":
