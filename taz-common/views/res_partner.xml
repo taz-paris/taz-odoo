@@ -289,7 +289,7 @@
 					<field name="former_email_address"/>
 				</group>
 			</page>
-			<page string="Inscriptions aux évènements" groups="event.group_event_user, event.group_event_registration_desk, event.group_event_manager">
+			<page string="Inscriptions aux évènements">
 				<field name="event_registration_ids">
 				   <tree string="Registration" sample="1" expand="1" default_order="create_date desc" class="o_event_registration_view_tree">
 					<field name="active" invisible="1"/>

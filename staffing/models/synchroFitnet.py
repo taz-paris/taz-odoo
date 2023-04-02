@@ -164,6 +164,20 @@ class fitnetProjectGroup(models.Model):
     fitnet_id = fields.Char("Fitnet ID")
 
 
+class fitnetProjectGroup(models.Model):
+    _inherit = "account.payment"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+
+class fitnetProjectGroup(models.Model):
+    _inherit = "account.journal"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
 
 
 
@@ -240,7 +254,6 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
-        self.correct_leave_timesheet_stock(client)
         self.sync_customer_invoices(client)
         #TODO           self.sync_supplier_invoices(client)
 
@@ -249,6 +262,7 @@ class fitnetProject(models.Model):
         self.sync_employees(client)
 
         self.sync_holidays(client) 
+        self.correct_leave_timesheet_stock(client)
 
         self.sync_employees_contracts(client)
         self.sync_customers(client)
@@ -271,7 +285,7 @@ class fitnetProject(models.Model):
 
     def correct_leave_timesheet_stock(self, client):
         _logger.info('---- correct_leave_timesheet_stock')
-        leaves = self.env['hr.leave'].search([('fitnet_id', '!=', None)]) 
+        leaves = self.env['hr.leave'].search([('fitnet_id', '!=', None), ('state', '=', "validate"), ('request_date_from', '>', '2022-12-31')]) 
         for leave in leaves:
             count = 0.0
             timesheets = self.env['account.analytic.line'].search([('holiday_id', '=', leave.id)])
@@ -294,7 +308,8 @@ class fitnetProject(models.Model):
             'expectedPaymentDate' : {'odoo_field' : 'invoice_date_due'},
             'ibanId' : {'odoo_field' : 'partner_bank_id'},
             'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'out_invoice' : 'out_invoice', 'out_refund':'out_refund'}},
-            'referenceInvoiceId' : {'odoo_field' : 'invoice_origin'},
+            'referenceInvoiceNumber' : {'odoo_field' : 'invoice_origin'},
+            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
         }
         mapping_fields_invoice_line = {
             'inoviceId' : {'odoo_field' : 'move_id'},
@@ -307,15 +322,18 @@ class fitnetProject(models.Model):
             'partner_id' : {'odoo_field' : 'partner_id'},
             'amount' : {'odoo_field' : 'amount'},
             'date' : {'odoo_field' : 'date'},
-            'payment_type' : {'odoo_field' :'payment_type'},
+            'payment_type' : {'odoo_field' :'payment_type', 'selection_mapping' : {'inbound' : 'inbound', 'outbound' : 'outbound'}},
             'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
+            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
+            'journal_id' : {'odoo_field' : 'journal_id'},
         }
         invoices_list = []
         invoices_lines_list = []
         payment_list = []
         for invoice in fitnet_objects:
-            if invoice['invoiceId'] not in [1492, 1493]:
+            if invoice['invoiceId'] not in [1492]:#, 1493]:
                 continue
+            #invoice['odoo_state'] = 'posted'
             if invoice['bTaxBilling'] < 0:
                 _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
                 invoice['move_type'] = 'out_refund'
@@ -326,7 +344,7 @@ class fitnetProject(models.Model):
             for line in invoice['invoiceLines']:
                 line['inoviceId'] = invoice['invoiceId']
                 odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
-                line['contractId_json'] = {odoo_analytic_ccount_id_project : 100} 
+                line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
                 line['quantity'] = 1.00
                 invoices_lines_list.append(line)
                 #if line['vatRate'] != 20.0:
@@ -337,27 +355,48 @@ class fitnetProject(models.Model):
                         'paymentId' : 'payment_' + str(invoice['invoiceId']),
                         'inoviceId' : invoice['invoiceId'],
                         'partner_id' : invoice['customerId'],
-                        'amount' : invoice['wTaxBilling'],
+                        'amount' : "%.2f" % round(abs(invoice['wTaxBilling']),2),
                         'date' : invoice['actualPaymentDate'],
+                        #'odoo_state' : 'posted',
                     }
                 if invoice['move_type'] == 'out_invoice' : 
                     payment['payment_type'] = 'inbound'
-                elif invoice['move_type'] == 'out_refound' :
-                    payment['payment_type'] = 'oubound'
-                #payment['journal_id'] = 
+                elif invoice['move_type'] == 'out_refund' :
+                    payment['payment_type'] = 'outbound'
+                payment['journal_id'] = invoice['ibanId']
                 payment['partner_bank_id'] = invoice['ibanId']
                 payment_list.append(payment)
 
         self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
         self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
-        #self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'paymentId',context={})
+        self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'paymentId',context={})
+        
+        for fitnet_payment in payment_list:
+            odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['paymentId'])])[0]
+            if odoo_payment.is_reconciled:
+                continue
+            payment_line_to_reconcile = False
+            for line in odoo_payment.move_id.line_ids:
+                if line.account_id.code == '411100':
+                    payment_line_to_reconcile = line
+        
+            odoo_invoice =  self.env['account.move'].search([('fitnet_id', '=', fitnet_payment['inoviceId'])])[0]
+            invoice_line_to_reconcile = False
+            for line in odoo_invoice.line_ids:
+                if line.account_id.code == '411100':
+                    invoice_line_to_reconcile = line
+            
+            if (invoice_line_to_reconcile and payment_line_to_reconcile) :
+                if invoice_line_to_reconcile.move_id.state == 'draft' :
+                    invoice_line_to_reconcile.move_id.action_post()
+                if payment_line_to_reconcile.move_id.state == 'draft' :
+                    payment_line_to_reconcile.move_id.action_post()
+                (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
+
 
         #TODO : générer l'adresse de facturation du partner si différente de celle déjà connue (ou MAJ de la fiche partenaire si l'adresse postale est vide
             # attribut billingAdress de l'objet invoice Fitnet
-        #TODO : mettre à jour les statuts des factures/paiements
-        #TODO : intégrer les bons comptes comptables (1 part partenaire)
-        #TODO generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
-        #TODO générer le paiement dans Odoo (date du paiement = actualPaymentDate dans le modèle fitnet)
+        #TODO : generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
         #TODO : gérer les factures et avoirs fournisseurs (ie de nos sous-traitants) ==> Pas sur que ces factures soient structurées sur Fitnet
 
     def sync_holidays(self, client):
@@ -868,6 +907,8 @@ class fitnetProject(models.Model):
                 if fitnet_field_name in fitnet_object.keys():
                     fitnet_value = fitnet_object[fitnet_field_name]
                 else : 
+                    #_logger.info(fitnet_field_name)
+                    #_logger.info(fitnet_object)
                     onDemand = self.get_proprieteOnDemand_by_id(fitnet_object, fitnet_field_name)
                     if onDemand is not None:
                         fitnet_value = onDemand
@@ -928,8 +969,8 @@ class fitnetProject(models.Model):
 
                     if odoo_object :
                         if odoo_object[odoo_field_name] != odoo_value:
-                            #_logger.info(odoo_object[odoo_field_name])
-                            #_logger.info(odoo_value)
+                            _logger.info(odoo_object[odoo_field_name])
+                            _logger.info(odoo_value)
                             res[odoo_field_name] = odoo_value
                     else :
                             res[odoo_field_name] = odoo_value

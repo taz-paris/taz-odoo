@@ -142,5 +142,27 @@
             </field>
         </record>
 
+
+        <record id="account_view_account_payment_form_inherit" model="ir.ui.view">
+            <field name="name">Payment</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                <field name="ref" position="after">
+                        <field name="fitnet_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="account_view_account_journal_form_inherit" model="ir.ui.view">
+            <field name="name">Journal</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <field name="code" position="after">
+                        <field name="fitnet_id" readonly="0"/>
+                </field>
+            </field>
+        </record>
    </data>
 </odoo>

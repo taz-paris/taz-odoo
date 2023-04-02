@@ -139,7 +139,9 @@ class tazResPartner(models.Model):
      mailchimp_status = fields.Selection([('cleaned', 'cleaned'), ('nonsubscribed', 'nonsubscribed'), ('subscribed', 'subscribed'), ('unsubscribed', 'unsubscribed')], "Statut Mailchimp lors de l'import")
 
      contact_user_link_ids = fields.One2many("taz.contact_user_link", 'partner_id', string="Liens contacts-utilisateurs")
-     event_registration_ids = fields.One2many('event.registration', 'partner_id')
+     event_registration_ids = fields.One2many('event.registration', 'partner_id',  groups="event.group_event_user, event.group_event_registration_desk, event.group_event_manager")
+
+
 
      def name_get(self):
          res = []
