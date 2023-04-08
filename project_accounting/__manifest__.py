@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "staffing",
+    'name': "project_accounting",
 
-    'summary': """Staffing module""",
+    'summary': """Project accounting""",
 
     'description': """
     """,
@@ -18,21 +18,16 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'project_timesheet_holidays', 'hr_skills', 'taz-common', 'project_accounting', 'web_widget_bokeh_chart'],
+    'depends': ['base', 'project', 'taz-common'],
 
     # always loaded
     'data': [
-        'security/security.xml',
+        #'security/security.xml',
         'security/ir.model.access.csv',
-        'views/staffing.xml',
+        'views/project_stage.xml',
+        'views/project_group.xml',
         'views/project.xml',
-        'views/employee.xml',
-        'views/account_analytic_line.xml',
-        'views/hr_job.xml',
-        'views/timesheets.xml',
-        'data/cron_fitnet_sync.xml',
-        'data/cron_employee_availability.xml',
-        'views/synchroFitnet.xml',
+        'views/res_partner.xml',
     ],
 
 

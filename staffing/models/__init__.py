@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-
 from . import staffing
 from . import project
-#from . import project_group
 from . import synchroFitnet
 from . import employee
 from . import account_analytic_line
 from . import hr_leave
 from . import hr_job
-from . import res_partner

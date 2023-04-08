@@ -1,0 +1,17 @@
+  <data>
+    <record model="ir.ui.view" id="taz-common.contact_user_link_tree">
+      <field name="name">Lien Contact Utilisateur</field>
+      <field name="model">taz.contact_user_link</field>
+      <field name="arch" type="xml">
+          <tree editable="top">
+                  <field name="partner_id" optional="hide" options="{'no_quick_create':True}" attrs="{'required' : False}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+                  <field name="user_id" />
+                  <field name="date_last_business_action" />
+		  <!--
+                  <field name="desired_meeting_frequency" />
+		  -->
+		  <field name="proximity_level" />
+        </tree>
+      </field>
+    </record>
+</data>

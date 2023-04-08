@@ -1,0 +1,241 @@
+<odoo>
+    <data>
+        <record id="view_project_search" model="ir.ui.view">
+            <field name="name">Project</field>
+            <field name="model">project.project</field>
+            <field name="priority">5</field>
+            <field name="arch" type="xml">
+                <search string="Search Project">
+                    <field name="name" string="N° ou nom du projet" filter_domain="['|', ('number', 'ilike', self), ('name', 'ilike', self)]"/>
+                    <field name="user_id" string="Directeur de mission"/>
+                    <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
+                    <field name="stage_id" groups="project.group_project_stages"/>
+                    <field name="project_group_id" string="Groupe de projets"/>
+                    <filter string="Les projets dont je suis DM" name="own_projects" domain="[('user_id', '=', uid)]"/>
+                    <filter string="Projets ayant changé de statut depuis 7 jours" name="recent_project_changed" domain="[('state_last_change_date', '&gt;=', ((context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')))]"/>
+                    <separator/>
+                    <filter string="Date de début" name="start_date" date="date_start"/>
+                    <filter string="Date de fin" name="end_date" date="date"/>
+                    <separator/>
+                    <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Directeur de mission" name="Manager" context="{'group_by': 'user_id'}"/>
+                        <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+	   <record model="ir.ui.view" id="project_accounting.project_tree">
+	      <field name="name">Project</field>
+	      <field name="model">project.project</field>
+	      <field name="priority">5</field>
+	      <field name="arch" type="xml">
+		<tree>
+		  <field name="number"/>
+		  <field name="name"/>
+		  <field name="partner_id"/>
+		  <field name="stage_id"/>
+		</tree>
+	      </field>
+	    </record>
+
+	<record id="seq_project" model="ir.sequence">
+		<field name="name">Preject number sequence</field>
+		<field name="code">project.project</field>
+		<field name="active">True</field>
+		<field name="prefix">%(y)s</field>
+		<field name="number_increment">1</field>
+			<!--	DO NOT UPDATE THE SEQUENCE NUMBER NEXT AFTER CREATION #TODO : move to sequence dedicated XML and set "no update" flag
+				<field name="number_next">1</field>
+			-->
+		<field name="padding">3</field>
+		<field name="implementation">standard</field>
+	</record>
+
+
+	   <record model="ir.ui.view" id="project_accounting.project_form">
+	      <field name="name">Project</field>
+	      <field name="model">project.project</field>
+	      <field name="priority">5</field>
+	      <field name="arch" type="xml">
+		<form string="Project" class="o_form_project_project" js_class="project_form">
+			<header>
+				<!--
+				<field name="stage_id" widget="statusbar" readonly="1"/>
+					<field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" groups="project.group_project_stages"/>
+					-->
+			</header>
+			<field name="company_id" invisible="1"/>
+			<field name="analytic_account_id" invisible="1"/>
+			<sheet string="Project">
+
+
+				<widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+				<field name="active" invisible="1"/>
+				<div class="oe_title">
+					<h1 class="d-flex flex-row">
+				    		<field name="number" readonly="1" nolabel="1" class="me-1"/>
+				    		<field name="name" class="o_text_overflow" placeholder="Intitulé du projet"/>
+					</h1>
+                    		</div>
+				    <group>
+					<group>
+					    <field name="partner_id"/>
+					    <field name="stage_id"/>
+					    <field name="probability"/>
+					    <field name="order_amount"/>
+					    <field name="margin_target"/>
+					</group>
+					<group>
+					    <field name="project_director_employee_id" attrs="{'readonly':[('active','=',False)]}" />
+					    <label for="date_start" string="Dates de début/fin"/>
+					    <div name="dates" class="o_row">
+						<field name="date_start" widget="daterange" options="{&quot;related_end_date&quot;: &quot;date&quot;}"/>
+						<i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
+						<i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow" attrs="{'invisible': [('date_start', '=', False), ('date', '=', False)]}"/>
+						<field name="date" widget="daterange" options="{&quot;related_start_date&quot;: &quot;date_start&quot;}"/>
+					    </div>
+					    <field name="project_group_id"/>
+					</group>
+				   </group>
+				<notebook>
+
+					<page name="description" string="Description">
+						<group>
+							<group>
+					    		    <field name="description" options="{'resizable': false}" placeholder="Description du projet..."/>
+							    <field name="remark"/>
+							</group>
+						</group>
+					</page>
+					<page string="Jalons de facturation">
+						<field name="milestone_ids" context="{'default_project_id':active_id}" >
+							<tree decoration-danger="is_deadline_exceeded">
+								<field name="can_be_marked_as_done" invisible="1"/>
+								<field name="name"/>
+								<field name="deadline"/>
+								<field name="is_reached"/>
+								<field name="reached_date"/>
+								<field name="is_deadline_exceeded" invisible="1"/>
+							</tree>
+						</field>
+					</page>
+					<page string="Info de facturation">
+						<group>
+							<group>
+							    <field name="is_purchase_order_received"/>
+							    <field name="purchase_order_number"/>
+							    <field name="outsourcing"/>
+							    <field name="billed_amount"/>
+							    <field name="payed_amount"/>
+							</group>
+							<group>
+					    			<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+					    			<field name="analytic_account_id"/>
+								<field name="state_last_change_date"/>
+							</group>
+						</group>
+					</page>
+				</notebook>
+			</sheet>
+		<div class="oe_chatter">
+                    <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
+		    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+		</form>
+	      </field>
+	    </record>
+
+
+	   <record model="ir.ui.view" id="project_kanban">
+	      <field name="name">Project</field>
+	      <field name="model">project.project</field>
+	      <field name="arch" type="xml">
+		      <kanban default_group_by="stage_id" class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" on_create="project.open_create_project" action="staffing.project_action" type="action" sample="1" default_order="sequence, name, id">
+			    <field name="display_name"/>
+			    <field name="partner_id"/>
+			    <field name="commercial_partner_id"/>
+			    <field name="color"/>
+			    <field name="task_count"/>
+			    <field name="milestone_count_reached"/>
+			    <field name="milestone_count"/>
+			    <field name="allow_milestones"/>
+			    <field name="label_tasks"/>
+			    <field name="alias_id"/>
+			    <field name="alias_name"/>
+			    <field name="alias_domain"/>
+			    <field name="is_favorite"/>
+			    <field name="rating_count"/>
+			    <field name="rating_avg"/>
+			    <field name="rating_status"/>
+			    <field name="rating_active"/>
+			    <field name="analytic_account_id"/>
+			    <field name="date"/>
+			    <field name="privacy_visibility"/>
+			    <field name="last_update_color"/>
+			    <field name="last_update_status"/>
+			    <field name="tag_ids"/>
+			    <field name="sequence" widget="handle"/>
+			    <templates>
+				<t t-name="kanban-box">
+				    <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon oe_kanban_content oe_kanban_card">
+					<div class="o_project_kanban_main ">
+					    <span>
+					       <field name="is_favorite" widget="boolean_favorite" nolabel="1" force_save="1"/>
+					    </span>
+					    <div class="o_kanban_card_content mw-100">
+						<div class="o_kanban_primary_left">
+						    <div class="o_primary">
+							<span class="o_text_overflow" t-att-title="record.display_name.value"><t t-esc="record.display_name.value"/></span>
+							<span class="o_text_overflow text-muted" t-if="record.partner_id.value">
+							    <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_id.value"/>
+							</span>
+							<div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted o_row">
+							    <span class="fa fa-clock-o me-2" title="Dates"/><field name="date_start"/>
+							    <i t-if="record.date.raw_value and record.date_start.raw_value" class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
+							    <field name="date"/>
+							</div>
+						    </div>
+						</div>
+					    </div>
+					</div>:
+				    </div>
+				</t>
+			    </templates>
+			</kanban>
+	      </field>
+	   </record>
+		
+	    <record id="recent_project_action" model="ir.actions.act_window">
+		<field name="name">Projets</field>
+		<field name="res_model">project.project</field>
+		<field name="view_mode">kanban</field>
+		<field name="context">{'search_default_recent_project_changed' : 1}</field>
+		<field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
+				      ]" />
+	    </record>
+
+	    <record id="project_action" model="ir.actions.act_window">
+		<field name="name">Projets</field>
+		<field name="res_model">project.project</field>
+		<field name="view_mode">tree,form</field>
+		<field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
+				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+				      ]" />
+	    </record>
+
+	    <menuitem name="News escale" id="project_news_menu" parent="project.menu_main_pm" action="recent_project_action"/>
+	    <menuitem name="Projets" id="project_menu" parent="project.menu_main_pm" action="project_action"/>
+
+
+   </data>
+</odoo>
