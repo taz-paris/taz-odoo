@@ -18,7 +18,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'project_timesheet_holidays', 'hr_skills', 'taz-common', 'web_widget_bokeh_chart'],
+    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'project_timesheet_holidays', 'hr_skills', 'taz-common', 'project_accounting', 'web_widget_bokeh_chart'],
 
     # always loaded
     'data': [
@@ -34,7 +34,6 @@
         'data/cron_fitnet_sync.xml',
         'data/cron_employee_availability.xml',
         'views/synchroFitnet.xml',
-        'views/project_group.xml',
     ],
 
 

@@ -333,7 +333,6 @@ class fitnetProject(models.Model):
         for invoice in fitnet_objects:
             if invoice['invoiceId'] not in [1492]:#, 1493]:
                 continue
-            #invoice['odoo_state'] = 'posted'
             if invoice['bTaxBilling'] < 0:
                 _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
                 invoice['move_type'] = 'out_refund'
@@ -357,7 +356,6 @@ class fitnetProject(models.Model):
                         'partner_id' : invoice['customerId'],
                         'amount' : "%.2f" % round(abs(invoice['wTaxBilling']),2),
                         'date' : invoice['actualPaymentDate'],
-                        #'odoo_state' : 'posted',
                     }
                 if invoice['move_type'] == 'out_invoice' : 
                     payment['payment_type'] = 'inbound'
@@ -397,7 +395,10 @@ class fitnetProject(models.Model):
         #TODO : générer l'adresse de facturation du partner si différente de celle déjà connue (ou MAJ de la fiche partenaire si l'adresse postale est vide
             # attribut billingAdress de l'objet invoice Fitnet
         #TODO : generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
-        #TODO : gérer les factures et avoirs fournisseurs (ie de nos sous-traitants) ==> Pas sur que ces factures soient structurées sur Fitnet
+        #TODO : gérer les factures et avoirs fournisseurs (ie de nos sous-traitants)
+            # récupérer les founisseurs : https://tasmane.fitnetmanager.com/FitnetManager/rest/suppliers/1/2
+            # récupérer les statuts possibles pour les achats : https://tasmane.fitnetmanager.com/FitnetManager/rest/monitoringPurchases/getAllStatus/1
+            # récupérer les achats : https://tasmane.fitnetmanager.com/FitnetManager/rest/monitoringPurchases/1/all/01-2018/06-2050 
 
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')

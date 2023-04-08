@@ -76,6 +76,7 @@
             </field>
         </record>
 
+<!--
         <record id="project_group_fitnet_form_inherit" model="ir.ui.view">
             <field name="name">Project group</field>
             <field name="model">project.group</field>
@@ -86,7 +87,7 @@
                 </field>
             </field>
         </record>
-
+-->
         <record id="res_project_stage_fitnet_view_form_inherit" model="ir.ui.view">
             <field name="name">Project stage</field>
             <field name="model">project.project.stage</field>
