@@ -41,8 +41,9 @@ class staffingProject(models.Model):
             rec.user_id = rec.project_director_employee_id.user_id if rec.project_director_employee_id else False
 
     def write(self, vals):
-        if 'stage_id' in vals.keys():
-            vals['state_last_change_date'] = datetime.today()
+        for record in self :
+            if 'stage_id' in vals.keys():
+                vals['state_last_change_date'] = datetime.today()
         return super().write(vals)
 
     @api.model
@@ -62,10 +63,8 @@ class staffingProject(models.Model):
             ('70', '70 %'),
             ('100', '100 %'),
         ], string='Probabilité')
-    order_amount = fields.Float('Montant commande')
     billed_amount = fields.Float('Montant facturé', readonly=True)
     payed_amount = fields.Float('Montant payé', readonly=True)
-    margin_target = fields.Float('Objectif de marge (%)') #TODO : contrôler que c'est positif et <= 100
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
 
     number = fields.Char('Numéro', readonly=True, required=True, copy=False, default='New')
@@ -82,3 +81,106 @@ class staffingProject(models.Model):
     #TODO : ajouter un type (notamment pour les accords cadre) ? ou bien utiliser les tags ?
     #TODO : ajouter les personnes qui ont travaillé sur la propale + double book
 
+
+    @api.depends('company_part_amount_initial', 'company_part_cost_initial', 'company_part_amount_current', 'company_part_cost_current', 'outsource_part_amount_initial', 'outsource_part_cost_initial', 'outsource_part_amount_current', 'outsource_part_cost_current', 'other_part_amount_initial', 'other_part_cost_initial', 'other_part_amount_current', 'other_part_cost_current')
+    def compute(self):
+        for rec in self:
+            ######## TOTAL
+            rec.order_amount = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
+
+            rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.other_part_cost_initial
+            rec.order_marging_amount_initial = rec.company_part_marging_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
+            rec.order_marging_rate_initial = 0.0
+            if rec.order_amount != 0 : 
+                rec.order_marging_rate_initial = rec.order_marging_amount_initial / rec.order_amount * 100
+
+            rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
+            rec.order_marging_amount_current = rec.company_part_marging_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
+            rec.order_marging_rate_current = 0.0
+            if rec.order_amount != 0 : 
+                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_amount * 100
+
+            ######## COMPANY PART
+            rec.company_part_marging_amount_initial =  rec.company_part_amount_initial - rec.company_part_cost_initial
+            rec.company_part_marging_rate_initial = 0.0
+            if rec.company_part_amount_initial != 0 :
+                rec.company_part_marging_rate_initial = rec.company_part_marging_amount_initial / rec.company_part_amount_initial * 100
+    
+            rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
+            rec.company_part_marging_rate_current = 0.0
+            if rec.company_part_amount_current != 0 :
+                rec.company_part_marging_rate_current = rec.company_part_marging_amount_current / rec.company_part_amount_current * 100
+    
+            ######## OUTSOURCE PART
+            rec.outsource_part_marging_amount_initial =  rec.outsource_part_amount_initial - rec.outsource_part_cost_initial
+            rec.outsource_part_marging_rate_initial = 0.0 
+            if rec.outsource_part_amount_initial != 0 :                
+                rec.outsource_part_marging_rate_initial = rec.outsource_part_marging_amount_initial / rec.outsource_part_amount_initial * 100
+                                                                
+            rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current
+            rec.outsource_part_marging_rate_current = 0.0 
+            if rec.outsource_part_amount_current != 0 :
+                rec.outsource_part_marging_rate_current = rec.outsource_part_marging_amount_current / rec.outsource_part_amount_current * 100
+
+            ######## OTHER PART
+            rec.other_part_marging_amount_initial =  rec.other_part_amount_initial - rec.other_part_cost_initial
+            rec.other_part_marging_rate_initial = 0.0
+            if rec.other_part_amount_initial != 0 :
+                rec.other_part_marging_rate_initial = rec.other_part_marging_amount_initial / rec.other_part_amount_initial * 100
+
+            rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current
+            rec.other_part_marging_rate_current = 0.0
+            if rec.other_part_amount_current != 0 :
+                rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
+
+
+
+    final_customer_order_amount = fields.Monetary('Montant commandé', help="Montant total commandé par le client final (supérieur au montant piloté par Tasmane si Tasmane est sous-traitant. Egal au montant piloté par Tasmne sinon.)")
+    #TODO : ajouter un contrôle : le montant commandé ne peut être inférieur au montant piloté par Tasmane
+
+
+    ######## TOTAL
+    order_amount = fields.Monetary('Montant piloté par Tasmane (fixe ???)', store=True, compute=compute,  help="Montant effectivement commandé à Tasmane : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
+    #TODO : ajouter un contrôme opur vérifier que self.company_part_amount_initial+self.outsource_part_amount_initial == self.company_part_amount_current+self.outsource_part_amount_current
+    order_cost_initial = fields.Monetary('Coût total initial', compute=compute)
+    order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute)
+    order_marging_rate_initial = fields.Float('Marge totale (%) initiale', compute=compute)
+
+    order_cost_current = fields.Monetary('Coût total actuel', compute=compute)
+    order_marging_amount_current = fields.Monetary('Marge totale (€) actuelle', compute=compute)
+    order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute)
+
+    ######## COMPANY PART
+    company_part_amount_initial = fields.Monetary('Montant dispositif Tasmane initial', help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
+    company_part_cost_initial = fields.Monetary('Coût de production dispo Tasmane (€) initial', help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
+    company_part_marging_amount_initial = fields.Monetary('Marge sur dispo Tasmane (€) initiale', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
+    company_part_marging_rate_initial = fields.Float('Marge sur dispo Tasmane (%) initiale', store=True, compute=compute)
+
+    company_part_amount_current = fields.Monetary('Montant dispositif Tasmane actuel', help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
+    company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
+    company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) actuelle', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
+    company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) actuelle', store=True, compute=compute)
+
+    ######## OUTSOURCE PART
+    outsource_part_amount_initial = fields.Monetary('Montant de la part sous-traitée initial', help="Montant produit par les sous-traitants de Tasmane : part produite par les sous-traitants que Tasmane paye à l'acte")
+    outsource_part_cost_initial = fields.Monetary('Coût de revient de la part sous-traitée initial')
+    outsource_part_marging_amount_initial = fields.Monetary('Marge sur part sous-traitée (€) initiale', store=True, compute=compute)
+    outsource_part_marging_rate_initial = fields.Float('Marge sur part sous-traitée (%) initiale', store=True, compute=compute)
+
+    outsource_part_amount_current = fields.Monetary('Montant de la part sous-traitée actuel', help="Montant produit par les sous-traitants de Tasmane : part produite par les sous-traitants que Tasmane paye à l'acte")
+    outsource_part_cost_current = fields.Monetary('Coût de revient de la part sous-traitée actuel')
+    outsource_part_marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', store=True, compute=compute)
+    outsource_part_marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', store=True, compute=compute)
+    #quid des co-traitants
+
+
+    ######## OTHER PART
+    other_part_amount_initial = fields.Monetary('Prix de vente HT autres prestations initial', help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
+    other_part_cost_initial = fields.Monetary('Coût de revient HT des autres prestations initial')
+    other_part_marging_amount_initial = fields.Monetary('Marge sur les autres prestations (€) initiale', store=True, compute=compute)
+    other_part_marging_rate_initial = fields.Float('Marge sur les autres prestations (%) initiale', store=True, compute=compute)
+
+    other_part_amount_current = fields.Monetary('Prix de vente HT des autres prestations actuel', help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
+    other_part_cost_current = fields.Monetary('Coût de revient HT des autres prestations actuel')
+    other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) actuelle', store=True, compute=compute)
+    other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) actuelle', store=True, compute=compute)

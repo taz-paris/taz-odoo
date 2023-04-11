@@ -17,7 +17,7 @@
 				</div>
                 	</field>
 
-                	<field name="margin_target" position="after">
+                	<field name="probability" position="after">
 				<field name="margin_landing" widget="progressbar"/>
 				<field name="margin_text"/>
 				<field name="favorite_user_ids" widget="many2many_tags"/>

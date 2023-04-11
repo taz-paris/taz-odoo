@@ -55,16 +55,21 @@ class EventRegistrationLightController(http.Controller):
             if not partner :
                 partner = request.env['res.partner'].search([('personal_email', '=', email), ('active', '=', True)])
             if not partner :
-                partner = request.env['res.partner'].search([('former_email_address', 'in', email), ('active', '=', True)])
+                partner = request.env['res.partner'].search([('former_email_address', 'ilike', email), ('active', '=', True)])
             if len(partner) >= 1 :
                 partner_id = partner[0].id
             else :
-                partner_id = False
+                partner_object = request.env['res.partner'].create({'first_name' : first_name, 'name' : name, 'email' : email, 'type' : 'contact'})
                 # TODO : est-ce qu'on le crée avec un user dédié et/ou on le top "créé suite à inscription event" ==> si un rebot nous pollue àa permettrait de les repérer
+                # TODO : ajouter un try/catch pour être propre et afficher un message générique au visiteur qui tente de s'inscrire.
 
             #create registration
-            target = request.env['event.registration'].create({'event_id' : event.id, 'partner_id' : partner_id, 'email' : email, 'name' : first_name + " " + name, 'state' : 'open'})
-        return request.env['ir.ui.view']._render_template("event_registration_light.registration_submit")
+            target = request.env['event.registration'].create({'event_id' : event.id, 'partner_id' : partner_object.id, 'email' : email, 'name' : first_name + " " + name, 'state' : 'open'})
+
+        return request.env['ir.ui.view']._render_template("event_registration_light.registration_submit", {
+            'event': event,
+            'formated_dates' : self.get_formated_date(event),
+        })  
 
 
     def get_formated_date(self, event):

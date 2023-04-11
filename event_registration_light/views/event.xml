@@ -1,0 +1,16 @@
+<odoo>
+	<data>
+
+        <record id="event_registration_light.event_form_inherit" model="ir.ui.view">
+            <field name="name">Event</field>
+            <field name="model">event.event</field>
+            <field name="inherit_id" ref="event.view_event_form"/>
+            <field name="arch" type="xml">
+                <field name="tag_ids" position="after">
+                        <field name="registration_form_url" readonly="1" widget="url" />
+                </field>
+            </field>
+        </record>
+
+	</data>
+</odoo>

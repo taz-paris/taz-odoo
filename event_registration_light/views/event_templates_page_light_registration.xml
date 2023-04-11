@@ -2,57 +2,7 @@
 
 <template id="registration_form" name="Registration form">
 		<head>
-			<style type="text/css" >
-				html,body{
-					height:100%;
-					width:100%;
-					/*
-					background-color:#dad3cc;
-					color:#273c59;
-					*/
-					background-color:#273c59;
-					color:#FFFFFF;
-					font-family: arial,helvetica neue,helvetica,sans-serif;
-				}
-				label{
-					display: block;
-					padding-bottom: 6px;
-				}
-				input{
-				  display: inline-block;
-				  margin: 0 0 24px;
-				  min-height: 36px;
-				  min-width: 50px;
-				  padding: 0 0.4em;
-				  vertical-align: middle;
-				  width: 100%;
-				}
-				.button {
-				  background-color: rgb(245, 83, 100);
-				  color:#FFFFFF;
-				  font-weight: bold;
-				  padding : 15px;
-				  border-radius: 6px;
-				  border: 0px none;
-				  cursor: pointer;
-				}
-				form {
-				  margin:auto;
-				  width: 450px;
-				  padding : 40px;
-				}
-				img {
-				  height:150px;
-				  margin:auto;
-				  display: block;
-				}
-				p {
-				  font-size: 30px;
-				  margin:auto;
-				  display: block;
-				  text-align: center;
-				}
-			</style>
+			<link rel="stylesheet" type="text/css" href="/event_registration_light/static/style.css"/>
 			<title><t t-esc="event.name or 'Subscription'"/></title>
 			<link type="image/x-icon" rel="shortcut icon" href="/web/image/res.company/1/favicon" />
 		</head>
@@ -74,7 +24,15 @@
 </template>
 
 <template id="registration_submit" name="Registration result">
-	OK
+		<head>
+			<link rel="stylesheet" type="text/css" href="/event_registration_light/static/style.css"/>
+			<title><t t-esc="event.name or 'Subscription'"/></title>
+			<link type="image/x-icon" rel="shortcut icon" href="/web/image/res.company/1/favicon" />
+		</head>
+		<body>
+			<img src='/event_registration_light/static/img/logo.png' alt="Logo"/>
+			<p>Inscription confirmée pour l'évènement.</p>
+		</body>
 </template>
 
 </odoo>

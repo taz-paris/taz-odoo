@@ -290,7 +290,7 @@
 				</group>
 			</page>
 			<page string="Inscriptions aux évènements">
-				<field name="event_registration_ids">
+				<field name="event_registration_ids" readonly="1">
 				   <tree string="Registration" sample="1" expand="1" default_order="create_date desc" class="o_event_registration_view_tree">
 					<field name="active" invisible="1"/>
 					<field name="email" optional="show"/>

@@ -1,0 +1,40 @@
+<odoo>
+	<data>
+	    <record model="ir.ui.view" id="wizard_partner_event_resgitration_form">
+		    <field name="name">Assistant d'inscription en masse aux évènements</field>
+	      <field name="model">res_partner_mass_event_registration</field>
+	      <field name="arch" type="xml">
+		<form>
+			<group>
+				<group>
+					<field name="add_event_id" domain="[('stage_id.pipe_end', '!=', 'False')]"/>
+					<field name="partner_ids" colspan="3" readonly="1">
+						<tree>
+						  <field name="first_name"/>
+						  <field name="name"/>
+						  <field name="long_company_name"/>
+						  <field name="industry_id"/>
+						  <field name="parent_id"/>
+						</tree>
+					</field>
+				</group>
+			</group>
+			<footer>
+               	 		<button name="action_validate" string="Valider" type="object"/>
+               	 		<button name="action_cancel" special="cancel" string="Annuler" type="object"/>
+            		</footer>
+		</form>
+	      </field>
+	    </record>
+		
+	<record id="launch_wizard_partner_event_registration" model="ir.actions.act_window">
+		<field name="name">Assistant d'inscription en masse aux évènements</field>
+	    <field name="res_model">res_partner_mass_event_registration</field>
+	    <field name="view_mode">form</field>
+	    <field name="target">new</field>
+	    <field name="context">{'default_partner_ids':active_ids}</field>
+	    <field name="binding_model_id" ref="base.model_res_partner"/>
+	</record>
+	
+	</data>
+</odoo>

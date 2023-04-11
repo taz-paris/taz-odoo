@@ -22,18 +22,14 @@
     # always loaded
     'data': [
         'views/event_templates_page_light_registration.xml',
+        'views/event.xml',
+        'views/wizard_partner_event_registration.xml',
+        'security/ir.model.access.csv',
     ],
 
-
-    #"assets": {
-    #    "web.assets_backend": [
-    #        "web_widget_bokeh_chart/static/src/js/web_widget_bokeh_chart.esm.js",
-    #    ],
-    #},
-
-    #'assets': {
-    #    'web.assets_backend': [
-    #        'staffing/static/src/css/style.css',
-    #    ],
-    #}
+    'assets': {
+        'web.assets_frontend': [
+            'event_registration_light/static/style.css',
+        ],
+    }
 }

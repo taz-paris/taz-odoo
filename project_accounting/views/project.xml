@@ -85,8 +85,6 @@
 					    <field name="partner_id"/>
 					    <field name="stage_id"/>
 					    <field name="probability"/>
-					    <field name="order_amount"/>
-					    <field name="margin_target"/>
 					</group>
 					<group>
 					    <field name="project_director_employee_id" attrs="{'readonly':[('active','=',False)]}" />
@@ -101,7 +99,68 @@
 					</group>
 				   </group>
 				<notebook>
-
+					<page name="invoicing" string="Suivi">
+						<group string="Général">
+							<group>
+					    			<field name="final_customer_order_amount"/>
+					    			<field name="order_amount"/>
+							</group>
+							<group>
+							</group>
+                                                        <group string="Initial (sur le devis/au lancement)">
+                                                                <field name="order_cost_initial"/>
+                                                                <field name="order_marging_amount_initial"/>
+                                                                <field name="order_marging_rate_initial" widget="progressbar"/>
+                                                        </group>
+                                                        <group string="Valeur courante (valeur finale si la mission est terminée)">
+                                                                <field name="order_cost_current"/>
+                                                                <field name="order_marging_amount_current"/>
+                                                                <field name="order_marging_rate_current" widget="progressbar"/>
+                                                        </group>
+                                                </group>
+						<group string="Production par le dispositif Tasmane">
+							<group string="Initial (sur le devis/au lancement)">
+					    			<field name="company_part_amount_initial"/>
+					    			<field name="company_part_cost_initial"/>
+					    			<field name="company_part_marging_amount_initial"/>
+					    			<field name="company_part_marging_rate_initial" widget="progressbar"/>
+							</group>
+							<group string="Valeur courante (valeur finale si la mission est terminée)">
+					    			<field name="company_part_amount_current"/>
+					    			<field name="company_part_cost_current"/>
+					    			<field name="company_part_marging_amount_current"/>
+					    			<field name="company_part_marging_rate_current" widget="progressbar"/>
+							</group>
+						</group>
+                                                <group string="Production sous-traitée par Tasmane">
+                                                        <group string="Initial (sur le devis/au lancement)">
+                                                                <field name="outsource_part_amount_initial"/>
+                                                                <field name="outsource_part_cost_initial"/>
+                                                                <field name="outsource_part_marging_amount_initial"/>
+                                                                <field name="outsource_part_marging_rate_initial" widget="progressbar"/>
+                                                        </group>  
+                                                        <group string="Valeur courante (valeur finale si la mission est terminée)">
+                                                                <field name="outsource_part_amount_current"/>
+                                                                <field name="outsource_part_cost_current"/>
+                                                                <field name="outsource_part_marging_amount_current"/>
+                                                                <field name="outsource_part_marging_rate_current" widget="progressbar"/>
+                                                        </group>
+                                                </group>
+                                                <group string="Autres pestations (exemple : séminaire dans les locaux de Tasmane">
+                                                        <group string="Initial (sur le devis/au lancement)">
+                                                                <field name="other_part_amount_initial"/>
+                                                                <field name="other_part_cost_initial"/>
+                                                                <field name="other_part_marging_amount_initial"/>
+                                                                <field name="other_part_marging_rate_initial" widget="progressbar"/>
+                                                        </group>  
+                                                        <group string="Valeur courante (valeur finale si la mission est terminée)">
+                                                                <field name="other_part_amount_current"/>
+                                                                <field name="other_part_cost_current"/>
+                                                                <field name="other_part_marging_amount_current"/>
+                                                                <field name="other_part_marging_rate_current" widget="progressbar"/>
+                                                        </group>
+                                                </group>
+					</page>
 					<page name="description" string="Description">
 						<group>
 							<group>
