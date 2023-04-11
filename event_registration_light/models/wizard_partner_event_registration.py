@@ -24,6 +24,6 @@ class resPartnerMassEventRegistration(models.TransientModel):
             if self.add_event_id:
                 already_registered = self.env['event.registration'].search_count([('partner_id', '=', partner.id), ('event_id', '=', self.add_event_id.id)])
                 if not already_registered :
-                    _logger.info('>>> Ajout event.registration %s sur le partner %s' % (event.name, partner.name))
+                    _logger.info('>>> Ajout event.registration %s sur le partner %s' % (self.add_event_id.name, partner.name))
                     #create registration
-                    target = request.env['event.registration'].create({'event_id' : self.add_event_id.id, 'partner_id' : partner.id, 'email' : partner.email, 'name' : partner.first_name + " " + partner.name, 'state' : 'open'})
+                    target = self.env['event.registration'].create({'event_id' : self.add_event_id.id, 'partner_id' : partner.id, 'email' : partner.email, 'name' : partner.first_name + " " + partner.name, 'state' : 'open'})
