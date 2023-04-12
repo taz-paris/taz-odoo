@@ -8,7 +8,11 @@
 		</head>
 		<body>
 			<img src='/event_registration_light/static/img/logo.png' alt="Logo"/>
+			<!--
 			<p>Merci de confirmer votre présence pour l'évènement <t t-esc="event.name" /> <br/> qui aura lieu le <t t-esc="formated_dates"/></p>
+			-->
+
+			<t t-esc="event.description_web_form" />
 			
 			<form t-attf-action="/eventlight/#{event.id}/registration/submit" method="post">
 				<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
@@ -18,7 +22,7 @@
 				<input type="text" name="first_name" id="first_name" required="True" />
 				<label form="email">Nom *</label>
 				<input type="text" name="name" id="name" required="True" />
-				<input class="button" type="submit" value="Je confirme ma présence" />
+				<input class="button" type="submit" value="Je m'inscris" />
 			</form>
 		</body>
 </template>

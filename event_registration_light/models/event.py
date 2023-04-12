@@ -21,3 +21,4 @@ class event(models.Model):
                 rec.registration_form_url = False
 
     registration_form_url = fields.Char("URL du formulaire d'inscription", compute=_get_registration_form_url)
+    description_web_form = fields.Html("Bloc HTML affiché sur le formulaire d'inscription")
