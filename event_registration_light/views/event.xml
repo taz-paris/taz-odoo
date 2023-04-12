@@ -9,6 +9,9 @@
                 <field name="tag_ids" position="after">
                         <field name="registration_form_url" readonly="1" widget="url" />
                 </field>
+                <field name="auto_confirm" position="replace">
+                        <field name="auto_confirm" readonly="1" help="Auto-confirm should be false to perfom the two step registration process : create draft registration, send invitation mail and let it be confirmed by guest." />
+                </field>
             </field>
         </record>
 
