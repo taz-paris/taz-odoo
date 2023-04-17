@@ -1,49 +1,45 @@
-				html,body{
-					height:100%;
-					width:100%;
-					/*
-					background-color:#dad3cc;
-					color:#273c59;
-					*/
-					background-color:#273c59;
-					color:#FFFFFF;
-					font-family: arial,helvetica neue,helvetica,sans-serif;
-				}
-				label{
-					display: block;
-					padding-bottom: 6px;
-				}
-				input{
-				  display: inline-block;
-				  margin: 0 0 24px;
-				  min-height: 36px;
-				  min-width: 50px;
-				  padding: 0 0.4em;
-				  vertical-align: middle;
-				  width: 100%;
-				}
-				.button {
-				  background-color: rgb(245, 83, 100);
-				  color:#FFFFFF;
-				  font-weight: bold;
-				  padding : 15px;
-				  border-radius: 6px;
-				  border: 0px none;
-				  cursor: pointer;
-				}
-				form {
-				  margin:auto;
-				  width: 450px;
-				  padding : 40px;
-				}
-				img {
-				  height:150px;
-				  margin:auto;
-				  display: block;
-				}
-				p {
-				  font-size: 30px;
-				  margin:auto;
-				  display: block;
-				  text-align: center;
-				}
+.event_registration_light>html,body{
+	height:100%;
+	width:100%;
+	background-color:#273c59;
+	color:#FFFFFF;
+	font-family: arial,helvetica neue,helvetica,sans-serif;
+}
+.event_registration_light>label{
+	display: block;
+	padding-bottom: 6px;
+}
+.event_registration_light>input{
+  display: inline-block;
+  margin: 0 0 24px;
+  min-height: 36px;
+  min-width: 50px;
+  padding: 0 0.4em;
+  vertical-align: middle;
+  width: 100%;
+}
+.event_registration_light_button {
+  background-color: rgb(245, 83, 100);
+  color:#FFFFFF;
+  font-weight: bold;
+  padding : 15px;
+  border-radius: 6px;
+  border: 0px none;
+  cursor: pointer;
+}
+.event_registration_light>form {
+  margin:auto;
+  width: 450px;
+  padding : 40px;
+}
+.event_registration_light>img {
+  height:150px;
+  margin:auto;
+  display: block;
+}
+.event_registration_light>p {
+  font-size: 30px;
+  margin:auto;
+  display: block;
+  text-align: center;
+}

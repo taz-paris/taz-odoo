@@ -113,7 +113,7 @@
             	    <filter name="not_tracked" string="Comptes non suivis" domain="[('business_priority', '=', 'not_tracked')]"/>
             	    <filter name="priority_target" string="Comptes suivis en BDM" domain="[('business_priority', '=', 'tracked')]"/>
 		    <separator/>
-		    <filter name="state_not_done" string="Non terminées" domain="[('state', '!=', 'done')]"/>
+		    <filter name="state_not_done_not_cancelled" string="Non terminées ni annulées" domain="[('state', '!=', 'done'), ('state', '!=', 'cancelled')]"/>
 		    <group expand="0" string="Group By">
 			<filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
 			<separator/>
