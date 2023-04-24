@@ -1,0 +1,59 @@
+<odoo>
+    <data>
+        <record id="project_outsourcing_link_tree" model="ir.ui.view">
+            <field name="name">Project outsourcing link</field>
+            <field name="model">project.outsourcing.link</field>
+            <field name="arch" type="xml">      
+                <tree>    
+                        <field name="project_id"/>
+                        <field name="partner_id"/>
+                        <field name="order_sum_sale_order_lines"/>
+                        <field name="order_direct_payment_amount"/>
+                        <field name="order_company_payment_amount"/>
+                        <field name="sum_account_move_lines"/>
+		</tree>                                
+            </field>                                    
+        </record>
+
+        <record id="project_outsourcing_link_form" model="ir.ui.view">
+            <field name="name">Project outsourcing link</field>
+            <field name="model">project.outsourcing.link</field>
+            <field name="arch" type="xml">      
+                <form>    
+			<group>
+				<field name="project_id"/>
+				<field name="partner_id"/>
+			</group>
+			<group string="Commande du client final">
+				<group>
+					<field name="outsource_part_amount_current"/>
+				</group>
+				<group>
+					<field name="order_direct_payment_amount"/>
+					<field name="order_company_payment_amount"/>
+				</group>
+			</group>
+			<group string="Commande à Tasmane">
+				<group>
+					<field name="order_sum_sale_order_lines"/>
+					<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
+				</group>
+			</group>
+			<group string="Facturation Tasmane / sous-traitant">
+				<group>
+					<field name="sum_account_move_lines"/>
+					<button type="object" name="action_open_account_move_lines" string="Voir les lignes de facture/avoir"/>
+				</group>
+				<group>
+					<field name="marging_amount_current" />
+					<field name="marging_rate_current" widgte="progressbar" />
+				</group>
+			</group>
+			<group string="Paiement Tasmane / sous-traitant">
+			</group>
+		</form>                                
+            </field>                                    
+        </record>
+
+</data>
+</odoo>
