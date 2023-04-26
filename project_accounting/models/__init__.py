@@ -3,3 +3,4 @@ from . import project_group
 from . import project
 from . import res_partner
 from . import project_outsourcing_link
+from . import project_book

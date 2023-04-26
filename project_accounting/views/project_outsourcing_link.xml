@@ -49,6 +49,14 @@
 					<field name="marging_rate_current" widgte="progressbar" />
 				</group>
 			</group>
+			<group string="Paiement direct client / sous-traitant">
+				<group>
+					<field name="order_direct_payment_done" />
+				</group>
+				<group>
+					<field name="order_direct_payment_done_detail" />
+				</group>
+			</group>
 			<group string="Paiement Tasmane / sous-traitant">
 			</group>
 		</form>                                

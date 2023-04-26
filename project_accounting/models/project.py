@@ -150,7 +150,7 @@ class staffingProject(models.Model):
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
             
             #BOOK
-            rec.default_book = rec.company_part_marging_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
+            rec.default_book = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
 
     def get_all_cost_current(self):
         for rec in self:
@@ -221,24 +221,32 @@ class staffingProject(models.Model):
 
     def compute_account_move_total(self): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
+        #_logger.info("--compute_account_move_total")
         for rec in self:
+            #_logger.info(rec.id)
             line_ids = rec.get_account_move_line_ids()
             total = 0.0
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
                 #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
                 total += line.price_subtotal
+            #_logger.info(total)
             rec.company_invoice_sum_sale_order_lines = total
+            #_logger.info("fin boucle compute_account_move_total")
+
 
     def action_open_account_move_lines(self):
-        line_ids = self.get_sale_order_line_ids()
+        line_ids = self.get_account_move_line_ids()
 
         action = {
             'name': _('Invoice and refound lines'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
-            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            #'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
+            'view_type': 'form',
+            'view_mode': 'tree',
+            'view_id': self.env.ref("account.view_move_line_tree").id,
             'context': {
                 'create': False,
             }
@@ -255,24 +263,40 @@ class staffingProject(models.Model):
             # Hypothèse structurante : un projet a toujours exactement un client
         #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
                 # Si ça n'est pas égale, afficher un bandeau jaune
-        query = self.env['account.move.line']._search([('move_id.partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice'])])
+        move = self.env['account.move'].search([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice'])])
+        move_ids = []
+        for m in move :
+            move_ids.append(m.id)
+
+        query = self.env['account.move.line']._search([('move_id', 'in', move_ids)])
+        _logger.info(query)
+        if query == []:
+            return []
         query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
-        query.order = 'move_id'
+        query.order = None
         query_string, query_param = query.select('*')
         self._cr.execute(query_string, query_param)
-        line_ids = [line.get('id') for line in self._cr.dictfetchall()]
+        dic =  self._cr.dictfetchall()
+        line_ids = [line.get('id') for line in dic]
 
         return line_ids
 
 
-    final_customer_order_amount = fields.Monetary('Montant commandé', help="Montant total commandé par le client final (supérieur au montant piloté par Tasmane si Tasmane est sous-traitant. Egal au montant piloté par Tasmne sinon.)")
+    @api.onchange('book_validation_employee_id')
+    def onchange_book_validation_employee_id(self):
+        if self.book_validation_employee_id :
+            self.book_validation_datetime = datetime.now()
+        else :
+            self.book_validation_datetime = None
+
+    final_customer_order_amount = fields.Monetary('Montant du bon de commande client final', help="Montant total commandé par le client final (supérieur au montant piloté par Tasmane si Tasmane est sous-traitant. Egal au montant piloté par Tasmne sinon.)")
     #TODO : ajouter un contrôle : le montant commandé ne peut être inférieur au montant piloté par Tasmane
 
 
     ######## TOTAL
     order_amount = fields.Monetary('Montant piloté par Tasmane (fixe ???)', store=True, compute=compute,  help="Montant à réaliser par Tasmane : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     #TODO : ajouter un contrôme opur vérifier que self.company_part_amount_initial+self.outsource_part_amount_initial == self.company_part_amount_current+self.outsource_part_amount_current
-    order_sum_sale_order_lines = fields.Monetary('Total des commandes enregistrées', compute=compute_sale_order_total, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
+    order_sum_sale_order_lines = fields.Monetary('Total vendu par Tasmane', compute=compute_sale_order_total, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute)
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute)
     order_marging_rate_initial = fields.Float('Marge totale (%) initiale', compute=compute)
@@ -323,4 +347,8 @@ class staffingProject(models.Model):
     other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) actuelle', store=True, compute=compute)
 
 
-    default_book = fields.Monetary('Valeur du book par défaut', store=True, compute=compute)
+    default_book = fields.Monetary('Valeur du book par défaut', store=True, compute=compute, help="Somme du dispositif Tasmane prévu initialement + markup S/T prévu initialement + marge ventes autres prévue initialement")
+    book_period_ids = fields.One2many('project.book_period', 'project_id', string="Book par année")
+    book_employee_distribution_ids = fields.One2many('project.book_employee_distribution', 'project_id', string="Book par salarié")
+    book_validation_employee_id = fields.Many2one('hr.employee', string="Book validé par")
+    book_validation_datetime = fields.Datetime("Book validé le")

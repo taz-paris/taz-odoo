@@ -17,11 +17,13 @@
 				</div>
                 	</field>
 
+			<!--
                 	<field name="probability" position="after">
 				<field name="margin_landing" widget="progressbar"/>
 				<field name="margin_text"/>
 				<field name="favorite_user_ids" widget="many2many_tags"/>
                 	</field>
+			-->
 			<xpath expr="//notebook" position="inside">
 					<page string="Besoins/staffing">
 						<field name="id" invisible="1"/>

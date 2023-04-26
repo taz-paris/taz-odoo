@@ -1,0 +1,31 @@
+<odoo>
+    <data>
+        <record id="project_book_period_tree" model="ir.ui.view">
+            <field name="name">project book period</field>
+            <field name="model">project.book_period</field>
+            <field name="arch" type="xml">
+                <tree editable="top">
+			<!--
+                        <field name="project_id" optional="hide"/>
+			-->
+                        <field name="reference_period"/>
+                        <field name="period_project_book" sum="Total"/>
+                </tree>                      
+            </field>                       
+        </record>
+
+        <record id="book_employee_distribution_tree" model="ir.ui.view">
+            <field name="name">book employee distribution</field>
+            <field name="model">project.book_employee_distribution</field>
+            <field name="arch" type="xml">
+                <tree editable="top">
+			<!--
+                        <field name="project_id" optional="hide"/>
+			-->
+                        <field name="employee_id"/>
+                        <field name="book_factor" sum="Total"/>
+                </tree>                      
+            </field>                       
+        </record>
+   </data>
+</odoo>

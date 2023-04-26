@@ -18,7 +18,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'project', 'taz-common'],
+    'depends': ['base', 'account', 'project', 'sale_project', 'taz-common'],
 
     # always loaded
     'data': [
@@ -29,6 +29,7 @@
         'views/project.xml',
         'views/res_partner.xml',
         'views/project_outsourcing_link.xml',
+        'views/project_book.xml',
     ],
 
 

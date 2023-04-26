@@ -76,7 +76,7 @@ class projectOutsourcingLink(models.Model):
             rec.sum_account_move_lines = total
 
     def action_open_account_move_lines(self):
-        line_ids = self.get_sale_order_line_ids()
+        line_ids = self.get_account_move_line_ids()
 
         action = {
             'name': _('Invoice and refound lines'),
@@ -99,8 +99,15 @@ class projectOutsourcingLink(models.Model):
         #TODO : vérifier la cohérence entre le client du projet et le client des sale.order
             # Hypothèse structurante : un projet a toujours exactement un client
         #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
-                # Si ça n'est pas égale, afficher un bandeau jaune
-        query = self.env['account.move.line']._search([('move_id.partner_id', '=', self.partner_id.id), ('move_type', 'in', ['in_refund', 'in_invoice'])])
+
+        move = self.env['account.move'].search([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund'])])
+        move_ids = []
+        for m in move :
+            move_ids.append(m.id)
+
+        query = self.env['account.move.line']._search([('move_id', 'in', move_ids)])
+        if query == []:
+            return []
         query.add_where('analytic_distribution ? %s', [str(self.project_id.analytic_account_id.id)])
         query.order = None
         query_string, query_param = query.select('*')
@@ -120,8 +127,12 @@ class projectOutsourcingLink(models.Model):
                 rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
 
 
+    def _get_default_project_id(self):
+        return self.env.context.get('default_project_id') or self.env.context.get('active_id')
+
     partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Sous-traitant", required=True)
-    project_id = fields.Many2one('project.project', string="Projet", required=True)
+        #TODO ajouter un contrôle et un domaine => le sous-traitant d'un projet ne peut pas être égal au client final
+    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id)
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
@@ -137,3 +148,6 @@ class projectOutsourcingLink(models.Model):
     outsource_part_amount_current = fields.Monetary('Valorisation de la part sous-traitée')
     marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', store=True, compute=compute)
     marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', store=True, compute=compute)
+
+    order_direct_payment_done = fields.Monetary('Somme factures en paiement direct validées par Tasmane')
+    order_direct_payment_done_detail = fields.Html('Détail des factures en paiement direct validées par Tasmane')
