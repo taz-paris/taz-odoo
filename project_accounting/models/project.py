@@ -113,6 +113,7 @@ class staffingProject(models.Model):
             if rec.company_part_amount_current != 0 :
                 rec.company_part_marging_rate_current = rec.company_part_marging_amount_current / rec.company_part_amount_current * 100
     
+
             ######## OUTSOURCE PART
             rec.outsource_part_marging_amount_initial =  rec.outsource_part_amount_initial - rec.outsource_part_cost_initial
             rec.outsource_part_marging_rate_initial = 0.0 
@@ -123,13 +124,17 @@ class staffingProject(models.Model):
             rec.outsource_part_amount_current = 0.0
             rec.outsource_part_cost_current = 0.0
             rec.order_to_invoice_outsourcing = 0.0
-            rec.order_to_invoice_company = rec.company_part_marging_amount_current
+            rec.order_to_invoice_company = rec.order_sum_sale_order_lines
             for link in rec.project_outsourcing_link_ids:
                 rec.outsource_part_amount_current += link.outsource_part_amount_current
                 rec.outsource_part_cost_current += link.sum_account_move_lines
 
                 rec.order_to_invoice_outsourcing += link.order_direct_payment_amount
+                    #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
                 rec.order_to_invoice_company += link.order_company_payment_amount
+                    #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
+
+            rec.company_to_invoice_left = rec.order_to_invoice_company - rec.company_invoice_sum_move_lines
 
             rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current
             rec.outsource_part_marging_rate_current = 0.0 
@@ -150,9 +155,12 @@ class staffingProject(models.Model):
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
             
             #BOOK
-            rec.default_book = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
+            rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
+            rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
 
     def get_all_cost_current(self):
+        #TODO : changer de logique : avoir une fonction qui retourne les lignes de vente qui ne sont pas déjà attribuées à un sous-traitant puis sommer à partir de ces ID de lignes
+            # et ajouter un bouton pour voir le détail des lignes affectées
         for rec in self:
             query = self.env['account.move.line']._search([('move_type', 'in', ['in_refund', 'in_invoice'])])
             query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
@@ -231,7 +239,7 @@ class staffingProject(models.Model):
                 #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
                 total += line.price_subtotal
             #_logger.info(total)
-            rec.company_invoice_sum_sale_order_lines = total
+            rec.company_invoice_sum_move_lines = total
             #_logger.info("fin boucle compute_account_move_total")
 
 
@@ -289,12 +297,10 @@ class staffingProject(models.Model):
         else :
             self.book_validation_datetime = None
 
+    ######## TOTAL
     final_customer_order_amount = fields.Monetary('Montant du bon de commande client final', help="Montant total commandé par le client final (supérieur au montant piloté par Tasmane si Tasmane est sous-traitant. Egal au montant piloté par Tasmne sinon.)")
     #TODO : ajouter un contrôle : le montant commandé ne peut être inférieur au montant piloté par Tasmane
-
-
-    ######## TOTAL
-    order_amount = fields.Monetary('Montant piloté par Tasmane (fixe ???)', store=True, compute=compute,  help="Montant à réaliser par Tasmane : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
+    order_amount = fields.Monetary('Montant piloté par Tasmane', store=True, compute=compute,  help="Montant à réaliser par Tasmane : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     #TODO : ajouter un contrôme opur vérifier que self.company_part_amount_initial+self.outsource_part_amount_initial == self.company_part_amount_current+self.outsource_part_amount_current
     order_sum_sale_order_lines = fields.Monetary('Total vendu par Tasmane', compute=compute_sale_order_total, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute)
@@ -305,9 +311,10 @@ class staffingProject(models.Model):
     order_marging_amount_current = fields.Monetary('Marge totale (€) actuelle', compute=compute)
     order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute)
 
-    order_to_invoice_company = fields.Monetary('Montant à facturer par Tasmane', compute=compute)
-    company_invoice_sum_sale_order_lines = fields.Monetary('Montant déjà facturé par Tasmane', compute=compute_account_move_total)
-    order_to_invoice_outsourcing = fields.Monetary('Montant à facturer par les sous-traitants de Tasmane', compute=compute)
+    order_to_invoice_company = fields.Monetary('Montant à facturer par Tasmane au client', compute=compute)
+    company_invoice_sum_move_lines = fields.Monetary('Montant déjà facturé par Tasmane au client', compute=compute_account_move_total)
+    company_to_invoice_left = fields.Monetary('Montant restant à factuer par Tasmane au client', compute=compute)
+    order_to_invoice_outsourcing = fields.Monetary('Montant S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute)
 
     ######## COMPANY PART
     company_part_amount_initial = fields.Monetary('Montant dispositif Tasmane initial', help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
@@ -347,7 +354,9 @@ class staffingProject(models.Model):
     other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) actuelle', store=True, compute=compute)
 
 
-    default_book = fields.Monetary('Valeur du book par défaut', store=True, compute=compute, help="Somme du dispositif Tasmane prévu initialement + markup S/T prévu initialement + marge ventes autres prévue initialement")
+    ######## BOOK
+    default_book_initial = fields.Monetary('Valeur du book par défaut initial', store=True, compute=compute, help="Somme du dispositif Tasmane prévu initialement + markup S/T prévu initialement + marge ventes autres prévue initialement")
+    default_book_current = fields.Monetary('Valeur du book par défaut actuel', store=True, compute=compute, help="Valeur du book par défaut actualisée suivant les commandes/factures/avoirs effectivement reçus")
     book_period_ids = fields.One2many('project.book_period', 'project_id', string="Book par année")
     book_employee_distribution_ids = fields.One2many('project.book_employee_distribution', 'project_id', string="Book par salarié")
     book_validation_employee_id = fields.Many2one('hr.employee', string="Book validé par")

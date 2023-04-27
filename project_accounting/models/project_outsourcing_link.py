@@ -18,15 +18,13 @@ class projectOutsourcingLink(models.Model):
     def compute_sale_order_total(self): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         for rec in self:
-            rec.order_sum_sale_order_lines = 0
-            """
+            #rec.order_sum_sale_order_lines = 0
             line_ids = rec.get_sale_order_line_ids()
             total = 0.0
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
                 total += line.price_subtotal
             rec.order_sum_sale_order_lines = total
-            """
 
     def action_open_sale_order_lines(self):
         line_ids = self.get_sale_order_line_ids()
@@ -54,6 +52,8 @@ class projectOutsourcingLink(models.Model):
         #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
                 # Si ça n'est pas égale, afficher un bandeau jaune
         query = self.env['purchase.order.line']._search([('order_id.partner_id', '=', self.partner_id.id)])
+        if query == []:
+            return []
         query.add_where('analytic_distribution ? %s', [str(self.project_id.analytic_account_id.id)])
         query.order = None
         query_string, query_param = query.select('*')

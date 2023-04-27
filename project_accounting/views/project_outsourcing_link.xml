@@ -24,7 +24,7 @@
 				<field name="project_id"/>
 				<field name="partner_id"/>
 			</group>
-			<group string="Commande du client final">
+			<group string="Général">
 				<group>
 					<field name="outsource_part_amount_current"/>
 				</group>
@@ -33,7 +33,7 @@
 					<field name="order_company_payment_amount"/>
 				</group>
 			</group>
-			<group string="Commande à Tasmane">
+			<group string="Commande de Tasmane au S/T">
 				<group>
 					<field name="order_sum_sale_order_lines"/>
 					<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
