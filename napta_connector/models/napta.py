@@ -122,7 +122,8 @@ class fitnetPartner(models.Model):
             attributes = {
              # "client_metadata": {},
              # "external_id": "string",
-              "name": self.name
+              "name": self.name,
+              "external_id" : rec.id,
             }
             self.napta_id = client.post_api('client', attributes)
             return self.napta_id
@@ -153,6 +154,7 @@ class fitnetProject(models.Model):
               "description" : rec.description,
               "billing_method" : "fixed_price",
               "client_id" : rec.partner_id.napta_id,
+              "external_id" : rec.id,
             }
             self.napta_id = client.post_api('project', attributes)
             return self.napta_id

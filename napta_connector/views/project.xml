@@ -7,9 +7,8 @@
               <field name="model">project.project</field>
               <field name="priority">5</field>
 	      <field name="arch" type="xml">
-                	<field name="stage_id" position="before">
-				    <button type="object" name="create_napta" string="Créer sur Napta">
-				    </button>
+                	<field name="name" position="after">
+				<button type="object" name="create_napta" string="Créer sur Napta"/>
                 	</field>
 	      </field>
 	    </record>

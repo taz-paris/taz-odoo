@@ -634,7 +634,7 @@ class fitnetProject(models.Model):
                 #customerGroupId => on ne la synchronise pas car Odoo doit rester maître
                 #segmentId => on ne la synchronise pas car Odoo doit rester maître sur le Business Domain (plus à jour que Fitnet)
             }
-            res = self.prepare_update_from_fitnet_values('res.partner', customer, mapping_fields, odoo_customer)
+            old_odoo_values, res = self.prepare_update_from_fitnet_values('res.partner', customer, mapping_fields, odoo_customer)
             if len(res) > 0:
                 _logger.info("Mise à jour du res.partner client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
                 odoo_customer.write(res)
@@ -795,6 +795,14 @@ class fitnetProject(models.Model):
         odoo_model_name = 'project.project'
         fitnet_objects = client.get_api("contracts/1")
 
+
+        dm_list = self.env['hr.employee'].search([('job_id', 'in', [5, 6, 7, 10])])
+        _logger.info(dm_list)
+        DMFitnetIDList = []
+        for dm in dm_list:
+            DMFitnetIDList.append(dm.fitnet_id)
+        _logger.info(DMFitnetIDList)
+
         for obj in fitnet_objects:
             # Transco de la liste déroulante Bon de commmande reçu en un booléen sur Odoo
             if self.get_proprieteOnDemand_by_id(obj, "zone_13_key_P_1-S_1")  == "Reçu":
@@ -802,9 +810,13 @@ class fitnetProject(models.Model):
             else:
                 obj['is_purchase_order_received'] = False
         
-
             # Recherche du res.user Odoo qui correspond au DM de la mission
-            comList = obj['affectedCommercialsList']
+            comList = []
+            for com in obj['affectedCommercialsList']:
+                if str(com['employeeId']) in DMFitnetIDList :
+                    comList.append(com)
+            comList = sorted(comList, key=lambda x: x['employeeId'])
+
             fitnet_employee_id = None
             if len(comList) == 1 :
                 fitnet_employee_id = comList[0]['employeeId'] 
@@ -817,6 +829,7 @@ class fitnetProject(models.Model):
                         fitnet_employee_id = comList[0]['employeeId']
             obj['project_director_employee_id'] = fitnet_employee_id
 
+        #self.delete_not_found_fitnet_object(odoo_model_name, fitnet_objects, 'contractId')
         self.create_overide_by_fitnet_values(odoo_model_name, fitnet_objects, mapping_fields, 'contractId')
 
 
@@ -845,27 +858,26 @@ class fitnetProject(models.Model):
                 continue
             if len(odoo_objects) == 1 :
                 odoo_object = odoo_objects[0]
-                dict_dif = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
+                old_odoo_values, dict_dif = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields, odoo_object)
                 if len(dict_dif) > 0:
                     #import copy
                     #old_dict_dif = copy.copy(dict_dif)
                     #dic_old_values = odoo_object.with_context(context).read()[0]
                     #_logger.info("Fitnet object : %s" % str(fitnet_object))
                     _logger.info("Mise à jour de l'objet %s ID= %s (fitnet_id = %s) avec les valeurs de Fitnet %s" % (odoo_model_name, str(odoo_object.id), str(fitnet_id), str(dict_dif)))
+                    _logger.info("      > Old odoo values : %s" % str(old_odoo_values))
                     odoo_object.with_context(context).write(dict_dif)
                     #dic_new_values = odoo_object.with_context(context).read()[0]
                     #_logger.info("Changements apportés :")
                     #for field in old_dict_dif.keys() :
                     #    _logger.info("          > %s : %s => %s" %(field, dic_old_values[field], dic_new_values[field]))
             if len(odoo_objects) == 0 :
-                dic = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields)
+                old_odoo_values, dic = self.prepare_update_from_fitnet_values(odoo_model_name, fitnet_object, mapping_fields)
                 dic['fitnet_id'] = fitnet_id
                 _logger.info("Creating Odoo instance of %s object for fitnet %s=%s with values %s" % (odoo_model_name, fitnet_id_fieldname, fitnet_id, str(dic)))
                 odoo_object = self.env[odoo_model_name].with_context(context).create(dic)
-                #_logger.info("Odoo object created, Odoo ID=%s state=%s" % (str(odoo_object.id), odoo_object.state))
                 _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
-            #if not c:
-            #    continue
+
         _logger.info('######## FINAL SQL COMMIT')
         self.env.cr.commit()
 
@@ -884,7 +896,6 @@ class fitnetProject(models.Model):
             _logger.info(odoo_objet.read())
             odoo_objet.unlink()
             _logger.info("      > Instance supprimée")
-
         #odoo_objects_all = self.env[odoo_model_name].search([('fitnet_id', '!=', None)])
         #_logger.info(len(odoo_objects_all))
 
@@ -899,6 +910,7 @@ class fitnetProject(models.Model):
             model = models[0]
 
             res = {}
+            old_odoo_value = {}
             for fitnet_field_name, odoo_dic in mapping_fields.items():
                 #_logger.info('fitnet_field_name %s' % fitnet_field_name)
                 odoo_field_name = odoo_dic['odoo_field']
@@ -970,18 +982,20 @@ class fitnetProject(models.Model):
 
                     if odoo_object :
                         if odoo_object[odoo_field_name] != odoo_value:
-                            _logger.info(odoo_object[odoo_field_name])
-                            _logger.info(odoo_value)
+                            #_logger.info("      Ancienne valeur dans Odoo pour l'attribut %s de l'objet %s (Odoo ID = %s): %s" % (odoo_field_name, odoo_model_name, str(odoo_object['id']), odoo_object[odoo_field_name]))
+                            #_logger.info("              > Nouvelle valeur : %s" % odoo_value)
+                            old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]
                             res[odoo_field_name] = odoo_value
                     else :
                             res[odoo_field_name] = odoo_value
 
 
                 if odoo_field.ttype == "many2one" :
-                    if fitnet_value == None : #le champ manu2one était valorisé sur Fitnet, mais a été remis à blanc sur Fitnet
+                    if fitnet_value == None : #le champ many2one était valorisé sur Fitnet, mais a été remis à blanc sur Fitnet
                         if odoo_object :
                             if odoo_object[odoo_field_name] :
                                 res[odoo_field_name] = False
+                                old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]
                         else:
                             res[odoo_field_name] = False
                         continue
@@ -999,15 +1013,23 @@ class fitnetProject(models.Model):
                         if odoo_object :
                             if odoo_object[odoo_field_name] != target_object:
                                 res[odoo_field_name] = odoo_value
+                                #_logger.info("      Ancienne valeur dans Odoo pour l'attribut MANY TO ONE %s de l'objet %s (Odoo ID = %s): %s" % (odoo_field_name, odoo_model_name, str(odoo_object['id']), odoo_object[odoo_field_name]))
+                                #_logger.info("              > Nouvelle valeur : %s" % odoo_value)
+                                old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]
                         else :
                             res[odoo_field_name] = odoo_value
+
                     if len(target_objects) == 0 :
-                        _logger.info("Erreur : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_value))
+                        odoo_id = ""
+                        if odoo_object :
+                            odoo_id = odoo_object['id']
+                        _logger.info("Alimentation du champ %s pour l' object Odoo %s (ID ODOO = %s)" % (odoo_field_name, odoo_model_name, str(odoo_id)))
+                        _logger.info("      > Erreur - impossible de trouver l'objet lié : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_value))
                         continue
                 #écraser la valeur Odoo par la valeur Fitnet si elles sont différentes
                 if odoo_value is None:
                     _logger.info("Type %s non géré pour le champ Fitnet %s = %s" % (odoo_field.ttype, fitnet_field_name, fitnet_value))
                     continue
 
-            return res
+            return old_odoo_value, res
 
