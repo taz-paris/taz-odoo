@@ -1,0 +1,26 @@
+<odoo>
+	<data>
+
+           <record model="ir.ui.view" id="project_form_inherit">
+              <field name="name">Project</field>
+	      <field name="inherit_id" ref="project_accounting.project_form"/>
+              <field name="model">project.project</field>
+              <field name="priority">5</field>
+	      <field name="arch" type="xml">
+                	<field name="stage_id" position="before">
+				    <button type="object" name="create_napta" string="Créer sur Napta">
+				    </button>
+                	</field>
+	      </field>
+	    </record>
+
+<!--
+     <record id="forecast_action" model="ir.actions.server">
+          <field name="name">Forecast</field>
+          <field name="model_id" ref="model_project_project"/>
+          <field name="state">code</field>
+          <field name="code">env.get('project.project').open_forecast_pivot_timesheets()</field>
+     </record>
+-->
+	</data>
+</odoo>
