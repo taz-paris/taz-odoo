@@ -11,7 +11,12 @@
 		    </div>
 		</xpath>
 
-		<!-- Chez Tasmane les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande -->
+		<!-- Chez Tasmane les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande 
+			=> C'est à dire si au moins une des lignes de la facture a un article qui appartient à un marché public
+			=> TODO : remplace display_quantity_price_unit par cette condition lorsque l'on aura développé l'objet marché public et le lien avec les articles
+
+			=> Dans le même esprit, on pourrait n'afficher la colonne taxe dans le tableau que s'il y a plusieurs taux de taxe sur la facture
+			-->
 		<xpath expr="//th[@name='th_quantity']" position="attributes">
 			<attribute name="t-if">display_quantity_price_unit</attribute>
 		</xpath>
@@ -26,28 +31,4 @@
 		</xpath>
 	</template>
 
-	<!--
-        <template id="report_invoice_with_quantity_price_unit">
-            <t t-call="web.html_container">
-                <t t-foreach="docs" t-as="o">
-                    <t t-set="lang" t-value="o.partner_id.lang"/>
-                    <t t-set="display_quantity_price_unit" t-value="True"/>
-                    <t t-if="o._get_name_invoice_report() == 'account.report_invoice_document'"
-                        t-call="account.report_invoice_document" t-lang="lang"/>
-                </t>
-            </t>
-        </template>
-
-        <template id="report_invoice_with_payments_with_quantity_price_uni">
-            <t t-call="web.html_container">
-                <t t-foreach="docs" t-as="o">
-                    <t t-set="lang" t-value="o.partner_id.lang"/>
-                    <t t-set="print_with_payments" t-value="True"/>
-                    <t t-set="display_quantity_price_unit" t-value="True"/>
-                    <t t-if="o._get_name_invoice_report() == 'account.report_invoice_document'"
-                        t-call="account.report_invoice_document" t-lang="lang"/>
-                </t>
-            </t>
-        </template>
-	-->
 </odoo>

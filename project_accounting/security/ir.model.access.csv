@@ -3,3 +3,4 @@
 "project_outsourcing_link_admin","project_outsourcing_link_admin","project_accounting.model_project_outsourcing_link","taz-common.taz-basic","True","True","True","True"
 "project_book_period_admin","project_book_period_admin","project_accounting.model_project_book_period","taz-common.taz-basic","True","True","True","True"
 "project_book_employee_distribution_admin","project_book_employee_distribution_admin","project_accounting.model_project_book_employee_distribution","taz-common.taz-basic","True","True","True","True"
+"project_book_employee_distribution_period_readonly","project_book_employee_distribution_period_readonly","project_accounting.model_project_book_employee_distribution_period","taz-common.taz-basic","True","False","False","False"

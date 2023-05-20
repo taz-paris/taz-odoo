@@ -82,7 +82,6 @@ class tazCustomerBookFollowup(models.Model):
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
-        _logger.info(fields)
 
         res['date_update'] = datetime.date.today()
 
@@ -95,6 +94,7 @@ class tazCustomerBookFollowup(models.Model):
                 res['customer_book_goal_id'] = bg_last.id
                 res['period_book'] = partner_default.get_book_by_year(int(bg_last.reference_period))
 
+        _logger.info(res)
         return res
 
     #@api.model
@@ -113,13 +113,13 @@ class tazCustomerBookFollowup(models.Model):
 
     name = fields.Char("Nom", compute=_compute_name)
 
-    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, ondelete='restrict')
+    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=True, ondelete='restrict')
     period_goal = fields.Float("Montant obj", related="customer_book_goal_id.period_goal", store=True)
     partner_id = fields.Many2one(string="Entreprise", related="customer_book_goal_id.partner_id", store=True)
     partner_industry_id = fields.Many2one(related="customer_book_goal_id.partner_id.industry_id", store=True)
 
-    date_update = fields.Date("Date de valeur")
-    period_book = fields.Float("Book à date")
+    date_update = fields.Date("Date de valeur", readonly=True)
+    period_book = fields.Float("Book à date", readonly=True)
     period_futur_book = fields.Float("Intime conviction", help="Montant que l'on estime pouvoir book en plus d'ici la fin de l'année.")
 
     period_landing = fields.Float("Atterissage annuel", compute=landing, store=True)

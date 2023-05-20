@@ -232,6 +232,7 @@
 								<field name="book_employee_distribution_ids" context="{'default_project_id':active_id}"/>
 							</group>
 						</group>
+						<field name="book_employee_distribution_period_ids"/>
 					</page>
 					<page name="description" string="Description">
 						<group>

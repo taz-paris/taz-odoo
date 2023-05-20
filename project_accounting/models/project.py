@@ -36,6 +36,16 @@ class staffingProject(models.Model):
         return recs.name_get()
     """
 
+    def get_book_by_year(self, year):
+        _logger.info('-- RES.PARTNER get_book_by_year')
+        res = 0.0
+        for book_period_id in self.book_period_ids:
+            if book_period_id.reference_period == str(year):
+                res += book_period_id.period_project_book
+                #TODO : ne pas sommer les book pas encore validés ???
+        _logger.info(res)
+        return res
+
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
     @api.depends('project_director_employee_id')
     def _compute_user_id(self):
@@ -54,7 +64,7 @@ class staffingProject(models.Model):
         return super().create(vals)
  
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
-    stage_is_part_of_booking = fields.Boolean()#related="stage_id.is_part_of_booking")
+    stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_group_id = fields.Many2one('project.group', string='Groupe de projets', domain="[('partner_id', '=', partner_id)]")
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
@@ -359,5 +369,6 @@ class staffingProject(models.Model):
     default_book_current = fields.Monetary('Valeur du book par défaut actuel', store=True, compute=compute, help="Valeur du book par défaut actualisée suivant les commandes/factures/avoirs effectivement reçus")
     book_period_ids = fields.One2many('project.book_period', 'project_id', string="Book par année")
     book_employee_distribution_ids = fields.One2many('project.book_employee_distribution', 'project_id', string="Book par salarié")
+    book_employee_distribution_period_ids = fields.One2many('project.book_employee_distribution_period', 'project_id', 'Book par salarié et par an')
     book_validation_employee_id = fields.Many2one('hr.employee', string="Book validé par")
     book_validation_datetime = fields.Datetime("Book validé le")

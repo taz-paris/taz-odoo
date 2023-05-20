@@ -26,15 +26,16 @@ class projectAccountingResPartner(models.Model):
              rec.has_project_started_this_year = res
 
      def get_book_by_year(self, year):
+         _logger.info('-- RES.PARTNER get_book_by_year')
          project_ids = self.env['project.project'].search([
                             ('partner_id', '=', self.id),
                             ('stage_is_part_of_booking', '=', True),
-                            ('date_start', '>=', datetime(year, 1, 1)),
-                            ('date_start', '<=', datetime(year, 12, 31))
                         ])
+         _logger.info(project_ids)
          res = 0.0
          for project in project_ids:
-             res += project.order_amount
+             res += project.get_book_by_year(year)
+         _logger.info(res)
          return res
 
      project_ids = fields.One2many('project.project', 'partner_id', string="Projets")
