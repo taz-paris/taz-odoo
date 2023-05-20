@@ -254,20 +254,19 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+        self.sync_customers(client)
+        #TODO           self.sync_prospect(client)
+
         self.sync_customer_invoices(client)
         #TODO           self.sync_supplier_invoices(client)
 
-
         #return self.import_grille_competences()
         self.sync_employees(client)
+        self.sync_employees_contracts(client)
 
         self.sync_holidays(client) 
         self.correct_leave_timesheet_stock(client)
 
-        self.sync_employees_contracts(client)
-        self.sync_customers(client)
-
-        #TODO           self.sync_prospect(client)
         self.sync_project(client)
         self.sync_contracts(client)
 
@@ -292,7 +291,7 @@ class fitnetProject(models.Model):
             for timesheet in timesheets:
                 count += timesheet.unit_amount
             if count != leave.number_of_days:
-                _logger.info('Incohérence : leave_id=%s pour %s => duréee =%s alors que total des timesheet=%s. Debut le %s' % (str(leave.id), leave.employee_id.name, str(leave.number_of_days), str(count), str(leave.request_date_from)))
+                _logger.info('Incohérence : leave_id=%s pour %s (statut : %s) => duréee =%s alors que total des timesheet=%s. Debut le %s' % (str(leave.id), leave.employee_id.name, leave.state, str(leave.number_of_days), str(count), str(leave.request_date_from)))
                 _logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
                 #leave.number_of_days = leave.number_of_days
                 #_logger.info('      Corrigé')
@@ -625,19 +624,105 @@ class fitnetProject(models.Model):
                 'email' : {'odoo_field' : 'email'},
                 'paymentTermsId' : {'odoo_field' : 'property_payment_term_id'},
 
-
                 'siret' : {'odoo_field' : 'siret'},
-                #adresse par defaut
-                #adresse de facturation
+
+                'address_streetNumber' : {'odoo_field' : 'street'},
+                'address_additionnalAddressInfo' : {'odoo_field' : 'street2'},
+                'address_additionnalAddressInfo2' : {'odoo_field' : 'street3'},
+                'address_zipCode' : {'odoo_field' : 'zip'},
+                'address_city' : {'odoo_field' : 'city'},
+                'default_invoice_payement_bank_account' : {'odoo_field' : 'default_invoice_payement_bank_account'},
                 #compte bancaire
                 #compte comptable
                 #customerGroupId => on ne la synchronise pas car Odoo doit rester maître
                 #segmentId => on ne la synchronise pas car Odoo doit rester maître sur le Business Domain (plus à jour que Fitnet)
             }
+
+            
+
+            ####### Compte bancaire de paiement par défault
+            customer['default_invoice_payement_bank_account'] = None
+            iban = customer['companyCustomerLink'][0]['iban']
+            bank_accounts = self.env['res.partner.bank'].search([])
+            for ba in bank_accounts:
+                if ba.acc_number.replace(' ', '') == iban:
+                    customer['default_invoice_payement_bank_account'] = ba.fitnet_id
+
+
+            ####### Import de l'addresse postale la plus intéressante (difficile de gérer plusieurs addresse, il faudrait un fitnet_address_id sur le res.partner... ce qui ne serait pas compatible avec l'algo de base)
+            customer['address_streetNumber'] = None
+            customer['address_additionnalAddressInfo'] = None
+            customer['address_additionnalAddressInfo2'] = None
+            customer['address_zipCode'] = None
+            customer['address_city'] = None
+
+            customer_addresses = client.get_api("customerAddress?companyId=1&customerId="+str(customer['clientId']))
+            if "No customer addresses found" in json.dumps(customer_addresses):
+                _logger.info("Aucune addresse postale dans Fitnet pour %s (Finet_id = %s)" % (odoo_customer.name, str(customer['clientId'])))
+            else :
+                if len(customer_addresses) != 1 :
+                    _logger.info("Le client %s (fitnet_id = %s) a %s addresses postales dans Fitnet." % (odoo_customer.name, str(customer['clientId']), str(len(customer_addresses))))
+                target_odoo_address = None
+                for address in customer_addresses:
+                    if target_odoo_address == None:
+                        target_odoo_address = address
+                    else :
+                       #si Fitnet a un adresse par défaut et une adresse de facturation par défaut, alors on prend l'adresse de facturation par défaut
+                       # Cette méthode vise à gérer une qualité de donnée inégale sur Fitnet
+                            # - certains clients ont une adresse sur Fitnet mais qui n'est déclarée ni comme par défaut pour Tasmane, ni comme adresse de facturation par défault
+                            # - certaines addresse ont une "addresse complète" (format libre) mais les champs structurés ne sont pas rempli
+                       if address['isDefaultInvoicingAddress'] :
+                           target_odoo_address = address
+                           break
+                       if address['isDefaultAddress'] :
+                           target_odoo_address = address
+                if target_odoo_address == None:
+                    _logger.info("Aucune addresse postale dans Fitnet pour %s (Finet_id = %s)" % (odoo_customer.name, str(customer['clientId'])))
+                else :
+                    #customer['address_label'] = target_odoo_address['addressLabel']
+                    customer['address_streetNumber'] = target_odoo_address['streetNumber']
+                    customer['address_additionnalAddressInfo'] = target_odoo_address['additionnalAddressInfo']
+                    customer['address_zipCode'] = target_odoo_address['zipCode']
+                    customer['address_city'] = target_odoo_address['city']
+                    if target_odoo_address['country'] and target_odoo_address['country'].strip().lower() != "france" :
+                        _logger.info("Pays (non FR) fourni pour cette adresse postale %s => Merci de le saisir à la main dans Odoo" % target_odoo_address['completeAddress'])
+
+                    if not(target_odoo_address['zipCode'] and target_odoo_address['city'] and target_odoo_address['streetNumber']):
+                        _logger.info("Client %s (fitnet_id = %s). L'un des champs structurés de l'addresse n'est pas fourni pour cette adresse postale (format libre) %s" % (odoo_customer.name, str(customer['clientId']), target_odoo_address['completeAddress']))
+                        lines = target_odoo_address['completeAddress'].split("\r\n")
+                        cust = odoo_customer.name
+                        if lines[0].strip().lower() == cust.strip().lower() :#or lines[0].strip().lower() == odoo_customer.long_company_name.strip().lower():
+                            lines.pop(0)
+                        if lines[len(lines)-1].strip().lower() == 'france':
+                            lines.pop(len(lines)-1)
+
+                        if len(lines) not in [2, 3, 4] :
+                            _logger.info("Trop / trop peu de lignes pour une interprétation automatique.")
+                        else :
+                            city_line = lines.pop(len(lines)-1).strip()
+                            if not(city_line[0:5].isdigit()):
+                                _logger.info("Cette ligne devrait commencer par un code postal à 5 chiffres : %s" % city_line)
+                            else :
+                                customer['address_zipCode'] = city_line[0:5]
+                                customer['address_city'] = city_line[5:].strip()
+                                
+                                customer['address_streetNumber'] = lines.pop(0).strip()
+                                if len(lines) :
+                                    customer['address_additionnalAddressInfo'] = lines.pop(0).strip()
+                                if len(lines) :
+                                    customer['address_additionnalAddressInfo2'] = lines.pop(0).strip()
+
+                                _logger.info("Addresse transformée : \n%s\n%s\n%s\n%s" % (customer['address_streetNumber'], customer['address_additionnalAddressInfo'], customer['address_zipCode'], customer['address_city']))
+
+
+
+
             old_odoo_values, res = self.prepare_update_from_fitnet_values('res.partner', customer, mapping_fields, odoo_customer)
             if len(res) > 0:
                 _logger.info("Mise à jour du res.partner client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
                 odoo_customer.write(res)
+            
+
 
     def sync_employees_contracts(self, client):
         _logger.info('--- synch_employees_contracts')

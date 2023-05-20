@@ -1,0 +1,14 @@
+<odoo>
+	<template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+		<xpath expr="//div[@id='total']/div" position="before">
+			    <div class="col-auto">
+                                Compte bancaire à créditer par virement :
+                                        <ul>
+                                                <li>Banque : <span t-field="o.partner_bank_id.bank_id.name"/></li>
+                                                <li>BIC : <span t-field="o.partner_bank_id.bank_id.bic"/></li>
+                                                <li>IBAN : <b><span t-field="o.partner_bank_id.acc_number"/></b></li>
+                                        </ul>
+                            </div>
+		</xpath>
+	</template>
+</odoo>

@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 from datetime import datetime
 
 
-class staffingResPartner(models.Model):
+class projectAccountingResPartner(models.Model):
      _inherit = "res.partner"
 
      @api.depends('project_ids', 'project_ids.date_start', 'project_ids.partner_id', 'project_ids.stage_is_part_of_booking')
@@ -39,3 +39,11 @@ class staffingResPartner(models.Model):
 
      project_ids = fields.One2many('project.project', 'partner_id', string="Projets")
      has_project_started_this_year = fields.Boolean('Un projet a débuté cette année', compute=compute_has_project_started_this_year, store=True)
+
+     def _get_default_invoice_payement_bank_account_domain(self):
+         return [('partner_id', '=', self.env.company.id)]
+
+     default_invoice_payement_bank_account = fields.Many2one('res.partner.bank', 
+             string="Compte bancaire de paiement", 
+             help="Compte bancaire qui apparaitra par défaut sur les factures envoyées à ce client, et sur lequel le client devra payer la facture.", 
+             domain=_get_default_invoice_payement_bank_account_domain)

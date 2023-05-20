@@ -11,7 +11,7 @@
             </field>
     	</record> 
 
-        <record id="res_partner_staffing_view_form_inherit" model="ir.ui.view">
+        <record id="res_partner_project_accounting_view_form_inherit" model="ir.ui.view">
             <field name="name">Partner</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="taz-common.company_form"/>
@@ -36,5 +36,18 @@
                 </xpath>
             </field>
         </record>
+
+
+	<record id="account_view_partner_property_form_inherit" model="ir.ui.view">
+            <field name="name">Partner</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
+            <field name="arch" type="xml">
+		    <field name="bank_ids" position="after">
+			    <field name="default_invoice_payement_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
+		    </field>
+	    </field>
+	</record>
+
   </data>
 </odoo>
