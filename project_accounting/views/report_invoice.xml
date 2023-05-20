@@ -1,14 +1,53 @@
 <odoo>
 	<template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
 		<xpath expr="//div[@id='total']/div" position="before">
-			    <div class="col-auto">
-                                Compte bancaire à créditer par virement :
-                                        <ul>
-                                                <li>Banque : <span t-field="o.partner_bank_id.bank_id.name"/></li>
-                                                <li>BIC : <span t-field="o.partner_bank_id.bank_id.bic"/></li>
-                                                <li>IBAN : <b><span t-field="o.partner_bank_id.acc_number"/></b></li>
-                                        </ul>
-                            </div>
+		    <div class="col-auto">
+			Compte bancaire à créditer par virement :
+				<ul>
+					<li>Banque : <span t-field="o.partner_bank_id.bank_id.name"/></li>
+					<li>BIC : <span t-field="o.partner_bank_id.bank_id.bic"/></li>
+					<li>IBAN : <b><span t-field="o.partner_bank_id.acc_number"/></b></li>
+				</ul>
+		    </div>
+		</xpath>
+
+		<!-- Chez Tasmane les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande -->
+		<xpath expr="//th[@name='th_quantity']" position="attributes">
+			<attribute name="t-if">display_quantity_price_unit</attribute>
+		</xpath>
+		<xpath expr="//th[@name='th_priceunit']" position="attributes">
+			<attribute name="t-if">display_quantity_price_unit</attribute>
+		</xpath>
+		<xpath expr="//span[@t-field='line.quantity']/.." position="attributes">
+			<attribute name="t-if">display_quantity_price_unit</attribute>
+		</xpath>
+		<xpath expr="//span[@t-field='line.price_unit']/.." position="attributes">
+			<attribute name="t-if">display_quantity_price_unit</attribute>
 		</xpath>
 	</template>
+
+	<!--
+        <template id="report_invoice_with_quantity_price_unit">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.partner_id.lang"/>
+                    <t t-set="display_quantity_price_unit" t-value="True"/>
+                    <t t-if="o._get_name_invoice_report() == 'account.report_invoice_document'"
+                        t-call="account.report_invoice_document" t-lang="lang"/>
+                </t>
+            </t>
+        </template>
+
+        <template id="report_invoice_with_payments_with_quantity_price_uni">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.partner_id.lang"/>
+                    <t t-set="print_with_payments" t-value="True"/>
+                    <t t-set="display_quantity_price_unit" t-value="True"/>
+                    <t t-if="o._get_name_invoice_report() == 'account.report_invoice_document'"
+                        t-call="account.report_invoice_document" t-lang="lang"/>
+                </t>
+            </t>
+        </template>
+	-->
 </odoo>
