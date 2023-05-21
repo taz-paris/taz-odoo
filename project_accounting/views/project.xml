@@ -203,7 +203,7 @@
 									<field name="project_id" optional="hide"/>
 									<field name="partner_id"/>
 									<field name="outsource_part_amount_current" string="Part sous-traitée" sum="Total"/>
-									<field name="order_sum_sale_order_lines" string="Commandé" sum="Total"/>
+									<field name="order_sum_purchase_order_lines" string="Commandé" sum="Total"/>
 									<field name="order_direct_payment_amount" string="Paiement direct" sum="Total"/>
 									<field name="order_company_payment_amount" string="Paiement Tasmane" sum="Total"/>
 									<field name="sum_account_move_lines" sum="Total"/>

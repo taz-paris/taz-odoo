@@ -190,6 +190,11 @@ class staffingProject(models.Model):
     def compute_sale_order_total(self): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         for rec in self:
+            rec.order_sum_sale_order_lines = 0.0
+            # avec un utilisateur avec un ID != celui d'aurélien, ça crash :
+            #       Record does not exist or has been deleted
+            #       (Record: sale.order.line(1,), Field : sale.order.line.price_subtotal, User: 2) 
+            # renvoyé par sudo vim /usr/lib/python3/dist-packages/odoo/fields.py ligne 1191
             line_ids = rec.get_sale_order_line_ids()
             total = 0.0
             for line_id in line_ids:
@@ -197,7 +202,6 @@ class staffingProject(models.Model):
                 #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
                 total += line.price_subtotal
             rec.order_sum_sale_order_lines = total
-
 
     def action_open_sale_order_lines(self):
         line_ids = self.get_sale_order_line_ids()
@@ -226,13 +230,12 @@ class staffingProject(models.Model):
             # Hypothèse structurante : un projet a toujours exactement un client
         #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
                 # Si ça n'est pas égale, afficher un bandeau jaune
-        query = self.env['sale.order.line']._search([])
-        query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
-        query.order = None
-        query_string, query_param = query.select('*')
+        #_logger.info('-- project sale.order.lines computation')
+        query_string = 'SELECT * FROM "sale_order_line" WHERE ("sale_order_line"."company_id" IS NULL  OR ("sale_order_line"."company_id" in %s)) AND analytic_distribution ? %s'
+        query_param = [(1,), str(self.analytic_account_id.id)]
         self._cr.execute(query_string, query_param)
         line_ids = [line.get('id') for line in self._cr.dictfetchall()]
-
+        #_logger.info(line_ids)
         return line_ids
 
 

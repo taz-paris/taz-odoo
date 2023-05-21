@@ -74,6 +74,6 @@
             </field>
         </record>
 
-	<menuitem name="Distribution du book" id="project_menu" parent="project.menu_main_pm" action="project_book_employee_distribution_period_action"/>
+	<menuitem name="Distribution du book" id="project_book_distribution_menu" parent="project.menu_main_pm" action="project_book_employee_distribution_period_action"/>
    </data>
 </odoo>

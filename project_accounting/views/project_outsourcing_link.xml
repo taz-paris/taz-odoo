@@ -7,7 +7,7 @@
                 <tree>    
                         <field name="project_id"/>
                         <field name="partner_id"/>
-                        <field name="order_sum_sale_order_lines"/>
+                        <field name="order_sum_purchase_order_lines"/>
                         <field name="order_direct_payment_amount"/>
                         <field name="order_company_payment_amount"/>
                         <field name="sum_account_move_lines"/>
@@ -35,8 +35,8 @@
 			</group>
 			<group string="Commande de Tasmane au S/T">
 				<group>
-					<field name="order_sum_sale_order_lines"/>
-					<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
+					<field name="order_sum_purchase_order_lines"/>
+					<button type="object" name="action_open_purchase_order_lines" string="Voir les lignes de commande"/>
 				</group>
 			</group>
 			<group string="Facturation Tasmane / sous-traitant">

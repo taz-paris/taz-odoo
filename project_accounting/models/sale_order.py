@@ -23,6 +23,11 @@ class projectAccountingSaleOrder(models.Model):
 
 class projectAccountingSaleOrderLine(models.Model):
     _inherit = "sale.order.line"
+    _sql_constraints = [
+            ('direct_payment_purchase_order_line_id_uniq', 'UNIQUE (direct_payment_purchase_order_line_id)',  "Impossible d'enregistrer deux fois la même lignes de commande de SOUS-TRAITANT (purchase.order.line) dans l'attribut direct_payment_purchase_order_line_id.")
+    ]
+
+
 
     #TODO ATTENTION :
     #  POINT PAS CLAIR : sur les sale.order et purchase.order seule la QUANTITE restant à facturer sur chaque ligne détermine si la ligne a un reliquat de facturation et en aucun cas le MONTANT
@@ -37,14 +42,6 @@ class projectAccountingSaleOrderLine(models.Model):
                 line.invoice_status = 'to invoice'
     """
 
-    @api.constrains('direct_payment_purchase_order_line_id', 'analytic_distribution', 'price_subtotal')
-    def check(self):
-        for rec in self:
-            if rec.direct_payment_purchase_order_line_id:
-                if rec.analytic_distribution != rec.direct_payment_purchase_order_line_id.analytic_distribution or rec.price_subtotal != rec.direct_payment_purchase_order_line_id.price_subtotal:
-                    raise ValidationError(_("L'une des lignes portant un paiement direct est incohérente (ex : la distribution analytique a plsuieurs compte ou bien elle n'est pas à 100%)"))
-
-    #TODO rec.direct_payment_purchase_order_line_id NE PEUX pas changer si la ligne a déjà été facturée et payée (line.untaxed_amount_to_invoice==0.0) ou si la ligne du purchase order a déjà été payée
 
     @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'state', 'direct_payment_purchase_order_line_id')
     def _compute_qty_to_invoice(self):
@@ -52,11 +49,18 @@ class projectAccountingSaleOrderLine(models.Model):
         for line in self:
             if line.direct_payment_purchase_order_line_id:
                 line.qty_to_invoice = 0
-
-
     #TODO : ajouter un attribut permettant de suivre les PV / validation de facture des sous-traitants en paiement direct ?
 
 
+    @api.constrains('direct_payment_purchase_order_line_id', 'analytic_distribution', 'price_subtotal')
+    def check(self):
+        for rec in self:
+            if rec.direct_payment_purchase_order_line_id:
+                if rec.analytic_distribution != rec.direct_payment_purchase_order_line_id.analytic_distribution :
+                    raise ValidationError(_("L'une des lignes portant un paiement direct est incohérente : distribution anlytique sur SOL != POL"))
+                if rec.price_subtotal != rec.direct_payment_purchase_order_line_id.price_subtotal:
+                    raise ValidationError(_("L'une des lignes portant un paiement direct est incohérente : sous-total SOL %s != POL %s" % (rec.price_subtotal, rec.direct_payment_purchase_order_line_id.price_subtotal)))
+    #TODO rec.direct_payment_purchase_order_line_id NE PEUX pas changer si la ligne a déjà été facturée et payée (line.untaxed_amount_to_invoice==0.0) ou si la ligne du purchase order a déjà été payée
 
     @api.depends('price_subtotal', 'analytic_distribution')
     def compute_domain_direct_payment_purchase_order_line(self_list):
@@ -72,15 +76,17 @@ class projectAccountingSaleOrderLine(models.Model):
 
                 else :    
                     #TODO : ajouter une condition dans le filtre : le PO n'est pas annulé ni terminée et la POL n'est pas déjà facturée
-                    query = self.env['purchase.order.line']._search([('direct_payment_sale_order_line_id', '=', False), ('price_subtotal', '=', self.price_subtotal)])
-                    query.add_where('analytic_distribution ? %s', [str(analytic_account_ids[0])])
-                    query.order = None
-                    query_string, query_param = query.select('*')
+                    query_string = 'SELECT * FROM "purchase_order_line" \
+                                    WHERE ("purchase_order_line"."company_id" IS NULL  OR ("purchase_order_line"."company_id" in %s)) \
+                                    AND  ("purchase_order_line"."id" not in (SELECT "direct_payment_purchase_order_line_id" FROM "sale_order_line" WHERE "direct_payment_purchase_order_line_id" IS NOT NULL)) \
+                                    AND "purchase_order_line"."price_subtotal" = %s \
+                                    AND analytic_distribution ? %s \
+                                    '
+                    query_param = [(1,), self.price_subtotal, str(analytic_account_ids[0])]
                     self._cr.execute(query_string, query_param)
-                    line_ids = []
-                    for line in self._cr.dictfetchall() :
-                        if len(list(line.get('analytic_distribution').keys())) == 1 and line.get('analytic_distribution')[analytic_account_ids[0]] == 100:
-                            line_ids.append(line.get('id'))
+                    line_ids = [line.get('id') for line in self._cr.dictfetchall()]
+                    #_logger.info(line_ids)
+        
 
             #_logger.info(line_ids)
             self.allowed_direct_payment_purchase_order_line_ids = line_ids

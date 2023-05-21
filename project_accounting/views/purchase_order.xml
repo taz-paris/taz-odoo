@@ -6,8 +6,13 @@
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='product_qty']" position="before">
+                <xpath expr="//field[@name='price_subtotal']" position="after">
                         <field name="direct_payment_sale_order_line_id" widget="many2many_tags" optional="show"/>
+			<field name="order_direct_payment_validated_amount" optional="show"/>
+			<field name="order_direct_payment_validated_detail" optional="show"/>
+			<field name="reselling_subtotal" optional="show"/>
+			<field name="margin_amount" optional="show"/>
+			<field name="margin_rate" widget="progressbar" optional="show"/>
                 </xpath>
             </field>
         </record>
