@@ -31,6 +31,8 @@
         'views/project_outsourcing_link.xml',
         'views/project_book.xml',
         'views/report_invoice.xml',
+        'views/sale_order.xml',
+        'views/purchase_order.xml',
     ],
 
 

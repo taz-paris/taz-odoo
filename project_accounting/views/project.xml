@@ -126,7 +126,6 @@
 					</page>
 					<page name="project_structure" string="Structure INITIALE du projet">
 						<group string="Total">
-							<field name="final_customer_order_amount"/>
 							<field name="order_sum_sale_order_lines" />
 							<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
 						</group>

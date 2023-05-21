@@ -18,7 +18,8 @@ class projectOutsourcingLink(models.Model):
     def compute_sale_order_total(self): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         for rec in self:
-            #rec.order_sum_sale_order_lines = 0
+            rec.order_sum_sale_order_lines = 0
+
             line_ids = rec.get_sale_order_line_ids()
             total = 0.0
             for line_id in line_ids:
@@ -126,6 +127,14 @@ class projectOutsourcingLink(models.Model):
             if rec.outsource_part_amount_current != 0 :
                 rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
 
+            """
+            dp = 0.0
+            for purchase_line in rec.get_sale_order_line_ids() :
+                if purchase_line.direct_payment_sale_order_line_id :
+                    dp += purchase_line.price_subtotal
+            rec.order_direct_payment_amount = dp
+            """
+
 
     def _get_default_project_id(self):
         return self.env.context.get('default_project_id') or self.env.context.get('active_id')
@@ -138,16 +147,15 @@ class projectOutsourcingLink(models.Model):
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
     order_sum_sale_order_lines = fields.Monetary('Total des commandes de Tasmane enregistrées', compute=compute_sale_order_total)
-    order_direct_payment_amount = fields.Monetary('Montant paiement direct', help="Montant payé directement par le client final au sous-traitant de Tasmane")
-        #TODO : calculer ce champ à partir d'un champ "facturé directement par" vers le res.partenr sous-traitant sur la sale.order.line 
+    order_direct_payment_amount = fields.Monetary('Montant paiement direct', compute=compute, help="Montant payé directement par le client final au sous-traitant de Tasmane")
         #TODO : il va falloir lister les factures validées sur Chorus et checker ce montant
     order_company_payment_amount = fields.Monetary('Montant à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute)
 
     sum_account_move_lines = fields.Monetary('Total des factures/avoirs', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute_account_move_total)
 
     outsource_part_amount_current = fields.Monetary('Valorisation de la part sous-traitée')
-    marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', store=True, compute=compute)
-    marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', store=True, compute=compute)
+    marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', compute=compute)
+    marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', compute=compute)
 
     order_direct_payment_done = fields.Monetary('Somme factures en paiement direct validées par Tasmane')
     order_direct_payment_done_detail = fields.Html('Détail des factures en paiement direct validées par Tasmane')

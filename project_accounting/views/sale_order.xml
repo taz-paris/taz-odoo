@@ -1,0 +1,47 @@
+<odoo>
+  <data>
+	<record id="view_order_form_inherit" model="ir.ui.view">
+            <field name="name">Sale order</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+		    <!--
+		<field name="name" positon="replace">
+			<field name="client_order_ref"/>
+		</field>
+		<field name="date_order" positon="before">
+			<field name="name" readonly="1"/>
+		</field>
+		    -->
+		<field name="order_line" position="before">
+			<group string="Bon de commande du client final">
+				<group>
+					<field name="other_company_amount" />
+				</group>
+				<group>
+					<field name="final_customer_order_amount" />
+				</group>
+			</group>
+			<group string="Lignes de commande de la part pilotée par Tasmane"/>
+		</field>
+		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">
+			<field name="direct_payment_purchase_order_line_id" optional="show"/>
+			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1"/>
+			<field name="untaxed_amount_to_invoice" optional="hide"/>
+		</xpath>
+            </field>
+        </record>
+
+
+<!--
+	<record id="view_order_line_tree_inherit" model="ir.ui.view">
+            <field name="name">Sale order line</field>
+            <field name="model">sale.order.line</field>
+            <field name="inherit_id" ref="sale.view_order_line_tree"/>
+	    <field name="arch" type="xml">
+            </field>
+        </record>
+-->
+
+  </data>
+</odoo>

@@ -308,7 +308,6 @@ class staffingProject(models.Model):
             self.book_validation_datetime = None
 
     ######## TOTAL
-    final_customer_order_amount = fields.Monetary('Montant du bon de commande client final', help="Montant total commandé par le client final (supérieur au montant piloté par Tasmane si Tasmane est sous-traitant. Egal au montant piloté par Tasmne sinon.)")
     #TODO : ajouter un contrôle : le montant commandé ne peut être inférieur au montant piloté par Tasmane
     order_amount = fields.Monetary('Montant piloté par Tasmane', store=True, compute=compute,  help="Montant à réaliser par Tasmane : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     #TODO : ajouter un contrôme opur vérifier que self.company_part_amount_initial+self.outsource_part_amount_initial == self.company_part_amount_current+self.outsource_part_amount_current
