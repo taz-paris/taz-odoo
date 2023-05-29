@@ -168,11 +168,11 @@ class staffingProject(models.Model):
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
 
-    def get_all_cost_current(self):
+    def get_all_cost_current(self, filter_list=[]):
         #TODO : changer de logique : avoir une fonction qui retourne les lignes de vente qui ne sont pas déjà attribuées à un sous-traitant puis sommer à partir de ces ID de lignes
             # et ajouter un bouton pour voir le détail des lignes affectées
         for rec in self:
-            query = self.env['account.move.line']._search([('move_type', 'in', ['in_refund', 'in_invoice'])])
+            query = self.env['account.move.line']._search(filter_list+[('move_type', 'in', ['in_refund', 'in_invoice'])])
             query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
             query.order = None
             query_string, query_param = query.select('*')
@@ -240,12 +240,12 @@ class staffingProject(models.Model):
 
 
 
-    def compute_account_move_total(self): 
+    def compute_account_move_total(self, filter_list=[]): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         #_logger.info("--compute_account_move_total")
         for rec in self:
             #_logger.info(rec.id)
-            line_ids = rec.get_account_move_line_ids()
+            line_ids = rec.get_account_move_line_ids(filter_list)
             total = 0.0
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
@@ -279,12 +279,12 @@ class staffingProject(models.Model):
 
         return action
 
-    def get_account_move_line_ids(self):
+    def get_account_move_line_ids(self, filter_list=[]):
         #TODO : vérifier la cohérence entre le client du projet et le client des sale.order
             # Hypothèse structurante : un projet a toujours exactement un client
         #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
                 # Si ça n'est pas égale, afficher un bandeau jaune
-        move = self.env['account.move'].search([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice'])])
+        move = self.env['account.move'].search(filter_list + [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice'])])
         move_ids = []
         for m in move :
             move_ids.append(m.id)

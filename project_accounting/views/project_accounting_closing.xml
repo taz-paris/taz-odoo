@@ -17,8 +17,70 @@
               <field name="model">project.accounting_closing</field>
               <field name="arch" type="xml">
                 <form>
-                  <field name="project_id"/>
-                  <field name="closing_date"/>
+			<group name="general">
+				<field name="project_id"/>
+				<field name="closing_date"/>
+				<field name="previous_closing"/>
+			</group>
+			<group col="3">
+				<group name="invoice" string="Facturation">
+					<field name="invoice_previous_balance"/>
+					<field name="invoice_period_amount"/>
+					<field name="invoice_balance"/>
+				</group>
+				<group name="purchase" string="Achats">
+					<field name="purchase_previous_balance"/>
+					<field name="purchase_period_amount"/>
+					<field name="purchase_balance"/>
+				</group>
+				<group name="prov" string="Total provisions">
+					<field name="provision_previous_balance_sum"/>
+					<field name="provision_balance_sum"/>
+				</group>
+			</group>
+			<group col="4">
+				<group name="pca" string="PCA">
+					<field name="pca_previous_balance"/>
+					<field name="pca_period_amount"/>
+					<field name="pca_balance"/>
+				</group>
+				<group name="fae" string="FAE">
+					<field name="fae_previous_balance"/>
+					<field name="fae_period_amount"/>
+					<field name="fae_balance"/>
+				</group>
+				<group name="cca" string="CCA">
+					<field name="cca_previous_balance"/>
+					<field name="cca_period_amount"/>
+					<field name="cca_balance"/>
+				</group>
+				<group name="fnp" string="FNP">
+					<field name="fnp_previous_balance"/>
+					<field name="fnp_period_amount"/>
+					<field name="fnp_balance"/>
+				</group>
+			</group>
+			<group name="prod" string="Production">
+				<group>
+					<field name="production_previous_balance"/>
+					<field name="production_period_amount"/>
+					<field name="production_stock"/>
+				</group>
+				<group>
+					<field name="production_destocking"/>
+					<field name="production_balance"/>
+				</group>
+			</group>
+			<group name="revenue" string="Chiffre d'affaire">
+				<group>
+					<field name="gross_revenue"/>
+					<field name="internal_revenue"/>
+				</group>
+				<group>
+					<field name="internal_margin_amount"/>
+					<field name="internal_margin_amount"/>
+				</group>
+			</group>
                 </form>
               </field>
             </record>
