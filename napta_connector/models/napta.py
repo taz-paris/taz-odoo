@@ -19,7 +19,8 @@ _logger = logging.getLogger(__name__)
 ##########                SET PARAMETERS                ##########
 ##################################################################
 
-API_URL = "https://pickyourskills.eu.auth0.com"
+API_URL_TOKEN_ENDPOINT = "https://pickyourskills.eu.auth0.com/oauth/token"
+API_URL_BUSINESS_ENDPOINT = "https://app.napta.io/api/v1/"
 
 cache_mode = False
 cache_folder = '/tmp/'
@@ -32,8 +33,8 @@ class ClientRestNapta:
         self.env = env
         self.CLIENT_ID = self.env['ir.config_parameter'].sudo().get_param("napta_client_id")
         self.CLIENT_SECRET = self.env['ir.config_parameter'].sudo().get_param("napta_client_secret")
-        self.API_URL = API_URL
-        self.API_URL_BUSINESS_ENDPOINT = self.API_URL+'/api/v1/'
+        self.API_URL_TOKEN_ENDPOINT = API_URL_TOKEN_ENDPOINT
+        self.API_URL_BUSINESS_ENDPOINT = API_URL_BUSINESS_ENDPOINT
 
     def get_access_token(self):
         access_values = json.loads(self.env['ir.config_parameter'].sudo().get_param("napta_access_values"))
@@ -50,7 +51,7 @@ class ClientRestNapta:
                 }
         headers = { 'content-type': "application/x-www-form-urlencoded" }
         _logger.info("--- Call method to get the access token")
-        response = requests.post(self.API_URL+'/oauth/token', data=data, headers=headers)
+        response = requests.post(self.API_URL_TOKEN_ENDPOINT, data=data, headers=headers)
         _logger.info(response.status_code)
         _logger.info(response.content)
         access_values = response.json()
@@ -71,7 +72,8 @@ class ClientRestNapta:
             'authorization': 'Bearer '+self.get_access_token(),
             'content-type': 'application/json'
         }
-
+        _logger.info("POST "+self.API_URL_BUSINESS_ENDPOINT+napta_type)
+        _logger.info(data)
         response = requests.post(self.API_URL_BUSINESS_ENDPOINT+napta_type, json=data, headers=headers)
         _logger.info(response.status_code)
         _logger.info(response.content)
@@ -123,7 +125,7 @@ class fitnetPartner(models.Model):
              # "client_metadata": {},
              # "external_id": "string",
               "name": self.name,
-              "external_id" : rec.id,
+              "external_id" : str(rec.id),
             }
             self.napta_id = client.post_api('client', attributes)
             return self.napta_id
@@ -140,7 +142,7 @@ class fitnetProject(models.Model):
         _logger.info('---- Create Napta project')
         client = ClientRestNapta(self.env)
         for rec in self:
-            _logger.info(client.get_api('project'))
+            #_logger.info(client.get_api('project'))
             if rec.napta_id :
                 continue
 
@@ -154,7 +156,7 @@ class fitnetProject(models.Model):
               "description" : rec.description,
               "billing_method" : "fixed_price",
               "client_id" : rec.partner_id.napta_id,
-              "external_id" : rec.id,
+              "external_id" : str(rec.id),
             }
             self.napta_id = client.post_api('project', attributes)
             return self.napta_id

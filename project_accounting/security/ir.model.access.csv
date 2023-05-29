@@ -4,3 +4,5 @@
 "project_book_period_admin","project_book_period_admin","project_accounting.model_project_book_period","taz-common.taz-basic","True","True","True","True"
 "project_book_employee_distribution_admin","project_book_employee_distribution_admin","project_accounting.model_project_book_employee_distribution","taz-common.taz-basic","True","True","True","True"
 "project_book_employee_distribution_period_readonly","project_book_employee_distribution_period_readonly","project_accounting.model_project_book_employee_distribution_period","taz-common.taz-basic","True","False","False","False"
+"project_accounting_closing_readonly","project_bookaccounting_closing_readonly","project_accounting.model_project_accounting_closing","taz-common.taz-basic","True","False","False","False"
+"project_accounting_closing_admin","project_bookaccounting_closing_admin","project_accounting.model_project_accounting_closing","account.group_account_manager","True","True","True","True"

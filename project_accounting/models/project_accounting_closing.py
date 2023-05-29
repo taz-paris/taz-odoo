@@ -1,0 +1,124 @@
+from odoo import models, fields, api
+from odoo.exceptions import UserError, ValidationError
+import logging
+_logger = logging.getLogger(__name__)
+
+import datetime
+from dateutil.relativedelta import relativedelta
+
+class projectAccountingClosing(models.Model):
+    _name = "project.accounting_closing"
+    _description = "Project accounting closing"
+    _order = "closing_date desc" #Super important pour que les contrôles fonctionnent (ils partent du principe que ce tri est déjà fait)
+    _sql_constraints = [
+        ('project_date_uniq', 'UNIQUE (project_id, closing_date)',  "Impossible d'avoir deux clôtures à une même date pour un même projet.")
+    ]
+
+    def _get_default_project_id(self):
+        return self.env.context.get('default_project_id') or self.env.context.get('active_id')
+
+    def _get_default_closing_date(self):
+        accounting_closing_ids = self.project_id.accounting_closing_ids
+        if len(accounting_closing_ids) == 0 : 
+                #or (len(accounting_closing_ids) == 1 and accounting_closing_ids[0].id == sefl.id):
+            # si c'est la première cloture du projet, on met sa date de cloture par défaut au dernier jour du mois précédent le mois courant
+            return datetime.date.today().replace(day=1) - datetime.timedelta(1)
+        last_closing_date = accounting_closing_ids[0].closing_date
+        # sinon, c'est le dernier jour du mois suivant celui de la dernière cloture
+        return (last_closing_date + relativedelta(month=2)).replace(day=1) - datetime.timedelta(1)
+
+    @api.constrains('closing_date')
+    def _check_closing_date(self):
+        for rec in self:
+            accounting_closing_ids = self.project_id.accounting_closing_ids
+            if accounting_closing_ids[0].id != self.id:
+                raise ValidationError(_("Il n'est pas possible de saisir une date de clôture antérieure à la dernière cloture enregistrée."))
+
+    def write(self, vals):
+        for rec in self :
+            if rec.next_closing :
+                raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe."))
+        super().write(vals)
+
+
+    def unlink(self):
+        if self.next_closing :
+            raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car une clôture postérieure existe."))
+        super.unlink()
+
+
+
+    @api.depends('project_id', 'closing_date', 'previous_closing', 'invoice_period_amount', 'purchase_period_amount', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
+    def compute(self):
+        for rec in self :
+            rec.invoice_balance = rec.invoice_previous_balance + rec.invoice_period_amount
+            rec.purchase_balance = rec.purchase_previous_balance + rec.purchase_period_amount
+
+            rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
+            rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
+            rec.cca_balance = rec.cca_previous_balance + rec.cca_period_amount
+            rec.fnp_balance = rec.fnp_previous_balance + rec.fnp_period_amount
+            rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
+            rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
+
+            production_period_amount = 0.0
+            lines = self.env['account.analytic.line'].search([('project_id', '=', rec.project_id.id), ('date', '>', rec.previous_closing.closing_date), ('date', '<=', rec.closing_date)])
+            for line in lines :
+                production_period_amount += line.amount
+            rec.production_period_amount = production_period_amount
+
+            rec.production_stock = rec.production_previous_balance + rec.production_period_amount
+            rec.production_balance = rec.production_stock - rec.production_destocking
+
+            rec.gross_revenue = rec.invoice_period_amount + rec.pca_period_amount + rec.fae_period_amount
+            rec.internal_revenue = rec.gross_revenue - rec.purchase_balance + rec.cca_period_amount + rec.fnp_period_amount
+            rec.internal_margin_amount = rec.internal_revenue - rec.production_destocking
+            rec.internal_margin_rate = 0.0
+            if rec.internal_revenue :
+                rec.internal_margin_rate = rec.internal_margin_amount / rec.internal_revenue * 100
+
+    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
+    closing_date = fields.Date("Date de clôture", required=True, default=_get_default_closing_date)
+    previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente")
+    next_closing = fields.One2many('project.accounting_closing', 'previous_closing', string="Clôture suivante")
+
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
+
+    invoice_previous_balance = fields.Monetary('Précédent solde facturation', related='previous_closing.invoice_balance')
+    invoice_period_amount = fields.Monetary('Facturation du mois') #TODO : calcul automatique
+    invoice_balance = fields.Monetary('Solde de facturation', compute=compute)
+    
+    purchase_previous_balance = fields.Monetary('Précédent solde achats', related='previous_closing.purchase_balance')
+    purchase_period_amount = fields.Monetary('Achats du mois') #TODO : calcul automatique
+    purchase_balance = fields.Monetary('Solde d\'achats', compute=compute)
+    
+    pca_previous_balance = fields.Monetary('Précédent solde PCA', related='previous_closing.pca_balance')
+    pca_period_amount = fields.Monetary('PCA(-)')
+    pca_balance = fields.Monetary('Solde PCA', compute=compute)
+    
+    fae_previous_balance = fields.Monetary('Précédent solde FAE', related='previous_closing.fae_balance')
+    fae_period_amount = fields.Monetary('FAE(+)')
+    fae_balance = fields.Monetary('Solde FAE', compute=compute)
+    
+    cca_previous_balance = fields.Monetary('Précédent solde CCA', related='previous_closing.cca_balance')
+    cca_period_amount = fields.Monetary('CCA(+)')
+    cca_balance = fields.Monetary('Solde CCA', compute=compute)
+
+    provision_previous_balance_sum = fields.Monetary('Somme reprise prov.', compute=compute)
+    provision_balance_sum = fields.Monetary('Somme solde prov.', compute=compute)
+    
+    fnp_previous_balance = fields.Monetary('Précédent solde FNP', related='previous_closing.fnp_balance')
+    fnp_period_amount = fields.Monetary('FNP(-)')
+    fnp_balance = fields.Monetary('Solde FNP', compute=compute)
+    
+    production_previous_balance = fields.Monetary('Précédent stock', related='previous_closing.production_balance')
+    production_period_amount = fields.Monetary('Production du mois', compute=compute)
+    production_stock = fields.Monetary('Stock total', compute=compute)
+    production_destocking = fields.Monetary('Destockage')
+    production_balance = fields.Monetary('Solde de production', compute=compute)
+    
+    gross_revenue = fields.Monetary('CA brut', compute=compute)
+    internal_revenue = fields.Monetary('CA net de ST', compute=compute)
+    internal_margin_amount = fields.Monetary('Marge nette ST (€)', compute=compute)
+    internal_margin_amount = fields.Monetary('Marge nette ST (%)', compute=compute)

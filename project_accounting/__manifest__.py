@@ -33,6 +33,7 @@
         'views/report_invoice.xml',
         'views/sale_order.xml',
         'views/purchase_order.xml',
+        'views/project_accounting_closing.xml',
     ],
 
 

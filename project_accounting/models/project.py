@@ -374,3 +374,7 @@ class staffingProject(models.Model):
     book_employee_distribution_period_ids = fields.One2many('project.book_employee_distribution_period', 'project_id', 'Book par salarié et par an')
     book_validation_employee_id = fields.Many2one('hr.employee', string="Book validé par")
     book_validation_datetime = fields.Datetime("Book validé le")
+
+
+    # ACCOUNTING CLOSING
+    accounting_closing_ids = fields.One2many('project.accounting_closing', 'project_id', 'Clôtures comptables')

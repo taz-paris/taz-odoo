@@ -1,0 +1,35 @@
+<odoo>
+	<data>
+           <record model="ir.ui.view" id="project_accounting.project_accounting_closing_tree">
+              <field name="name">Project accounting closing</field>
+              <field name="model">project.accounting_closing</field>
+              <field name="arch" type="xml">
+                <tree>
+                  <field name="project_id"/>
+                  <field name="closing_date"/>
+                </tree>
+              </field>
+            </record>
+
+
+           <record model="ir.ui.view" id="project_accounting.project_accounting_closing_form">
+              <field name="name">Project accounting closing</field>
+              <field name="model">project.accounting_closing</field>
+              <field name="arch" type="xml">
+                <form>
+                  <field name="project_id"/>
+                  <field name="closing_date"/>
+                </form>
+              </field>
+            </record>
+
+        <record id="project_accounting_closing_action" model="ir.actions.act_window">
+                <field name="name">Clôtures comptables par projet</field>
+                <field name="res_model">project.accounting_closing</field>
+                <field name="view_mode">tree</field>
+	</record>
+
+	<menuitem name="Clôtures compatbles" id="project_accounting_closing_menu" parent="project.menu_main_pm" action="project_accounting_closing_action"/>
+
+	</data>
+</odoo>
