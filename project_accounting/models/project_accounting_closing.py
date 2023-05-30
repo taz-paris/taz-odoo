@@ -19,16 +19,21 @@ class projectAccountingClosing(models.Model):
         return self.env.context.get('default_project_id') or self.env.context.get('active_id')
 
     def _get_default_closing_date(self):
+        _logger.info('--_get_default_closing_date')
         if not self.project_id and not self._get_default_project_id():
             return False
 
-        accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', self.project_id.id)], order="closing_date desc")
+        project_id = self.project_id
+        if not project_id:
+            project_id = self._get_default_project_id()
+
+        accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', project_id)], order="closing_date desc")
         if len(accounting_closing_ids) == 0 : 
             # si c'est la première cloture du projet, on met sa date de cloture par défaut au dernier jour du mois précédent le mois courant
             return datetime.date.today().replace(day=1) - datetime.timedelta(1)
         last_closing_date = accounting_closing_ids[0].closing_date
         # sinon, c'est le dernier jour du mois suivant celui de la dernière cloture
-        return (last_closing_date + relativedelta(month=2)).replace(day=1) - datetime.timedelta(1)
+        return (last_closing_date + relativedelta(months=2)).replace(day=1) - datetime.timedelta(1)
 
     @api.constrains('closing_date')
     def _check_closing_date(self):
@@ -47,23 +52,30 @@ class projectAccountingClosing(models.Model):
     def unlink(self):
         if self.next_closing :
             raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car une clôture postérieure existe."))
-        super.unlink()
+        super().unlink()
 
 
 
     @api.depends('project_id', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     def compute(self):
+        _logger.info('-- compute')
         for rec in self :
-            previous_accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
-            if len(previous_accounting_closing_ids) :
-                rec.previous_closing = previous_accounting_closing_ids[0]
-            else :
-                rec.previous_closing = None
+            previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
+            previous_closing = None
+            previous_closing_date_filter = []
+            _logger.info(previous_accounting_closing_ids)
+            if len(previous_accounting_closing_ids) > 0 :
+                previous_closing = previous_accounting_closing_ids[0]
+                previous_closing_date_filter.append(('date', '>', previous_closing.closing_date))
+                _logger.info('==== AAAA')
+            rec.previous_closing = previous_closing
 
-            rec.invoice_period_amount = rec.project_id.compute_account_move_total([('date', '>', rec.previous_closing.closing_date), ('date', '<=', rec.closing_date)])
+            _logger.info(previous_closing_date_filter)
+
+            rec.invoice_period_amount = rec.project_id.compute_account_move_total(previous_closing_date_filter + [('date', '<=', rec.closing_date)])
             rec.invoice_balance = rec.invoice_previous_balance + rec.invoice_period_amount
 
-            rec.purchase_period_amount = rec.project_id.get_all_cost_current([('date', '>', rec.previous_closing.closing_date), ('date', '<=', rec.closing_date)])
+            rec.purchase_period_amount = rec.project_id.get_all_cost_current(previous_closing_date_filter + [('date', '<=', rec.closing_date)])
             rec.purchase_balance = rec.purchase_previous_balance + rec.purchase_period_amount
 
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
@@ -74,7 +86,7 @@ class projectAccountingClosing(models.Model):
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
             production_period_amount = 0.0
-            lines = self.env['account.analytic.line'].search([('project_id', '=', rec.project_id.id), ('date', '>', rec.previous_closing.closing_date), ('date', '<=', rec.closing_date)])
+            lines = self.env['account.analytic.line'].search(previous_closing_date_filter + [('project_id', '=', rec.project_id.id), ('date', '<=', rec.closing_date)])
             for line in lines :
                 production_period_amount += line.amount
             rec.production_period_amount = production_period_amount

@@ -97,6 +97,8 @@ class staffingProject(models.Model):
     @api.depends('company_part_amount_initial', 'company_part_cost_initial', 'company_part_amount_current', 'company_part_cost_current', 'outsource_part_amount_initial', 'outsource_part_cost_initial', 'outsource_part_amount_current', 'outsource_part_cost_current', 'other_part_amount_initial', 'other_part_cost_initial', 'other_part_amount_current', 'other_part_cost_current')
     def compute(self):
         for rec in self:
+            rec.company_invoice_sum_move_lines = rec.compute_account_move_total()
+
             ######## TOTAL
             rec.order_amount = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
 
@@ -240,20 +242,18 @@ class staffingProject(models.Model):
 
 
 
-    def compute_account_move_total(self, filter_list=[]): 
+    def compute_account_move_total(self, filter_list=[]):
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
-        #_logger.info("--compute_account_move_total")
-        for rec in self:
-            #_logger.info(rec.id)
-            line_ids = rec.get_account_move_line_ids(filter_list)
-            total = 0.0
-            for line_id in line_ids:
-                line = rec.env['account.move.line'].browse(line_id)
-                #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-                total += line.price_subtotal
-            #_logger.info(total)
-            rec.company_invoice_sum_move_lines = total
-            #_logger.info("fin boucle compute_account_move_total")
+        _logger.info("--compute_account_move_total")
+        line_ids = self.get_account_move_line_ids(filter_list)
+        total = 0.0
+        _logger.info(len(line_ids))
+        for line_id in line_ids:
+            line = self.env['account.move.line'].browse(line_id)
+            #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
+            total += line.price_subtotal
+        _logger.info(total)
+        return total
 
 
     def action_open_account_move_lines(self):
@@ -324,7 +324,7 @@ class staffingProject(models.Model):
     order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute)
 
     order_to_invoice_company = fields.Monetary('Montant à facturer par Tasmane au client', compute=compute)
-    company_invoice_sum_move_lines = fields.Monetary('Montant déjà facturé par Tasmane au client', compute=compute_account_move_total)
+    company_invoice_sum_move_lines = fields.Monetary('Montant déjà facturé par Tasmane au client', compute=compute)
     company_to_invoice_left = fields.Monetary('Montant restant à factuer par Tasmane au client', compute=compute)
     order_to_invoice_outsourcing = fields.Monetary('Montant S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute)
 

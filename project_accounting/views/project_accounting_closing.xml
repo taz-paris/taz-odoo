@@ -78,20 +78,75 @@
 				</group>
 				<group>
 					<field name="internal_margin_amount"/>
-					<field name="internal_margin_amount"/>
+					<field name="internal_margin_rate" widget="progressbar"/>
 				</group>
 			</group>
                 </form>
               </field>
             </record>
 
+	<record id="project_accounting.project_accounting_closing_pivot" model="ir.ui.view">
+		<field name="name">project.accounting_closing.pivot</field>
+		<field name="model">project.accounting_closing</field>
+		<field name="arch" type="xml">
+		    <pivot string="Clôtures comptables" sample="1">
+			<field name="closing_date" type="col" interval="year"/>
+			<field name="closing_date" type="col" interval="month"/>
+			<field name="project_id" type="row"/>
+			<!--
+			<field name="invoice_previous_balance" type="measure"/>
+			-->
+			<field name="invoice_period_amount" type="measure"/>
+			<field name="invoice_balance" type="measure"/>
+			<!--
+			<field name="purchase_previous_balance" type="measure"/>
+			-->
+			<field name="purchase_period_amount" type="measure"/>
+			<field name="purchase_balance" type="measure"/>
+			<field name="provision_previous_balance_sum" type="measure"/>
+			<field name="provision_balance_sum" type="measure"/>
+			<!--
+			<field name="pca_previous_balance" type="measure"/>
+			-->
+			<field name="pca_period_amount" type="measure"/>
+			<field name="pca_balance" type="measure"/>
+			<!--
+			<field name="fae_previous_balance" type="measure"/>
+			-->
+			<field name="fae_period_amount" type="measure"/>
+			<field name="fae_balance" type="measure"/>
+			<!--
+			<field name="cca_previous_balance" type="measure"/>
+			-->
+			<field name="cca_period_amount" type="measure"/>
+			<field name="cca_balance" type="measure"/>
+			<!--
+			<field name="fnp_previous_balance" type="measure"/>
+			-->
+			<field name="fnp_period_amount" type="measure"/>
+			<field name="fnp_balance" type="measure"/>
+			<!--
+			<field name="production_previous_balance" type="measure"/>
+			-->
+			<field name="production_period_amount" type="measure"/>
+			<field name="production_stock" type="measure"/>
+			<field name="production_destocking" type="measure"/>
+			<field name="production_balance" type="measure"/>
+			<field name="gross_revenue" type="measure"/>
+			<field name="internal_revenue" type="measure"/>
+			<field name="internal_margin_amount" type="measure"/>
+			<field name="internal_margin_rate" type="measure"/>
+		    </pivot>
+		</field>
+	</record>
+
         <record id="project_accounting_closing_action" model="ir.actions.act_window">
                 <field name="name">Clôtures comptables par projet</field>
                 <field name="res_model">project.accounting_closing</field>
-                <field name="view_mode">tree</field>
+                <field name="view_mode">tree,form,pivot</field>
 	</record>
 
-	<menuitem name="Clôtures compatbles" id="project_accounting_closing_menu" parent="project.menu_main_pm" action="project_accounting_closing_action"/>
+	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu" parent="project.menu_main_pm" action="project_accounting_closing_action"/>
 
 	</data>
 </odoo>
