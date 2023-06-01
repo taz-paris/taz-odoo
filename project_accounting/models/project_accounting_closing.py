@@ -19,7 +19,6 @@ class projectAccountingClosing(models.Model):
         return self.env.context.get('default_project_id') or self.env.context.get('active_id')
 
     def _get_default_closing_date(self):
-        _logger.info('--_get_default_closing_date')
         if not self.project_id and not self._get_default_project_id():
             return False
 
@@ -60,9 +59,15 @@ class projectAccountingClosing(models.Model):
     def compute(self):
         _logger.info('-- compute')
         for rec in self :
-            previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
+            proj_id = rec.project_id
+            if '<NewId origin=' in str(proj_id) :
+                proj_id = rec._origin.project_id
+
+            previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
             previous_closing = None
             previous_closing_date_filter = []
+            _logger.info(proj_id)
+            _logger.info(rec.closing_date)
             _logger.info(previous_accounting_closing_ids)
             if len(previous_accounting_closing_ids) > 0 :
                 previous_closing = previous_accounting_closing_ids[0]
@@ -86,7 +91,7 @@ class projectAccountingClosing(models.Model):
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
             production_period_amount = 0.0
-            lines = self.env['account.analytic.line'].search(previous_closing_date_filter + [('project_id', '=', rec.project_id.id), ('date', '<=', rec.closing_date)])
+            lines = self.env['account.analytic.line'].search(previous_closing_date_filter + [('project_id', '=', proj_id.id), ('date', '<=', rec.closing_date)])
             for line in lines :
                 production_period_amount += line.amount
             rec.production_period_amount = production_period_amount
@@ -101,6 +106,9 @@ class projectAccountingClosing(models.Model):
             if rec.internal_revenue :
                 rec.internal_margin_rate = rec.internal_margin_amount / rec.internal_revenue * 100
 
+            rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
+
+    name = fields.Char('Libellé', compute=compute, store=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
     closing_date = fields.Date("Date de clôture", required=True, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)

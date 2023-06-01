@@ -140,6 +140,8 @@ class staffingEmployee(models.Model):
             
             lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date + timedelta(days=(-1*7)), date_end=curent_monday, date_start=curent_monday + timedelta(days=(-1*7)), filters=dic)
             act = work_days_prev_period_1_weeks - lines['holiday_timesheet_unit_amount']
+            rec.prev_1_weeks_activity_previsionnal_project_days = lines['previsional_timesheet_unit_amount']
+            rec.prev_1_weeks_activity_delta_previsionnal_project_days = rec.prev_1_weeks_activity_previsionnal_project_days - rec.prev_1_weeks_project_days
             if act :
                 rec.prev_1_weeks_activity_previsionnal_rate = lines['previsional_timesheet_unit_amount'] / act * 100
             else :
@@ -263,9 +265,11 @@ class staffingEmployee(models.Model):
     prev_1_weeks_workdays = fields.Float("J. ouvrés", help="Jours ouvrés dernière semaine", compute=availability, store=True)
     prev_1_weeks_activity_days = fields.Float("J. facturables", help="Jours facturables dernière semaine", compute=availability, store=True)
     prev_1_weeks_learning_internal_days = fields.Float("j. internes+fomations", help="Jours internes + formation dernière semaine", compute=availability, store=True)
-    prev_1_weeks_project_days = fields.Float("J. imputés", help="Jours imputés dernière semaine", compute=availability, store=True)
+    prev_1_weeks_project_days = fields.Float("J. pointés", help="Jours imputés dernière semaine", compute=availability, store=True)
     prev_1_weeks_activity_rate = fields.Float("% pointé", help="Taux d'activité dernière semaine", compute=availability, store=True, group_operator='avg')
     prev_1_weeks_activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel dernière semaine", compute=availability, store=True, group_operator='avg')
+    prev_1_weeks_activity_previsionnal_project_days = fields.Float('Prév. (j)', compute=availability, store=True)
+    prev_1_weeks_activity_delta_previsionnal_project_days = fields.Float('Delta prev-pointé (j)', compute=availability, store=True)
 
     availability_4_weeks_graph = fields.Char("Graph dispo S+4", compute=availability_4_weeks_graph)
 
