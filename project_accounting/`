@@ -96,7 +96,6 @@ class staffingProject(models.Model):
 
     @api.depends('company_part_amount_initial', 'company_part_cost_initial', 'company_part_amount_current', 'company_part_cost_current', 'outsource_part_amount_initial', 'outsource_part_cost_initial', 'outsource_part_amount_current', 'outsource_part_cost_current', 'other_part_amount_initial', 'other_part_cost_initial', 'other_part_amount_current', 'other_part_cost_current')
     def compute(self):
-        _logger.info('===== project.py COMPUTE')
         for rec in self:
             rec.company_invoice_sum_move_lines = rec.compute_account_move_total()
 

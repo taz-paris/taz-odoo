@@ -12,6 +12,11 @@
 		<field name="date_order" positon="before">
 			<field name="name" readonly="1"/>
 		</field>
+		<field name="order_line" positon="before">
+			<group>
+                        	<field name="client_order_ref"/>
+			</group>
+                </field>
 		    -->
 		<field name="order_line" position="before">
 			<group string="Bon de commande du client final">
@@ -25,9 +30,9 @@
 			<group string="Lignes de commande de la part pilotée par Tasmane"/>
 		</field>
 		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">
-			<field name="direct_payment_purchase_order_line_id" optional="show"/>
-			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1"/>
-			<field name="untaxed_amount_to_invoice" optional="hide"/>
+			<field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
+			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
+			<field name="untaxed_amount_to_invoice" optional="hide" on_change="1"/>
 		</xpath>
             </field>
         </record>

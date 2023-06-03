@@ -100,11 +100,18 @@
 				   </group>
 				<notebook>
 					<page name="dashboard" string="Synthèse DM/Manager">
+						<group>
 							<group string="Somme dispositif Tasame + Sous-traitance + autres">
                                                                 <field name="order_cost_current"/>
                                                                 <field name="order_marging_amount_current"/>
                                                                 <field name="order_marging_rate_current" widget="progressbar"/>
                                                         </group>
+							<group string="Commande">
+								<field name="order_sum_sale_order_lines" />
+								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
+							</group>
+						</group>
+						<group col="3">
 							<group string="Production par le dispositif Tasmane">
 					    			<field name="company_part_amount_current"/>
 					    			<field name="company_part_cost_current"/>
@@ -117,58 +124,43 @@
                                                                 <field name="outsource_part_marging_amount_current"/>
                                                                 <field name="outsource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
-                                                	<group string="Autres pestations (exemple : séminaire dans les locaux de Tasmane)">
+                                                	<group string="Autres pestations (exemple : séminaire chez Tasmane)">
                                                                 <field name="other_part_amount_current"/>
                                                                 <field name="other_part_cost_current"/>
                                                                 <field name="other_part_marging_amount_current"/>
                                                                 <field name="other_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
+						</group>
 					</page>
 					<page name="project_structure" string="Structure INITIALE du projet">
-						<group string="Total">
-							<field name="order_sum_sale_order_lines" />
-							<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
-						</group>
 						<group string="Somme dispositif Tasame + Sous-traitance + autres">
 							<group>
 								<field name="order_amount"/>
 								<field name="order_cost_initial"/>
-							</group>
-							<group>
 								<field name="order_marging_amount_initial"/>
 								<field name="order_marging_rate_initial" widget="progressbar"/>
 							</group>
 						</group>
-						<group string="Dispositif Tasmane">
-							<group>
+						<group col="3">
+							<group string="Dispositif Tasmane">
 								<field name="company_part_amount_initial"/>
 								<field name="company_part_cost_initial"/>
-							</group>
-							<group>
 								<field name="company_part_marging_amount_initial"/>
 								<field name="company_part_marging_rate_initial" widget="progressbar"/>
 							</group>
-						</group>
-						<group string="Production sous-traitée par Tasmane">
-							<group>
+							<group string="Production sous-traitée par Tasmane">
 								<field name="outsource_part_amount_initial"/>
 								<field name="outsource_part_cost_initial"/>
-							</group>
-							<group>
 								<field name="outsource_part_marging_amount_initial"/>
 								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
-							</group>
-						</group>  
-						<group string="Autres pestations (exemple : séminaire dans les locaux de Tasmane)">
-							<group>
+							</group>  
+							<group string="Autres pestations (exemple : séminaire chez Tasmane)">
 								<field name="other_part_amount_initial"/>
 								<field name="other_part_cost_initial"/>
-							</group>
-							<group>
 								<field name="other_part_marging_amount_initial"/>
 								<field name="other_part_marging_rate_initial" widget="progressbar"/>
-							</group>
-						</group>  
+							</group>  
+						</group>
 					</page>
 					<page name="customer_invoicing" string="Facturation client">
 						<group string="Jalons de facturation">

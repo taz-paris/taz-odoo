@@ -47,22 +47,29 @@ class projectOutsourcingLink(models.Model):
         return action
 
     def get_purchase_order_line_ids(self):
-        #TODO : vérifier la cohérence entre le client du projet et le client des sale.order
-            # Hypothèse structurante : un projet a toujours exactement un client
         #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
                 # Si ça n'est pas égale, afficher un bandeau jaune
-        query_string = 'SELECT * FROM "purchase_order_line" WHERE ("purchase_order_line"."company_id" IS NULL  OR ("purchase_order_line"."company_id" in %s)) AND "purchase_order_line"."partner_id" = %s AND analytic_distribution ? %s'
-        query_param = [(1,), self.partner_id.id, str(self.project_id.analytic_account_id.id)]
+        _logger.info('--get_purchase_order_line_ids')
+        query = self.env['purchase.order.line']._search([('partner_id', '=', self.partner_id.id)])
+        #_logger.info(query)
+        if query == []:
+            return []
+        query.add_where('analytic_distribution ? %s', [str(self.project_id.analytic_account_id.id)])
+        query.order = None
+        query_string, query_param = query.select('purchase_order_line.*')
+        #_logger.info(query_string)
+        #_logger.info(query_param)
         self._cr.execute(query_string, query_param)
-        line_ids = [line.get('id') for line in self._cr.dictfetchall()]
-        #_logger.info(line_ids)
+        dic =  self._cr.dictfetchall()
+        line_ids = [line.get('id') for line in dic]
+
         return line_ids
         
 
     def compute_account_move_total(self): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         for rec in self:
-            line_ids = rec.get_account_move_line_ids()
+            line_ids = rec.project_id.get_account_move_line_ids([('partner_id', '=', rec.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund'])])
             total = 0.0
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
@@ -71,7 +78,7 @@ class projectOutsourcingLink(models.Model):
             rec.sum_account_move_lines = total
 
     def action_open_account_move_lines(self):
-        line_ids = self.get_account_move_line_ids()
+        line_ids = self.project_id.get_account_move_line_ids([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund'])])
 
         action = {
             'name': _('Invoice and refound lines'),
@@ -90,37 +97,11 @@ class projectOutsourcingLink(models.Model):
 
         return action
 
-    def get_account_move_line_ids(self):
-        #TODO : vérifier la cohérence entre le client du projet et le client des sale.order
-            # Hypothèse structurante : un projet a toujours exactement un client
-        #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
-
-        move = self.env['account.move'].search([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund'])])
-        move_ids = []
-        for m in move :
-            move_ids.append(m.id)
-
-        query = self.env['account.move.line']._search([('move_id', 'in', move_ids)])
-        if query == []:
-            return []
-        query.add_where('analytic_distribution ? %s', [str(self.project_id.analytic_account_id.id)])
-        query.order = None
-        query_string, query_param = query.select('*')
-        self._cr.execute(query_string, query_param)
-        line_ids = [line.get('id') for line in self._cr.dictfetchall()]
-
-        return line_ids
 
     @api.depends('order_sum_purchase_order_lines', 'order_direct_payment_amount', 'sum_account_move_lines')
     def compute(self):
+        _logger.info('--compute project_outsourcing_link.py')
         for rec in self :
-            rec.order_company_payment_amount = rec.order_sum_purchase_order_lines - rec.order_direct_payment_amount
-
-            rec.marging_amount_current =  rec.outsource_part_amount_current - rec.sum_account_move_lines
-            rec.marging_rate_current = 0.0 
-            if rec.outsource_part_amount_current != 0 :
-                rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
-
             rec.outsource_part_amount_current = 0.0
             rec.order_direct_payment_amount = 0.0
             rec.order_direct_payment_done = 0.0
@@ -132,6 +113,17 @@ class projectOutsourcingLink(models.Model):
                     rec.order_direct_payment_amount += purchase_line.price_subtotal
                     rec.order_direct_payment_done += purchase_line.order_direct_payment_validated_amount
                     rec.order_direct_payment_done_detail += purchase_line.order_direct_payment_validated_detail + " "
+
+            rec.order_company_payment_amount = rec.order_sum_purchase_order_lines - rec.order_direct_payment_amount
+            rec.marging_amount_current =  rec.outsource_part_amount_current - rec.sum_account_move_lines
+            rec.marging_rate_current = 0.0 
+            if rec.outsource_part_amount_current != 0 :
+                rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
+
+            _logger.info(rec.order_company_payment_amount)
+            _logger.info(rec.order_sum_purchase_order_lines)
+            _logger.info(rec.order_direct_payment_amount)
+
 
 
     def _get_default_project_id(self):

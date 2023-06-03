@@ -24,19 +24,15 @@
 				<field name="project_id"/>
 				<field name="partner_id"/>
 			</group>
-			<group string="Général">
+			<group string="Commande de Tasmane au S/T">
 				<group>
+					<field name="order_sum_purchase_order_lines"/>
 					<field name="outsource_part_amount_current"/>
+					<button type="object" name="action_open_purchase_order_lines" string="Voir les lignes de commande"/>
 				</group>
 				<group>
 					<field name="order_direct_payment_amount"/>
 					<field name="order_company_payment_amount"/>
-				</group>
-			</group>
-			<group string="Commande de Tasmane au S/T">
-				<group>
-					<field name="order_sum_purchase_order_lines"/>
-					<button type="object" name="action_open_purchase_order_lines" string="Voir les lignes de commande"/>
 				</group>
 			</group>
 			<group string="Facturation Tasmane / sous-traitant">
@@ -46,7 +42,7 @@
 				</group>
 				<group>
 					<field name="marging_amount_current" />
-					<field name="marging_rate_current" widgte="progressbar" />
+					<field name="marging_rate_current" widget="progressbar" />
 				</group>
 			</group>
 			<group string="Paiement direct client / sous-traitant">

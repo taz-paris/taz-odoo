@@ -59,23 +59,21 @@ class projectAccountingClosing(models.Model):
     def compute(self):
         _logger.info('-- compute')
         for rec in self :
-            proj_id = rec.project_id
-            if '<NewId origin=' in str(proj_id) :
+            proj_id = rec.project_id #quand on applique la fonction WRITE
+            if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)
                 proj_id = rec._origin.project_id
+            if not proj_id : #pour avoir les valeurs de facturation du mois dès l'ouverture de la popup de création d'une nouvelle cloture
+                proj_id = rec.env['project.project'].search([('id', '=', rec._get_default_project_id())])[0]
 
             previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
             previous_closing = None
             previous_closing_date_filter = []
-            _logger.info(proj_id)
-            _logger.info(rec.closing_date)
-            _logger.info(previous_accounting_closing_ids)
+
             if len(previous_accounting_closing_ids) > 0 :
                 previous_closing = previous_accounting_closing_ids[0]
                 previous_closing_date_filter.append(('date', '>', previous_closing.closing_date))
-                _logger.info('==== AAAA')
             rec.previous_closing = previous_closing
 
-            _logger.info(previous_closing_date_filter)
 
             rec.invoice_period_amount = rec.project_id.compute_account_move_total(previous_closing_date_filter + [('date', '<=', rec.closing_date)])
             rec.invoice_balance = rec.invoice_previous_balance + rec.invoice_period_amount
