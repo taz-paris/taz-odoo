@@ -33,6 +33,7 @@
 			<field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
 			<field name="untaxed_amount_to_invoice" optional="hide" on_change="1"/>
+			<field name="previsional_invoice_date" optional="show" on_change="1"/>
 		</xpath>
             </field>
         </record>

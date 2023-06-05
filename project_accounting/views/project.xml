@@ -163,19 +163,6 @@
 						</group>
 					</page>
 					<page name="customer_invoicing" string="Facturation client">
-						<group string="Jalons de facturation">
-						</group>
-							<field name="milestone_ids" context="{'default_project_id':active_id}" >
-								<tree decoration-danger="is_deadline_exceeded">
-									<field name="can_be_marked_as_done" invisible="1"/>
-									<field name="name"/>
-									<field name="deadline"/>
-									<field name="quantity_percentage" string="Pourcentage"/>
-									<field name="is_reached"/>
-									<field name="reached_date"/>
-									<field name="is_deadline_exceeded" invisible="1"/>
-								</tree>
-							</field>
 						<group string="Facturation effective de Tasmane au client">
 							<group>
             							<field name="order_to_invoice_company" />

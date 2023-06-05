@@ -254,11 +254,13 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
-        self.sync_customers(client)
-        #TODO           self.sync_prospect(client)
 
+        self.sync_suppliers(client)
+        self.sync_supplier_invoices(client)
+
+        self.sync_customers(client)
         self.sync_customer_invoices(client)
-        #TODO           self.sync_supplier_invoices(client)
+        #TODO           self.sync_prospect(client)
 
         #return self.import_grille_competences()
         self.sync_employees(client)
@@ -722,6 +724,40 @@ class fitnetProject(models.Model):
                 _logger.info("Mise à jour du res.partner client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
                 odoo_customer.write(res)
             
+
+    def sync_suppliers(self, client):
+        _logger.info('--- sync_suppliers')
+        suppliers = client.get_api("suppliers/1/1")
+
+        for supplier in suppliers:
+            supplier['id_odoo'] = 'supplier_'+str(supplier['supplierId'])
+            if supplier['siret']:
+                supplier['siret'] = supplier['siret'].replace(' ', '').replace('.', '')
+            #elif supplier['siren']:
+            #    supplierr['siret'] = supplier['siren'].replace(' ', '').replace('.', '')
+            if supplier['vatNumber']:
+                supplier['vatNumber'] = supplier['vatNumber'].replace(' ', '').replace('.', '')
+
+            mapping_fields = {
+                'name' : {'odoo_field' : 'name'},
+                'vatNumber' : {'odoo_field' : 'vat'}, 
+                'code' : {'odoo_field' : 'ref'},
+                'siret' : {'odoo_field' : 'siret'},
+
+               # 'address_streetNumber' : {'odoo_field' : 'street'},
+               # 'address_additionnalAddressInfo' : {'odoo_field' : 'street2'},
+               # 'address_additionnalAddressInfo2' : {'odoo_field' : 'street3'},
+               # 'address_zipCode' : {'odoo_field' : 'zip'},
+               # 'address_city' : {'odoo_field' : 'city'},
+               # 'default_invoice_payement_bank_account' : {'odoo_field' : 'default_invoice_payement_bank_account'},
+            }
+        odoo_model_name = 'res.partner'
+        self.create_overide_by_fitnet_values(odoo_model_name, suppliers, mapping_fields, 'id_odoo')
+
+
+    def sync_supplier_invoices(self, client):
+        _logger.info('--- sync_supplier_invoices')
+        suppliers = client.get_api("monitoringPurchases/1/all/01-2018/12-2050")
 
 
     def sync_employees_contracts(self, client):

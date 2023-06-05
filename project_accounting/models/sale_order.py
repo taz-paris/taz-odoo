@@ -103,3 +103,4 @@ class projectAccountingSaleOrderLine(models.Model):
             domain="[('id', 'in', allowed_direct_payment_purchase_order_line_ids)]",
             )
 
+    previsional_invoice_date = fields.Date('Date prev. de facturation', states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
