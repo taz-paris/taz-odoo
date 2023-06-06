@@ -255,8 +255,8 @@ class fitnetProject(models.Model):
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
 
-        self.sync_suppliers(client)
         self.sync_supplier_invoices(client)
+        self.sync_suppliers(client)
 
         self.sync_customers(client)
         self.sync_customer_invoices(client)
@@ -297,109 +297,6 @@ class fitnetProject(models.Model):
                 _logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
                 #leave.number_of_days = leave.number_of_days
                 #_logger.info('      Corrigé')
-
-
-    def sync_customer_invoices(self, client):
-        _logger.info('---- sync_customer_invoices')
-        fitnet_objects = client.get_api('invoices/v2/1/0/01-01-2018/31-12-2050')
-        mapping_fields_invoice = {
-            'invoiceNumber' : {'odoo_field' : 'name'},
-            'customerId' : {'odoo_field' : 'partner_id'},
-            'billingDate' : {'odoo_field' : 'invoice_date'},
-            'expectedPaymentDate' : {'odoo_field' : 'invoice_date_due'},
-            'ibanId' : {'odoo_field' : 'partner_bank_id'},
-            'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'out_invoice' : 'out_invoice', 'out_refund':'out_refund'}},
-            'referenceInvoiceNumber' : {'odoo_field' : 'invoice_origin'},
-            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
-        }
-        mapping_fields_invoice_line = {
-            'inoviceId' : {'odoo_field' : 'move_id'},
-            'designation' : {'odoo_field' : 'name'},
-            'amountBTax' : {'odoo_field' : 'price_unit'},
-            'quantity' : {'odoo_field' : 'quantity'},
-            'contractId_json' : {'odoo_field' : 'analytic_distribution'},
-        }
-        mapping_fields_payment = {
-            'partner_id' : {'odoo_field' : 'partner_id'},
-            'amount' : {'odoo_field' : 'amount'},
-            'date' : {'odoo_field' : 'date'},
-            'payment_type' : {'odoo_field' :'payment_type', 'selection_mapping' : {'inbound' : 'inbound', 'outbound' : 'outbound'}},
-            'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
-            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
-            'journal_id' : {'odoo_field' : 'journal_id'},
-        }
-        invoices_list = []
-        invoices_lines_list = []
-        payment_list = []
-        for invoice in fitnet_objects:
-            if invoice['invoiceId'] not in [1492]:#, 1493]:
-                continue
-            if invoice['bTaxBilling'] < 0:
-                _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
-                invoice['move_type'] = 'out_refund'
-            else :
-                invoice['move_type'] = 'out_invoice'
-            invoices_list.append(invoice)
-
-            for line in invoice['invoiceLines']:
-                line['inoviceId'] = invoice['invoiceId']
-                odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
-                line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
-                line['quantity'] = 1.00
-                invoices_lines_list.append(line)
-                #if line['vatRate'] != 20.0:
-                #    raise ValidationError(_("Taux de TVA != 20%"))
-
-            if invoice['actualPaymentDate'] != "" :
-                payment = {
-                        'paymentId' : 'payment_' + str(invoice['invoiceId']),
-                        'inoviceId' : invoice['invoiceId'],
-                        'partner_id' : invoice['customerId'],
-                        'amount' : "%.2f" % round(abs(invoice['wTaxBilling']),2),
-                        'date' : invoice['actualPaymentDate'],
-                    }
-                if invoice['move_type'] == 'out_invoice' : 
-                    payment['payment_type'] = 'inbound'
-                elif invoice['move_type'] == 'out_refund' :
-                    payment['payment_type'] = 'outbound'
-                payment['journal_id'] = invoice['ibanId']
-                payment['partner_bank_id'] = invoice['ibanId']
-                payment_list.append(payment)
-
-        self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
-        self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
-        self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'paymentId',context={})
-        
-        for fitnet_payment in payment_list:
-            odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['paymentId'])])[0]
-            if odoo_payment.is_reconciled:
-                continue
-            payment_line_to_reconcile = False
-            for line in odoo_payment.move_id.line_ids:
-                if line.account_id.code == '411100':
-                    payment_line_to_reconcile = line
-        
-            odoo_invoice =  self.env['account.move'].search([('fitnet_id', '=', fitnet_payment['inoviceId'])])[0]
-            invoice_line_to_reconcile = False
-            for line in odoo_invoice.line_ids:
-                if line.account_id.code == '411100':
-                    invoice_line_to_reconcile = line
-            
-            if (invoice_line_to_reconcile and payment_line_to_reconcile) :
-                if invoice_line_to_reconcile.move_id.state == 'draft' :
-                    invoice_line_to_reconcile.move_id.action_post()
-                if payment_line_to_reconcile.move_id.state == 'draft' :
-                    payment_line_to_reconcile.move_id.action_post()
-                (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
-
-
-        #TODO : générer l'adresse de facturation du partner si différente de celle déjà connue (ou MAJ de la fiche partenaire si l'adresse postale est vide
-            # attribut billingAdress de l'objet invoice Fitnet
-        #TODO : generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
-        #TODO : gérer les factures et avoirs fournisseurs (ie de nos sous-traitants)
-            # récupérer les founisseurs : https://tasmane.fitnetmanager.com/FitnetManager/rest/suppliers/1/2
-            # récupérer les statuts possibles pour les achats : https://tasmane.fitnetmanager.com/FitnetManager/rest/monitoringPurchases/getAllStatus/1
-            # récupérer les achats : https://tasmane.fitnetmanager.com/FitnetManager/rest/monitoringPurchases/1/all/01-2018/06-2050 
 
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')
@@ -723,7 +620,117 @@ class fitnetProject(models.Model):
             if len(res) > 0:
                 _logger.info("Mise à jour du res.partner client Odoo ID= %s avec les valeurs de Fitnet %s" % (str(odoo_customer.id), str(res)))
                 odoo_customer.write(res)
+ 
+
+    def sync_customer_invoices(self, client):
+        _logger.info('---- sync_customer_invoices')
+        fitnet_objects = client.get_api('invoices/v2/1/0/01-01-2018/31-12-2050')
+        mapping_fields_invoice = {
+            'invoiceNumber' : {'odoo_field' : 'name'},
+            'customerId' : {'odoo_field' : 'partner_id'},
+            'billingDate' : {'odoo_field' : 'invoice_date'},
+            #'billingDate' : {'odoo_field' : 'date'},
+            'expectedPaymentDate' : {'odoo_field' : 'invoice_date_due'},
+            'ibanId' : {'odoo_field' : 'partner_bank_id'},
+            'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'out_invoice' : 'out_invoice', 'out_refund':'out_refund'}},
+            'referenceInvoiceNumber' : {'odoo_field' : 'invoice_origin'},
+            # : {'odoo_field' : 'reversal_move_id'}
+            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
+            #'odoo_payment_state' : {'odoo_field' : 'payment_state', 'selection_mapping' : { : 'not_paid', : 'in_payment', : 'paid', : 'partial', : 'reversed', : 'invoicing_legacy'}}
+        }
+        mapping_fields_invoice_line = {
+            'inoviceId' : {'odoo_field' : 'move_id'},
+            'designation' : {'odoo_field' : 'name'},
+            'amountBTax' : {'odoo_field' : 'price_unit'},
+            'quantity' : {'odoo_field' : 'quantity'},
+            'contractId_json' : {'odoo_field' : 'analytic_distribution'},
+            #product_id
+        }
+        mapping_fields_payment = {
+            'partner_id' : {'odoo_field' : 'partner_id'},
+            'amount' : {'odoo_field' : 'amount'},
+            'date' : {'odoo_field' : 'date'},
+            'payment_type' : {'odoo_field' :'payment_type', 'selection_mapping' : {'inbound' : 'inbound', 'outbound' : 'outbound'}},
+            'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
+            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
+            'journal_id' : {'odoo_field' : 'journal_id'},
+        }
+        invoices_list = []
+        invoices_lines_list = []
+        payment_list = []
+        for invoice in fitnet_objects:
+            if invoice['invoiceId'] not in [1492]:#, 1493]:
+                continue
+            if invoice['bTaxBilling'] < 0:
+                _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
+                #TODO : vérifier que c'est cohérent avec "isCredit": "Yes",
+                invoice['move_type'] = 'out_refund'
+            else :
+                invoice['move_type'] = 'out_invoice'
+            invoices_list.append(invoice)
+
+            for line in invoice['invoiceLines']:
+                line['inoviceId'] = invoice['invoiceId']
+                odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
+                line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
+                line['quantity'] = 1.00
+                invoices_lines_list.append(line)
+                #if line['vatRate'] != 20.0:
+                #    raise ValidationError(_("Taux de TVA != 20%"))
+
+            if invoice['actualPaymentDate'] != "" :
+                payment = {
+                        'paymentId' : 'payment_' + str(invoice['invoiceId']),
+                        'inoviceId' : invoice['invoiceId'],
+                        'partner_id' : invoice['customerId'],
+                        'amount' : "%.2f" % round(abs(invoice['wTaxBilling']),2),
+                        'date' : invoice['actualPaymentDate'],
+                    }
+                if invoice['move_type'] == 'out_invoice' : 
+                    payment['payment_type'] = 'inbound'
+                elif invoice['move_type'] == 'out_refund' :
+                    payment['payment_type'] = 'outbound'
+                payment['journal_id'] = invoice['ibanId']
+                payment['partner_bank_id'] = invoice['ibanId']
+                payment_list.append(payment)
+
+        self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
+        self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
+        """
+        self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'paymentId',context={})
+        
+        for fitnet_payment in payment_list:
+            odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['paymentId'])])[0]
+            if odoo_payment.is_reconciled:
+                continue
+            payment_line_to_reconcile = False
+            for line in odoo_payment.move_id.line_ids:
+                if line.account_id.code == '411100':
+                    payment_line_to_reconcile = line
+        
+            odoo_invoice =  self.env['account.move'].search([('fitnet_id', '=', fitnet_payment['inoviceId'])])[0]
+            invoice_line_to_reconcile = False
+            for line in odoo_invoice.line_ids:
+                if line.account_id.code == '411100':
+                    invoice_line_to_reconcile = line
             
+            if (invoice_line_to_reconcile and payment_line_to_reconcile) :
+                if invoice_line_to_reconcile.move_id.state == 'draft' :
+                    invoice_line_to_reconcile.move_id.action_post()
+                if payment_line_to_reconcile.move_id.state == 'draft' :
+                    payment_line_to_reconcile.move_id.action_post()
+                (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
+        """
+
+        #TODO : générer l'adresse de facturation du partner si différente de celle déjà connue (ou MAJ de la fiche partenaire si l'adresse postale est vide
+            # attribut billingAdress de l'objet invoice Fitnet
+        #TODO : generer le project.milestone et y rattacher la facture (date du jalon = bilingDueDate dans le modèle fitnet)
+        #TODO : gérer les factures et avoirs fournisseurs (ie de nos sous-traitants)
+            # récupérer les founisseurs : https://tasmane.fitnetmanager.com/FitnetManager/rest/suppliers/1/2
+            # récupérer les statuts possibles pour les achats : https://tasmane.fitnetmanager.com/FitnetManager/rest/monitoringPurchases/getAllStatus/1
+            # récupérer les achats : https://tasmane.fitnetmanager.com/FitnetManager/rest/monitoringPurchases/1/all/01-2018/06-2050 
+
+           
 
     def sync_suppliers(self, client):
         _logger.info('--- sync_suppliers')
@@ -757,7 +764,138 @@ class fitnetProject(models.Model):
 
     def sync_supplier_invoices(self, client):
         _logger.info('--- sync_supplier_invoices')
-        suppliers = client.get_api("monitoringPurchases/1/all/01-2018/12-2050")
+        supplier_invoices = client.get_api("monitoringPurchases/1/all/01-2018/12-2050")
+
+        nature_list = {}
+        for supplier_invoice in supplier_invoices:
+            if supplier_invoice['natureId'] not in nature_list.keys():
+                nature_list[supplier_invoice['natureId']] = {'libelle' : supplier_invoice['nature'], 'count' : 1}
+            else :
+                nature_list[supplier_invoice['natureId']]['count'] += 1
+        _logger.info(len(nature_list))
+        _logger.info(nature_list)
+
+        # Fitnet Status of the Purchase: -1 [Canceled], 0 [Planned], 1 [Confirmed], 2 [Invoice received] or 3 [Paid] (Status can only be reached one by one, apart from [Canceled] that can be reached from any status and from [Paid] as well, accounting that an Actual Payment Date is set and the concerned setting is enabled)
+
+        mapping_fields_invoice = {
+            'invoiceNumber' : {'odoo_field' : 'name'},
+            'supplierId' : {'odoo_field' : 'partner_id'},
+            'paymentConditionsId' : {'odoo_field' : 'invoice_payment_term_id'},
+            #'date' : {'odoo_field' : 'date'},
+            'date' : {'odoo_field' : 'invoice_date'},
+            'dueDate' : {'odoo_field' : 'invoice_date_due'},
+            'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'in_invoice' : 'in_invoice', 'in_refund' : 'in_refund'}},
+            'ibanId' : {'odoo_field' : 'partner_bank_id'},
+            #'referenceInvoiceNumber' : {'odoo_field' : 'invoice_origin'},
+            # : {'odoo_field' : 'reversal_move_id'}
+            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'0' : 'draft', '1' : 'draft', '2':'posted', '3' : 'posted', '-1' : 'cancel'}},
+            #'odoo_payment_state' : {'odoo_field' : 'payment_state', 'selection_mapping' : { : 'not_paid', : 'in_payment', : 'paid', : 'partial', : 'reversed', : 'invoicing_legacy'}}
+        }
+        #TODO : alimenter le partner_bank_id
+        mapping_fields_invoice_line = {
+            'purchaseId' : {'odoo_field' : 'move_id'},
+            'title' : {'odoo_field' : 'name'},
+            'unitPrice' : {'odoo_field' : 'price_unit'},
+            'quantity' : {'odoo_field' : 'quantity'},
+            'contractId_json' : {'odoo_field' : 'analytic_distribution'},
+            #product_id
+        }
+        mapping_fields_payment = {
+            'partner_id' : {'odoo_field' : 'partner_id'},
+            'amount' : {'odoo_field' : 'amount'},
+            'date' : {'odoo_field' : 'date'},
+            'payment_type' : {'odoo_field' :'payment_type', 'selection_mapping' : {'inbound' : 'inbound', 'outbound' : 'outbound'}},
+            'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
+            #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
+            'journal_id' : {'odoo_field' : 'journal_id'},
+        }
+        invoices_list = []
+        invoices_lines_list = []
+        payment_list = []
+        for invoice in supplier_invoices:
+            if invoice['purchaseId'] not in [682, 790]:
+                continue
+            if invoice['purchaseStatus'] in ['0', '1']:
+                continue
+            if invoice['natureId'] in ['1']: #sous traitance
+                continue
+                #TODO pour gérer les natures différentes  créer un article différent par compte comptable différent ou taux de taxe différent
+            if invoice['amountBeforeTax'] < 0:
+                _logger.info('avoir fitnet invoiceId=' + str(invoice['purchaseId']))
+                invoice['move_type'] = 'in_refund'
+            else :
+                invoice['move_type'] = 'in_invoice'
+            invoices_list.append(invoice)
+
+            if len(invoice['purchaseItems']) != 1 :
+                _logger.info('Facture %s Nombre de lignes de facture différent de 1 : %' % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
+
+            for line in invoice['purchaseItems']:
+                line['purchaseId'] = invoice['purchaseId']
+                odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
+                line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
+                line['quantity'] = 1.00
+                line['ibanId'] = None
+                invoices_lines_list.append(line)
+                #if line['vatRate'] != 20.0:
+                #    raise ValidationError(_("Taux de TVA != 20%"))
+
+            if invoice['actualPayementDate'] != "" :
+                payment = {
+                        'supplier_paymentId' : 'payment_' + str(invoice['purchaseId']),
+                        'purchaseId' : invoice['purchaseId'],
+                        'partner_id' : invoice['customerId'],
+                        'amount' : "%.2f" % round(abs(invoice['amountWithTax']),2),
+                        'date' : invoice['actualPayementDate'],
+                    }
+                if invoice['move_type'] == 'in_invoice' : 
+                    payment['payment_type'] = 'outbound'
+                elif invoice['move_type'] == 'in_refund' :
+                    payment['payment_type'] = 'inbound'
+                #payment['journal_id'] = invoice['ibanId']
+                #payment['partner_bank_id'] = invoice['ibanId']
+                payment_list.append(payment)
+
+        self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'purchaseId',context={})
+        self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'id',context={})
+        """
+        self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'supplier_paymentId',context={})
+        
+        for fitnet_payment in payment_list:
+            odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['supplier_paymentId'])])[0]
+            if odoo_payment.is_reconciled:
+                continue
+            payment_line_to_reconcile = False
+            for line in odoo_payment.move_id.line_ids:
+                #if line.account_id.code == '411100': #TODO : le compte dépend de la nature d'achat
+                    payment_line_to_reconcile = line
+        
+            odoo_invoice =  self.env['account.move'].search([('fitnet_id', '=', fitnet_payment['inoviceId'])])[0]
+            invoice_line_to_reconcile = False
+            for line in odoo_invoice.line_ids:
+                if line.account_id.code == '411100':
+                    invoice_line_to_reconcile = line
+            
+            if (invoice_line_to_reconcile and payment_line_to_reconcile) :
+                if invoice_line_to_reconcile.move_id.state == 'draft' :
+                    invoice_line_to_reconcile.move_id.action_post()
+                if payment_line_to_reconcile.move_id.state == 'draft' :
+                    payment_line_to_reconcile.move_id.action_post()
+                (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
+        """
+
+        #Montant du BC client : montant projet Berny + somme des factures fournisseurs de natureId 2 = 'Sous-traitance'
+            #On ne devrait avoir de telles factures que pour les missions avec sous-traitance paiement tasmane ou Tasmnae+direct
+
+        #Compte bancaire de paiment => créer un compte "indéterminé - repprise Berny" qu'il faudra désactiver à l'extinction de Berny
+
+        #Restera à compléter sur Odoo :
+            # Si uniquement dispositif Tasmane : rien à faire ?
+            # Si cotraitance : le montant du BC hors pilotage Tasmane sur le BC client
+            # Si sous-traitance (avec ou sans paiement direct) : la valorisation des parts dispositif Tasmane (sur la fiche projet) et S/T (sur le BC fournisseur)
+            # Si paiement direct + Tasmane : le montant du paiement direct (sur le BC client et le BC fournisseur => ligne générée à 0)
+            # Si uniquement paiement direct (PAS DE MARKUP ?) : le lien est fait automatiquement par la reprise de données mais devra être vérifié
+            # Pour les paiements directs déjà en partie payés => remplir le montant de paimeent direct déjà réalisé sur les lignes des BC fournisseurs et les ref Chorus
 
 
     def sync_employees_contracts(self, client):

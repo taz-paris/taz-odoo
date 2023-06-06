@@ -63,7 +63,9 @@ class projectAccountingClosing(models.Model):
             if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)
                 proj_id = rec._origin.project_id
             if not proj_id : #pour avoir les valeurs de facturation du mois dès l'ouverture de la popup de création d'une nouvelle cloture
-                proj_id = rec.env['project.project'].search([('id', '=', rec._get_default_project_id())])[0]
+                proj_ids = rec.env['project.project'].search([('id', '=', rec._get_default_project_id())])
+                if len(proj_ids) :
+                    proj_id = proj_ids[0]
 
             previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
             previous_closing = None

@@ -20,21 +20,22 @@ class staffingProject(models.Model):
     #    res = super().create(vals)
     #    return res
 
-    """
     def name_get(self):
         res = []
         for rec in self:
-            display_name = "%s %s (%s)" % (rec.number or "", rec.name or "", rec.partner_id.name or "")
+            display_name = "%s %s" % (rec.number or "", rec.name or "")
+            if rec.partner_id : 
+                display_name += "("+str(rec.partner_id.name)+")"
             res.append((rec.id, display_name))
         return res
 
-    def name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = args or []
-        recs = self.browse()
-        if not recs:
-            recs = self.search(['|', '|', ('number', operator, name), ('name', operator, name)] + args, limit=limit)
-        return recs.name_get()
-    """
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+        args = list(args or [])
+        if name :
+            args += ['|', ('name', operator, name), ('number', operator, name)]
+        return self._search(args, limit=limit, access_rights_uid=name_get_uid)
+
 
     def get_book_by_year(self, year):
         _logger.info('-- RES.PARTNER get_book_by_year')

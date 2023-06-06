@@ -8,3 +8,4 @@ from . import account_move
 from . import sale_order
 from . import purchase_order
 from . import project_accounting_closing
+from . import analytic_account
