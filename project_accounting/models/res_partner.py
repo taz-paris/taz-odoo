@@ -11,6 +11,28 @@ from datetime import datetime
 class projectAccountingResPartner(models.Model):
      _inherit = "res.partner"
 
+     def write(self, vals):
+         for rec in self :
+             if rec._precompute_protected() and not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
+                 raise ValidationError(_("Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut être modifiée que par un ADV.\nVous ne pouvez pas modifier cette fiche entreprise car vous n'être pas ADV."))
+         super().write(vals)
+
+     def _precompute_protected(self):
+        protected = False
+        if self.is_company :
+            if self.invoice_ids or self.sale_order_ids or self.purchase_order_count :
+                protected = True
+        return protected
+        
+
+     @api.depends('invoice_ids', 'sale_order_ids', 'purchase_order_count')
+     def _compute_protected_partner(self):
+         for rec in self:
+             protected = rec._precompute_protected()
+             rec.is_protected_partner = protected
+        #TODO vérifier que invoices ids prend bien aussi les accoun.move liés par l'adresse de facturation/livraison
+
+
      @api.depends('project_ids', 'project_ids.date_start', 'project_ids.partner_id', 'project_ids.stage_is_part_of_booking')
      def compute_has_project_started_this_year(self):
          for rec in self:
@@ -40,6 +62,7 @@ class projectAccountingResPartner(models.Model):
 
      project_ids = fields.One2many('project.project', 'partner_id', string="Projets")
      has_project_started_this_year = fields.Boolean('Un projet a débuté cette année', compute=compute_has_project_started_this_year, store=True)
+     is_protected_partner = fields.Boolean('Fiche entreprise protégée', compute=_compute_protected_partner, help="Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut être modifiée que par un ADV.")
 
      def _get_default_invoice_payement_bank_account_domain(self):
          return [('partner_id', '=', self.env.company.id)]
