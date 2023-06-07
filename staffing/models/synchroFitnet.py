@@ -256,10 +256,10 @@ class fitnetProject(models.Model):
 
 
         self.sync_supplier_invoices(client)
+        self.sync_customer_invoices(client)
         self.sync_suppliers(client)
 
         self.sync_customers(client)
-        self.sync_customer_invoices(client)
         #TODO           self.sync_prospect(client)
 
         #return self.import_grille_competences()
@@ -629,7 +629,7 @@ class fitnetProject(models.Model):
             'invoiceNumber' : {'odoo_field' : 'name'},
             'customerId' : {'odoo_field' : 'partner_id'},
             'billingDate' : {'odoo_field' : 'invoice_date'},
-            #'billingDate' : {'odoo_field' : 'date'},
+            'invoice_date' : {'odoo_field' : 'invoice_date'},
             'expectedPaymentDate' : {'odoo_field' : 'invoice_date_due'},
             'ibanId' : {'odoo_field' : 'partner_bank_id'},
             'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'out_invoice' : 'out_invoice', 'out_refund':'out_refund'}},
@@ -659,14 +659,17 @@ class fitnetProject(models.Model):
         invoices_lines_list = []
         payment_list = []
         for invoice in fitnet_objects:
-            if invoice['invoiceId'] not in [1492]:#, 1493]:
-                continue
+            #if invoice['invoiceId'] not in [1492, 1493]:
+            #    continue
+            #if invoice['status'] not in ["Facture réglée", "Avoir réglé"]:
+            #    continue
             if invoice['bTaxBilling'] < 0:
                 _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
                 #TODO : vérifier que c'est cohérent avec "isCredit": "Yes",
                 invoice['move_type'] = 'out_refund'
             else :
                 invoice['move_type'] = 'out_invoice'
+            invoice['invoice_date'] = invoice['billingDate']
             invoices_list.append(invoice)
 
             for line in invoice['invoiceLines']:
@@ -779,10 +782,10 @@ class fitnetProject(models.Model):
 
         mapping_fields_invoice = {
             'invoiceNumber' : {'odoo_field' : 'name'},
-            'supplierId' : {'odoo_field' : 'partner_id'},
+            'odoo_supplierId' : {'odoo_field' : 'partner_id'},
             'paymentConditionsId' : {'odoo_field' : 'invoice_payment_term_id'},
-            #'date' : {'odoo_field' : 'date'},
-            'date' : {'odoo_field' : 'invoice_date'},
+            'date' : {'odoo_field' : 'date'},
+            'invoice_date' : {'odoo_field' : 'invoice_date'},
             'dueDate' : {'odoo_field' : 'invoice_date_due'},
             'move_type' : {'odoo_field' : 'move_type', 'selection_mapping' : {'in_invoice' : 'in_invoice', 'in_refund' : 'in_refund'}},
             'ibanId' : {'odoo_field' : 'partner_bank_id'},
@@ -825,17 +828,20 @@ class fitnetProject(models.Model):
                 invoice['move_type'] = 'in_refund'
             else :
                 invoice['move_type'] = 'in_invoice'
+            invoice['odoo_supplierId'] = 'supplier_'+str(invoice['supplierId'])
+            invoice['ibanId'] = None
+            invoice['invoice_date'] = invoice['date']
             invoices_list.append(invoice)
 
-            if len(invoice['purchaseItems']) != 1 :
-                _logger.info('Facture %s Nombre de lignes de facture différent de 1 : %' % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
+            
+            #if len(invoice['purchaseItems']) != 1 :
+            #    _logger.info("Facture fournisseur %s Nombre de lignes de facture différent de 1 : %" % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
 
             for line in invoice['purchaseItems']:
                 line['purchaseId'] = invoice['purchaseId']
                 odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
                 line['quantity'] = 1.00
-                line['ibanId'] = None
                 invoices_lines_list.append(line)
                 #if line['vatRate'] != 20.0:
                 #    raise ValidationError(_("Taux de TVA != 20%"))
@@ -844,7 +850,7 @@ class fitnetProject(models.Model):
                 payment = {
                         'supplier_paymentId' : 'payment_' + str(invoice['purchaseId']),
                         'purchaseId' : invoice['purchaseId'],
-                        'partner_id' : invoice['customerId'],
+                        'partner_id' : invoice['odoo_supplierId'],
                         'amount' : "%.2f" % round(abs(invoice['amountWithTax']),2),
                         'date' : invoice['actualPayementDate'],
                     }

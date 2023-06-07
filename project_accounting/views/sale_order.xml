@@ -29,6 +29,13 @@
 			</group>
 			<group string="Lignes de commande de la part pilotée par Tasmane"/>
 		</field>
+
+		<xpath expr="//notebook" position='inside'>
+			<page string="Avances (sans facture)">
+				<field name="advance_payment_ids" context="{'default_partner_id' : partner_id, 'default_advance_sale_order_id':active_id, 'default_ref' : 'Avance sans facture sur BC ' + (client_order_ref or '')}" />
+			</page>
+		</xpath>
+
 		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">
 			<field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>

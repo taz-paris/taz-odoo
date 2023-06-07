@@ -218,8 +218,6 @@ class staffingProject(models.Model):
 
     
     def get_sale_order_line_ids(self):
-        #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
-                # Si ça n'est pas égale, afficher un bandeau jaune
         _logger.info('-- project sale.order.lines computation')
         query = self.env['sale.order.line']._search([])
         #_logger.info(query)
@@ -342,15 +340,12 @@ class staffingProject(models.Model):
         }
 
         order_id = self.env['sale.order'].create(order_dic)
-        #TODO : vérifier qu'à ce moment, la fiche projet a bien été mise à jour avec le nouveau sale order
-        _logger.info(order_id)
 
         return  {
             'res_model': 'sale.order',
             'res_id': order_id.id, 
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            #'view_id': self.env.ref("").id,
             'context': {
                 'create': False,
             }
@@ -359,7 +354,6 @@ class staffingProject(models.Model):
 
 
     ######## TOTAL
-    #TODO : ajouter un contrôle : le montant commandé ne peut être inférieur au montant piloté par Tasmane
     order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', compute=compute_sale_order_total, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
