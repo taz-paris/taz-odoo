@@ -654,6 +654,7 @@ class fitnetProject(models.Model):
             'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
             #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
             'journal_id' : {'odoo_field' : 'journal_id'},
+            'partner_type' : {'odoo_field' : 'partner_type',  'selection_mapping' : {'customer' : 'customer', 'supplier' : 'supplier'}},
         }
         invoices_list = []
         invoices_lines_list = []
@@ -664,7 +665,7 @@ class fitnetProject(models.Model):
             #if invoice['status'] not in ["Facture réglée", "Avoir réglé"]:
             #    continue
             if invoice['bTaxBilling'] < 0:
-                _logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
+                #_logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
                 #TODO : vérifier que c'est cohérent avec "isCredit": "Yes",
                 invoice['move_type'] = 'out_refund'
             else :
@@ -688,6 +689,7 @@ class fitnetProject(models.Model):
                         'partner_id' : invoice['customerId'],
                         'amount' : "%.2f" % round(abs(invoice['wTaxBilling']),2),
                         'date' : invoice['actualPaymentDate'],
+                        'partner_type' : 'customer',
                     }
                 if invoice['move_type'] == 'out_invoice' : 
                     payment['payment_type'] = 'inbound'
@@ -796,7 +798,7 @@ class fitnetProject(models.Model):
         }
         #TODO : alimenter le partner_bank_id
         mapping_fields_invoice_line = {
-            'purchaseId' : {'odoo_field' : 'move_id'},
+            'odoo_purchaseId' : {'odoo_field' : 'move_id'},
             'title' : {'odoo_field' : 'name'},
             'unitPrice' : {'odoo_field' : 'price_unit'},
             'quantity' : {'odoo_field' : 'quantity'},
@@ -804,19 +806,44 @@ class fitnetProject(models.Model):
             #product_id
         }
         mapping_fields_payment = {
-            'partner_id' : {'odoo_field' : 'partner_id'},
+            'odoo_supplierId' : {'odoo_field' : 'partner_id'},
             'amount' : {'odoo_field' : 'amount'},
             'date' : {'odoo_field' : 'date'},
             'payment_type' : {'odoo_field' :'payment_type', 'selection_mapping' : {'inbound' : 'inbound', 'outbound' : 'outbound'}},
-            'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
+            #'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
             #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
             'journal_id' : {'odoo_field' : 'journal_id'},
+            'partner_type' : {'odoo_field' : 'partner_type',  'selection_mapping' : {'customer' : 'customer', 'supplier' : 'supplier'}},
         }
         invoices_list = []
         invoices_lines_list = []
         payment_list = []
+
+        purchaseId_unicity_ctrl = {}
         for invoice in supplier_invoices:
-            if invoice['purchaseId'] not in [682, 790]:
+            fonc_key = invoice['purchaseId']
+            if fonc_key not in purchaseId_unicity_ctrl.keys():
+                purchaseId_unicity_ctrl[fonc_key] = {'count' : 0, 'invoice_list' : []}
+            purchaseId_unicity_ctrl[fonc_key]['count'] += 1
+            purchaseId_unicity_ctrl[fonc_key]['invoice_list'].append(invoice)
+            
+        """
+        for pid, val in purchaseId_unicity_ctrl.items():
+            if val['count'] > 1:
+                _logger.info(pid)
+                _logger.info(val['count'])
+                _logger.info(val['invoice_list'])
+        """
+
+        for invoice in supplier_invoices:
+            invoice['odoo_purchaseId'] = 'supplier_' + str(invoice['purchaseId']) #ATTENTION : l'API ne retourne pas un purchaseId unique, il est réutilisé si annulation.
+            #Si le purchaseId n'est pas unique, alors la clé fonctionnelle est la concaténation du purchaseId et du orderNumber
+            # AVANTAGE : les changements d'orderNumber n'impacteront que les rares avec des purchaseId non nuls => les autres ne seront pas sensisbles au changement de orderNumber
+            # INCONVENIENT : on va créer des doublons lors de la synchro juste après avoir créé le premier doublon ==> TODO : exécuter la fonction de néttoyage sur Odoo des éléments supprimés dans Fitnet
+            if purchaseId_unicity_ctrl[invoice['purchaseId']]['count'] > 1:
+                invoice['odoo_purchaseId'] = 'supplier_' + str(invoice['orderNumber']) + '_' + str(invoice['purchaseId']) 
+            invoice.pop('purchaseId')
+            if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
                 continue
             if invoice['purchaseStatus'] in ['0', '1']:
                 continue
@@ -824,7 +851,7 @@ class fitnetProject(models.Model):
                 continue
                 #TODO pour gérer les natures différentes  créer un article différent par compte comptable différent ou taux de taxe différent
             if invoice['amountBeforeTax'] < 0:
-                _logger.info('avoir fitnet invoiceId=' + str(invoice['purchaseId']))
+                #_logger.info('avoir fitnet invoiceId=' + str(invoice['odoo_purchaseId']))
                 invoice['move_type'] = 'in_refund'
             else :
                 invoice['move_type'] = 'in_invoice'
@@ -838,7 +865,11 @@ class fitnetProject(models.Model):
             #    _logger.info("Facture fournisseur %s Nombre de lignes de facture différent de 1 : %" % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
 
             for line in invoice['purchaseItems']:
-                line['purchaseId'] = invoice['purchaseId']
+                line['odoo_purchaseId'] = invoice['odoo_purchaseId']
+                line.pop('purchaseId')
+                line['odoo_purchaseLineId'] = 'supplier_'+str(line['id'])
+                line.pop('id')
+                line['unitPrice'] = abs(line['unitPrice']) #ATTENTION : contrairement aux avoirs clients, l'API Fitnet retourne un montant négatif pour les avoirs fournisseurs => il faut donc prendre la valeur absolue
                 odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
                 line['quantity'] = 1.00
@@ -848,23 +879,24 @@ class fitnetProject(models.Model):
 
             if invoice['actualPayementDate'] != "" :
                 payment = {
-                        'supplier_paymentId' : 'payment_' + str(invoice['purchaseId']),
-                        'purchaseId' : invoice['purchaseId'],
-                        'partner_id' : invoice['odoo_supplierId'],
+                        'supplier_paymentId' : 'payment_purchase_' + str(invoice['odoo_purchaseId']),
+                        'purchaseId' : invoice['odoo_purchaseId'],
+                        'odoo_supplierId' : invoice['odoo_supplierId'],
                         'amount' : "%.2f" % round(abs(invoice['amountWithTax']),2),
                         'date' : invoice['actualPayementDate'],
+                        'proprieteOnDemand' : [],
+                        'partner_type' : 'supplier',
                     }
                 if invoice['move_type'] == 'in_invoice' : 
                     payment['payment_type'] = 'outbound'
                 elif invoice['move_type'] == 'in_refund' :
                     payment['payment_type'] = 'inbound'
-                #payment['journal_id'] = invoice['ibanId']
+                payment['journal_id'] = 99
                 #payment['partner_bank_id'] = invoice['ibanId']
                 payment_list.append(payment)
 
-        self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'purchaseId',context={})
-        self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'id',context={})
-        """
+        self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'odoo_purchaseId',context={})
+        self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'odoo_purchaseLineId',context={})
         self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'supplier_paymentId',context={})
         
         for fitnet_payment in payment_list:
@@ -872,14 +904,15 @@ class fitnetProject(models.Model):
             if odoo_payment.is_reconciled:
                 continue
             payment_line_to_reconcile = False
+            account_number = '604000'
             for line in odoo_payment.move_id.line_ids:
-                #if line.account_id.code == '411100': #TODO : le compte dépend de la nature d'achat
+                if line.account_id.code == account_number: #TODO : le compte dépend de la nature d'achat
                     payment_line_to_reconcile = line
         
-            odoo_invoice =  self.env['account.move'].search([('fitnet_id', '=', fitnet_payment['inoviceId'])])[0]
+            odoo_invoice =  self.env['account.move'].search([('fitnet_id', '=', fitnet_payment['purchaseId'])])[0]
             invoice_line_to_reconcile = False
             for line in odoo_invoice.line_ids:
-                if line.account_id.code == '411100':
+                if line.account_id.code == account_number:
                     invoice_line_to_reconcile = line
             
             if (invoice_line_to_reconcile and payment_line_to_reconcile) :
@@ -888,12 +921,9 @@ class fitnetProject(models.Model):
                 if payment_line_to_reconcile.move_id.state == 'draft' :
                     payment_line_to_reconcile.move_id.action_post()
                 (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
-        """
 
         #Montant du BC client : montant projet Berny + somme des factures fournisseurs de natureId 2 = 'Sous-traitance'
             #On ne devrait avoir de telles factures que pour les missions avec sous-traitance paiement tasmane ou Tasmnae+direct
-
-        #Compte bancaire de paiment => créer un compte "indéterminé - repprise Berny" qu'il faudra désactiver à l'extinction de Berny
 
         #Restera à compléter sur Odoo :
             # Si uniquement dispositif Tasmane : rien à faire ?

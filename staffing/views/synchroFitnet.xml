@@ -164,5 +164,16 @@
                 </field>
             </field>
         </record>
+
+        <record id="account_view_move_form_inherit" model="ir.ui.view">
+            <field name="name">Account move</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <field name="to_check" position="after">
+                        <field name="fitnet_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
    </data>
 </odoo>
