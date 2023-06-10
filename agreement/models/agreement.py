@@ -16,7 +16,7 @@ class Agreement(models.Model):
         "res.partner",
         string="Partner",
         ondelete="restrict",
-        domain=[("parent_id", "=", False)],
+        #domain=[("parent_id", "=", False)],
         tracking=True,
     )
     company_id = fields.Many2one(

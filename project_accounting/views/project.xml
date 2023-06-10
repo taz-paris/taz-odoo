@@ -238,6 +238,7 @@
 							    <field name="outsourcing"/>
 							    <field name="billed_amount"/>
 							    <field name="payed_amount"/>
+							    <field name="agreement_id"/>
 							</group>
 							<group>
 					    			<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>

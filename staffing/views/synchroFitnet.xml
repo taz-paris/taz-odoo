@@ -173,6 +173,58 @@
                 <field name="to_check" position="after">
                         <field name="fitnet_id" readonly="1"/>
                 </field>
+		<xpath expr="//tree/field[@name='quantity']" position="before">
+                        <field name="fitnet_id" optional="hide" on_change="1"/>
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="view_order_form_inherit" model="ir.ui.view">
+            <field name="name">Sale order</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <field name="user_id" position="after">
+                        <field name="fitnet_id" readonly="1"/>
+                </field>
+		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">
+                        <field name="fitnet_id" optional="hide" on_change="1"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="agreement_form_inherit" model="ir.ui.view">
+            <field name="name">Agreement</field>
+            <field name="model">agreement</field>
+            <field name="inherit_id" ref="agreement.agreement_form"/>
+            <field name="arch" type="xml">
+                <field name="end_date" position="after">
+                        <field name="fitnet_id" readonly="0"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="product_normal_form_view_inherit" model="ir.ui.view">
+            <field name="name">Product</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <field name="categ_id" position="after">
+                        <field name="fitnet_id" readonly="0"/>
+                </field>
+            </field>
+        </record>
+
+
+        <record id="product_uom_form_view_inherit" model="ir.ui.view">
+            <field name="name">UOM</field>
+            <field name="model">uom.uom</field>
+            <field name="inherit_id" ref="uom.product_uom_form_view"/>
+            <field name="arch" type="xml">
+                <field name="rounding" position="after">
+                        <field name="fitnet_id" readonly="0"/>
+                </field>
             </field>
         </record>
    </data>

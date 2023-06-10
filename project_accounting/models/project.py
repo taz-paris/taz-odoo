@@ -64,6 +64,8 @@ class staffingProject(models.Model):
         vals['state_last_change_date'] = datetime.today()
         return super().create(vals)
  
+    state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
+    number = fields.Char('Numéro', readonly=True, required=True, copy=False, default='New')
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
@@ -76,22 +78,29 @@ class staffingProject(models.Model):
             ('70', '70 %'),
             ('100', '100 %'),
         ], string='Probabilité')
-    billed_amount = fields.Float('Montant facturé', readonly=True)
-    payed_amount = fields.Float('Montant payé', readonly=True)
-    state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
-
-    number = fields.Char('Numéro', readonly=True, required=True, copy=False, default='New')
-    is_purchase_order_received = fields.Boolean('Bon de commande reçu')
-    purchase_order_number = fields.Char('Numéro du bon de commande')
     remark = fields.Text("Remarques")
+
+    amount = fields.Float('Montant net S/T Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
+    billed_amount = fields.Float('Montant facturé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
+    payed_amount = fields.Float('Montant payé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
+    is_purchase_order_received = fields.Boolean('Bon de commande reçu Fitnet') #Attribut temporaire Fitnet à supprimer
+    purchase_order_number = fields.Char('Numéro du bon de commande Fitnet') #Attribut temporaire Fitnet à supprimer (le numéro de BC est sur le bon de commande client et non sur le projet en cible)
     outsourcing = fields.Selection([
             ('no-outsourcing', 'Sans sous-traitance'),
             ('co-sourcing', 'Avec Co-traitance'),
             ('direct-paiement-outsourcing', 'Sous-traitance paiement direct'),
             ('direct-paiement-outsourcing-company', 'Sous-traitance paiement direct + Tasmane'),
             ('outsourcing', 'Sous-traitance paiement Tasmane'),
-        ], string="Type de sous-traitance")
-    #TODO : ajouter un type (notamment pour les accords cadre) ? ou bien utiliser les tags ?
+        ], string="Type de sous-traitance Fitnet") #Attribut temporaire Fitnet à supprimer
+    agreement_id = fields.Many2one(
+        comodel_name="agreement",
+        string="Agreement Fitnet",
+        ondelete="restrict",
+        tracking=True,
+        readonly=True,
+        copy=False,
+        states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
+    ) #Attribut temporaire Fitnet à supprimer (l'agreement_id est sur le bon de commande client et non sur le projet en cible)
 
 
     @api.depends('company_part_amount_initial', 'company_part_cost_initial', 'company_part_amount_current', 'company_part_cost_current', 'outsource_part_amount_initial', 'outsource_part_cost_initial', 'outsource_part_amount_current', 'outsource_part_cost_current', 'other_part_amount_initial', 'other_part_cost_initial', 'other_part_amount_current', 'other_part_cost_current')
