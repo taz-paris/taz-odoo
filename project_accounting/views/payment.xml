@@ -1,0 +1,25 @@
+<odoo>
+    <data>
+        <record id="account_view_account_payment_form_inherit" model="ir.ui.view">
+            <field name="name">Payment</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_form"/>
+            <field name="arch" type="xml">
+                   <field name="ref" position="before">
+                           <field name="advance_sale_order_id" readonly="1"/>
+                  </field>
+               </field>
+        </record>
+
+        <record id="account_view_account_payment_tree_inherit" model="ir.ui.view">
+            <field name="name">Payment</field>
+            <field name="model">account.payment</field>
+            <field name="inherit_id" ref="account.view_account_payment_tree"/>
+            <field name="arch" type="xml">
+                   <field name="state" position="before">
+                           <field name="reconciled_invoice_ids" widget="many2many_tags" />
+                  </field>
+               </field>
+        </record>
+    </data>
+</odoo>

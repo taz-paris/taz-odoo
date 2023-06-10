@@ -139,8 +139,14 @@
 		<field name="industry_id" string="Business Domain"/>
             	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
             	<filter name="no_industry_id" string="Sans business domain" domain="[('industry_id', '=', False)]"/>
-            	<filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
+            	<filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
             	<filter name="no_child" string="Sans contact" domain="[('child_ids_contact', '=', False)]"/>
+
+            	<filter string="Entreprise A REVOIR dont je suis propriétaire" name="to_review_assigned_to_me"
+		    domain="[('user_id', '=', uid), ('category_id', 'child_of', [236])]"
+                help="Entreprises qui m'ont été assignées en vendeur principal et dont les fiches sont à revoir"/>
+		    <!-- Le tagg ID=236 est FICHE-A-REVOIR-CORRIGER-->
+
 		<filter string="Archivée" name="inactive" domain="[('active', '=', False)]"/>
 		<separator/>
             	    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
@@ -150,6 +156,7 @@
 		<separator/>
 		<group expand="0" string="Group By">
 			<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
+			<filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
 		</group>
         </search>
         </field>
@@ -326,11 +333,15 @@
             <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"
                 help="Contacts qui m'ont été assignés en vendeur principal"/>
+            <filter string="Contacts A REVOIR dont je suis propriétaire" name="to_review_assigned_to_me"
+		    domain="[('user_id', '=', uid), ('category_id', 'child_of', [236])]"
+                help="Contacts qui m'ont été assignés en vendeur principal et dont les fiches sont à revoir"/>
+		    <!-- Le tagg ID=236 est FICHE-A-REVOIR-CORRIGER-->
 	    <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
             <separator/>
             <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
             <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
-            <filter name="no_user_id" string="Sans propriétaire" domain="[('user_id', '=', False)]"/>
+            <filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
 	    <separator/>
 		    <!-- ATTENTION : timedelta doesn't accept MONTHS nore YEAR arguments https://docs.python.org/2/library/datetime.html#datetime.timedelta -->
 	    <filter name="no_action_3months" string="Pas vus depuis > 3 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
@@ -341,6 +352,7 @@
             <group expand="0" string="Group By">
             	<filter string="Business domain" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
             	<filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
+		<filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
             </group>
         </search>
         </field>

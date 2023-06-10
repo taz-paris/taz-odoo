@@ -651,7 +651,7 @@ class fitnetProject(models.Model):
             'amount' : {'odoo_field' : 'amount'},
             'date' : {'odoo_field' : 'date'},
             'payment_type' : {'odoo_field' :'payment_type', 'selection_mapping' : {'inbound' : 'inbound', 'outbound' : 'outbound'}},
-            'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
+            #'partner_bank_id' : {'odoo_field' : 'partner_bank_id'},
             #'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'posted':'posted', 'cancel' : 'cancel'}},
             'journal_id' : {'odoo_field' : 'journal_id'},
             'partner_type' : {'odoo_field' : 'partner_type',  'selection_mapping' : {'customer' : 'customer', 'supplier' : 'supplier'}},
@@ -660,8 +660,8 @@ class fitnetProject(models.Model):
         invoices_lines_list = []
         payment_list = []
         for invoice in fitnet_objects:
-            #if invoice['invoiceId'] not in [1492, 1493]:
-            #    continue
+            if invoice['invoiceId'] not in [1492, 1493]:
+                continue
             #if invoice['status'] not in ["Facture réglée", "Avoir réglé"]:
             #    continue
             if invoice['bTaxBilling'] < 0:
@@ -695,15 +695,17 @@ class fitnetProject(models.Model):
                     payment['payment_type'] = 'inbound'
                 elif invoice['move_type'] == 'out_refund' :
                     payment['payment_type'] = 'outbound'
-                payment['journal_id'] = invoice['ibanId']
-                payment['partner_bank_id'] = invoice['ibanId']
+                #payment['journal_id'] = invoice['ibanId']
+                #payment['partner_bank_id'] = invoice['ibanId']
+                payment['journal_id'] = 99
+                #payment['partner_bank_id'] = invoice['ibanId']
                 payment_list.append(payment)
 
         self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
         self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
-        """
         self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'paymentId',context={})
         
+        """
         for fitnet_payment in payment_list:
             odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['paymentId'])])[0]
             if odoo_payment.is_reconciled:
@@ -725,6 +727,27 @@ class fitnetProject(models.Model):
                 if payment_line_to_reconcile.move_id.state == 'draft' :
                     payment_line_to_reconcile.move_id.action_post()
                 (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
+        """
+
+        """
+        invoices_by_contract = {}
+        for invoice in fitnet_objects:
+                if invoice['contractId'] not in invoices_by_contract.keys():
+                    invoices_by_contract[invoice['contractId']] = []
+                invoices_by_contract[invoice['contractId']].append(invoice)
+        
+        sale_order_list = []
+        sale_order_line_list[]
+        for contract_id, contract_invoice_list in invoices_by_contract.items():
+            Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
+            sale_order = {
+                        'partner_id' : contract_invoice_list[0]['customerId'],
+                    }
+            sale_order_lines = []
+            for inv in contract_invoice_list:
+                for l in inv['invoiceLines']:
+                    sale_order_lines. {
+                            }
         """
 
         #TODO : générer l'adresse de facturation du partner si différente de celle déjà connue (ou MAJ de la fiche partenaire si l'adresse postale est vide
@@ -749,12 +772,14 @@ class fitnetProject(models.Model):
             #    supplierr['siret'] = supplier['siren'].replace(' ', '').replace('.', '')
             if supplier['vatNumber']:
                 supplier['vatNumber'] = supplier['vatNumber'].replace(' ', '').replace('.', '')
+            supplier['is_company'] = True
 
             mapping_fields = {
                 'name' : {'odoo_field' : 'name'},
                 'vatNumber' : {'odoo_field' : 'vat'}, 
                 'code' : {'odoo_field' : 'ref'},
                 'siret' : {'odoo_field' : 'siret'},
+                'is_company' : {'odoo_field' : 'is_company'},
 
                # 'address_streetNumber' : {'odoo_field' : 'street'},
                # 'address_additionnalAddressInfo' : {'odoo_field' : 'street2'},
@@ -843,11 +868,11 @@ class fitnetProject(models.Model):
             if purchaseId_unicity_ctrl[invoice['purchaseId']]['count'] > 1:
                 invoice['odoo_purchaseId'] = 'supplier_' + str(invoice['orderNumber']) + '_' + str(invoice['purchaseId']) 
             invoice.pop('purchaseId')
-            if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
+            #if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
+            #    continue
+            if invoice['purchaseStatus'] in [0, 1]:
                 continue
-            if invoice['purchaseStatus'] in ['0', '1']:
-                continue
-            if invoice['natureId'] in ['1']: #sous traitance
+            if invoice['natureId'] in [1]: #sous traitance
                 continue
                 #TODO pour gérer les natures différentes  créer un article différent par compte comptable différent ou taux de taxe différent
             if invoice['amountBeforeTax'] < 0:
@@ -877,7 +902,7 @@ class fitnetProject(models.Model):
                 #if line['vatRate'] != 20.0:
                 #    raise ValidationError(_("Taux de TVA != 20%"))
 
-            if invoice['actualPayementDate'] != "" :
+            if invoice['actualPayementDate'] != "" and invoice['actualPayementDate'] != None :
                 payment = {
                         'supplier_paymentId' : 'payment_purchase_' + str(invoice['odoo_purchaseId']),
                         'purchaseId' : invoice['odoo_purchaseId'],
@@ -899,12 +924,13 @@ class fitnetProject(models.Model):
         self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'odoo_purchaseLineId',context={})
         self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'supplier_paymentId',context={})
         
+        """
         for fitnet_payment in payment_list:
             odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['supplier_paymentId'])])[0]
             if odoo_payment.is_reconciled:
                 continue
             payment_line_to_reconcile = False
-            account_number = '604000'
+            account_number = '401100'
             for line in odoo_payment.move_id.line_ids:
                 if line.account_id.code == account_number: #TODO : le compte dépend de la nature d'achat
                     payment_line_to_reconcile = line
@@ -921,6 +947,7 @@ class fitnetProject(models.Model):
                 if payment_line_to_reconcile.move_id.state == 'draft' :
                     payment_line_to_reconcile.move_id.action_post()
                 (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
+        """
 
         #Montant du BC client : montant projet Berny + somme des factures fournisseurs de natureId 2 = 'Sous-traitance'
             #On ne devrait avoir de telles factures que pour les missions avec sous-traitance paiement tasmane ou Tasmnae+direct
@@ -1053,7 +1080,7 @@ class fitnetProject(models.Model):
             'beginDate' : {'odoo_field' : 'date_start'},
             'endDate' : {'odoo_field' : 'date'},
             'contractNumber' : {'odoo_field' : 'number'},
-            'contractAmount' : {'odoo_field' : 'order_amount'},
+            #'contractAmount' : {'odoo_field' : 'order_amount'},
             'is_purchase_order_received' : {'odoo_field' : 'is_purchase_order_received'},
             'contractCategoryId' : {
                 'odoo_field' : 'outsourcing', 
@@ -1209,6 +1236,9 @@ class fitnetProject(models.Model):
             for fitnet_field_name, odoo_dic in mapping_fields.items():
                 #_logger.info('fitnet_field_name %s' % fitnet_field_name)
                 odoo_field_name = odoo_dic['odoo_field']
+                #_logger.info(fitnet_object)
+                #_logger.info(model.id)
+                #_logger.info(odoo_field_name)
                 odoo_field = self.env['ir.model.fields'].search([('model_id', '=', model.id), ('name', '=', odoo_field_name)])[0]
                 odoo_value = None
 

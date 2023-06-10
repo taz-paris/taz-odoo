@@ -124,7 +124,9 @@ class tazResPartner(models.Model):
 
      street3 = fields.Char('Rue3')
      title = fields.Many2one(string="Civilité")
-     function = fields.Char(tracking=True)
+     user_id = fields.Many2one(tracking=True, string="Propriétaire")
+     user_active = fields.Boolean('Statut du propriétaire', related='user_id.active')
+     function = fields.Char(tracking=True, string="Poste occupé")
 
      personal_phone = fields.Char("Tel personnel", unaccent=False)
      personal_email = fields.Char("Email personnel")
@@ -243,10 +245,12 @@ class tazResPartner(models.Model):
                         return consistency
                  else :
                      #pré-remplissage de l'entreprise
+                     mail_domain_excluded_from_company_auto_discovery = self.env['ir.config_parameter'].sudo().get_param("mail_domain_excluded_from_company_auto_discovery").split(',')
                      domain = self.email.split("@")[1] 
-                     lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True), ('active', '=', True)], order="write_date desc")
-                     if len(lc) > 0:
-                        self.parent_id = lc[0].id #on pré-rempli avec l'entreprise qui a le nom de domaine et qui a été mise à jour en dernier
+                     if domain not in mail_domain_excluded_from_company_auto_discovery :
+                        lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True), ('active', '=', True)], order="write_date desc")
+                        if len(lc) > 0:
+                            self.parent_id = lc[0].id #on pré-remplit avec l'entreprise qui a le nom de domaine et qui a été mise à jour en dernier
                      
 
      @api.onchange('parent_id')
@@ -259,22 +263,24 @@ class tazResPartner(models.Model):
                 
      def _test_parent_id_email_consistency(self):
          _logger.info("_test_parent_id_email_consistency")
+         mail_domain_excluded_from_company_auto_discovery = self.env['ir.config_parameter'].sudo().get_param("mail_domain_excluded_from_company_auto_discovery").split(',')
          domain = self.email.split("@")[1] 
-         lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True), ('active', '=', True)], order="write_date desc")
-         if len(lc) > 0:
-             coherent = False
-             list_match = []
-             for c in lc:
-                list_match.append("%s [ID=%s]" % (c.name, str(c.id)))
-                if str(self.parent_id.id).replace('NewId_','') == str(c.id): #quand on passe par l'entreprise, et que l'on ouvre la popup de modification d'un contact lié, l'id parent est en mémoire, et il est préfixé par "NewID"
-                    coherent = True
-             if coherent == False :
-                 return {
-                    'warning': {
-                        'title': _("Attention : est-ce la bonne entreprise ?"),
-                        'message': _("Le domaine de l'adresse email est présent dans les contacts de %s autre(s) entreprise(s)... mais pas celle sélectionnée. N'y aurait-il pas un soucis ?  \n\n\nListe des entreprises dont au moins un contact a une adresse email avec ce nom de domaine(%s) : \n%s" % (len(list_match), domain, '\n'.join(list_match) or ""))
-                        }
-                 }
+         if domain not in mail_domain_excluded_from_company_auto_discovery :
+             lc = self.env['res.partner'].search([('child_mail_address_domain_list', 'ilike', domain), ('is_company', '=', True), ('active', '=', True)], order="write_date desc")
+             if len(lc) > 0:
+                 coherent = False
+                 list_match = []
+                 for c in lc:
+                    list_match.append("%s [ID=%s]" % (c.name, str(c.id)))
+                    if str(self.parent_id.id).replace('NewId_','') == str(c.id): #quand on passe par l'entreprise, et que l'on ouvre la popup de modification d'un contact lié, l'id parent est en mémoire, et il est préfixé par "NewID"
+                        coherent = True
+                 if coherent == False :
+                     return {
+                        'warning': {
+                            'title': _("Attention : est-ce la bonne entreprise ?"),
+                            'message': _("Le domaine de l'adresse email est présent dans les contacts de %s autre(s) entreprise(s)... mais pas celle sélectionnée. N'y aurait-il pas un soucis ?  \n\n\nListe des entreprises dont au moins un contact a une adresse email avec ce nom de domaine(%s) : \n%s" % (len(list_match), domain, '\n'.join(list_match) or ""))
+                            }
+                     }
          return False
 
 

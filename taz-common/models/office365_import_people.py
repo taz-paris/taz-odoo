@@ -163,10 +163,13 @@ class tazOfficePeople(models.TransientModel):
                     if (len(l) > 1):
                         computed_lname = '.'.join(l[1:]).upper()
 
+                    mail_domain_excluded_from_company_auto_discovery = self.env['ir.config_parameter'].sudo().get_param("mail_domain_excluded_from_company_auto_discovery").split(',')
                     domain_target = mail["address"].split("@")[1]
-                    cl = self.env['res.partner'].search([('is_company', '=', 'True'),('child_mail_address_domain_list', 'like', domain_target)], order="write_date desc")
-                    if cl:
-                        parent_id = cl[0].id
+                    if domain_target not in mail_domain_excluded_from_company_auto_discovery :
+                        cl = self.env['res.partner'].search([('is_company', '=', 'True'),('child_mail_address_domain_list', 'like', domain_target)], order="write_date desc")
+                        if cl:
+                            parent_id = cl[0].id
+
                     user_id = self.env.user.id
 
                 res.append({
