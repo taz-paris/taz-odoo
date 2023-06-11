@@ -194,6 +194,22 @@ class fitnetSaleOrderLine(models.Model):
     ]
     fitnet_id = fields.Char("Fitnet ID")
 
+
+
+class fitnetPurchaseOrder(models.Model):
+    _inherit = "purchase.order"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
+class fitnetPurchaseOrderLine(models.Model):
+    _inherit = "purchase.order.line"
+    _sql_constraints = [
+        ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
+    ]
+    fitnet_id = fields.Char("Fitnet ID")
+
 class fitnetAgreement(models.Model):
     _inherit = "agreement"
     _sql_constraints = [
@@ -288,9 +304,9 @@ class fitnetProject(models.Model):
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
 
-        self.sync_customer_invoices(client)
         self.sync_supplier_invoices(client)
         self.sync_suppliers(client)
+        self.sync_customer_invoices(client)
 
         self.sync_customers(client)
         #TODO           self.sync_prospect(client)
@@ -710,6 +726,10 @@ class fitnetProject(models.Model):
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
                 line['quantity'] = 1.00
                 invoices_lines_list.append(line)
+                if invoice['bTaxBilling'] < 0:
+                    line['signed_amountBTax'] = -1 * line['amountBTax']
+                else :
+                    line['signed_amountBTax'] = line['amountBTax']
                 #if line['vatRate'] != 20.0:
                 #    raise ValidationError(_("Taux de TVA != 20%"))
 
@@ -766,8 +786,8 @@ class fitnetProject(models.Model):
         supplier_invoices = client.get_api("monitoringPurchases/1/all/01-2018/12-2050")
         invoices_by_contract = {}
         for invoice in fitnet_objects:
-            if invoice['invoiceId'] not in [1492, 1493, 1618]:
-                continue
+            #if invoice['invoiceId'] not in [1492, 1493, 1618]:
+            #    continue
             if invoice['contractId'] not in invoices_by_contract.keys():
                 invoices_by_contract[invoice['contractId']] = []
             invoices_by_contract[invoice['contractId']].append(invoice)
@@ -798,11 +818,12 @@ class fitnetProject(models.Model):
                         'product_id' : 999, #TODO : utiliser le paramétrage pour déterminer le produit
                         'name': 'Reprise Fitnet - facturé', #TODO : lire le libellé du produit
                         'product_uom_qty': l['quantity'],
+                        'qty_delivered': l['quantity'],
                         'product_uom': 1,
-                        'price_unit': l['amountBTax'],
+                        'price_unit': l['signed_amountBTax'],
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
                             })
-                    sum_invoice += l['amountBTax']
+                    sum_invoice += l['signed_amountBTax']
 
             total_factures_tasmane_sous_traitant = 0.0 
             for supplier_invoice in supplier_invoices:
@@ -811,8 +832,8 @@ class fitnetProject(models.Model):
                 if supplier_invoice['contractId'] == contract_id:
                     total_factures_tasmane_sous_traitant += supplier_invoice['amountBeforeTax']
             
-            total_a_facture = odoo_project.amount + total_factures_tasmane_sous_traitant
-            reste_a_facturer = total_a_facture - sum_invoice
+            total_a_facturer = odoo_project.amount + total_factures_tasmane_sous_traitant
+            reste_a_facturer = total_a_facturer - sum_invoice
             if reste_a_facturer != 0.0 :
                 sale_order_line_list.append({
                         'order_id' : contract_id,
@@ -821,6 +842,7 @@ class fitnetProject(models.Model):
                         'product_id' : 999, #TODO : utiliser le paramétrage pour déterminer le produit
                         'name': 'Reprise Fitnet - reste à facturer par Tasmane',
                         'product_uom_qty': 1,
+                        'qty_delivered': 0,
                         'product_uom': 1,
                         'price_unit': reste_a_facturer,
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
@@ -838,6 +860,7 @@ class fitnetProject(models.Model):
                         'product_id' : 999, #TODO : utiliser le paramétrage pour déterminer le produit
                         'name': 'Reprise Fitnet - paiement direct',
                         'product_uom_qty': 1,
+                        'qty_delivered': 0,
                         'product_uom': 1,
                         'price_unit': 0.0,
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
@@ -867,10 +890,11 @@ class fitnetProject(models.Model):
             'invoice_lines' : {'odoo_field' : 'invoice_lines'},
             'product_uom' : {'odoo_field' : 'product_uom'},
             'product_id' : {'odoo_field' : 'product_id'},
+            'qty_delivered' : {'odoo_field' : 'qty_delivered'},
         }
         
-        _logger.info(sale_order_list)
-        _logger.info(sale_order_line_list)
+        #_logger.info(sale_order_list)
+        #_logger.info(sale_order_line_list)
         self.create_overide_by_fitnet_values('sale.order', sale_order_list, mapping_fields_sale_order, 'order_id',context={})
         self.create_overide_by_fitnet_values('sale.order.line', sale_order_line_list, mapping_fields_sale_order_line, 'line_id',context={})
 
@@ -944,6 +968,7 @@ class fitnetProject(models.Model):
             'unitPrice' : {'odoo_field' : 'price_unit'},
             'quantity' : {'odoo_field' : 'quantity'},
             'contractId_json' : {'odoo_field' : 'analytic_distribution'},
+            'purchase_line_id' : {'odoo_field' : 'purchase_line_id'},
             #product_id
         }
         mapping_fields_payment = {
@@ -986,8 +1011,6 @@ class fitnetProject(models.Model):
             invoice.pop('purchaseId')
             #if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
             #    continue
-            if invoice['purchaseStatus'] in [0, 1]:
-                continue
             #if invoice['natureId'] not in [2]: #sous traitance
             #    continue
                 #TODO pour gérer les natures différentes  créer un article différent par compte comptable différent ou taux de taxe différent
@@ -999,22 +1022,34 @@ class fitnetProject(models.Model):
             invoice['odoo_supplierId'] = 'supplier_'+str(invoice['supplierId'])
             invoice['ibanId'] = None
             invoice['invoice_date'] = invoice['date']
-            invoices_list.append(invoice)
+
+            if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
+                invoices_list.append(invoice)
 
             
             #if len(invoice['purchaseItems']) != 1 :
             #    _logger.info("Facture fournisseur %s Nombre de lignes de facture différent de 1 : %" % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
 
+            odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
+
             for line in invoice['purchaseItems']:
                 line['odoo_purchaseId'] = invoice['odoo_purchaseId']
                 line.pop('purchaseId')
+
                 line['odoo_purchaseLineId'] = 'supplier_'+str(line['id'])
                 line.pop('id')
+
+                line['purchase_line_id'] = line['odoo_purchaseLineId']
+                if odoo_project and (odoo_project.stage_id.fitnet_id == '-1' or (odoo_project.date and odoo_project.date < datetime.date(2023,1,1))):
+                    line['purchase_line_id'] = None
+
+                line['initial_unitPrice'] = line['unitPrice']
                 line['unitPrice'] = abs(line['unitPrice']) #ATTENTION : contrairement aux avoirs clients, l'API Fitnet retourne un montant négatif pour les avoirs fournisseurs => il faut donc prendre la valeur absolue
                 odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
                 line['quantity'] = 1.00
-                invoices_lines_list.append(line)
+                if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
+                    invoices_lines_list.append(line)
                 #if line['vatRate'] != 20.0:
                 #    raise ValidationError(_("Taux de TVA != 20%"))
 
@@ -1034,12 +1069,92 @@ class fitnetProject(models.Model):
                     payment['payment_type'] = 'inbound'
                 payment['journal_id'] = 99
                 #payment['partner_bank_id'] = invoice['ibanId']
-                payment_list.append(payment)
+                if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
+                    payment_list.append(payment)
 
+        ############################### GENERATION DES BONS DE COMMANDE FOURNISSEUR
+        invoices_by_contract = {}
+        for invoice in supplier_invoices:
+            #if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
+            #    continue
+            if invoice['natureId'] not in [2]: #sous traitance
+                continue
+            if invoice['contractId'] not in invoices_by_contract.keys():
+                invoices_by_contract[invoice['contractId']] = []
+            invoices_by_contract[invoice['contractId']].append(invoice)
+        #_logger.info(invoices_by_contract)
+        sale_order_list = []
+        sale_order_line_list = []
+        for contract_id, contract_invoice_list in invoices_by_contract.items():
+            if not contract_id:
+                continue
+            odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
+            #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
+            if odoo_project.stage_id.fitnet_id == '-1' or (odoo_project.date and odoo_project.date < datetime.date(2023,1,1)):
+                continue
+
+            sale_order_list.append({
+                    'partner_id' : contract_invoice_list[0]['odoo_supplierId'],
+                    'order_id' : contract_id,
+                    'state' : 'purchase',
+                    })
+
+            for inv in contract_invoice_list:
+                for l in inv['purchaseItems']:
+                    sale_order_line_list.append({
+                        'order_id' : contract_id,
+                        'line_id' : l['odoo_purchaseLineId'],
+                        'product_id' : 1000, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'name': 'Reprise Fitnet - échéance du '+str(inv['date'])+' (réglement prévu avant le '+str(inv['dueDate'])+')', #TODO : lire le libellé du produit
+                        'product_uom_qty': l['quantity'],
+                        'qty_delivered': l['quantity'],
+                        'product_uom': 99,
+                        'price_unit': l['initial_unitPrice'],
+                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
+                            })
+
+            if odoo_project.outsourcing in ["direct-paiement-outsourcing", "direct-paiement-outsourcing-company"]:
+                sale_order_line_list.append({
+                        'order_id' : contract_id,
+                        'line_id' : str(contract_id)+'_paiement_direct',
+                        'product_id' : 1000, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'name': 'Reprise Fitnet - paiement direct',
+                        'product_uom_qty': 1,
+                        'qty_delivered': 0,
+                        'product_uom': 99,
+                        'price_unit': 0.0,
+                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
+                    })
+
+
+        mapping_fields_sale_order = {
+            'partner_id' : {'odoo_field' : 'partner_id'},
+            #'state' : {'odoo_field' : 'partner_type',  'selection_mapping' : {'draft' : 'draft', 'sent' : 'sent', 'sale' : 'sale', 'done' : 'done', 'cancel' : 'cancel'}},
+        }
+        mapping_fields_sale_order_line = {
+            'order_id' : {'odoo_field' : 'order_id'},
+            'name' : {'odoo_field' : 'name'},
+            'price_unit' : {'odoo_field' : 'price_unit'},
+            'product_uom_qty' : {'odoo_field' : 'product_uom_qty'},
+            'analytic_distribution' : {'odoo_field' : 'analytic_distribution'},
+            'product_uom' : {'odoo_field' : 'product_uom'},
+            'product_id' : {'odoo_field' : 'product_id'},
+            'qty_delivered' : {'odoo_field' : 'qty_received'},
+        }
+        
+        #_logger.info(sale_order_list)
+        #_logger.info(sale_order_line_list)
+        _logger.info('############################### GENERATION DES BONS DE COMMANDE FOURNISSEUR')
+        self.create_overide_by_fitnet_values('purchase.order', sale_order_list, mapping_fields_sale_order, 'order_id',context={})
+        self.create_overide_by_fitnet_values('purchase.order.line', sale_order_line_list, mapping_fields_sale_order_line, 'line_id',context={})
+
+        ######################  GENRATION DES FACTURES FOURNISSEUR
+        _logger.info('######################  GENRATION DES FACTURES FOURNISSEUR')
         self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'odoo_purchaseId',context={})
         self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'odoo_purchaseLineId',context={})
         self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'supplier_paymentId',context={})
         
+        ########################## VALIDATION ET LETTRAGE DES FACTURES CLIENTS ET DE LEURS PAIEMENTS
         """
         for fitnet_payment in payment_list:
             odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['supplier_paymentId'])])[0]
@@ -1065,16 +1180,7 @@ class fitnetProject(models.Model):
                 (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
         """
 
-        #Montant du BC client : montant projet Berny + somme des factures fournisseurs de natureId 2 = 'Sous-traitance'
-            #On ne devrait avoir de telles factures que pour les missions avec sous-traitance paiement tasmane ou Tasmnae+direct
 
-        #Restera à compléter sur Odoo :
-            # Si uniquement dispositif Tasmane : rien à faire ?
-            # Si cotraitance : le montant du BC hors pilotage Tasmane sur le BC client
-            # Si sous-traitance (avec ou sans paiement direct) : la valorisation des parts dispositif Tasmane (sur la fiche projet) et S/T (sur le BC fournisseur)
-            # Si paiement direct + Tasmane : le montant du paiement direct (sur le BC client et le BC fournisseur => ligne générée à 0)
-            # Si uniquement paiement direct (PAS DE MARKUP ?) : le lien est fait automatiquement par la reprise de données mais devra être vérifié
-            # Pour les paiements directs déjà en partie payés => remplir le montant de paimeent direct déjà réalisé sur les lignes des BC fournisseurs et les ref Chorus
 
 
     def sync_employees_contracts(self, client):

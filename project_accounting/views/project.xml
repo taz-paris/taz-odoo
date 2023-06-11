@@ -115,7 +115,7 @@
 								<field name="order_sum_sale_order_lines" />
 								<field name="is_constistant_order_amount" invisible="0"/>
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
-								<button type="object" name="create_sale_order" string="Créer commande" attrs="{'invisible': [('is_constistant_order_amount', '=', True)]}"/>
+								<button type="object" name="create_sale_order" string="Créer commandei client" attrs="{'invisible': [('is_constistant_order_amount', '=', True)]}"/>
 							</group>
 						</group>
 						<group col="3">
@@ -198,6 +198,7 @@
 
 						<group>
             						<field name="order_to_invoice_outsourcing" />
+							<button type="object" name="create_purchase_order" string="Créer commande fournisseur"/>
 						</group>
 					</page>
 					<page name="book" string="Book">
@@ -236,6 +237,7 @@
 							    <field name="is_purchase_order_received"/>
 							    <field name="purchase_order_number"/>
 							    <field name="outsourcing"/>
+							    <field name="amount"/>
 							    <field name="billed_amount"/>
 							    <field name="payed_amount"/>
 							    <field name="agreement_id"/>

@@ -194,6 +194,20 @@
             </field>
         </record>
 
+        <record id="purchase_order_form_inherit" model="ir.ui.view">
+            <field name="name">Purchase order</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <field name="user_id" position="after">
+                        <field name="fitnet_id" readonly="1"/>
+                </field>
+                <xpath expr="//field[@name='price_subtotal']" position="after">
+                        <field name="fitnet_id" optional="hide" on_change="1"/>
+                </xpath>
+            </field>
+        </record>
+
         <record id="agreement_form_inherit" model="ir.ui.view">
             <field name="name">Agreement</field>
             <field name="model">agreement</field>

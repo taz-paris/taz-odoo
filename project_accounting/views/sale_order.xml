@@ -19,6 +19,10 @@
                 </field>
 		    -->
 		<field name="order_line" position="before">
+			<group string="Lignes de commande de la part pilotée par Tasmane"/>
+		</field>
+
+		<xpath expr="//group[@name='note_group']" position="after">
 			<group string="Bon de commande du client final">
 				<group>
 					<field name="other_company_amount" />
@@ -27,8 +31,7 @@
 					<field name="final_customer_order_amount" />
 				</group>
 			</group>
-			<group string="Lignes de commande de la part pilotée par Tasmane"/>
-		</field>
+		</xpath>
 
 		<xpath expr="//notebook" position='inside'>
 			<page string="Avances (sans facture)">

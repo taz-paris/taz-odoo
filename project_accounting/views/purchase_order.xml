@@ -13,6 +13,7 @@
 			<field name="reselling_subtotal" optional="show" on_change="1"/>
 			<field name="margin_amount" optional="show" on_change="1"/>
 			<field name="margin_rate" widget="progressbar" optional="show" on_change="1"/>
+			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
                 </xpath>
             </field>
         </record>

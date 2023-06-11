@@ -74,7 +74,7 @@ class projectOutsourcingLink(models.Model):
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
                 #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-                total += line.price_subtotal
+                total += line.balance
             rec.sum_account_move_lines = total
 
     def action_open_account_move_lines(self):

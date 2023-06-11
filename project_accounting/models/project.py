@@ -83,15 +83,15 @@ class staffingProject(models.Model):
     amount = fields.Float('Montant net S/T Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
     billed_amount = fields.Float('Montant facturé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
     payed_amount = fields.Float('Montant payé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
-    is_purchase_order_received = fields.Boolean('Bon de commande reçu Fitnet') #Attribut temporaire Fitnet à supprimer
-    purchase_order_number = fields.Char('Numéro du bon de commande Fitnet') #Attribut temporaire Fitnet à supprimer (le numéro de BC est sur le bon de commande client et non sur le projet en cible)
+    is_purchase_order_received = fields.Boolean('Bon de commande reçu Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
+    purchase_order_number = fields.Char('Numéro du bon de commande Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer (le numéro de BC est sur le bon de commande client et non sur le projet en cible)
     outsourcing = fields.Selection([
             ('no-outsourcing', 'Sans sous-traitance'),
             ('co-sourcing', 'Avec Co-traitance'),
             ('direct-paiement-outsourcing', 'Sous-traitance paiement direct'),
             ('direct-paiement-outsourcing-company', 'Sous-traitance paiement direct + Tasmane'),
             ('outsourcing', 'Sous-traitance paiement Tasmane'),
-        ], string="Type de sous-traitance Fitnet") #Attribut temporaire Fitnet à supprimer
+        ], string="Type de sous-traitance Fitnet", readonly=True) #Attribut temporaire Fitnet à supprimer
     agreement_id = fields.Many2one(
         comodel_name="agreement",
         string="Agreement Fitnet",
@@ -255,7 +255,7 @@ class staffingProject(models.Model):
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
                 #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-                total += line.price_subtotal
+                total += line.balance
             _logger.info(total)
             return total
 
@@ -270,7 +270,7 @@ class staffingProject(models.Model):
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
             #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-            total += line.price_subtotal
+            total += -1 * line.balance
         _logger.info(total)
         return total
 
@@ -278,6 +278,7 @@ class staffingProject(models.Model):
     def action_open_account_move_lines(self):
         line_ids = self.get_account_move_line_ids([('move_type', 'in', ['out_refund', 'out_invoice'])])
             #On ne met pas le partenr_id dans le filtre car dans certains cas, Tasmane ne facture pas le client final, mais un intermédiaire (Sopra par exemple) 
+            #TODO : on devrait exlure les sous-traitants mais intégrer in_refund, out_invoice.. mais dans ce cas ça mélangerait les factures de frais généraux...
 
         action = {
             'name': _('Invoice and refound lines'),
@@ -361,6 +362,38 @@ class staffingProject(models.Model):
         }
 
 
+    def create_purchase_order(self):
+        _logger.info('--- create_purchase_order')
+        self.ensure_one()
+        
+        """
+        price_unit = 0.0
+        order_dic = {
+            'order_line': [
+                    (0, None, {
+                        'product_id': 5, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'name': 'Prestation sous-traitée', #TODO : lire le libellé du produit
+                        'product_uom_qty': 1,
+                        'product_uom':1,
+                        'price_unit': price_unit,
+                        #'price_subtotal': price_unit,
+                        'analytic_distribution' : {str(self.analytic_account_id.id) : 100.0}
+                    }),
+                ],
+        }
+        order_id = self.env['purchase.order'].create(order_dic)
+        """
+
+        return  {
+            'res_model': 'purchase.order',
+            #'res_id': order_id.id, 
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'context': {
+                'create': False,
+                'context': {'default_analytic_distribution': {self.analytic_account_id.id: 100}},
+            }
+        }
 
     ######## TOTAL
     order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
