@@ -62,7 +62,6 @@ class projectAccountingPurchaseOrderLine(models.Model):
                 rec.margin_rate = rec.margin_amount / rec.reselling_subtotal * 100
 
 
-
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",
             help = "Ligne de la commande du client final")
@@ -74,4 +73,5 @@ class projectAccountingPurchaseOrderLine(models.Model):
     reselling_subtotal = fields.Monetary('Montant de revente', help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
     margin_amount = fields.Monetary('Marge €', compute=compute)
     margin_rate = fields.Monetary('Marge %', compute=compute)
-    
+
+

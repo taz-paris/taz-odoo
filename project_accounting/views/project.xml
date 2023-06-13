@@ -80,7 +80,7 @@
 
 				<div class="oe_title">
 					<h1 class="d-flex flex-row">
-				    		<field name="number" readonly="1" nolabel="1" style="width:10%%"/>
+				    		<field name="number" nolabel="1" style="width:12%%"/>
 				    		<field name="name" class="o_text_overflow" placeholder="Intitulé du projet" required="1"/>
 					</h1>
                     		</div>
@@ -115,7 +115,7 @@
 								<field name="order_sum_sale_order_lines" />
 								<field name="is_constistant_order_amount" invisible="0"/>
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
-								<button type="object" name="create_sale_order" string="Créer commandei client" attrs="{'invisible': [('is_constistant_order_amount', '=', True)]}"/>
+								<button type="object" name="create_sale_order" string="Créer commande client" attrs="{'invisible': [('is_constistant_order_amount', '=', True)]}"/>
 							</group>
 						</group>
 						<group col="3">
@@ -260,7 +260,7 @@
 	      </field>
 	    </record>
 
-
+	<!--
 	   <record model="ir.ui.view" id="project_kanban">
 	      <field name="name">Project</field>
 	      <field name="model">project.project</field>
@@ -331,6 +331,9 @@
 				    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
 				      ]" />
 	    </record>
+	    <menuitem name="News escale" id="project_news_menu" parent="project.menu_main_pm" action="recent_project_action"/>
+	-->
+
 
 	    <record id="project_action" model="ir.actions.act_window">
 		<field name="name">Projets</field>
@@ -344,8 +347,27 @@
 				      ]" />
 	    </record>
 
-	    <menuitem name="News escale" id="project_news_menu" parent="project.menu_main_pm" action="recent_project_action"/>
-	    <menuitem name="Projets" id="project_menu" parent="project.menu_main_pm" action="project_action"/>
+	    <menuitem name="Projets DAF" id="project_menu" sequence="5" parent="project.menu_main_pm" action="project_action"/>
+
+
+        <record id="view_project_kanban_inherit" model="ir.ui.view">
+            <field name="name">Project</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.view_project_kanban"/>
+	    <field name="arch" type="xml">
+		<xpath expr="//kanban" position="attributes">
+			<attribute name="on_create"></attribute>
+			<attribute name="action"></attribute>
+			<attribute name="type"></attribute>
+                </xpath>
+		<!--
+		<xpath expr="//div[@class='oe_kanban_bottom_left']" position="replace">
+			<div/>
+		</xpath>
+		<xpath expr="//*[@role='menu']" position="replace"/>
+		-->
+	    </field>
+	</record>
 
 
    </data>

@@ -5,19 +5,13 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
-		    <!--
-		<field name="name" positon="replace">
-			<field name="client_order_ref"/>
-		</field>
-		<field name="date_order" positon="before">
-			<field name="name" readonly="1"/>
-		</field>
-		<field name="order_line" positon="before">
-			<group>
-                        	<field name="client_order_ref"/>
-			</group>
-                </field>
-		    -->
+		   
+		<field name="partner_id" position="before">
+		    <field name="client_order_ref" position="move"/>
+	    	</field>
+
+		<field name="partner_shipping_id" position="replace"/>
+
 		<field name="order_line" position="before">
 			<group string="Lignes de commande de la part pilotée par Tasmane"/>
 		</field>
@@ -47,19 +41,23 @@
 			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
 
 		</xpath>
+		<field name="order_line" position="attributes">
+                        <attribute name="context">{'default_analytic_distribution' : context.get('default_analytic_distribution')}</attribute>
+                </field>
             </field>
         </record>
 
 
-<!--
 	<record id="view_order_line_tree_inherit" model="ir.ui.view">
             <field name="name">Sale order line</field>
             <field name="model">sale.order.line</field>
             <field name="inherit_id" ref="sale.view_order_line_tree"/>
 	    <field name="arch" type="xml">
+		<field name="order_id"  position="attributes">
+			<attribute name="widget">many2one</attribute>
+		</field>
             </field>
         </record>
--->
 
   </data>
 </odoo>

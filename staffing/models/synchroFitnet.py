@@ -306,11 +306,13 @@ class fitnetProject(models.Model):
 
         self.sync_supplier_invoices(client)
         self.sync_suppliers(client)
-        self.sync_customer_invoices(client)
 
         self.sync_customers(client)
-        #TODO           self.sync_prospect(client)
         self.sync_contracts(client)
+
+        self.sync_customer_invoices(client)
+
+        #TODO           self.sync_prospect(client)
 
         #return self.import_grille_competences()
         self.sync_employees(client)
@@ -573,14 +575,15 @@ class fitnetProject(models.Model):
                 'paymentTermsId' : {'odoo_field' : 'property_payment_term_id'},
 
                 'siret' : {'odoo_field' : 'siret'},
-
-                'address_streetNumber' : {'odoo_field' : 'street'},
-                'address_additionnalAddressInfo' : {'odoo_field' : 'street2'},
-                'address_additionnalAddressInfo2' : {'odoo_field' : 'street3'},
-                'address_zipCode' : {'odoo_field' : 'zip'},
-                'address_city' : {'odoo_field' : 'city'},
                 'default_invoice_payement_bank_account' : {'odoo_field' : 'default_invoice_payement_bank_account'},
-                #compte bancaire
+
+                #'address_streetNumber' : {'odoo_field' : 'street'},
+                #'address_additionnalAddressInfo' : {'odoo_field' : 'street2'},
+                #'address_additionnalAddressInfo2' : {'odoo_field' : 'street3'},
+                #'address_zipCode' : {'odoo_field' : 'zip'},
+                #'address_city' : {'odoo_field' : 'city'},
+
+
                 #compte comptable
                 #customerGroupId => on ne la synchronise pas car Odoo doit rester maître
                 #segmentId => on ne la synchronise pas car Odoo doit rester maître sur le Business Domain (plus à jour que Fitnet)
@@ -598,6 +601,7 @@ class fitnetProject(models.Model):
 
 
             ####### Import de l'addresse postale la plus intéressante (difficile de gérer plusieurs addresse, il faudrait un fitnet_address_id sur le res.partner... ce qui ne serait pas compatible avec l'algo de base)
+            """
             customer['address_streetNumber'] = None
             customer['address_additionnalAddressInfo'] = None
             customer['address_additionnalAddressInfo2'] = None
@@ -661,7 +665,7 @@ class fitnetProject(models.Model):
                                     customer['address_additionnalAddressInfo2'] = lines.pop(0).strip()
 
                                 _logger.info("Addresse transformée : \n%s\n%s\n%s\n%s" % (customer['address_streetNumber'], customer['address_additionnalAddressInfo'], customer['address_zipCode'], customer['address_city']))
-
+            """
 
 
 
@@ -724,7 +728,8 @@ class fitnetProject(models.Model):
                 line['inoviceId'] = invoice['invoiceId']
                 odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
-                line['quantity'] = 1.00
+                if line['quantity'] == 0:
+                    line['quantity'] = 1.00
                 invoices_lines_list.append(line)
                 if invoice['bTaxBilling'] < 0:
                     line['signed_amountBTax'] = -1 * line['amountBTax']
@@ -1047,7 +1052,6 @@ class fitnetProject(models.Model):
                 line['unitPrice'] = abs(line['unitPrice']) #ATTENTION : contrairement aux avoirs clients, l'API Fitnet retourne un montant négatif pour les avoirs fournisseurs => il faut donc prendre la valeur absolue
                 odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
-                line['quantity'] = 1.00
                 if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
                     invoices_lines_list.append(line)
                 #if line['vatRate'] != 20.0:
@@ -1099,19 +1103,28 @@ class fitnetProject(models.Model):
                     'state' : 'purchase',
                     })
 
+            fitnet_id_outsourcing_partners = self.env['res.partner'].search([('fitnet_id', '=', contract_invoice_list[0]['odoo_supplierId'])])
+            if len(fitnet_id_outsourcing_partners) > 0 :
+                fitnet_id_outsourcing_partner = fitnet_id_outsourcing_partners[0]
+                outsourcing_links = self.env['project.outsourcing.link'].search([('project_id', '=', odoo_project.id), ('partner_id', '=', fitnet_id_outsourcing_partner.id)])
+                if len(outsourcing_links) == 0:
+                        outsourcing_link_id = self.env['project.outsourcing.link'].create({'project_id' : odoo_project.id, 'partner_id' : fitnet_id_outsourcing_partner.id})
+                        _logger.info("Création de l'outsourcing link pour le projet %s (Odoo_id = %s) et le sous-traitant %s (odoo_id = %s)" % (odoo_project.name, str(odoo_project.id), fitnet_id_outsourcing_partner.name, str(fitnet_id_outsourcing_partner.id)))
+
             for inv in contract_invoice_list:
                 for l in inv['purchaseItems']:
-                    sale_order_line_list.append({
+                    sol = {
                         'order_id' : contract_id,
                         'line_id' : l['odoo_purchaseLineId'],
                         'product_id' : 1000, #TODO : utiliser le paramétrage pour déterminer le produit
-                        'name': 'Reprise Fitnet - échéance du '+str(inv['date'])+' (réglement prévu avant le '+str(inv['dueDate'])+')', #TODO : lire le libellé du produit
+                        'name': 'Reprise Fitnet - échéance du '+str(inv['date'])+' (réglement prévu avant le '+str(inv['dueDate'])+') '+l['title'], #TODO : lire le libellé du produit
                         'product_uom_qty': l['quantity'],
                         'qty_delivered': l['quantity'],
                         'product_uom': 99,
                         'price_unit': l['initial_unitPrice'],
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
-                            })
+                            }
+                    sale_order_line_list.append(sol)
 
             if odoo_project.outsourcing in ["direct-paiement-outsourcing", "direct-paiement-outsourcing-company"]:
                 sale_order_line_list.append({

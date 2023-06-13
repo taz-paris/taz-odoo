@@ -4,7 +4,7 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
-            <field name="client_order_ref" position="after">
+            <field name="payment_term_id" position="after">
                 <field name="agreement_id" />
                 <field
                     name="agreement_type_id"

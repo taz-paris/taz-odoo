@@ -13,8 +13,8 @@ class analyticAccount(models.Model):
         result = []
         for account in self:
             name = account.name
-            if account.project_count > 0:
-                name =  (account.project_ids[0]['number']+' ' or '') + account.name
+            if account.project_count > 0 :
+                name =  (str(account.project_ids[0]['number'])+' ' or '') + account.name
             #TODO : que faire si cas exceptionnel avec plusieurs projets sur un même compte analytique ? Concaténer tous les numéros de projets ?
             result.append((account.id, name))
         return result

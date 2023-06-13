@@ -15,7 +15,7 @@
             <field name="inherit_id" ref="taz-common.company_form"/>
             <field name="arch" type="xml">
                 <field name="ref" position="after">
-                        <field name="fitnet_id" readonly="1"/>
+                        <field name="fitnet_id" readonly="0"/>
                 </field>
             </field>
         </record>
@@ -214,7 +214,7 @@
             <field name="inherit_id" ref="agreement.agreement_form"/>
             <field name="arch" type="xml">
                 <field name="end_date" position="after">
-                        <field name="fitnet_id" readonly="0"/>
+                        <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>
         </record>
@@ -225,7 +225,7 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
                 <field name="categ_id" position="after">
-                        <field name="fitnet_id" readonly="0"/>
+                        <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>
         </record>
@@ -237,7 +237,7 @@
             <field name="inherit_id" ref="uom.product_uom_form_view"/>
             <field name="arch" type="xml">
                 <field name="rounding" position="after">
-                        <field name="fitnet_id" readonly="0"/>
+                        <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>
         </record>

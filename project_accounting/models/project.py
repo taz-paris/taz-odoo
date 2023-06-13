@@ -3,6 +3,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo import _
 
 from datetime import datetime, timedelta
+import json
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -11,6 +12,9 @@ _logger = logging.getLogger(__name__)
 class staffingProject(models.Model):
     _inherit = "project.project"
     _order = "number desc"
+    _sql_constraints = [
+        ('number_uniq', 'UNIQUE (number)',  "Impossible d'enregistrer deux projet avec le même numéro.")
+    ]
 
 
     #@api.model
@@ -65,7 +69,7 @@ class staffingProject(models.Model):
         return super().create(vals)
  
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
-    number = fields.Char('Numéro', readonly=True, required=True, copy=False, default='New')
+    number = fields.Char('Numéro', readonly=False, required=False, copy=False, default='')
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
@@ -99,7 +103,6 @@ class staffingProject(models.Model):
         tracking=True,
         readonly=True,
         copy=False,
-        states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
     ) #Attribut temporaire Fitnet à supprimer (l'agreement_id est sur le bon de commande client et non sur le projet en cible)
 
 
@@ -358,6 +361,7 @@ class staffingProject(models.Model):
             'view_mode': 'form',
             'context': {
                 'create': False,
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
             }
         }
 
@@ -391,7 +395,7 @@ class staffingProject(models.Model):
             'view_mode': 'form',
             'context': {
                 'create': False,
-                'context': {'default_analytic_distribution': {self.analytic_account_id.id: 100}},
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
             }
         }
 

@@ -24,7 +24,5 @@ class SaleOrder(models.Model):
         string="Agreement Type",
         ondelete="restrict",
         tracking=True,
-        readonly=True,
         copy=True,
-        states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
     )
