@@ -189,7 +189,7 @@ class naptaProject(models.Model):
 
         client = ClientRestNapta(self.env)
         #Déterminer les projet à remonter sur Napta
-        projects = self.env['project.project'].search([])
+        projects = self.env['project.project'].search([], order="number desc")
 
 
         for project in projects:
@@ -204,7 +204,7 @@ class naptaProject(models.Model):
             forecast_lines.create_update_napta_userprojectperiod()
 
             timesheet_lines = self.env['account.analytic.line'].search([('category', '=', 'project_employee_validated'), ('project_id', '=', project.id)], order="date asc")
-            #timesheet_lines.create_update_napta_timesheetperiod()
+            timesheet_lines.create_update_napta_timesheetperiod()
 
             if len(forecast_lines) == 0 and len(timesheet_lines) == 0:
                 if project.stage_id.id == 1: #importer les projets en opportunité... et qui n'ont dont PAS ENCORE de staffing
@@ -212,6 +212,8 @@ class naptaProject(models.Model):
 
             #if len(forecast_lines) > 0 or len(timesheet_lines) > 0:
             #    break
+
+        _logger.info('======== napta_init_from_odoo TERMINEE')
 
 
 class naptaPartner(models.Model):
