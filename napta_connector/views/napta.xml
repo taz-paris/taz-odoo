@@ -11,7 +11,7 @@
      </record>
 	  -->
 
-        <record id="res_partner_fitnet_view_form_inherit" model="ir.ui.view">
+        <record id="res_partner_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Partner</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="taz-common.company_form"/>
@@ -22,7 +22,7 @@
             </field>
         </record>
 
-        <record id="res_project_fitnet_view_form_inherit" model="ir.ui.view">
+        <record id="res_project_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Project</field>
             <field name="model">project.project</field>
             <field name="inherit_id" ref="project_accounting.project_form"/>
@@ -33,6 +33,27 @@
             </field>
         </record>
 
+        <record id="res_user_napta_view_form_inherit" model="ir.ui.view">
+            <field name="name">User</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <field name="karma" position="after">
+                        <field name="napta_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_hr_job_form_inherit2" model="ir.ui.view">
+            <field name="name">Poste</field>
+            <field name="model">hr.job</field>
+            <field name="inherit_id" ref="hr.view_hr_job_form"/>
+            <field name="arch" type="xml">
+                <field name="contract_type_id" position="after">
+                        <field name="napta_id" readonly="0"/>
+                </field>
+            </field>
+        </record>
 <!--
         <record id="hr_employee_fitnet_view_form_inherit" model="ir.ui.view">
             <field name="name">Équipage</field>
@@ -123,16 +144,6 @@
             </field>
         </record>
 
-        <record id="view_hr_job_form_inherit2" model="ir.ui.view">
-            <field name="name">Poste</field>
-            <field name="model">hr.job</field>
-            <field name="inherit_id" ref="hr.view_hr_job_form"/>
-            <field name="arch" type="xml">
-                <field name="contract_type_id" position="after">
-                        <field name="fitnet_id" readonly="1"/>
-                </field>
-            </field>
-        </record>
 
         <record id="hr_contract_view_form_inherit" model="ir.ui.view">
             <field name="name">Contrat</field>

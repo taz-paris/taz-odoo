@@ -675,6 +675,16 @@ class fitnetProject(models.Model):
                 odoo_customer.write(res)
  
 
+    def is_project_to_migrate(self):
+        #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
+        if self.stage_id.fitnet_id == '-1' or (self.date and self.date < datetime.date(2023,1,1)):
+            return False
+        if not self.number:
+            return False
+        if not self.fitnet_id:
+            return False
+        return True
+
     def sync_customer_invoices(self, client):
         _logger.info('---- sync_customer_invoices')
         fitnet_objects = client.get_api('invoices/v2/1/0/01-01-2018/31-12-2050')
@@ -802,7 +812,7 @@ class fitnetProject(models.Model):
         for contract_id, contract_invoice_list in invoices_by_contract.items():
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
             #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
-            if odoo_project.stage_id.fitnet_id == '-1' or (odoo_project.date and odoo_project.date < datetime.date(2023,1,1)):
+            if not odoo_project.is_project_to_migrate():
                 continue
 
             sale_order_list.append({
@@ -1045,7 +1055,7 @@ class fitnetProject(models.Model):
                 line.pop('id')
 
                 line['purchase_line_id'] = line['odoo_purchaseLineId']
-                if odoo_project and (odoo_project.stage_id.fitnet_id == '-1' or (odoo_project.date and odoo_project.date < datetime.date(2023,1,1))):
+                if odoo_project and not odoo_project.is_project_to_migrate():
                     line['purchase_line_id'] = None
 
                 line['initial_unitPrice'] = line['unitPrice']
@@ -1094,7 +1104,7 @@ class fitnetProject(models.Model):
                 continue
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
             #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
-            if odoo_project.stage_id.fitnet_id == '-1' or (odoo_project.date and odoo_project.date < datetime.date(2023,1,1)):
+            if not odoo_project.is_project_to_migrate():
                 continue
 
             sale_order_list.append({

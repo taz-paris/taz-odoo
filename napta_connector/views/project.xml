@@ -8,7 +8,7 @@
               <field name="priority">5</field>
 	      <field name="arch" type="xml">
                 	<field name="name" position="after">
-				<button type="object" name="create_napta" string="Créer sur Napta"/>
+				<button type="object" name="napta_init_from_odoo" string="Napta init from Odoo" groups="base.group_system"/>
                 	</field>
 	      </field>
 	    </record>

@@ -1,16 +1,16 @@
 import requests
+import time
 import zlib
 import os
 import json
 import datetime
+from dateutil.relativedelta import relativedelta
 import pytz
 from lxml import etree, html
 
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
-          
-from dateutil.relativedelta import relativedelta
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class ClientRestNapta:
         access_values = json.loads(self.env['ir.config_parameter'].sudo().get_param("napta_access_values"))
         if 'expires_at' in access_values.keys() :
             if datetime.datetime.fromtimestamp(access_values['expires_at']) >= datetime.datetime.now() :
-                _logger.info(access_values)
+                #_logger.info(access_values)
                 return access_values['access_token']
 
         data = {
@@ -60,11 +60,56 @@ class ClientRestNapta:
         self.env['ir.config_parameter'].sudo().set_param('napta_access_values',json.dumps(access_values))
         return access_values['access_token']
 
-    def post_api(self, napta_type, attributes):
+    def create_update_api(self, napta_type, attributes, odoo_object):
+        _logger.info('------ create_update_api_api API')
+        _logger.info(napta_type)
+        _logger.info(attributes)
+        _logger.info("ID odoo object : %s" % str(odoo_object.id))
+        if odoo_object.napta_id :
+            return self.patch_api(napta_type, attributes, odoo_object.napta_id)
+        else:
+            res = self.post_api(napta_type, attributes)
+            odoo_object.napta_id = res['data']['id']
+            self.env.cr.commit()
+            return res
+
+    def patch_api(self, napta_type, attributes, napta_id):
+        if napta_type not in []:#['timesheet_period', 'timesheet', 'userprojectperiod']:
+            _logger.info('Pas de mise à jour sur ce type pour éviter de faire trop d\'appels.')
+            return
+        _logger.info('------ patch API')
+
         data = {
           "data": {
             "attributes": attributes,
-            #"relationships": {},
+            "type": napta_type,
+            "id" : napta_id,
+          }
+        }
+        headers = {
+            'authorization': 'Bearer '+self.get_access_token(),
+            'content-type': 'application/json'
+        }
+        _logger.info("PATCH "+self.API_URL_BUSINESS_ENDPOINT+napta_type)
+        _logger.info(data)
+        response = requests.patch(self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id), json=data, headers=headers)
+        if response.status_code == 429:
+            _logger.info("429 too many requests : attente de 60 secondes")
+            time.sleep(60)
+            response = requests.patch(self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id), json=data, headers=headers)
+        _logger.info(response.status_code)
+        _logger.info(response.content)
+        res = response.json()
+        return res
+
+    def post_api(self, napta_type, attributes):
+        _logger.info('------ post API')
+        #_logger.info(napta_type)
+        #_logger.info(attributes)
+
+        data = {
+          "data": {
+            "attributes": attributes,
             "type": napta_type
           }
         }
@@ -75,93 +120,280 @@ class ClientRestNapta:
         _logger.info("POST "+self.API_URL_BUSINESS_ENDPOINT+napta_type)
         _logger.info(data)
         response = requests.post(self.API_URL_BUSINESS_ENDPOINT+napta_type, json=data, headers=headers)
+        if response.status_code == 429:
+            _logger.info("429 too many requestis : attente de 60 secondes")
+            time.sleep(60)
+            response = requests.post(self.API_URL_BUSINESS_ENDPOINT+napta_type, json=data, headers=headers)
+            
         _logger.info(response.status_code)
         _logger.info(response.content)
         res = response.json()
-        return res['data']['id']
+        return res
 
-    def get_api(self, napta_type, id=None):
-        target_action = self.API_URL_BUSINESS_ENDPOINT+napta_type
-        if id :
-            target_action += '/'+str(id)
 
-        path = os.path.join(cache_folder, target_action.replace('/','_'))
-        if cache_mode :
-            if os.path.exists(path):
-                with open(path, 'r', encoding='utf-8') as cf:
-                    return json.loads(cf.read())
-
+    def get_api(self, napta_type):
+        _logger.info('------ get API')
         headers = {
             'authorization': 'Bearer '+self.get_access_token(),
             'content-type': 'application/json'
         }
-        _logger.info("Calling "+ target_action)
-        _logger.info(headers)
-        response = requests.get(target_action, headers=headers)
-        _logger.info(response.status_code)
+        params = {
+            'page[size]' : 10000,
+        }
+        _logger.info("GET "+self.API_URL_BUSINESS_ENDPOINT+napta_type)
+        response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
+        if response.status_code == 429:
+            _logger.info("429 too many requests : attente de 60 secondes")
+            time.sleep(60)
+            response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
         _logger.info(response.content)
-        response_code = response.status_code
-        _logger.info("HTTP return code :" + str(response_code))
-        res = response.json()
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(res, f, indent=4)
-        return res
+        return response.json()
 
 
-class fitnetPartner(models.Model):
-    _inherit = "res.partner"
-    _sql_constraints = [
-        ('fitnet_id_uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objets avec le même Fitnet ID.")
-    ]
-    napta_id = fields.Char("Napta ID")
-
-    def create_napta(self):
-        _logger.info('---- Create Napta customer')
-        client = ClientRestNapta(self.env)
-        for rec in self:
-            if rec.napta_id :
-                continue
-            attributes = {
-             # "client_metadata": {},
-             # "external_id": "string",
-              "name": self.name,
-              "external_id" : str(rec.id),
-            }
-            self.napta_id = client.post_api('client', attributes)
-            return self.napta_id
-
-
-class fitnetProject(models.Model):
+class naptaProject(models.Model):
     _inherit = "project.project"
     _sql_constraints = [
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
     
-    def create_napta(self):
-        _logger.info('---- Create Napta project')
+    def create_update_napta(self):
+        _logger.info('---- Create or update Napta project')
         client = ClientRestNapta(self.env)
         for rec in self:
-            #_logger.info(client.get_api('project'))
-            if rec.napta_id :
-                continue
-
             if not (rec.partner_id.napta_id):
-                rec.partner_id.create_napta()    
+                rec.partner_id.create_update_napta()    
 
             attributes = {
-             # "client_metadata": {},
-             # "external_id": "string",
               "name": rec.name,
-              "description" : rec.description,
+              "description" : rec.description or "",
               "billing_method" : "fixed_price",
               "client_id" : rec.partner_id.napta_id,
               "external_id" : str(rec.id),
             }
-            self.napta_id = client.post_api('project', attributes)
-            return self.napta_id
+            client.create_update_api('project', attributes, rec)
+
+    
+    """
+    def delete_napta_ids(self):
+        for obj in ['staffing.need', 'account.analytic.line']:
+            _logger.info('Suppression des napta_id sur les instance de %s' % obj)
+            list_obj = self.env[obj].search([('napta_id', '!=', None)])
+            for o in list_obj :
+                o.write({'napta_id' : None})
+    """
+
+    def napta_init_from_odoo(self):
+        #self.delete_napta_ids()
+        #return
+
+        client = ClientRestNapta(self.env)
+        #Déterminer les projet à remonter sur Napta
+        projects = self.env['project.project'].search([])
 
 
+        for project in projects:
+            _logger.info(project.number)
+            if not project.is_project_to_migrate() :
+                continue
+            if not project.partner_id: #TODO à traiter à la main
+                continue
+
+
+            forecast_lines = self.env['account.analytic.line'].search([('category', '=', 'project_forecast'), ('project_id', '=', project.id)], order="date asc")
+            forecast_lines.create_update_napta_userprojectperiod()
+
+            timesheet_lines = self.env['account.analytic.line'].search([('category', '=', 'project_employee_validated'), ('project_id', '=', project.id)], order="date asc")
+            #timesheet_lines.create_update_napta_timesheetperiod()
+
+            if len(forecast_lines) == 0 and len(timesheet_lines) == 0:
+                if project.stage_id.id == 1: #importer les projets en opportunité... et qui n'ont dont PAS ENCORE de staffing
+                    project.create_update_napta()
+
+            #if len(forecast_lines) > 0 or len(timesheet_lines) > 0:
+            #    break
+
+
+class naptaPartner(models.Model):
+    _inherit = "res.partner"
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+    def create_update_napta(self):
+        _logger.info('---- Create or update Napta customer')
+        client = ClientRestNapta(self.env)
+        for rec in self:
+            attributes = {
+              "name": self.name,
+              "external_id" : str(rec.id),
+            }
+            client.create_update_api('client', attributes,rec)
+
+
+class naptaNeed(models.Model):
+    _inherit = "staffing.need"
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+
+    def create_update_napta(self):
+        _logger.info('---- Create or update Napta user_project')
+        client = ClientRestNapta(self.env)
+        for rec in self:
+            if not (rec.staffed_employee_id.user_id.napta_id):
+                rec.staffed_employee_id.user_id.create_update_napta()
+
+            if not (rec.project_id.napta_id):
+                rec.project_id.create_update_napta()
+
+            attributes = {
+              "project_id": rec.project_id.napta_id,
+              "simulated" : False,
+              "user_id" : rec.staffed_employee_id.user_id.napta_id,
+            }
+            client.create_update_api('user_project', attributes, rec)
+
+
+class naptaAnalyticLine(models.Model):
+    _inherit = 'account.analytic.line'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+
+    def create_update_napta_userprojectperiod(self):
+        _logger.info('---- Create or update Napta userprojectperiod')
+        client = ClientRestNapta(self.env)
+        for rec in self:
+            if rec.category != 'project_forecast':
+                continue
+
+            if not (rec.staffing_need_id.napta_id):
+                rec.staffing_need_id.create_update_napta()
+            
+            """
+            posterior_lines = self.env['account.analytic.line'].search([('staffing_need_id', '=', rec.staffing_need_id.id),('category', '=', 'project_forecast'), ('date', '>', rec.date)], order="date desc")
+            if len(posterior_lines) > 0:
+                # Si ce n'est pas la feuille de temps la plus récente, la date de fin du staffing est la veille de la date de début de la feuille de temps suivante
+                end_date = posterior_lines[0].date - relativedelta(days=1)
+            else :
+            """
+            if True:
+                # Si c'est la feuille de temps la plus récente, la date de fin du staffing est le vendredi, ou le dernier jour du mois de la date de cette feuille de temps
+                dt = rec.date
+                last_day_of_month = (dt + relativedelta(months=1)).replace(day=1) - relativedelta(days=1)
+                next_friday = dt + relativedelta(days=4 - dt.weekday())
+                end_date = min(last_day_of_month,next_friday)
+
+            if rec.date > end_date:
+                #ça veut dire que la date du prévisionnel commence un samedi ou un dimanche => possible sur les cissions entre 2 mois avec plannification auto si le 1er jour du mois est un samedi ou un dimanche (en juillet 23 par exemple)
+                continue
+
+            attributes = {
+              #"completed":
+              "user_project_id" : rec.staffing_need_id.napta_id,
+              "start_date" : rec.date.isoformat(),
+              "end_date" : end_date.isoformat(),
+              "staffed_days" : rec.unit_amount,
+            }
+            client.create_update_api('userprojectperiod', attributes, rec)
+
+    def create_update_napta_timesheetperiod(self):
+        _logger.info('---- Create or update Napta timesheetperiod')
+        client = ClientRestNapta(self.env)
+        for rec in self:
+            if rec.category != 'project_employee_validated':
+                continue
+    
+            if not (rec.staffing_need_id.napta_id):
+                rec.staffing_need_id.create_update_napta()
+
+            if not (rec.staffing_need_id.staffed_employee_id.user_id.napta_id):
+                rec.staffing_need_id.staffed_employee_id.user_id.create_update_napta()
+
+            #################### Génération de la timesheet
+            #Aucun objet Odoo ne correspond à l'objet timesheet de Napta
+            #il faut commencer par rechercher la timesheet pour ce user_id,year,week s'il on veut le mettre à jour
+            year = rec.date.year
+            week = int(rec.date.strftime("%V"))
+            user_id = rec.staffing_need_id.staffed_employee_id.user_id.napta_id
+
+            timesheet_id = None
+            timesheet_list = client.get_api('timesheet')
+            for timesheet in timesheet_list['data']:
+                ta = timesheet['attributes']
+                if int(ta['user_id']) == int(user_id) and int(ta['week']) == int(week) and int(ta['year']) == int(year) :
+                    timesheet_id = timesheet['id']
+
+            timesheet_dic = {
+                        "user_id" : user_id,
+                        "week" : week,
+                        "year" : year,
+                        "closed" : True,
+                    }
+            if timesheet_id :
+                client.patch_api('timesheet', timesheet_dic, timesheet_id)
+            else :
+                timesheet_id = client.post_api('timesheet', timesheet_dic)['data']['id']
+
+            ###################### Génération de la timesheet_period
+            attributes = {
+              "timesheet_id" : timesheet_id,
+              "project_id" : rec.staffing_need_id.napta_id,
+              "day" : rec.date.weekday()+1,
+              "worked_days" : rec.unit_amount,
+            }
+            client.create_update_api('timesheet_period', attributes, rec)
+
+class naptaResUsers(models.Model):
+    _inherit = 'res.users'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+
+    def create_update_napta(self):
+        _logger.info('---- Create or update Napta users')
+        client = ClientRestNapta(self.env)
+        napta_user_list = client.get_api('user')
+        for rec in self:
+            for napta_user in napta_user_list['data']:
+                if napta_user['attributes']['email'] == rec.login :
+                    rec.napta_id = napta_user['id']
+                    self.env.cr.commit()
+
+            attributes = {
+                'email' : rec.login,
+                'first_name' : rec.first_name,
+                'last_name' : rec.name,
+                'active' : rec.active,
+                'user_group_id' : 6, #Consultant - TODO gérer dynamiquement l'affectation
+                'user_position_id' : rec.employee_id.job_id.napta_id,
+            }
+            client.create_update_api('user', attributes, rec)
+
+
+class naptaJob(models.Model):
+    _inherit = 'hr.job'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+    def create_update_napta(self):
+        _logger.info('---- Create or update Napta user_position')
+        client = ClientRestNapta(self.env)
+        for rec in self:
+            attributes = {
+                'name' : rec.name,
+            }
+            client.create_update_api('user_position', attributes, rec)
 """
     def synchAllFitnet(self):
         _logger.info(' ############## Début de la synchro Napta')
