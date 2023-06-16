@@ -35,7 +35,7 @@
 		<tree>
 		  <field name="number"/>
 		  <field name="name"/>
-		  <field name="partner_id"/>
+		  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 		  <field name="stage_id"/>
 		</tree>
 	      </field>
@@ -86,7 +86,7 @@
                     		</div>
 				    <group>
 					<group>
-					    <field name="partner_id" required="1"/>
+					    <field name="partner_id" required="1" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 					    <field name="stage_id" required="1"/>
 					    <field name="probability"/>
 					</group>
@@ -187,7 +187,7 @@
 							<field name="project_outsourcing_link_ids" context="{'default_project_id' : active_id}">
 								<tree>    
 									<field name="project_id" optional="hide"/>
-									<field name="partner_id"/>
+									<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 									<field name="outsource_part_amount_current" string="Part sous-traitée" sum="Total"/>
 									<field name="order_sum_purchase_order_lines" string="Commandé" sum="Total"/>
 									<field name="order_direct_payment_amount" string="Paiement direct" sum="Total"/>
