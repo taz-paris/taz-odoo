@@ -68,6 +68,18 @@ class staffingProject(models.Model):
         vals['state_last_change_date'] = datetime.today()
         return super().create(vals)
  
+
+    @api.depends('project_director_employee_id')
+    def _compute_user_enrolled_ids(self):
+        #surchargée dans le module staffing
+        for rec in self:
+            user_enrolled_ids = []
+            if rec.user_id :
+                user_enrolled_ids.append(rec.user_id.id)
+            rec.user_enrolled_ids = [(6, 0, user_enrolled_ids)]
+
+    user_enrolled_ids = fields.Many2many('res.users', string="Utilisateurs concernés par ce projet", compute=_compute_user_enrolled_ids, store=True)
+
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
     number = fields.Char('Numéro', readonly=True, required=False, copy=False, default='')
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet

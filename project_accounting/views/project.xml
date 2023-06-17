@@ -11,7 +11,7 @@
                     <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
                     <field name="stage_id" groups="project.group_project_stages"/>
                     <field name="project_group_id" string="Groupe de projets"/>
-                    <filter string="Les projets dont je suis DM" name="own_projects" domain="[('user_id', '=', uid)]"/>
+                    <filter string="Mes projets" name="own_projects" domain="[('user_enrolled_ids', 'in', uid)]"/>
                     <filter string="Projets ayant changé de statut depuis 7 jours" name="recent_project_changed" domain="[('state_last_change_date', '&gt;=', ((context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')))]"/>
                     <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
@@ -260,81 +260,6 @@
 	      </field>
 	    </record>
 
-	<!--
-	   <record model="ir.ui.view" id="project_kanban">
-	      <field name="name">Project</field>
-	      <field name="model">project.project</field>
-	      <field name="arch" type="xml">
-		      <kanban default_group_by="stage_id" class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" on_create="project.open_create_project" action="staffing.project_action" type="action" sample="1" default_order="sequence, name, id">
-			    <field name="display_name"/>
-			    <field name="partner_id"/>
-			    <field name="commercial_partner_id"/>
-			    <field name="color"/>
-			    <field name="task_count"/>
-			    <field name="milestone_count_reached"/>
-			    <field name="milestone_count"/>
-			    <field name="allow_milestones"/>
-			    <field name="label_tasks"/>
-			    <field name="alias_id"/>
-			    <field name="alias_name"/>
-			    <field name="alias_domain"/>
-			    <field name="is_favorite"/>
-			    <field name="rating_count"/>
-			    <field name="rating_avg"/>
-			    <field name="rating_status"/>
-			    <field name="rating_active"/>
-			    <field name="analytic_account_id"/>
-			    <field name="date"/>
-			    <field name="privacy_visibility"/>
-			    <field name="last_update_color"/>
-			    <field name="last_update_status"/>
-			    <field name="tag_ids"/>
-			    <field name="sequence" widget="handle"/>
-			    <templates>
-				<t t-name="kanban-box">
-				    <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon oe_kanban_content oe_kanban_card">
-					<div class="o_project_kanban_main ">
-					    <span>
-					       <field name="is_favorite" widget="boolean_favorite" nolabel="1" force_save="1"/>
-					    </span>
-					    <div class="o_kanban_card_content mw-100">
-						<div class="o_kanban_primary_left">
-						    <div class="o_primary">
-							<span class="o_text_overflow" t-att-title="record.display_name.value"><t t-esc="record.display_name.value"/></span>
-							<span class="o_text_overflow text-muted" t-if="record.partner_id.value">
-							    <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_id.value"/>
-							</span>
-							<div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted o_row">
-							    <span class="fa fa-clock-o me-2" title="Dates"/><field name="date_start"/>
-							    <i t-if="record.date.raw_value and record.date_start.raw_value" class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
-							    <field name="date"/>
-							</div>
-						    </div>
-						</div>
-					    </div>
-					</div>:
-				    </div>
-				</t>
-			    </templates>
-			</kanban>
-	      </field>
-	   </record>
-		
-	    <record id="recent_project_action" model="ir.actions.act_window">
-		<field name="name">Projets</field>
-		<field name="res_model">project.project</field>
-		<field name="view_mode">kanban</field>
-		<field name="context">{'search_default_recent_project_changed' : 1}</field>
-		<field name="view_ids" eval="
-				    [
-				    (5, 0, 0),
-				    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
-				      ]" />
-	    </record>
-	    <menuitem name="News escale" id="project_news_menu" parent="project.menu_main_pm" action="recent_project_action"/>
-	-->
-
-
 	    <record id="project_action" model="ir.actions.act_window">
 		<field name="name">Projets</field>
 		<field name="res_model">project.project</field>
@@ -350,6 +275,93 @@
 	    <menuitem name="Projets DAF" id="project_menu" sequence="5" parent="project.menu_main_pm" action="project_action"/>
 
 
+	   <record model="ir.ui.view" id="project_kanban">
+	      <field name="name">Project</field>
+	      <field name="model">project.project</field>
+	      <field name="priority">5</field>
+	      <field name="arch" type="xml">
+		<kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" sample="1" default_order="sequence, number">
+                    <field name="display_name"/>
+                    <field name="partner_id"/>
+                    <field name="commercial_partner_id"/>
+                    <field name="color"/>
+                    <field name="task_count"/>
+                    <field name="milestone_count_reached"/>
+                    <field name="milestone_count"/>
+                    <field name="allow_milestones"/>
+                    <field name="label_tasks"/>
+                    <field name="alias_id"/>
+                    <field name="alias_name"/>
+                    <field name="alias_domain"/>
+                    <field name="is_favorite"/>
+                    <field name="rating_count"/>
+                    <field name="rating_avg"/>
+                    <field name="rating_status"/>
+                    <field name="rating_active"/>
+                    <field name="analytic_account_id"/>
+                    <field name="date"/>
+                    <field name="privacy_visibility"/>
+                    <field name="last_update_color"/>
+                    <field name="last_update_status"/>
+                    <field name="tag_ids"/>
+                    <field name="number"/>
+                    <progressbar field="last_update_status" colors="{&quot;on_track&quot;: &quot;success&quot;, &quot;at_risk&quot;: &quot;warning&quot;, &quot;off_track&quot;: &quot;danger&quot;, &quot;on_hold&quot;: &quot;info&quot;}"/>
+                    <field name="sequence" widget="handle"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon oe_kanban_content oe_kanban_card">
+                                <div class="o_project_kanban_main ">
+                                    <div class="o_kanban_card_content mw-100">
+                                        <div class="o_kanban_primary_left">
+                                            <div class="o_primary">
+                                                <span class="o_text_overflow" t-att-title="record.display_name.value"><t t-esc="record.display_name.value"/></span>
+                                                <span class="o_text_overflow text-muted" t-if="record.partner_id.value">
+                                                    <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_id.value"/>
+                                                </span>
+                                                <div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted o_row">
+                                                    <span class="fa fa-clock-o me-2" title="Dates"/><field name="date_start"/>
+                                                    <i t-if="record.date.raw_value and record.date_start.raw_value" class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
+                                                    <field name="date"/>
+                                                </div>
+                                                <div t-if="record.alias_name.value and record.alias_domain.value" class="text-muted text-truncate" t-att-title="record.alias_id.value">
+                                                    <span class="fa fa-envelope-o me-2" aria-label="Domain Alias" title="Domain Alias"/><t t-esc="record.alias_id.value"/>
+                                                </div>
+                                                <div t-if="record.rating_active.raw_value and record.rating_count.raw_value &gt; 0" class="text-muted" groups="project.group_project_rating">
+                                                    <b class="me-1">
+                                                        <span style="font-weight:bold;" class="fa mt4 fa-smile-o text-success" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Satisfied" role="img" aria-label="Happy face"/>
+                                                        <span style="font-weight:bold;" class="fa mt4 fa-meh-o text-warning" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Okay" role="img" aria-label="Neutral face"/>
+                                                        <span style="font-weight:bold;" class="fa mt4 fa-frown-o text-danger" t-else="" title="Average Rating: Dissatisfied" role="img" aria-label="Sad face"/>
+                                                    </b>
+                                                    <field name="rating_avg_percentage" widget="percentage"/>
+                                                </div>
+                                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span>
+                                       <field name="is_favorite" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+	      </field>
+	   </record>
+		
+	    <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
+		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
+      		<field name="search_view_id" ref="view_project_search"/>
+		<field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
+				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
+				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+				      ]" />
+	    </record>
+
+	<!--
         <record id="view_project_kanban_inherit" model="ir.ui.view">
             <field name="name">Project</field>
             <field name="model">project.project</field>
@@ -360,15 +372,10 @@
 			<attribute name="action"></attribute>
 			<attribute name="type"></attribute>
                 </xpath>
-		<!--
-		<xpath expr="//div[@class='oe_kanban_bottom_left']" position="replace">
-			<div/>
-		</xpath>
-		<xpath expr="//*[@role='menu']" position="replace"/>
-		-->
 	    </field>
 	</record>
-
+	-->
 
    </data>
 </odoo>
+

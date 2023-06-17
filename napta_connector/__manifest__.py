@@ -17,7 +17,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'project_timesheet_holidays', 'hr_skills', 'staffing', 'taz-common', 'project_accounting', 'web_widget_bokeh_chart'],
+    'depends': ['staffing', 'project_accounting'],
 
     # always loaded
     'data': [

@@ -235,7 +235,7 @@ class ClientRestNapta:
 
     """
     def delete_napta_ids(self):
-        for obj in [‘project.project’, ‘res.partner’, ‘staffing.need’, ‘account.analytic.line’, ‘res.users’, ‘hr.job’]:
+        for obj in [‘project.project’, ‘res.partner’, ‘staffing.need’, ‘account.analytic.line’, ‘res.users’, ‘hr.job’, 'project.project.stage']:
             _logger.info('Suppression des napta_id sur les instance de %s' % obj)
             list_obj = self.env[obj].search([('napta_id', '!=', None)])
             for o in list_obj :
@@ -265,8 +265,8 @@ class naptaProject(models.Model):
               "billing_method" : "fixed_price",
               "client_id" : rec.partner_id.napta_id,
               "external_id" : str(rec.id),
-              #TODO "sold_budget" : ,
-              #TODO "target_margin_rate" : ,
+              "sold_budget" : rec.company_part_amount_curent,
+              "target_margin_rate" : rec.company_part_marging_rate_curent,
               "estimated_start_date" : str(rec.date_start),
               "estimated_end_date" : str(rec.date),
             }
@@ -480,6 +480,7 @@ class naptaResUsers(models.Model):
                         rec.napta_id = napta_user['id']
                         self.env.cr.commit()
 
+            """
             rec.employee_id.job_id.create_update_napta()
             attributes = {
                 'email' : rec.login,
@@ -489,8 +490,11 @@ class naptaResUsers(models.Model):
                 'user_group_id' : 6, #Consultant - TODO gérer dynamiquement l'affectation
                 'user_position_id' : rec.employee_id.job_id.napta_id,
                 # TODO 'daily_cost' : ,
+                # 'hiring_date' : ,
+                # 'first_availability_date' : ,
             }
             client.create_update_api('user', attributes, rec)
+            """
 
 
 class naptaJob(models.Model):
@@ -508,3 +512,4 @@ class naptaJob(models.Model):
                 'name' : rec.name,
             }
             client.create_update_api('user_position', attributes, rec)
+

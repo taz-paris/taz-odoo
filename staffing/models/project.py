@@ -181,3 +181,14 @@ class staffingProject(models.Model):
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
 
 
+    @api.depends('project_director_employee_id', 'staffing_need_ids.staffed_employee_id', 'staffing_need_ids.project_id')
+    def _compute_user_enrolled_ids(self):
+        for rec in self:
+            user_enrolled_ids = []
+            if rec.user_id :
+                user_enrolled_ids.append(rec.user_id.id)
+            for need in rec.staffing_need_ids :
+                if need.staffed_employee_id.user_id.id :
+                    user_enrolled_ids.append(need.staffed_employee_id.user_id.id)
+            rec.user_enrolled_ids = [(6, 0, user_enrolled_ids)]
+
