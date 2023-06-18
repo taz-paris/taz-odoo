@@ -46,6 +46,11 @@
 		<field name="order_line" position="attributes">
                         <attribute name="context">{'default_analytic_distribution' : context.get('default_analytic_distribution')}</attribute>
                 </field>
+
+		<xpath expr="//field[@name='order_line']/tree" position="attributes">
+			<attribute name="decoration-success">direct_payment_purchase_order_line_id != False</attribute>
+		</xpath>
+
             </field>
         </record>
 
@@ -57,6 +62,9 @@
 	    <field name="arch" type="xml">
 		<field name="order_id"  position="attributes">
 			<attribute name="widget">many2one</attribute>
+		</field>
+		<field name="order_partner_id" position="after">
+			<field name="order_partner_invoice_id"/>
 		</field>
             </field>
         </record>
