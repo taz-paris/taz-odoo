@@ -35,6 +35,7 @@
         'views/purchase_order.xml',
         'views/project_accounting_closing.xml',
         'views/payment.xml',
+        'views/account_move.xml',
     ],
 
 
