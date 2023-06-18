@@ -304,8 +304,9 @@ class fitnetProject(models.Model):
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
 
-        self.sync_supplier_invoices(client)
         self.sync_suppliers(client)
+
+        self.sync_supplier_invoices(client)
 
         self.sync_customers(client)
         self.sync_contracts(client)
@@ -346,8 +347,8 @@ class fitnetProject(models.Model):
             if count != leave.number_of_days:
                 _logger.info('Incohérence : leave_id=%s pour %s (statut : %s) => duréee =%s alors que total des timesheet=%s. Debut le %s' % (str(leave.id), leave.employee_id.name, leave.state, str(leave.number_of_days), str(count), str(leave.request_date_from)))
                 _logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
-                #leave.number_of_days = leave.number_of_days
-                #_logger.info('      Corrigé')
+                leave.number_of_days = leave.number_of_days
+                _logger.info('      Corrigé')
 
     def sync_holidays(self, client):
         _logger.info('---- sync_holydays')

@@ -385,8 +385,8 @@ class naptaProject(models.Model):
             if not project.partner_id: #TODO à traiter à la main
                 _logger.info("Projet sans client sur Odoo : non migré vers Napta  %s %s (odoo_id = %s)"% (project.name, project.number, str(project.id)))
                 continue
-            if project.id not in [1260]:
-                continue
+            #if project.id not in [1260]:
+            #    continue
 
             _logger.info('======== INITIALISATION PROJET %s %s (odoo_id = %s)' % (project.name, project.number, str(project.id)))
 
