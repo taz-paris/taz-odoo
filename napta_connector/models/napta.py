@@ -60,17 +60,6 @@ class ClientRestNapta:
         self.env['ir.config_parameter'].sudo().set_param('napta_access_values',json.dumps(access_values))
         return access_values['access_token']
 
-    def create_update_api(self, napta_type, attributes, odoo_object):
-        #_logger.info('------ create_update_api_api API')
-        #_logger.info("ID odoo object : %s" % str(odoo_object.id))
-
-        if odoo_object.napta_id :
-            return self.patch_api(napta_type, attributes, odoo_object.napta_id)
-        else:
-            res = self.post_api(napta_type, attributes)
-            odoo_object.napta_id = res['data']['id']
-            self.env.cr.commit()
-            return res
 
     def read_cache(self, napta_type, napta_id=None):
         if not(os.path.exists(cache_folder)):
@@ -118,8 +107,27 @@ class ClientRestNapta:
 
         return True
 
+    def delete_element_cache(self, napta_type, napta_id): 
+        path = os.path.join(cache_folder, napta_type.replace('/','_'))
+        if not(os.path.exists(path)):
+            return False
+
+        with open(path, 'r', encoding='utf-8') as cf:
+            content = json.loads(cf.read())
+
+        content['data_by_id'].pop(str(napta_id))
+
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(content, f, indent=4)
+
+        return True
+
+
+
     def empty_cache(self):
         _logger.info("------- empty_cache")
+        if not(os.path.exists(cache_folder)):
+            return False
         for filename in os.listdir(cache_folder):
             file_path = os.path.join(cache_folder, filename)
             if os.path.isfile(file_path) or os.path.islink(file_path):
@@ -128,16 +136,34 @@ class ClientRestNapta:
         _logger.info("------- empty_cache TERMINÉ")
 
 
-    def patch_api(self, napta_type, attributes, napta_id):
-        #if napta_type not in ['timesheet','timesheet_period']:#['timesheet_period', 'timesheet', 'userprojectperiod']:
-        #    _logger.info('Pas de mise à jour sur ce type pour éviter de faire trop d\'appels.')
-        #    return
+    def create_update_api(self, napta_type, attributes, odoo_object):
+        #_logger.info('------ create_update_api_api API')
+        #_logger.info("ID odoo object : %s" % str(odoo_object.id))
+
+        if odoo_object.napta_id :
+            return self.patch_api(napta_type, attributes, odoo_object.napta_id)
+        else:
+            res = self.post_api(napta_type, attributes)
+            odoo_object.napta_id = res['data']['id']
+            self.env.cr.commit()
+            return res
+
+
+    def get_change_dic(self, napta_type, attributes, napta_id):
         cache_value = self.read_cache(napta_type, napta_id)
         changes_dic = {}
         if cache_value :
             for attribute_key, attribute_value in attributes.items():
                 if str(cache_value['attributes'][attribute_key]) != str(attribute_value):
                     changes_dic[attribute_key] = {'old_value' : cache_value['attributes'][attribute_key], 'new_value' : attribute_value}
+        return changes_dic, cache_value
+
+
+    def patch_api(self, napta_type, attributes, napta_id):
+        #if napta_type not in ['timesheet','timesheet_period']:#['timesheet_period', 'timesheet', 'userprojectperiod']:
+        #    _logger.info('Pas de mise à jour sur ce type pour éviter de faire trop d\'appels.')
+        #    return
+        changes_dic, cache_value = self.get_change_dic(napta_type, attributes, napta_id)
 
         if len(changes_dic) == 0:
             #_logger.info('      > Pas de changement.')
@@ -159,7 +185,7 @@ class ClientRestNapta:
             'authorization': 'Bearer '+self.get_access_token(),
             'content-type': 'application/json'
         }
-        _logger.info("PATCH "+self.API_URL_BUSINESS_ENDPOINT+napta_type)
+        _logger.info("PATCH "+self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id))
         _logger.info(data)
         response = requests.patch(self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id), json=data, headers=headers)
         if response.status_code == 429:
@@ -201,6 +227,27 @@ class ClientRestNapta:
         self.update_cache(napta_type, res['data']['id'], res)
         return res
 
+    def delete_api(self, napta_type, odoo_object):
+        _logger.info('------ delete API')
+        _logger.info("ID odoo object : %s" % str(odoo_object.id))
+        napta_id = odoo_object.napta_id
+
+        headers = {
+            'authorization': 'Bearer '+self.get_access_token(),
+            'content-type': 'application/json'
+        }
+        _logger.info("DELETE "+self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id))
+        response = requests.delete(self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id), headers=headers)
+        if response.status_code == 429:
+            _logger.info("POST 429 too many requests : attente de 60 secondes")
+            time.sleep(60)
+            response = requests.delete(self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id), headers=headers)
+
+        _logger.info(response.status_code)
+        odoo_object.napta_id = None
+        self.env.cr.commit
+        self.delete_element_cache(napta_type, napta_id)
+        return
 
     def get_api(self, napta_type, page_size=1000000, filter=None):
         """ 
@@ -265,8 +312,8 @@ class naptaProject(models.Model):
               "billing_method" : "fixed_price",
               "client_id" : rec.partner_id.napta_id,
               "external_id" : str(rec.id),
-              "sold_budget" : rec.company_part_amount_curent,
-              "target_margin_rate" : rec.company_part_marging_rate_curent,
+              "sold_budget" : rec.company_part_amount_current,
+              "target_margin_rate" : rec.company_part_marging_rate_current,
               "estimated_start_date" : str(rec.date_start),
               "estimated_end_date" : str(rec.date),
             }
@@ -288,6 +335,8 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE napta_init_from_odoo ')
 
         client = ClientRestNapta(self.env)
+
+
         client.empty_cache()
         
         #client.delete_napta_ids()
@@ -304,8 +353,8 @@ class naptaProject(models.Model):
             if not project.partner_id: #TODO à traiter à la main
                 _logger.info("Projet sans client sur Odoo : non migré vers Napta  %s %s (odoo_id = %s)"% (project.name, project.number, str(project.id)))
                 continue
-            #if project.id not in [570]:#Hélios
-            #    continue
+            if project.id not in [1260]:
+                continue
 
             _logger.info('======== INITIALISATION PROJET %s %s (odoo_id = %s)' % (project.name, project.number, str(project.id)))
 
@@ -459,6 +508,13 @@ class naptaAnalyticLine(models.Model):
               "day" : rec.date.weekday()+1,
               "worked_days" : rec.unit_amount,
             }
+
+            if rec.napta_id:
+                changes_dic, cache_value = client.get_change_dic('timesheet_period', attributes, rec.napta_id)
+                if any(x in ['timesheet_id', 'project_id', 'day'] for x in changes_dic.keys()):
+                    _logger.info("Impossible de patch un timesheet_period avec les attributs 'timesheet_id', 'project_id', 'day' => Suppression sur Napta (puis recréation)")
+                    client.delete_api('timesheet_period', rec)
+
             client.create_update_api('timesheet_period', attributes, rec)
 
 class naptaResUsers(models.Model):
