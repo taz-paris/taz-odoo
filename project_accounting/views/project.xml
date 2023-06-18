@@ -272,7 +272,7 @@
 				      ]" />
 	    </record>
 
-	    <menuitem name="Projets DAF" id="project_menu" sequence="5" parent="project.menu_main_pm" action="project_action"/>
+	    <menuitem name="Projets ADV" id="project_menu" sequence="5" parent="project.menu_main_pm" action="project_action"/>
 
 
 	   <record model="ir.ui.view" id="project_kanban">
@@ -376,6 +376,9 @@
 	</record>
 	-->
 
+    <record  id="project.menu_main_pm" model="ir.ui.menu">
+	    <field name="sequence">4</field>
+    </record>
    </data>
 </odoo>
 

@@ -380,9 +380,11 @@
     <record id="taz-admin" model="res.groups">
         <field name="name">TAZ-Admin</field>
         <field name="comment">Administrator for TAZ* modules.</field>
-	<!--
-        <field name="category_id" ref="ng_office_technology.module_category_ng_office_technology"/>
-	-->
+    </record>
+
+    <record id="taz-management" model="res.groups">
+        <field name="name">TAZ-Management</field>
+        <field name="comment">Rights for DM and Managers.</field>
     </record>
 
     <record id="taz-basic" model="res.groups">
@@ -391,14 +393,20 @@
     </record>
 
     <!-- Masquer les modules de base, sauf poru le super admin -->
-    <menuitem id="mail.menu_root_discuss" groups="base.group_system"/>
-    <menuitem id="calendar.mail_menu_calendar" groups="base.group_system"/>
-    <menuitem id="contacts.menu_contacts" groups="base.group_system"/>
-    <!--
-    <record  id="account.menu_finance" model="ir.ui.menu">
+    <record  id="mail.menu_root_discuss" model="ir.ui.menu">
 	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
     </record>
-	    -->
+    <record  id="calendar.mail_menu_calendar" model="ir.ui.menu">
+	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+    <record  id="contacts.menu_contacts" model="ir.ui.menu">
+	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+    <record  id="account.menu_finance" model="ir.ui.menu">
+	    <!-- on supprimer le menu Facturation si l'usager n'a que le droits readonly (qui est obligatoire pour tous les consultants pour enregister un nouveau contact) -->
+	    <!-- on ajouter le menu Facturation pour les DM/Manager -->
+	    <field name="groups_id" eval="[(3, ref('account.group_account_readonly')), (4, ref('taz-common.taz-management'))]"/>
+    </record>
     <record  id="hr_holidays.menu_hr_holidays_root" model="ir.ui.menu">
 	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
     </record>
