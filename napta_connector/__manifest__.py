@@ -17,7 +17,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['staffing', 'project_accounting'],
+    'depends': ['staffing', 'project_accounting', 'project'],
 
     # always loaded
     'data': [

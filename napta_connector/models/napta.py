@@ -297,7 +297,30 @@ class naptaProject(models.Model):
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
-    
+    is_prevent_napta_creation = fields.Boolean("Portage pur (ne remonte pas sur Napta)")
+
+    """
+    @api.model_create_multi
+    def create(self, vals):
+        projects = super().create(vals)
+        for rec in projects:
+            if not rec.is_prevent_napta_creation:
+                rec.create_update_napta()
+        return projects
+
+    def write(self, vals):
+        res = super().create(vals)
+        for rec in self:
+            if not rec.is_prevent_napta_creation:
+                rec.create_update_napta()
+        return res
+
+    def unlink(self):
+        if sef.napta_id :
+           raise ValidationError(_("Impossible de supprimer ce projet car il est synchronisé avec Napta.")) 
+        return super().unlink()
+    """
+
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project')
         client = ClientRestNapta(self.env)
@@ -314,13 +337,15 @@ class naptaProject(models.Model):
               "external_id" : str(rec.id),
               "sold_budget" : rec.company_part_amount_current,
               "target_margin_rate" : rec.company_part_marging_rate_current,
-              "estimated_start_date" : str(rec.date_start),
-              "estimated_end_date" : str(rec.date),
+              "estimated_start_date" : str(rec.date_start) if rec.date_start else None,
+              "estimated_end_date" : str(rec.date) if rec.date else None,
             }
+
             client.create_update_api('project', attributes, rec)
 
             # Directeur de mission
             if rec.project_director_employee_id:
+                rec.project_director_employee_id.user_id.create_update_napta()
                 project_contributors = client.read_cache('project_contributor')
                 contributor_link_id = None
                 for project_contributor in project_contributors.values():
@@ -330,6 +355,13 @@ class naptaProject(models.Model):
                     contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
                 #On ne supprime pas de Napta les contributors qui ne sont pas/plus DM dans Odoo
 
+    def goto_napta(self):
+        if self.napta_id:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': 'https://app.napta.io/project/%s' % (self.napta_id),
+                'target': 'new',
+            }
     
     def napta_init_from_odoo(self):
         _logger.info('======== DEMARRAGE napta_init_from_odoo ')

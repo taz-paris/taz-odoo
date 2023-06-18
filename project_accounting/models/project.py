@@ -9,20 +9,23 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class staffingProject(models.Model):
+class projectAccountProject(models.Model):
     _inherit = "project.project"
     _order = "number desc"
     _sql_constraints = [
-        ('number_uniq', 'UNIQUE (number)',  "Impossible d'enregistrer deux projet avec le même numéro.")
+        ('number_uniq', 'UNIQUE (number)',  "Impossible d'enregistrer deux projets avec le même numéro.")
     ]
 
-
-    #@api.model
-    #def create(self, vals):
-    #    if vals.get('number', '') == '':
-    #            vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''
-    #    res = super().create(vals)
-    #    return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        _logger.info('---- MULTI create project from accounting_project')
+        projects = self.browse()
+        for vals in vals_list:
+            vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''
+            vals['state_last_change_date'] = datetime.today()
+            _logger.info('Numéro de projet auto : %s' % str(vals['number']))
+            projects |= super().create(vals)
+        return projects
 
     def name_get(self):
         res = []
@@ -62,12 +65,6 @@ class staffingProject(models.Model):
             if 'stage_id' in vals.keys():
                 vals['state_last_change_date'] = datetime.today()
         return super().write(vals)
-
-    @api.model
-    def create(self, vals):
-        vals['state_last_change_date'] = datetime.today()
-        return super().create(vals)
- 
 
     @api.depends('project_director_employee_id')
     def _compute_user_enrolled_ids(self):
