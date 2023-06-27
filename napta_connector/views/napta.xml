@@ -39,7 +39,7 @@
             <field name="inherit_id" ref="hr_timesheet.timesheet_view_tree_user"/>
             <field name="arch" type="xml">
                 <field name="date" position="after">
-                        <field name="napta_id" readonly="0" optional="hide"/>
+                        <field name="napta_id" readonly="1" optional="hide"/>
                 </field>
             </field>
         </record>
@@ -60,7 +60,7 @@
             <field name="inherit_id" ref="hr.view_hr_job_form"/>
             <field name="arch" type="xml">
                 <field name="contract_type_id" position="after">
-                        <field name="napta_id" readonly="0"/>
+                        <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
@@ -184,7 +184,7 @@
             <field name="inherit_id" ref="account.view_account_journal_form"/>
             <field name="arch" type="xml">
                 <field name="code" position="after">
-                        <field name="fitnet_id" readonly="0"/>
+                        <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>
         </record>

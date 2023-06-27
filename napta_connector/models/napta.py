@@ -299,7 +299,6 @@ class naptaProject(models.Model):
     napta_id = fields.Char("Napta ID")
     is_prevent_napta_creation = fields.Boolean("Portage pur (ne remonte pas sur Napta)")
 
-    """
     @api.model_create_multi
     def create(self, vals):
         projects = super().create(vals)
@@ -316,9 +315,10 @@ class naptaProject(models.Model):
         return res
 
     def unlink(self):
-        if sef.napta_id :
+        if self.napta_id :
            raise ValidationError(_("Impossible de supprimer ce projet car il est synchronisé avec Napta.")) 
         return super().unlink()
+    """
     """
 
     def create_update_napta(self):
@@ -359,7 +359,7 @@ class naptaProject(models.Model):
         if self.napta_id:
             return {
                 'type': 'ir.actions.act_url',
-                'url': 'https://app.napta.io/project/%s' % (self.napta_id),
+                'url': 'https://app.napta.io/projects/%s' % (self.napta_id),
                 'target': 'new',
             }
     

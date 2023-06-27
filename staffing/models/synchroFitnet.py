@@ -304,8 +304,12 @@ class fitnetProject(models.Model):
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
 
-        self.sync_suppliers(client)
+        self.sync_employees(client)
+        self.sync_employees_contracts(client)
+        self.sync_holidays(client) 
+        self.correct_leave_timesheet_stock(client)
 
+        self.sync_suppliers(client)
         self.sync_supplier_invoices(client)
 
         self.sync_customers(client)
@@ -316,11 +320,6 @@ class fitnetProject(models.Model):
         #TODO           self.sync_prospect(client)
 
         #return self.import_grille_competences()
-        self.sync_employees(client)
-        self.sync_employees_contracts(client)
-
-        self.sync_holidays(client) 
-        self.correct_leave_timesheet_stock(client)
 
         self.sync_project(client)
 
@@ -1293,6 +1292,7 @@ class fitnetProject(models.Model):
             'surname' : {'odoo_field' : 'first_name'},
             'email' : {'odoo_field' : 'work_email'},
             'gender' : {'odoo_field' : 'gender', 'selection_mapping' : {'Male' : 'male', 'Female' : 'female'}},
+            'registration_id' : {'odoo_field' : 'identification_id'},
             #registration_id
             #hiringDate => attribut du hr.contract
             #leavingDate => attribut du hr.contract
