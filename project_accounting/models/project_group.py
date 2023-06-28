@@ -21,8 +21,8 @@ class projectGroup(models.Model):
             for project in rec.project_ids:
                  if not project.stage_id.is_part_of_booking:
                      continue
-                 if project.order_amount :
-                     order_amount += project.order_amount
+                 if project.amount :
+                     order_amount += project.amount
                  if project.billed_amount :
                      billed_amount += project.billed_amount
                  if project.payed_amount :
@@ -46,8 +46,8 @@ class projectGroup(models.Model):
     #TODO pré-remplir le partner_id avec celui du project lorsqu'on crée le project.group à partir du project
     project_ids = fields.One2many('project.project', 'project_group_id', string="Projets")
     description = fields.Html("Description")
-    order_amount = fields.Float('Montant commande', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
-    billed_amount = fields.Float('Montant facturé', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
-    payed_amount = fields.Float('Montant payé', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
+    order_amount = fields.Float('Montant commande net de S/T Fitnet', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
+    billed_amount = fields.Float('Montant facturé Fitnet', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
+    payed_amount = fields.Float('Montant payé Fitnet', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
     negative_total_costs = fields.Float('Pointage (réal. ou prév.)', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")
     margin_landing = fields.Float('Marge à terminaison (%)', compute=compute, help="Seuls les projets dont le statut a le booléen is_part_of_booking vrai sont sommés. Les autres sont ignorés")

@@ -298,6 +298,8 @@ class naptaProject(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
     is_prevent_napta_creation = fields.Boolean("Portage pur (ne remonte pas sur Napta)")
+    date_start = fields.Date(readonly=True)
+    date = fields.Date(readonly=True)
 
     @api.model_create_multi
     def create(self, vals):
@@ -352,7 +354,8 @@ class naptaProject(models.Model):
                     if project_contributor['attributes']['contributor_id'] == str(rec.project_director_employee_id.user_id.napta_id) and project_contributor['attributes']['project_id'] == str(rec.napta_id):
                         contributor_link_id = project_contributor['id']
                 if not contributor_link_id :
-                    contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
+                    if rec.project_director_employee_id.user_id.napta_id:
+                        contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
                 #On ne supprime pas de Napta les contributors qui ne sont pas/plus DM dans Odoo
 
     def goto_napta(self):
@@ -581,6 +584,9 @@ class naptaResUsers(models.Model):
                 # 'hiring_date' : ,
                 # 'first_availability_date' : ,
             }
+            if rec.napta_id :
+                attributes.pop(user_group_id)
+                attributes.pop(user_position_id) #TODO : intégrer le mapping Napta ?
             client.create_update_api('user', attributes, rec)
             """
 

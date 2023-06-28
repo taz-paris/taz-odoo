@@ -349,7 +349,21 @@
 	      </field>
 	   </record>
 		
+	    <!-- ACTION APPLICAQUE AUX UTILISATUER QUI ONT LE droit de gestion des étapes du projet (ie admin) -->
 	    <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
+		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
+      		<field name="search_view_id" ref="view_project_search"/>
+		<field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
+				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
+				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+				      ]" />
+	    </record>
+
+	    <!-- ACTION APPLICAQUE AUX UTILISATUER SANS LE droit de gestion des étapes du projet -->
+	    <record id="project.open_view_project_all" model="ir.actions.act_window">
 		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
       		<field name="search_view_id" ref="view_project_search"/>
 		<field name="view_ids" eval="

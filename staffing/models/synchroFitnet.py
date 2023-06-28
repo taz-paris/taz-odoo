@@ -304,6 +304,9 @@ class fitnetProject(models.Model):
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
 
+        self.sync_customers(client)
+        self.sync_contracts(client)
+
         self.sync_employees(client)
         self.sync_employees_contracts(client)
         self.sync_holidays(client) 
@@ -312,8 +315,6 @@ class fitnetProject(models.Model):
         self.sync_suppliers(client)
         self.sync_supplier_invoices(client)
 
-        self.sync_customers(client)
-        self.sync_contracts(client)
 
         self.sync_customer_invoices(client)
 

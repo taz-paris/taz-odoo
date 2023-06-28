@@ -28,7 +28,7 @@
             <field name="inherit_id" ref="project_accounting.project_form"/>
             <field name="arch" type="xml">
                 <field name="tag_ids" position="after">
-                        <field name="napta_id" readonly="1"/>
+                        <field name="napta_id" readonly="0"/>
                 </field>
             </field>
         </record>
