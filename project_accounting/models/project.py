@@ -18,7 +18,7 @@ class projectAccountProject(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        _logger.info('---- MULTI create project from accounting_project')
+        #_logger.info('---- MULTI create project from accounting_project')
         projects = self.browse()
         for vals in vals_list:
             vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''

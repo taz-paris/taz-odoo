@@ -24,7 +24,7 @@ host = "tasmane.fitnetmanager.com"
 api_root = "/FitnetManager/rest/"
 
 cache_mode = False
-cache_folder = '/tmp/'
+cache_folder = '/tmp/fitnet/'
 
 ##################################################################
 ##########                 REST CLIENT                  ##########

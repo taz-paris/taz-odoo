@@ -301,14 +301,16 @@ class naptaProject(models.Model):
 
     @api.model_create_multi
     def create(self, vals):
+        #_logger.info('---- MULTI create project from napta_connector')
         projects = super().create(vals)
         for rec in projects:
             if not rec.is_prevent_napta_creation:
                 rec.create_update_napta()
         return projects
 
+
     def write(self, vals):
-        res = super().create(vals)
+        res = super().write(vals)
         for rec in self:
             if not rec.is_prevent_napta_creation:
                 rec.create_update_napta()
@@ -318,8 +320,6 @@ class naptaProject(models.Model):
         if self.napta_id :
            raise ValidationError(_("Impossible de supprimer ce projet car il est synchronisé avec Napta.")) 
         return super().unlink()
-    """
-    """
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project')
