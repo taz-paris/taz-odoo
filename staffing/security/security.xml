@@ -4,5 +4,9 @@
         	<field name="name">Staffing admin</field>
         	<field name="comment">Staffing administration</field>
 	</record>
+	<record id="staffing_readonly" model="res.groups">
+        	<field name="name">Staffing readonly</field>
+        	<field name="comment">Staffing readonly</field>
+	</record>
   </data>
 </odoo>
