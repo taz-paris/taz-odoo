@@ -45,12 +45,6 @@ class ContactUserLink(models.Model):
         #, default=lambda self: self.env['taz.contact_user_link'].search([('id', '=', self._context.get("default_partner_id"))], limit=1))
         #self._context.get("default_partner_id"))
     date_last_business_action = fields.Date('Date du dernier RDV', compute=_compute_date_last_business_action, store=True)
-    #desired_meeting_frequency = fields.Selection([
-    #        ('year', '1 fois par an'),
-    #        ('year2', '2 fois par an'),
-    #        ('year3', '3 fois par an'),
-    #        ('year4', '4 fois par an'),
-    #    ], srting="Fréquence de contact"),
     #RDV to plan before
     proximity_level = fields.Selection([
             ('0', "je le connais de vue"),
@@ -58,3 +52,9 @@ class ContactUserLink(models.Model):
             ('2', "j'ai eu une collaboration intense avec lui"),
             ('3', "j'ai son numéro de portable et je peux l'appeler à 22h"),
         ], string="Niveau de proximité") 
+    target_contact_frequency = fields.Selection([
+            ('generic', '0 - Je lui envoie des campagnes "génériques"'),
+            ('year', '1 - Je veux le voir 1 fois par an'),
+            ('year4', '2 - Je veux le voir 4 fois par an'),
+       ], srting="Fréquence de contact"),
+

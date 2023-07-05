@@ -137,15 +137,17 @@ class ClientRestNapta:
 
 
     def create_update_api(self, napta_type, attributes, odoo_object):
-        #_logger.info('------ create_update_api_api API')
-        #_logger.info("ID odoo object : %s" % str(odoo_object.id))
+        _logger.info('------ create_update_api_api API')
+        _logger.info("ID odoo object : %s" % str(odoo_object.id))
 
         if odoo_object.napta_id :
             return self.patch_api(napta_type, attributes, odoo_object.napta_id)
         else:
             res = self.post_api(napta_type, attributes)
             odoo_object.napta_id = res['data']['id']
+            _logger.info('pppppppppppppppppppp')
             self.env.cr.commit()
+            _logger.info('pppppppppppppppppppp2')
             return res
 
 
@@ -568,7 +570,8 @@ class naptaResUsers(models.Model):
             if not(rec.napta_id):
                 for napta_user in napta_user_list.values():
                     if napta_user['attributes']['email'] == rec.login :
-                        rec.napta_id = napta_user['id']
+                        #TODO : toutes les fonctions qui doivent écrire sur un res.user doivent passer par SUDO car un tasmanien l'ambda n'a pas le droit en écriture sur cet objet
+                        rec.sudo().napta_id = napta_user['id']
                         self.env.cr.commit()
 
             """

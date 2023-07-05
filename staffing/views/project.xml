@@ -7,6 +7,7 @@
               <field name="model">project.project</field>
               <field name="priority">5</field>
 	      <field name="arch" type="xml">
+			<!--
                 	<field name="active" position="before">
 				<div class="oe_button_box" name="button_box">
 				    <button class="oe_stat_button" type="object" name="open_project_pivot_timesheets" icon="fa-calendar">
@@ -17,7 +18,6 @@
 				</div>
                 	</field>
 
-			<!--
                 	<field name="probability" position="after">
 				<field name="margin_landing" widget="progressbar"/>
 				<field name="margin_text"/>

@@ -8,7 +8,7 @@
                   <field name="user_id" />
                   <field name="date_last_business_action" />
 		  <!--
-                  <field name="desired_meeting_frequency" />
+                  <field name="target_contact_frequency" />
 		  -->
 		  <field name="proximity_level" />
         </tree>

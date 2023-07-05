@@ -72,6 +72,15 @@
 			<sheet string="Project">
 
 				<widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+
+                                <div class="oe_button_box" name="button_box">
+                                    <button class="oe_stat_button" type="object" name="action_open_all_account_move_lines" icon="fa-eye">
+                                        <div class="o_form_field o_stat_info">
+                                           <span class="o_stat_text">Toutes les écritures</span>
+                                        </div>
+                                    </button>
+			    	</div>
+
 				<field name="active" invisible="1"/>
 
 				<div class="alert alert-warning mb-0" role="alert" attrs="{'invisible': [('is_constistant_order_amount', '=', True)]}">
@@ -88,6 +97,7 @@
 					<group>
 					    <field name="partner_id" required="1" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 					    <field name="stage_id" required="1"/>
+					    <field name="state" invisible="1"/>
 					    <field name="probability"/>
 					</group>
 					<group>
@@ -106,7 +116,7 @@
 					<page name="dashboard" string="Synthèse DM/Manager">
 						<group>
 							<group string="Somme dispositif Tasame + Sous-traitance + autres">
-								<field name="order_amount_current"/>
+								<field name="order_amount_current" />
                                                                 <field name="order_cost_current"/>
                                                                 <field name="order_marging_amount_current"/>
                                                                 <field name="order_marging_rate_current" widget="progressbar"/>
@@ -120,8 +130,8 @@
 						</group>
 						<group col="3">
 							<group string="Production par le dispositif Tasmane">
-					    			<field name="company_part_amount_current"/>
-					    			<field name="company_part_cost_current"/>
+					    			<field name="company_part_amount_current" force_save="1"/>
+					    			<field name="company_part_cost_current" force_save="1"/>
 					    			<field name="company_part_marging_amount_current"/>
 					    			<field name="company_part_marging_rate_current" widget="progressbar"/>
 							</group>
@@ -132,7 +142,7 @@
                                                                 <field name="outsource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
                                                 	<group string="Autres pestations (exemple : séminaire chez Tasmane)">
-                                                                <field name="other_part_amount_current"/>
+                                                                <field name="other_part_amount_current" force_save="1"/>
                                                                 <field name="other_part_cost_current"/>
                                                                 <field name="other_part_marging_amount_current"/>
                                                                 <field name="other_part_marging_rate_current" widget="progressbar"/>
@@ -177,7 +187,7 @@
 								<field name="company_to_invoice_left" />
 							</group>
 							<group>
-								<button type="object" name="action_open_account_move_lines" string="Voir les lignes de facture/avoir"/>
+								<button type="object" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
 							</group>
 						</group>
 						<group string="Paiement du client à Tasmane">
