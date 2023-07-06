@@ -113,6 +113,37 @@
 					</group>
 				   </group>
 				<notebook>
+					<page name="project_structure" string="Structure INITIALE du projet">
+						<group string="Somme dispositif Tasame + Sous-traitance + autres">
+							<group>
+								<field name="order_amount_initial"/>
+								<field name="order_cost_initial"/>
+								<field name="order_marging_amount_initial"/>
+								<field name="order_marging_rate_initial" widget="progressbar"/>
+							</group>
+						</group>
+						<group col="3">
+							<group string="Dispositif Tasmane">
+								<field name="company_part_amount_initial"/>
+								<field name="company_part_cost_initial"/>
+								<field name="company_part_marging_amount_initial"/>
+								<field name="company_part_marging_rate_initial" widget="progressbar"/>
+							</group>
+							<group string="Production sous-traitée par Tasmane">
+								<field name="outsource_part_amount_initial"/>
+								<field name="outsource_part_cost_initial"/>
+								<field name="outsource_part_marging_amount_initial"/>
+								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
+							</group>  
+							<group string="Autres pestations (exemple : séminaire chez Tasmane)">
+								<field name="other_part_amount_initial"/>
+								<field name="other_part_cost_initial"/>
+								<field name="other_part_marging_amount_initial"/>
+								<field name="other_part_marging_rate_initial" widget="progressbar"/>
+							</group>  
+						</group>
+					</page>
+
 					<page name="dashboard" string="Synthèse DM/Manager">
 						<group>
 							<group string="Somme dispositif Tasame + Sous-traitance + autres">
@@ -147,36 +178,6 @@
                                                                 <field name="other_part_marging_amount_current"/>
                                                                 <field name="other_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
-						</group>
-					</page>
-					<page name="project_structure" string="Structure INITIALE du projet">
-						<group string="Somme dispositif Tasame + Sous-traitance + autres">
-							<group>
-								<field name="order_amount_initial"/>
-								<field name="order_cost_initial"/>
-								<field name="order_marging_amount_initial"/>
-								<field name="order_marging_rate_initial" widget="progressbar"/>
-							</group>
-						</group>
-						<group col="3">
-							<group string="Dispositif Tasmane">
-								<field name="company_part_amount_initial"/>
-								<field name="company_part_cost_initial"/>
-								<field name="company_part_marging_amount_initial"/>
-								<field name="company_part_marging_rate_initial" widget="progressbar"/>
-							</group>
-							<group string="Production sous-traitée par Tasmane">
-								<field name="outsource_part_amount_initial"/>
-								<field name="outsource_part_cost_initial"/>
-								<field name="outsource_part_marging_amount_initial"/>
-								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
-							</group>  
-							<group string="Autres pestations (exemple : séminaire chez Tasmane)">
-								<field name="other_part_amount_initial"/>
-								<field name="other_part_cost_initial"/>
-								<field name="other_part_marging_amount_initial"/>
-								<field name="other_part_marging_rate_initial" widget="progressbar"/>
-							</group>  
 						</group>
 					</page>
 					<page name="customer_invoicing" string="Facturation client">

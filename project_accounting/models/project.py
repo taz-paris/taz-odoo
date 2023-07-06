@@ -139,11 +139,13 @@ class projectAccountProject(models.Model):
                 rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_amount_current * 100
 
             ######## COMPANY PART
+
             rec.company_part_marging_amount_initial =  rec.company_part_amount_initial - rec.company_part_cost_initial
             rec.company_part_marging_rate_initial = 0.0
             if rec.company_part_amount_initial != 0 :
                 rec.company_part_marging_rate_initial = rec.company_part_marging_amount_initial / rec.company_part_amount_initial * 100
     
+            rec.company_part_cost_current = -rec.get_production_cost()
             rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
             rec.company_part_marging_rate_current = 0.0
             if rec.company_part_amount_current != 0 :
@@ -483,9 +485,10 @@ class projectAccountProject(models.Model):
     company_part_amount_current = fields.Monetary('Montant dispositif Tasmane actuel', 
             states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
             help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
-    company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', 
-            states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
-            help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
+    company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', store=True, compute=compute, help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
+    #company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', 
+    #        states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
+    #        help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) actuelle', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
     company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) actuelle', store=True, compute=compute)
 

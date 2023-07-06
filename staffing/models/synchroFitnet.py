@@ -26,6 +26,8 @@ api_root = "/FitnetManager/rest/"
 cache_mode = False
 cache_folder = '/tmp/fitnet/'
 
+LISTE_PROJET_EXCLUSIF = ['22028']#'23009']
+
 ##################################################################
 ##########                 REST CLIENT                  ##########
 ##################################################################
@@ -303,6 +305,9 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+        self.sync_customer_invoices(client)
+        self.sync_supplier_invoices(client)
+        return
 
         self.sync_customers(client)
         self.sync_contracts(client)
@@ -313,10 +318,8 @@ class fitnetProject(models.Model):
         self.correct_leave_timesheet_stock(client)
 
         self.sync_suppliers(client)
-        self.sync_supplier_invoices(client)
 
 
-        self.sync_customer_invoices(client)
 
         #TODO           self.sync_prospect(client)
 
@@ -686,6 +689,7 @@ class fitnetProject(models.Model):
             return False
         return True
 
+
     def sync_customer_invoices(self, client):
         _logger.info('---- sync_customer_invoices')
         fitnet_objects = client.get_api('invoices/v2/1/0/01-01-2018/31-12-2050')
@@ -726,6 +730,13 @@ class fitnetProject(models.Model):
         for invoice in fitnet_objects:
             #if invoice['invoiceId'] not in [1492, 1493, 2315]:
             #    continue
+            odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
+            #TODO A SUPPRIMER
+            if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
+                continue
+            #_logger.info("******** Projet %s" % odoo_project.number)
+
+
             if invoice['bTaxBilling'] < 0:
                 #_logger.info('avoir fitnet invoiceId=' + str(invoice['invoiceId']))
                 #TODO : vérifier que c'est cohérent avec "isCredit": "Yes",
@@ -804,6 +815,13 @@ class fitnetProject(models.Model):
         for invoice in fitnet_objects:
             #if invoice['invoiceId'] not in [1492, 1493, 1618]:
             #    continue
+            odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
+            #TODO A SUPPRIMER
+            if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
+                continue
+            #_logger.info("******** Projet %s" % odoo_project.number)
+
+
             if invoice['contractId'] not in invoices_by_contract.keys():
                 invoices_by_contract[invoice['contractId']] = []
             invoices_by_contract[invoice['contractId']].append(invoice)
@@ -813,9 +831,8 @@ class fitnetProject(models.Model):
         for contract_id, contract_invoice_list in invoices_by_contract.items():
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
             #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
-            if not odoo_project.is_project_to_migrate():
-                continue
-
+            #if not odoo_project.is_project_to_migrate():
+            #    continue
             sale_order_list.append({
                     'partner_id' : contract_invoice_list[0]['customerId'],
                     'order_id' : contract_id,
@@ -914,8 +931,8 @@ class fitnetProject(models.Model):
         self.create_overide_by_fitnet_values('sale.order', sale_order_list, mapping_fields_sale_order, 'order_id',context={})
         self.create_overide_by_fitnet_values('sale.order.line', sale_order_line_list, mapping_fields_sale_order_line, 'line_id',context={})
 
-           
-
+    
+    
     def sync_suppliers(self, client):
         _logger.info('--- sync_suppliers')
         suppliers = client.get_api("suppliers/1/1")
@@ -1047,6 +1064,10 @@ class fitnetProject(models.Model):
             #    _logger.info("Facture fournisseur %s Nombre de lignes de facture différent de 1 : %" % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
 
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
+            #TODO A SUPPRIMER
+            if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
+                continue
+            #_logger.info("******** Projet %s" % odoo_project.number)
 
             for line in invoice['purchaseItems']:
                 line['odoo_purchaseId'] = invoice['odoo_purchaseId']
@@ -1090,9 +1111,17 @@ class fitnetProject(models.Model):
         ############################### GENERATION DES BONS DE COMMANDE FOURNISSEUR
         invoices_by_contract = {}
         for invoice in supplier_invoices:
+            #TODO A SUPPRIMER
+            odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
+            if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
+                continue
+            #_logger.info("******** Projet %s" % odoo_project.number)
+            #_logger.info(invoice)
+
             #if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
             #    continue
             if invoice['natureId'] not in [2]: #sous traitance
+                _loggger.info("natureId exclu")
                 continue
             if invoice['contractId'] not in invoices_by_contract.keys():
                 invoices_by_contract[invoice['contractId']] = []
@@ -1102,11 +1131,13 @@ class fitnetProject(models.Model):
         sale_order_line_list = []
         for contract_id, contract_invoice_list in invoices_by_contract.items():
             if not contract_id:
+                _loggger.info("pas de contract_id")
                 continue
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
             #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
-            if not odoo_project.is_project_to_migrate():
-                continue
+            #if not odoo_project.is_project_to_migrate():
+            #    _logger.info("exclu car pas un projet à migrer")
+            #    continue
 
             sale_order_list.append({
                     'partner_id' : contract_invoice_list[0]['odoo_supplierId'],

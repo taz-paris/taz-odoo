@@ -137,17 +137,15 @@ class ClientRestNapta:
 
 
     def create_update_api(self, napta_type, attributes, odoo_object):
-        _logger.info('------ create_update_api_api API')
-        _logger.info("ID odoo object : %s" % str(odoo_object.id))
+        #_logger.info('------ create_update_api_api API')
+        #_logger.info("ID odoo object : %s" % str(odoo_object.id))
 
         if odoo_object.napta_id :
             return self.patch_api(napta_type, attributes, odoo_object.napta_id)
         else:
             res = self.post_api(napta_type, attributes)
             odoo_object.napta_id = res['data']['id']
-            _logger.info('pppppppppppppppppppp')
             self.env.cr.commit()
-            _logger.info('pppppppppppppppppppp2')
             return res
 
 
@@ -284,14 +282,12 @@ class ClientRestNapta:
 
     """
     def delete_napta_ids(self):
-        for obj in [‘project.project’, ‘res.partner’, ‘staffing.need’, ‘account.analytic.line’, ‘res.users’, ‘hr.job’, 'project.project.stage']:
+        for obj in[]: # ["project.project", "res.partner", "staffing.need", "account.analytic.line", "res.users"]: #, "hr.job", "project.project.stage"
             _logger.info('Suppression des napta_id sur les instance de %s' % obj)
             list_obj = self.env[obj].search([('napta_id', '!=', None)])
             for o in list_obj :
                 o.write({'napta_id' : None})
     """
-
-
 
 class naptaProject(models.Model):
     _inherit = "project.project"
@@ -311,7 +307,6 @@ class naptaProject(models.Model):
             if not rec.is_prevent_napta_creation:
                 rec.create_update_napta()
         return projects
-
 
     def write(self, vals):
         res = super().write(vals)
@@ -341,8 +336,8 @@ class naptaProject(models.Model):
               "external_id" : str(rec.id),
               "sold_budget" : rec.company_part_amount_current,
               "target_margin_rate" : rec.company_part_marging_rate_current,
-              "estimated_start_date" : str(rec.date_start) if rec.date_start else None,
-              "estimated_end_date" : str(rec.date) if rec.date else None,
+              #"estimated_start_date" : str(rec.date_start) if rec.date_start else None,
+              #"estimated_end_date" : str(rec.date) if rec.date else None,
             }
 
             client.create_update_api('project', attributes, rec)
@@ -372,13 +367,8 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE napta_init_from_odoo ')
 
         client = ClientRestNapta(self.env)
-
-
         client.empty_cache()
         
-        #client.delete_napta_ids()
-        #return
-
         #Déterminer les projet à remonter sur Napta
 
         projects = self.env['project.project'].search([], order="number desc")
@@ -392,6 +382,8 @@ class naptaProject(models.Model):
                 continue
             #if project.id not in [1260]:
             #    continue
+            if project.is_prevent_napta_creation :
+                continue
 
             _logger.info('======== INITIALISATION PROJET %s %s (odoo_id = %s)' % (project.name, project.number, str(project.id)))
 
@@ -573,13 +565,15 @@ class naptaResUsers(models.Model):
                         #TODO : toutes les fonctions qui doivent écrire sur un res.user doivent passer par SUDO car un tasmanien l'ambda n'a pas le droit en écriture sur cet objet
                         rec.sudo().napta_id = napta_user['id']
                         self.env.cr.commit()
+            if not(rec.napta_id):
+                _logger.info('################### Utilisateur manquant %s' % rec.login)
 
             """
             rec.employee_id.job_id.create_update_napta()
             attributes = {
                 'email' : rec.login,
                 'first_name' : rec.first_name,
-                'last_name' : rec.name,
+                'last_name' : rec.name.upper(),
                 'active' : rec.active,
                 'user_group_id' : 6, #Consultant - TODO gérer dynamiquement l'affectation
                 'user_position_id' : rec.employee_id.job_id.napta_id,
@@ -609,4 +603,4 @@ class naptaJob(models.Model):
                 'name' : rec.name,
             }
             client.create_update_api('user_position', attributes, rec)
-
+        
