@@ -26,7 +26,7 @@ api_root = "/FitnetManager/rest/"
 cache_mode = False
 cache_folder = '/tmp/fitnet/'
 
-LISTE_PROJET_EXCLUSIF = ['23019']#'23066']#'22028']#'23009']
+LISTE_PROJET_EXCLUSIF = ['23067','23112','23019','23066','22028','23009']
 
 ##################################################################
 ##########                 REST CLIENT                  ##########
@@ -832,8 +832,16 @@ class fitnetProject(models.Model):
             invoices_by_contract[invoice['contractId']].append(invoice)
         
         #ajouter des invoices virtuelle pour gérer les projets qui n'ont encore envoyé aucune facture (car l'API Fitent ne les retourne pas)
-        _logger.info(invoices_by_contract)
         for p in self.env['project.project'].search([]):
+            """
+            if not odoo_project.is_project_to_migrate():
+                if p.number and p.is_prevent_napta_creation != True:
+                    if  p.napta_id :
+                        _logger.info('conflitttttttttttttttttttttttttttttt %s %s' % (p.napta_id, p.number))
+                    else :
+                        _logger.info(' OK %s %s' % (p.napta_id, p.number))
+                        #p.is_prevent_napta_creation == True
+            """
             if len(LISTE_PROJET_EXCLUSIF)>0 and p.number not in LISTE_PROJET_EXCLUSIF:
                 continue
             if p.partner_id.name == "Tasmane":
@@ -879,7 +887,8 @@ class fitnetProject(models.Model):
                         'product_uom': 1,
                         'price_unit': l['signed_amountBTax'],
                         'direct_payment_purchase_order_line_id' : False,
-                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
+                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
+                        'previsional_invoice_date' : inv['billingDueDate'],
                             })
                     sum_invoice += l['signed_amountBTax']
 
@@ -898,7 +907,8 @@ class fitnetProject(models.Model):
                         'product_uom': 1,
                         'price_unit': reste_a_facturer,
                         'direct_payment_purchase_order_line_id' : False,
-                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
+                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
+                        'previsional_invoice_date' : False,
                     })
             else :
                 RAF_lines = self.env['sale.order.line'].search([('fitnet_id', '=', str(contract_id)+'_reste_a_facturer')])
@@ -920,6 +930,7 @@ class fitnetProject(models.Model):
                         'price_unit': 0.0,
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
                         'direct_payment_purchase_order_line_id' : str(contract_id)+'_paiement_direct',
+                        'previsional_invoice_date' : False,
                     })
 
             if odoo_project.outsourcing in ["no-outsourcing", "co-sourcing"] and odoo_project.outsource_part_cost_current == 0.0 :
@@ -947,6 +958,7 @@ class fitnetProject(models.Model):
             'product_id' : {'odoo_field' : 'product_id'},
             'qty_delivered' : {'odoo_field' : 'qty_delivered'},
             'direct_payment_purchase_order_line_id' : {'odoo_field' : 'direct_payment_purchase_order_line_id'},
+            'previsional_invoice_date' : {'odoo_field' : 'previsional_invoice_date'},
         }
         
         #_logger.info(sale_order_list)
@@ -998,8 +1010,8 @@ class fitnetProject(models.Model):
                 nature_list[supplier_invoice['natureId']] = {'libelle' : supplier_invoice['nature'], 'count' : 1}
             else :
                 nature_list[supplier_invoice['natureId']]['count'] += 1
-        _logger.info(len(nature_list))
-        _logger.info(nature_list)
+        #_logger.info(len(nature_list))
+        #_logger.info(nature_list)
 
         # Fitnet Status of the Purchase: -1 [Canceled], 0 [Planned], 1 [Confirmed], 2 [Invoice received] or 3 [Paid] (Status can only be reached one by one, apart from [Canceled] that can be reached from any status and from [Paid] as well, accounting that an Actual Payment Date is set and the concerned setting is enabled)
 
@@ -1152,7 +1164,7 @@ class fitnetProject(models.Model):
                 invoices_by_contract_supplier[key_contract_supplier] = []
             invoices_by_contract_supplier[key_contract_supplier].append(invoice)
 
-        _logger.info(invoices_by_contract_supplier)
+        #_logger.info(invoices_by_contract_supplier)
 
         sale_order_list = []
         sale_order_line_list = []
@@ -1214,7 +1226,8 @@ class fitnetProject(models.Model):
                         'product_uom': 99,
                         'price_unit': l['initial_unitPrice'],
                         'reselling_subtotal' : reselling_subtotal,
-                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
+                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
+                        'previsional_invoice_date' : inv['date'] or False,
                             }
                     #_logger.info(sol)
                     sale_order_line_list.append(sol)
@@ -1231,7 +1244,8 @@ class fitnetProject(models.Model):
                         'product_uom': 99,
                         'price_unit': 0.0,
                         'reselling_subtotal' : 0.0,
-                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0}
+                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
+                        'previsional_invoice_date' : False,
                     })
 
 
@@ -1250,6 +1264,7 @@ class fitnetProject(models.Model):
             'product_id' : {'odoo_field' : 'product_id'},
             'qty_delivered' : {'odoo_field' : 'qty_received'},
             'reselling_subtotal' : {'odoo_field' : 'reselling_subtotal'},
+            'previsional_invoice_date' : {'odoo_field' : 'previsional_invoice_date'},
         }
         
         #_logger.info(sale_order_list)
