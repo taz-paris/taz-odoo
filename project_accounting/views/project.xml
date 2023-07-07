@@ -144,19 +144,20 @@
 						</group>
 					</page>
 
-					<page name="dashboard" string="Synthèse DM/Manager">
+					<page name="dashboard" string="Synthèse À DATE">
 						<group>
 							<group string="Somme dispositif Tasame + Sous-traitance + autres">
 								<field name="order_amount_current" />
-                                                                <field name="order_cost_current"/>
-                                                                <field name="order_marging_amount_current"/>
-                                                                <field name="order_marging_rate_current" widget="progressbar"/>
-                                                        </group>
-							<group string="Commande">
 								<field name="order_sum_sale_order_lines" />
 								<field name="is_constistant_order_amount" invisible="0"/>
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
 								<button type="object" name="create_sale_order" string="Créer commande client" attrs="{'invisible': [('is_constistant_order_amount', '=', True)]}"/>
+                                                        </group>
+							<group string="Marge actuelle">
+                                                                <field name="company_invoice_sum_move_lines"/>
+                                                                <field name="order_cost_current"/>
+                                                                <field name="order_marging_amount_current"/>
+                                                                <field name="order_marging_rate_current" widget="progressbar"/>
 							</group>
 						</group>
 						<group col="3">

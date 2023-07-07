@@ -8,6 +8,10 @@
                 <field name="partner_shipping_id" position="attributes">
 			<attribute name="invisible">True</attribute>
                 </field>
+		<xpath expr="//tree/field[@name='purchase_order_id']" position="before">
+                        <field name="purchase_line_id" optional="hide" on_change="1"/>
+                        <field name="sale_line_ids" optional="hide" on_change="1" widget="many2many_tags"/>
+                </xpath>
             </field>
         </record>
   </data>
