@@ -313,7 +313,6 @@ class fitnetProject(models.Model):
 
         self.sync_customer_invoices(client)
         self.sync_supplier_invoices(client)
-        return
 
         self.sync_customers(client)
         self.sync_contracts(client)
@@ -1519,7 +1518,7 @@ class fitnetProject(models.Model):
 
 
     def get_proprieteOnDemand_by_id(self, fitnet_object, prop_id):
-        _logger.info(prop_id)
+        #_logger.info(prop_id)
         res = None
         for prop in fitnet_object['proprieteOnDemand']:
             if prop['id'] == prop_id:
