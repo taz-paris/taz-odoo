@@ -55,6 +55,30 @@
         </record>
 
 
+
+        <record id="view_order_tree_inherit" model="ir.ui.view">
+            <field name="name">Sale order</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+	    <field name="arch" type="xml">
+		<field name="name" position="replace">
+			<field name="client_order_ref"/>
+		</field> 
+            </field>
+        </record>
+
+        <record id="view_quotation_tree_with_onboarding_inherit" model="ir.ui.view">
+            <field name="name">Sale order</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+	    <field name="arch" type="xml">
+		<field name="name" position="replace">
+			<field name="client_order_ref"/>
+		</field> 
+            </field>
+        </record>
+
+
 	<record id="view_order_line_tree_inherit" model="ir.ui.view">
             <field name="name">Sale order line</field>
             <field name="model">sale.order.line</field>

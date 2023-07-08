@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 
 class projectAccountingSaleOrder(models.Model):
     _inherit = "sale.order"
+    _rec_name = "client_order_ref"
 
     def compute_final_customer_order_amount(self):
         for rec in self:

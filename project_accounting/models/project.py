@@ -135,8 +135,8 @@ class projectAccountProject(models.Model):
             rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
             rec.order_marging_amount_current = rec.company_invoice_sum_move_lines - rec.order_cost_current
             rec.order_marging_rate_current = 0.0
-            if rec.order_amount_current != 0 : 
-                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_amount_current * 100
+            if rec.company_invoice_sum_move_lines != 0 : 
+                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.company_invoice_sum_move_lines * 100
 
             ######## COMPANY PART
 

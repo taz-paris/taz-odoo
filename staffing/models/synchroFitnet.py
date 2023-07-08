@@ -26,7 +26,7 @@ api_root = "/FitnetManager/rest/"
 cache_mode = False
 cache_folder = '/tmp/fitnet/'
 
-LISTE_PROJET_EXCLUSIF = ['23067','23112','23019','23066','22028','23009']
+LISTE_PROJET_EXCLUSIF = []#'23067','23112','23019','23066','22028','23009']
 
 ##################################################################
 ##########                 REST CLIENT                  ##########
@@ -310,6 +310,7 @@ class fitnetProject(models.Model):
         #    p.button_cancel()
         #return
 
+
         self.sync_customer_invoices(client)
         self.sync_supplier_invoices(client)
         return
@@ -324,13 +325,13 @@ class fitnetProject(models.Model):
 
         self.sync_suppliers(client)
 
+        self.sync_project(client)
 
 
         #TODO           self.sync_prospect(client)
 
         #return self.import_grille_competences()
 
-        self.sync_project(client)
 
         self.sync_assignments(client)
         self.sync_assignmentsoffContract(client)
@@ -763,8 +764,10 @@ class fitnetProject(models.Model):
                     line['signed_amountBTax'] = -1 * line['amountBTax']
                 else :
                     line['signed_amountBTax'] = line['amountBTax']
-                #if line['vatRate'] != 20.0:
-                #    raise ValidationError(_("Taux de TVA != 20%"))
+                if invoice['bTaxBilling']/5 > invoice['vat'] + 1.0 or invoice['bTaxBilling']/5 < invoice['vat']-1 :
+                    vat_rate = invoice['vat'] / invoice['bTaxBilling']
+                    _logger.info("ERREUR : taux de TVA n'est pas 20 pourcents mais %s pour la facture %s" % (str(vat_rate), str(invoice['invoiceNumber'])))
+                    
 
             if invoice['actualPaymentDate'] != "" :
                 payment = {
@@ -886,7 +889,6 @@ class fitnetProject(models.Model):
                         'qty_delivered': l['quantity'],
                         'product_uom': 1,
                         'price_unit': l['signed_amountBTax'],
-                        'direct_payment_purchase_order_line_id' : False,
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
                         'previsional_invoice_date' : inv['billingDueDate'],
                             })
@@ -906,7 +908,6 @@ class fitnetProject(models.Model):
                         'qty_delivered': 0,
                         'product_uom': 1,
                         'price_unit': reste_a_facturer,
-                        'direct_payment_purchase_order_line_id' : False,
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
                         'previsional_invoice_date' : False,
                     })
@@ -929,7 +930,6 @@ class fitnetProject(models.Model):
                         'product_uom': 1,
                         'price_unit': 0.0,
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
-                        'direct_payment_purchase_order_line_id' : str(contract_id)+'_paiement_direct',
                         'previsional_invoice_date' : False,
                     })
 
@@ -957,7 +957,8 @@ class fitnetProject(models.Model):
             'product_uom' : {'odoo_field' : 'product_uom'},
             'product_id' : {'odoo_field' : 'product_id'},
             'qty_delivered' : {'odoo_field' : 'qty_delivered'},
-            'direct_payment_purchase_order_line_id' : {'odoo_field' : 'direct_payment_purchase_order_line_id'},
+            #'direct_payment_purchase_order_line_id' : {'odoo_field' : 'direct_payment_purchase_order_line_id'},
+                #on ne peut pas savoir le(s)quel(s) des fournisseurs seront au moins en partie de paiement direct
             'previsional_invoice_date' : {'odoo_field' : 'previsional_invoice_date'},
         }
         
@@ -1101,10 +1102,17 @@ class fitnetProject(models.Model):
             if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
                 invoices_list.append(invoice)
 
+            if invoice['amountBeforeTax']/5 > invoice['vat'] + 1.0 or invoice['amountBeforeTax']/5 < invoice['vat']-1 :
+                if invoice['amountBeforeTax'] != 0 :
+                    vat_rate = invoice['vat'] / invoice['amountBeforeTax']
+                    _logger.info("ERREUR : taux de TVA n'est pas 20 pourcents mais %s pour la facture %s" % (str(vat_rate), str(invoice['invoiceNumber'])))
+                else :
+                    _logger.info("amountBeforeTax est null %s" % str(invoice['invoiceNumber']))
             
             #if len(invoice['purchaseItems']) != 1 :
             #    _logger.info("Facture fournisseur %s Nombre de lignes de facture différent de 1 : %" % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
             for line in invoice['purchaseItems']:
+
                 line['odoo_purchaseId'] = invoice['odoo_purchaseId']
                 line.pop('purchaseId')
 
@@ -1112,8 +1120,11 @@ class fitnetProject(models.Model):
                 line.pop('id')
 
                 line['purchase_line_id'] = line['odoo_purchaseLineId']
-                #if odoo_project and not odoo_project.is_project_to_migrate():
-                #    line['purchase_line_id'] = None
+
+                po_line = self.env['purchase.order.line'].search([('fitnet_id','=',line['purchase_line_id'])])
+                if len(po_line) == 0:
+                    #_logger.info('Pas de POLine XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX %s %s' % (invoice['contractId'], invoice['invoiceNumber']))
+                    line['purchase_line_id'] = None
 
                 line['initial_unitPrice'] = line['unitPrice']
                 line['unitPrice'] = abs(line['unitPrice']) #ATTENTION : contrairement aux avoirs clients, l'API Fitnet retourne un montant négatif pour les avoirs fournisseurs => il faut donc prendre la valeur absolue
@@ -1121,8 +1132,6 @@ class fitnetProject(models.Model):
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
                 if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
                     invoices_lines_list.append(line)
-                #if line['vatRate'] != 20.0:
-                #    raise ValidationError(_("Taux de TVA != 20%"))
 
             if invoice['actualPayementDate'] != "" and invoice['actualPayementDate'] != None :
                 payment = {
@@ -1156,7 +1165,7 @@ class fitnetProject(models.Model):
             #if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
             #    continue
             if invoice['natureId'] not in [2]: #sous traitance
-                _loggger.info(" ATTENTION : natureId exclu")
+                _logger.info(" ATTENTION : natureId exclu")
                 continue
 
             key_contract_supplier = str(invoice['contractId']) + '***' + str(invoice['odoo_supplierId'])
@@ -1174,6 +1183,11 @@ class fitnetProject(models.Model):
             if not contract_id:
                 _loggger.info("pas de contract_id")
                 continue
+            if contract_id == 'None' :
+                continue
+            #_logger.info(key_contract_supplier)
+            #_logger.info(contract_invoice_list)
+            #_logger.info(contract_id)
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
             #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
             #if not odoo_project.is_project_to_migrate():
@@ -1215,6 +1229,11 @@ class fitnetProject(models.Model):
                             reselling_subtotal =  l['initial_unitPrice'] / sum_contract_invoice_lines * odoo_project.amount
                     sum_reselling_subtotal += reselling_subtotal
 
+                    if inv['purchaseStatus'] in [0, 1]:#Si la facture est au statut annulé ou à venir
+                        qty_delivered = 0
+                    else :
+                        qty_delivered = l['quantity']
+
                     sol = {
                         'order_id' : key_contract_supplier,
                         'line_id' : l['odoo_purchaseLineId'],
@@ -1222,7 +1241,7 @@ class fitnetProject(models.Model):
                         'name': 'Reprise Fitnet - échéance du '+str(inv['date'])+' (réglement prévu avant le '+str(inv['dueDate'])+') '+l['title'], #TODO : lire le libellé du produit
                         'product_uom_qty': l['quantity'],
                         'product_qty': l['quantity'],
-                        'qty_delivered': l['quantity'], #TODO : devrait être à 0 si pas encore facturé
+                        'qty_delivered': qty_delivered,
                         'product_uom': 99,
                         'price_unit': l['initial_unitPrice'],
                         'reselling_subtotal' : reselling_subtotal,
@@ -1698,8 +1717,9 @@ class fitnetProject(models.Model):
                         odoo_id = ""
                         if odoo_object :
                             odoo_id = odoo_object['id']
-                        _logger.info("Alimentation du champ %s pour l' object Odoo %s (ID ODOO = %s)" % (odoo_field_name, odoo_model_name, str(odoo_id)))
-                        _logger.info("      > Erreur - impossible de trouver l'objet lié : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_value))
+                        if fitnet_value != False:
+                            _logger.info("Alimentation du champ %s pour l' object Odoo %s (ID ODOO = %s)" % (odoo_field_name, odoo_model_name, str(odoo_id)))
+                            _logger.info("      > Erreur - impossible de trouver l'objet lié : aucun objet %s n'a de fitnet_id valorisé à %s" % (odoo_field.relation, fitnet_value))
                         continue
 
                 if odoo_field.ttype == "many2many" :
