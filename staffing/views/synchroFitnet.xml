@@ -236,7 +236,7 @@
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
                 <field name="categ_id" position="after">
-                        <field name="fitnet_id" readonly="1"/>
+                        <field name="fitnet_id" readonly="0"/>
                 </field>
             </field>
         </record>

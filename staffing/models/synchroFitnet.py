@@ -718,6 +718,7 @@ class fitnetProject(models.Model):
             'amountBTax' : {'odoo_field' : 'price_unit'},
             'quantity' : {'odoo_field' : 'quantity'},
             'contractId_json' : {'odoo_field' : 'analytic_distribution'},
+            'product_id' : {'odoo_field' : 'product_id'},
             #'sale_line_ids' : {'odoo_field' : 'sale_line_ids'},
             #product_id
         }
@@ -764,10 +765,16 @@ class fitnetProject(models.Model):
                     line['signed_amountBTax'] = -1 * line['amountBTax']
                 else :
                     line['signed_amountBTax'] = line['amountBTax']
+                
+                line['product_id'] = 999
                 if invoice['bTaxBilling']/5 > invoice['vat'] + 1.0 or invoice['bTaxBilling']/5 < invoice['vat']-1 :
-                    vat_rate = invoice['vat'] / invoice['bTaxBilling']
-                    _logger.info("ERREUR : taux de TVA n'est pas 20 pourcents mais %s pour la facture %s" % (str(vat_rate), str(invoice['invoiceNumber'])))
-                    
+                    vat_rate = round(invoice['vat'] / invoice['bTaxBilling'],2)
+                    if abs(vat_rate) == 0.0:
+                        line['product_id'] = 1001
+                    else:
+                        _logger.info("ERREUR : taux de TVA n'est pas 20 pourcents mais %s pour la facture %s du client %s %s" % (str(vat_rate), str(invoice['invoiceNumber']), invoice['invoicingCustomer'], odoo_project.partner_id.vat))
+               
+
 
             if invoice['actualPaymentDate'] != "" :
                 payment = {
@@ -852,8 +859,6 @@ class fitnetProject(models.Model):
             if p.amount == 0.0:
                 continue
             if int(p.fitnet_id) not in invoices_by_contract.keys():
-                #_logger.info('ajout de la ligne virtuelle $$$$$$$$$$$$$$$$$$$$ %s' % str(p.fitnet_id))
-                #_logger.info(invoices_by_contract.keys())
                 fact_list = []
                 fact_list.append({
                     'customerId' : p.partner_id.fitnet_id,
@@ -883,7 +888,7 @@ class fitnetProject(models.Model):
                         'order_id' : contract_id,
                         'line_id' : l['inoviceLineId'],
                         'invoice_lines' : [l['inoviceLineId']],
-                        'product_id' : 999, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'product_id' : l['product_id'],#999,
                         'name': 'Reprise Fitnet - facturé', #TODO : lire le libellé du produit
                         'product_uom_qty': l['quantity'],
                         'qty_delivered': l['quantity'],
@@ -902,7 +907,7 @@ class fitnetProject(models.Model):
                         'order_id' : contract_id,
                         'line_id' : str(contract_id)+'_reste_a_facturer',
                         'invoice_lines' : [],
-                        'product_id' : 999, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'product_id' : l['product_id'],#999,
                         'name': 'Reprise Fitnet - reste à facturer par Tasmane',
                         'product_uom_qty': 1,
                         'qty_delivered': 0,
@@ -920,10 +925,10 @@ class fitnetProject(models.Model):
             if odoo_project.outsourcing in ["direct-paiement-outsourcing", "direct-paiement-outsourcing-company"]:
                 sale_order_line_list.append({
                         'order_id' : contract_id,
-                        'line_id' : '',#key_contract_supplier+'_paiement_direct',
+                        'line_id' : str(contract_id)+'_paiement_direct',
                             #TODO : il faut boucler sur les BCF du projet pour liéer les lignes de paimeent direct... mais pas possible de savoir a priori pour quel(s) fournisseur du projet il y en aura
                         'invoice_lines' : [],
-                        'product_id' : 999, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'product_id' : l['product_id'],#999,
                         'name': 'Reprise Fitnet - paiement direct',
                         'product_uom_qty': 1,
                         'qty_delivered': 0,
@@ -1038,6 +1043,7 @@ class fitnetProject(models.Model):
             'quantity' : {'odoo_field' : 'quantity'},
             'contractId_json' : {'odoo_field' : 'analytic_distribution'},
             'purchase_line_id' : {'odoo_field' : 'purchase_line_id'},
+            'product_id' : {'odoo_field' : 'product_id'},
             #product_id
         }
         mapping_fields_payment = {
@@ -1078,11 +1084,6 @@ class fitnetProject(models.Model):
             if purchaseId_unicity_ctrl[invoice['purchaseId']]['count'] > 1:
                 invoice['odoo_purchaseId'] = 'supplier_' + str(invoice['orderNumber']) + '_' + str(invoice['purchaseId']) 
             invoice.pop('purchaseId')
-            #if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
-            #    continue
-            #if invoice['natureId'] not in [2]: #sous traitance
-            #    continue
-                #TODO pour gérer les natures différentes  créer un article différent par compte comptable différent ou taux de taxe différent
             if invoice['amountBeforeTax'] < 0:
                 #_logger.info('avoir fitnet invoiceId=' + str(invoice['odoo_purchaseId']))
                 invoice['move_type'] = 'in_refund'
@@ -1102,13 +1103,8 @@ class fitnetProject(models.Model):
             if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
                 invoices_list.append(invoice)
 
-            if invoice['amountBeforeTax']/5 > invoice['vat'] + 1.0 or invoice['amountBeforeTax']/5 < invoice['vat']-1 :
-                if invoice['amountBeforeTax'] != 0 :
-                    vat_rate = invoice['vat'] / invoice['amountBeforeTax']
-                    _logger.info("ERREUR : taux de TVA n'est pas 20 pourcents mais %s pour la facture %s" % (str(vat_rate), str(invoice['invoiceNumber'])))
-                else :
-                    _logger.info("amountBeforeTax est null %s" % str(invoice['invoiceNumber']))
-            
+
+           
             #if len(invoice['purchaseItems']) != 1 :
             #    _logger.info("Facture fournisseur %s Nombre de lignes de facture différent de 1 : %" % (invoice['invoiceNumber'], str(len(invoice['purchaseItems']))))
             for line in invoice['purchaseItems']:
@@ -1132,6 +1128,19 @@ class fitnetProject(models.Model):
                 line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
                 if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
                     invoices_lines_list.append(line)
+
+
+                line['product_id'] = 1000
+                if invoice['amountBeforeTax']/5 > invoice['vat'] + 1.0 or invoice['amountBeforeTax']/5 < invoice['vat']-1 :
+                    if invoice['amountBeforeTax'] != 0 :
+                        vat_rate = round(invoice['vat'] / invoice['amountBeforeTax'],2)
+                        if abs(vat_rate) == 0.0:
+                            line['product_id'] = 1003
+                        else:
+                            _logger.info("ERREUR : taux de TVA n'est pas 20 pourcents mais %s pour la facture %s du client %s %s" % (str(vat_rate), str(invoice['invoiceNumber']), invoice['supplier'], odoo_project.partner_id.vat))
+                    else :
+                        _logger.info("amountBeforeTax est null %s" % str(invoice['invoiceNumber']))
+ 
 
             if invoice['actualPayementDate'] != "" and invoice['actualPayementDate'] != None :
                 payment = {
@@ -1159,21 +1168,11 @@ class fitnetProject(models.Model):
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
             if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
                 continue
-            #_logger.info("******** Projet %s" % odoo_project.number)
-            #_logger.info(invoice)
-
-            #if invoice['odoo_purchaseId'] not in ['supplier_682', 'supplier_790']:
-            #    continue
-            if invoice['natureId'] not in [2]: #sous traitance
-                _logger.info(" ATTENTION : natureId exclu")
-                continue
 
             key_contract_supplier = str(invoice['contractId']) + '***' + str(invoice['odoo_supplierId'])
             if key_contract_supplier not in invoices_by_contract_supplier.keys():
                 invoices_by_contract_supplier[key_contract_supplier] = []
             invoices_by_contract_supplier[key_contract_supplier].append(invoice)
-
-        #_logger.info(invoices_by_contract_supplier)
 
         sale_order_list = []
         sale_order_line_list = []
@@ -1185,11 +1184,7 @@ class fitnetProject(models.Model):
                 continue
             if contract_id == 'None' :
                 continue
-            #_logger.info(key_contract_supplier)
-            #_logger.info(contract_invoice_list)
-            #_logger.info(contract_id)
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
-            #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
             #if not odoo_project.is_project_to_migrate():
             #    _logger.info("exclu car pas un projet à migrer")
             #    continue
@@ -1237,7 +1232,7 @@ class fitnetProject(models.Model):
                     sol = {
                         'order_id' : key_contract_supplier,
                         'line_id' : l['odoo_purchaseLineId'],
-                        'product_id' : 1000, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'product_id' : l['product_id'],
                         'name': 'Reprise Fitnet - échéance du '+str(inv['date'])+' (réglement prévu avant le '+str(inv['dueDate'])+') '+l['title'], #TODO : lire le libellé du produit
                         'product_uom_qty': l['quantity'],
                         'product_qty': l['quantity'],
@@ -1255,7 +1250,7 @@ class fitnetProject(models.Model):
                 sale_order_line_list.append({
                         'order_id' : key_contract_supplier,
                         'line_id' : key_contract_supplier + '_paiement_direct',
-                        'product_id' : 1000, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'product_id' : l['product_id'],
                         'name': 'Reprise Fitnet - paiement direct',
                         'product_uom_qty': 1,
                         'product_qty': 1,
@@ -1643,7 +1638,7 @@ class fitnetProject(models.Model):
 
 
                     if odoo_field.ttype in ["float", "monetary"] :
-                        odoo_value = float(fitnet_value)
+                        odoo_value = round(float(fitnet_value),2)
 
                     if odoo_field.ttype in ["integer"] :
                         odoo_value = int(fitnet_value)
