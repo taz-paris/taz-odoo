@@ -21,9 +21,10 @@ class projectOutsourcingLink(models.Model):
             #rec.order_sum_purchase_order_lines = 0
             line_ids = rec.get_purchase_order_line_ids()
             total = 0.0
+            #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
-                total += line.price_subtotal
+                total += line.qty_to_invoice * line.price_unit
             rec.order_sum_purchase_order_lines = total
 
     def action_open_purchase_order_lines(self):

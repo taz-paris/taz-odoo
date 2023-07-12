@@ -311,31 +311,28 @@ class fitnetProject(models.Model):
         #return
 
 
+
+        #self.sync_employees(client)
+        self.sync_employees_contracts(client)
+        return
+        #self.sync_holidays(client) 
+        #self.correct_leave_timesheet_stock(client)
+
+
         self.sync_customer_invoices(client)
         self.sync_supplier_invoices(client)
 
         self.sync_customers(client)
-        self.sync_contracts(client)
-
-        self.sync_employees(client)
-        self.sync_employees_contracts(client)
-        self.sync_holidays(client) 
-        self.correct_leave_timesheet_stock(client)
 
         self.sync_suppliers(client)
+        #self.sync_contracts(client) #projets
 
-        self.sync_project(client)
+        #self.sync_project(client)
 
-
-        #TODO           self.sync_prospect(client)
-
-        #return self.import_grille_competences()
-
-
-        self.sync_assignments(client)
-        self.sync_assignmentsoffContract(client)
+        #self.sync_assignments(client)
+        #self.sync_assignmentsoffContract(client)
     
-        self.sync_timesheets(client)
+        #self.sync_timesheets(client)
 
         #Correctif à passer de manière exceptionnelle
         #self.analytic_line_employee_correction()
@@ -1330,14 +1327,15 @@ class fitnetProject(models.Model):
             contract['wage'] = 0.0
 
             contract['leaving_date_previous_day'] = False
-            if contract['leaving_date']:
+            if contract['leaving_date'] and contract['leaving_date'] != "10/07/2023":
                 if contract['effective_date'] == contract['leaving_date']:
                     contract['leaving_date_previous_day'] = contract['leaving_date']
                 else:
                     leaving_date_previous_day = datetime.datetime.strptime(contract['leaving_date'], '%d/%m/%Y').date() - datetime.timedelta(days=1)
                     contract['leaving_date_previous_day'] = leaving_date_previous_day.strftime("%d/%m/%Y")
 
-            if contract['leaving_date']:
+
+            if contract['leaving_date'] and contract['leaving_date'] != "10/07/2023":
                 contract['state'] = 'close'
             else :
                 contract['state'] = 'open'
@@ -1350,8 +1348,8 @@ class fitnetProject(models.Model):
             'state' : {'odoo_field' : 'state', 'selection_mapping' : {'open' : 'open', 'close' : 'close'}},
             'effective_date' : {'odoo_field' : 'date_start'},
             'leaving_date_previous_day' : {'odoo_field' : 'date_end'},
-            'collaboratorProfileId' : {'odoo_field' : 'job_id'},
             'wage' : {'odoo_field' : 'wage'},
+            'contractProfileId' : {'odoo_field' : 'job_id'},
             #contract_type_id
             #qualification
             #positionName

@@ -83,13 +83,14 @@ class HrCost(models.Model):
         lines = self.env['account.analytic.line'].search([('date', '>=', date_oldest), ('project_id', '!=', False)])
         _logger.info(len(lines))
         #on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
+        """
         for line in lines:
             job = line.employee_id._get_job_id(line.date)
             if not job:
                 continue
             if job.id == self.job_id.id:
                 line.refresh_amount()
-            
+        """ 
 
 
     job_id = fields.Many2one('hr.job', string="Poste", required=True)

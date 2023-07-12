@@ -29,6 +29,7 @@
             <field name="arch" type="xml">
                 <field name="tag_ids" position="after">
                         <field name="napta_id" readonly="1"/>
+			<button type="object" name="delete_on_napta" string="Supprimer sur Napta" colspan="2" attrs="{'invisible': [('napta_id', '=', False)]}" groups="base.group_system"/>
                 </field>
             </field>
         </record>
@@ -63,7 +64,42 @@
                         <field name="napta_id" readonly="1"/>
                 </field>
             </field>
+    </record>
+
+        <record id="view_department_form_inherit" model="ir.ui.view">
+            <field name="name">Département</field>
+            <field name="model">hr.department</field>
+            <field name="inherit_id" ref="hr.view_department_form"/>
+            <field name="arch" type="xml">
+                <field name="parent_id" position="after">
+                        <field name="napta_id" readonly="0"/>
+                </field>
+            </field>
         </record>
+
+        <record id="hr_contract_history_view_form_inherit" model="ir.ui.view">
+            <field name="name">Contract history</field>
+            <field name="model">hr.contract.history</field> 
+            <field name="inherit_id" ref="hr_contract.hr_contract_history_view_form"/>
+            <field name="arch" type="xml">
+		<xpath expr="//tree/field[@name='state']" position="before">
+			<field name="napta_id" readonly="1" optional="hide"/>
+                </xpath>
+            </field>
+        </record> 
+
+
+        <record id="hr_contract_view_form_inherit" model="ir.ui.view">
+            <field name="name">Contrat</field>
+            <field name="model">hr.contract</field>
+            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+            <field name="arch" type="xml">
+                <field name="hr_responsible_id" position="after">
+                        <field name="napta_id" readonly="0"/>
+                </field>
+            </field>
+        </record>
+
 <!--
         <record id="hr_employee_fitnet_view_form_inherit" model="ir.ui.view">
             <field name="name">Équipage</field>
@@ -154,17 +190,6 @@
             </field>
         </record>
 
-
-        <record id="hr_contract_view_form_inherit" model="ir.ui.view">
-            <field name="name">Contrat</field>
-            <field name="model">hr.contract</field>
-            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
-            <field name="arch" type="xml">
-                <field name="hr_responsible_id" position="after">
-                        <field name="fitnet_id" readonly="1"/>
-                </field>
-            </field>
-        </record>
 
 
         <record id="account_view_account_payment_form_inherit" model="ir.ui.view">

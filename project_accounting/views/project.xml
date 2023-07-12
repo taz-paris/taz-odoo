@@ -151,7 +151,8 @@
 								<field name="order_sum_sale_order_lines" />
 								<field name="is_constistant_order_amount" invisible="0"/>
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
-								<button type="object" name="create_sale_order" string="Créer commande client" attrs="{'invisible': [('is_constistant_order_amount', '=', True)]}"/>
+								<button type="object" name="create_sale_order" string="Créer commande client" /> 
+								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
                                                         </group>
 							<group string="Marge actuelle">
                                                                 <field name="company_invoice_sum_move_lines"/>

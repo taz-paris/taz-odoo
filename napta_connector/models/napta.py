@@ -22,7 +22,7 @@ _logger = logging.getLogger(__name__)
 API_URL_TOKEN_ENDPOINT = "https://pickyourskills.eu.auth0.com/oauth/token"
 API_URL_BUSINESS_ENDPOINT = "https://app.napta.io/api/v1/"
 
-cache_duration_in_minutes = 15
+cache_duration_in_minutes = 60
 cache_folder = '/tmp/napta'
 
 ##################################################################
@@ -282,7 +282,7 @@ class ClientRestNapta:
 
     """
     def delete_napta_ids(self):
-        for obj in[]: # ["project.project", "res.partner", "staffing.need", "account.analytic.line", "res.users"]: #, "hr.job", "project.project.stage"
+        for obj in[]: # ["project.project", "res.partner", "staffing.need", "account.analytic.line", "res.users", "hr.contract"]: #, "hr.job", "project.project.stage"
             _logger.info('Suppression des napta_id sur les instance de %s' % obj)
             list_obj = self.env[obj].search([('napta_id', '!=', None)])
             for o in list_obj :
@@ -319,6 +319,16 @@ class naptaProject(models.Model):
         if self.napta_id :
            raise ValidationError(_("Impossible de supprimer ce projet car il est synchronisé avec Napta.")) 
         return super().unlink()
+
+    def delete_on_napta(self):
+        self.ensure_one()
+        if not self.napta_id:
+           raise ValidationError(_("Impossible de supprimer ce projet sur Napta car son id_napta est inconnu.")) 
+        _logger.info('Projet à supprimer de napta %s %s (ID ODOO = %s / NaptaID = %s)' % (self.number, self.name, str(self.id), self.napta_id))
+        client = ClientRestNapta(self.env)
+        self.is_prevent_napta_creation = True
+        client.delete_api('project', self)
+        self.env.cr.commit()
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project')
@@ -368,11 +378,44 @@ class naptaProject(models.Model):
 
         client = ClientRestNapta(self.env)
         client.empty_cache()
-        
-        #Déterminer les projet à remonter sur Napta
 
+        users = self.env['res.users'].search([])
+        for user in users:
+            user.create_update_napta()
+
+        """
+        #supprimer les projets remontés par erreur
         projects = self.env['project.project'].search([], order="number desc")
+        for project in projects:
+            if not project.napta_id:
+                continue
+            if project.is_project_to_migrate() :
+                _logger.info('projet à migrer %s' % project.number)
+                continue
+            if project.id in [1148,1374,1150,1337,1373,1372,1371] : #1148 = K4M et autres formations Fitnet POUR 2023 uniquement
+                continue
+            #projet avec un napta_id qui ne sont pas à migrer
+            _logger.info('projet à supprimer de napta %s %s (ID ODOO = %s / NaptaID = %s)' % (project.number, project.name, str(project.id), project.napta_id))
+            project.is_prevent_napta_creation = True
+            client.delete_api('project', project)
+            self.env.cr.commit()
+        return
+        """
 
+        """
+        #Synchro du projet 1148 = K4M et autres formations Fitnet POUR 2023 uniquement
+        project = self.env['project.project'].search([('id','=',1148)])[0]
+        _logger.info('======== INITIALISATION PROJET %s %s (odoo_id = %s)' % (project.name, project.number, str(project.id)))
+
+        forecast_lines = self.env['account.analytic.line'].search([('date', '>', datetime.date(2023,1,1)), ('category', '=', 'project_forecast'), ('project_id', '=', project.id)], order="date asc")
+        forecast_lines.create_update_napta_userprojectperiod()
+
+        timesheet_lines = self.env['account.analytic.line'].search([('date', '>', datetime.date(2023,1,1)), ('category', '=', 'project_employee_validated'), ('project_id', '=', project.id)], order="date asc")
+        timesheet_lines.create_update_napta_timesheetperiod()
+
+       
+        #Déterminer les projet à remonter sur Napta
+        projects = self.env['project.project'].search([], order="number desc")
         for project in projects:
             _logger.info(project.number)
             if not project.is_project_to_migrate() :
@@ -396,6 +439,8 @@ class naptaProject(models.Model):
             if len(forecast_lines) == 0 and len(timesheet_lines) == 0:
                 if project.stage_id.id == 1: #importer les projets en opportunité... et qui n'ont dont PAS ENCORE de staffing
                     project.create_update_napta()
+        """
+
 
         _logger.info('======== napta_init_from_odoo TERMINEE')
 
@@ -538,6 +583,7 @@ class naptaAnalyticLine(models.Model):
               "worked_days" : rec.unit_amount,
             }
 
+            # The PATCH method is not allowed for this object : if there is a difference delete existing object dans create the new one
             if rec.napta_id:
                 changes_dic, cache_value = client.get_change_dic('timesheet_period', attributes, rec.napta_id)
                 if any(x in ['timesheet_id', 'project_id', 'day'] for x in changes_dic.keys()):
@@ -559,14 +605,17 @@ class naptaResUsers(models.Model):
         client = ClientRestNapta(self.env)
         napta_user_list = client.read_cache('user')
         for rec in self:
+            """
             if not(rec.napta_id):
                 for napta_user in napta_user_list.values():
                     if napta_user['attributes']['email'] == rec.login :
                         #TODO : toutes les fonctions qui doivent écrire sur un res.user doivent passer par SUDO car un tasmanien l'ambda n'a pas le droit en écriture sur cet objet
                         rec.sudo().napta_id = napta_user['id']
                         self.env.cr.commit()
+            """
             if not(rec.napta_id):
                 _logger.info('################### Utilisateur manquant %s' % rec.login)
+                continue
 
             """
             rec.employee_id.job_id.create_update_napta()
@@ -587,6 +636,9 @@ class naptaResUsers(models.Model):
             client.create_update_api('user', attributes, rec)
             """
 
+            for contract in rec.employee_id.contract_ids :
+                contract.create_update_napta()
+
 
 class naptaJob(models.Model):
     _inherit = 'hr.job'
@@ -604,3 +656,54 @@ class naptaJob(models.Model):
             }
             client.create_update_api('user_position', attributes, rec)
         
+
+class naptaHrContract(models.Model):
+    _inherit = 'hr.contract'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+    def create_update_napta(self):
+        _logger.info('---- Create or update Napta user_history')
+        client = ClientRestNapta(self.env)
+        for rec in self:
+            _logger.info(rec.name)
+            if not rec.job_id.napta_id :
+                _logger.info("Poste inexistant sur Napta %s pour %s." %(rec.job_id.name, rec.name))
+                continue
+
+            BEGIN_OF_TIME = datetime.date(2022, 1, 1)
+            if rec.date_start >= BEGIN_OF_TIME:
+                daily_cost = rec.job_id._get_daily_cost(rec.date_start).cost
+                start_date = str(rec.date_start)
+            else :
+                cost_line = rec.job_id._get_daily_cost(BEGIN_OF_TIME)
+                daily_cost = 0.0
+                if cost_line :
+                    daily_cost = cost_line.cost
+                start_date = str(BEGIN_OF_TIME)
+
+            attributes = {
+                'business_unit_id' : rec.job_id.department_id.napta_id,
+                'daily_cost' : daily_cost,
+                'location_id' : 1, #Paris TODO : ne plus hardcoder cette valeur
+                'start_date' : start_date,
+                'user_id' : rec.employee_id.user_id.napta_id,
+                'user_position_id' : rec.job_id.napta_id,
+            }
+
+            # The PATCH method is not allowed for this object : if there is a difference delete existing object dans create the new one
+            if rec.napta_id:
+                changes_dic, cache_value = client.get_change_dic('user_history', attributes, rec.napta_id)
+                if len(changes_dic) : 
+                    client.delete_api('user_history', rec)
+            client.create_update_api('user_history', attributes, rec)
+
+
+class naptaHrDepartment(models.Model):
+    _inherit = 'hr.department'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")

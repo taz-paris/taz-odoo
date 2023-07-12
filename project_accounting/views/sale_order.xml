@@ -10,6 +10,14 @@
 		    <field name="client_order_ref" position="move"/>
 	    	</field>
 
+		<field name="partner_id" position="attributes">
+			<attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+		</field>
+
+		<field name="partner_invoice_id" position="attributes">
+			<attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+		</field>
+
 		<field name="partner_shipping_id" position="attributes">
 			<attribute name="invisible">True</attribute>
 		</field>

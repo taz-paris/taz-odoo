@@ -162,6 +162,7 @@ class projectAccountProject(models.Model):
             rec.outsource_part_amount_current = 0.0
             rec.outsource_part_cost_current = 0.0
             rec.order_to_invoice_outsourcing = 0.0
+            rec.order_sum_sale_order_lines = rec.compute_sale_order_total()
             rec.order_to_invoice_company = rec.order_sum_sale_order_lines
             for link in rec.project_outsourcing_link_ids:
                 rec.outsource_part_amount_current += link.outsource_part_amount_current
@@ -204,21 +205,25 @@ class projectAccountProject(models.Model):
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
 
     def compute_sale_order_total(self): 
+        _logger.info('----------compute_sale_order_total')
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
-        for rec in self:
-            rec.order_sum_sale_order_lines = 0.0
-            # avec un utilisateur avec un ID != celui d'aurélien, ça crash :
-            #       Record does not exist or has been deleted
-            #       (Record: sale.order.line(1,), Field : sale.order.line.price_subtotal, User: 2) 
-            # renvoyé par sudo vim /usr/lib/python3/dist-packages/odoo/fields.py ligne 1191
-            line_ids = rec.get_sale_order_line_ids()
-            total = 0.0
-            for line_id in line_ids:
-                line = rec.env['sale.order.line'].browse(line_id)
-                #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-                total += line.price_subtotal
-            rec.order_sum_sale_order_lines = total
-
+        self.ensure_one()
+        rec = self
+        # avec un utilisateur avec un ID != celui d'aurélien, ça crash :
+        #       Record does not exist or has been deleted
+        #       (Record: sale.order.line(1,), Field : sale.order.line.price_subtotal, User: 2) 
+        # renvoyé par sudo vim /usr/lib/python3/dist-packages/odoo/fields.py ligne 1191
+        line_ids = rec.get_sale_order_line_ids()
+        total = 0.0
+        for line_id in line_ids:
+            line = rec.env['sale.order.line'].browse(line_id)
+            _logger.info(e.read())
+            #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
+            total += line.qty_to_invoice * line.price_unit
+        _logger.info(total)
+        _logger.info('----------END compute_sale_order_total')
+        return total
+        
     def action_open_sale_order_lines(self):
         line_ids = self.get_sale_order_line_ids()
 
@@ -456,7 +461,7 @@ class projectAccountProject(models.Model):
     ######## TOTAL
     order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
-    order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', compute=compute_sale_order_total, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
+    order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
     is_constistant_order_amount = fields.Boolean('Cohérence commande client/ventilation mission', compute=compute, help="Faux lorsque le montant total des lignes de commandes est différent de la somme de la part Dispositifi Tasmane+part sous-traitée+part autres prestations")
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute)
