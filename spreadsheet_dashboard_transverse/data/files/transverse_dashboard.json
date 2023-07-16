@@ -1,0 +1,155 @@
+{
+    "version": 12,
+    "sheets": [
+        {
+            "id": "sheet1",
+            "name": "Dashboard",
+            "colNumber": 10,
+            "rowNumber": 100,
+	    "rows" : {},
+	    "cols": {},
+	    "merges": [],
+	    "cells": {
+		"A1": {
+			"style": 1,
+			"content": "[Actions en retard qui me sont assignées](odoo://view/{\"viewType\":\"list\",\"action\":{\"domain\":[[\"state\",\"in\",[\"todo\",\"planned\", \"wait\"]], [\"date_deadline\", \"<\", \"today\"]],\"context\":{\"search_default_assigned_to_me\":1},\"modelName\":\"taz.business_action\",\"views\":[[false,\"list\"],[false,\"kanban\"],[false,\"form\"],[false,\"calendar\"],[false,\"pivot\"],[false,\"graph\"],[false,\"activity\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Actions en retard\"})",
+			"border": 1
+		},
+		"A2" : {
+                    "style": 2,
+                    "content": "=_t(\"Action commerciale\")",
+                    "border": 2
+                },
+		"A3" : {
+                    "style": 3,
+                    "content": "=ODOO.LIST(1,1,\"name\")"
+                },
+		"B2" : {
+                    "style": 2,
+                    "content": "=_t(\"Affectée à\")",
+                    "border": 2
+                },
+		"B3": {
+                    "style": 9,
+                    "content": "=ODOO.LIST(1,1,\"owner_id\")"
+                }
+	    },
+	    "conditionalFormats": [],
+            "figures": [],
+	    "areGridLinesVisible": true,
+            "isVisible": true
+	}
+    ],
+    "entities": {},
+    "styles": {
+        "1": {
+            "textColor": "#01666b",
+            "bold": true,
+            "fontSize": 16
+        },
+        "2": {
+            "bold": true,
+            "fillColor": ""
+        },
+        "3": {
+            "fillColor": "#f2f2f2",
+            "textColor": "#01666b"
+        },
+        "4": {
+            "textColor": "#01666b"
+        },
+        "5": {
+            "bold": true
+        },
+        "6": {
+            "fillColor": "#f2f2f2",
+            "textColor": "#741b47"
+        },
+        "7": {
+            "textColor": "#741b47"
+        },
+        "8": {
+            "fontSize": 16,
+            "bold": true
+        },
+        "9": {
+            "fillColor": "#f2f2f2"
+        },
+        "10": {
+            "bold": true,
+            "align": "right"
+        },
+        "11": {
+            "bold": true,
+            "fillColor": "",
+            "align": "right"
+        },
+        "12": {
+            "fillColor": ""
+        }
+    },
+    "formats": {
+        "1": "0",
+        "2": "[$$]#,##0",
+        "3": "#,##0"
+    },
+    "borders": {
+        "1": {
+            "bottom": [
+                "thin",
+                "#000"
+            ]
+        },
+        "2": {
+            "top": [
+                "thin",
+                "#000"
+            ]
+        }
+    },
+    "revisionId": "START_REVISION",
+    "chartOdooMenusReferences": {},
+    "odooVersion": 4,
+    "lists": {
+        "1": {
+            "columns": [
+                "name",
+                "partner_id",
+                "owner_id",
+                "status",
+		"date_deadline"
+            ],
+            "domain": [
+                [
+                    "state",
+                    "in",
+		    ["todo","planned", "wait"]
+                ],
+                [
+                    "date_deadline",
+                    "<",
+                    "today"
+                ],
+		[
+                    "owner_id",
+                    "=",
+                    "uid"
+                ]
+            ],
+            "model": "taz.business_action",
+            "context": {"search_default_assigned_to_me":1},
+            "orderBy": [
+                {
+                    "name": "date_deadline",
+                    "asc": true
+                }
+            ],
+            "id": "1",
+            "name": "Mes actions en retard par deadlines croissantes"
+        }
+    },
+    "listNextId": 2,
+    "pivots": {},
+    "pivotNextId": 1,
+    "globalFilters": []
+}

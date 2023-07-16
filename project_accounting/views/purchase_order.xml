@@ -16,6 +16,9 @@
 			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
 			<field name="previsional_invoice_date" optional="hide"  on_change="1" />
                 </xpath>
+                <xpath expr="//field[@name='analytic_distribution']" position="attributes">
+                        <attribute name="optional">show</attribute>
+                </xpath>
 		<field name="order_line" position="attributes">
 			<attribute name="context">{'default_state': 'draft', 'default_analytic_distribution' : context.get('default_analytic_distribution')}</attribute>
 		</field>

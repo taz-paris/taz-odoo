@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="spreadsheet_dashboard_group_transverse" model="spreadsheet.dashboard.group">
+        <field name="name">Transverse</field>
+        <field name="sequence">500</field>
+    </record>
+
+    <record id="spreadsheet_dashboard_transverse" model="spreadsheet.dashboard">
+        <field name="name">Transverse</field>
+        <field name="data" type="base64" file="spreadsheet_dashboard_transverse/data/files/transverse_dashboard.json"/>
+        <field name="dashboard_group_id" ref="spreadsheet_dashboard_group_transverse"/>
+	<!--
+        <field name="group_ids" eval="[Command.link(ref('sales_team.group_sale_manager'))]"/>
+	-->
+        <field name="sequence">100</field>
+    </record>
+
+</odoo>

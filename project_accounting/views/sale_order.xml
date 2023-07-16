@@ -51,6 +51,11 @@
 			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
 
 		</xpath>
+
+		<xpath expr="//tree/field[@name='analytic_distribution']" position="attributes">
+			<attribute name="optional">show</attribute>
+		</xpath>
+
 		<field name="order_line" position="attributes">
                         <attribute name="context">{'default_analytic_distribution' : context.get('default_analytic_distribution')}</attribute>
                 </field>
