@@ -159,6 +159,7 @@ class ClientRestNapta:
         return changes_dic, cache_value
 
 
+
     def patch_api(self, napta_type, attributes, napta_id):
         #if napta_type not in ['timesheet','timesheet_period']:#['timesheet_period', 'timesheet', 'userprojectperiod']:
         #    _logger.info('Pas de mise à jour sur ce type pour éviter de faire trop d\'appels.')
@@ -232,6 +233,14 @@ class ClientRestNapta:
         _logger.info("ID odoo object : %s" % str(odoo_object.id))
         napta_id = odoo_object.napta_id
 
+        self.delete_api_raw(napta_type, napta_id)
+
+        odoo_object.napta_id = None
+        self.env.cr.commit
+        self.delete_element_cache(napta_type, napta_id)
+        return
+
+    def delete_api_raw(self, napta_type, napta_id):
         headers = {
             'authorization': 'Bearer '+self.get_access_token(),
             'content-type': 'application/json'
@@ -242,12 +251,8 @@ class ClientRestNapta:
             _logger.info("POST 429 too many requests : attente de 60 secondes")
             time.sleep(60)
             response = requests.delete(self.API_URL_BUSINESS_ENDPOINT+napta_type+"/"+str(napta_id), headers=headers)
-
         _logger.info(response.status_code)
-        odoo_object.napta_id = None
-        self.env.cr.commit
-        self.delete_element_cache(napta_type, napta_id)
-        return
+
 
     def get_api(self, napta_type, page_size=1000000, filter=None):
         """ 
@@ -379,9 +384,17 @@ class naptaProject(models.Model):
         client = ClientRestNapta(self.env)
         client.empty_cache()
 
+
+        """
+        # RESET des user_history portant les CJM
         users = self.env['res.users'].search([])
         for user in users:
-            user.create_update_napta()
+            if not user.napta_id :
+                _logger.info("Pas de napta_id pour l'utilisatuer : %s" % user.login)
+                continue
+            for contract in user.employee_id.contract_ids:
+                contract.reset_user_history()
+        """
 
         """
         #supprimer les projets remontés par erreur
@@ -612,12 +625,10 @@ class naptaResUsers(models.Model):
                         #TODO : toutes les fonctions qui doivent écrire sur un res.user doivent passer par SUDO car un tasmanien l'ambda n'a pas le droit en écriture sur cet objet
                         rec.sudo().napta_id = napta_user['id']
                         self.env.cr.commit()
-            """
             if not(rec.napta_id):
                 _logger.info('################### Utilisateur manquant %s' % rec.login)
                 continue
 
-            """
             rec.employee_id.job_id.create_update_napta()
             attributes = {
                 'email' : rec.login,
@@ -635,10 +646,6 @@ class naptaResUsers(models.Model):
                 attributes.pop(user_position_id) #TODO : intégrer le mapping Napta ?
             client.create_update_api('user', attributes, rec)
             """
-
-            for contract in rec.employee_id.contract_ids :
-                contract.create_update_napta()
-
 
 class naptaJob(models.Model):
     _inherit = 'hr.job'
@@ -662,10 +669,9 @@ class naptaHrContract(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
 
-    def create_update_napta(self):
-        _logger.info('---- Create or update Napta user_history')
+    def reset_user_history(self):
+        _logger.info('---- RESET Napta user_history')
         client = ClientRestNapta(self.env)
         for rec in self:
             _logger.info(rec.name)
@@ -673,38 +679,54 @@ class naptaHrContract(models.Model):
                 _logger.info("Poste inexistant sur Napta %s pour %s." %(rec.job_id.name, rec.name))
                 continue
 
+            user_history_target_list = []
+
             BEGIN_OF_TIME = datetime.date(2020, 1, 1)
             if rec.date_start >= BEGIN_OF_TIME:
-                cost_line = rec.job_id._get_daily_cost(rec.date_start)
-                daily_cost = 0.0
-                if cost_line :
-                    daily_cost = cost_line.cost
-                start_date = str(rec.date_start)
+                date_debut = rec.date_start
             else :
-                cost_line = rec.job_id._get_daily_cost(BEGIN_OF_TIME)
+                date_debut = BEGIN_OF_TIME
+
+            if rec.date_end:
+                date_fin = rec.date_end
+            else:
+                date_fin = datetime.date(datetime.date.today().year, 12, 31)
+
+            d = date_debut
+            while d < date_fin:
+                cost_line = rec.job_id._get_daily_cost(d) #TODO : on part du principe que le CJM est valable pour toute l'année... il serait plus propre de parcourir les CJM du grade sur la période du contrat
                 daily_cost = 0.0
                 if cost_line :
                     daily_cost = cost_line.cost
-                start_date = str(BEGIN_OF_TIME)
+                start_date = d
+ 
+                attributes = {
+                    'business_unit_id' : rec.job_id.department_id.napta_id,
+                    'daily_cost' : daily_cost,
+                    'location_id' : 1, #Paris TODO : ne plus hardcoder cette valeur
+                    'start_date' : str(start_date),
+                    'user_id' : rec.employee_id.user_id.napta_id,
+                    'user_position_id' : rec.job_id.napta_id,
+                }
+                user_history_target_list.append(attributes)
 
-            attributes = {
-                'business_unit_id' : rec.job_id.department_id.napta_id,
-                'daily_cost' : daily_cost,
-                'location_id' : 1, #Paris TODO : ne plus hardcoder cette valeur
-                'start_date' : start_date,
-                'user_id' : rec.employee_id.user_id.napta_id,
-                'user_position_id' : rec.job_id.napta_id,
-            }
+                d = d + relativedelta(years=1)
 
-            # The PATCH method is not allowed for this object : if there is a difference delete existing object dans create the new one
-            if rec.napta_id:
-                changes_dic, cache_value = client.get_change_dic('user_history', attributes, rec.napta_id)
-                if len(changes_dic) : 
-                    client.delete_api('user_history', rec)
-            client.create_update_api('user_history', attributes, rec)
+            #On supprimer les user_history existant... même ceux qui sont corrects
+                # DELETE renvoie un code 422 si on essaye de supprimer le seul user_history restant d'un utilisatuer => dans l'idéal il faudrait mieux raisonner par délta et ne supprimer/créer que le strict nécessaire 
+            for user_history_id, user_history in client.read_cache('user_history').items():
+                if str(user_history['attributes']['user_id']) != str(rec.employee_id.user_id.napta_id): #TODO : imparfait => on supprime tous les user history de l'utilisateur... y compris pour les autres contrats
+                    continue
+                client.delete_api_raw('user_history', user_history_id)
 
+            #On recrée tous les user_history
+            for user_history_target in user_history_target_list:
+                _logger.info(user_history_target) 
+                res = client.post_api('user_history', user_history_target)
+                napta_id = res['data']['id']
+                user_history_target['napta_id'] = napta_id
 
-#TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
+    #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
 
 class naptaHrDepartment(models.Model):
     _inherit = 'hr.department'
