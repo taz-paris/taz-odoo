@@ -313,13 +313,13 @@ class fitnetProject(models.Model):
 
 
         #self.sync_employees(client)
-        self.sync_employees_contracts(client)
-        return
+        #self.sync_employees_contracts(client)
         #self.sync_holidays(client) 
         #self.correct_leave_timesheet_stock(client)
 
 
         self.sync_customer_invoices(client)
+        return
         self.sync_supplier_invoices(client)
 
         self.sync_customers(client)
@@ -695,6 +695,7 @@ class fitnetProject(models.Model):
     def sync_customer_invoices(self, client):
         _logger.info('---- sync_customer_invoices')
         fitnet_objects = client.get_api('invoices/v2/1/0/01-01-2018/31-12-2050')
+
         mapping_fields_invoice = {
             'invoiceNumber' : {'odoo_field' : 'name'},
             'customerId' : {'odoo_field' : 'partner_id'},
@@ -716,7 +717,6 @@ class fitnetProject(models.Model):
             'contractId_json' : {'odoo_field' : 'analytic_distribution'},
             'product_id' : {'odoo_field' : 'product_id'},
             #'sale_line_ids' : {'odoo_field' : 'sale_line_ids'},
-            #product_id
         }
         mapping_fields_payment = {
             'partner_id' : {'odoo_field' : 'partner_id'},
@@ -732,10 +732,7 @@ class fitnetProject(models.Model):
         invoices_lines_list = []
         payment_list = []
         for invoice in fitnet_objects:
-            #if invoice['invoiceId'] not in [1492, 1493, 2315]:
-            #    continue
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
-            #TODO A SUPPRIMER
             if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
                 continue
             #_logger.info("******** Projet %s" % odoo_project.number)
@@ -823,57 +820,72 @@ class fitnetProject(models.Model):
         ############################### GENERATION DES BONS DE COMMANDE CLIENT
         _logger.info('############################### GENERATION DES BONS DE COMMANDE CLIENT')
         invoices_by_contract = {}
+        contract_with_invoices = []
         for invoice in fitnet_objects:
-            #if invoice['invoiceId'] not in [1492, 1493, 1618]:
-            #    continue
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
-            #TODO A SUPPRIMER
             if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
                 continue
             #_logger.info("******** Projet %s" % odoo_project.number)
 
+            key_contract = str(invoice['contractId']) + '***' + str(invoice['orderNumber'])
+            if key_contract not in invoices_by_contract.keys():
+                invoices_by_contract[key_contract] = []
+            invoices_by_contract[key_contract].append(invoice)
 
-            if invoice['contractId'] not in invoices_by_contract.keys():
-                invoices_by_contract[invoice['contractId']] = []
-            invoices_by_contract[invoice['contractId']].append(invoice)
+            if str(invoice['contractId']) not in contract_with_invoices:
+                contract_with_invoices.append(str(invoice['contractId']))
         
-        #ajouter des invoices virtuelle pour gérer les projets qui n'ont encore envoyé aucune facture (car l'API Fitent ne les retourne pas)
-        for p in self.env['project.project'].search([]):
-            """
-            if not odoo_project.is_project_to_migrate():
-                if p.number and p.is_prevent_napta_creation != True:
-                    if  p.napta_id :
-                        _logger.info('conflitttttttttttttttttttttttttttttt %s %s' % (p.napta_id, p.number))
-                    else :
-                        _logger.info(' OK %s %s' % (p.napta_id, p.number))
-                        #p.is_prevent_napta_creation == True
-            """
-            if len(LISTE_PROJET_EXCLUSIF)>0 and p.number not in LISTE_PROJET_EXCLUSIF:
+
+        to_invoice_fitnet = client.get_api('invoices/getInvoicesToBeIssued/1/0/01-01-2018/31-12-2050')
+        to_invoice_fitnet_id_list = []
+        for to_invoice in to_invoice_fitnet :
+            odoo_project = self.env['project.project'].search([('fitnet_id', '=', to_invoice['contractId'])])[0]
+            if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
                 continue
-            if p.partner_id.name == "Tasmane":
-                continue
-            if p.amount == 0.0:
-                continue
-            if int(p.fitnet_id) not in invoices_by_contract.keys():
-                fact_list = []
-                fact_list.append({
-                    'customerId' : p.partner_id.fitnet_id,
-                    'invoiceLines' : [],
-                    })
-                invoices_by_contract[p.fitnet_id] = fact_list
+            #_logger.info("******** Projet %s" % odoo_project.number)
+
+            to_invoice['invoiceNumber'] = ''
+            to_invoice['expectedPaymentDate'] = False
+            to_invoice['actualPaymentDate'] = ''
+            to_invoice['bTaxBilling'] = to_invoice['toBeInvoiced']
+            inoviceId = "billableToBeInvoicedId_"+str(to_invoice['billableToBeInvoicedId'])
+            to_invoice['invoiceId'] = inoviceId
+            for l in to_invoice['invoiceLines']:
+                l['inoviceId'] = inoviceId
+                l['product_id'] = 999
+                l['inoviceLineId'] = "billableToBeInvoicedLineId_"+ str(to_invoice['billableToBeInvoicedId'])
+                l['signed_amountBTax'] = l['amountBTax']
+                if l['quantity'] == 0:
+                    l['quantity'] = 1
+                #TODO : ça va cracher si plusieurs lignes sur l'échéance
+            to_invoice_fitnet_id_list.append(inoviceId)
+
+
+            key_contract = str(to_invoice['contractId']) + '***' + str(to_invoice['orderNumber'])
+            if key_contract not in invoices_by_contract.keys():
+                invoices_by_contract[key_contract] = []
+            invoices_by_contract[key_contract].append(to_invoice)
+
+            if str(to_invoice['contractId']) not in contract_with_invoices:
+                contract_with_invoices.append(str(to_invoice['contractId']))
+
+        #Quand on facture, la facture n'est plus renvoyée par le endpoint getInvoicesToBeIssued => il faut la supprimer d'Odoo pour éviter les doublons
+        for so in self.env['sale.order'].search([('fitnet_id', 'ilike', 'billableToBeInvoicedId_%')]) :
+            if so.fitnet_id not in to_invoice_fitnet_id_list:
+                so.unlink()
 
         sale_order_list = []
         sale_order_line_list = []
-        for contract_id, contract_invoice_list in invoices_by_contract.items():
+        for key_contract, contract_invoice_list in invoices_by_contract.items():
+            contract_id = key_contract.split('***')[0]
+            ref_bon_commande = key_contract.split('***')[1]
+
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
-            #Si le projet nest pas à letat annule et que la date de fin > 31/12/2022
-            #if not odoo_project.is_project_to_migrate():
-            #    continue
             sale_order_list.append({
                     'partner_id' : contract_invoice_list[0]['customerId'],
-                    'order_id' : contract_id,
+                    'order_id' : key_contract,
                     'agreement_id' : odoo_project.agreement_id.fitnet_id,
-                    'client_order_ref' : odoo_project.purchase_order_number,
+                    'client_order_ref' : ref_bon_commande,
                     'state' : 'sale',
                     })
 
@@ -881,11 +893,11 @@ class fitnetProject(models.Model):
             for inv in contract_invoice_list:
                 for l in inv['invoiceLines']:
                     sale_order_line_list.append({
-                        'order_id' : contract_id,
+                        'order_id' : key_contract,
                         'line_id' : l['inoviceLineId'],
                         'invoice_lines' : [l['inoviceLineId']],
                         'product_id' : l['product_id'],#999,
-                        'name': 'Reprise Fitnet - facturé', #TODO : lire le libellé du produit
+                        'name': 'Reprise Fitnet', #TODO : lire le libellé du produit
                         'product_uom_qty': l['quantity'],
                         'qty_delivered': l['quantity'],
                         'product_uom': 1,
@@ -895,33 +907,27 @@ class fitnetProject(models.Model):
                             })
                     sum_invoice += l['signed_amountBTax']
 
-            
-            total_a_facturer = odoo_project.amount
-            reste_a_facturer = total_a_facturer - sum_invoice
-            if reste_a_facturer != 0.0:
-                sale_order_line_list.append({
-                        'order_id' : contract_id,
-                        'line_id' : str(contract_id)+'_reste_a_facturer',
-                        'invoice_lines' : [],
-                        'product_id' : l['product_id'],#999,
-                        'name': 'Reprise Fitnet - reste à facturer par Tasmane',
-                        'product_uom_qty': 1,
-                        'qty_delivered': 0,
-                        'product_uom': 1,
-                        'price_unit': reste_a_facturer,
-                        'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
-                        'previsional_invoice_date' : False,
-                    })
-            else :
-                RAF_lines = self.env['sale.order.line'].search([('fitnet_id', '=', str(contract_id)+'_reste_a_facturer')])
-                for raf_line in RAF_lines:
-                    RAF_lines.unlink()
 
+            ##### RRPRISE 
+            """
+            #orders = self.env['sale.order'].search([('fitnet_id', '=', str(contract_id))])
+            #for order in orders:
+            #    _logger.info("delete sale.order")
+            #    order.unlink()
+            RAF_lines = self.env['sale.order.line'].search([('fitnet_id', '=', str(contract_id)+'_reste_a_facturer')])
+            for raf_line in RAF_lines:
+                _logger.info("delete sale.order.line reste_a_facturer")
+                RAF_lines.unlink()
+            RAF_lines = self.env['sale.order.line'].search([('fitnet_id', '=', str(contract_id)+'_paiement_direct')])
+            for raf_line in RAF_lines:
+                _logger.info("delete sale.order.line paiement_direct")
+                RAF_lines.unlink()
+            """
 
             if odoo_project.outsourcing in ["direct-paiement-outsourcing", "direct-paiement-outsourcing-company"]:
                 sale_order_line_list.append({
-                        'order_id' : contract_id,
-                        'line_id' : str(contract_id)+'_paiement_direct',
+                        'order_id' : key_contract,
+                        'line_id' : str(key_contract)+'_paiement_direct',
                             #TODO : il faut boucler sur les BCF du projet pour liéer les lignes de paimeent direct... mais pas possible de savoir a priori pour quel(s) fournisseur du projet il y en aura
                         'invoice_lines' : [],
                         'product_id' : l['product_id'],#999,
