@@ -61,7 +61,7 @@
             <field name="inherit_id" ref="hr.view_hr_job_form"/>
             <field name="arch" type="xml">
                 <field name="contract_type_id" position="after">
-                        <field name="napta_id" readonly="1"/>
+                        <field name="napta_id" readonly="0"/>
                 </field>
             </field>
     </record>

@@ -217,7 +217,7 @@ class projectAccountProject(models.Model):
         total = 0.0
         for line_id in line_ids:
             line = rec.env['sale.order.line'].browse(line_id)
-            _logger.info(e.read())
+            _logger.info(line.read())
             #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
             total += line.qty_to_invoice * line.price_unit
         _logger.info(total)

@@ -673,9 +673,12 @@ class naptaHrContract(models.Model):
                 _logger.info("Poste inexistant sur Napta %s pour %s." %(rec.job_id.name, rec.name))
                 continue
 
-            BEGIN_OF_TIME = datetime.date(2022, 1, 1)
+            BEGIN_OF_TIME = datetime.date(2020, 1, 1)
             if rec.date_start >= BEGIN_OF_TIME:
-                daily_cost = rec.job_id._get_daily_cost(rec.date_start).cost
+                cost_line = rec.job_id._get_daily_cost(rec.date_start)
+                daily_cost = 0.0
+                if cost_line :
+                    daily_cost = cost_line.cost
                 start_date = str(rec.date_start)
             else :
                 cost_line = rec.job_id._get_daily_cost(BEGIN_OF_TIME)
@@ -700,6 +703,8 @@ class naptaHrContract(models.Model):
                     client.delete_api('user_history', rec)
             client.create_update_api('user_history', attributes, rec)
 
+
+#TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
 
 class naptaHrDepartment(models.Model):
     _inherit = 'hr.department'
