@@ -105,7 +105,7 @@ class projectAccountProject(models.Model):
             ('direct-paiement-outsourcing', 'Sous-traitance paiement direct'),
             ('direct-paiement-outsourcing-company', 'Sous-traitance paiement direct + Tasmane'),
             ('outsourcing', 'Sous-traitance paiement Tasmane'),
-        ], string="Type de sous-traitance Fitnet", readonly=True) #Attribut temporaire Fitnet à supprimer
+        ], string="Type de sous-traitance") #Attribut temporaire Fitnet à supprimer
     agreement_id = fields.Many2one(
         comodel_name="agreement",
         string="Agreement Fitnet",
@@ -218,8 +218,10 @@ class projectAccountProject(models.Model):
         for line_id in line_ids:
             line = rec.env['sale.order.line'].browse(line_id)
             _logger.info(line.read())
+            if line.direct_payment_purchase_order_line_id:
+                continue
             #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-            total += line.qty_to_invoice * line.price_unit
+            total += line.product_uom_qty * line.price_unit
         _logger.info(total)
         _logger.info('----------END compute_sale_order_total')
         return total

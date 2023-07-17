@@ -879,6 +879,8 @@ class fitnetProject(models.Model):
         for key_contract, contract_invoice_list in invoices_by_contract.items():
             contract_id = key_contract.split('***')[0]
             ref_bon_commande = key_contract.split('***')[1]
+            if ref_bon_commande == '':
+                ref_bon_commande = "Pas de ref. client sur le BC"
 
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', contract_id)])[0]
             sale_order_list.append({
@@ -896,8 +898,8 @@ class fitnetProject(models.Model):
                         'order_id' : key_contract,
                         'line_id' : l['inoviceLineId'],
                         'invoice_lines' : [l['inoviceLineId']],
-                        'product_id' : l['product_id'],#999,
-                        'name': 'Reprise Fitnet', #TODO : lire le libellé du produit
+                        'product_id' : l['product_id'],
+                        'name': l['designation'],
                         'product_uom_qty': l['quantity'],
                         'qty_delivered': l['quantity'],
                         'product_uom': 1,

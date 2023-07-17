@@ -97,6 +97,7 @@
 					<group>
 					    <field name="partner_id" required="1" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 					    <field name="stage_id" required="1"/>
+					    <field name="outsourcing"/>
 					    <field name="state" invisible="1"/>
 					    <field name="probability"/>
 					</group>
@@ -249,7 +250,6 @@
 							<group>
 							    <field name="is_purchase_order_received"/>
 							    <field name="purchase_order_number"/>
-							    <field name="outsourcing"/>
 							    <field name="amount"/>
 							    <field name="billed_amount"/>
 							    <field name="payed_amount"/>

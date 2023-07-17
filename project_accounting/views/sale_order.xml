@@ -6,9 +6,23 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
 		   
+		 <!--
+		<xpath expr="//div[@class='oe_title']/h1" position="inside">
+		    <field name="client_order_ref" position="move"/>
+		</xpath>
+		 -->
 		<field name="partner_id" position="before">
 		    <field name="client_order_ref" position="move"/>
 	    	</field>
+		<field name="fiscal_position_id" position="after">
+			<group>
+				<field name="name" position="move"/>
+			</group>
+		</field>
+
+		<field name="client_order_ref" position="attributes">
+ 			<attribute name="placeholder">Référence client du Bon de commande</attribute>
+		</field>
 
 		<field name="partner_id" position="attributes">
 			<attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
@@ -26,6 +40,7 @@
 			<group string="Lignes de commande de la part pilotée par Tasmane"/>
 		</field>
 
+
 		<xpath expr="//group[@name='note_group']" position="after">
 			<group string="Bon de commande du client final">
 				<group>
@@ -41,6 +56,16 @@
 			<page string="Avances (sans facture)">
 				<field name="advance_payment_ids" context="{'default_partner_id' : partner_id, 'default_advance_sale_order_id':active_id, 'default_ref' : 'Avance sans facture sur BC ' + (client_order_ref or '')}" />
 			</page>
+		</xpath>
+
+		<xpath expr="//group[@name='sales_person']" position="attributes">
+			<attribute name="invisible">True</attribute>
+		</xpath>
+		<xpath expr="//group[@name='sale_shipping']" position="attributes">
+			<attribute name="invisible">True</attribute>
+		</xpath>
+		<xpath expr="//group[@name='sale_reporting']" position="attributes">
+			<attribute name="invisible">True</attribute>
 		</xpath>
 
 		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">
@@ -67,6 +92,16 @@
             </field>
         </record>
 
+    	<record id="sale_order_form_quote_inherit" model="ir.ui.view">
+		<field name="name">sale.order.form.inherit.sale_management.inherit</field>
+		<field name="model">sale.order</field>
+		<field name="inherit_id" ref="sale_management.sale_order_form_quote"/>
+		<field name="arch" type="xml">
+			<xpath expr="//page[@name='optional_products']" position="attributes">
+				<attribute name="groups">base.group_system</attribute>
+			</xpath>
+		</field>
+	</record>
 
 
         <record id="view_order_tree_inherit" model="ir.ui.view">
