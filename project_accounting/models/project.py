@@ -453,10 +453,10 @@ class projectAccountProject(models.Model):
     @api.onchange('company_part_amount_initial', 'company_part_cost_initial', 'other_part_amount_initial')
     def copy_initial_current(self):
         for rec in self :
-            if rec.stage_id.state == 'before_launch':
-                rec.company_part_amount_current = rec.company_part_amount_initial
-                rec.company_part_cost_current = rec.company_part_cost_initial
-                rec.other_part_amount_current = rec.other_part_amount_initial
+            #if rec.stage_id.state == 'before_launch':
+            rec.company_part_amount_current = rec.company_part_amount_initial
+            rec.company_part_cost_current = rec.company_part_cost_initial
+            rec.other_part_amount_current = rec.other_part_amount_initial
 
 
     state = fields.Selection(related='stage_id.state')
@@ -464,7 +464,7 @@ class projectAccountProject(models.Model):
     order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
-    is_constistant_order_amount = fields.Boolean('Cohérence commande client/ventilation mission', compute=compute, help="Faux lorsque le montant total des lignes de commandes est différent de la somme de la part Dispositifi Tasmane+part sous-traitée+part autres prestations")
+    is_constistant_order_amount = fields.Boolean('Cohérence commande client/ventilation mission', store=True, compute=compute, help="Faux lorsque le montant total des lignes de commandes est différent de la somme de la part Dispositifi Tasmane+part sous-traitée+part autres prestations")
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute)
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute)
@@ -481,16 +481,21 @@ class projectAccountProject(models.Model):
 
     ######## COMPANY PART
     company_part_amount_initial = fields.Monetary('Montant dispositif Tasmane initial', 
-            states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
             help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
     company_part_cost_initial = fields.Monetary('Coût de production dispo Tasmane (€) initial', 
-            states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
             help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     company_part_marging_amount_initial = fields.Monetary('Marge sur dispo Tasmane (€) initiale', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
     company_part_marging_rate_initial = fields.Float('Marge sur dispo Tasmane (%) initiale', store=True, compute=compute)
 
     company_part_amount_current = fields.Monetary('Montant dispositif Tasmane actuel', 
             states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
+            tracking=True,
             help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
     company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', store=True, compute=compute, help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     #company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', 
@@ -501,10 +506,14 @@ class projectAccountProject(models.Model):
 
     ######## OUTSOURCE PART
     outsource_part_amount_initial = fields.Monetary('Montant de la part sous-traitée initial', 
-            states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
             help="Montant produit par les sous-traitants de Tasmane : part produite par les sous-traitants que Tasmane paye à l'acte")
     outsource_part_cost_initial = fields.Monetary('Coût de revient de la part sous-traitée initial',
-            states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
             )
     outsource_part_marging_amount_initial = fields.Monetary('Marge sur part sous-traitée (€) initiale', store=True, compute=compute)
     outsource_part_marging_rate_initial = fields.Float('Marge sur part sous-traitée (%) initiale', store=True, compute=compute)
@@ -520,16 +529,21 @@ class projectAccountProject(models.Model):
 
     ######## OTHER PART
     other_part_amount_initial = fields.Monetary('Montant HT de la part "autres prestations" initial', 
-            states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
             help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
     other_part_cost_initial = fields.Monetary('Coût de revient HT des autres prestations initial',
-            states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
             )
     other_part_marging_amount_initial = fields.Monetary('Marge sur les autres prestations (€) initiale', store=True, compute=compute)
     other_part_marging_rate_initial = fields.Float('Marge sur les autres prestations (%) initiale', store=True, compute=compute)
 
     other_part_amount_current = fields.Monetary('Montant HT de la part "autres prestations" actuel', 
             states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
+            tracking=True,
             help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
     other_part_cost_current = fields.Monetary('Coût de revient HT des autres prestations actuel', store=True, compute=compute)
     other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) actuelle', store=True, compute=compute)

@@ -24,7 +24,9 @@ class projectOutsourcingLink(models.Model):
             #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
-                total += line.qty_to_invoice * line.price_unit
+                if line.direct_payment_sale_order_line_id:
+                    continue
+                total += line.product_qty * line.price_unit
             rec.order_sum_purchase_order_lines = total
 
     def action_open_purchase_order_lines(self):
@@ -113,8 +115,9 @@ class projectOutsourcingLink(models.Model):
                 if purchase_line.direct_payment_sale_order_line_id :
                     rec.order_direct_payment_amount += purchase_line.price_subtotal
                     rec.order_direct_payment_done += purchase_line.order_direct_payment_validated_amount
-                    rec.order_direct_payment_done_detail += purchase_line.order_direct_payment_validated_detail + " "
+                    rec.order_direct_payment_done_detail += "%s " % (purchase_line.order_direct_payment_validated_detail or "")
 
+            rec.compute_purchase_order_total()
             rec.order_company_payment_amount = rec.order_sum_purchase_order_lines - rec.order_direct_payment_amount
             rec.marging_amount_current =  rec.outsource_part_amount_current - rec.sum_account_move_lines
             rec.marging_rate_current = 0.0 

@@ -115,14 +115,6 @@
 				   </group>
 				<notebook>
 					<page name="project_structure" string="Structure INITIALE du projet">
-						<group string="Somme dispositif Tasame + Sous-traitance + autres">
-							<group>
-								<field name="order_amount_initial"/>
-								<field name="order_cost_initial"/>
-								<field name="order_marging_amount_initial"/>
-								<field name="order_marging_rate_initial" widget="progressbar"/>
-							</group>
-						</group>
 						<group col="3">
 							<group string="Dispositif Tasmane">
 								<field name="company_part_amount_initial"/>
@@ -142,6 +134,14 @@
 								<field name="other_part_marging_amount_initial"/>
 								<field name="other_part_marging_rate_initial" widget="progressbar"/>
 							</group>  
+						</group>
+						<group string="Somme dispositif Tasame + Sous-traitance + autres">
+							<group>
+								<field name="order_amount_initial"/>
+								<field name="order_cost_initial"/>
+								<field name="order_marging_amount_initial"/>
+								<field name="order_marging_rate_initial" widget="progressbar"/>
+							</group>
 						</group>
 					</page>
 

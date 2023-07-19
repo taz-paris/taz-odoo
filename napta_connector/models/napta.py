@@ -349,8 +349,8 @@ class naptaProject(models.Model):
               "billing_method" : "fixed_price",
               "client_id" : rec.partner_id.napta_id,
               "external_id" : str(rec.id),
-              "sold_budget" : rec.company_part_amount_current,
-              "target_margin_rate" : rec.company_part_marging_rate_current,
+              "sold_budget" : rec.company_part_amount_initial,
+              "target_margin_rate" : round(rec.company_part_marging_rate_initial/100.0,2),
               #"estimated_start_date" : str(rec.date_start) if rec.date_start else None,
               #"estimated_end_date" : str(rec.date) if rec.date else None,
             }

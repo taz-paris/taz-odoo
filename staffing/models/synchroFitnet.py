@@ -945,9 +945,16 @@ class fitnetProject(models.Model):
             if odoo_project.outsourcing in ["no-outsourcing", "co-sourcing"] and odoo_project.outsource_part_cost_current == 0.0 :
                 if odoo_project.company_part_amount_current != odoo_project.amount :
                     odoo_project.company_part_amount_current = odoo_project.amount
-            else :
-                if odoo_project.company_part_amount_current != 0.0 :
-                    odoo_project.company_part_amount_current = 0.0
+            #else :
+            #    if odoo_project.company_part_amount_current != 0.0 :
+            #        odoo_project.company_part_amount_current = 0.0
+
+            if odoo_project.outsourcing in ["no-outsourcing", "co-sourcing"] and odoo_project.outsource_part_cost_initial == 0.0 :
+                if odoo_project.company_part_amount_initial != odoo_project.amount :
+                    odoo_project.company_part_amount_initial = odoo_project.amount
+            #else :
+            #    if odoo_project.company_part_amount_current != 0.0 :
+            #        odoo_project.company_part_amount_current = 0.0
 
 
         mapping_fields_sale_order = {
