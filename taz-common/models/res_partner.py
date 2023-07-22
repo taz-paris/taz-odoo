@@ -462,25 +462,3 @@ class tazResPartner(models.Model):
 #Wizzard de fusion / déduplication :
     #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/odoo/addons/base/wizard/base_partner_merge.py
     #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/odoo/addons/base/wizard/base_partner_merge_views.xml
-
-
-     def open_my_partner_intimity(self):
-        contact_user_link_ids = self.env['taz.contact_user_link'].search([('user_id', '=', self.env.user.id)])
-
-        rec_id = []
-        for contact_user_link_id in contact_user_link_ids :
-            if contact_user_link_id.partner_id.active == True:
-                rec_id.append(contact_user_link_id.partner_id.id)
-
-        return {
-                'type': 'ir.actions.act_window',
-                'name': "Contacts de mon plan d'intimité",
-                'res_model': 'res.partner',
-                'view_type': 'tree',
-                'view_mode': 'tree,form',
-                'view_id': [self.env.ref("taz-common.contact_tree").id, self.env.ref("taz-common.contact_form").id],
-                'search_view_id' : (self.env.ref("taz-common.contact_search").id,),
-                'context': {},
-                'domain' : [('id', 'in', rec_id)],
-                'target': 'current',
-            }

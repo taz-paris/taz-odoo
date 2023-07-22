@@ -23,8 +23,11 @@
       <field name="name">Lien Contact Utilisateur</field>
       <field name="model">taz.contact_user_link</field>
       <field name="arch" type="xml">
-          <tree editable="top" decoration-danger="is_late == True">
-                  <field name="partner_id" optional="hide" options="{'no_quick_create':True}" attrs="{'required' : False}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+          <tree editable="top" default_order="next_meeting_before" decoration-danger="is_late == True">
+                  <field name="partner_id" options="{'no_quick_create':True}" attrs="{'required' : False}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+                  <field name="parent_partner_id" optional="hide" />
+                  <field name="parent_partner_industry_id" optional="hide" />
+		  <field name="rel_inhouse_influence_level" optional="show" />
                   <field name="user_id" optional="hide" />
 		  <field name="proximity_level" />
 		  <field name="last_business_action_id" optional="hide" />
@@ -38,15 +41,41 @@
         </tree>
       </field>
     </record>
-<!--
-    <record id="action_server_list_my_partner_intimity" model="ir.actions.server">
-          <field name="name">Contacts de mon plan d'intimité</field>
-          <field name="model_id" ref="model_res_partner"/>
-          <field name="binding_model_id" eval="False"/>
-          <field name="state">code</field>
-          <field name="code">action =  env.get('res.partner').open_my_partner_intimity()</field>
-     </record>
--->
+
+            
+    <record model="ir.ui.view" id="taz-common.contact_user_link_search">
+        <field name="name">taz.contact_user_link.search</field>
+        <field name="model">taz.contact_user_link</field>
+        <field name="arch" type="xml">
+           <search string="Lien tasmanien-client">
+                    <field name="partner_id" string="Contact"/>
+                    <field name="parent_partner_id" string="Entreprise"/>
+                    <field name="parent_partner_industry_id" string="Business Domain"/>
+                    <filter string="Mes lien tasmanien-client" name="my_link"
+                        domain="[('user_id', '=', uid)]"/>
+                    <filter string="À revoir d'ici 2 mois" name="m_2"
+                        domain="[('next_meeting_before','&lt;=', ((context_today() + relativedelta(months=2)).strftime('%Y-%m-%d')))]" />
+                    <separator/>
+                    <filter name="filter_next_meeting_before" date="next_meeting_before"/>
+                    <filter string="En retard" name="is_late"
+			    domain="[('is_late','=', True)]" />
+                    <separator/>
+		    <!--
+                    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
+                    <filter name="not_tracked" string="Comptes non suivis" domain="[('business_priority', '=', 'not_tracked')]"/>
+                    <filter name="priority_target" string="Comptes suivis en BDM" domain="[('business_priority', '=', 'tracked')]"/>
+                    <separator/>
+                    <filter name="state_not_done_not_cancelled" string="Non terminées ni annulées" domain="[('state', '!=', 'done'), ('state', '!=', 'cancelled')]"/>
+			-->
+                    <group expand="0" string="Group By">
+                        <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
+                        <filter string="Business domain" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
+                        <filter string="A revoir avant le" name="group_next_meeting_before" context="{'group_by': 'next_meeting_before'}"/>
+                    </group>
+           </search>
+        </field>
+    </record>
+
     <record model="ir.actions.act_window" id="taz-common.action_intimity_plan">
       <field name="name">Mon plan d'intimité client</field>
       <field name="res_model">taz.contact_user_link</field>
@@ -59,7 +88,7 @@
       <field name="domain">[('user_id', '=', uid)]</field>
     </record>
 
-    <menuitem name="Contacts de mon plan d'intimité" id="taz-common.my_partner_intimity" sequence="20" parent="taz-common.commerce" action="taz-common.action_intimity_plan"/>
+    <menuitem name="Mon plan d'intimité client" id="taz-common.my_partner_intimity" sequence="20" parent="taz-common.commerce" action="taz-common.action_intimity_plan"/>
 
 
 </data>

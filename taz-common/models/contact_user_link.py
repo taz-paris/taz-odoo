@@ -41,7 +41,7 @@ class ContactUserLink(models.Model):
 
     @api.depends('user_id', 'partner_id', 'partner_id.business_action_ids', 'partner_id.business_action_ids.date_deadline', 'partner_id.business_action_ids.state', 'target_contact_frequency_id', 'target_contact_frequency_id.day_number')
     def _compute_date_business_action(self):
-        _logger.info("-- _compute_date_business_action")
+        #_logger.info("-- _compute_date_business_action")
         for rec in self :
             partner_id = rec.partner_id
             #if rec._origin.id :
@@ -81,9 +81,11 @@ class ContactUserLink(models.Model):
                 rec.next_business_action_id = False
 
     user_id = fields.Many2one('res.users', string='Tasmanien', required=True, default=lambda self: self.env.user)
+
     partner_id = fields.Many2one('res.partner', string='Contact', required=False)
-        #, default=lambda self: self.env['taz.contact_user_link'].search([('id', '=', self._context.get("default_partner_id"))], limit=1))
-        #self._context.get("default_partner_id"))
+    parent_partner_id = fields.Many2one('res.partner', string="Entreprise", related='partner_id.parent_id', store=True)
+    parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.parent_industry_id', store=True)
+    rel_inhouse_influence_level = fields.Selection(related="partner_id.inhouse_influence_level") 
     last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action)
     date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=True)
     next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce tasmanien avec ce contact.", compute=_compute_date_business_action)
@@ -98,7 +100,7 @@ class ContactUserLink(models.Model):
             ('3', "3 - j'ai son numéro de portable et je peux l'appeler à 22h"),
         ], string="Niveau de proximité") 
     target_contact_frequency_id = fields.Many2one('taz.contact_user_link_frequency', string="Fréquence de contact")
-    comment = fields.Html("Commentaire")
+    comment = fields.Text("Commentaire")
     communication_preference = fields.Selection([
             ('email-tu', "email auto - TU"),
             ('email-vous', "email auto - VOUS"),
