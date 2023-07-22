@@ -319,13 +319,12 @@ class fitnetProject(models.Model):
 
 
         self.sync_customer_invoices(client)
-        return
         self.sync_supplier_invoices(client)
 
         self.sync_customers(client)
 
         self.sync_suppliers(client)
-        #self.sync_contracts(client) #projets
+        self.sync_contracts(client) #projets
 
         #self.sync_project(client)
 
@@ -943,14 +942,14 @@ class fitnetProject(models.Model):
                     })
 
             if odoo_project.outsourcing in ["no-outsourcing", "co-sourcing"] and odoo_project.outsource_part_cost_current == 0.0 :
-                if odoo_project.company_part_amount_current != odoo_project.amount :
+                if odoo_project.company_part_amount_current == 0.0 :
                     odoo_project.company_part_amount_current = odoo_project.amount
             #else :
             #    if odoo_project.company_part_amount_current != 0.0 :
             #        odoo_project.company_part_amount_current = 0.0
 
             if odoo_project.outsourcing in ["no-outsourcing", "co-sourcing"] and odoo_project.outsource_part_cost_initial == 0.0 :
-                if odoo_project.company_part_amount_initial != odoo_project.amount :
+                if odoo_project.company_part_amount_initial == 0.0  :
                     odoo_project.company_part_amount_initial = odoo_project.amount
             #else :
             #    if odoo_project.company_part_amount_current != 0.0 :
@@ -1476,7 +1475,7 @@ class fitnetProject(models.Model):
             'billedAmount' : {'odoo_field' : 'billed_amount'},
             'payedAmount' : {'odoo_field' : 'payed_amount'},
             'status' : {'odoo_field' : 'stage_id'},
-            'project_director_employee_id' : {'odoo_field' : 'project_director_employee_id'},
+            #'project_director_employee_id' : {'odoo_field' : 'project_director_employee_id'},
             'commercialStatusID' : {
                 'odoo_field' : 'probability', 
                 'selection_mapping':

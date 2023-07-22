@@ -101,7 +101,7 @@ class projectOutsourcingLink(models.Model):
         return action
 
 
-    @api.depends('order_sum_purchase_order_lines', 'order_direct_payment_amount', 'sum_account_move_lines')
+    @api.depends('project_id', 'partner_id', 'order_sum_purchase_order_lines', 'order_direct_payment_amount', 'sum_account_move_lines')
     def compute(self):
         _logger.info('--compute project_outsourcing_link.py')
         for rec in self :
