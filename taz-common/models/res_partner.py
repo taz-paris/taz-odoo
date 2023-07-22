@@ -116,10 +116,10 @@ class tazResPartner(models.Model):
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
      date_last_business_action = fields.Date('Date du dernier RDV', compute=_compute_date_last_business_action, store=True)
      inhouse_influence_level = fields.Selection([
-         ('1', "Réseau - pas de lien direct"),
-         ('2', "Eclaireur - peut donner de l'information sur un compte à potentiel"),
-         ('3', "Prescripteur - peut pousser Tasmane vers un interlocuteur décideur"),
-         ('4', "Décideur -  peut décider par lui-même"),
+         ('1', "1 - Réseau - pas de lien direct"),
+         ('2', "2 - Eclaireur - peut donner de l'information sur un compte à potentiel"),
+         ('3', "3 - Prescripteur - peut pousser Tasmane vers un interlocuteur décideur"),
+         ('4', "4 - Décideur -  peut décider par lui-même"),
          ], string="Niveau d'influence chez le client")
 
      street3 = fields.Char('Rue3')

@@ -6,6 +6,8 @@
 "__export__.ir_model_access_976_fd5cd51f","res_partner_industry_pillar.all","taz-common.model_res_partner_industry_pillar","base.group_user","True","True","True","True"
 "taz_basic_res_partner","taz_basic_res_partner","base.model_res_partner","taz-basic","True","True","True","False"
 "taz_basic_res_partner_link","taz_basic_res_partner_link","taz-common.model_taz_contact_user_link","taz-basic","True","True","True","True"
+"taz_basic_res_partner_link_frequency","taz_basic_res_partner_link_frequency","taz-common.model_taz_contact_user_link_frequency","taz-basic","True","False","False","False"
+"taz_admin_res_partner_link_frequency","taz_admin_res_partner_link_frequency","taz-common.model_taz_contact_user_link_frequency","taz-admin","True","True","True","True"
 "taz-common.access_taz_res_partner_mass_category","access_taz_res_partner_mass_category","taz-common.model_taz_res_partner_mass_category","base.group_user","True","True","True","True"
 "taz_admin_res_industry","taz_admin_res_partner_industry","taz-common.model_res_partner_industry","taz-admin","True","True","True","True"
 "taz_basic_crm_lead","taz_basic_crm_lead","crm.model_crm_lead","taz-basic","True","False","False","False"

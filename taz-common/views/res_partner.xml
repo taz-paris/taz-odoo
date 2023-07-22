@@ -492,15 +492,5 @@ if records:
         <record id="portal.partner_wizard_action_create_and_open" model="ir.actions.server">
             <field name="binding_model_id" eval="False"/>
         </record>
-
-    <record id="action_server_list_my_partner_intimity" model="ir.actions.server">
-          <field name="name">Contacts de mon plan d'intimité</field>
-          <field name="model_id" ref="model_res_partner"/>
-          <field name="binding_model_id" eval="False"/>
-          <field name="state">code</field>
-          <field name="code">action =  env.get('res.partner').open_my_partner_intimity()</field>
-     </record>
-    <menuitem name="Contacts de mon plan d'intimité" id="taz-common.my_partner_intimity" sequence="20" parent="taz-common.commerce" action="taz-common.action_server_list_my_partner_intimity"/>
-
   </data>
 </odoo>
