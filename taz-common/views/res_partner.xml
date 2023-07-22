@@ -238,6 +238,7 @@
 			    <field name="date_last_business_action"/>
 			    <field name="linkedin_url" widget="url"/>
                             <field name="comment"/>
+		            <field name="inhouse_influence_level"/>
 			</group>
                     </group>
 		    <notebook>
@@ -260,8 +261,6 @@
 				</field>
 			</page>
 			<page string="Tasmaniens en contact">
-				<label for="inhouse_influence_level" string="Niveau d'influence chez le client"/>
-				<field name="inhouse_influence_level"/>
 				<field name="contact_user_link_ids" context="{'default_partner_id': active_id}"/>
 			</page>
 			<page name="contact_channels" string="Coordonnées">
