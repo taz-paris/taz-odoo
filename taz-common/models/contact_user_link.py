@@ -33,6 +33,76 @@ class ContactUserLink(models.Model):
         return res
         """
 
+    def init_from_taggs(self):
+        #Fonction pour initialiser les ContactUserLink à partir des taggs pour les Voeux
+        dict_tags = {
+            'Voeux_ADU_email_perso' : {'user_id' : 6, 'communication_preference' : 'email_perso'},
+            'Voeux_ADU_papier_perso' : {'user_id' : 6, 'communication_preference' : 'paper_perso'},
+            'Voeux_ALE_email_perso' : {'user_id' : 85, 'communication_preference' : 'email_perso'},
+            'Voeux_ALE_papier_perso' : {'user_id' : 85, 'communication_preference' : 'paper_perso'},
+            'Voeux_DGE_email_perso' : {'user_id' : 20, 'communication_preference' : 'email_perso'},
+            'Voeux_DGE_email_tu' : {'user_id' : 20, 'communication_preference' : 'email_tu'},
+            'Voeux_DGE_email_vous' : {'user_id' : 20, 'communication_preference' : 'email_vous'},
+            'Voeux_DGE_papier_perso' : {'user_id' : 20, 'communication_preference' : 'paper_perso'},
+            'Voeux_EDV_email_perso' : {'user_id' : 24, 'communication_preference' : 'email_perso'},
+            'Voeux_EDV_email_tu' : {'user_id' : 24, 'communication_preference' : 'email_tu'},
+            'Voeux_EDV_papier_perso' : {'user_id' : 24, 'communication_preference' : 'paper_perso'},
+            'Voeux_FBE_email_perso' : {'user_id' : 25, 'communication_preference' : 'email_perso'},
+            'Voeux_FBE_papier_perso' : {'user_id' : 25, 'communication_preference' : 'paper_perso'},
+            'Voeux_FJE_papier_perso' : {'user_id' : 19, 'communication_preference' : 'paper_perso'},
+            'Voeux_FJE_papier_tu' : {'user_id' : 19, 'communication_preference' : 'paper_tu'},
+            'Voeux_FJE_papier_vous' : {'user_id' : 19, 'communication_preference' : 'paper_vous'},
+            'Voeux_FKO_email_perso' : {'user_id' : 13, 'communication_preference' : 'email_perso'},
+            'Voeux_FKO_email_tu' : {'user_id' : 13, 'communication_preference' : 'email_tu'},
+            'Voeux_FKO_email_vous' : {'user_id' : 13, 'communication_preference' : 'email_vous'},
+            'Voeux_FKO_papier_perso' : {'user_id' : 13, 'communication_preference' : 'paper_perso'},
+            'Voeux_IBN_email_perso' : {'user_id' : 97, 'communication_preference' : 'email_perso'},
+            'Voeux_IBN_papier_perso' : {'user_id' : 97, 'communication_preference' : 'paper_perso'},
+            'Voeux_JGA_email_perso' : {'user_id' : 14, 'communication_preference' : 'email_perso'},
+            'Voeux_JLR_email_perso' : {'user_id' : 98, 'communication_preference' : 'email_perso'},
+            'Voeux_JLR_papier_perso' : {'user_id' : 98, 'communication_preference' : 'paper_perso'},
+            'Voeux_MAG_email_perso' : {'user_id' : 16, 'communication_preference' : 'email_perso'},
+            'Voeux_MAG_papier_perso' : {'user_id' : 16, 'communication_preference' : 'paper_perso'},
+            'Voeux_MBE_email_perso' : {'user_id' : 109, 'communication_preference' : 'email_perso'},
+            'Voeux_MBE_papier_perso' : {'user_id' : 109, 'communication_preference' : 'paper_perso'},
+            'Voeux_MJA_email_perso' : {'user_id' : 106, 'communication_preference' : 'email_perso'},
+            'Voeux_MJA_papier_perso' : {'user_id' : 106, 'communication_preference' : 'paper_perso'},
+            'Voeux_ONI_email_perso' : {'user_id' : 114, 'communication_preference' : 'email_perso'},
+            'Voeux_ONI_papier_perso' : {'user_id' : 114, 'communication_preference' : 'paper_perso'},
+            'Voeux_PDP_email_perso' : {'user_id' : 115, 'communication_preference' : 'email_perso'},
+            'Voeux_PDP_papier_perso' : {'user_id' : 115, 'communication_preference' : 'paper_perso'},
+            'Voeux_PDU_email_perso' : {'user_id' : 9, 'communication_preference' : 'email_perso'},
+            'Voeux_PDU_papier_perso' : {'user_id' : 9, 'communication_preference' : 'paper_perso'},
+            'Voeux_PGE_email_perso' : {'user_id' : 18, 'communication_preference' : 'email_perso'},
+            'Voeux_PGE_email_tu' : {'user_id' : 18, 'communication_preference' : 'email_tu'},
+            'Voeux_PGE_email_vous' : {'user_id' : 18, 'communication_preference' : 'email_vous'},
+            'Voeux_PGE_papier_perso' : {'user_id' : 18, 'communication_preference' : 'paper_perso'},
+            'Voeux_PLA_email_perso' : {'user_id' : 116, 'communication_preference' : 'email_perso'},
+            'Voeux_PLA_papier_perso' : {'user_id' : 116, 'communication_preference' : 'paper_perso'},
+            'Voeux_SRI_email_perso' : {'user_id' : 126, 'communication_preference' : 'email_perso'},
+            'Voeux_SRI_papier_perso' : {'user_id' : 126, 'communication_preference' : 'paper_perso'},
+            'Voeux_TMI_email_perso' : {'user_id' : 10, 'communication_preference' : 'email_perso'},
+            'Voeux_TMI_email_tu' : {'user_id' : 10, 'communication_preference' : 'email_tu'},
+            'Voeux_TMI_email_vous' : {'user_id' : 10, 'communication_preference' : 'email_vous'},
+            'Voeux_TMI_papier_perso' : {'user_id' : 10, 'communication_preference' : 'paper_perso'},
+            'Voeux_VVI_email_perso' : {'user_id' : 130, 'communication_preference' : 'email_perso'},
+            'Voeux_VVI_papier_perso' : {'user_id' : 130, 'communication_preference' : 'paper_perso'},
+            'Voeux_WTH_email_perso' : {'user_id' : 23, 'communication_preference' : 'email_perso'},
+            'Voeux_WTH_papier_perso' : {'user_id' : 23, 'communication_preference' : 'paper_perso'},
+        }
+
+        for tag, dic in dict_tags.items() :
+            _logger.info('======== '+tag)
+            t = self.env['res.partner.category'].search([('name', '=', tag)])[0]
+            for partner in t.partner_ids:
+                contact_user_links = self.env['taz.contact_user_link'].search([('user_id', '=', dic['user_id']), ('partner_id', '=', partner.id)])
+                if len(contact_user_links) == 0 :
+                    self.env['taz.contact_user_link'].create({'user_id' : dic['user_id'], 'partner_id' : partner.id, 'communication_preference' : dic['communication_preference']})
+                else:
+                    if contact_user_links[0].communication_preference == False :
+                        contact_user_links[0].communication_preference = dic['communication_preference']
+
+
     @api.model
     def create(self, vals):
         if not vals.get("partner_id"):
@@ -102,8 +172,10 @@ class ContactUserLink(models.Model):
     target_contact_frequency_id = fields.Many2one('taz.contact_user_link_frequency', string="Fréquence de contact")
     comment = fields.Text("Commentaire")
     communication_preference = fields.Selection([
-            ('email-tu', "email auto - TU"),
-            ('email-vous', "email auto - VOUS"),
-            ('email-perso', "email personalisé"),
-            ('paper-perso', "papier personalisé"),
+            ('email_tu', "email auto - TU"),
+            ('email_vous', "email auto - VOUS"),
+            ('email_perso', "email personalisé"),
+            ('paper_perso', "papier personalisé"),
+            ('paper_tu', "papier auto - TU"),
+            ('paper_vous', "papier auto - VOUS"),
         ], string="Pref. com. voeux") 

@@ -109,4 +109,14 @@
 
     <menuitem id="taz-common.menu_contact_user_link_frequency" name="Fréquence recontre client"
         parent="taz-common.res_partner_menu_config" sequence="6" action="taz-common.action_contact_user_link_frequency"/>
+
+
+    <record id="action_init_contact_user_link_from_taggs" model="ir.actions.server">
+          <field name="name">init_contact_user_link_from_taggs</field>
+          <field name="model_id" ref="model_taz_contact_user_link"/>
+          <field name="binding_model_id" ref="model_taz_contact_user_link"/>
+          <field name="state">code</field>
+          <field name="code">action =  env.get('taz.contact_user_link').init_from_taggs()</field>
+          <field name="groups_id" eval="[(4, ref('base.group_system'))]" />
+   </record>
 </data>
