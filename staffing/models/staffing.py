@@ -17,6 +17,7 @@ class staffingNeed(models.Model):
             if record.staffed_employee_id:
                 record.name = "%s - %s %s" % (record.project_id.name or "", record.staffed_employee_id.first_name or "", record.staffed_employee_id.name or "")
 
+    """
     @api.onchange('project_id')
     def onchange_project_id(self):
         if self.project_id:
@@ -28,6 +29,20 @@ class staffingNeed(models.Model):
             else: 
                 self.begin_date = self.project_id.date_start
                 self.end_date = self.project_id.date
+    """
+
+    @api.depends('analytic_line_forecast_ids')
+    def compute(self):
+        for rec in self :
+            begin_date = None
+            end_date = None
+            for line_forecast in rec.analytic_line_forecast_ids:
+                if begin_date == None or line_forecast.begin_date < begin_date:
+                    begin_date = line_forecast.begin_date
+                if end_date == None or line_forecast.end_date > end_date :
+                    end_date = line_forecast.end_date
+            rec.begin_date = begin_date
+            rec.end_date = end_date
 
     @api.onchange('begin_date', 'end_date')
     def onchnage_dates(self):
@@ -54,12 +69,24 @@ class staffingNeed(models.Model):
     considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)")
     #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
     staffed_employee_id = fields.Many2one('hr.employee', string='Équipier satffé')
-    begin_date = fields.Date('Date début', required=True)
-    end_date = fields.Date('Date fin', required=False) #La date de fin n'est pas requise car pour les activités hors mission on a pas à mettre de date de fin
+    begin_date = fields.Date('Date début', compute=compute, store=True)
+    end_date = fields.Date('Date fin', compute=compute, store=True) #La date de fin n'est pas requise car pour les activités hors mission on a pas à mettre de date de fin
     nb_days_needed = fields.Float('Nb jours')
     description = fields.Text("Description du besoin")
     ##TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui ont un budget jour initial à 0
     #percent_needed = fields.Float('Pourcentage besoin')
+    analytic_line_forecast_ids = fields.One2many(
+            'account.analytic.line',
+            'staffing_need_id',
+            string="Staffing (prévisionnel)",
+            domain=[('category', '=', 'project_forecast')]
+        )
+    analytic_line_timesheet_ids = fields.One2many(
+            'account.analytic.line',
+            'staffing_need_id',
+            string="Pointage (brouillon ou validé)",
+            domain=[('category', 'in', ('project_draft', 'project_employee_validated'))]
+        )
 
     state = fields.Selection([
         ('wait', 'En attente'),
@@ -70,14 +97,11 @@ class staffingNeed(models.Model):
 
     staffing_proposal_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_ids)
     staffing_proposal_other_job_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_other_job_ids)
+
     def open_record(self):
-        # first you need to get the id of your record
-        # you didn't specify what you want to edit exactly
         rec_id = self.id
-        # then if you have more than one form view then specify the form id
         form_id = self.env.ref("staffing.need_form")
 
-        # then open the form
         return {
                 'type': 'ir.actions.act_window',
                 'name': 'Besoins de staffing',
@@ -115,6 +139,8 @@ class staffingNeed(models.Model):
 
         employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : montrer ceux qui seront présent à date de début de la mission mais pas encore chez Tasmane
         for employee in employees:
+            if not self.begin_date:
+                continue
             employee_job = employee._get_job_id(self.begin_date)
             if not employee_job:
                 continue

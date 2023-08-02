@@ -153,6 +153,12 @@
 				  </kanban>
 			  </field>
 		</page>
+		<page string="Staffing (prévisionnel)">
+			<field name="analytic_line_forecast_ids"/>
+		</page>
+		<page string="Pointage (brouillon ou validé)">
+			<field name="analytic_line_timesheet_ids"/>
+		</page>
 		</notebook>
         </form>
       </field>

@@ -457,6 +457,11 @@ class naptaProject(models.Model):
 
         _logger.info('======== napta_init_from_odoo TERMINEE')
 
+    def synchAllNapta(self):
+        self.env['res.users'].create_update_odoo()
+        self.env['staffing.need'].create_update_odoo()
+        #self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
+
 
 class naptaPartner(models.Model):
     _inherit = "res.partner"
@@ -500,6 +505,7 @@ class naptaNeed(models.Model):
     napta_id = fields.Char("Napta ID")
 
 
+    """
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta user_project')
         client = ClientRestNapta(self.env)
@@ -513,7 +519,29 @@ class naptaNeed(models.Model):
               "user_id" : rec.staffed_employee_id.user_id.napta_id,
             }
             client.create_update_api('user_project', attributes, rec)
+    """
 
+    def create_update_odoo(self):
+        #_logger.info('---- Create or update Odoo user_project')
+        client = ClientRestNapta(self.env)
+        user_projects = client.read_cache('user_project')
+        for napta_id, user_project in user_projects.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'staffed_employee_id' : {'napta_id' : user_project['attributes']['user_id']},
+                    'project_id' : {'napta_id' : user_project['attributes']['project_id']},
+                    #is_assessment_activated
+                    #simulated
+                    #user_project_metadata
+                    #userproject_status_id
+                }
+            create_update_odoo(self.env, 'staffing.need', dic)
+        #TODO : supprimer les user_project qui ont été supprimées sur Napta
+
+class naptaEmployee(models.Model):
+    _inherit = 'hr.employee'
+    #Dans le modele employee, le napta_id est un related field car Napta ne différencie par l'objet employé de l'objet utilisateur
+    napta_id = fields.Char("Napta ID", related='user_id.napta_id')
 
 class naptaAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -524,6 +552,24 @@ class naptaAnalyticLine(models.Model):
     napta_id = fields.Char("Napta ID")
 
 
+    def create_update_odoo_userprojectperiod(self):
+        _logger.info('---- BATCH Create or update Odoo userprojectperiod')
+        client = ClientRestNapta(self.env)
+        userprojectperiods = client.read_cache('userprojectperiod')
+        for napta_id, userprojectperiod in userprojectperiods.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'category' : 'project_forecast',
+                    'staffing_need_id' : {'napta_id' : userprojectperiod['attributes']['user_project_id']},
+                    'date' : userprojectperiod['attributes']['start_date'],
+                    'date_end' : userprojectperiod['attributes']['end_date'],
+                    'unit_amount' : userprojectperiod['attributes']['staffed_days'],
+                }
+            create_update_odoo(self.env, 'account.analytic.line', dic)
+        #TODO : supprimer les userprojectperiod qui ont été supprimées sur Napta
+
+
+    """
     def create_update_napta_userprojectperiod(self):
         #_logger.info('---- Create or update Napta userprojectperiod')
         client = ClientRestNapta(self.env)
@@ -604,6 +650,7 @@ class naptaAnalyticLine(models.Model):
                     client.delete_api('timesheet_period', rec)
 
             client.create_update_api('timesheet_period', attributes, rec)
+    """
 
 class naptaResUsers(models.Model):
     _inherit = 'res.users'
@@ -612,13 +659,42 @@ class naptaResUsers(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
 
+    def create_update_odoo(self):
+        _logger.info('---- BATCH Create or update Odoo user')
+        client = ClientRestNapta(self.env)
+        users = client.read_cache('user')
+        for napta_id, user in users.items():
+            #Utilisateurs techniques qui ne doivent pas être créés sur Odoo
+            if user['attributes']['email'] in ['admin@napta.io', 'adminapi@tasmane-napta.com', 'consultant@tasmane-napta.com']:
+                continue
 
+            dic = {
+                    'napta_id' : napta_id,
+                    'login' : user['attributes']['email'],
+                    'name' : user['attributes']['last_name'],
+                    'first_name' : user['attributes']['first_name'],
+                    'active' : user['attributes']['active'],
+                }
+            odoo_object = create_update_odoo(self.env, 'res.users', dic)
+
+            #Create hr.employee
+            odoo_user = self.env['res.users'].search([('id','=',odoo_object.id)])
+            if len(odoo_user) == 1:
+                if not odoo_user.employee_id:
+                    odoo_user.action_create_employee()
+                    _logger.info("Création de l'employée depuis l'utilsiateur avec le login=%s" % odoo_user.login)
+
+            #TODO : mettre à jour le job_id de l'employee et la date d'embauche/contrat
+            #TODO : créer les hr.job manquant
+            #TODO : quid de la synchro des CJM ?
+
+
+    """
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta users')
         client = ClientRestNapta(self.env)
         napta_user_list = client.read_cache('user')
         for rec in self:
-            """
             if not(rec.napta_id):
                 for napta_user in napta_user_list.values():
                     if napta_user['attributes']['email'] == rec.login :
@@ -645,7 +721,7 @@ class naptaResUsers(models.Model):
                 attributes.pop(user_group_id)
                 attributes.pop(user_position_id) #TODO : intégrer le mapping Napta ?
             client.create_update_api('user', attributes, rec)
-            """
+        """
 
 class naptaJob(models.Model):
     _inherit = 'hr.job'
@@ -734,3 +810,204 @@ class naptaHrDepartment(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
+
+
+########################################################################################
+########################################################################################
+###########
+########### FONCTIONS UTILITAIRES PROPRES A L'IMPORT DES DONNEES DE NAPTA
+###########
+########################################################################################
+########################################################################################
+
+KEYS_CATALOG = { #Par défaut la clé fonctionnelle d'un objet est napta_id => si pour un objet donné, la clé est composée de plusieurs attributs, préciser la liste de ces attributs dans ce dictionnaire
+    'account.analytic.line' : ['napta_id', 'category'],
+}
+
+def get_napta_key_domain_search(odoo_model_name, dic):
+    if not(type(dic) is dict):
+        raise ValidationError(_("dic should be a dictionnary that contains the values of the key attributes"))
+
+    if odoo_model_name in KEYS_CATALOG.keys():
+        key_attribute_list = KEYS_CATALOG[odoo_model_name]
+    else :
+        key_attribute_list = ['napta_id']
+
+    if 'napta_id' not in key_attribute_list:
+        raise ValidationError(_("key_attribute_list has to contains napta_id"))
+
+    key_domain_search = []
+    for key_attribute in key_attribute_list:
+        if key_attribute not in dic.keys():
+            raise ValidationError(_("dic should contains the values of the key attributes %s" % key_attribute))
+        if dic[key_attribute] in [False, None, "", 0, '0']:
+            raise ValidationError(_("values of the key attributes %s shouldn't be null/false/none %s for the odoo_model_name=%s" % (key_attribute, str(dic[key_attribute]), odoo_model_name)))
+        key_domain_search.append((key_attribute, '=', dic[key_attribute]))
+
+    if odoo_model_name in ['hr.employee', 'res.users']:
+        tup = ('active', 'in', [True, False])
+        key_domain_search.append(tup)
+    #_logger.info('key_domain_search = %s' % str(key_domain_search))
+
+    return key_domain_search
+
+
+def create_update_odoo(env, odoo_model_name, dic, context={}):
+    key_domain_search = get_napta_key_domain_search(odoo_model_name, dic)
+    obj_list = env[odoo_model_name].search(key_domain_search)
+
+    if len(obj_list) > 1 :
+        raise ValidationError(_("Several objects are return with this key_attribute_list => So this list in not carriing KEY, because it's not UNIQUE"))
+
+    elif len(obj_list) == 1 :
+        odoo_object = obj_list[0]
+        old_odoo_values, dict_dif = prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object)
+
+        if len(dict_dif):
+            _logger.info("Mise à jour de l'objet %s ID= %s (napta key = %s) avec les valeurs %s" % (odoo_model_name, str(odoo_object.id), str(key_domain_search), str(dict_dif)))
+            _logger.info("      > Old odoo values : %s" % str(old_odoo_values))
+            odoo_object.with_context(context).write(dict_dif)
+
+    else : #creation
+        old_odoo_values, dic = prepare_update_from_napta_values(env, odoo_model_name, dic)
+        _logger.info("Create odoo_objet=%s with fields %s" % (odoo_model_name, str(dic)))
+        odoo_object = env[odoo_model_name].with_context(context).create(dic)
+        _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
+    
+    return odoo_object
+
+
+def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=False) :
+        #_logger.info('--- prepare_update_from_napta_values')
+        models = env['ir.model'].search([('model','=',odoo_model_name)])
+        if len(models) != 1:
+            _logger.info("Objet non trouvé %s." % odoo_model_name)
+            return False
+        model = models[0]
+
+        res = {}
+        old_odoo_value = {}
+        for odoo_field_name, napta_value in dic.items():
+            odoo_field = env['ir.model.fields'].search([('model_id', '=', model.id), ('name', '=', odoo_field_name)])[0]
+            odoo_value = None
+
+            if odoo_field.ttype in ["char", "html", "text", "date", "datetime", "float", "integer", "boolean", "selection", "monetary", "json"]  :
+                if napta_value == None:
+                    napta_value = False
+                odoo_value = napta_value
+
+                if odoo_field.ttype in ["date"]  :
+                    if napta_value :
+                        odoo_value = datetime.datetime.strptime(napta_value, '%Y-%m-%d').date()
+
+                if odoo_field.ttype in ["datetime"]  :
+                    #Odoo expects dates in UTC format without timezone
+                    #Napta API return dates in that timezone => Nothing to change
+                    if napta_value:
+                        odoo_value = datetime.datetime.strptime(napta_value, '%Y-%m-%dT%H:%M:%S.%f')
+
+                if odoo_field.ttype in ["float", "monetary"] :
+                    odoo_value = round(float(napta_value),2)
+
+                if odoo_field.ttype in ["integer"] :
+                    odoo_value = int(napta_value)
+
+                if odoo_field.ttype in ["boolean"] :
+                    odoo_value = bool(napta_value)
+
+                if odoo_field.ttype in ["selection"] :
+                    odoo_value = str(napta_value)
+
+                if odoo_field.ttype in ["html"] :
+                    if napta_value and len(napta_value.strip())>0: 
+                        #TODO : cette conversion ne donne pas le bon encodage => les commentaires avect des accent sont toujours raffraichis, même si Odoo a déjà la bonne valeur
+                        html_napta = html.tostring(html.fromstring(napta_value)).decode('utf-8')
+                        #_logger.info(html_napta)
+                        odoo_value = html_napta
+
+                        #html_fitnet5 = html.tostring(html.fromstring(napta_value.encode('utf-8'))).decode('utf-8')
+                        #_logger.info(html_fitnet5)
+                        #html_fitnet4 = html.tostring(html.fromstring(napta_value.encode('utf-8')), encoding='utf-8').decode('utf-8')
+                        #_logger.info(html_fitnet4)
+                        #html_fitnet3 = html.tostring(html.fromstring(napta_value, parser=html.HTMLParser(encoding='utf-8'))).decode('utf-8')
+                        #_logger.info(html_fitnet3)
+                        #html_fitnet2 = html.tostring(html.fromstring(napta_value))
+                        #_logger.info(html_fitnet2)
+
+                        #html_odoo =  html.tostring(odoo_object[odoo_field_name])
+                        #if html_fitnet == html_odoo:
+                        #    odoo_value = odoo_object[odoo_field_name]
+
+                if odoo_object :
+                    if odoo_object[odoo_field_name] != odoo_value:
+                        #_logger.info("      Ancienne valeur dans Odoo pour l'attribut %s de l'objet %s (Odoo ID = %s): %s" % (odoo_field_name, odoo_model_name, str(odoo_object['id']), odoo_object[odoo_field_name]))
+                        #_logger.info("              > Nouvelle valeur : %s" % odoo_value)
+                        old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]
+                        res[odoo_field_name] = odoo_value
+                else :
+                        res[odoo_field_name] = odoo_value
+
+
+            if odoo_field.ttype == "many2one" :
+                if None in napta_value.values() or False in napta_value.values() : #le champ many2one était valorisé sur Napta, mais a été remis à blanc sur Napta
+                    if odoo_object :
+                        if odoo_object[odoo_field_name] :
+                            res[odoo_field_name] = False
+                            old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]
+                    else:
+                        res[odoo_field_name] = False
+                    continue
+                key_domain_search = get_napta_key_domain_search(odoo_field.relation, napta_value)
+                target_objects = env[odoo_field.relation].search(key_domain_search)
+                if len(target_objects) > 1 :
+                    _logger.info("Plusieurs objets Odoo %s ont la clé %s" % (odoo_field.relation, key_domain_search))
+                    continue
+                elif len(target_objects) == 1 :
+                    target_object = target_objects[0]
+                    odoo_value = target_object.id
+                    if odoo_object :
+                        if odoo_object[odoo_field_name] != target_object:
+                            res[odoo_field_name] = odoo_value
+                            #_logger.info("      Ancienne valeur dans Odoo pour l'attribut MANY TO ONE %s de l'objet %s (Odoo ID = %s): %s" % (odoo_field_name, odoo_model_name, str(odoo_object['id']), odoo_object[odoo_field_name]))
+                            #_logger.info("              > Nouvelle valeur : %s" % odoo_value)
+                            old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]
+                    else :
+                        res[odoo_field_name] = odoo_value
+
+                elif len(target_objects) == 0 :
+                    odoo_id = ""
+                    if odoo_object :
+                        odoo_id = odoo_object['id']
+                    if napta_value != False:
+                        _logger.info("Alimentation du champ %s pour l' object Odoo %s (ID ODOO = %s)" % (odoo_field_name, odoo_model_name, str(odoo_id)))
+                        _logger.info("      > Erreur - impossible de trouver l'objet lié : aucun objet %s n'a de clé valorisé à %s" % (odoo_field.relation, key_domain_search))
+                    continue
+
+            if odoo_field.ttype == "many2many" :
+                odoo_value = []
+                for key_dic in napta_value:
+                    key_domain_search = get_napta_key_domain_search(odoo_field.relation, key_dic)
+                    target_objects = env[odoogt_field.relation].search(key_domain_search)
+                    if len(target_objects) != 1 :
+                        _logger.info("Aucun ou plusieurs objets Odoo %s ont le key_domain_search %s" % (odoo_field.relation, str(key_domain_search)))
+                        continue
+                    odoo_value.append(target_objects[0].id)
+                    
+                if odoo_object :
+                    ids_odoo_object = []
+                    for o in odoo_object[odoo_field_name]:
+                        ids_odoo_object.append(o.id)
+
+                    if ids_odoo_object.sort() != odoo_value.sort():
+                        #_logger.info("      Ancienne valeur dans Odoo pour l'attribut %s de l'objet %s (Odoo ID = %s): %s" % (odoo_field_name, odoo_model_name, str(odoo_object['id']), odoo_object[odoo_field_name]))
+                        #_logger.info("              > Nouvelle valeur : %s" % odoo_value)
+                        old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]
+                        res[odoo_field_name] = [(6, 0, odoo_value)]
+                else :
+                        res[odoo_field_name] = [(6, 0, odoo_value)]
+
+            if odoo_value is None:
+                _logger.info("Type %s non géré pour le champ %s = %s" % (odoo_field.ttype, odoo_field.name, napta_value))
+                continue
+
+        return old_odoo_value, res

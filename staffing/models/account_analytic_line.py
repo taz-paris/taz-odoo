@@ -54,6 +54,7 @@ class staffingAnalyticLine(models.Model):
     staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")
     hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
+    date_end = fields.Date("Date de fin")
 
 
 
