@@ -6,6 +6,11 @@
             <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
 	    <field name="priority">5</field>
             <field name="arch" type="xml">
+		<field name="date" position="after">
+			<field name="date_end"/>
+			<field name="employee_id"/>
+			<field name="category"/>
+		</field>
                 <field name="unit_amount" position="replace">
 			<!-- suppression du widget timesheet_uom qui empêche de saisir tous les montants-->
 			<field name="unit_amount" optional="show" sum="Total" decoration-danger="unit_amount &gt; 1 or unit_amount &lt; 0"/>

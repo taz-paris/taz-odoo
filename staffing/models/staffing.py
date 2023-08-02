@@ -37,10 +37,11 @@ class staffingNeed(models.Model):
             begin_date = None
             end_date = None
             for line_forecast in rec.analytic_line_forecast_ids:
-                if begin_date == None or line_forecast.begin_date < begin_date:
-                    begin_date = line_forecast.begin_date
-                if end_date == None or line_forecast.end_date > end_date :
-                    end_date = line_forecast.end_date
+                if begin_date == None or line_forecast.date < begin_date:
+                    begin_date = line_forecast.date
+                if line_forecast.date_end :
+                    if end_date == None or line_forecast.date_end > end_date :
+                        end_date = line_forecast.date_end
             rec.begin_date = begin_date
             rec.end_date = end_date
 

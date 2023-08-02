@@ -47,8 +47,8 @@ class staffingAnalyticLine(models.Model):
 
     category = fields.Selection(selection_add=[
             ('project_forecast', 'Prévisionnel'), 
-            ('project_draft', 'Pointage brouillon'),
-            ('project_employee_validated', 'Pointage validé'),
+            #('project_draft', 'Pointage brouillon'),
+            ('project_employee_validated', 'Pointage (validé ou non)'),
         ])
 
     staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")

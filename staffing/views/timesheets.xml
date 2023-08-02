@@ -10,6 +10,7 @@
 				<field name="project_id" optional="show" readonly="1"/>
 				<field name="staffing_need_id" optional="hide" readonly="1" domain="[('staffed_employee_id', '=', context.get('employee_id'))]"/>
 				<field name="date" readonly="1"/>
+				<field name="date_end" readonly="1"/>
                     		<field name="category" optional="show" readonly="1"/>
 				<field name="unit_amount" sum="Total" decoration-danger="unit_amount &gt; 5 or unit_amount &lt; 0"/>
 				<!--

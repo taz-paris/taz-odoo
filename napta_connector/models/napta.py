@@ -458,9 +458,17 @@ class naptaProject(models.Model):
         _logger.info('======== napta_init_from_odoo TERMINEE')
 
     def synchAllNapta(self):
+        _logger.info('======== DEMARRAGE synchAllNapta')
+
+        client = ClientRestNapta(self.env)
+        client.empty_cache()
+
         self.env['res.users'].create_update_odoo()
         self.env['staffing.need'].create_update_odoo()
-        #self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
+        self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
+        #self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
+
+        _logger.info('======== synchAllNapta TERMINEE')
 
 
 class naptaPartner(models.Model):
@@ -568,6 +576,26 @@ class naptaAnalyticLine(models.Model):
             create_update_odoo(self.env, 'account.analytic.line', dic)
         #TODO : supprimer les userprojectperiod qui ont été supprimées sur Napta
 
+        
+    def create_update_odoo_timesheetperiod(self):
+        _logger.info('---- BATCH Create or update Odoo timesheet_period')
+        client = ClientRestNapta(self.env)
+        timesheet_list = client.read_cache('timesheet')
+        timesheet_periods = client.read_cache('timesheet_period')
+        return
+        for napta_id, timesheet_period in timesheet_periods.items():
+            timesheet = timesheet_list[timesheet_period['attributes']['timesheet_id']]
+            target_date = datetime.date.fromisocalendar(timesheet['attributes']['year'], timesheet['attributes']['week'], timesheet_period['attributes']['day'])
+            dic = {
+                    'napta_id' : napta_id,
+                    'category' : 'project_employee_validated',
+                    'employee_id' : {'napta_id' : timesheet['attributes']['user_id']},
+                    'project_id' : {'napta_id' : timesheet_period['attributes']['project_id']},
+                    'date' : target_date,
+                    'unit_amount' : timesheet_period['attributes']['worked_days'],
+                }
+            create_update_odoo(self.env, 'account.analytic.line', dic)
+        #TODO : supprimer les userprojectperiod qui ont été supprimées sur Napta
 
     """
     def create_update_napta_userprojectperiod(self):
@@ -867,13 +895,17 @@ def create_update_odoo(env, odoo_model_name, dic, context={}):
             _logger.info("Mise à jour de l'objet %s ID= %s (napta key = %s) avec les valeurs %s" % (odoo_model_name, str(odoo_object.id), str(key_domain_search), str(dict_dif)))
             _logger.info("      > Old odoo values : %s" % str(old_odoo_values))
             odoo_object.with_context(context).write(dict_dif)
+            #_logger.info('######## SQL COMMIT')
+            env.cr.commit()
 
     else : #creation
         old_odoo_values, dic = prepare_update_from_napta_values(env, odoo_model_name, dic)
         _logger.info("Create odoo_objet=%s with fields %s" % (odoo_model_name, str(dic)))
         odoo_object = env[odoo_model_name].with_context(context).create(dic)
         _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
-    
+        #_logger.info('######## SQL COMMIT')
+        env.cr.commit()
+
     return odoo_object
 
 
