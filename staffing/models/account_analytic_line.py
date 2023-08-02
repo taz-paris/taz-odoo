@@ -47,7 +47,6 @@ class staffingAnalyticLine(models.Model):
 
     category = fields.Selection(selection_add=[
             ('project_forecast', 'Prévisionnel'), 
-            #('project_draft', 'Pointage brouillon'),
             ('project_employee_validated', 'Pointage (validé ou non)'),
         ])
 

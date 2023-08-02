@@ -466,7 +466,7 @@ class naptaProject(models.Model):
         self.env['res.users'].create_update_odoo()
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
-        #self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
+        self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
 
         _logger.info('======== synchAllNapta TERMINEE')
 
@@ -582,10 +582,9 @@ class naptaAnalyticLine(models.Model):
         client = ClientRestNapta(self.env)
         timesheet_list = client.read_cache('timesheet')
         timesheet_periods = client.read_cache('timesheet_period')
-        return
         for napta_id, timesheet_period in timesheet_periods.items():
             timesheet = timesheet_list[timesheet_period['attributes']['timesheet_id']]
-            target_date = datetime.date.fromisocalendar(timesheet['attributes']['year'], timesheet['attributes']['week'], timesheet_period['attributes']['day'])
+            target_date = datetime.date.fromisocalendar(int(timesheet['attributes']['year']), int(timesheet['attributes']['week']), int(timesheet_period['attributes']['day']))
             dic = {
                     'napta_id' : napta_id,
                     'category' : 'project_employee_validated',
@@ -929,7 +928,7 @@ def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=Fals
                 odoo_value = napta_value
 
                 if odoo_field.ttype in ["date"]  :
-                    if napta_value :
+                    if napta_value and type(napta_value) == str :
                         odoo_value = datetime.datetime.strptime(napta_value, '%Y-%m-%d').date()
 
                 if odoo_field.ttype in ["datetime"]  :

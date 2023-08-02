@@ -86,7 +86,7 @@ class staffingNeed(models.Model):
             'account.analytic.line',
             'staffing_need_id',
             string="Pointage (brouillon ou validé)",
-            domain=[('category', 'in', ('project_draft', 'project_employee_validated'))]
+            domain=[('category', '=', 'project_employee_validated')]
         )
 
     state = fields.Selection([
