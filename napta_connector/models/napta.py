@@ -359,7 +359,6 @@ class naptaProject(models.Model):
 
             # Directeur de mission
             if rec.project_director_employee_id:
-                rec.project_director_employee_id.user_id.create_update_napta()
                 project_contributors = client.read_cache('project_contributor')
                 contributor_link_id = None
                 for project_contributor in project_contributors.values():
@@ -367,8 +366,23 @@ class naptaProject(models.Model):
                         contributor_link_id = project_contributor['id']
                 if not contributor_link_id :
                     if rec.project_director_employee_id.user_id.napta_id:
-                        contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
+                        if rec.project_director_employee_id.user_id.napta_id :
+                            contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
                 #On ne supprime pas de Napta les contributors qui ne sont pas/plus DM dans Odoo
+
+    def create_update_odoo(self):
+        _logger.info('---- Get project begin/begin dates from Napta')
+        client = ClientRestNapta(self.env)
+        user_projects = client.read_cache('project')
+        for napta_id, user_project in user_projects.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'date_start' : user_project['attributes']['estimated_start_date'],
+                    'date' : user_project['attributes']['estimated_end_date'],
+                }
+            create_update_odoo(self.env, 'project.project', dic, only_update=True)
+        #TODO : supprimer les user_project qui ont été supprimées sur Napta
+
 
     def goto_napta(self):
         if self.napta_id:
@@ -463,6 +477,7 @@ class naptaProject(models.Model):
         client = ClientRestNapta(self.env)
         client.empty_cache()
 
+        self.env['project.project'].create_update_odoo()
         self.env['res.users'].create_update_odoo()
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
@@ -503,7 +518,6 @@ class naptaProjectStage(models.Model):
               "name": rec.name,
             }
             client.create_update_api('projectstatus', attributes, rec)
-
 
 class naptaNeed(models.Model):
     _inherit = "staffing.need"
@@ -757,6 +771,7 @@ class naptaJob(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
 
+    """
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta user_position')
         client = ClientRestNapta(self.env)
@@ -765,7 +780,7 @@ class naptaJob(models.Model):
                 'name' : rec.name,
             }
             client.create_update_api('user_position', attributes, rec)
-        
+    """ 
 
 class naptaHrContract(models.Model):
     _inherit = 'hr.contract'
@@ -773,6 +788,7 @@ class naptaHrContract(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
 
+    """
     def reset_user_history(self):
         _logger.info('---- RESET Napta user_history')
         client = ClientRestNapta(self.env)
@@ -828,6 +844,7 @@ class naptaHrContract(models.Model):
                 res = client.post_api('user_history', user_history_target)
                 napta_id = res['data']['id']
                 user_history_target['napta_id'] = napta_id
+    """
 
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
 
@@ -874,12 +891,11 @@ def get_napta_key_domain_search(odoo_model_name, dic):
     if odoo_model_name in ['hr.employee', 'res.users']:
         tup = ('active', 'in', [True, False])
         key_domain_search.append(tup)
-    #_logger.info('key_domain_search = %s' % str(key_domain_search))
 
     return key_domain_search
 
 
-def create_update_odoo(env, odoo_model_name, dic, context={}):
+def create_update_odoo(env, odoo_model_name, dic, context={}, only_update=False):
     key_domain_search = get_napta_key_domain_search(odoo_model_name, dic)
     obj_list = env[odoo_model_name].search(key_domain_search)
 
@@ -894,16 +910,18 @@ def create_update_odoo(env, odoo_model_name, dic, context={}):
             _logger.info("Mise à jour de l'objet %s ID= %s (napta key = %s) avec les valeurs %s" % (odoo_model_name, str(odoo_object.id), str(key_domain_search), str(dict_dif)))
             _logger.info("      > Old odoo values : %s" % str(old_odoo_values))
             odoo_object.with_context(context).write(dict_dif)
-            #_logger.info('######## SQL COMMIT')
             env.cr.commit()
 
     else : #creation
-        old_odoo_values, dic = prepare_update_from_napta_values(env, odoo_model_name, dic)
-        _logger.info("Create odoo_objet=%s with fields %s" % (odoo_model_name, str(dic)))
-        odoo_object = env[odoo_model_name].with_context(context).create(dic)
-        _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
-        #_logger.info('######## SQL COMMIT')
-        env.cr.commit()
+        if only_update == False:
+            old_odoo_values, dic = prepare_update_from_napta_values(env, odoo_model_name, dic)
+            _logger.info("Create odoo_objet=%s with fields %s" % (odoo_model_name, str(dic)))
+            odoo_object = env[odoo_model_name].with_context(context).create(dic)
+            _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
+            env.cr.commit()
+        else:
+            odoo_object = False
+            _logger.info("Objet existant sur Napta mais non créée sur Odoo dic = %s" % (dic))
 
     return odoo_object
 
