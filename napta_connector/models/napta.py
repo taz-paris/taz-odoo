@@ -1068,3 +1068,4 @@ def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=Fals
 
         return old_odoo_value, res
 
+
