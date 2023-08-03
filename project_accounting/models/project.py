@@ -163,7 +163,7 @@ class projectAccountProject(models.Model):
             rec.outsource_part_cost_current = 0.0
             rec.order_to_invoice_outsourcing = 0.0
             rec.order_sum_sale_order_lines = rec.compute_sale_order_total()
-            rec.order_to_invoice_company = rec.order_sum_sale_order_lines
+            rec.order_to_invoice_company = rec.compute_sale_order_total(with_direct_payment=False)
             for link in rec.project_outsourcing_link_ids:
                 rec.outsource_part_amount_current += link.outsource_part_amount_current
                 rec.outsource_part_cost_current += link.sum_account_move_lines
@@ -204,7 +204,7 @@ class projectAccountProject(models.Model):
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
 
-    def compute_sale_order_total(self): 
+    def compute_sale_order_total(self, with_direct_payment=True): 
         _logger.info('----------compute_sale_order_total')
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         self.ensure_one()
@@ -217,12 +217,12 @@ class projectAccountProject(models.Model):
         total = 0.0
         for line_id in line_ids:
             line = rec.env['sale.order.line'].browse(line_id)
-            _logger.info(line.read())
-            if line.direct_payment_purchase_order_line_id:
+            #_logger.info(line.read())
+            if line.direct_payment_purchase_order_line_id and with_direct_payment==False :
                 continue
             #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
             total += line.product_uom_qty * line.price_unit
-        _logger.info(total)
+        #_logger.info(total)
         _logger.info('----------END compute_sale_order_total')
         return total
         
@@ -235,6 +235,7 @@ class projectAccountProject(models.Model):
             'res_model': 'sale.order.line',
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
+            'target' : 'current',
             'context': {
                 'create': False,
             }
@@ -310,6 +311,7 @@ class projectAccountProject(models.Model):
             'domain': [('id', 'in', line_ids)],
             'view_type': 'form',
             'view_mode': 'tree',
+            'target' : 'current',
             'view_id': self.env.ref("account.view_move_line_tree").id,
             'context': {
                 'create': False,

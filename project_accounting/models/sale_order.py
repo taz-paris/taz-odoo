@@ -60,8 +60,8 @@ class projectAccountingSaleOrderLine(models.Model):
             if rec.direct_payment_purchase_order_line_id:
                 if rec.analytic_distribution != rec.direct_payment_purchase_order_line_id.analytic_distribution :
                     raise ValidationError(_("L'une des lignes portant un paiement direct est incohérente : distribution anlytique sur SOL != POL"))
-                if rec.price_subtotal != rec.direct_payment_purchase_order_line_id.price_subtotal:
-                    raise ValidationError(_("L'une des lignes portant un paiement direct est incohérente : sous-total SOL %s != POL %s" % (rec.price_subtotal, rec.direct_payment_purchase_order_line_id.price_subtotal)))
+                #if rec.price_subtotal != rec.direct_payment_purchase_order_line_id.price_subtotal:
+                #    raise ValidationError(_("L'une des lignes portant un paiement direct est incohérente : sous-total SOL %s != POL %s" % (rec.price_subtotal, rec.direct_payment_purchase_order_line_id.price_subtotal)))
     #TODO rec.direct_payment_purchase_order_line_id NE PEUX pas changer si la ligne a déjà été facturée et payée (line.untaxed_amount_to_invoice==0.0) ou si la ligne du purchase order a déjà été payée
 
     @api.depends('price_subtotal', 'analytic_distribution')

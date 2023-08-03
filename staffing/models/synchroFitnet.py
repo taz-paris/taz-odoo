@@ -40,6 +40,8 @@ class ClientRestFitnetManager:
         url_appel_api = proto+host+api_root
         self.url_appel_api = url_appel_api
         _logger.info("ClientRestFitnetManager : " + self.url_appel_api)
+        if not(os.path.exists(cache_folder)):
+            os.mkdir(cache_folder)
 
     def get_api(self, target_action):
         path = os.path.join(cache_folder, target_action.replace('/','_'))
@@ -318,13 +320,13 @@ class fitnetProject(models.Model):
         #self.correct_leave_timesheet_stock(client)
 
 
+        self.sync_suppliers(client)
+        self.sync_customers(client)
+        self.sync_contracts(client) #projets
         self.sync_customer_invoices(client)
         self.sync_supplier_invoices(client)
 
-        self.sync_customers(client)
 
-        self.sync_suppliers(client)
-        self.sync_contracts(client) #projets
 
         #self.sync_project(client)
 
@@ -1450,8 +1452,9 @@ class fitnetProject(models.Model):
             'title' : {'odoo_field' : 'name'},
             'projectId' : {'odoo_field' : 'project_group_id'},
             'customerId' : {'odoo_field' : 'partner_id'},
-            'beginDate' : {'odoo_field' : 'date_start'},
-            'endDate' : {'odoo_field' : 'date'},
+            #'beginDate' : {'odoo_field' : 'date_start'},
+            #'endDate' : {'odoo_field' : 'date'},
+            #'status' : {'odoo_field' : 'stage_id'},
             'contractNumber' : {'odoo_field' : 'number'},
             'contractTypeId' : {'odoo_field' : 'agreement_id'},
             'contractAmount' : {'odoo_field' : 'amount'},
@@ -1474,7 +1477,6 @@ class fitnetProject(models.Model):
             'orderNumber' : {'odoo_field' : 'purchase_order_number'},
             'billedAmount' : {'odoo_field' : 'billed_amount'},
             'payedAmount' : {'odoo_field' : 'payed_amount'},
-            'status' : {'odoo_field' : 'stage_id'},
             #'project_director_employee_id' : {'odoo_field' : 'project_director_employee_id'},
             'commercialStatusID' : {
                 'odoo_field' : 'probability', 

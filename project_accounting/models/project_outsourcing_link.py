@@ -15,7 +15,7 @@ class projectOutsourcingLink(models.Model):
             ('project_partner_uniq', 'UNIQUE (partner_id, project_id)',  "Impossible d'enregistrer deux fois le même sous-traitant pour un même projet. Ajoutez des commandes à la ligne existantes.")
     ]
 
-    def compute_purchase_order_total(self): 
+    def compute_purchase_order_total(self, with_direct_payment=True): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         for rec in self:
             #rec.order_sum_purchase_order_lines = 0
@@ -24,7 +24,7 @@ class projectOutsourcingLink(models.Model):
             #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
-                if line.direct_payment_sale_order_line_id:
+                if line.direct_payment_sale_order_line_id and with_direct_payment==False:
                     continue
                 total += line.product_qty * line.price_unit
             rec.order_sum_purchase_order_lines = total
@@ -117,7 +117,7 @@ class projectOutsourcingLink(models.Model):
                     rec.order_direct_payment_done += purchase_line.order_direct_payment_validated_amount
                     rec.order_direct_payment_done_detail += "%s " % (purchase_line.order_direct_payment_validated_detail or "")
 
-            rec.compute_purchase_order_total()
+            rec.order_sum_purchase_order_lines = rec.compute_purchase_order_total()
             rec.order_company_payment_amount = rec.order_sum_purchase_order_lines - rec.order_direct_payment_amount
             rec.marging_amount_current =  rec.outsource_part_amount_current - rec.sum_account_move_lines
             rec.marging_rate_current = 0.0 
@@ -140,7 +140,7 @@ class projectOutsourcingLink(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    order_sum_purchase_order_lines = fields.Monetary('Total des commandes de Tasmane enregistrées', compute=compute_purchase_order_total)
+    order_sum_purchase_order_lines = fields.Monetary('Total des commandes de Tasmane enregistrées', compute=compute)
     order_direct_payment_amount = fields.Monetary('Montant paiement direct', compute=compute, help="Montant payé directement par le client final au sous-traitant de Tasmane")
         #TODO : il va falloir lister les factures validées sur Chorus et checker ce montant
     order_company_payment_amount = fields.Monetary('Montant à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute)

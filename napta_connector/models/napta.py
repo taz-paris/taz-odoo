@@ -482,6 +482,16 @@ class naptaProject(models.Model):
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
+        #TODO : synchro des congés et les catégories de jours de congés
+        #TODO : quid de la synchro des jours fériés avec Napta ?
+                # les générer jusqu'en 2050 avec https://pypi.org/project/jours-feries-france/ ?
+        #TODO : synchro des compétences, les catégories de compétences, les échelles de notations, les valeurs des échelles de notations et les compétences des utilisateurs, les souhaits des utilisateurs
+
+        #TODO : mettre à jour le job_id de l'employee et la date d'embauche/contrat
+            # Gérer le recalcul des montants des analytic lines si le grade ou le CJM change a posteriori
+        #TODO : créer les hr.job manquant
+        #TODO : créer les project.satge manquant
+        #TODO : quid de la synchro des CJM ?
 
         _logger.info('======== synchAllNapta TERMINEE')
 
@@ -544,7 +554,7 @@ class naptaNeed(models.Model):
     """
 
     def create_update_odoo(self):
-        #_logger.info('---- Create or update Odoo user_project')
+        _logger.info('---- BATCH Create or update Odoo user_project')
         client = ClientRestNapta(self.env)
         user_projects = client.read_cache('user_project')
         for napta_id, user_project in user_projects.items():
@@ -725,9 +735,6 @@ class naptaResUsers(models.Model):
                     odoo_user.action_create_employee()
                     _logger.info("Création de l'employée depuis l'utilsiateur avec le login=%s" % odoo_user.login)
 
-            #TODO : mettre à jour le job_id de l'employee et la date d'embauche/contrat
-            #TODO : créer les hr.job manquant
-            #TODO : quid de la synchro des CJM ?
 
 
     """
