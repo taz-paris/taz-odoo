@@ -167,10 +167,7 @@ class projectAccountProject(models.Model):
             for link in rec.project_outsourcing_link_ids:
                 rec.outsource_part_amount_current += link.outsource_part_amount_current
                 rec.outsource_part_cost_current += link.sum_account_move_lines
-
                 rec.order_to_invoice_outsourcing += link.order_direct_payment_amount
-                    #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
-                rec.order_to_invoice_company += link.order_company_payment_amount
                     #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
 
             rec.company_to_invoice_left = rec.order_to_invoice_company - rec.company_invoice_sum_move_lines
