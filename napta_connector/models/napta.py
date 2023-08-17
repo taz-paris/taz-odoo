@@ -475,7 +475,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        client.empty_cache()
+#        client.empty_cache()
 
         self.env['project.project'].create_update_odoo()
         self.env['res.users'].create_update_odoo()

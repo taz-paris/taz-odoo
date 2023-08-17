@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 class staffingAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
-
     def write(self, vals):
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
