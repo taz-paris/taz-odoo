@@ -101,7 +101,7 @@ class projectBookEmployeeDistributionPeriod(models.Model):
     _name = "project.book_employee_distribution_period"
     _description = "Project book employee distribution PERIOD"
     _sql_constraints = [
-        ('project_employee_period_uniq', 'UNIQUE (project_id, book_employee_distribution_id, book_period_id)',  "Impossible d'avoir deux book différents pour un même salarié/période.")
+        ('proj_employ_period', 'UNIQUE (project_id, book_employee_distribution_id, project_book_period_id)',  "Impossible d'avoir deux book différents pour un même salarié/période.")
     ]
 
     @api.constrains('book_employee_distribution_id', 'book_period_id')

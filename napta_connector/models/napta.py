@@ -791,11 +791,11 @@ class naptaJob(models.Model):
 
 class naptaHrContract(models.Model):
     _inherit = 'hr.contract'
+    """
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
 
-    """
     def reset_user_history(self):
         _logger.info('---- RESET Napta user_history')
         client = ClientRestNapta(self.env)
