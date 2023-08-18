@@ -6,6 +6,7 @@
       <field name="arch" type="xml">
         <tree editable="top" expand="1">
           <field name="name" optional="hide"/>
+	  <field name="id" widget="open_tab"/>
           <field name="project_id" options="{'no_quick_create': True}" context="{'tree_view_ref':'staffing.project_tree', 'form_view_ref':'staffing.project_form'}"/>
 	  <field name="project_stage" optional="show"/>
 	  <field name="description" optional="show"/>
@@ -17,7 +18,6 @@
 	  <field name="nb_days_needed" optional="show"/>
 	  <field name="state" optional="show"/>
           <field name="staffed_employee_id" optional="hide"/>
-		<button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
         </tree>
       </field>
     </record>

@@ -575,13 +575,13 @@ class fitnetProject(models.Model):
             #   del customer['vatNumber']
 
             mapping_fields = {
-                'vatNumber' : {'odoo_field' : 'vat'}, 
+                #'vatNumber' : {'odoo_field' : 'vat'}, 
                 'clientCode' : {'odoo_field' : 'ref'},
                 'phone' : {'odoo_field' : 'phone'},
                 'email' : {'odoo_field' : 'email'},
                 'paymentTermsId' : {'odoo_field' : 'property_payment_term_id'},
 
-                'siret' : {'odoo_field' : 'siret'},
+                #'siret' : {'odoo_field' : 'siret'},
                 'default_invoice_payement_bank_account' : {'odoo_field' : 'default_invoice_payement_bank_account'},
 
                 #'address_streetNumber' : {'odoo_field' : 'street'},

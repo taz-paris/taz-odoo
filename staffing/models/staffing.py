@@ -99,24 +99,6 @@ class staffingNeed(models.Model):
     staffing_proposal_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_ids)
     staffing_proposal_other_job_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_other_job_ids)
 
-    def open_record(self):
-        rec_id = self.id
-        form_id = self.env.ref("staffing.need_form")
-
-        return {
-                'type': 'ir.actions.act_window',
-                'name': 'Besoins de staffing',
-                'res_model': 'staffing.need',
-                'res_id': rec_id,
-                'view_type': 'form',
-                'view_mode': 'form',
-                'view_id': form_id.id,
-                'context': {},
-                # if you want to open the form in edit mode direclty
-                'flags': {'initial_mode': 'edit'},
-                'target': 'current',
-            }
-
     @api.model
     def create(self, vals):
         needs = super().create(vals)

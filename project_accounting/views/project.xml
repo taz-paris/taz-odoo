@@ -7,7 +7,7 @@
             <field name="arch" type="xml">
                 <search string="Search Project">
                     <field name="name" string="N° ou nom du projet" filter_domain="['|', ('number', 'ilike', self), ('name', 'ilike', self)]"/>
-                    <field name="project_director_employee_id" string="Directeur de mission"/>
+                    <field name="project_director_employee_id" string="Directeur de mission (nom de famille)"/>
                     <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
                     <field name="stage_id" groups="project.group_project_stages"/>
                     <field name="project_group_id" string="Groupe de projets"/>
@@ -32,11 +32,26 @@
 	      <field name="model">project.project</field>
 	      <field name="priority">5</field>
 	      <field name="arch" type="xml">
-		<tree>
+		  <tree 
+			  decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'"
+			  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
+			      >
+		  <field name="id" widget="open_tab"/>
 		  <field name="number"/>
-		  <field name="name"/>
+		  <field name="name" />
 		  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
-		  <field name="stage_id"/>
+		  <field name="project_director_employee_id"/>
+		  <field name="stage_id" 
+			  widget="badge" 
+			  decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'"
+			  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
+			  />
+		  <field name="color_rel" invisible="1" />
+		  <field name="order_amount_current" optional="hide" />
+		  <field name="order_sum_sale_order_lines" optional="show" />
+            	  <field name="order_to_invoice_company" optional="hide" />
+            	  <field name="company_invoice_sum_move_lines" optional="hide" />
+		  <field name="company_to_invoice_left" optional="hide" />
 		</tree>
 	      </field>
 	    </record>

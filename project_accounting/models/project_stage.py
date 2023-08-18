@@ -17,4 +17,12 @@ class projectStage(models.Model):
         ('launched', 'Projet lancé (mission en cours)'),
         ('closed', 'Projet terminé ou annulé ou perdu'),
         ], string="Etat")
+    color = fields.Selection([
+            ('decoration-danger', 'Rouge'),
+            ('decoration-info', 'Bleu'),
+            ('decoration-muted', 'Gris'),
+            ('decoration-primary', 'Rose'),
+            ('decoration-success', 'Vert'),
+            ('decoration-warning', 'Marron'),
+        ], "Couleur")
 

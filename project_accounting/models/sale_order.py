@@ -13,6 +13,8 @@ class projectAccountingSaleOrder(models.Model):
     _inherit = "sale.order"
     _rec_name = "client_order_ref"
 
+    client_order_ref = fields.Char(default="Pas de ref. client sur le BC")
+
     def compute_final_customer_order_amount(self):
         for rec in self:
             rec.final_customer_order_amount = rec.other_company_amount + rec.amount_untaxed

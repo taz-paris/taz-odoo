@@ -78,6 +78,7 @@ class projectAccountProject(models.Model):
     user_enrolled_ids = fields.Many2many('res.users', string="Utilisateurs concernés par ce projet", compute=_compute_user_enrolled_ids, store=True)
 
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
+    color_rel = fields.Selection(related="stage_id.color", store=True)
     number = fields.Char('Numéro', readonly=True, required=False, copy=False, default='')
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
@@ -227,7 +228,7 @@ class projectAccountProject(models.Model):
         line_ids = self.get_sale_order_line_ids()
 
         action = {
-            'name': _('Order lines'),
+            'name': _('Lignes de commande client'),
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order.line',
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
