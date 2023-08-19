@@ -284,7 +284,7 @@ class projectAccountProject(models.Model):
     def compute_account_move_total(self, filter_list=[]):
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         _logger.info("--compute_account_move_total")
-        line_ids = self.get_account_move_line_ids(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice'])])
+        line_ids = self.get_account_move_line_ids(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice']), ('display_type', 'not in', ['line_note', 'line_section'])])
             #On ne met pas le partenr_id dans le filtre car dans certains cas, Tasmane ne facture pas le client final, mais un intermédiaire (Sopra par exemple) 
         total = 0.0
         _logger.info(len(line_ids))
@@ -302,7 +302,7 @@ class projectAccountProject(models.Model):
             #TODO : on devrait exlure les sous-traitants mais intégrer in_refund, out_invoice.. mais dans ce cas ça mélangerait les factures de frais généraux...
 
         action = {
-            'name': _('Invoice and refound lines'),
+            'name': _("Lignes de factures / avoirs"),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
             #'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
@@ -310,7 +310,7 @@ class projectAccountProject(models.Model):
             'view_type': 'form',
             'view_mode': 'tree',
             'target' : 'current',
-            'view_id': self.env.ref("account.view_move_line_tree").id,
+            'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
             'context': {
                 'create': False,
             }

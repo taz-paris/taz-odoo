@@ -1,14 +1,49 @@
 <odoo>
 	<template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
 		<xpath expr="//div[@id='total']/div" position="before">
-		    <div class="col-auto">
-			Compte bancaire à créditer par virement :
-				<ul>
-					<li>Banque : <span t-field="o.partner_bank_id.bank_id.name"/></li>
-					<li>BIC : <span t-field="o.partner_bank_id.bank_id.bic"/></li>
-					<li>IBAN : <b><span t-field="o.partner_bank_id.acc_number"/></b></li>
-				</ul>
-		    </div>
+			<t t-if="o.partner_bank_id">
+			    <div class="col-auto">
+				Modalités de règlement : Règlement par virement
+					<ul>
+						<li>Banque : <span t-field="o.partner_bank_id.bank_id.name"/></li>
+						<li>BIC : <span t-field="o.partner_bank_id.bank_id.bic"/></li>
+						<li>IBAN : <b><span t-field="o.partner_bank_id.acc_number"/></b></li>
+					</ul>
+			    </div>
+			</t>
+		</xpath>
+
+		<xpath expr="//div[@name='origin']" position="replace">
+		</xpath>
+
+		<xpath expr="//div[@name='customer_code']" position="replace">
+		    <t t-if="o.partner_id.long_company_name">
+			<div class="col-auto col-3 mw-100 mb-2" name="customer_long_company_name">
+                                <strong>Client :</strong>
+                                <p class="m-0" t-field="o.partner_id.long_company_name"/>
+			</div>
+		    </t>
+		    <t t-else="">
+			 <div class="col-auto col-3 mw-100 mb-2" name="customer_name">
+                                <strong>Client :</strong>
+                                <p class="m-0" t-field="o.partner_id.name"/>
+                        </div>
+		    </t>
+		</xpath>
+
+		<xpath expr="//td[@name='account_invoice_line_name']" position="replace">
+			<td name="account_invoice_line_name">
+				<t t-if="line.rel_project_ids">
+					<t t-foreach="line.rel_project_ids" t-as="project">
+							Projet <span t-field="project.number" t-options="{'widget': 'text'}"/> - <span t-field="project.name" t-options="{'widget': 'text'}"/><br/>
+					</t>
+				</t>
+				<span t-field="line.name" t-options="{'widget': 'text'}"/>
+			</td>
+		</xpath>
+
+		<xpath expr="//div[@name='reference']/strong" position="replace">
+                        <strong>N° de bon de commande</strong>
 		</xpath>
 
 		<!-- Chez Tasmane les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande 

@@ -33,7 +33,7 @@ class projectOutsourcingLink(models.Model):
         line_ids = self.get_purchase_order_line_ids()
 
         action = {
-            'name': _('Order lines'),
+            'name': _('Lignes de BC fournisseur'),
             'type': 'ir.actions.act_window',
             'res_model': 'purchase.order.line',
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
@@ -81,10 +81,10 @@ class projectOutsourcingLink(models.Model):
             rec.sum_account_move_lines = total
 
     def action_open_account_move_lines(self):
-        line_ids = self.project_id.get_account_move_line_ids([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund'])])
+        line_ids = self.project_id.get_account_move_line_ids([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
 
         action = {
-            'name': _('Invoice and refound lines'),
+            'name': _('Lignes de factures / avoirs fournisseurs'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],

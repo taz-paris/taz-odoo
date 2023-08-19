@@ -27,6 +27,7 @@ class projectAccountingSaleOrder(models.Model):
 
 class projectAccountingSaleOrderLine(models.Model):
     _inherit = "sale.order.line"
+    _order = "previsional_invoice_date asc"
     _sql_constraints = [
             ('direct_payment_purchase_order_line_id_uniq', 'UNIQUE (direct_payment_purchase_order_line_id)',  "Impossible d'enregistrer deux fois la même lignes de commande de SOUS-TRAITANT (purchase.order.line) dans l'attribut direct_payment_purchase_order_line_id.")
     ]

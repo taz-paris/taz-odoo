@@ -67,6 +67,7 @@
 			<field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
 			<field name="untaxed_amount_to_invoice" optional="hide" on_change="1"/>
+			<field name="untaxed_amount_invoiced" optional="hide" on_change="1" />
 			<field name="previsional_invoice_date" optional="show" string="Date prev fact" on_change="1"/>
 			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
 
@@ -125,6 +126,9 @@
             </field>
         </record>
 
+    <record id="sale.action_quotations_with_onboarding" model="ir.actions.act_window">
+        <field name="context">{'search_default_my_quotation': 0}</field>
+    </record>
 
 	<record id="view_order_line_tree_inherit" model="ir.ui.view">
             <field name="name">Sale order line</field>
@@ -134,8 +138,33 @@
 		<field name="order_id"  position="attributes">
 			<attribute name="widget">many2one</attribute>
 		</field>
+		<field name="salesman_id"  position="attributes">
+			<attribute name="optional">hide</attribute>
+		</field>
+		<field name="product_uom"  position="attributes">
+			<attribute name="optional">hide</attribute>
+		</field>
+		<field name="product_uom_qty"  position="attributes">
+			<attribute name="optional">hide</attribute>
+		</field>
+		<field name="qty_delivered"  position="attributes">
+			<attribute name="optional">hide</attribute>
+		</field>
+		<field name="qty_invoiced"  position="attributes">
+			<attribute name="optional">hide</attribute>
+		</field>
+		<field name="qty_to_invoice"  position="attributes">
+			<attribute name="optional">hide</attribute>
+		</field>
 		<field name="order_partner_id" position="after">
 			<field name="order_partner_invoice_id"/>
+		</field>
+		<field name="price_subtotal" position="after">
+			<field name="untaxed_amount_invoiced" optional="show" string="Facturé (HT)" />
+			<field name="untaxed_amount_to_invoice" optional="show" string="Reste à facturer (HT)"/>
+			<field name="previsional_invoice_date" optional="show"/>
+			<field name="direct_payment_purchase_order_line_id" optional="show"/>
+			<field name="invoice_lines" optional="hide"/>
 		</field>
             </field>
         </record>

@@ -4,6 +4,7 @@ from odoo import _
 
 import logging
 _logger = logging.getLogger(__name__)
+import json
 
 
 class projectAccountingAccountMove(models.Model):
@@ -48,3 +49,27 @@ class projectAccountingAccountMove(models.Model):
             _logger.info(payments_widget_vals)
             move.invoice_outstanding_credits_debits_widget = payments_widget_vals
             move.invoice_has_outstanding = len(new_content)
+
+class projectAccountingAccountMoveLine(models.Model):
+    _inherit = "account.move.line"
+
+    parent_payment_state = fields.Selection(related='move_id.payment_state', store=True, string="État du paiement (fature)")
+    parent_state = fields.Selection(string="État (fature)")
+
+    @api.depends('analytic_distribution')
+    def comptute_project_ids(self):
+        for rec in self:
+            project_ids_res = []
+            #for analytic_account in self.env['account.analytic.account'].browse(rec.analytic_distribution.keys()):
+            for analytic_account_id in rec.analytic_distribution.keys():
+                analytic_account = self.env['account.analytic.account'].search([('id', '=', analytic_account_id)])[0]
+                if len(analytic_account.project_ids):
+                    for project_id in analytic_account.project_ids:
+                        project_ids_res.append(project_id.id)
+
+            if len(project_ids_res):
+                rec.rel_project_ids = [(6, 0, project_ids_res)] 
+            else :
+                rec.rel_project_ids = False
+   
+    rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)

@@ -5,6 +5,9 @@
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
+		<field name="partner_id" position="attributes">
+			<attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+		</field>
                 <field name="partner_shipping_id" position="attributes">
 			<attribute name="invisible">True</attribute>
                 </field>
@@ -12,6 +15,49 @@
                         <field name="purchase_line_id" optional="hide" on_change="1"/>
                         <field name="sale_line_ids" optional="hide" on_change="1" widget="many2many_tags"/>
                 </xpath>
+		<xpath expr="//tree/field[@name='account_id']" position="attributes">
+			<attribute name="optional">hide</attribute>
+                </xpath>
+
+		<xpath expr="//button[@name='preview_invoice']" position="replace">
+		</xpath>
+            </field>
+        </record>
+
+
+	<record id="view_invoicelines_tree" model="ir.ui.view">
+            <field name="name">Account move line</field>
+            <field name="model">account.move.line</field>
+            <field name="arch" type="xml">
+		<tree>
+			<!-- Displayed fields -->
+			<field name="product_id" optional="hide" />
+			<field name="move_id" widget="many2one"/>
+			<field name="name" widget="section_and_note_text" optional="show"/>
+			<field name="account_id" optional="hide" groups="account.group_account_readonly" />
+			<field name="analytic_distribution" optional="hide" widget="analytic_distribution" groups="analytic.group_analytic_accounting" />
+			<field name="quantity" optional="show"/>
+			<field name="product_uom_category_id" invisible="1"/>
+			<field name="product_uom_id" groups="uom.group_uom" optional="hide"/>
+			<field name="price_unit" />
+			<field name="discount"  optional="hide"/>
+			<field name="tax_ids" widget="many2many_tags" domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', '=', parent.company_id), ('country_id', '=', parent.tax_country_id)]" context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}" options="{'no_create': True}" optional="show"/>
+			<field name="price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+			<field name="price_total" groups="account.group_show_line_subtotals_tax_included"/>
+
+			<field name="parent_state" widget="badge" decoration-success="parent_state == 'posted'" decoration-info="parent_state == 'draft'" optional="show" on_change="1" />
+			<field name="parent_payment_state" widget="badge" decoration-danger="parent_payment_state == 'not_paid'" decoration-warning="parent_payment_state in ('partial', 'in_payment')" decoration-success="parent_payment_state in ('paid', 'reversed')" optional="show" />
+
+			<!-- Others fields -->
+			<field name="partner_id" invisible="1"/>
+			<field name="currency_id" invisible="1"/>
+			<field name="company_id" invisible="1"/>
+			<field name="company_currency_id" invisible="1"/>
+			<field name="display_type" force_save="1" invisible="1"/>
+			<!-- /l10n_in_edi.test_edi_json -->
+			<!-- required for @api.onchange('product_id') -->
+			<field name="product_uom_id" invisible="1"/>
+		</tree>
             </field>
         </record>
   </data>

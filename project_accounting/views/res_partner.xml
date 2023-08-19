@@ -22,6 +22,10 @@
 			Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Cette fiche ne peut être modifiée que par un ADV.	
 			    </div>
 		    </field> 
+		    <field name="property_account_position_id" position="after">
+			    <field name="default_invoice_payement_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
+			    <field name="is_protected_partner"/>
+		    </field>
 		<xpath expr='//notebook' position="inside">
 			<page string="Projets">
 				<group>
