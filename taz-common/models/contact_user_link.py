@@ -35,6 +35,15 @@ class ContactUserLink(models.Model):
 
     def init_from_taggs(self):
         #Fonction pour initialiser les ContactUserLink à partir des taggs pour les Voeux
+        for link in self.search([]):
+            if link.communication_preference in ['email_tu', 'paper_tu']:
+                link.formality = 'tu_prenom'
+            if link.communication_preference in ['email_vous', 'paper_vous']:
+                link.formality = 'vous_nom'
+            if link.communication_preference in ['email_perso', 'paper_perso']:
+                link.formality = 'vous_nom'
+
+        """
         dict_tags = {
             'Voeux_ADU_email_perso' : {'user_id' : 6, 'communication_preference' : 'email_perso'},
             'Voeux_ADU_papier_perso' : {'user_id' : 6, 'communication_preference' : 'paper_perso'},
@@ -102,6 +111,7 @@ class ContactUserLink(models.Model):
                     if contact_user_links[0].communication_preference == False :
                         contact_user_links[0].communication_preference = dic['communication_preference']
 
+        """
 
     @api.model
     def create(self, vals):
@@ -150,12 +160,29 @@ class ContactUserLink(models.Model):
             else :
                 rec.next_business_action_id = False
 
+
+    @api.depends('partner_id.inhouse_influence_level')
+    def _compute_rel_inhouse_influence_level(self):
+        for rec in self :
+            rec.rel_inhouse_influence_level = rec.partner_id.inhouse_influence_level
+
+    def _inverse_rel_inhouse_influence_level(self):
+        for rec in self :
+            rec.partner_id.inhouse_influence_level = rec.rel_inhouse_influence_level
+
+
     user_id = fields.Many2one('res.users', string='Tasmanien', required=True, default=lambda self: self.env.user)
 
     partner_id = fields.Many2one('res.partner', string='Contact', required=False)
     parent_partner_id = fields.Many2one('res.partner', string="Entreprise", related='partner_id.parent_id', store=True)
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.parent_industry_id', store=True)
-    rel_inhouse_influence_level = fields.Selection(related="partner_id.inhouse_influence_level") 
+    rel_inhouse_influence_level = fields.Selection([
+         ('1', "1 - Réseau - pas de lien direct"),
+         ('2', "2 - Eclaireur - peut donner de l'information sur un compte à potentiel"),
+         ('3', "3 - Prescripteur - peut pousser Tasmane vers un interlocuteur décideur"),
+         ('4', "4 - Décideur -  peut décider par lui-même"),
+         ], string="Niveau d'influence chez le client", compute="_compute_rel_inhouse_influence_level", inverse="_inverse_rel_inhouse_influence_level") 
+
     last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action)
     date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=True)
     next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce tasmanien avec ce contact.", compute=_compute_date_business_action)
@@ -171,6 +198,11 @@ class ContactUserLink(models.Model):
         ], string="Niveau de proximité") 
     target_contact_frequency_id = fields.Many2one('taz.contact_user_link_frequency', string="Fréquence de contact")
     comment = fields.Text("Commentaire")
+    formality = fields.Selection([
+        ('vous_nom', 'Vous + nom'),
+        ('vous_prenom', 'Vous + prénom'),
+        ('tu_prenom', 'Tu + prénom'),
+        ], "Tu/vous")
     communication_preference = fields.Selection([
             ('email_tu', "email auto - TU"),
             ('email_vous', "email auto - VOUS"),

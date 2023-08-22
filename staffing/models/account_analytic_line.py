@@ -239,9 +239,13 @@ class staffingAnalyticLine(models.Model):
 
 
     def refresh_amount(self):
-        #_logger.info("---- refresh_amount")
+        _logger.info("---- refresh_amount")
         amount_converted, cost_line = self.compute_amount()
         if not amount_converted:
             return False
-        self.amount = amount_converted
-        self.hr_cost_id =  cost_line
+        if self.amount != amount_converted:
+            self.amount = amount_converted
+            _logger.info("change amount of line :")
+            _logger.info(self.read())
+        if self.hr_cost_id != cost_line:
+            self.hr_cost_id =  cost_line

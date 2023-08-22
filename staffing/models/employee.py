@@ -303,7 +303,7 @@ class staffingEmployee(models.Model):
     def _get_contract(self, date):
         res = False
         for contract in self.contract_ids:
-            if contract.date_start <= date and contract.state =='open':
+            if contract.date_start <= date :
                 if contract.date_end and contract.date_end < date:
                     continue
                 res = contract
@@ -313,6 +313,7 @@ class staffingEmployee(models.Model):
         contract = self._get_contract(date)
         if contract :
             return contract.job_id
+        #_logger.info('Pas de contrat pour ce consultant à cette date')
         return False
 
     def _get_daily_cost(self, date):
@@ -320,6 +321,7 @@ class staffingEmployee(models.Model):
         if job_id :
             return job_id._get_daily_cost(date)
         else :  
+            #_logger.info('Pas de job_id pour ce consultant à cette date')
             return False
 
     def number_days_available_period(self, date_start, date_end):

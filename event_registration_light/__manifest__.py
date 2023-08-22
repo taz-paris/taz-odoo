@@ -23,6 +23,7 @@
     'data': [
         'views/event_templates_page_light_registration.xml',
         'views/event.xml',
+        'views/event_registration.xml',
         'views/wizard_partner_event_registration.xml',
         'views/res_partner.xml',
         'security/ir.model.access.csv',

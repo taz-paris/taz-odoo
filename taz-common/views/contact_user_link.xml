@@ -9,11 +9,12 @@
 		  <field name="proximity_level" />
 		  <field name="last_business_action_id" optional="hide" />
                   <field name="date_last_business_action" />
-                  <field name="target_contact_frequency_id" options="{'no_quick_create':True}" />
+                  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}" />
 		  <field name="is_late" optional="hide" />
 		  <field name="next_meeting_before" optional="show" />
 		  <field name="next_business_action_id" optional="show" />
 		  <field name="comment" optional="show" />
+		  <field name="formality" optional="show" />
 		  <field name="communication_preference" optional="show" />
         </tree>
       </field>
@@ -32,11 +33,12 @@
 		  <field name="proximity_level" />
 		  <field name="last_business_action_id" optional="hide" />
                   <field name="date_last_business_action" />
-                  <field name="target_contact_frequency_id" options="{'no_quick_create':True}" />
+                  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}" />
 		  <field name="is_late" optional="hide" />
 		  <field name="next_meeting_before" optional="show" />
 		  <field name="next_business_action_id" optional="show" />
 		  <field name="comment" optional="show" />
+		  <field name="formality" optional="show" />
 		  <field name="communication_preference" optional="show" />
         </tree>
       </field>
