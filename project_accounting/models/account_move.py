@@ -61,15 +61,29 @@ class projectAccountingAccountMoveLine(models.Model):
         for rec in self:
             project_ids_res = []
             #for analytic_account in self.env['account.analytic.account'].browse(rec.analytic_distribution.keys()):
-            for analytic_account_id in rec.analytic_distribution.keys():
-                analytic_account = self.env['account.analytic.account'].search([('id', '=', analytic_account_id)])[0]
-                if len(analytic_account.project_ids):
-                    for project_id in analytic_account.project_ids:
-                        project_ids_res.append(project_id.id)
+            if rec.analytic_distribution:
+                for analytic_account_id in rec.analytic_distribution.keys():
+                    analytic_account = self.env['account.analytic.account'].search([('id', '=', analytic_account_id)])[0]
+                    if len(analytic_account.project_ids):
+                        for project_id in analytic_account.project_ids:
+                            project_ids_res.append(project_id.id)
 
             if len(project_ids_res):
                 rec.rel_project_ids = [(6, 0, project_ids_res)] 
             else :
                 rec.rel_project_ids = False
    
+
+    @api.depends('price_subtotal', 'direction_sign')
+    def _compute_price_subtotal_signed(self):
+        for rec in self:
+            rec.price_subtotal_signed = rec.price_subtotal * rec.direction_sign * -1
+
     rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
+    direction_sign = fields.Integer(related="move_id.direction_sign", store=True)
+    price_subtotal_signed = fields.Monetary(
+        string='Montant HT (signé)',
+        compute='_compute_price_subtotal_signed',
+        store=True,
+        currency_field='currency_id',
+    )

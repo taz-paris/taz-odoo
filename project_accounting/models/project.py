@@ -276,7 +276,7 @@ class projectAccountProject(models.Model):
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
                 #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-                total += line.balance
+                total += line.price_subtotal_signed
             _logger.info(total)
             return total
 
@@ -291,7 +291,7 @@ class projectAccountProject(models.Model):
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
             #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-            total += -1 * line.balance
+            total += line.price_subtotal_signed
         _logger.info(total)
         return total
 
@@ -349,17 +349,18 @@ class projectAccountProject(models.Model):
     def get_account_move_line_ids(self, filter_list=[]):
         _logger.info('--get_account_move_line_ids')
         query = self.env['account.move.line']._search(filter_list)
-        #_logger.info(query)
+        _logger.info(query)
         if query == []:
             return []
         query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
         query.order = None
         query_string, query_param = query.select('account_move_line.*')
-        #_logger.info(query_string)
-        #_logger.info(query_param)
+        _logger.info(query_string)
+        _logger.info(query_param)
         self._cr.execute(query_string, query_param)
         dic =  self._cr.dictfetchall()
         line_ids = [line.get('id') for line in dic]
+        _logger.info(line_ids)
 
         return line_ids
 

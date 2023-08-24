@@ -33,6 +33,7 @@
 			<!-- Displayed fields -->
 			<field name="product_id" optional="hide" />
 			<!-- TODO Ajouter la date de facture -->
+			<field name="date" optional="show"/>
 			<field name="move_id" widget="many2one"/>
 			<field name="name" widget="section_and_note_text" optional="hide"/>
 			<field name="account_id" optional="hide" groups="account.group_account_readonly" />
@@ -43,8 +44,7 @@
 			<field name="price_unit" />
 			<field name="discount"  optional="hide"/>
 			<field name="tax_ids" widget="many2many_tags" domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', '=', parent.company_id), ('country_id', '=', parent.tax_country_id)]" context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}" options="{'no_create': True}" optional="show"/>
-			<field name="price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
-			<field name="price_total" groups="account.group_show_line_subtotals_tax_included"/>
+			<field name="price_subtotal_signed" groups="account.group_show_line_subtotals_tax_excluded"/>
 
 			<field name="parent_state" widget="badge" decoration-success="parent_state == 'posted'" decoration-info="parent_state == 'draft'" optional="show" on_change="1" />
 			<field name="parent_payment_state" widget="badge" decoration-danger="parent_payment_state == 'not_paid'" decoration-warning="parent_payment_state in ('partial', 'in_payment')" decoration-success="parent_payment_state in ('paid', 'reversed')" optional="show" />

@@ -307,6 +307,10 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+
+        #for line in self.env['account.move.line'].search([]):
+        #    line._compute_price_subtotal_signed()
+
         #proj = self.env['project.project'].search([('napta_id', '=', False), ('is_prevent_napta_creation', '=', False)])
         #for p in proj:
         #    p.is_prevent_napta_creation = True
@@ -796,6 +800,9 @@ class fitnetProject(models.Model):
         self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'invoiceId',context={})
         self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'inoviceLineId',context={})
         self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'paymentId',context={})
+
+        self.delete_not_found_fitnet_object('account.move', invoices_list, 'invoiceId', filters=[('move_type', 'in', ['out_invoice', 'out_refund'])])
+        self.delete_not_found_fitnet_object('account.payment', payment_list, 'paymentId', filters=[('partner_type', '=', 'customer')])
         
         ########################## VALIDATION ET LETTRAGE DES FACTURES CLIENTS ET DE LEURS PAIEMENTS
         """
@@ -1309,12 +1316,18 @@ class fitnetProject(models.Model):
         self.create_overide_by_fitnet_values('purchase.order', sale_order_list, mapping_fields_sale_order, 'order_id',context={})
         self.create_overide_by_fitnet_values('purchase.order.line', sale_order_line_list, mapping_fields_sale_order_line, 'line_id',context={})
 
+        self.delete_not_found_fitnet_object('purchase.order.line', sale_order_line_list, 'line_id')
+        self.delete_not_found_fitnet_object('purchase.order', sale_order_list, 'order_id')
+
         ######################  GENRATION DES FACTURES FOURNISSEUR
         _logger.info('######################  GENRATION DES FACTURES FOURNISSEUR')
         self.create_overide_by_fitnet_values('account.move', invoices_list, mapping_fields_invoice, 'odoo_purchaseId',context={})
         self.create_overide_by_fitnet_values('account.move.line', invoices_lines_list, mapping_fields_invoice_line, 'odoo_purchaseLineId',context={})
         self.create_overide_by_fitnet_values('account.payment', payment_list, mapping_fields_payment, 'supplier_paymentId',context={})
         
+        self.delete_not_found_fitnet_object('account.move', invoices_list, 'odoo_purchaseId', filters=[('move_type', 'in', ['in_invoice', 'in_refund'])])
+        self.delete_not_found_fitnet_object('account.payment', payment_list, 'supplier_paymentId', filters=[('partner_type', '=', 'supplier')])
+
         ########################## VALIDATION ET LETTRAGE DES FACTURES CLIENTS ET DE LEURS PAIEMENTS
         """
         for fitnet_payment in payment_list:
@@ -1505,11 +1518,9 @@ class fitnetProject(models.Model):
 
 
         dm_list = self.env['hr.employee'].search([('job_id', 'in', [3, 5, 6, 7, 10])])
-        _logger.info(dm_list)
         DMFitnetIDList = []
         for dm in dm_list:
             DMFitnetIDList.append(dm.fitnet_id)
-        _logger.info(DMFitnetIDList)
 
         for obj in fitnet_objects:
             # Transco de la liste déroulante Bon de commmande reçu en un booléen sur Odoo
@@ -1603,8 +1614,9 @@ class fitnetProject(models.Model):
         _logger.info("Nombre d'objets %s qui portent un ID Fitnet qui n'est plus retourné par l'API Fitnet : %s" % (odoo_model_name, str(len(odoo_objects))))
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
+            _logger.info("      > Instance du modèle %s sur le point d'être supprimée OdooID %s / FitnetID %s" % (odoo_model_name, odoo_objet.id, odoo_objet.fitnet_id))
             odoo_objet.unlink()
-            _logger.info("      > Instance supprimée OdooID %s" % odoo_objet.id)
+            self.env.cr.commit()
         #odoo_objects_all = self.env[odoo_model_name].search([('fitnet_id', '!=', None)])
         #_logger.info(len(odoo_objects_all))
 
