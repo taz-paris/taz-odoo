@@ -110,4 +110,5 @@ class projectAccountingSaleOrderLine(models.Model):
 
     previsional_invoice_date = fields.Date('Date prev. de facturation', states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
     order_partner_invoice_id = fields.Many2one(string='Adresse de facturation', related="order_id.partner_invoice_id")
-    qty_delivered = fields.Float(string="Quantité livrée")
+    qty_delivered = fields.Float(string="Qté livrée")
+    comment = fields.Text("Commentaire lien ADV/facturation")

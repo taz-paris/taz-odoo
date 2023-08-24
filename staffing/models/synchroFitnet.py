@@ -307,10 +307,14 @@ class fitnetProject(models.Model):
         login_password = self.env['ir.config_parameter'].sudo().get_param("fitnet_login_password") 
         client = ClientRestFitnetManager(proto, host, api_root, login_password)
 
+        #proj = self.env['project.project'].search([('napta_id', '=', False), ('is_prevent_napta_creation', '=', False)])
+        #for p in proj:
+        #    p.is_prevent_napta_creation = True
+
+
         #pos = self.env['purchase.order'].search([])
         #for p in pos:
         #    p.button_cancel()
-        #return
 
 
 
@@ -870,11 +874,6 @@ class fitnetProject(models.Model):
             if str(to_invoice['contractId']) not in contract_with_invoices:
                 contract_with_invoices.append(str(to_invoice['contractId']))
 
-        #Quand on facture, la facture n'est plus renvoyée par le endpoint getInvoicesToBeIssued => il faut la supprimer d'Odoo pour éviter les doublons
-        for so in self.env['sale.order'].search([('fitnet_id', 'ilike', 'billableToBeInvoicedId_%')]) :
-            if so.fitnet_id not in to_invoice_fitnet_id_list:
-                so.unlink()
-
         sale_order_list = []
         sale_order_line_list = []
         for key_contract, contract_invoice_list in invoices_by_contract.items():
@@ -985,6 +984,9 @@ class fitnetProject(models.Model):
         #_logger.info(sale_order_line_list)
         self.create_overide_by_fitnet_values('sale.order', sale_order_list, mapping_fields_sale_order, 'order_id',context={})
         self.create_overide_by_fitnet_values('sale.order.line', sale_order_line_list, mapping_fields_sale_order_line, 'line_id',context={})
+
+        self.delete_not_found_fitnet_object('sale.order.line', sale_order_line_list, 'line_id')
+        self.delete_not_found_fitnet_object('sale.order', sale_order_list, 'order_id')
 
     
     
@@ -1138,8 +1140,12 @@ class fitnetProject(models.Model):
 
                 line['initial_unitPrice'] = line['unitPrice']
                 line['unitPrice'] = abs(line['unitPrice']) #ATTENTION : contrairement aux avoirs clients, l'API Fitnet retourne un montant négatif pour les avoirs fournisseurs => il faut donc prendre la valeur absolue
-                odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
-                line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
+                if invoice['contractId'] :
+                    odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
+                    line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
+                else :
+                    line['contractId_json'] = False
+
                 if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
                     invoices_lines_list.append(line)
 
@@ -1453,7 +1459,7 @@ class fitnetProject(models.Model):
     def sync_contracts(self, client):
         _logger.info('---- sync_contracts')
         mapping_fields = {
-            'title' : {'odoo_field' : 'name'},
+            #'title' : {'odoo_field' : 'name'},
             'projectId' : {'odoo_field' : 'project_group_id'},
             'customerId' : {'odoo_field' : 'partner_id'},
             #'beginDate' : {'odoo_field' : 'date_start'},
@@ -1481,7 +1487,7 @@ class fitnetProject(models.Model):
             'orderNumber' : {'odoo_field' : 'purchase_order_number'},
             'billedAmount' : {'odoo_field' : 'billed_amount'},
             'payedAmount' : {'odoo_field' : 'payed_amount'},
-            #'project_director_employee_id' : {'odoo_field' : 'project_director_employee_id'},
+            'project_director_employee_id' : {'odoo_field' : 'project_director_employee_id'},
             'commercialStatusID' : {
                 'odoo_field' : 'probability', 
                 'selection_mapping':
@@ -1498,7 +1504,7 @@ class fitnetProject(models.Model):
         fitnet_objects = client.get_api("contracts/1")
 
 
-        dm_list = self.env['hr.employee'].search([('job_id', 'in', [5, 6, 7, 10])])
+        dm_list = self.env['hr.employee'].search([('job_id', 'in', [3, 5, 6, 7, 10])])
         _logger.info(dm_list)
         DMFitnetIDList = []
         for dm in dm_list:
@@ -1598,7 +1604,7 @@ class fitnetProject(models.Model):
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
             odoo_objet.unlink()
-            _logger.info("      > Instance supprimée")
+            _logger.info("      > Instance supprimée OdooID %s" % odoo_objet.id)
         #odoo_objects_all = self.env[odoo_model_name].search([('fitnet_id', '!=', None)])
         #_logger.info(len(odoo_objects_all))
 

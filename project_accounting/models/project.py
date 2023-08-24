@@ -112,7 +112,7 @@ class projectAccountProject(models.Model):
         string="Agreement Fitnet",
         ondelete="restrict",
         tracking=True,
-        readonly=True,
+        readonly=False,
         copy=False,
     ) #Attribut temporaire Fitnet à supprimer (l'agreement_id est sur le bon de commande client et non sur le projet en cible)
 
@@ -382,6 +382,8 @@ class projectAccountProject(models.Model):
 
         order_dic = {
             'partner_id': self.partner_id.id,
+            'agreement_id' : self.agreement_id.id,
+            'user_id' : self.user_id.id,
             'order_line': [
                     (0, None, {
                         'product_id': 4, #TODO : utiliser le paramétrage pour déterminer le produit

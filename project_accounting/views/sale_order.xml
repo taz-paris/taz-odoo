@@ -138,6 +138,7 @@
             <field name="arch" type="xml">
 		<xpath expr="//filter[@name='to_invoice']" position="before">
 		    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced')]"/>
+		    <field string="Projet" name="analytic_distribution" />
 		</xpath>
             </field>
         </record>
@@ -149,6 +150,9 @@
 	    <field name="arch" type="xml">
 		<field name="order_id"  position="attributes">
 			<attribute name="widget">many2one</attribute>
+		</field>
+		<field name="name"  position="attributes">
+			<attribute name="optional">hide</attribute>
 		</field>
 		<field name="salesman_id"  position="attributes">
 			<attribute name="optional">hide</attribute>
@@ -177,8 +181,9 @@
 			<field name="previsional_invoice_date" optional="show"/>
 			<field name="direct_payment_purchase_order_line_id" optional="show"/>
 			<field name="invoice_lines" optional="hide"/>
-			<field name="invoice_status" optional="show"/>
+			<field name="invoice_status" optional="hide" widget="many2many_tags"/>
 			<field name="state" optional="hide"/>
+			<field name="comment" optional="show"/>
 			<!--
 			<field name="fitnet_id" optional="hide"/>
 				-->
@@ -193,11 +198,12 @@
 	    <field name="priority" eval="50"/>
 	    <field name="arch" type="xml">
 		<tree editable="top" create="false">
+			<field name="salesman_id" modifiers="{'readonly': true}"/>
 			<field name="order_partner_id" modifiers="{'readonly': true}"/>
 			<field name="order_partner_invoice_id" optional="hide" modifiers="{'readonly': true}"/>
 			<field name="analytic_distribution" widget="analytic_distribution"/>
 			<field name="order_id" widget="many2one" on_change="1" modifiers="{'required': true}"/>
-			<field name="previsional_invoice_date" optional="show"/>
+			<field name="previsional_invoice_date" string="Echéance" optional="show"/>
 			<field name="name" modifiers="{'required': true}" optional="hide"/>
 			<field name="price_subtotal" sum="Montant HT" widget="monetary" modifiers="{'readonly': true}"/>
 
@@ -211,8 +217,9 @@
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1"/>
 			<field name="invoice_lines" optional="hide" on_change="1"/>
 			<field name="currency_id" invisible="1"/>
-			<field name="invoice_status" optional="show"/>
+			<field name="invoice_status" optional="hide"/>
 			<field name="state" optional="hide"/>
+			<field name="comment" optional="show"/>
 		</tree>
 	    </field>
 	</record>

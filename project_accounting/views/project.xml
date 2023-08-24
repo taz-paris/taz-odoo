@@ -50,9 +50,11 @@
 		  <field name="color_rel" invisible="1" />
 		  <field name="order_amount_current" optional="hide" />
 		  <field name="order_sum_sale_order_lines" optional="show" />
+		  <field name="remark" optional="show" />
             	  <field name="order_to_invoice_company" optional="hide" />
             	  <field name="company_invoice_sum_move_lines" optional="hide" />
 		  <field name="company_to_invoice_left" optional="hide" />
+		  <field name="agreement_id" optional="show"/>
 		</tree>
 	      </field>
 	    </record>
@@ -114,6 +116,7 @@
 					    <field name="partner_id" required="1" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 					    <field name="stage_id" required="1"/>
 					    <field name="outsourcing"/>
+					    <field name="agreement_id"/>
 					    <field name="state" invisible="1"/>
 					    <field name="probability"/>
 					</group>
@@ -269,7 +272,6 @@
 							    <field name="amount"/>
 							    <field name="billed_amount"/>
 							    <field name="payed_amount"/>
-							    <field name="agreement_id"/>
 							</group>
 							<group>
 					    			<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>

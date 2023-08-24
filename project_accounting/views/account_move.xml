@@ -32,8 +32,9 @@
 		<tree>
 			<!-- Displayed fields -->
 			<field name="product_id" optional="hide" />
+			<!-- TODO Ajouter la date de facture -->
 			<field name="move_id" widget="many2one"/>
-			<field name="name" widget="section_and_note_text" optional="show"/>
+			<field name="name" widget="section_and_note_text" optional="hide"/>
 			<field name="account_id" optional="hide" groups="account.group_account_readonly" />
 			<field name="analytic_distribution" optional="hide" widget="analytic_distribution" groups="analytic.group_analytic_accounting" />
 			<field name="quantity" optional="show"/>
