@@ -927,6 +927,7 @@ class fitnetProject(models.Model):
                 RAF_lines.unlink()
             """
 
+            """
             if odoo_project.outsourcing in ["direct-paiement-outsourcing", "direct-paiement-outsourcing-company"]:
                 sale_order_line_list.append({
                         'order_id' : key_contract,
@@ -942,6 +943,7 @@ class fitnetProject(models.Model):
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
                         'previsional_invoice_date' : False,
                     })
+            """
 
             if odoo_project.outsourcing in ["no-outsourcing", "co-sourcing"] and odoo_project.outsource_part_cost_current == 0.0 :
                 if odoo_project.company_part_amount_current == 0.0 :
@@ -1258,6 +1260,7 @@ class fitnetProject(models.Model):
                     #_logger.info(sol)
                     sale_order_line_list.append(sol)
 
+            """
             if odoo_project.outsourcing in ["direct-paiement-outsourcing", "direct-paiement-outsourcing-company"]:
                 sale_order_line_list.append({
                         'order_id' : key_contract_supplier,
@@ -1273,6 +1276,7 @@ class fitnetProject(models.Model):
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
                         'previsional_invoice_date' : False,
                     })
+                """
 
 
         mapping_fields_sale_order = {

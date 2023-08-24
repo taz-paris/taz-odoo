@@ -22,7 +22,7 @@ _logger = logging.getLogger(__name__)
 API_URL_TOKEN_ENDPOINT = "https://pickyourskills.eu.auth0.com/oauth/token"
 API_URL_BUSINESS_ENDPOINT = "https://app.napta.io/api/v1/"
 
-cache_duration_in_minutes = 60
+cache_duration_in_minutes = 75
 cache_folder = '/tmp/napta'
 
 ##################################################################
@@ -124,8 +124,8 @@ class ClientRestNapta:
 
 
 
-    def empty_cache(self):
-        _logger.info("------- empty_cache")
+    def refresh_cache(self):
+        _logger.info("------- refresh_cache")
         if not(os.path.exists(cache_folder)):
             return False
         for filename in os.listdir(cache_folder):
@@ -133,7 +133,12 @@ class ClientRestNapta:
             if os.path.isfile(file_path) or os.path.islink(file_path):
                 os.remove(file_path)
                 _logger.info("Remove %s" % str(file_path))
-        _logger.info("------- empty_cache TERMINÉ")
+
+        self.read_cache('user_history')
+        self.read_cache('project')
+        self.read_cache('project_contributor')
+        self.read_cache('client')
+        _logger.info("------- refresh_cache TERMINÉ")
 
 
     def create_update_api(self, napta_type, attributes, odoo_object):
@@ -396,21 +401,19 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE napta_init_from_odoo ')
 
         client = ClientRestNapta(self.env)
-        client.empty_cache()
+        #client.refresh_cache()
 
 
         """
         # RESET des user_history portant les CJM
-        users = self.env['res.users'].search([])
+        users = self.env['res.users'].search([('active', 'in', [True, False])])
         for user in users:
             if not user.napta_id :
                 _logger.info("Pas de napta_id pour l'utilisatuer : %s" % user.login)
                 continue
             for contract in user.employee_id.contract_ids:
                 contract.reset_user_history()
-        """
 
-        """
         #supprimer les projets remontés par erreur
         projects = self.env['project.project'].search([], order="number desc")
         for project in projects:
@@ -475,7 +478,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-#        client.empty_cache()
+        client.refresh_cache()
 
         self.env['project.project'].create_update_odoo()
         self.env['res.users'].create_update_odoo()
@@ -584,6 +587,7 @@ class naptaAnalyticLine(models.Model):
     napta_id = fields.Char("Napta ID")
 
 
+
     def create_update_odoo_userprojectperiod(self):
         _logger.info('---- BATCH Create or update Odoo userprojectperiod')
         client = ClientRestNapta(self.env)
@@ -598,7 +602,17 @@ class naptaAnalyticLine(models.Model):
                     'unit_amount' : userprojectperiod['attributes']['staffed_days'],
                 }
             create_update_odoo(self.env, 'account.analytic.line', dic)
-        #TODO : supprimer les userprojectperiod qui ont été supprimées sur Napta
+
+        #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
+        filter_list = [('napta_id', '!=', None), ('category', '=', 'project_forecast'), ('napta_id', 'not in', list(userprojectperiods.keys()))]
+        odoo_objects = self.env['account.analytic.line'].search(filter_list)
+        _logger.info("Nombre d'objets %s qui portent un ID Fitnet qui n'est plus retourné par l'API Fitnet : %s" % ('staffing prévisionnel', str(len(odoo_objects))))
+        for odoo_objet in odoo_objects:
+            _logger.info(odoo_objet.read())
+            odoo_objet.unlink()
+            _logger.info("      > Instance supprimée")
+        #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
+            #TODO ajouter des borne de début/fin renseignées avec les bord d'apel
 
         
     def create_update_odoo_timesheetperiod(self):
@@ -618,7 +632,19 @@ class naptaAnalyticLine(models.Model):
                     'unit_amount' : timesheet_period['attributes']['worked_days'],
                 }
             create_update_odoo(self.env, 'account.analytic.line', dic)
-        #TODO : supprimer les userprojectperiod qui ont été supprimées sur Napta
+
+        #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
+        filter_list = [('napta_id', '!=', None), ('category', '=', 'project_employee_validated'), ('napta_id', 'not in', list(timesheet_periods.keys()))]
+        odoo_objects = self.env['account.analytic.line'].search(filter_list)
+        _logger.info("Nombre d'objets %s qui portent un ID Fitnet qui n'est plus retourné par l'API Fitnet : %s" % ('pointages valides', str(len(odoo_objects))))
+
+        for odoo_objet in odoo_objects:
+            _logger.info(odoo_objet.read())
+            odoo_objet.unlink()
+            _logger.info("      > Instance supprimée")
+        #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
+            #TODO ajouter des borne de début/fin renseignées avec les bord d'apel
+
 
     """
     def create_update_napta_userprojectperiod(self):
@@ -796,6 +822,7 @@ class naptaHrContract(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
 
+    """
     def reset_user_history(self):
         _logger.info('---- RESET Napta user_history')
         client = ClientRestNapta(self.env)
@@ -836,7 +863,7 @@ class naptaHrContract(models.Model):
                 }
                 user_history_target_list.append(attributes)
 
-                d = d + relativedelta(years=1)
+                d = datetime.date(d.year+1, 1, 1)
 
             #On supprimer les user_history existant... même ceux qui sont corrects
                 # DELETE renvoie un code 422 si on essaye de supprimer le seul user_history restant d'un utilisatuer => dans l'idéal il faudrait mieux raisonner par délta et ne supprimer/créer que le strict nécessaire 
@@ -851,7 +878,6 @@ class naptaHrContract(models.Model):
                 res = client.post_api('user_history', user_history_target)
                 napta_id = res['data']['id']
                 user_history_target['napta_id'] = napta_id
-    """
 
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
 

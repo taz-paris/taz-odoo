@@ -40,9 +40,10 @@
 		  <field name="number"/>
 		  <field name="name" />
 		  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
-		  <field name="project_director_employee_id"/>
+		  <field name="project_director_employee_id" optional="show" />
+		  <field name="outsourcing" optional="show"/>
 		  <field name="stage_id" 
-			  widget="badge" 
+			  widget="badge" optional="show"
 			  decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'"
 			  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
 			  />

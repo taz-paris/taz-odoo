@@ -38,9 +38,17 @@
 							Projet <span t-field="project.number" t-options="{'widget': 'text'}"/> - <span t-field="project.name" t-options="{'widget': 'text'}"/><br/>
 					</t>
 				</t>
+				<t t-if="line.sale_line_ids">
+					<t t-foreach="line.sale_line_ids" t-as="sale_line">
+							Bon de commande <span t-field="sale_line.order_id.client_order_ref" t-options="{'widget': 'text'}"/> <br/>
+					</t>
+				</t>
+				<br/>
+				<br/>
 				<span t-field="line.name" t-options="{'widget': 'text'}"/>
 			</td>
 		</xpath>
+
 
 		<xpath expr="//div[@name='reference']/strong" position="replace">
                         <strong>N° de bon de commande</strong>

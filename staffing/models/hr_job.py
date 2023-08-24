@@ -57,12 +57,11 @@ class HrCost(models.Model):
         res = super().write(vals)
 
         if 'cost' in vals.keys():
-            for account_analytic_line in account_analytic_line_ids:
+            for account_analytic_line in self.account_analytic_line_ids:
                 account_analytic_line.refresh_amount()
 
         if 'begin_date' in vals.keys():
             self.on_date_change(self.begin_date, old_begin_date)
-
 
     ## Gestion de la rétroactivité
             # si le job_id change : interdit, il est en readonly (simplificateur et pas génant fonctionellement) => OK

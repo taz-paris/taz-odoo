@@ -211,7 +211,7 @@ class staffingAnalyticLine(models.Model):
         if not self.employee_id :
             return False,False
         
-        self.employee_id.availability()
+        #self.employee_id.availability()
         #TODO : surcharger unlink pour recalculer l'availability
 
         if timesheet.holiday_id :

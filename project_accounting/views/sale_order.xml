@@ -130,6 +130,18 @@
         <field name="context">{'search_default_my_quotation': 0}</field>
     </record>
 
+
+	<record id="view_sales_order_line_filter_inherit" model="ir.ui.view">
+            <field name="name">Sale order line search</field>
+            <field name="model">sale.order.line</field>
+            <field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
+            <field name="arch" type="xml">
+		<xpath expr="//filter[@name='to_invoice']" position="before">
+		    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced')]"/>
+		</xpath>
+            </field>
+        </record>
+
 	<record id="view_order_line_tree_inherit" model="ir.ui.view">
             <field name="name">Sale order line</field>
             <field name="model">sale.order.line</field>
@@ -148,7 +160,7 @@
 			<attribute name="optional">hide</attribute>
 		</field>
 		<field name="qty_delivered"  position="attributes">
-			<attribute name="optional">hide</attribute>
+			<attribute name="string">Quantité livrée</attribute>
 		</field>
 		<field name="qty_invoiced"  position="attributes">
 			<attribute name="optional">hide</attribute>
@@ -161,13 +173,62 @@
 		</field>
 		<field name="price_subtotal" position="after">
 			<field name="untaxed_amount_invoiced" optional="show" string="Facturé (HT)" />
-			<field name="untaxed_amount_to_invoice" optional="show" string="Reste à facturer (HT)"/>
+			<field name="untaxed_amount_to_invoice" optional="show" string="Livré à facturer (HT)"/>
 			<field name="previsional_invoice_date" optional="show"/>
 			<field name="direct_payment_purchase_order_line_id" optional="show"/>
 			<field name="invoice_lines" optional="hide"/>
+			<field name="invoice_status" optional="show"/>
+			<field name="state" optional="hide"/>
+			<!--
+			<field name="fitnet_id" optional="hide"/>
+				-->
 		</field>
             </field>
         </record>
 
+
+        <record id="view_sale_order_line_delivery_validation" model="ir.ui.view">
+            <field name="name">Echéances de facturation</field>
+	    <field name="model">sale.order.line</field>
+	    <field name="priority" eval="50"/>
+	    <field name="arch" type="xml">
+		<tree editable="top" create="false">
+			<field name="order_partner_id" modifiers="{'readonly': true}"/>
+			<field name="order_partner_invoice_id" optional="hide" modifiers="{'readonly': true}"/>
+			<field name="analytic_distribution" widget="analytic_distribution"/>
+			<field name="order_id" widget="many2one" on_change="1" modifiers="{'required': true}"/>
+			<field name="previsional_invoice_date" optional="show"/>
+			<field name="name" modifiers="{'required': true}" optional="hide"/>
+			<field name="price_subtotal" sum="Montant HT" widget="monetary" modifiers="{'readonly': true}"/>
+
+			<field name="product_uom_qty" string="Qté" optional="show" on_change="1" modifiers="{'required': true}"/>
+			<field name="qty_delivered" optional="show" on_change="1"/>
+
+			<field name="qty_invoiced" optional="hide" on_change="1" modifiers="{'readonly': true}"/>
+			<field name="qty_to_invoice" optional="hide" modifiers="{'readonly': true}"/>
+			<field name="untaxed_amount_to_invoice" optional="hide" string="Reste à facturer (HT)" modifiers="{'readonly': true}"/>
+			<field name="direct_payment_purchase_order_line_id" optional="hide" on_change="1"/>
+			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1"/>
+			<field name="invoice_lines" optional="hide" on_change="1"/>
+			<field name="currency_id" invisible="1"/>
+			<field name="invoice_status" optional="show"/>
+			<field name="state" optional="hide"/>
+		</tree>
+	    </field>
+	</record>
+
+	    <record model="ir.actions.act_window" id="action_sale_order_line_delivery_validation">
+	      <field name="name">Échéances de facturation</field>
+	      <field name="res_model">sale.order.line</field>
+	      <field name="context"></field>
+	      <field name="view_mode">tree,form,kanban</field>
+			      <field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),
+				      ]" />
+	    </record>
+
+	<menuitem name="Échéances de facturation" sequence="5" id="menu_sale_order_line_delivery_validation" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation"/>
   </data>
 </odoo>
