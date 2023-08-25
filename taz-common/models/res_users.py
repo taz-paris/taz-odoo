@@ -81,10 +81,13 @@ class tazResUsers(models.Model):
 
 
     @api.model
-    def _msgraph_patch(self, endpoint, data, ifmatch):
+    def _msgraph_patch(self, endpoint, data, ifmatch=None):
         _logger.info('Envoi requete PATCH à %s le corps %s avec le header ifMatch %s' % (endpoint, data, ifmatch))
         access_token = self._get_valid_access_token()
-        req = requests.patch(endpoint, json=data, headers={'Authorization': 'Bearer %s' % access_token, 'If-Match' : ifmatch, 'Prefer' : 'return=representation'}, timeout=10) 
+        headers = {'Authorization': 'Bearer %s' % access_token, 'Prefer' : 'return=representation'}
+        if ifmatch:
+            headers['If-Match'] = ifmatch
+        req = requests.patch(endpoint, json=data, headers=headers, timeout=10) 
         _logger.info(req.text)
         if req.ok:
             return req.json()
@@ -131,3 +134,9 @@ class tazResUsers(models.Model):
                 break
             offset = offset + MSGRAPH_PAGE_SIZE
         return contacts
+
+    def _msgraph_post_draft_mail(self, json_mail_structure):
+        #Documentation : https://learn.microsoft.com/en-us/graph/api/user-post-messages?view=graph-rest-1.0&tabs=http
+        endpoint = 'https://graph.microsoft.com/v1.0/me/messages'
+        req = self.env.user._msgraph_post(endpoint, json_mail_structure)
+        return req

@@ -20,6 +20,34 @@
       </field>
     </record>
 
+
+    <record model="ir.ui.view" id="taz-common.contact_user_link_form">
+      <field name="name">Lien Contact Utilisateur</field>
+      <field name="model">taz.contact_user_link</field>
+      <field name="arch" type="xml">
+	      <form>
+		  <group>
+			  <group string="Lien Contact / Tasmanien">
+				  <field name="partner_id" options="{'no_quick_create':True}" attrs="{'required' : False}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+				  <field name="parent_partner_id" />
+				  <field name="rel_inhouse_influence_level" />
+				  <field name="user_id"/>
+				  <field name="proximity_level" />
+				  <field name="formality" />
+				  <field name="communication_preference"/>
+			</group>
+			<group string="Synthèse des actions commerciales">
+				  <field name="date_last_business_action" />
+				  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}" />
+				  <field name="next_meeting_before"/>
+				  <field name="next_business_action_id" />
+				  <field name="comment" />
+		  	</group>
+		</group>
+        </form>
+      </field>
+    </record>
+
     <record model="ir.ui.view" id="taz-common.contact_user_link_tree_intimity_plan">
       <field name="name">Lien Contact Utilisateur</field>
       <field name="model">taz.contact_user_link</field>

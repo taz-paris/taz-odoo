@@ -16,6 +16,7 @@ class ContactUserLinkFrequency(models.Model):
 
 class ContactUserLink(models.Model):
     _name = "taz.contact_user_link"
+    _rec_name = "name"
     _description = "Record attributes of the relation of an user and a customer/contact"
     _sql_constraints = [
         ('contact_user_uniq', 'UNIQUE (partner_id, user_id)',  "Impossible d'enregistrer deux liens pour un même contact et un même utilisatuer.")
@@ -113,6 +114,7 @@ class ContactUserLink(models.Model):
 
         """
 
+
     @api.model
     def create(self, vals):
         if not vals.get("partner_id"):
@@ -171,6 +173,12 @@ class ContactUserLink(models.Model):
             rec.partner_id.inhouse_influence_level = rec.rel_inhouse_influence_level
 
 
+    @api.depends('user_id', 'partner_id')
+    def _compute_name(self):
+        for rec in self:
+            rec.name = rec.user_id.name_get()[0][1] + ' / ' + rec.partner_id.name_get()[0][1]
+
+    name = fields.Char('Nom du lien', compute='_compute_name')
     user_id = fields.Many2one('res.users', string='Tasmanien', required=True, default=lambda self: self.env.user)
 
     partner_id = fields.Many2one('res.partner', string='Contact', required=False)

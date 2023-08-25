@@ -27,6 +27,7 @@
         'views/wizard_partner_event_registration.xml',
         'views/res_partner.xml',
         'security/ir.model.access.csv',
+        'data/email_templates.xml',
     ],
 
     'assets': {
