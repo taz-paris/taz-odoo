@@ -466,7 +466,7 @@ class projectAccountProject(models.Model):
     ######## TOTAL
     order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
-    order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
+    order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
     is_constistant_order_amount = fields.Boolean('Cohérence commande client/ventilation mission', store=True, compute=compute, help="Faux lorsque le montant total des lignes de commandes est différent de la somme de la part Dispositifi Tasmane+part sous-traitée+part autres prestations")
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute)

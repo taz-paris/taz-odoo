@@ -21,7 +21,7 @@
 			<xpath expr="//page[@name='contact_channels']" position="after">
 				<page string="Inscriptions aux évènements">
 					<field name="event_registration_ids" readonly="1">
-					   <tree string="Registration" sample="1" expand="1" default_order="create_date desc" class="o_event_registration_view_tree">
+					   <tree string="Registration" sample="1" expand="1" class="o_event_registration_view_tree">
 						<field name="active" invisible="1"/>
 						<field name="email" optional="show"/>
 						<field name="event_id" invisible="context.get('default_event_id')"/>
