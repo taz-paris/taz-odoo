@@ -1,0 +1,83 @@
+<odoo>
+        <data>
+
+		<record id="view_event_registration_tree_inherit" model="ir.ui.view">
+		    <field name="name">Event registration</field>
+		    <field name="model">event.registration</field>
+		    <field name="inherit_id" ref="event.view_event_registration_tree"/>
+		    <field name="arch" type="xml">
+			<field name="state" position="before">
+				<field name="mail_auto" />
+				<field name="contact_user_link_id" />
+				<field name="registration_user_id" invisible="1" />
+			</field>
+			<field name="phone" position="attributes">
+				<attribute name="optional">hide</attribute>
+			</field>
+			<field name="name" position="attributes">
+				<attribute name="optional">hide</attribute>
+			</field>
+			<field name="partner_id" position="attributes">
+				<attribute name="optional">show</attribute>
+			</field>
+			<field name="activity_ids" position="attributes">
+				<attribute name="optional">hide</attribute>
+			</field>
+			<field name="event_ticket_id" position="attributes">
+				<attribute name="optional">hide</attribute>
+			</field>
+			<xpath expr="//button[@name='action_confirm']" position="before">
+				<button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
+					attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
+				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
+					attrs="{'invisible': ['|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+			</xpath>
+		    </field>
+		</record>
+
+		<record id="view_event_registration_form_inherit" model="ir.ui.view">
+		    <field name="name">Event registration</field>
+		    <field name="model">event.registration</field>
+		    <field name="inherit_id" ref="event.view_event_registration_form"/>
+		    <field name="arch" type="xml">
+                        <field name="state" position="attributes">
+                                <attribute name="statusbar_visible">identified,draft,open,done</attribute>
+                        </field>
+			<field name="email" position="after">
+				<field name="mail_auto" />
+				<field name="contact_user_link_id" options="{'no_quick_create' : True, 'create_name_field' : 'user_id'}" context="{'default_partner_id' : partner_id}"/>
+				<field name="registration_user_id" invisible="1" />
+			</field>
+			<field name="event_ticket_id" position="attributes">
+				<attribute name="optional">hide</attribute>
+			</field>
+                       <xpath expr="//button[@name='action_confirm']" position="before">
+                                <button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
+                                        attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
+				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
+					attrs="{'invisible': ['|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+                        </xpath>
+		    </field>
+		</record>
+
+	     <record id="event_registration_view_search_event_inherit" model="ir.ui.view">
+		<field name="name">event.registration.view.search.event.inherit</field>
+		<field name="model">event.registration</field>
+		<field name="inherit_id" ref="event.view_registration_search"/>
+		<field name="arch" type="xml">
+			<xpath expr="//search/filter[@name='filter_is_ongoing']" position="before">
+				<filter string="Mes invités" name="assigned_to_me" domain="[('registration_user_id', '=', uid)]"/>
+				<field name="registration_user_id" string="Responsable de l'invitation"/>
+				<filter string="Responsable de l'invitation" name="group_registration_user_id" domain="[]" context="{'group_by':'registration_user_id'}"/>
+				<separator/>
+				<filter string="Mail automatique" name="mail_auto" domain="[('mail_auto', '=', True)]"/>
+				<filter string="Mail personnalisé" name="mail_perso" domain="[('mail_auto', '=', False)]"/>
+				<separator/>
+			</xpath>
+			<xpath expr="//search/filter[@name='unconfirmed']" position="before">
+				<filter string="Identifié" name="identified" domain="[('state', '=', 'identified')]"/>
+			</xpath>
+		</field>
+	    </record>
+        </data>
+</odoo>
