@@ -22,7 +22,7 @@
                 <form>    
 			<group>
 				<field name="project_id"/>
-				<field name="partner_id"/>
+				<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" options="{'no_quick_create': True}"/>
 			</group>
 			<group string="Commande de Tasmane au S/T">
 				<group>
