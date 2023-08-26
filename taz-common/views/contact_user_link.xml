@@ -81,26 +81,45 @@
                     <field name="partner_id" string="Contact"/>
                     <field name="parent_partner_id" string="Entreprise"/>
                     <field name="parent_partner_industry_id" string="Business Domain"/>
-                    <filter string="Mes lien tasmanien-client" name="my_link"
+		<!-- Inutile car la page du plan d'intimité ne permet de voir que ses propres liens
+                    <filter string="Mes liens tasmanien-client" name="my_link"
                         domain="[('user_id', '=', uid)]"/>
+		-->
+                    <separator/>
                     <filter string="À revoir d'ici 2 mois" name="m_2"
                         domain="[('next_meeting_before','&lt;=', ((context_today() + relativedelta(months=2)).strftime('%Y-%m-%d')))]" />
-                    <separator/>
                     <filter name="filter_next_meeting_before" date="next_meeting_before"/>
                     <filter string="En retard" name="is_late"
 			    domain="[('is_late','=', True)]" />
                     <separator/>
+		    <filter name="proximity_level_0" string="Proximité = Niveau 0" domain="[('proximity_level', '=', '0')]" />
+		    <filter name="proximity_level_1" string="Proximité = Niveau 1" domain="[('proximity_level', '=', '1')]" />
+		    <filter name="proximity_level_2" string="Proximité = Niveau 2" domain="[('proximity_level', '=', '2')]" />
+		    <filter name="proximity_level_3" string="Proximité = Niveau 3" domain="[('proximity_level', '=', '3')]" />
+                    <separator/>
+		    <filter name="rel_inhouse_influence_level_1" string="Influence = Niveau 1" domain="[('rel_inhouse_influence_level', '=', '1')]"/>
+		    <filter name="rel_inhouse_influence_level_2" string="Influence = Niveau 2" domain="[('rel_inhouse_influence_level', '=', '2')]"/>
+		    <filter name="rel_inhouse_influence_level_3" string="Influence = Niveau 3" domain="[('rel_inhouse_influence_level', '=', '3')]"/>
+		    <filter name="rel_inhouse_influence_level_4" string="Influence = Niveau 4" domain="[('rel_inhouse_influence_level', '=', '4')]"/>
+                    <separator/>
+		    <filter name="communication_preference_email_auto" string="Préférence de com. = email auto" domain="[('communication_preference', '=', 'email_auto')]" />
+		    <filter name="communication_preference_email_perso" string="Préférence de com. = email perso" domain="[('communication_preference', '=', 'email_perso')]" />
+		    <filter name="communication_preference_paper_auto" string="Préférence de com. = papier auto" domain="[('communication_preference', '=', 'paper_auto')]" />
+		    <filter name="communication_preference_paper_perso" string="Préférence de com. = papier perso" domain="[('communication_preference', '=', 'paper_perso')]" />
 		    <!--
                     <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
                     <filter name="not_tracked" string="Comptes non suivis" domain="[('business_priority', '=', 'not_tracked')]"/>
-                    <filter name="priority_target" string="Comptes suivis en BDM" domain="[('business_priority', '=', 'tracked')]"/>
                     <separator/>
-                    <filter name="state_not_done_not_cancelled" string="Non terminées ni annulées" domain="[('state', '!=', 'done'), ('state', '!=', 'cancelled')]"/>
 			-->
                     <group expand="0" string="Group By">
                         <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
                         <filter string="Business domain" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
                         <filter string="A revoir avant le" name="group_next_meeting_before" context="{'group_by': 'next_meeting_before'}"/>
+                        <filter name="group_target_contact_frequency_id" context="{'group_by': 'target_contact_frequency_id'}"/>
+                        <filter name="group_proximity_level" context="{'group_by': 'proximity_level'}"/>
+                        <filter name="group_rel_inhouse_influence_level" context="{'group_by': 'rel_inhouse_influence_level'}"/>
+                        <filter name="group_formality" context="{'group_by': 'formality'}"/>
+                        <filter name="group_communication_preference" context="{'group_by': 'communication_preference'}"/>
                     </group>
            </search>
         </field>

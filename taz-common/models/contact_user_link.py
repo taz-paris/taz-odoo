@@ -35,6 +35,7 @@ class ContactUserLink(models.Model):
         """
 
     def init_from_taggs(self):
+        _logger.info("DEBUT init_from_taggs")
         #Fonction pour initialiser les ContactUserLink à partir des taggs pour les Voeux
         """
         for link in self.search([]):
@@ -49,6 +50,7 @@ class ContactUserLink(models.Model):
                 link.formality = 'vous_nom'
             if link.communication_preference in ['email_perso', 'paper_perso']:
                 link.formality = 'vous_nom'
+        """
 
         dict_tags = {
             'Voeux_ADU_email_perso' : {'user_id' : 6, 'communication_preference' : 'email_perso'},
@@ -112,12 +114,14 @@ class ContactUserLink(models.Model):
             for partner in t.partner_ids:
                 contact_user_links = self.env['taz.contact_user_link'].search([('user_id', '=', dic['user_id']), ('partner_id', '=', partner.id)])
                 if len(contact_user_links) == 0 :
-                    self.env['taz.contact_user_link'].create({'user_id' : dic['user_id'], 'partner_id' : partner.id, 'communication_preference' : dic['communication_preference']})
-                else:
-                    if contact_user_links[0].communication_preference == False :
-                        contact_user_links[0].communication_preference = dic['communication_preference']
+                    _logger.info('lien manquant pour tag = %s / Contact = %s %s' % (tag, str(partner.id), partner.name))
+                    #self.env['taz.contact_user_link'].create({'user_id' : dic['user_id'], 'partner_id' : partner.id, 'communication_preference' : dic['communication_preference']})
+                #else:
+                #    if contact_user_links[0].communication_preference == False :
+                #        contact_user_links[0].communication_preference = dic['communication_preference']
 
-        """
+        _logger.info("FIN init_from_taggs")
+
 
 
     @api.model
@@ -194,7 +198,7 @@ class ContactUserLink(models.Model):
          ('2', "2 - Eclaireur - peut donner de l'information sur un compte à potentiel"),
          ('3', "3 - Prescripteur - peut pousser Tasmane vers un interlocuteur décideur"),
          ('4', "4 - Décideur -  peut décider par lui-même"),
-         ], string="Niveau d'influence chez le client", compute="_compute_rel_inhouse_influence_level", inverse="_inverse_rel_inhouse_influence_level") 
+         ], store=True, string="Niveau d'influence chez le client", compute="_compute_rel_inhouse_influence_level", inverse="_inverse_rel_inhouse_influence_level") 
 
     last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action)
     date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=True)
