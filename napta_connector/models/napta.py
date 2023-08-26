@@ -286,7 +286,10 @@ class ClientRestNapta:
             _logger.info("GET 429 too many requests : attente de 60 secondes")
             time.sleep(60)
             response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
-        #_logger.info(response.content)
+        elif response.status_code != 200 :
+            _logger.info(response.status_code)
+            _logger.info(response.reason)
+            _logger.info(response.content)
         return response.json()
 
 

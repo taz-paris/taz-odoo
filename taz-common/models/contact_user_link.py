@@ -36,6 +36,12 @@ class ContactUserLink(models.Model):
 
     def init_from_taggs(self):
         #Fonction pour initialiser les ContactUserLink à partir des taggs pour les Voeux
+        """
+        for link in self.search([]):
+            if link.communication_preference in ['email_tu', 'email_vous']:
+                link.communication_preference = 'email_auto'
+            if link.communication_preference in ['paper_tu', 'paper_vous']:
+                link.communication_preference = 'paper_auto'
         for link in self.search([]):
             if link.communication_preference in ['email_tu', 'paper_tu']:
                 link.formality = 'tu_prenom'
@@ -44,7 +50,6 @@ class ContactUserLink(models.Model):
             if link.communication_preference in ['email_perso', 'paper_perso']:
                 link.formality = 'vous_nom'
 
-        """
         dict_tags = {
             'Voeux_ADU_email_perso' : {'user_id' : 6, 'communication_preference' : 'email_perso'},
             'Voeux_ADU_papier_perso' : {'user_id' : 6, 'communication_preference' : 'paper_perso'},
@@ -212,10 +217,8 @@ class ContactUserLink(models.Model):
         ('tu_prenom', 'Tu + prénom'),
         ], "Tu/vous")
     communication_preference = fields.Selection([
-            ('email_tu', "email auto - TU"),
-            ('email_vous', "email auto - VOUS"),
+            ('email_auto', "email auto"),
             ('email_perso', "email personalisé"),
+            ('paper_auto', "papier auto"),
             ('paper_perso', "papier personalisé"),
-            ('paper_tu', "papier auto - TU"),
-            ('paper_vous', "papier auto - VOUS"),
         ], string="Pref. com. voeux") 

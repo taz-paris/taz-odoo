@@ -87,5 +87,4 @@ class eventRegistration(models.Model):
                         }
                     ]
             office365_mail_draft = self.env.user._msgraph_post_draft_mail(mail_dict)
-            _logger.info(office365_mail_draft)
             rec.last_office365_mail_draft = office365_mail_draft
