@@ -495,8 +495,8 @@ class naptaProject(models.Model):
 
         #TODO : mettre à jour le job_id de l'employee et la date d'embauche/contrat
             # Gérer le recalcul des montants des analytic lines si le grade ou le CJM change a posteriori
-        #TODO : créer les hr.job manquant
-        #TODO : créer les project.satge manquant
+        #TODO : créer les hr.job manquants
+        #TODO : créer les project.stage manquants
         #TODO : quid de la synchro des CJM ?
 
         _logger.info('======== synchAllNapta TERMINEE')
@@ -586,6 +586,7 @@ class naptaAnalyticLine(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id, category)',  "Impossible d'enregistrer deux objets account.analytic.line avec le même couple {Napta ID, category}.")
         # ATTENTION : le pointé et le préviionnel sont deux objets sur Napta => donc c'est la clé composée qui est unique. ==> Quels impacts sur le futur ? TODO
+            #TODO : surcharger la méthode de recherche pour retourner une erreur si on cherche sur le champ napta_id sans avoir valorisé category avec une seule valeur ?
     ]
     napta_id = fields.Char("Napta ID")
 
@@ -609,7 +610,7 @@ class naptaAnalyticLine(models.Model):
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
         filter_list = [('napta_id', '!=', None), ('category', '=', 'project_forecast'), ('napta_id', 'not in', list(userprojectperiods.keys()))]
         odoo_objects = self.env['account.analytic.line'].search(filter_list)
-        _logger.info("Nombre d'objets %s qui portent un ID Fitnet qui n'est plus retourné par l'API Fitnet : %s" % ('staffing prévisionnel', str(len(odoo_objects))))
+        _logger.info("Nombre d'objets %s qui portent un ID Napta qui n'est plus retourné par l'API Napta : %s" % ('staffing prévisionnel', str(len(odoo_objects))))
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
             odoo_objet.unlink()
@@ -639,7 +640,7 @@ class naptaAnalyticLine(models.Model):
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
         filter_list = [('napta_id', '!=', None), ('category', '=', 'project_employee_validated'), ('napta_id', 'not in', list(timesheet_periods.keys()))]
         odoo_objects = self.env['account.analytic.line'].search(filter_list)
-        _logger.info("Nombre d'objets %s qui portent un ID Fitnet qui n'est plus retourné par l'API Fitnet : %s" % ('pointages valides', str(len(odoo_objects))))
+        _logger.info("Nombre d'objets %s qui portent un ID Napta qui n'est plus retourné par l'API Napta : %s" % ('pointages valides', str(len(odoo_objects))))
 
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
@@ -825,7 +826,6 @@ class naptaHrContract(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
 
-    """
     def reset_user_history(self):
         _logger.info('---- RESET Napta user_history')
         client = ClientRestNapta(self.env)
@@ -881,7 +881,7 @@ class naptaHrContract(models.Model):
                 res = client.post_api('user_history', user_history_target)
                 napta_id = res['data']['id']
                 user_history_target['napta_id'] = napta_id
-
+    """
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
 
 class naptaHrDepartment(models.Model):

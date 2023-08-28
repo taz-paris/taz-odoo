@@ -19,6 +19,7 @@
 			</field>
 			<field name="partner_id" position="attributes">
 				<attribute name="optional">show</attribute>
+				<attribute name="string">Nom du contact</attribute>
 			</field>
 			<field name="activity_ids" position="attributes">
 				<attribute name="optional">hide</attribute>
@@ -30,7 +31,7 @@
 				<button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
 					attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
 				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-					attrs="{'invisible': ['|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+					attrs="{'invisible': ['|', '|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
 			</xpath>
 		    </field>
 		</record>
@@ -55,7 +56,7 @@
                                 <button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
                                         attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
 				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-					attrs="{'invisible': ['|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+					attrs="{'invisible': ['|', '|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
                         </xpath>
 		    </field>
 		</record>
@@ -80,4 +81,8 @@
 		</field>
 	    </record>
         </data>
+
+    <record id="event.act_event_registration_from_event" model="ir.actions.act_window">
+        <field name="context">{'default_event_id': active_id}</field>
+    </record>
 </odoo>

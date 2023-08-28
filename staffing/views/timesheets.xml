@@ -63,7 +63,7 @@
           <field name="code">action =  model.open_timesheet_navigate_weeks('next')</field>
      </record>
 
-		<menuitem name="Pointage" id="staffing.timesheet_menu"/>
+		<menuitem name="Pointage" id="staffing.timesheet_menu" groups="staffing_admin"/>
 		<menuitem name="Semaine précédente" id="staffing.timesheet_previous_week_menu" parent="staffing.timesheet_menu" action="staffing.timesheet_previous_week_action"/>
 
 		<menuitem name="Sélection semaine/consultant" id="staffing.timesheet_chooser_menu" parent="staffing.timesheet_menu" action="staffing.timesheet_choose_week_action"/>
