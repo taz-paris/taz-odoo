@@ -36,5 +36,15 @@
 	    <field name="binding_model_id" ref="base.model_res_partner"/>
 	</record>
 	
+		
+	<record id="launch_wizard_partner_event_registration_contact_user_link" model="ir.actions.act_window">
+		<field name="name">Assistant d'inscription en masse aux évènements</field>
+		<field name="res_model">res_partner_mass_event_registration</field>
+	    <field name="view_mode">form</field>
+	    <field name="target">new</field>
+	    <field name="context">{'default_contact_user_link_ids':active_ids}</field>
+	    <field name="binding_model_id" ref="taz-common.model_taz_contact_user_link"/>
+	</record>
+	
 	</data>
 </odoo>
