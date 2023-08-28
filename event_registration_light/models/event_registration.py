@@ -36,6 +36,7 @@ class eventRegistration(models.Model):
             ('open', 'Confirmé'), ('done', 'Présent')
             ], default='identified')
     last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
+    event_id = fields.Many2one(states={'draft': [('readonly', False)], 'identified': [('readonly', False)]})
 
 
     def get_html_invitation(self):

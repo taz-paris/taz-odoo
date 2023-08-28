@@ -24,6 +24,7 @@ class event(models.Model):
     description_web_form = fields.Html("Bloc HTML affiché sur le formulaire d'inscription")
     invitation_mail_template = fields.Many2one("ir.ui.view", "Template du mail d'invitation", domain=[('type', '=', 'qweb')])
     invitation_cc_address = fields.Char('Adresse en CC')
+    event_registrations_open = fields.Boolean(store=True)
 
 
 class EventType(models.Model):

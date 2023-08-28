@@ -82,7 +82,9 @@
 	    </record>
         </data>
 
+	<!--
     <record id="event.act_event_registration_from_event" model="ir.actions.act_window">
         <field name="context">{'default_event_id': active_id}</field>
     </record>
+	-->
 </odoo>
