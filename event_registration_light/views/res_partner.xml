@@ -22,6 +22,7 @@
 				<page string="Inscriptions aux évènements">
 					<field name="event_registration_ids">
 					   <tree string="Registration" editable="top" sample="1" expand="1" class="o_event_registration_view_tree">
+		  				<field name="id" widget="open_tab"/>
 						<field name="active" invisible="1"/>
 						<field name="event_id" domain="[('event_registrations_open', '=', True)]"/>
 						<field name="mail_auto" />
@@ -29,9 +30,15 @@
 						<field name="company_id" groups="base.group_multi_company" optional="hide"/>
 						<field name="email" optional="hide"/>
 						<field name="message_needaction" invisible="1"/>
+						<field name="last_office365_mail_draft" invisible="1" />
+						<field name="comment" widget="text" optional="show" />
 						<button name="action_confirm" string="Confirm" type="object" icon="fa-check" attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'draft')]}"/>
 						<button name="action_set_done" string="Mark as Attending" type="object" icon="fa-level-down" attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'open')]}"/>
 						<button name="action_cancel" string="Cancel" type="object" class="o_btn_cancel_registration" icon="fa-times" attrs="{'invisible': ['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'draft')]}"/>
+						<button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
+							attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
+						<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
+							attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', '!=', False), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
 						<field name="activity_exception_decoration" widget="activity_exception"/>
 					    </tree>
 					</field>

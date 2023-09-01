@@ -215,9 +215,9 @@
 			<field name="untaxed_amount_to_invoice" optional="hide" string="Reste à facturer (HT)" modifiers="{'readonly': true}"/>
 			<field name="direct_payment_purchase_order_line_id" optional="hide" on_change="1"/>
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1"/>
-			<field name="invoice_lines" optional="hide" on_change="1"/>
+			<field name="invoice_lines" optional="hide" widget="many2many_tags" on_change="1"/>
 			<field name="currency_id" invisible="1"/>
-			<field name="invoice_status" optional="hide" widget="many2many_tags"/>
+			<field name="invoice_status" optional="hide" />
 			<field name="state" optional="hide"/>
 			<field name="comment" optional="show"/>
 		</tree>

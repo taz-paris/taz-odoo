@@ -27,7 +27,7 @@ class projectOutsourcingLink(models.Model):
                 if line.direct_payment_sale_order_line_id and with_direct_payment==False:
                     continue
                 total += line.product_qty * line.price_unit
-            rec.order_sum_purchase_order_lines = total
+            return total
 
     def action_open_purchase_order_lines(self):
         line_ids = self.get_purchase_order_line_ids()
@@ -103,7 +103,7 @@ class projectOutsourcingLink(models.Model):
 
     @api.depends('project_id', 'partner_id', 'order_sum_purchase_order_lines', 'order_direct_payment_amount', 'sum_account_move_lines')
     def compute(self):
-        _logger.info('--compute project_outsourcing_link.py')
+        _logger.info('--compute project_outsourcing_link')
         for rec in self :
             rec.outsource_part_amount_current = 0.0
             rec.order_direct_payment_amount = 0.0
@@ -115,7 +115,7 @@ class projectOutsourcingLink(models.Model):
                 if purchase_line.direct_payment_sale_order_line_id :
                     rec.order_direct_payment_amount += purchase_line.price_subtotal
                     rec.order_direct_payment_done += purchase_line.order_direct_payment_validated_amount
-                    rec.order_direct_payment_done_detail += "%s " % (purchase_line.order_direct_payment_validated_detail or "")
+                    rec.order_direct_payment_done_detail += "%s \n" % (purchase_line.order_direct_payment_validated_detail or "")
 
             rec.order_sum_purchase_order_lines = rec.compute_purchase_order_total()
             rec.order_company_payment_amount = rec.order_sum_purchase_order_lines - rec.order_direct_payment_amount
@@ -123,10 +123,6 @@ class projectOutsourcingLink(models.Model):
             rec.marging_rate_current = 0.0 
             if rec.outsource_part_amount_current != 0 :
                 rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
-
-            _logger.info(rec.order_company_payment_amount)
-            _logger.info(rec.order_sum_purchase_order_lines)
-            _logger.info(rec.order_direct_payment_amount)
 
 
 

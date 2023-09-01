@@ -74,9 +74,10 @@ class projectBookEmployeeDistribution(models.Model):
 
 
     def create(self,vals):
-        new = super().create(vals)
-        for book_period in new.project_id.book_period_ids:
-            self.env['project.book_employee_distribution_period'].sudo().create({'book_employee_distribution_id' : new.id, 'project_book_period_id' : book_period.id})
+        new_list = super().create(vals)
+        for new in new_list:
+            for book_period in new.project_id.book_period_ids:
+                self.env['project.book_employee_distribution_period'].sudo().create({'book_employee_distribution_id' : new.id, 'project_book_period_id' : book_period.id})
 
     @api.constrains('book_factor')
     def _check_book_factor(self):

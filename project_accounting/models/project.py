@@ -97,7 +97,7 @@ class projectAccountProject(models.Model):
 
     amount = fields.Float('Montant net S/T Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
     billed_amount = fields.Float('Montant facturé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
-    payed_amount = fields.Float('Montant payé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
+    payed_amount = fields.Float('Montant payé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprime
     is_purchase_order_received = fields.Boolean('Bon de commande reçu Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
     purchase_order_number = fields.Char('Numéro du bon de commande Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer (le numéro de BC est sur le bon de commande client et non sur le projet en cible)
     outsourcing = fields.Selection([
@@ -191,16 +191,58 @@ class projectAccountProject(models.Model):
             if rec.other_part_amount_current != 0 :
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
             
-            #Contrôle de cohérence
+            ######## INVOICE DATA CONTROLE
             #TODO : il ne faut regarder que les commandes pour lesquelles on a effectivement reçu un numéro de commande... pas les commandes en brouillon
             is_constistant_order_amount = False
             if rec.order_amount_current == rec.order_sum_sale_order_lines :
                 is_constistant_order_amount = True
             rec.is_constistant_order_amount = is_constistant_order_amount
 
+            #is_validated_order = fields.Boolean("BCC non validé", store=True, compute=compute, help="Les BC clients sont à l'état 'Bon de commande' (ou 'Annulé).")
+            is_validated_order = True
+            line_ids = rec.get_sale_order_line_ids()
+            for line_id in line_ids:
+                line = rec.env['sale.order.line'].browse(line_id)
+                if line.state in ['draft', 'sent']:
+                    is_validated_order = False
+                    break
+            rec.is_validated_order = is_validated_order
+
+            is_validated_book = False
+            if rec.book_validation_datetime :
+                is_validated_book = True
+            rec.is_validated_book = is_validated_book
+
+            is_consistant_outsourcing = True
+            if not(rec.outsourcing):
+                is_consistant_outsourcing = False
+            else :
+                if rec.outsourcing in ['direct-paiement-outsourcing', 'direct-paiement-outsourcing-company', 'outsourcing']:
+                    if rec.outsource_part_amount_current == 0:
+                         is_consistant_outsourcing = False
+            rec.is_consistant_outsourcing = is_consistant_outsourcing
+
+            is_validated_purchase_order = True
+            #TODO : à débuger et lancer le recalcul sur toute la base de projets
+            """
+            for link in rec.project_outsourcing_link_ids:
+                for purchase_order_line in link.get_purchase_order_line_ids():
+                    line = rec.env['purchase.order.line'].browse(line_id)
+                    if line.state in ['draft', 'sent', 'to approve']:
+                        is_validated_purchase_order = False
+                        break
+            rec.is_validated_purchase_order = is_validated_purchase_order
+            """
+
+            if rec.invoicing_comment or not(rec.is_constistant_order_amount) or not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_validated_book) or not(rec.is_consistant_outsourcing):
+                rec.is_review_needed = True
+            else :
+                rec.is_review_needed = False
+
             #BOOK
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
+
 
     def compute_sale_order_total(self, with_direct_payment=True): 
         _logger.info('----------compute_sale_order_total')
@@ -467,7 +509,6 @@ class projectAccountProject(models.Model):
     order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
-    is_constistant_order_amount = fields.Boolean('Cohérence commande client/ventilation mission', store=True, compute=compute, help="Faux lorsque le montant total des lignes de commandes est différent de la somme de la part Dispositifi Tasmane+part sous-traitée+part autres prestations")
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute)
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute)
@@ -565,3 +606,13 @@ class projectAccountProject(models.Model):
 
     # ACCOUNTING CLOSING
     accounting_closing_ids = fields.One2many('project.accounting_closing', 'project_id', 'Clôtures comptables')
+
+
+    # INVOICING MANAGEMENT DATA
+    is_constistant_order_amount = fields.Boolean('Cohérence commande client/ventilation mission', store=True, compute=compute, help="Faux lorsque le montant total des lignes de commandes est différent de la somme de la part Dispositifi Tasmane+part sous-traitée+part autres prestations")
+    is_validated_order = fields.Boolean("BC clients tous validés", store=True, compute=compute, help="VRAI si tous les BC clients sont à l'état 'Bon de commande'.")
+    is_validated_purchase_order = fields.Boolean("BC fournisseurs tous validés", store=True, compute=compute, help="VRAI si tous les BC fournissuers sont à l'état 'Bon de commande'.")
+    is_validated_book = fields.Boolean("Répartition book validée", store=True, compute=compute, help="VRAI si la répartition du book est validée.")
+    is_consistant_outsourcing = fields.Boolean("BCF présents", store=True, compute=compute, help="VRAI si le type de sous-traitance est renseigné et qu'il est cohérent avec les Bons de commande fournisseur du projet.")
+    is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
+    invoicing_comment = fields.Text("Commentaire ADV")

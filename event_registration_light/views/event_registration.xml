@@ -10,6 +10,8 @@
 				<field name="mail_auto" />
 				<field name="contact_user_link_id" />
 				<field name="registration_user_id" invisible="1" />
+				<field name="last_office365_mail_draft" invisible="1" />
+				<field name="comment" widget="text" optional="show" />
 			</field>
 			<field name="phone" position="attributes">
 				<attribute name="optional">hide</attribute>
@@ -31,7 +33,7 @@
 				<button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
 					attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
 				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-					attrs="{'invisible': ['|', '|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+					attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', '!=', False), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
 			</xpath>
 		    </field>
 		</record>
@@ -48,6 +50,8 @@
 				<field name="mail_auto" />
 				<field name="contact_user_link_id" options="{'no_quick_create' : True, 'create_name_field' : 'user_id'}" context="{'default_partner_id' : partner_id}"/>
 				<field name="registration_user_id" invisible="1" />
+				<field name="last_office365_mail_draft" invisible="1" />
+				<field name="comment" />
 			</field>
 			<field name="event_ticket_id" position="attributes">
 				<attribute name="optional">hide</attribute>
@@ -56,7 +60,7 @@
                                 <button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
                                         attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
 				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-					attrs="{'invisible': ['|', '|', ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+					attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', '!=', False), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
                         </xpath>
 		    </field>
 		</record>

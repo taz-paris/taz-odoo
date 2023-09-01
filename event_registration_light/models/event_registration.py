@@ -37,6 +37,7 @@ class eventRegistration(models.Model):
             ], default='identified')
     last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
     event_id = fields.Many2one(states={'draft': [('readonly', False)], 'identified': [('readonly', False)]})
+    comment = fields.Text("Commentaire", help="Ce commentaire est propre à l'inscription de ce contact pour cet évènement.")
 
 
     def get_html_invitation(self):
@@ -50,6 +51,9 @@ class eventRegistration(models.Model):
                 if self.partner_id.title.name :
                     form = self.partner_id.title.name + ' ' + self.partner_id.name
       
+        if not self.event_id.invitation_mail_template :
+                raise ValidationError(_("Un administrateur du module Evènement doit définir le template du mail sur la fiche évènement."))
+
         return self.env['ir.ui.view']._render_template(self.event_id.invitation_mail_template.xml_id, {
                 'event': self.event_id,
                 'registration' : self,
