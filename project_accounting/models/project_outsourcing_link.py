@@ -40,6 +40,7 @@ class projectOutsourcingLink(models.Model):
             'domain': [('id', 'in', line_ids)],
             'context': {
                 'create': False,
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
             }
         }
 
@@ -91,6 +92,7 @@ class projectOutsourcingLink(models.Model):
             'domain': [('id', 'in', line_ids)],
             'context': {
                 'create': False,
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
             }
         }
 

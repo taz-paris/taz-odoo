@@ -278,6 +278,7 @@ class projectAccountProject(models.Model):
             'target' : 'current',
             'context': {
                 'create': False,
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
             }
         }
 
@@ -355,6 +356,7 @@ class projectAccountProject(models.Model):
             'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
             'context': {
                 'create': False,
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
             }
         }
 
@@ -380,6 +382,7 @@ class projectAccountProject(models.Model):
             'view_id': self.env.ref("account.view_move_line_tree").id,
             'context': {
                 'create': False,
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
             }
         }
 
@@ -388,6 +391,8 @@ class projectAccountProject(models.Model):
         #    action['res_id'] = invoice_ids[0]
 
         return action
+
+
     def get_account_move_line_ids(self, filter_list=[]):
         _logger.info('--get_account_move_line_ids')
         query = self.env['account.move.line']._search(filter_list)
