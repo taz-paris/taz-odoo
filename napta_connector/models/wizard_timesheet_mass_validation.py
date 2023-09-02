@@ -2,6 +2,7 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo import _
 from odoo.addons.napta_connector.models.napta import ClientRestNapta
+import datetime
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -17,12 +18,14 @@ class wizardTimesheetMassValidation(models.TransientModel):
         t = self.env['account.analytic.line'].search([('napta_id', '!=', False), ('category', '=', 'project_employee_validated'), ('date', '<', self.date), ('is_timesheet_closed_on_napta', '=', False)]) 
         self.timesheet_period_ids = t.ids
 
+    def _default_date(self):
+        return datetime.date.today().replace(day=1) 
 
-    date = fields.Date('Valider toutes les feuilles de temps STRICTEMENT antérieures au')
+    date = fields.Date('Valider toutes les feuilles de temps STRICTEMENT antérieures au', default=_default_date)
     timesheet_period_ids = fields.Many2many('account.analytic.line', string="Feuilles de temps")
 
     def action_validate(self):
-        #self.env['project.project'].sudo().synchAllNapta()
+        self.env['project.project'].sudo().synchAllNapta()
 
         client = ClientRestNapta(self.env)
 

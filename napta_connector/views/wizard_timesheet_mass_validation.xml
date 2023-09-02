@@ -7,7 +7,7 @@
 		<form>
 			<group>
 				<group>
-					<field name="date" />
+					<field name="date" colspan="2" />
 					<field name="timesheet_period_ids" colspan="3" />
 				</group>
 			</group>
