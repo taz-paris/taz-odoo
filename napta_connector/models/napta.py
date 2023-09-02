@@ -588,6 +588,7 @@ class naptaAnalyticLine(models.Model):
             #TODO : surcharger la méthode de recherche pour retourner une erreur si on cherche sur le champ napta_id sans avoir valorisé category avec une seule valeur ?
     ]
     napta_id = fields.Char("Napta ID")
+    is_timesheet_closed_on_napta = fields.Boolean("Feuille de temps validée sur Napta")
 
 
 
@@ -633,6 +634,7 @@ class naptaAnalyticLine(models.Model):
                     'project_id' : {'napta_id' : timesheet_period['attributes']['project_id']},
                     'date' : target_date,
                     'unit_amount' : timesheet_period['attributes']['worked_days'],
+                    'is_timesheet_closed_on_napta' : timesheet['attributes']['closed'],
                 }
             create_update_odoo(self.env, 'account.analytic.line', dic)
 

@@ -21,10 +21,10 @@ class resPartnerMassCategory(models.TransientModel):
              column2='partner_id', relation='wizard_category_partners_ids', string='Contacts') 
 
      def action_validate(self):
-         _logger.info('------------ resPartnerMassCategory VALIDATE')
-         _logger.info(self.add_category_ids)
-         _logger.info(self.remove_category_ids)
-         _logger.info(self.partner_ids)
+         #_logger.info('------------ resPartnerMassCategory VALIDATE')
+         #_logger.info(self.add_category_ids)
+         #_logger.info(self.remove_category_ids)
+         #_logger.info(self.partner_ids)
          for c in self.remove_category_ids:
              if c in self.add_category_ids:
                 raise ValidationError(_('Opération impossible. Le tag %s est présent dans la liste des tags à ajouter et celle des tags à supprimer. Ce n\'est pas cohérent.' % c.name))

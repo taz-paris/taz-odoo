@@ -105,6 +105,7 @@ class projectAccountingClosing(models.Model):
             rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
 
     name = fields.Char('Libellé', compute=compute, store=True)
+    is_validated = fields.Boolean('Validé', tracking=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
     closing_date = fields.Date("Date de clôture", required=True, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)

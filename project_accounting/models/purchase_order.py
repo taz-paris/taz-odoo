@@ -62,6 +62,12 @@ class projectAccountingPurchaseOrderLine(models.Model):
                 rec.margin_rate = rec.margin_amount / rec.reselling_subtotal * 100
 
 
+    def _compute_analytic_distribution(self):
+        super()._compute_analytic_distribution()
+        for line in self:
+            if line._context.get('default_analytic_distribution'):
+                line.analytic_distribution = line._context.get('default_analytic_distribution')
+
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",
             help = "Ligne de la commande du client final")

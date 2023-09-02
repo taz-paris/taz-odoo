@@ -1,0 +1,2 @@
+"id","name","model_id/id","group_id/id","perm_read","perm_write","perm_create","perm_unlink"
+"access_wizard_timesheet_mass_validation","access_wizard_timesheet_mass_validation","napta_connector.model_wizard_timesheet_mass_validation","account.group_account_manager","True","True","True","True"

@@ -320,6 +320,10 @@ class fitnetProject(models.Model):
         #for p in pos:
         #    p.button_cancel()
 
+        #for sol in self.env['sale.order.line'].search([('fitnet_id', '!=', False)]):
+        #    if sol.invoice_status != 'invoiced':
+        #        sol._compute_invoice_status()
+        #        _logger.info(sol.invoice_status)
 
 
         #self.sync_employees(client)

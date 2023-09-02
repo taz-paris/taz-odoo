@@ -4,9 +4,49 @@
               <field name="name">Project accounting closing</field>
               <field name="model">project.accounting_closing</field>
               <field name="arch" type="xml">
-                <tree>
-                  <field name="project_id"/>
-                  <field name="closing_date"/>
+                <tree editable="top" create="false">
+                  	<field name="project_id" optional="show"/>
+                  	<field name="closing_date" optional="show"/>
+			<field name="previous_closing" optional="hide"/>
+			<field name="is_validated" optional="show"/>
+			<!-- Factiration -->
+			<field name="invoice_previous_balance" optional="hide"/>
+			<field name="invoice_period_amount" optional="show"/>
+			<field name="invoice_balance" optional="hide"/>
+			<!-- Achats-->
+			<field name="purchase_previous_balance" optional="hide"/>
+			<field name="purchase_period_amount" optional="show"/>
+			<field name="purchase_balance" optional="hide"/>
+			<!-- Total provision -->
+			<field name="provision_previous_balance_sum" optional="hide"/>
+			<field name="provision_balance_sum" optional="hide"/>
+			<!-- PCA -->
+			<field name="pca_previous_balance" optional="hide"/>
+			<field name="pca_period_amount" optional="show"/>
+			<field name="pca_balance" optional="hide"/>
+			<!-- FAE -->
+			<field name="fae_previous_balance" optional="hide"/>
+			<field name="fae_period_amount" optional="show"/>
+			<field name="fae_balance" optional="hide"/>
+			<!-- CCA -->
+			<field name="cca_previous_balance" optional="hide"/>
+			<field name="cca_period_amount" optional="show"/>
+			<field name="cca_balance" optional="hide"/>
+			<!-- FNP -->
+			<field name="fnp_previous_balance" optional="hide"/>
+			<field name="fnp_period_amount" optional="show"/>
+			<field name="fnp_balance" optional="hide"/>
+			<!-- Production -->
+			<field name="production_previous_balance" optional="hide"/>
+			<field name="production_period_amount" optional="show"/>
+			<field name="production_stock" optional="show"/>
+			<field name="production_destocking" optional="show"/>
+			<field name="production_balance" optional="hide"/>
+			<!-- Chiffre d'afffaire -->
+			<field name="gross_revenue" optional="hide"/>
+			<field name="internal_revenue" optional="hide"/>
+			<field name="internal_margin_amount" optional="hide"/>
+			<field name="internal_margin_rate" widget="progressbar" optional="hide"/>
                 </tree>
               </field>
             </record>
@@ -21,6 +61,7 @@
 				<field name="project_id"/>
 				<field name="closing_date"/>
 				<field name="previous_closing"/>
+				<field name="is_validated"/>
 			</group>
 			<group col="3">
 				<group name="invoice" string="Facturation">
@@ -146,7 +187,8 @@
                 <field name="view_mode">tree,form,pivot</field>
 	</record>
 
-	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu" parent="project.menu_main_pm" action="project_accounting_closing_action"/>
+	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm" />
+	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_list" parent="project_accounting_closing_menu_root" action="project_accounting_closing_action"/>
 
 	</data>
 </odoo>

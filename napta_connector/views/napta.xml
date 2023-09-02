@@ -39,6 +39,7 @@
             <field name="arch" type="xml">
                 <field name="date" position="after">
                         <field name="napta_id" readonly="1" optional="hide"/>
+			<field name="is_timesheet_closed_on_napta" readonly="1"/>
                 </field>
             </field>
         </record>
