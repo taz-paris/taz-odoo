@@ -16,8 +16,8 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
     @api.onchange('date')
     def _onchange_date(self):
         self.project_ids = False
-        p = self.env['project.project'].search([('stage_id.state', 'in', ['before_launch', 'launched'])])
-        #TODO : il faudrait mieux les projets non cloturés à cette DATE ou bien cloturer entre la DATE et le pointage précédent
+        #p = self.env['project.project'].search([('stage_id.state', 'in', ['before_launch', 'launched'])])
+        #TODO : il faudrait mieux les projets (non TERMINES à cette DATE OU cloturés entre la DATE et le pointage précédent) ET (qui n'ont pas cloture postérieur ou égal à cette date)
         self.project_ids = p.ids
         self.project_ids = [1129] #projet test3.1
 
