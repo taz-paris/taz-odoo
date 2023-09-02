@@ -30,6 +30,7 @@
 					<field name="order_sum_purchase_order_lines"/>
 					<field name="outsource_part_amount_current"/>
 					<button type="object" name="action_open_purchase_order_lines" string="Voir les lignes de commande"/>
+					<button type="object" name="create_purchase_order" string="Créer commande fournisseur"/>
 				</group>
 				<group>
 					<field name="order_direct_payment_amount"/>

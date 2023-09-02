@@ -73,5 +73,4 @@ class projectAccountingPurchaseOrderLine(models.Model):
     reselling_subtotal = fields.Monetary('Montant de revente', help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
     margin_amount = fields.Monetary('Marge €', compute=compute)
     margin_rate = fields.Monetary('Marge %', compute=compute)
-    previsional_invoice_date = fields.Date('Date prev. de facturation')#, states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
 

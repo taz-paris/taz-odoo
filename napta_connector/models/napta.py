@@ -309,8 +309,6 @@ class naptaProject(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
     is_prevent_napta_creation = fields.Boolean("Portage pur (ne remonte pas sur Napta)")
-    date_start = fields.Date(readonly=True)
-    date = fields.Date(readonly=True)
 
     @api.model_create_multi
     def create(self, vals):
@@ -385,10 +383,11 @@ class naptaProject(models.Model):
         for napta_id, user_project in user_projects.items():
             dic = {
                     'napta_id' : napta_id,
-                    'date_start' : user_project['attributes']['estimated_start_date'],
-                    'date' : user_project['attributes']['estimated_end_date'],
+                    'date_start' : user_project['attributes']['start_date'],
+                    'date' : user_project['attributes']['end_date'],
                 }
             create_update_odoo(self.env, 'project.project', dic, only_update=True)
+
         #TODO : supprimer les user_project qui ont été supprimées sur Napta
 
 

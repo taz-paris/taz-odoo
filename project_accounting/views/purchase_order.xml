@@ -6,15 +6,17 @@
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
+		<field name="product_id" position="before">
+			<field name="id" widget="open_tab" />
+		</field>
                 <xpath expr="//field[@name='price_subtotal']" position="after">
-                        <field name="direct_payment_sale_order_line_id" readonly="True" widget="many2many_tags" optional="show" on_change="1"/>
-			<field name="order_direct_payment_validated_amount" string="Mnt p/d validé" optional="show" on_change="1"/>
-			<field name="order_direct_payment_validated_detail" string="Com. p/d" optional="show" on_change="1"/>
-			<field name="reselling_subtotal" string="Mnt revente" optional="show" on_change="1"/>
+                        <field name="direct_payment_sale_order_line_id" readonly="1" widget="many2many_tags" optional="show" on_change="1"/>
+			<field name="order_direct_payment_validated_amount" optional="hide" on_change="1"/>
+			<field name="order_direct_payment_validated_detail" optional="hide" on_change="1"/>
+			<field name="reselling_subtotal" optional="show" on_change="1"/>
 			<field name="margin_amount" optional="show" on_change="1"/>
-			<field name="margin_rate" widget="progressbar" optional="show" on_change="1"/>
+			<field name="margin_rate" widget="progressbar" optional="hide" on_change="1"/>
 			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
-			<field name="previsional_invoice_date" optional="hide"  on_change="1" />
                 </xpath>
                 <xpath expr="//field[@name='analytic_distribution']" position="attributes">
                         <attribute name="optional">show</attribute>
@@ -22,6 +24,15 @@
 		<field name="order_line" position="attributes">
 			<attribute name="context">{'default_state': 'draft', 'default_analytic_distribution' : context.get('default_analytic_distribution')}</attribute>
 		</field>
+                <xpath expr="//field[@name='taxes_id']" position="attributes">
+                        <attribute name="optional">hide</attribute>
+                </xpath>
+		<!--
+                <xpath expr="//field[@name='receipt_reminder_email']" position="attributes">
+		-->
+                <xpath expr="//div[@name='reminder']" position="attributes">
+			<attribute name="invisible">1</attribute>
+                </xpath>
 		<!--
 		<xpath expr="//field[@name='order_line']/tree" position="attributes">
 			<attribute name="decoration-success">direct_payment_sale_order_line_id == True</attribute>
@@ -31,6 +42,28 @@
         </record>
 
 
+
+        <record id="purchase_order_line_form2_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.line.form</field>
+            <field name="model">purchase.order.line</field>
+            <field name="inherit_id" ref="purchase.purchase_order_line_form2"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+			<group>
+				<group string="Paiement direct">
+					<field name="direct_payment_sale_order_line_id" readonly="1" widget="many2many_tags" on_change="1"/>
+					<field name="order_direct_payment_validated_amount" on_change="1"/>
+					<field name="order_direct_payment_validated_detail" on_change="1"/>
+				</group>
+				<group string="Marge">
+					<field name="reselling_subtotal" on_change="1"/>
+					<field name="margin_amount" on_change="1"/>
+					<field name="margin_rate" widget="progressbar" on_change="1"/>
+				</group>
+			</group>
+                </xpath>
+            </field>
+        </record>
 
     <record id="purchase_order_kpis_tree_inherit" model="ir.ui.view">
         <field name="name">purchase.order.kpis.tree.inherit</field>

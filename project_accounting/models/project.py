@@ -459,39 +459,6 @@ class projectAccountProject(models.Model):
         }
 
 
-    def create_purchase_order(self):
-        _logger.info('--- create_purchase_order')
-        self.ensure_one()
-        
-        """
-        price_unit = 0.0
-        order_dic = {
-            'order_line': [
-                    (0, None, {
-                        'product_id': 5, #TODO : utiliser le paramétrage pour déterminer le produit
-                        'name': 'Prestation sous-traitée', #TODO : lire le libellé du produit
-                        'product_uom_qty': 1,
-                        'product_uom':1,
-                        'price_unit': price_unit,
-                        #'price_subtotal': price_unit,
-                        'analytic_distribution' : {str(self.analytic_account_id.id) : 100.0}
-                    }),
-                ],
-        }
-        order_id = self.env['purchase.order'].create(order_dic)
-        """
-
-        return  {
-            'res_model': 'purchase.order',
-            #'res_id': order_id.id, 
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'context': {
-                'create': False,
-                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
-            }
-        }
-
     def get_production_cost(self, filters=[]):
         production_period_amount = 0.0
         lines = self.env['account.analytic.line'].search(filters + [('project_id', '=', self.id), ('category', '=', 'project_employee_validated')])
@@ -605,8 +572,9 @@ class projectAccountProject(models.Model):
     book_period_ids = fields.One2many('project.book_period', 'project_id', string="Book par année")
     book_employee_distribution_ids = fields.One2many('project.book_employee_distribution', 'project_id', string="Book par salarié")
     book_employee_distribution_period_ids = fields.One2many('project.book_employee_distribution_period', 'project_id', 'Book par salarié et par an')
-    book_validation_employee_id = fields.Many2one('hr.employee', string="Book validé par")
-    book_validation_datetime = fields.Datetime("Book validé le")
+    book_validation_employee_id = fields.Many2one('hr.employee', string="Book validé par", tracking=True)
+        #TODO : il faudrait que seul le groupe TAZ_management puisse modifier le champ book_validation_employee_id, mais en attendant on log les changements dans le chatter.
+    book_validation_datetime = fields.Datetime("Book validé le", tracking=True)
 
 
     # ACCOUNTING CLOSING

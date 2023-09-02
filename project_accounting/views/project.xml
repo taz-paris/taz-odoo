@@ -246,7 +246,6 @@
 
 						<group>
             						<field name="order_to_invoice_outsourcing" />
-							<button type="object" name="create_purchase_order" string="Créer commande fournisseur"/>
 						</group>
 					</page>
 					<page name="book" string="Book">

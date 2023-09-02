@@ -40,7 +40,7 @@ class projectOutsourcingLink(models.Model):
             'domain': [('id', 'in', line_ids)],
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
             }
         }
 
@@ -92,7 +92,7 @@ class projectOutsourcingLink(models.Model):
             'domain': [('id', 'in', line_ids)],
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
             }
         }
 
@@ -101,6 +101,43 @@ class projectOutsourcingLink(models.Model):
         #    action['res_id'] = invoice_ids[0]
 
         return action
+
+
+    def create_purchase_order(self):
+        _logger.info('--- create_purchase_order')
+        self.ensure_one()
+        
+        """
+        price_unit = 0.0
+        order_dic = {
+            'order_line': [
+                    (0, None, {
+                        'product_id': 5, #TODO : utiliser le paramétrage pour déterminer le produit
+                        'name': 'Prestation sous-traitée', #TODO : lire le libellé du produit
+                        'product_uom_qty': 1,
+                        'product_uom':1,
+                        'price_unit': price_unit,
+                        #'price_subtotal': price_unit,
+                        'analytic_distribution' : {str(self.analytic_account_id.id) : 100.0}
+                    }),
+                ],
+        }
+        order_id = self.env['purchase.order'].create(order_dic)
+        """
+
+        return  {
+            'res_model': 'purchase.order',
+            #'res_id': order_id.id, 
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'context': {
+                'create': False,
+                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_partner_id' : self.project_id.partner_id.id,
+                'default_date_planned' : self.project_id.date,
+            }
+        }
+
 
 
     @api.depends('project_id', 'partner_id', 'order_sum_purchase_order_lines', 'order_direct_payment_amount', 'sum_account_move_lines')
