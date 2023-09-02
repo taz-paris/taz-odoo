@@ -11,6 +11,7 @@ class projectAccountingClosing(models.Model):
     _name = "project.accounting_closing"
     _description = "Project accounting closing"
     _order = "closing_date desc"
+    _inherit = ['mail.thread']
     _sql_constraints = [
         ('project_date_uniq', 'UNIQUE (project_id, closing_date)',  "Impossible d'avoir deux clôtures à une même date pour un même projet.")
     ]

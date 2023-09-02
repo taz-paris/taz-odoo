@@ -109,7 +109,7 @@ class projectAccountProject(models.Model):
         ], string="Type de sous-traitance") #Attribut temporaire Fitnet à supprimer
     agreement_id = fields.Many2one(
         comodel_name="agreement",
-        string="Agreement Fitnet",
+        string="Marché par défaut sur les BC clients",
         ondelete="restrict",
         tracking=True,
         readonly=False,
@@ -117,7 +117,19 @@ class projectAccountProject(models.Model):
     ) #Attribut temporaire Fitnet à supprimer (l'agreement_id est sur le bon de commande client et non sur le projet en cible)
 
 
-    @api.depends('company_part_amount_initial', 'company_part_cost_initial', 'company_part_amount_current', 'company_part_cost_current', 'outsource_part_amount_initial', 'outsource_part_cost_initial', 'outsource_part_amount_current', 'outsource_part_cost_current', 'other_part_amount_initial', 'other_part_cost_initial', 'other_part_amount_current', 'other_part_cost_current')
+    #le modèle analytic_mixin est surchargé dans ce module project_accounting afin d'appeller cette fonction compute lorsqu'une ligne avec une distribution analytque liée à ce projet est créée/modifiée
+    @api.depends(
+	'state',
+	'company_part_amount_initial',
+	'company_part_cost_initial',
+	'project_outsourcing_link_ids',
+	'other_part_amount_initial',
+	'other_part_cost_initial',
+	'other_part_amount_current',
+	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
+	'accounting_closing_ids',
+	'invoicing_comment',
+    )
     def compute(self):
         _logger.info('===== project.py COMPUTE')
         for rec in self:
@@ -357,6 +369,7 @@ class projectAccountProject(models.Model):
             'context': {
                 'create': False,
                 'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_move_type' : 'out_invoice',
             }
         }
 
@@ -482,18 +495,18 @@ class projectAccountProject(models.Model):
     order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
 
-    order_cost_initial = fields.Monetary('Coût total initial', compute=compute)
-    order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute)
-    order_marging_rate_initial = fields.Float('Marge totale (%) initiale', compute=compute)
+    order_cost_initial = fields.Monetary('Coût total initial', compute=compute, store=True)
+    order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute, store=True)
+    order_marging_rate_initial = fields.Float('Marge totale (%) initiale', compute=compute, store=True)
 
-    order_cost_current = fields.Monetary('Coût total actuel', compute=compute)
-    order_marging_amount_current = fields.Monetary('Marge totale (€) actuelle', compute=compute)
-    order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute)
+    order_cost_current = fields.Monetary('Coût total actuel', compute=compute, store=True)
+    order_marging_amount_current = fields.Monetary('Marge totale (€) actuelle', compute=compute, store=True)
+    order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute, store=True)
 
-    order_to_invoice_company = fields.Monetary('Montant à facturer par Tasmane au client', compute=compute)
-    company_invoice_sum_move_lines = fields.Monetary('Montant déjà facturé par Tasmane au client', compute=compute)
-    company_to_invoice_left = fields.Monetary('Montant restant à factuer par Tasmane au client', compute=compute)
-    order_to_invoice_outsourcing = fields.Monetary('Montant S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute)
+    order_to_invoice_company = fields.Monetary('Montant à facturer par Tasmane au client', compute=compute, store=True)
+    company_invoice_sum_move_lines = fields.Monetary('Montant déjà facturé par Tasmane au client', compute=compute, store=True)
+    company_to_invoice_left = fields.Monetary('Montant restant à factuer par Tasmane au client', compute=compute, store=True)
+    order_to_invoice_outsourcing = fields.Monetary('Montant S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute, store=True)
 
     ######## COMPANY PART
     company_part_amount_initial = fields.Monetary('Montant dispositif Tasmane initial', 

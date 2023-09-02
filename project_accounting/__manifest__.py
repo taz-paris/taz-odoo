@@ -18,7 +18,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'project', 'sale', 'taz-common', 'sale_management'],
+    'depends': ['base', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management'],
 
     # always loaded
     'data': [

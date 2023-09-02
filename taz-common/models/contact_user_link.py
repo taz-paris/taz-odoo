@@ -200,10 +200,10 @@ class ContactUserLink(models.Model):
          ('4', "4 - Décideur -  peut décider par lui-même"),
          ], store=True, string="Niveau d'influence chez le client", compute="_compute_rel_inhouse_influence_level", inverse="_inverse_rel_inhouse_influence_level") 
 
-    last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action)
-    date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=True)
-    next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce tasmanien avec ce contact.", compute=_compute_date_business_action)
-    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce tasmanien auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=True, default=False)
+    last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=True)
+    date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=False)
+    next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=True)
+    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce tasmanien auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=True, default=False) #TODO :impossible de stocker la valeur de is_late car sa valeur reposer sur la date du jour
     next_meeting_before = fields.Date('À revoir avant le', compute=_compute_date_business_action, store=True)
     
     #RDV to plan before
