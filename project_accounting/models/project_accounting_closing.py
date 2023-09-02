@@ -90,7 +90,7 @@ class projectAccountingClosing(models.Model):
             rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
-            rec.production_period_amount = proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', end_date)])
+            rec.production_period_amount = proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date)])
 
             rec.production_stock = rec.production_previous_balance + rec.production_period_amount
             rec.production_balance = rec.production_stock - rec.production_destocking
