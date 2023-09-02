@@ -1,0 +1,33 @@
+<odoo>
+	<data>
+	    <record model="ir.ui.view" id="wizard_accounting_closing_mass_creation_form">
+	      <field name="name">Assistant de création en masse des clôtures</field>
+	      <field name="model">wizard_accounting_closing_mass_creation</field>
+	      <field name="arch" type="xml">
+		<form>
+			<group>
+				<group>
+					<field name="date" colspan="2" />
+					<field name="project_ids" colspan="3" />
+				</group>
+			</group>
+			<footer>
+				<button name="action_validate" string="Valider" type="object" confirm="Vous allez générer des clotures pour ces projets. Voulez-vous continuer ?"/>
+               	 		<button name="action_cancel" special="cancel" string="Annuler" type="object"/>
+            		</footer>
+		</form>
+	      </field>
+	    </record>
+		
+	<record id="launch_wizard_accounting_closing_mass_creation" model="ir.actions.act_window">
+		<field name="name">Assistant de création en masse des clôture</field>
+	    <field name="res_model">wizard_accounting_closing_mass_creation</field>
+	    <field name="view_mode">form</field>
+	    <field name="target">new</field>
+	    <field name="context"></field>
+	</record>
+	
+	<menuitem name="Création en masse des clôtures comptables" id="project_accounting_closing_mass_creation" parent="project_accounting.project_accounting_closing_menu_root" action="launch_wizard_accounting_closing_mass_creation"/>
+
+	</data>
+</odoo>
