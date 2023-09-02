@@ -995,6 +995,15 @@ class fitnetProject(models.Model):
         self.delete_not_found_fitnet_object('sale.order.line', sale_order_line_list, 'line_id')
         self.delete_not_found_fitnet_object('sale.order', sale_order_list, 'order_id')
 
+        for pro in self.env['project.project'].search([('fitnet_id', '!=', False)]):
+            if not(pro.user_id):
+                continue
+            sol_ids = self.env['sale.order.line'].browse(pro.get_sale_order_line_ids())
+            for sol in sol_ids:
+                if not(sol.order_id.user_id) or sol.order_id.user_id.id != pro.user_id.id :
+                    _logger.info('Changement du sale.order.user_id pour sale.order ODOO ID='+str(sol.order_id.id))
+                    sol.order_id.user_id = pro.user_id.id
+
     
     
     def sync_suppliers(self, client):
@@ -1216,10 +1225,15 @@ class fitnetProject(models.Model):
             #    _logger.info("exclu car pas un projet à migrer")
             #    continue
 
+            date_planned = False
+            if contract_invoice_list[0]['date'] : 
+                date_planned = contract_invoice_list[0]['date'] +  ' 00:00:00'
+
             sale_order_list.append({
                     'partner_id' : contract_invoice_list[0]['odoo_supplierId'],
                     'order_id' : key_contract_supplier,
                     'state' : 'purchase',
+                    'date_planned' : date_planned,
                     })
 
             fitnet_id_outsourcing_partners = self.env['res.partner'].search([('fitnet_id', '=', contract_invoice_list[0]['odoo_supplierId'])])
@@ -1268,7 +1282,7 @@ class fitnetProject(models.Model):
                         'price_unit': l['initial_unitPrice'],
                         'reselling_subtotal' : reselling_subtotal,
                         'analytic_distribution' : {str(odoo_project.analytic_account_id.id) : 100.0},
-                        'previsional_invoice_date' : inv['date'] or False,
+                        #'previsional_invoice_date' : inv['date'] or False,
                             }
                     #_logger.info(sol)
                     sale_order_line_list.append(sol)
@@ -1294,6 +1308,7 @@ class fitnetProject(models.Model):
 
         mapping_fields_sale_order = {
             'partner_id' : {'odoo_field' : 'partner_id'},
+            'date_planned' : {'odoo_field' : 'date_planned'},
             #'state' : {'odoo_field' : 'partner_type',  'selection_mapping' : {'draft' : 'draft', 'sent' : 'sent', 'sale' : 'sale', 'done' : 'done', 'cancel' : 'cancel'}},
         }
         mapping_fields_sale_order_line = {
@@ -1307,7 +1322,7 @@ class fitnetProject(models.Model):
             'product_id' : {'odoo_field' : 'product_id'},
             'qty_delivered' : {'odoo_field' : 'qty_received'},
             'reselling_subtotal' : {'odoo_field' : 'reselling_subtotal'},
-            'previsional_invoice_date' : {'odoo_field' : 'previsional_invoice_date'},
+            #'previsional_invoice_date' : {'odoo_field' : 'previsional_invoice_date'},
         }
         
         #_logger.info(sale_order_list)
@@ -1638,7 +1653,10 @@ class fitnetProject(models.Model):
                 #_logger.info(fitnet_object)
                 #_logger.info(model.id)
                 #_logger.info(odoo_field_name)
-                odoo_field = self.env['ir.model.fields'].search([('model_id', '=', model.id), ('name', '=', odoo_field_name)])[0]
+                odoo_fields = self.env['ir.model.fields'].search([('model_id', '=', model.id), ('name', '=', odoo_field_name)])
+                if len(odoo_fields) == 0:
+                    _logger.info("Impossible de trouver le champ %s sur l'objet %s" % (odoo_field_name,model.id))
+                odoo_field = odoo_fields[0]
                 odoo_value = None
 
                 if fitnet_field_name in fitnet_object.keys():
