@@ -23,7 +23,7 @@ class projectAccountProject(models.Model):
         for vals in vals_list:
             vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''
             vals['state_last_change_date'] = datetime.today()
-            _logger.info('Numéro de projet auto : %s' % str(vals['number']))
+            #_logger.info('Numéro de projet auto : %s' % str(vals['number']))
             projects |= super().create(vals)
         return projects
 
@@ -51,7 +51,7 @@ class projectAccountProject(models.Model):
             if book_period_id.reference_period == str(year):
                 res += book_period_id.period_project_book
                 #TODO : ne pas sommer les book pas encore validés ???
-        _logger.info(res)
+        #_logger.info(res)
         return res
 
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
@@ -61,6 +61,8 @@ class projectAccountProject(models.Model):
             rec.user_id = rec.project_director_employee_id.user_id if rec.project_director_employee_id else False
 
     def write(self, vals):
+        #_logger.info('----- projet WRITE')
+        #_logger.info(vals)
         for record in self :
             if 'stage_id' in vals.keys():
                 vals['state_last_change_date'] = datetime.today()
@@ -131,8 +133,12 @@ class projectAccountProject(models.Model):
 	'invoicing_comment',
     )
     def compute(self):
-        _logger.info('===== project.py COMPUTE')
+        _logger.info('====================================================================== project.py COMPUTE')
         for rec in self:
+            old_default_book_initial = rec.default_book_initial
+            old_default_book_current = rec.default_book_current
+            old_order_sum_sale_order_lines = rec.order_sum_sale_order_lines
+
             rec.company_invoice_sum_move_lines = rec.compute_account_move_total()
 
             ######## TOTAL
@@ -254,10 +260,13 @@ class projectAccountProject(models.Model):
             #BOOK
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
+            if old_default_book_initial != rec.default_book_initial or old_default_book_current != rec.default_book_current or old_order_sum_sale_order_lines != rec.order_sum_sale_order_lines:
+                rec.book_validation_employee_id = False
+                rec.book_validation_datetime = False
 
 
     def compute_sale_order_total(self, with_direct_payment=True): 
-        _logger.info('----------compute_sale_order_total')
+        _logger.info('----------compute_sale_order_total => with_direct_payment=' + str(with_direct_payment))
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         self.ensure_one()
         rec = self
@@ -272,8 +281,9 @@ class projectAccountProject(models.Model):
             #_logger.info(line.read())
             if line.direct_payment_purchase_order_line_id and with_direct_payment==False :
                 continue
-            #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-            total += line.product_uom_qty * line.price_unit
+            if line.state not in ['sale']:
+                continue
+            total += line.product_uom_qty * line.price_unit * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         #_logger.info(total)
         _logger.info('----------END compute_sale_order_total')
         return total
@@ -311,12 +321,12 @@ class projectAccountProject(models.Model):
         query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
         query.order = None
         query_string, query_param = query.select('sale_order_line.*') #important car Odoo fait un LEFT join obligatoire, donc si on fait SELECT * on a plusieurs colonne ID dans le résultat
-        _logger.info(query_string)
-        _logger.info(query_param)
+        #_logger.info(query_string)
+        #_logger.info(query_param)
         self._cr.execute(query_string, query_param)
         dic =  self._cr.dictfetchall()
         line_ids = [line.get('id') for line in dic]
-        _logger.info(line_ids)
+        #_logger.info(line_ids)
         return line_ids
 
 
@@ -327,12 +337,11 @@ class projectAccountProject(models.Model):
         for rec in self :
             line_ids = rec.get_account_move_line_ids(filter_list + [('move_type', 'in', ['in_refund', 'in_invoice'])])
             total = 0.0
-            _logger.info(len(line_ids))
+            #_logger.info(len(line_ids))
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
-                #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-                total += line.price_subtotal_signed
-            _logger.info(total)
+                total += line.price_subtotal_signed * line.analytic_distribution[str(rec.analytic_account_id.id)]/100.0
+            #_logger.info(total)
             return total
 
 
@@ -342,12 +351,13 @@ class projectAccountProject(models.Model):
         line_ids = self.get_account_move_line_ids(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice']), ('display_type', 'not in', ['line_note', 'line_section'])])
             #On ne met pas le partenr_id dans le filtre car dans certains cas, Tasmane ne facture pas le client final, mais un intermédiaire (Sopra par exemple) 
         total = 0.0
-        _logger.info(len(line_ids))
+        #_logger.info(len(line_ids))
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
-            #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-            total += line.price_subtotal_signed
-        _logger.info(total)
+            if line.parent_state not in ['posted']:
+                continue
+            total += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+        #_logger.info(total)
         return total
 
 
@@ -409,18 +419,18 @@ class projectAccountProject(models.Model):
     def get_account_move_line_ids(self, filter_list=[]):
         _logger.info('--get_account_move_line_ids')
         query = self.env['account.move.line']._search(filter_list)
-        _logger.info(query)
+        #_logger.info(query)
         if query == []:
             return []
         query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
         query.order = None
         query_string, query_param = query.select('account_move_line.*')
-        _logger.info(query_string)
-        _logger.info(query_param)
+        #_logger.info(query_string)
+        #_logger.info(query_param)
         self._cr.execute(query_string, query_param)
         dic =  self._cr.dictfetchall()
         line_ids = [line.get('id') for line in dic]
-        _logger.info(line_ids)
+        #_logger.info(line_ids)
 
         return line_ids
 

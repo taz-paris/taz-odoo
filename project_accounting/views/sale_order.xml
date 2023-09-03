@@ -174,7 +174,7 @@
 			<attribute name="optional">hide</attribute>
 		</field>
 		<field name="order_partner_id" position="after">
-			<field name="order_partner_invoice_id"/>
+			<field name="order_partner_invoice_id" optional="hide"/>
 		</field>
 		<field name="price_subtotal" position="after">
 			<field name="untaxed_amount_invoiced" optional="show" string="Facturé (HT)" />
@@ -183,8 +183,9 @@
 			<field name="direct_payment_purchase_order_line_id" optional="show"/>
 			<field name="invoice_lines" optional="hide" widget="many2many_tags"/>
 			<field name="invoice_status" optional="hide"/>
-			<field name="state" optional="hide"/>
+			<field name="state" optional="show" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'" widget="badge" />
 			<field name="comment" optional="show"/>
+			<field name="analytic_distribution" optional="hide" widget="analytic_distribution"/>
 			<!--
 			<field name="fitnet_id" optional="hide"/>
 				-->

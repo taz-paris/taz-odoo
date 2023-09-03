@@ -19,6 +19,47 @@ class projectAccountingPurchaseOrder(models.Model):
     #   - ajouter un statut s'il reste des factures à valider sur Chorus alors que Tasmane a payé sa part (et ajuster la liste de suivi des PO)
 
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        _logger.info('---- create purchase.order')
+        res_list = super().create(vals_list)
+        for rec in res_list :
+            rec._compute_linked_projects()
+        return res_list
+
+    def write(self, vals):
+        _logger.info('---- write purchase.order')
+        res = super().write(vals)
+        for rec in self :
+            rec._compute_linked_projects()
+        return res
+
+    def unlink(self):
+        _logger.info('---- UNLINK purchase.order')
+        old_rel_project_ids = self.rel_project_ids
+        res = super().unlink()
+        for project in old_rel_project_ids:
+            project.compute()
+        return res
+
+    def _compute_linked_projects(self):
+        for rec in self:
+            for project in rec.rel_project_ids:
+                project.compute()
+
+    def comptute_project_ids(self):
+        for rec in self:
+            project_ids_res = []
+            for line in self.order_line:
+                for p in line.rel_project_ids:
+                    if p.id not in project_ids_res:
+                        project_ids_res.append(p.id)
+            if len(project_ids_res):
+                rec.rel_project_ids = [(6, 0, project_ids_res)]
+            else :
+                rec.rel_project_ids = False
+
+    rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
 
 
 

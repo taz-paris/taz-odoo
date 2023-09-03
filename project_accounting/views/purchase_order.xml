@@ -21,6 +21,9 @@
                 <xpath expr="//field[@name='analytic_distribution']" position="attributes">
                         <attribute name="optional">show</attribute>
                 </xpath>
+                <xpath expr="//field[@name='qty_received']" position="attributes">
+                        <attribute name="optional">show</attribute>
+                </xpath>
 		<field name="order_line" position="attributes">
 			<attribute name="context">{'default_state': 'draft', 'default_analytic_distribution' : context.get('default_analytic_distribution')}</attribute>
 		</field>

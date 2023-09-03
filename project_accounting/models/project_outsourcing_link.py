@@ -21,12 +21,13 @@ class projectOutsourcingLink(models.Model):
             #rec.order_sum_purchase_order_lines = 0
             line_ids = rec.get_purchase_order_line_ids()
             total = 0.0
-            #TODO : multiplier par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
                 if line.direct_payment_sale_order_line_id and with_direct_payment==False:
                     continue
-                total += line.product_qty * line.price_unit
+                if line.state not in ['purchase']:
+                    continue
+                total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
             return total
 
     def action_open_purchase_order_lines(self):
@@ -77,8 +78,9 @@ class projectOutsourcingLink(models.Model):
             total = 0.0
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
-                #TODO : multiplier le prix_subtotal par la clé de répartition de l'analytic_distribution... même si dans notre cas ça sera toujours 100% pour le même projet
-                total += line.price_subtotal_signed
+                if line.parent_state not in ['posted']:
+                    continue
+                total += line.price_subtotal_signed * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
             rec.sum_account_move_lines = total
 
     def action_open_account_move_lines(self):
