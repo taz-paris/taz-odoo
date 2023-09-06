@@ -71,7 +71,8 @@ class projectOutsourcingLink(models.Model):
         return line_ids
         
 
-    def compute_account_move_total(self): 
+    def compute_account_move_total_outsourcing_link(self): 
+        _logger.info('compute_account_move_total_outsourcing_link')
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         for rec in self:
             line_ids = rec.project_id.get_account_move_line_ids([('partner_id', '=', rec.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund'])])
@@ -182,7 +183,7 @@ class projectOutsourcingLink(models.Model):
         #TODO : il va falloir lister les factures validées sur Chorus et checker ce montant
     order_company_payment_amount = fields.Monetary('Montant à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute)
 
-    sum_account_move_lines = fields.Monetary('Total des factures/avoirs', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute_account_move_total)
+    sum_account_move_lines = fields.Monetary('Total des factures/avoirs', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute_account_move_total_outsourcing_link)
 
     outsource_part_amount_current = fields.Monetary('Valorisation de la part sous-traitée', compute=compute)
     marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', compute=compute)

@@ -4,12 +4,15 @@
               <field name="name">Project accounting closing</field>
               <field name="model">project.accounting_closing</field>
               <field name="arch" type="xml">
-                <tree editable="top" create="false">
+                <tree create="false">
                   	<field name="project_id" optional="show"/>
                   	<field name="closing_date" optional="show"/>
 			<field name="previous_closing" optional="hide"/>
+			<!-- Validation -->
 			<field name="is_validated" optional="show"/>
-			<!-- Factiration -->
+			<field name="comment" optional="hide" widget="text"/>
+			<field name="comment_previous" optional="hide" widget="text"/>
+			<!-- Facturation -->
 			<field name="invoice_previous_balance" optional="hide"/>
 			<field name="invoice_period_amount" optional="show"/>
 			<field name="invoice_balance" optional="hide"/>
@@ -58,10 +61,16 @@
               <field name="arch" type="xml">
                 <form>
 			<group name="general">
-				<field name="project_id"/>
-				<field name="closing_date"/>
-				<field name="previous_closing"/>
-				<field name="is_validated"/>
+				<group>
+					<field name="project_id"/>
+					<field name="closing_date"/>
+					<field name="previous_closing"/>
+				</group>
+				<group>
+					<field name="is_validated"/>
+					<field name="comment" widget="text"/>
+					<field name="comment_previous" widget="text"/>
+				</group>
 			</group>
 			<group col="3">
 				<group name="invoice" string="Facturation">
@@ -180,6 +189,29 @@
 		    </pivot>
 		</field>
 	</record>
+
+        <record id="view_project_accounting_closing_search" model="ir.ui.view">
+            <field name="name">project.accounting_closing</field>
+            <field name="model">project.accounting_closing</field>
+            <field name="arch" type="xml">
+                <search string="Search Project accounting closing">
+                    <field name="rel_project_user_id" string="Directeur de mission (nom de famille)"/>
+                    <field name="rel_project_partner_id" string="Client" filter_domain="[('rel_project_partner_id', 'child_of', self)]"/>
+                    <separator/>
+                    <filter string="Date de la clôture comptable" name="closing_date" date="closing_date"/>
+                    <filter string="Clôture validée" name="validated" domain="[('is_validated', '=', True)]"/>
+                    <filter string="Clôture non validée" name="not_validated" domain="[('is_validated', '=', False)]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Directeur de mission" name="Manager" context="{'group_by': 'rel_project_user_id'}"/>
+                        <filter string="Client" name="Partner" context="{'group_by': 'rel_project_partner_id'}"/>
+                        <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}" />
+                    </group>
+		    <!--
+		    -->
+                </search>
+            </field>
+        </record>
 
         <record id="project_accounting_closing_action" model="ir.actions.act_window">
                 <field name="name">Clôtures comptables par projet</field>

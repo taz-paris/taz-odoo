@@ -137,7 +137,6 @@ class projectAccountProject(models.Model):
         for rec in self:
             old_default_book_initial = rec.default_book_initial
             old_default_book_current = rec.default_book_current
-            old_order_sum_sale_order_lines = rec.order_sum_sale_order_lines
 
             rec.company_invoice_sum_move_lines = rec.compute_account_move_total()
 
@@ -249,8 +248,8 @@ class projectAccountProject(models.Model):
                     if line.state in ['draft', 'sent', 'to approve']:
                         is_validated_purchase_order = False
                         break
-            rec.is_validated_purchase_order = is_validated_purchase_order
             """
+            rec.is_validated_purchase_order = is_validated_purchase_order
 
             if rec.invoicing_comment or not(rec.is_constistant_order_amount) or not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_validated_book) or not(rec.is_consistant_outsourcing):
                 rec.is_review_needed = True
@@ -260,7 +259,7 @@ class projectAccountProject(models.Model):
             #BOOK
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
-            if old_default_book_initial != rec.default_book_initial or old_default_book_current != rec.default_book_current or old_order_sum_sale_order_lines != rec.order_sum_sale_order_lines:
+            if rec.default_book_initial != rec.default_book_current and ((old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current)):
                 rec.book_validation_employee_id = False
                 rec.book_validation_datetime = False
 
@@ -528,7 +527,7 @@ class projectAccountProject(models.Model):
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
-            help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
+            help="Montant du pointage Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     company_part_marging_amount_initial = fields.Monetary('Marge sur dispo Tasmane (€) initiale', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
     company_part_marging_rate_initial = fields.Float('Marge sur dispo Tasmane (%) initiale', store=True, compute=compute)
 
@@ -536,10 +535,10 @@ class projectAccountProject(models.Model):
             states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
             tracking=True,
             help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
-    company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', store=True, compute=compute, help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
+    company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', store=True, compute=compute, help="Montant du pointage Tasmaame valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     #company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', 
     #        states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
-    #        help="Montant du pointage Tasname valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
+    #        help="Montant du pointage Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) actuelle', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
     company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) actuelle', store=True, compute=compute)
 

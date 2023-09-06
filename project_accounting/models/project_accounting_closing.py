@@ -107,6 +107,10 @@ class projectAccountingClosing(models.Model):
 
     name = fields.Char('Libellé', compute=compute, store=True)
     is_validated = fields.Boolean('Validé', tracking=True)
+    comment = fields.Text("Commentaire")
+    comment_previous = fields.Text("Commentaire clôture précédente", related='previous_closing.comment')
+    rel_project_partner_id = fields.Many2one(related='project_id.partner_id', store=True)
+    rel_project_user_id = fields.Many2one(related='project_id.user_id', store=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
     closing_date = fields.Date("Date de clôture", required=True, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)
@@ -152,3 +156,4 @@ class projectAccountingClosing(models.Model):
     internal_revenue = fields.Monetary('CA net de ST', compute=compute, store=True)
     internal_margin_amount = fields.Monetary('Marge nette ST (€)', compute=compute, store=True)
     internal_margin_rate = fields.Monetary('Marge nette ST (%)', compute=compute, store=True)
+
