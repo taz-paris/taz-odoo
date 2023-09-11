@@ -110,23 +110,6 @@ class projectOutsourcingLink(models.Model):
         _logger.info('--- create_purchase_order')
         self.ensure_one()
         
-        """
-        price_unit = 0.0
-        order_dic = {
-            'order_line': [
-                    (0, None, {
-                        'product_id': 5, #TODO : utiliser le paramétrage pour déterminer le produit
-                        'name': 'Prestation sous-traitée', #TODO : lire le libellé du produit
-                        'product_uom_qty': 1,
-                        'product_uom':1,
-                        'price_unit': price_unit,
-                        #'price_subtotal': price_unit,
-                        'analytic_distribution' : {str(self.analytic_account_id.id) : 100.0}
-                    }),
-                ],
-        }
-        order_id = self.env['purchase.order'].create(order_dic)
-        """
 
         return  {
             'res_model': 'purchase.order',

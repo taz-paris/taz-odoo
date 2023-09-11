@@ -63,6 +63,10 @@
 			<attribute name="invisible">True</attribute>
 		</xpath>
 
+		<field name="order_line" position="before">
+			<field name="target_amount" onchange="1"/>
+		</field>
+
 		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">
 			<field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
@@ -71,15 +75,24 @@
 			<field name="previsional_invoice_date" optional="show" string="Date prev fact" on_change="1"/>
 			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
 			<field name="comment" optional="show"  on_change="1" />
-
 		</xpath>
 
 		<xpath expr="//tree/field[@name='analytic_distribution']" position="attributes">
 			<attribute name="optional">show</attribute>
 		</xpath>
 
+		<xpath expr="//tree/field[@name='price_unit']" position="attributes">
+			<attribute name="onchange">1</attribute>
+		</xpath>
+		<xpath expr="//tree/field[@name='price_subtotal']" position="attributes">
+			<attribute name="onchange">1</attribute>
+		</xpath>
 		<field name="order_line" position="attributes">
-                        <attribute name="context">{'default_analytic_distribution' : context.get('default_analytic_distribution')}</attribute>
+			<attribute name="context">{
+				'default_analytic_distribution' : context.get('default_analytic_distribution'), 
+				'default_previsional_invoice_date' : context.get('default_previsional_invoice_date'),
+				'default_price_unit' : context.get('default_price_unit'),
+				}</attribute>
                 </field>
 
 		<xpath expr="//field[@name='order_line']/tree" position="attributes">

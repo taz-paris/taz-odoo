@@ -1,6 +1,23 @@
 <odoo>
 	<data>
 
+    <!-- EVENT.REGISTRATION ACTIONS -->
+    <record id="act_event_registration_from_event_all" model="ir.actions.act_window">
+        <field name="res_model">event.registration</field>
+        <field name="name">Attendees</field>
+        <field name="view_mode">tree,kanban,form,calendar,graph</field>
+        <field name="domain">[('event_id', '=', active_id)]</field>
+        <field name="context">{'default_event_id': active_id}</field>
+        <field name="search_view_id" ref="event.event_registration_view_search_event_specific"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Attendees yet!
+            </p><p>
+                Wait until Attendees register to your Event or create their registrations manually.
+            </p>
+        </field>
+    </record>
+
         <record id="event_registration_light.event_form_inherit" model="ir.ui.view">
             <field name="name">Event</field>
             <field name="model">event.event</field>
@@ -15,6 +32,16 @@
                 <field name="auto_confirm" position="replace">
                         <field name="auto_confirm" readonly="1" help="Auto-confirm should be false to perfom the two steps registration process : create draft registration, send invitation mail and let it be confirmed by guest." />
                 </field>
+		<xpath expr="//button[@name='%(event.act_event_registration_from_event)d']" position="after">
+			<button name="%(event_registration_light.act_event_registration_from_event_all)d"
+                                type="action"
+                                context="{'search_default_expected': False}"
+                                class="oe_stat_button"
+                                icon="fa-users"
+                                help="Tous les invités">
+			<span class="o_stat_text">Invités (tous)</span>
+                        </button>
+            	</xpath>
             </field>
         </record>
 

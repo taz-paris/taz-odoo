@@ -12,6 +12,7 @@ from odoo.addons import base
 
 class eventRegistration(models.Model):
     _inherit = "event.registration"
+    _rec_name = 'display_name'
     
 
     @api.onchange('mail_auto')
@@ -38,6 +39,8 @@ class eventRegistration(models.Model):
     last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
     event_id = fields.Many2one(states={'draft': [('readonly', False)], 'identified': [('readonly', False)]})
     comment = fields.Text("Commentaire", help="Ce commentaire est propre à l'inscription de ce contact pour cet évènement.")
+    rel_partner_id_user_id = fields.Many2one(related='partner_id.user_id')
+
 
 
     def get_html_invitation(self):

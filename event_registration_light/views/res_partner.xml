@@ -7,7 +7,7 @@
 		    <field name="inherit_id" ref="taz-common.contact_search"/>
 		    <field name="arch" type="xml">
 			<xpath expr="//field[@name='parent_industry_id']" position="after">
-			    <field name="event_registration_ids" string="Inscriptions aux évènements" />
+			    <field name="event_registration_ids" string="Inscriptions aux évènements" filter_domain="[('event_registration_ids.event_id', 'ilike', self)]" />
 			</xpath>
 		    </field>
 		</record>
@@ -25,8 +25,10 @@
 		  				<field name="id" widget="open_tab"/>
 						<field name="active" invisible="1"/>
 						<field name="event_id" domain="[('event_registrations_open', '=', True)]"/>
-						<field name="mail_auto" />
 						<field name="state" decoration-info="state in ('draft', 'open')" decoration-success="state == 'done'" decoration-muted="state == 'cancel'" widget="badge"/>
+						<field name="mail_auto" optional="show"/>
+						<field name="contact_user_link_id" optional="show"/>
+						<field name="partner_id" invisible="1" />
 						<field name="company_id" groups="base.group_multi_company" optional="hide"/>
 						<field name="email" optional="hide"/>
 						<field name="message_needaction" invisible="1"/>

@@ -71,8 +71,10 @@
 		<field name="inherit_id" ref="event.view_registration_search"/>
 		<field name="arch" type="xml">
 			<xpath expr="//search/filter[@name='filter_is_ongoing']" position="before">
-				<filter string="Mes invités" name="assigned_to_me" domain="[('registration_user_id', '=', uid)]"/>
+				<filter string="Contacts dont je suis propriétaire" name="contact_proprietary" domain="[('rel_partner_id_user_id', '=', uid)]"/>
+				<filter string="Mes invités (dont je suis responsable de l'envoi de l'invitation)" name="assigned_to_me" domain="[('registration_user_id', '=', uid)]"/>
 				<field name="registration_user_id" string="Responsable de l'invitation"/>
+				<field name="rel_partner_id_user_id" string="Propriétaire du contact (nom de famille)"/>
 				<filter string="Responsable de l'invitation" name="group_registration_user_id" domain="[]" context="{'group_by':'registration_user_id'}"/>
 				<separator/>
 				<filter string="Mail automatique" name="mail_auto" domain="[('mail_auto', '=', True)]"/>

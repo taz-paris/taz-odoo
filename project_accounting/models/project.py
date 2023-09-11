@@ -450,33 +450,19 @@ class projectAccountProject(models.Model):
         if self.order_amount_current - self.order_sum_sale_order_lines > 0:
             price_unit = self.order_amount_current - self.order_sum_sale_order_lines
 
-        order_dic = {
-            'partner_id': self.partner_id.id,
-            'agreement_id' : self.agreement_id.id,
-            'user_id' : self.user_id.id,
-            'order_line': [
-                    (0, None, {
-                        'product_id': 4, #TODO : utiliser le paramétrage pour déterminer le produit
-                        'name': 'Prestation Tasmane', #TODO : lire le libellé du produit
-                        'product_uom_qty': 1,
-                        'product_uom':1,
-                        'price_unit': price_unit,
-                        #'price_subtotal': price_unit,
-                        'analytic_distribution' : {str(self.analytic_account_id.id) : 100.0}
-                    }),
-                ],
-        }
-
-        order_id = self.env['sale.order'].create(order_dic)
-
         return  {
             'res_model': 'sale.order',
-            'res_id': order_id.id, 
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'context': {
                 'create': False,
+                'default_partner_id' : self.partner_id.id,
+                'default_agreement_id' : self.agreement_id.id,
+                'default_user_id' : self.user_id.id,
                 'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_previsional_invoice_date' : self.date,
+                #'default_price_unit' : price_unit,
+                'default_target_amount' : price_unit,
             }
         }
 

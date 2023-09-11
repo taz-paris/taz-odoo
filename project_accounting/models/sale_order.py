@@ -67,6 +67,7 @@ class projectAccountingSaleOrder(models.Model):
                 rec.rel_project_ids = False
 
     rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
+    target_amount = fields.Monetary("Montant cible - à répartir")
 
 
 
@@ -91,6 +92,62 @@ class projectAccountingSaleOrderLine(models.Model):
             if line.is_downpayment and line.untaxed_amount_to_invoice != 0:
                 line.invoice_status = 'to invoice'
     """
+    @api.onchange('product_id')
+    def _onchange_product_id_taz(self):
+        if not self.product_id:
+            return
+        _logger.info('_onchange_product_id')
+        #_logger.info(self._origin.order_id.target_amount)
+        #_logger.info(self._origin.order_id.amount_untaxed)
+        #_logger.info(self._origin.price_unit)
+        #_logger.info(self._origin.price_subtotal)
+        #_logger.info(self.order_id.target_amount)
+        #_logger.info(self.order_id.amount_untaxed)
+        #self.price_unit = self.order_id.target_amount - self.order_id.amount_untaxed
+        total = 0.0
+        for l in self.order_id.order_line:
+            #if l.direct_payment_purchase_order_line_id:
+            #    continue
+            if l.id == self.id:
+                continue
+            total+=l.price_subtotal
+        self.price_unit = self.order_id.target_amount - total
+        _logger.info(self.price_unit)
+
+
+    @api.depends('product_id', 'product_uom', 'product_uom_qty')
+    def _compute_price_unit(self):
+        _logger.info('_compute_price_unit')
+        super()._compute_price_unit()
+        for line in self:
+            # check if there is already invoiced amount. if so, the price shouldn't change as it might have been
+            # manually edited
+            _logger.info('line')
+            if line.qty_invoiced > 0:
+                continue
+            #total = line.order_id.amount_untaxed
+            total = 0.0
+            _logger.info(self.order_id.amount_untaxed)
+            for l in line.order_id.order_line:
+                #if l.direct_payment_purchase_order_line_id:
+                #    continue
+                if l.id == line.id:
+                    continue
+                _logger.info(l.id)
+                _logger.info(line.id)
+                _logger.info(l.price_subtotal)
+            """
+                total+=l.price_subtotal
+            _logger.info(total)
+            _logger.info(total-line.price_subtotal)
+            _logger.info(line.price_subtotal)
+            total -= line.price_subtotal
+            line.price_unit = line.order_id.target_amount - total
+            line.price_unit = line.price_subtotal
+            """
+            _logger.info(line.order_id.target_amount)
+            _logger.info(line.order_id.amount_untaxed)
+            line.price_unit = line.order_id.target_amount - (line.order_id.amount_untaxed -line.price_subtotal)
 
 
     @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'state', 'direct_payment_purchase_order_line_id')
