@@ -185,7 +185,11 @@ class ContactUserLink(models.Model):
     @api.depends('user_id', 'partner_id')
     def _compute_name(self):
         for rec in self:
-            rec.name = rec.user_id.name_get()[0][1] + ' / ' + rec.partner_id.name_get()[0][1]
+            p_name = ""
+            if rec.partner_id.name_get() :
+                p_name = rec.partner_id.name_get()[0][1]
+            rec.name = rec.user_id.name_get()[0][1] + ' / ' + p_name
+
 
     name = fields.Char('Nom du lien', compute='_compute_name')
     user_id = fields.Many2one('res.users', string='Tasmanien', required=True, default=lambda self: self.env.user)

@@ -57,13 +57,16 @@ class eventRegistration(models.Model):
         if not self.event_id.invitation_mail_template :
                 raise ValidationError(_("Un administrateur du module Evènement doit définir le template du mail sur la fiche évènement."))
 
-        return self.env['ir.ui.view']._render_template(self.event_id.invitation_mail_template.xml_id, {
+        mail_body = self.env['ir.ui.view']._render_template(self.event_id.invitation_mail_template.xml_id, {
                 'event': self.event_id,
                 'registration' : self,
                 'formality' : form,
                 'closing' : self.registration_user_id.first_name + ' ' + self.registration_user_id.name
             })
 
+        _logger.info(mail_body)
+
+        return mail_body
 
 
     def create_office365_mail_draft(self):

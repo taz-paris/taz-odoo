@@ -48,7 +48,7 @@
                         </field>
 			<field name="email" position="after">
 				<field name="mail_auto" />
-				<field name="contact_user_link_id" options="{'no_quick_create' : True, 'create_name_field' : 'user_id'}" context="{'default_partner_id' : partner_id}"/>
+				<field name="contact_user_link_id" options="{'no_quick_create' : True}" context="{'default_partner_id' : partner_id}"/>
 				<field name="registration_user_id" invisible="1" />
 				<field name="last_office365_mail_draft" invisible="1" />
 				<field name="comment" />

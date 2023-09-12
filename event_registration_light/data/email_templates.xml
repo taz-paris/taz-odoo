@@ -2,7 +2,7 @@
 	<data noupdate="1">
 		<template id="invitation_email_template_soiree_annuelle_Tasmane_2023">
 		    <t t-call="web.html_container">
-			    <t t-if="registration.contact_user_link_id.formality in ['vous_nom','vous_prenom']">
+			    <t t-if="registration.contact_user_link_id.formality in ['vous_nom','vous_prenom', False]">
 Bonjour <t t-out="formality"/>,<br/>
 <br/>
 Tasmane organise le jeudi 19 octobre à 19h sa soirée de conférence annuelle, fort du succès rencontré lors de la première édition. La thématique de la conférence sera <b>«  Diriger en contexte de crise : stratégies de résilience »</b>, et celle-ci sera suivi d’un cocktail dinatoire. Les intervenants doivent encore être confirmés, mais le sujet pourrait vous intéresser.<br/>
