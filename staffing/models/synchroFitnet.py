@@ -325,6 +325,18 @@ class fitnetProject(models.Model):
         #        sol._compute_invoice_status()
         #        _logger.info(sol.invoice_status)
 
+ 
+        #for line in self.env['account.move.line'].search([('fitnet_id', '!=', False), ('move_type', 'in', ['in_invoice', 'in_refund']), ('product_id', '=', 10), ('parent_payment_state', '=', 'partial')]):
+        #    _logger.info(line)
+        #    if line.tax_ids[0].id != 67 :
+        #        if line.move_id.state == 'posted' :
+        #            line.move_id.button_draft()
+        #        line.tax_ids = [(6, 0, [67])]
+        #        line.move_id.action_post()
+        #        _logger.info('===> OK no-tax')
+
+        
+
 
         #self.sync_employees(client)
         #self.sync_employees_contracts(client)
@@ -1145,6 +1157,7 @@ class fitnetProject(models.Model):
             # INCONVENIENT : on va créer des doublons lors de la synchro juste après avoir créé le premier doublon ==> TODO : exécuter la fonction de néttoyage sur Odoo des éléments supprimés dans Fitnet
             if purchaseId_unicity_ctrl[invoice['purchaseId']]['count'] > 1:
                 invoice['odoo_purchaseId'] = 'supplier_' + str(invoice['orderNumber']) + '_' + str(invoice['purchaseId']) 
+                invoice["invoiceNumber"] += " [" + str(invoice['orderNumber']) +"]"
             invoice.pop('purchaseId')
             if invoice['amountBeforeTax'] < 0:
                 #_logger.info('avoir fitnet invoiceId=' + str(invoice['odoo_purchaseId']))
@@ -1155,6 +1168,9 @@ class fitnetProject(models.Model):
             invoice['ibanId'] = None
             invoice['invoice_date'] = invoice['date']
             invoice['odoo_state'] = 'posted'
+            if invoice['purchaseStatus'] == -1:
+                #'purchaseStatus' : {'odoo_field' : 'state', 'selection_mapping' : {'0' : 'draft', '1' : 'draft', '2':'posted', '3' : 'posted', '-1' : 'cancel'}},
+                invoice['odoo_state'] = 'cancel'
 
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
             #TODO A SUPPRIMER
@@ -1163,7 +1179,7 @@ class fitnetProject(models.Model):
             #_logger.info("******** Projet %s" % odoo_project.number)
 
 
-            if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
+            if invoice['purchaseStatus'] not in [0, 1, -1]:#Si la facture n'est pas au statut annulé ou à venir
                 invoices_list.append(invoice)
 
 
@@ -1193,7 +1209,7 @@ class fitnetProject(models.Model):
                 else :
                     line['contractId_json'] = False
 
-                if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
+                if invoice['purchaseStatus'] not in [0, 1, -1]:#Si la facture n'est pas au statut annulé ou à venir
                     invoices_lines_list.append(line)
 
 
@@ -1209,7 +1225,7 @@ class fitnetProject(models.Model):
                             _logger.info("amountBeforeTax est null %s" % str(invoice['invoiceNumber']))
  
 
-            if invoice['actualPayementDate'] != "" and invoice['actualPayementDate'] != None :
+            if invoice['actualPayementDate'] != "" and invoice['actualPayementDate'] != None and invoice['purchaseStatus'] != -1:
                 payment = {
                         'supplier_paymentId' : 'payment_purchase_' + str(invoice['odoo_purchaseId']),
                         'purchaseId' : invoice['odoo_purchaseId'],
@@ -1225,7 +1241,7 @@ class fitnetProject(models.Model):
                     payment['payment_type'] = 'inbound'
                 payment['journal_id'] = 99
                 #payment['partner_bank_id'] = invoice['ibanId']
-                if invoice['purchaseStatus'] not in [0, 1]:#Si la facture n'est pas au statut annulé ou à venir
+                if invoice['purchaseStatus'] not in [0, 1, -1]:#Si la facture n'est pas au statut annulé ou à venir
                     payment_list.append(payment)
 
         ############################### GENERATION DES BONS DE COMMANDE FOURNISSEUR
@@ -1260,10 +1276,13 @@ class fitnetProject(models.Model):
             if contract_invoice_list[0]['date'] : 
                 date_planned = contract_invoice_list[0]['date'] +  ' 00:00:00'
 
+            statut = 'purchase'
+            if invoice['purchaseStatus'] == -1:
+                statut = 'cancel'
             sale_order_list.append({
                     'partner_id' : contract_invoice_list[0]['odoo_supplierId'],
                     'order_id' : key_contract_supplier,
-                    'odoo_state' : 'purchase',
+                    'odoo_state' : statut,
                     'date_planned' : date_planned,
                     })
 
@@ -1296,7 +1315,7 @@ class fitnetProject(models.Model):
                             reselling_subtotal =  l['initial_unitPrice'] / sum_contract_invoice_lines * odoo_project.amount
                     sum_reselling_subtotal += reselling_subtotal
 
-                    if inv['purchaseStatus'] in [0, 1]:#Si la facture est au statut annulé ou à venir
+                    if inv['purchaseStatus'] in [0, 1, -1]:#Si la facture est au statut annulé ou à venir
                         qty_delivered = 0
                     else :
                         qty_delivered = l['quantity']
@@ -1403,7 +1422,6 @@ class fitnetProject(models.Model):
                 (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
                 _logger.info("reconcile " + payment_line_to_reconcile.name + "/" + invoice_line_to_reconcile.name)
                 self.env.cr.commit()
-
 
 
 
