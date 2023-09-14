@@ -123,6 +123,7 @@ class projectAccountProject(models.Model):
     @api.depends(
 	'state',
 	'company_part_amount_initial',
+	'company_part_amount_current',
 	'company_part_cost_initial',
 	'project_outsourcing_link_ids',
 	'other_part_amount_initial',
@@ -135,6 +136,7 @@ class projectAccountProject(models.Model):
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
         for rec in self:
+            _logger.info(str(rec.number) + "=>" +rec.name)
             old_default_book_initial = rec.default_book_initial
             old_default_book_current = rec.default_book_current
 
@@ -339,7 +341,8 @@ class projectAccountProject(models.Model):
             #_logger.info(len(line_ids))
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
-                total += line.price_subtotal_signed * line.analytic_distribution[str(rec.analytic_account_id.id)]/100.0
+                if str(rec.analytic_account_id.id) in line.analytic_distribution.keys():
+                    total += line.price_subtotal_signed * line.analytic_distribution[str(rec.analytic_account_id.id)]/100.0
             #_logger.info(total)
             return total
 

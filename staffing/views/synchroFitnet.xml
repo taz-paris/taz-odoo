@@ -185,7 +185,7 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
-                <field name="user_id" position="after">
+                <field name="analytic_account_id" position="after">
                         <field name="fitnet_id" readonly="1"/>
                 </field>
 		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">

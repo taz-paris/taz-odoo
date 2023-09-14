@@ -20,6 +20,15 @@ class event(models.Model):
             else:
                 rec.registration_form_url = False
 
+    @api.depends('seats_max', 'registration_ids.state', 'registration_ids.active')
+    def _compute_seats(self):
+        """ Determine reserved, available, reserved but unconfirmed and used seats. """
+        # initialize fields to 0
+        super()._compute_seats()
+        for event in self:
+            event.seats_expected = event.seats_reserved + event.seats_used
+
+
     registration_form_url = fields.Char("URL du formulaire d'inscription", compute=_get_registration_form_url)
     description_web_form = fields.Html("Bloc HTML affiché sur le formulaire d'inscription")
     invitation_mail_template = fields.Many2one("ir.ui.view", "Template du mail d'invitation", domain=[('type', '=', 'qweb')])

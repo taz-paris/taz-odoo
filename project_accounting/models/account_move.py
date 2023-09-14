@@ -80,11 +80,13 @@ class projectAccountingAccountMove(models.Model):
             #lines = move._compute_payments_widget_to_reconcile_info()
             _logger.info(payments_widget_vals['content'])
             for line in payments_widget_vals['content']:
-                payment = self.env['account.payment'].search([('id', '=', line['account_payment_id'])])[0]
-                #On supprime les paiements d'avance, s'ils ne concernent pas le sale.order d'au moins une des lignes de la factures
-                if payment.advance_sale_order_id and payment.advance_sale_order_id.id not in move.line_ids.sale_line_ids.order_id.ids :
-                    continue
-                new_content.append(line)
+                payments = self.env['account.payment'].search([('id', '=', line['account_payment_id'])])
+                if len(payments):
+                    payment = payments[0]
+                    #On supprime les paiements d'avance, s'ils ne concernent pas le sale.order d'au moins une des lignes de la factures
+                    if payment.advance_sale_order_id and payment.advance_sale_order_id.id not in move.line_ids.sale_line_ids.order_id.ids :
+                        continue
+                    new_content.append(line)
 
             payments_widget_vals['content'] = new_content
             _logger.info(payments_widget_vals)
