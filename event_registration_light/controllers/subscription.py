@@ -12,14 +12,15 @@ import babel.dates
 
 class EventRegistrationLightController(http.Controller):
 
-    @http.route(['/eventlight/<model("event.event"):event>/registration/new'], type='http', auth="public", methods=['GET'])
-    def registration_form(self, event):
+    @http.route(['/eventlight/<int:event_id>/registration/new'], type='http', auth="public", methods=['GET'])
+    def registration_form(self, event_id):
         #TODO - contrôle uuid de l'invitation
         #TODO : envoyer un lien d'annulation par mail
         #availability_check = True
         #if event.seats_limited:
             # count registration with state = open
             # if seats_limit overpassaed => return "no seat availlable" page
+        event = request.env['event.event'].sudo().browse([event_id])
         if not event.event_registrations_open :
             return "Les inscription ne sont pas ouvertes pour cet évènement."
         return request.env['ir.ui.view']._render_template("event_registration_light.registration_form", {
@@ -27,8 +28,9 @@ class EventRegistrationLightController(http.Controller):
             'formated_dates' : self.get_formated_date(event),
         })
 
-    @http.route(['/eventlight/<model("event.event"):event>/registration/submit'], type='http', auth="public", methods=['POST'])
-    def registration_submit(self, event, **post):
+    @http.route(['/eventlight/<int:event_id>/registration/submit'], type='http', auth="public", methods=['POST'])
+    def registration_submit(self, event_id, **post):
+        event = request.env['event.event'].sudo().browse([event_id])
         if not event.event_registrations_open : #TODO : si on veut que ça restourne False si le nombre de place max est réservé... il va falloir créer un ticket en plus de la resgitration
             return "Les inscription ne sont pas ouvertes pour cet évènement."
 
