@@ -267,9 +267,14 @@ class projectAccountProject(models.Model):
                 rec.book_validation_employee_id = False
                 rec.book_validation_datetime = False
 
-            if rec.is_book_manually_computed == False :
+
+            if rec.is_book_manually_computed == True :
+                for book_employee_distribution in rec.book_employee_distribution_ids:
+                    book_employee_distribution.unlink()
+
+            else :
                 rec.book_comment = ""
-                #TODO : supprimer tous les project.book_employee_distribution ?
+
                 if (old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current):
                     #on modifie le montant de l'année en cours
                     t = datetime.today()
@@ -294,6 +299,7 @@ class projectAccountProject(models.Model):
                         book_period_current_year = rec.env['project.book_period'].create(dic)
                         _logger.info(book_period_current_year)
                         _logger.info("Créé")
+
                     if book_period_current_year.period_project_book != default_current_year_book_amount:
                         book_period_current_year.period_project_book = default_current_year_book_amount
                         rec.book_validation_employee_id = False

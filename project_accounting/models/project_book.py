@@ -85,7 +85,8 @@ class projectBookEmployeeDistribution(models.Model):
         new_list = super().create(vals)
         for new in new_list:
             for book_period in new.project_id.book_period_ids:
-                self.env['project.book_employee_distribution_period'].sudo().create({'book_employee_distribution_id' : new.id, 'project_book_period_id' : book_period.id})
+                self.env['project.book_employee_distribution_period'].create({'employee_id' : new.employee_id.id, 'book_employee_distribution_id' : new.id, 'project_book_period_id' : book_period.id})
+        return new_list
 
     @api.constrains('book_factor')
     def _check_book_factor(self):
@@ -112,6 +113,12 @@ class projectBookEmployeeDistributionPeriod(models.Model):
     _sql_constraints = [
         ('proj_employ_period', 'UNIQUE (project_id, book_employee_distribution_id, project_book_period_id)',  "Impossible d'avoir deux book différents pour un même salarié/période.")
     ]
+
+    def create(self,vals):
+        _logger.info("Project book employee distribution PERIOD -- create")
+        _logger.info(vals)
+        new = super().create(vals)
+        return new
 
     @api.constrains('book_employee_distribution_id', 'book_period_id')
     def _check(self):
