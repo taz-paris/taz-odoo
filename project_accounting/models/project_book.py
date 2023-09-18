@@ -17,9 +17,10 @@ class projectBookPeriod(models.Model):
     def create(self,vals):
         #_logger.info("projectBookPeriod -- create")
         #_logger.info(vals)
-        new = super().create(vals)
-        for employee_distribution in new.project_id.book_employee_distribution_ids:
-            self.env['project.book_employee_distribution_period'].sudo().create({'book_employee_distribution_id' : employee_distribution.id, 'project_book_period_id' : new.id})
+        new_list = super().create(vals)
+        for new in new_list:
+            for employee_distribution in new.project_id.book_employee_distribution_ids:
+                self.env['project.book_employee_distribution_period'].sudo().create({'employee_id' : employee_distribution.employee_id.id, 'book_employee_distribution_id' : employee_distribution.id, 'project_book_period_id' : new.id})
         return new
 
     @api.model

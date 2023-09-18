@@ -261,10 +261,22 @@
 								<field name="book_validation_datetime" readonly="1" force_save="1"/>
 							</group>
 							<group>
-								<field name="book_period_ids" context="{'default_project_id':active_id}" attrs="{'readonly': [('is_book_manually_computed', '=', False)]}"/>
+								<field name="book_period_ids" context="{'default_project_id':active_id}" attrs="{'readonly': [('is_book_manually_computed', '=', False)]}">
+									<tree editable="top">
+										<field name="project_id" invisible="1"/>
+										<field name="reference_period"/>
+										<field name="period_project_book" sum="Total"/>
+									</tree>
+								</field>
 							</group>
 							<group>
-								<field name="book_employee_distribution_ids" context="{'default_project_id':active_id}" attrs="{'invisible': [('is_book_manually_computed', '=', True)]}"/>
+								<field name="book_employee_distribution_ids" context="{'default_project_id':active_id}" attrs="{'invisible': [('is_book_manually_computed', '=', True)]}">
+									<tree editable="top">
+										<field name="project_id" invisible="1"/>
+										<field name="employee_id"/>
+										<field name="book_factor" sum="Total"/>
+									</tree>   
+								</field>
 							</group>
 						</group>
 						<field name="book_employee_distribution_period_ids"  context="{'default_project_id':active_id}">
@@ -276,7 +288,7 @@
 									<!--
 								<field name="reference_period" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 									-->
-								<field name="project_book_period_id" domain="[('project_id', '=', context.get('default_project_id'))]"/>
+								<field name="project_book_period_id" domain="[('project_id', '=', context.get('default_project_id'))]" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="period_project_book" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="book_factor" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="period_project_book_employee" sum="Total" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
@@ -419,6 +431,16 @@
 	      </field>
 	   </record>
 		
+    <record id="action_recompute_project" model="ir.actions.server">
+          <field name="name">recompute_project</field>
+          <field name="model_id" ref="model_project_project"/>
+          <field name="binding_model_id" ref="model_project_project"/>
+          <field name="state">code</field>
+          <field name="code">for rec in records:
+                  rec.compute()</field>
+          <field name="groups_id" eval="[(4, ref('base.group_system'))]" />
+  </record>
+
 	    <!-- ACTION APPLICAQUE AUX UTILISATUER QUI ONT LE droit de gestion des étapes du projet (ie admin) -->
 	    <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
 		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>

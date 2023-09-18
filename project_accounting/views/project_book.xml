@@ -5,9 +5,7 @@
             <field name="model">project.book_period</field>
             <field name="arch" type="xml">
                 <tree editable="top">
-			<!--
-                        <field name="project_id" optional="hide"/>
-			-->
+                        <field name="project_id"/>
                         <field name="reference_period"/>
                         <field name="period_project_book" sum="Total"/>
                 </tree>                      
@@ -19,9 +17,7 @@
             <field name="model">project.book_employee_distribution</field>
             <field name="arch" type="xml">
                 <tree editable="top">
-			<!--
-                        <field name="project_id" optional="hide"/>
-			-->
+                        <field name="project_id"/>
                         <field name="employee_id"/>
                         <field name="book_factor" sum="Total"/>
                 </tree>                      
@@ -54,6 +50,19 @@
                 <field name="view_mode">tree</field>
         </record>
 
+        <record id="project_book_period_action" model="ir.actions.act_window">
+		<field name="name">Book par projet/année</field>
+             	<field name="res_model">project.book_period</field>
+                <field name="view_mode">tree</field>
+        </record>
+
+        <record id="project_book_employee_distribution_action" model="ir.actions.act_window">
+		<field name="name">Facteur de book par projet/consultant</field>
+             	<field name="res_model">project.book_employee_distribution</field>
+                <field name="view_mode">tree</field>
+        </record>
+
+
         <record id="view_project_book_employee_distribution_period_search" model="ir.ui.view">
             <field name="name">Distribution du book projet/salarié/année</field>
             <field name="model">project.book_employee_distribution_period</field>
@@ -81,6 +90,9 @@
             </field>
         </record>
 
-	<menuitem name="Distribution du book" id="project_book_distribution_menu" parent="project.menu_main_pm" action="project_book_employee_distribution_period_action"/>
+	<menuitem name="Gestion du book" id="project_book_menu" parent="project.menu_main_pm" />
+	<menuitem name="Distribution du book" id="project_book_distribution_menu" parent="project_book_menu" action="project_book_employee_distribution_period_action"/>
+	<menuitem name="Book par période/projet" id="project_book_period_menu" parent="project_book_menu" action="project_book_period_action"/>
+	<menuitem name="Facteur de book par consultant/projet" id="project_book_employee_distribution" parent="project_book_menu" action="project_book_employee_distribution_action"/>
    </data>
 </odoo>

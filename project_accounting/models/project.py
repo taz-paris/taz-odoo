@@ -214,12 +214,11 @@ class projectAccountProject(models.Model):
             
             ######## INVOICE DATA CONTROLE
             #TODO : il ne faut regarder que les commandes pour lesquelles on a effectivement reçu un numéro de commande... pas les commandes en brouillon
-            is_constistant_order_amount = False
-            if rec.order_amount_current == rec.order_sum_sale_order_lines :
-                is_constistant_order_amount = True
+            is_constistant_order_amount = True
+            if rec.order_amount_current != rec.order_sum_sale_order_lines :
+                is_constistant_order_amount = False
             rec.is_constistant_order_amount = is_constistant_order_amount
 
-            #is_validated_order = fields.Boolean("BCC non validé", store=True, compute=compute, help="Les BC clients sont à l'état 'Bon de commande' (ou 'Annulé).")
             is_validated_order = True
             line_ids = rec.get_sale_order_line_ids()
             for line_id in line_ids:
@@ -275,7 +274,9 @@ class projectAccountProject(models.Model):
             else :
                 rec.book_comment = ""
 
-                if (old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current):
+                #if (old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current):
+                #TODO supprimer le if true une fois tous les projets recalculés
+                if True:
                     #on modifie le montant de l'année en cours
                     t = datetime.today()
                     current_year = t.year
@@ -290,20 +291,19 @@ class projectAccountProject(models.Model):
                             book_period.unlink()
                     default_current_year_book_amount = rec.default_book_initial - pasted_years_book
                     if book_period_current_year == False :
-                        _logger.info("Création du book_period_current_year")
                         dic = {
                                 'project_id' : rec._origin.id,
                                 'reference_period' : str(current_year),
                             }
-                        _logger.info(dic)
                         book_period_current_year = rec.env['project.book_period'].create(dic)
-                        _logger.info(book_period_current_year)
-                        _logger.info("Créé")
 
                     if book_period_current_year.period_project_book != default_current_year_book_amount:
                         book_period_current_year.period_project_book = default_current_year_book_amount
                         rec.book_validation_employee_id = False
                         rec.book_validation_datetime = False
+
+                    if book_period_current_year.period_project_book == 0.0 :
+                        book_period_current_year.unlink()
 
 
     def compute_sale_order_total(self, with_direct_payment=True): 
