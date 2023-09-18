@@ -123,11 +123,13 @@ class projectAccountProject(models.Model):
     @api.depends(
 	'state',
 	'company_part_amount_initial',
-	'company_part_amount_current',
 	'company_part_cost_initial',
+        'outsource_part_amount_initial',
+        'outsource_part_cost_initial',
 	'project_outsourcing_link_ids',
 	'other_part_amount_initial',
 	'other_part_cost_initial',
+	'company_part_amount_current',
 	'other_part_amount_current',
 	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
 	'accounting_closing_ids',
@@ -136,7 +138,7 @@ class projectAccountProject(models.Model):
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
         for rec in self:
-            _logger.info(str(rec.number) + "=>" +rec.name)
+            _logger.info(str(rec.number) + "=>" +str(rec.name))
             old_default_book_initial = rec.default_book_initial
             old_default_book_current = rec.default_book_current
 
@@ -264,6 +266,38 @@ class projectAccountProject(models.Model):
             if rec.default_book_initial != rec.default_book_current and ((old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current)):
                 rec.book_validation_employee_id = False
                 rec.book_validation_datetime = False
+
+            if rec.is_book_manually_computed == False :
+                rec.book_comment = ""
+                #TODO : supprimer tous les project.book_employee_distribution ?
+                if (old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current):
+                    #on modifie le montant de l'année en cours
+                    t = datetime.today()
+                    current_year = t.year
+                    book_period_current_year = False
+                    pasted_years_book = 0.0
+                    for book_period in rec.book_period_ids:
+                        if int(book_period.reference_period) == current_year :
+                            book_period_current_year = book_period
+                        elif int(book_period.reference_period) < current_year :
+                            pasted_years_book += book_period.period_project_book
+                        elif int(book_period.reference_period) > current_year :
+                            book_period.unlink()
+                    default_current_year_book_amount = rec.default_book_initial - pasted_years_book
+                    if book_period_current_year == False :
+                        _logger.info("Création du book_period_current_year")
+                        dic = {
+                                'project_id' : rec._origin.id,
+                                'reference_period' : str(current_year),
+                            }
+                        _logger.info(dic)
+                        book_period_current_year = rec.env['project.book_period'].create(dic)
+                        _logger.info(book_period_current_year)
+                        _logger.info("Créé")
+                    if book_period_current_year.period_project_book != default_current_year_book_amount:
+                        book_period_current_year.period_project_book = default_current_year_book_amount
+                        rec.book_validation_employee_id = False
+                        rec.book_validation_datetime = False
 
 
     def compute_sale_order_total(self, with_direct_payment=True): 
@@ -580,6 +614,8 @@ class projectAccountProject(models.Model):
     ######## BOOK
     default_book_initial = fields.Monetary('Valeur du book par défaut initial', store=True, compute=compute, help="Somme du dispositif Tasmane prévu initialement + markup S/T prévu initialement + marge ventes autres prévue initialement")
     default_book_current = fields.Monetary('Valeur du book par défaut actuel', store=True, compute=compute, help="Valeur du book par défaut actualisée suivant les commandes/factures/avoirs effectivement reçus")
+    is_book_manually_computed = fields.Boolean('Book géré manuellement')
+    book_comment = fields.Text('Commentaire sur le book')
     book_period_ids = fields.One2many('project.book_period', 'project_id', string="Book par année")
     book_employee_distribution_ids = fields.One2many('project.book_employee_distribution', 'project_id', string="Book par salarié")
     book_employee_distribution_period_ids = fields.One2many('project.book_employee_distribution_period', 'project_id', 'Book par salarié et par an')

@@ -32,12 +32,17 @@
             <field name="name">book employee distribution period</field>
             <field name="model">project.book_employee_distribution_period</field>
             <field name="arch" type="xml">
-                <tree editable="top">
+                <tree>
                         <field name="project_id"/>
+                        <field name="rel_is_book_manually_computed"/>
+                        <field name="rel_book_comment"/>
                         <field name="employee_id"/>
+			<field name="project_book_period_id"/>
+			<!--
                         <field name="reference_period"/>
-                        <field name="period_project_book"/>
-                        <field name="book_factor"/>
+			-->
+                        <field name="period_project_book" optional="show"/>
+                        <field name="book_factor" optional="show"/>
 			<field name="period_project_book_employee" sum="Total"/>
                 </tree>                      
             </field>                       
@@ -61,6 +66,8 @@
 
                     <filter string="Les projets dont je suis DM" name="own_projects" domain="[('project_id.project_director_employee_id.user_id.id', '=', uid)]"/>
                     <filter string="Mon book" name="my_book" domain="[('employee_id.user_id', '=', uid)]"/>
+                    <filter string="Book calculé manuellement" name="is_book_manually_computed" domain="[('rel_is_book_manually_computed', '=', True)]"/>
+                    <filter string="Book calculé automatiquement" name="is_book_manually_computed_false" domain="[('rel_is_book_manually_computed', '=', False)]"/>
 
                     <filter string="Cette année" name="this_year" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
                     <filter string="L'an dernier" name="previous_year" domain="[('reference_period', '=', (context_today() + relativedelta(years=-1)).strftime('%Y'))]"/>

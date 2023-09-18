@@ -40,11 +40,13 @@
     ],
 
 
-    #"assets": {
-    #    "web.assets_backend": [
-    #        "web_widget_bokeh_chart/static/src/js/web_widget_bokeh_chart.esm.js",
-    #    ],
-    #},
+    "assets": {
+        "web.assets_backend": [
+            #"web_widget_bokeh_chart/static/src/js/web_widget_bokeh_chart.esm.js",
+            #"project_accounting/static/src/analytic_distribution_project_access.xml",
+            #"project_accounting/static/src/analytic_distribution_project_access.js",
+        ],
+    },
 
     #'assets': {
     #    'web.assets_backend': [

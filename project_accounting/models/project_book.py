@@ -9,20 +9,24 @@ class projectBookPeriod(models.Model):
     _name = "project.book_period"
     _description = "Project book period"
     _order = "reference_period desc"
+    _rec_name = "display_name"
     _sql_constraints = [
         ('project_year_uniq', 'UNIQUE (project_id, reference_period)',  "Impossible d'avoir deux book annuels différents pour un même projet.")
     ]
 
     def create(self,vals):
+        #_logger.info("projectBookPeriod -- create")
+        #_logger.info(vals)
         new = super().create(vals)
         for employee_distribution in new.project_id.book_employee_distribution_ids:
             self.env['project.book_employee_distribution_period'].sudo().create({'book_employee_distribution_id' : employee_distribution.id, 'project_book_period_id' : new.id})
+        return new
 
     @api.model
     def year_selection(self):
         year = 2019 # replace 2000 with your a start year
         year_list = []
-        while year != datetime.date.today().year + 2: # replace 2030 with your end year
+        while year != datetime.date.today().year +1 : 
             year_list.append((str(year), str(year)))
             year += 1
         return year_list
@@ -48,8 +52,11 @@ class projectBookPeriod(models.Model):
             res -= book_period.period_project_book
         return res
         
+    def compute_name(self):
+        for rec in self:
+            rec.display_name = rec.reference_period + " [" + str(rec.project_id.number) + "]"
 
-    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
+    project_id = fields.Many2one('project.project', string="Projet", required=True, ondelete='cascade', default=_get_default_project_id)
     reference_period = fields.Selection(
         year_selection,
         string="Année de référence",
@@ -59,7 +66,8 @@ class projectBookPeriod(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    period_project_book = fields.Monetary('Book', default=_get_default_period_project_book)
+    period_project_book = fields.Monetary('Book')#, default=_get_default_period_project_book)
+    display_name = fields.Char('Name', compute=compute_name)
 
 
 class projectBookEmployeeDistribution(models.Model):
@@ -114,20 +122,21 @@ class projectBookEmployeeDistributionPeriod(models.Model):
                 raise ValidationError(_('Le book_employee_distribution_id et project_book_period_id ne sont pas rattachés au même projet.'))
 
 
-    @api.depends('book_employee_distribution_id', 'project_book_period_id', 'book_factor', 'period_project_book')
+    @api.depends('book_employee_distribution_id', 'project_book_period_id', 'book_factor', 'period_project_book', 'rel_is_book_manually_computed')
     def compute(self):
         for rec in self :
-            rec.period_project_book_employee = rec.book_factor * rec.period_project_book
+            if rec.rel_is_book_manually_computed == False :
+                rec.period_project_book_employee = rec.book_factor * rec.period_project_book
 
     # Stored data
-    book_employee_distribution_id = fields.Many2one('project.book_employee_distribution', required=True, ondelete='cascade')
+    book_employee_distribution_id = fields.Many2one('project.book_employee_distribution', ondelete='cascade')
     project_book_period_id = fields.Many2one('project.book_period', required=True, ondelete='cascade')
 
     # Computed data
     period_project_book_employee = fields.Monetary("Book pour l'année/projet/employé", compute=compute, store=True, group_operator='sum')
 
     # Related book_employee_distribution_id
-    employee_id = fields.Many2one('hr.employee', related='book_employee_distribution_id.employee_id', string="Employé", store=True)
+    employee_id = fields.Many2one('hr.employee', related='book_employee_distribution_id.employee_id', required=True, readonly=False, string="Employé", store=True)
     book_factor = fields.Float(related="book_employee_distribution_id.book_factor", string="Coef. pour le projet/année/employée", store=True, group_operator=False)
 
     # Related project_book_period_id
@@ -135,4 +144,6 @@ class projectBookEmployeeDistributionPeriod(models.Model):
     reference_period = fields.Selection(related='project_book_period_id.reference_period', store=True)
     company_id = fields.Many2one('res.company', related="project_book_period_id.company_id")
     currency_id = fields.Many2one('res.currency', related="project_book_period_id.currency_id")
-    period_project_book = fields.Monetary(related="project_book_period_id.period_project_book", string="Book du projet pour l'année", store=True, group_operator=False)
+    period_project_book = fields.Monetary(related="project_book_period_id.period_project_book", string="Book du projet pour l'année", store=True, readonly=False, group_operator=False)
+    rel_book_comment = fields.Text(related='project_id.book_comment')
+    rel_is_book_manually_computed = fields.Boolean(related="project_id.is_book_manually_computed")

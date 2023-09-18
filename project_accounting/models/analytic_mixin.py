@@ -69,5 +69,7 @@ class AnalyticMixin(models.AbstractModel):
             else :
                 rec.rel_project_ids = False
    
+    def open_project_form(self):
+        _logger.info("mmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
 
     rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
