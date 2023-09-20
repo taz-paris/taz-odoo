@@ -347,8 +347,8 @@ class fitnetProject(models.Model):
         self.sync_suppliers(client)
         self.sync_customers(client)
         self.sync_contracts(client) #projets
-        self.sync_supplier_invoices(client)
         self.sync_customer_invoices(client)
+        self.sync_supplier_invoices(client)
 
 
 
@@ -826,7 +826,7 @@ class fitnetProject(models.Model):
             odoo_payment = self.env['account.payment'].search([('fitnet_id', '=', fitnet_payment['paymentId'])])[0]
             if odoo_payment.is_reconciled:
                 continue
-            _logger.info('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fitnte paymment')
+            _logger.info('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fitnet paymment')
             _logger.info(fitnet_payment)
             payment_line_to_reconcile = False
             for line in odoo_payment.move_id.line_ids:
@@ -844,12 +844,12 @@ class fitnetProject(models.Model):
                     invoice_line_to_reconcile = line
             
             if (invoice_line_to_reconcile and payment_line_to_reconcile) :
-                if invoice_line_to_reconcile.move_id.state == 'draft' :
+                if invoice_line_to_reconcile.move_id.state != 'posted' :
                     invoice_line_to_reconcile.move_id.action_post()
-                if payment_line_to_reconcile.move_id.state == 'draft' :
+                if payment_line_to_reconcile.move_id.state != 'posted' :
                     payment_line_to_reconcile.move_id.action_post()
-                (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
                 _logger.info("reconcile " + payment_line_to_reconcile.name + "/" + invoice_line_to_reconcile.name)
+                (payment_line_to_reconcile + invoice_line_to_reconcile).reconcile()
                 self.env.cr.commit()
 
         ############################### GENERATION DES BONS DE COMMANDE CLIENT
@@ -1682,6 +1682,17 @@ class fitnetProject(models.Model):
         _logger.info("Nombre d'objets %s qui portent un ID Fitnet qui n'est plus retourné par l'API Fitnet : %s" % (odoo_model_name, str(len(odoo_objects))))
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
+
+        for odoo_objet in odoo_objects:
+            _logger.info(odoo_objet.read())
+            """
+            if odoo_model_name == 'purchase.order.line':
+                _logger.info('      > Annulation du purchase.order pour pouvoir supprimer la purchase.order.line')
+                odoo_objet.order_id.button_cancel
+            if odoo_model_name == 'sale.order.line':
+                _logger.info('      > Annulation du sale.order pour pouvoir supprimer la sale.order.line')
+                odoo_objet.order_id.button_cancel
+            """
             _logger.info("      > Instance du modèle %s sur le point d'être supprimée OdooID %s / FitnetID %s" % (odoo_model_name, odoo_objet.id, odoo_objet.fitnet_id))
             odoo_objet.unlink()
             self.env.cr.commit()

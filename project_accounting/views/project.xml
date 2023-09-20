@@ -228,8 +228,10 @@
 								<button type="object" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
 							</group>
 						</group>
+						<!--
 						<group string="Paiement du client à Tasmane">
 						</group>
+						-->
 					</page>
 					<page name="purchase" string="Achats">
 							<field name="project_outsourcing_link_ids" context="{'default_project_id' : active_id}">
@@ -253,6 +255,7 @@
 							<group>
 								<field name="default_book_initial" />
 								<field name="default_book_current" />
+								<field name="default_book_end" />
 								<field name="is_book_manually_computed" />
 								<field name="book_comment" attrs="{'invisible': [('is_book_manually_computed', '=', False)]}"/>
 							</group>

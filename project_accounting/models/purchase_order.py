@@ -19,6 +19,17 @@ class projectAccountingPurchaseOrder(models.Model):
     #   - ajouter un statut s'il reste des factures à valider sur Chorus alors que Tasmane a payé sa part (et ajuster la liste de suivi des PO)
 
 
+    def button_cancel(self):
+        """
+        for order in self:
+            for inv in order.invoice_ids:
+                if inv and inv.state not in ('cancel', 'draft'):
+                    raise UserError(_("Unable to cancel this purchase order. You must first cancel the related vendor bills."))
+        """
+        self.write({'state': 'cancel', 'mail_reminder_confirmed': False})
+
+
+
     @api.model_create_multi
     def create(self, vals_list):
         _logger.info('---- create purchase.order')

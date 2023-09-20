@@ -141,6 +141,7 @@ class projectAccountProject(models.Model):
             _logger.info(str(rec.number) + "=>" +str(rec.name))
             old_default_book_initial = rec.default_book_initial
             old_default_book_current = rec.default_book_current
+            old_default_book_end = rec.default_book_end
 
             rec.company_invoice_sum_move_lines = rec.compute_account_move_total()
 
@@ -163,22 +164,25 @@ class projectAccountProject(models.Model):
             ######## COMPANY PART
 
             rec.company_part_marging_amount_initial =  rec.company_part_amount_initial - rec.company_part_cost_initial
-            rec.company_part_marging_rate_initial = 0.0
             if rec.company_part_amount_initial != 0 :
                 rec.company_part_marging_rate_initial = rec.company_part_marging_amount_initial / rec.company_part_amount_initial * 100
+            else :
+                rec.company_part_marging_rate_initial = 0.0
     
             rec.company_part_cost_current = -rec.get_production_cost()
             rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
-            rec.company_part_marging_rate_current = 0.0
             if rec.company_part_amount_current != 0 :
                 rec.company_part_marging_rate_current = rec.company_part_marging_amount_current / rec.company_part_amount_current * 100
+            else :
+                rec.company_part_marging_rate_current = 0.0
     
 
             ######## OUTSOURCE PART
             rec.outsource_part_marging_amount_initial =  rec.outsource_part_amount_initial - rec.outsource_part_cost_initial
-            rec.outsource_part_marging_rate_initial = 0.0 
             if rec.outsource_part_amount_initial != 0 :                
                 rec.outsource_part_marging_rate_initial = rec.outsource_part_marging_amount_initial / rec.outsource_part_amount_initial * 100
+            else:
+                rec.outsource_part_marging_rate_initial = 0.0 
                                                                 
 
             rec.outsource_part_amount_current = 0.0
@@ -186,31 +190,36 @@ class projectAccountProject(models.Model):
             rec.order_to_invoice_outsourcing = 0.0
             rec.order_sum_sale_order_lines = rec.compute_sale_order_total()
             rec.order_to_invoice_company = rec.compute_sale_order_total(with_direct_payment=False)
+            outsourcing_link_purchase_order_with_draft = 0.0
             for link in rec.project_outsourcing_link_ids:
                 rec.outsource_part_amount_current += link.outsource_part_amount_current
                 rec.outsource_part_cost_current += link.sum_account_move_lines
                 rec.order_to_invoice_outsourcing += link.order_direct_payment_amount
+                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_sale_order=True)
                     #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
 
             rec.company_to_invoice_left = rec.order_to_invoice_company - rec.company_invoice_sum_move_lines
 
             rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current
-            rec.outsource_part_marging_rate_current = 0.0 
             if rec.outsource_part_amount_current != 0 :
                 rec.outsource_part_marging_rate_current = rec.outsource_part_marging_amount_current / rec.outsource_part_amount_current * 100
+            else :
+                rec.outsource_part_marging_rate_current = 0.0 
 
             ######## OTHER PART
             rec.other_part_marging_amount_initial =  rec.other_part_amount_initial - rec.other_part_cost_initial
-            rec.other_part_marging_rate_initial = 0.0
             if rec.other_part_amount_initial != 0 :
                 rec.other_part_marging_rate_initial = rec.other_part_marging_amount_initial / rec.other_part_amount_initial * 100
+            else:
+                rec.other_part_marging_rate_initial = 0.0
 
             rec.other_part_cost_current = rec.get_all_cost_current() - rec.outsource_part_cost_current
 
             rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current
-            rec.other_part_marging_rate_current = 0.0
             if rec.other_part_amount_current != 0 :
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
+            else:
+                rec.other_part_marging_rate_current = 0.0
             
             ######## INVOICE DATA CONTROLE
             #TODO : il ne faut regarder que les commandes pour lesquelles on a effectivement reçu un numéro de commande... pas les commandes en brouillon
@@ -262,9 +271,10 @@ class projectAccountProject(models.Model):
             #BOOK
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
-            if rec.default_book_initial != rec.default_book_current and ((old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current)):
-                rec.book_validation_employee_id = False
-                rec.book_validation_datetime = False
+            rec.default_book_end = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True) - outsourcing_link_purchase_order_with_draft
+            #if rec.default_book_initial != rec.default_book_current and ((old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current)):
+            #    rec.book_validation_employee_id = False
+            #    rec.book_validation_datetime = False
 
 
             if rec.is_book_manually_computed == True :
@@ -274,8 +284,20 @@ class projectAccountProject(models.Model):
             else :
                 rec.book_comment = ""
 
-                #if (old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current):
-                #TODO supprimer le if true une fois tous les projets recalculés
+                """
+                generer_book_2023 = False
+                if rec.number != False and rec.number[0:2] == '23':
+                    generer_book_2023 = True
+                else :
+                    for book_period in rec.book_period_ids:
+                        if int(book_period.reference_period) == 2022 :
+                            generer_book_2023 = True
+                            break
+
+                if generer_book_2023:
+                """
+
+                #if (old_default_book_end != rec.default_book_end) and rec.stage_id.state != 'closed':
                 if True:
                     #on modifie le montant de l'année en cours
                     t = datetime.today()
@@ -289,7 +311,7 @@ class projectAccountProject(models.Model):
                             pasted_years_book += book_period.period_project_book
                         elif int(book_period.reference_period) > current_year :
                             book_period.unlink()
-                    default_current_year_book_amount = rec.default_book_initial - pasted_years_book
+                    default_current_year_book_amount = rec.default_book_end - pasted_years_book
                     if book_period_current_year == False :
                         dic = {
                                 'project_id' : rec._origin.id,
@@ -302,11 +324,12 @@ class projectAccountProject(models.Model):
                         rec.book_validation_employee_id = False
                         rec.book_validation_datetime = False
 
-                    if book_period_current_year.period_project_book == 0.0 :
-                        book_period_current_year.unlink()
+                    #TODO : provque une erreur "Enregistrement inexistant ou supprimé.(Enregistrement : project.book_period(380,), Utilisateur : 2) "
+                    #if book_period_current_year.period_project_book == 0.0 :
+                    #    book_period_current_year.unlink()
 
 
-    def compute_sale_order_total(self, with_direct_payment=True): 
+    def compute_sale_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
         _logger.info('----------compute_sale_order_total => with_direct_payment=' + str(with_direct_payment))
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         self.ensure_one()
@@ -317,12 +340,16 @@ class projectAccountProject(models.Model):
         # renvoyé par sudo vim /usr/lib/python3/dist-packages/odoo/fields.py ligne 1191
         line_ids = rec.get_sale_order_line_ids()
         total = 0.0
+
+        status_list_to_keep = ['sale']
+        if with_draft_sale_order :
+            status_list_to_keep.append('draft')
         for line_id in line_ids:
             line = rec.env['sale.order.line'].browse(line_id)
             #_logger.info(line.read())
             if line.direct_payment_purchase_order_line_id and with_direct_payment==False :
                 continue
-            if line.state not in ['sale']:
+            if line.state not in status_list_to_keep:
                 continue
             total += line.product_uom_qty * line.price_unit * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         #_logger.info(total)
@@ -387,7 +414,7 @@ class projectAccountProject(models.Model):
             return total
 
 
-    def compute_account_move_total(self, filter_list=[]):
+    def compute_account_move_total(self, filter_list=[('parent_state', 'in', ['posted'])]):
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         _logger.info("--compute_account_move_total")
         line_ids = self.get_account_move_line_ids(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice']), ('display_type', 'not in', ['line_note', 'line_section'])])
@@ -396,8 +423,6 @@ class projectAccountProject(models.Model):
         #_logger.info(len(line_ids))
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
-            if line.parent_state not in ['posted']:
-                continue
             total += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         #_logger.info(total)
         return total
@@ -490,6 +515,7 @@ class projectAccountProject(models.Model):
         self.ensure_one()
         
         price_unit = 0.0
+        #TODO : déduire le montant des sale order en état draft ?
         if self.order_amount_current - self.order_sum_sale_order_lines > 0:
             price_unit = self.order_amount_current - self.order_sum_sale_order_lines
 
@@ -620,6 +646,7 @@ class projectAccountProject(models.Model):
     ######## BOOK
     default_book_initial = fields.Monetary('Valeur du book par défaut initial', store=True, compute=compute, help="Somme du dispositif Tasmane prévu initialement + markup S/T prévu initialement + marge ventes autres prévue initialement")
     default_book_current = fields.Monetary('Valeur du book par défaut actuel', store=True, compute=compute, help="Valeur du book par défaut actualisée suivant les commandes/factures/avoirs effectivement reçus")
+    default_book_end = fields.Monetary('Valeur du book par défaut à terminaison', store=True, compute=compute, help="Valeur du book par défaut projetée à terminaison : somme des commandes clients (validées ou non) diminuée des commandes d'achats (validées ou non)")
     is_book_manually_computed = fields.Boolean('Book géré manuellement')
     book_comment = fields.Text('Commentaire sur le book')
     book_period_ids = fields.One2many('project.book_period', 'project_id', string="Book par année")

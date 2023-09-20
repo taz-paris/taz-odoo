@@ -9,13 +9,13 @@ import re
 import unicodedata
 
 from odoo.addons import base
-#base.models.res_partner.ADDRESS_FIELDS += ('street3',)
+base.models.res_partner.ADDRESS_FIELDS = base.models.res_partner.ADDRESS_FIELDS + ('street3',)
 
 class tazResPartner(models.Model):
      _inherit = "res.partner"
      
      def _get_default_address_format(self):
-        return "%(street)s\n%(street2)s\n%(street3)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s"
+        return "%(street)s\n%(street2)s\n%(street3)s\n%(zip)s %(city)s %(state_code)s\n%(country_name)s"
 
      def write(self_list, vals):
         res_dic = {}

@@ -15,8 +15,11 @@ class projectOutsourcingLink(models.Model):
             ('project_partner_uniq', 'UNIQUE (partner_id, project_id)',  "Impossible d'enregistrer deux fois le même sous-traitant pour un même projet. Ajoutez des commandes à la ligne existantes.")
     ]
 
-    def compute_purchase_order_total(self, with_direct_payment=True): 
+    def compute_purchase_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
+        status_list_to_keep = ['purchase']
+        if with_draft_sale_order :
+            status_list_to_keep.append('draft')
         for rec in self:
             #rec.order_sum_purchase_order_lines = 0
             line_ids = rec.get_purchase_order_line_ids()
@@ -25,7 +28,7 @@ class projectOutsourcingLink(models.Model):
                 line = self.env['purchase.order.line'].browse(line_id)
                 if line.direct_payment_sale_order_line_id and with_direct_payment==False:
                     continue
-                if line.state not in ['purchase']:
+                if line.state not in status_list_to_keep:
                     continue
                 total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
             return total
@@ -71,17 +74,16 @@ class projectOutsourcingLink(models.Model):
         return line_ids
         
 
-    def compute_account_move_total_outsourcing_link(self): 
+    def compute_account_move_total_outsourcing_link(self, filter_list=[('parent_state', 'in', ['posted'])]): 
         _logger.info('compute_account_move_total_outsourcing_link')
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         for rec in self:
-            line_ids = rec.project_id.get_account_move_line_ids([('partner_id', '=', rec.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund'])])
+            line_ids = rec.project_id.get_account_move_line_ids(filter_list + [('partner_id', '=', rec.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
             total = 0.0
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
-                if line.parent_state not in ['posted']:
-                    continue
                 total += line.price_subtotal_signed * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
+                #vérifier que le montant est cohérent même en cas d'avoir ou si Tasmane facture un apport d'affaire à un fournisseur
             rec.sum_account_move_lines = total
 
     def action_open_account_move_lines(self):
