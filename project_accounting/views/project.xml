@@ -264,7 +264,9 @@
 								<field name="book_validation_datetime" readonly="1" force_save="1"/>
 							</group>
 							<group>
-								<field name="book_period_ids" context="{'default_project_id':active_id}" attrs="{'readonly': [('is_book_manually_computed', '=', False)]}">
+								<field name="book_period_ids" context="{'default_project_id':active_id}">
+									<!--attrs="{'readonly': [('is_book_manually_computed', '=', False)]}">
+									-->
 									<tree editable="top">
 										<field name="project_id" invisible="1"/>
 										<field name="reference_period"/>

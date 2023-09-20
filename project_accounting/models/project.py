@@ -297,8 +297,8 @@ class projectAccountProject(models.Model):
                 if generer_book_2023:
                 """
 
-                #if (old_default_book_end != rec.default_book_end) and rec.stage_id.state != 'closed':
-                if True:
+                if (old_default_book_end != rec.default_book_end) and rec.stage_id.state != 'closed':
+                #if True:
                     #on modifie le montant de l'année en cours
                     t = datetime.today()
                     current_year = t.year
