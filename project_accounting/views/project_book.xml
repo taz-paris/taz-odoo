@@ -20,6 +20,7 @@
                         <field name="project_id"/>
                         <field name="employee_id"/>
                         <field name="book_factor" sum="Total"/>
+			<field name="final_book_factor" sum="Total"/>
                 </tree>                      
             </field>                       
         </record>
@@ -38,7 +39,7 @@
                         <field name="reference_period"/>
 			-->
                         <field name="period_project_book" optional="show"/>
-                        <field name="book_factor" optional="show"/>
+                        <field name="final_book_factor" optional="show"/>
 			<field name="period_project_book_employee" sum="Total"/>
                 </tree>                      
             </field>                       

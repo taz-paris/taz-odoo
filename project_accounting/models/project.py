@@ -272,9 +272,6 @@ class projectAccountProject(models.Model):
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
             rec.default_book_end = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True) - outsourcing_link_purchase_order_with_draft
-            #if rec.default_book_initial != rec.default_book_current and ((old_default_book_initial != rec.default_book_initial) or (old_default_book_current != rec.default_book_current)):
-            #    rec.book_validation_employee_id = False
-            #    rec.book_validation_datetime = False
 
 
             if rec.is_book_manually_computed == True :
@@ -284,21 +281,7 @@ class projectAccountProject(models.Model):
             else :
                 rec.book_comment = ""
 
-                """
-                generer_book_2023 = False
-                if rec.number != False and rec.number[0:2] == '23':
-                    generer_book_2023 = True
-                else :
-                    for book_period in rec.book_period_ids:
-                        if int(book_period.reference_period) == 2022 :
-                            generer_book_2023 = True
-                            break
-
-                if generer_book_2023:
-                """
-
                 if (old_default_book_end != rec.default_book_end) and rec.stage_id.state != 'closed':
-                #if True:
                     #on modifie le montant de l'année en cours
                     t = datetime.today()
                     current_year = t.year
@@ -312,6 +295,7 @@ class projectAccountProject(models.Model):
                         elif int(book_period.reference_period) > current_year :
                             book_period.unlink()
                     default_current_year_book_amount = rec.default_book_end - pasted_years_book
+
                     if book_period_current_year == False :
                         dic = {
                                 'project_id' : rec._origin.id,
@@ -669,3 +653,4 @@ class projectAccountProject(models.Model):
     is_consistant_outsourcing = fields.Boolean("BCF présents", store=True, compute=compute, help="VRAI si le type de sous-traitance est renseigné et qu'il est cohérent avec les Bons de commande fournisseur du projet.")
     is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
     invoicing_comment = fields.Text("Commentaire ADV")
+    project_book_factor = fields.Float("Facteur de bonus/malus", default=1.0)

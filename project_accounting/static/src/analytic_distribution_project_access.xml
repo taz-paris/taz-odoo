@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+	<t t-inherit-mode="extension" t-inherit="analytic.AnalyticDistribution">
+		<xpath expr="//div" position="after">
+			<a class="btn open_tab_widget fa fa-external-link"  t-on-click="open_project_form"  />
+		</xpath>
+	</t>
+</templates>

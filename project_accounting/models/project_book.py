@@ -102,10 +102,15 @@ class projectBookEmployeeDistribution(models.Model):
             if total_book_factor > 2.0 or total_book_factor < 0.0:
                 raise ValidationError("La somme des coefficients de book attribués dans un projet doit être comprise entre 0 et 2.")
 
+    @api.depends('project_id.project_book_factor', 'book_factor')
+    def compute(self):
+        for rec in self:
+            rec.final_book_factor = rec.book_factor * rec.project_id.project_book_factor
 
     employee_id = fields.Many2one('hr.employee', domain=[('active', '=', True)], string="Salarié")
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
     book_factor = fields.Float("Coefficient", required=True)
+    final_book_factor = fields.Float("Coefficient avec bonus/malus", store=True, compute=compute)
 
 
 class projectBookEmployeeDistributionPeriod(models.Model):
@@ -130,22 +135,22 @@ class projectBookEmployeeDistributionPeriod(models.Model):
                 raise ValidationError(_('Le book_employee_distribution_id et project_book_period_id ne sont pas rattachés au même projet.'))
 
 
-    @api.depends('book_employee_distribution_id', 'project_book_period_id', 'book_factor', 'period_project_book', 'rel_is_book_manually_computed')
+    @api.depends('book_employee_distribution_id', 'project_book_period_id', 'final_book_factor', 'period_project_book', 'rel_is_book_manually_computed')
     def compute(self):
         for rec in self :
             if rec.rel_is_book_manually_computed == False :
-                rec.period_project_book_employee = rec.book_factor * rec.period_project_book
+                rec.period_project_book_employee = rec.final_book_factor * rec.period_project_book
 
     # Stored data
     book_employee_distribution_id = fields.Many2one('project.book_employee_distribution', ondelete='cascade')
-    project_book_period_id = fields.Many2one('project.book_period', required=True, ondelete='cascade')
+    project_book_period_id = fields.Many2one('project.book_period', sting="Année", required=True, ondelete='cascade')
 
     # Computed data
     period_project_book_employee = fields.Monetary("Book pour l'année/projet/employé", compute=compute, store=True, group_operator='sum')
 
     # Related book_employee_distribution_id
     employee_id = fields.Many2one('hr.employee', related='book_employee_distribution_id.employee_id', required=True, readonly=False, string="Employé", store=True)
-    book_factor = fields.Float(related="book_employee_distribution_id.book_factor", string="Coef. pour le projet/année/employée", store=True, group_operator=False)
+    final_book_factor = fields.Float(related="book_employee_distribution_id.final_book_factor", string="Coef. pour le projet/année/employée", store=True, group_operator=False)
 
     # Related project_book_period_id
     project_id = fields.Many2one('project.project', related='project_book_period_id.project_id', string="Projet", store=True)
