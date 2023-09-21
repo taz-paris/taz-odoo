@@ -228,10 +228,12 @@
 								<button type="object" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
 							</group>
 						</group>
-						<!--
 						<group string="Paiement du client à Tasmane">
+							<group>
+								<field name="company_paid" />
+								<field name="company_residual" />
+							</group>
 						</group>
-						-->
 					</page>
 					<page name="purchase" string="Achats">
 							<field name="project_outsourcing_link_ids" context="{'default_project_id' : active_id}">

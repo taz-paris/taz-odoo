@@ -140,7 +140,8 @@ class projectAccountProject(models.Model):
             old_default_book_current = rec.default_book_current
             old_default_book_end = rec.default_book_end
 
-            rec.company_invoice_sum_move_lines = rec.compute_account_move_total()
+            rec.company_invoice_sum_move_lines, rec.company_paid = rec.compute_account_move_total()
+            rec.company_residual = rec.company_invoice_sum_move_lines - rec.company_paid
 
             ######## TOTAL
             rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
@@ -404,12 +405,13 @@ class projectAccountProject(models.Model):
         line_ids = self.get_account_move_line_ids(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice']), ('display_type', 'not in', ['line_note', 'line_section'])])
             #On ne met pas le partenr_id dans le filtre car dans certains cas, Tasmane ne facture pas le client final, mais un intermédiaire (Sopra par exemple) 
         total = 0.0
-        #_logger.info(len(line_ids))
+        paid = 0.0
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
             total += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            paid += line.amount_paid * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         #_logger.info(total)
-        return total
+        return total, paid
 
 
     def action_open_out_account_move_lines(self):
@@ -555,6 +557,9 @@ class projectAccountProject(models.Model):
     company_invoice_sum_move_lines = fields.Monetary('Montant déjà facturé par Tasmane au client', compute=compute, store=True)
     company_to_invoice_left = fields.Monetary('Montant restant à factuer par Tasmane au client', compute=compute, store=True)
     order_to_invoice_outsourcing = fields.Monetary('Montant S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute, store=True)
+
+    company_paid = fields.Monetary('Montant déjà payé par le client à Tasmane', compute=compute, store=True)
+    company_residual = fields.Monetary('Montant restant à payer par le client à Tasmane', compute=compute, store=True)
 
     ######## COMPANY PART
     company_part_amount_initial = fields.Monetary('Montant dispositif Tasmane initial', 

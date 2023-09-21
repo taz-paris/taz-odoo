@@ -80,11 +80,15 @@ class projectOutsourcingLink(models.Model):
         for rec in self:
             line_ids = rec.project_id.get_account_move_line_ids(filter_list + [('partner_id', '=', rec.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
             total = 0.0
+            paid = 0.0
             for line_id in line_ids:
                 line = rec.env['account.move.line'].browse(line_id)
                 total += line.price_subtotal_signed * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
+                paid += line.amount_paid * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0 
                 #vérifier que le montant est cohérent même en cas d'avoir ou si Tasmane facture un apport d'affaire à un fournisseur
             rec.sum_account_move_lines = total
+            rec.company_paid = paid
+            rec.company_residual = total - paid
 
     def action_open_account_move_lines(self):
         line_ids = self.project_id.get_account_move_line_ids([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
@@ -176,3 +180,6 @@ class projectOutsourcingLink(models.Model):
 
     order_direct_payment_done = fields.Monetary('Somme factures en paiement direct validées par Tasmane', compute=compute)
     order_direct_payment_done_detail = fields.Text('Détail des factures en paiement direct validées par Tasmane', compute=compute)
+
+    company_paid = fields.Monetary('Montant déjà payé par Tasmane au S/T', compute=compute, store=True)
+    company_residual = fields.Monetary('Montant restant à payer par Tasmane au S/T', compute=compute, store=True)

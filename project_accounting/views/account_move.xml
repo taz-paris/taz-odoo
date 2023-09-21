@@ -48,6 +48,7 @@
 
 			<field name="parent_state" widget="badge" decoration-success="parent_state == 'posted'" decoration-info="parent_state == 'draft'" optional="show" on_change="1" />
 			<field name="parent_payment_state" widget="badge" decoration-danger="parent_payment_state == 'not_paid'" decoration-warning="parent_payment_state in ('partial', 'in_payment')" decoration-success="parent_payment_state in ('paid', 'reversed')" optional="show" />
+			<field name="amount_paid" optional="show"/>
 
 			<!-- Others fields -->
 			<field name="partner_id" invisible="1"/>

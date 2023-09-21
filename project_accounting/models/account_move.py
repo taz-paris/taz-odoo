@@ -95,15 +95,24 @@ class projectAccountingAccountMove(models.Model):
 
 class projectAccountingAccountMoveLine(models.Model):
     _inherit = "account.move.line"
-
-    parent_payment_state = fields.Selection(related='move_id.payment_state', store=True, string="État du paiement (fature)")
-    parent_state = fields.Selection(string="État (fature)")
-
-    
+ 
     @api.depends('price_subtotal', 'direction_sign')
     def _compute_price_subtotal_signed(self):
         for rec in self:
             rec.price_subtotal_signed = rec.price_subtotal * rec.direction_sign * -1
+
+    @api.depends('move_id.amount_total', 'move_id.amount_residual', 'price_total')
+    def _compute_amount_paid(self):
+        for rec in self:
+            if rec.parent_payment_state == 'reversed':
+                rec.amount_paid = 0.0
+            else:
+                invoice_amount_paid = rec.move_id.amount_total - rec.move_id.amount_residual
+                rec.amount_paid = invoice_amount_paid * rec.direction_sign * -1 * (rec.price_total / rec.move_id.amount_total)
+
+    parent_payment_state = fields.Selection(related='move_id.payment_state', store=True, string="État du paiement (fature)")
+    parent_state = fields.Selection(string="État (fature)")
+    amount_paid = fields.Monetary("Montant payé", compute=_compute_amount_paid)
 
     direction_sign = fields.Integer(related="move_id.direction_sign", store=True)
     price_subtotal_signed = fields.Monetary(
