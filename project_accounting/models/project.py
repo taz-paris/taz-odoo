@@ -45,14 +45,11 @@ class projectAccountProject(models.Model):
 
 
     def get_book_by_year(self, year):
-        _logger.info('-- RES.PARTNER get_book_by_year')
-        res = 0.0
+        #_logger.info('-- RES.PARTNER get_book_by_year')
         for book_period_id in self.book_period_ids:
             if book_period_id.reference_period == str(year):
-                res += book_period_id.period_project_book
-                #TODO : ne pas sommer les book pas encore validés ???
-        #_logger.info(res)
-        return res
+                return book_period_id.period_project_book
+        return 0.0
 
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
     @api.depends('project_director_employee_id')
@@ -271,7 +268,10 @@ class projectAccountProject(models.Model):
             #BOOK
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
-            rec.default_book_end = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True) - outsourcing_link_purchase_order_with_draft
+            if rec.stage_is_part_of_booking :
+                rec.default_book_end = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True) - outsourcing_link_purchase_order_with_draft
+            else :
+                rec.default_book_end = 0.0
 
 
             if rec.is_book_manually_computed == True :
@@ -630,7 +630,7 @@ class projectAccountProject(models.Model):
     ######## BOOK
     default_book_initial = fields.Monetary('Valeur du book par défaut initial', store=True, compute=compute, help="Somme du dispositif Tasmane prévu initialement + markup S/T prévu initialement + marge ventes autres prévue initialement")
     default_book_current = fields.Monetary('Valeur du book par défaut actuel', store=True, compute=compute, help="Valeur du book par défaut actualisée suivant les commandes/factures/avoirs effectivement reçus")
-    default_book_end = fields.Monetary('Valeur du book par défaut à terminaison', store=True, compute=compute, help="Valeur du book par défaut projetée à terminaison : somme des commandes clients (validées ou non) diminuée des commandes d'achats (validées ou non)")
+    default_book_end = fields.Monetary('Valeur du book par défaut à terminaison', store=True, compute=compute, help="Si l'étape projet est paramétrée pour compter dans le book, ce champ correspond à la valeur du book par défaut projetée à terminaison : somme des commandes clients (validées ou non) diminuée des commandes d'achats (validées ou non). Sinon ce champ a une valeur nulle.")
     is_book_manually_computed = fields.Boolean('Book géré manuellement')
     book_comment = fields.Text('Commentaire sur le book')
     book_period_ids = fields.One2many('project.book_period', 'project_id', string="Book par année")
