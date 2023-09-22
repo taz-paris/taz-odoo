@@ -19,6 +19,7 @@ class HrContract(models.Model):
             cost_line = self.job_id._get_daily_cost_line(date)
             if not cost_line :
                 _logger.info(_("Dayily cost not defined for this employee at this date : %s, %s." % (self.employee_id.name, date)))
+                return 0.0, False
             return cost_line.cost, cost_line
 
     is_daily_cost_overridden = fields.Boolean("Surcharger le CJM du grade")
