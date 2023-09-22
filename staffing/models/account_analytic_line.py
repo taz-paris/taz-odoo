@@ -223,11 +223,7 @@ class staffingAnalyticLine(models.Model):
             cost = timesheet._hourly_cost()
             cost_line = False
         elif encoding_uom_id == self.env.ref("uom.product_uom_day"):
-            cost_line = timesheet.employee_id._get_daily_cost(timesheet.date) 
-            if not cost_line :
-                _logger.info(_("Dayily cost not defined for this employee at this date : %s, %s." % (timesheet.employee_id.name, timesheet.date)))
-                return False,False
-            cost = cost_line.cost
+            cost, cost_line = timesheet.employee_id._get_daily_cost(timesheet.date) 
         else : 
             raise ValidationError(_("Timesheet encoding uom should be either Hours or Days."))
 

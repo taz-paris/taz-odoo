@@ -5,3 +5,4 @@ from . import employee
 from . import account_analytic_line
 from . import hr_leave
 from . import hr_job
+from . import hr_contract

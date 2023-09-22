@@ -317,12 +317,11 @@ class staffingEmployee(models.Model):
         return False
 
     def _get_daily_cost(self, date):
-        job_id = self._get_job_id(date)
-        if job_id :
-            return job_id._get_daily_cost(date)
-        else :  
-            #_logger.info('Pas de job_id pour ce consultant à cette date')
-            return False
+        contract = self._get_contract(date)
+        _logger.info(contract)
+        cost, cost_line = contract._get_daily_cost(date)
+        _logger.info(cost, cost_line)
+        return cost, cost_line
 
     def number_days_available_period(self, date_start, date_end):
         #_logger.info('number_days_available_period %s' % self.name)
