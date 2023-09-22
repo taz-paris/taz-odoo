@@ -40,18 +40,18 @@ class projectAccountingClosing(models.Model):
         for rec in self:
             accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id)], order="closing_date desc")
             if accounting_closing_ids[0].id != self.id:
-                raise ValidationError(_("Il n'est pas possible de saisir une date de clôture antérieure à la dernière cloture enregistrée."))
+                raise ValidationError(_("Il n'est pas possible de saisir une date de clôture antérieure à la dernière cloture enregistrée pour ce projet."))
 
     def write(self, vals):
         for rec in self :
             if rec.next_closing :
-                raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe."))
+                raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
         super().write(vals)
 
 
     def unlink(self):
         if self.next_closing :
-            raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car une clôture postérieure existe."))
+            raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car une clôture postérieure existe pour ce projet."))
         super().unlink()
 
 
