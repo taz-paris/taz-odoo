@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 class HrJob(models.Model):
     _inherit = "hr.job"
 
-    def _get_daily_cost(self, date):
+    def _get_daily_cost_line(self, date):
         res = False
         for cost_line in self.cost_ids:
             if res == False :

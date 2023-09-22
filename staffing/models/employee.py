@@ -318,9 +318,10 @@ class staffingEmployee(models.Model):
 
     def _get_daily_cost(self, date):
         contract = self._get_contract(date)
-        _logger.info(contract)
-        cost, cost_line = contract._get_daily_cost(date)
-        _logger.info(cost, cost_line)
+        cost = False
+        cost_line = False
+        if contract :
+            cost, cost_line = contract._get_daily_cost(date)
         return cost, cost_line
 
     def number_days_available_period(self, date_start, date_end):

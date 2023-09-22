@@ -143,7 +143,7 @@ class projectBookEmployeeDistributionPeriod(models.Model):
 
     # Stored data
     book_employee_distribution_id = fields.Many2one('project.book_employee_distribution', ondelete='cascade')
-    project_book_period_id = fields.Many2one('project.book_period', sting="Année", required=True, ondelete='cascade')
+    project_book_period_id = fields.Many2one('project.book_period', string="Année", required=True, ondelete='cascade')
 
     # Computed data
     period_project_book_employee = fields.Monetary("Book pour l'année/projet/employé", compute=compute, store=True, group_operator='sum')

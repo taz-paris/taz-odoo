@@ -851,7 +851,7 @@ class naptaHrContract(models.Model):
 
             d = date_debut
             while d < date_fin:
-                cost_line = rec.job_id._get_daily_cost(d) #TODO : on part du principe que le CJM est valable pour toute l'année... il serait plus propre de parcourir les CJM du grade sur la période du contrat
+                cost, cost_line = rec.job_id._get_daily_cost(d) #TODO : on part du principe que le CJM est valable pour toute l'année... il serait plus propre de parcourir les CJM du grade sur la période du contrat
                 daily_cost = 0.0
                 if cost_line :
                     daily_cost = cost_line.cost
