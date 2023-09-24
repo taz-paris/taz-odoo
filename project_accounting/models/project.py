@@ -562,7 +562,7 @@ class projectAccountProject(models.Model):
             rec.check_partners_objects_consitency()
 
     def check_partners_objects_consitency(self):
-        return
+        _logger.info('-- check_partners_objects_consitency')
         for rec in self:
             all_customer = rec.get_all_customer_ids()
             all_supplier = rec.get_all_supplier_ids()
@@ -570,16 +570,19 @@ class projectAccountProject(models.Model):
 
             account_move_line_ids = self.get_account_move_line_ids([('partner_id', 'not in', all_partner)])
             if len(account_move_line_ids) :
-                raise ValidationError(_("Enregistrement impossible : les écritures comptables liées à un projet doivent obligatoirement concerner soit le client final, soit le client intermédiaire (onglet Facturation), soit l'un des fourisseurs (onglet Achats) enregistrés sur la fiche du projet."))
+                _logger.info(all_partner)
+                for line in account_move_line_ids:
+                    _logger.info(self.env['account.move.line'].browse([line]).read())
+                raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les écritures comptables liées à un projet doivent obligatoirement concerner soit le client final, soit le client intermédiaire (onglet Facturation), soit l'un des fourisseurs (onglet Achats) enregistrés sur la fiche du projet." % (rec.number, rec.name)))
 
-            sale_order_line_ids = rec.get_sale_order_line_ids([('partner_id', 'not in', all_customer)])
+            sale_order_line_ids = rec.get_sale_order_line_ids([('order_partner_id', 'not in', all_customer)])
             if len(sale_order_line_ids) :
-                raise ValidationError(_("Enregistrement impossible : les bons de commande clients liées à un projet doivent obligatoirement concerner soit le client final, soit le client intermédiaire (onglet Facturation)."))
+                raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande clients liées à un projet doivent obligatoirement concerner soit le client final, soit le client intermédiaire (onglet Facturation)." % (rec.number, rec.name)))
                 #TODO : réduire au client final ?
 
             purchase_order_line_ids = self.env['project.outsourcing.link'].get_purchase_order_line_ids(filter_list=[('partner_id', 'not in', all_supplier)], analytic_account_ids=[str(rec.analytic_account_id.id)]) 
-            if len(sale_order_line_ids) :
-                raise ValidationError(_("Enregistrement impossible : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)."))
+            if len(purchase_order_line_ids) :
+                raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)." % (rec.number, rec.name)))
 
 
     state = fields.Selection(related='stage_id.state')

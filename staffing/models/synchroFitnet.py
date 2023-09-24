@@ -347,8 +347,8 @@ class fitnetProject(models.Model):
         self.sync_suppliers(client)
         self.sync_customers(client)
         self.sync_contracts(client) #projets
-        self.sync_customer_invoices(client)
         self.sync_supplier_invoices(client)
+        self.sync_customer_invoices(client)
 
 
 
@@ -1203,11 +1203,30 @@ class fitnetProject(models.Model):
 
                 line['initial_unitPrice'] = line['unitPrice']
                 line['unitPrice'] = abs(line['unitPrice']) #ATTENTION : contrairement aux avoirs clients, l'API Fitnet retourne un montant négatif pour les avoirs fournisseurs => il faut donc prendre la valeur absolue
-                if invoice['contractId'] :
-                    odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
-                    line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
+                if 'contractId' in line.keys() and line['contractId'] : 
+                    # le contractID peut être au niveau de la facture du sous-traitant ... mais aussi parfois au niveau de la ligne de l'achat (ex : affaire 20-140 SDSI MSA avec Bernard) 
+                    odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', line['contractId'])])[0].analytic_account_id.id
+                    line_odoo_project = self.env['project.project'].search([('fitnet_id', '=', line['contractId'])])[0]
+                    line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0}
                 else :
-                    line['contractId_json'] = False
+                    if invoice['contractId'] :
+                        line_odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
+                        odoo_analytic_ccount_id_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0].analytic_account_id.id
+                        line['contractId_json'] = {str(odoo_analytic_ccount_id_project) : 100.0} 
+                    else :
+                        line['contractId_json'] = False
+                        line_odoo_project = False
+
+                if line['contractId_json'] : 
+                    fitnet_id_outsourcing_partners = self.env['res.partner'].search([('fitnet_id', '=', invoice['odoo_supplierId'])])
+                    if len(fitnet_id_outsourcing_partners) > 0 :
+                        fitnet_id_outsourcing_partner = fitnet_id_outsourcing_partners[0]
+                        outsourcing_links = self.env['project.outsourcing.link'].search([('project_id', '=', line_odoo_project.id), ('partner_id', '=', fitnet_id_outsourcing_partner.id)])
+                        if len(outsourcing_links) == 0:
+                                outsourcing_link_id = self.env['project.outsourcing.link'].create({'project_id' : line_odoo_project.id, 'partner_id' : fitnet_id_outsourcing_partner.id})
+                                _logger.info("Création de l'outsourcing link pour le projet %s (Odoo_id = %s) et le sous-traitant %s (odoo_id = %s)" % (line_odoo_project.name, str(line_odoo_project.id), fitnet_id_outsourcing_partner.name, str(fitnet_id_outsourcing_partner.id)))
+
+
 
                 if invoice['purchaseStatus'] not in [0, 1, -1]:#Si la facture n'est pas au statut annulé ou à venir
                     invoices_lines_list.append(line)
@@ -1247,7 +1266,6 @@ class fitnetProject(models.Model):
         ############################### GENERATION DES BONS DE COMMANDE FOURNISSEUR
         invoices_by_contract_supplier = {}
         for invoice in supplier_invoices:
-            #TODO A SUPPRIMER
             odoo_project = self.env['project.project'].search([('fitnet_id', '=', invoice['contractId'])])[0]
             if len(LISTE_PROJET_EXCLUSIF)>0 and odoo_project.number not in LISTE_PROJET_EXCLUSIF:
                 continue
@@ -1285,14 +1303,6 @@ class fitnetProject(models.Model):
                     'odoo_state' : statut,
                     'date_planned' : date_planned,
                     })
-
-            fitnet_id_outsourcing_partners = self.env['res.partner'].search([('fitnet_id', '=', contract_invoice_list[0]['odoo_supplierId'])])
-            if len(fitnet_id_outsourcing_partners) > 0 :
-                fitnet_id_outsourcing_partner = fitnet_id_outsourcing_partners[0]
-                outsourcing_links = self.env['project.outsourcing.link'].search([('project_id', '=', odoo_project.id), ('partner_id', '=', fitnet_id_outsourcing_partner.id)])
-                if len(outsourcing_links) == 0:
-                        outsourcing_link_id = self.env['project.outsourcing.link'].create({'project_id' : odoo_project.id, 'partner_id' : fitnet_id_outsourcing_partner.id})
-                        _logger.info("Création de l'outsourcing link pour le projet %s (Odoo_id = %s) et le sous-traitant %s (odoo_id = %s)" % (odoo_project.name, str(odoo_project.id), fitnet_id_outsourcing_partner.name, str(fitnet_id_outsourcing_partner.id)))
 
             sum_contract_invoice_lines = 0.0
             for inv in contract_invoice_list:
