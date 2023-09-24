@@ -113,6 +113,7 @@ class projectAccountingAccountMoveLine(models.Model):
     parent_payment_state = fields.Selection(related='move_id.payment_state', store=True, string="État du paiement (fature)")
     parent_state = fields.Selection(string="État (fature)")
     amount_paid = fields.Monetary("Montant payé", compute=_compute_amount_paid)
+    #TODO : stocker la valeur de ce champ : store=True
 
     direction_sign = fields.Integer(related="move_id.direction_sign", store=True)
     price_subtotal_signed = fields.Monetary(

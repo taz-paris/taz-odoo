@@ -54,16 +54,20 @@ class AnalyticMixin(models.AbstractModel):
 
     @api.depends('analytic_distribution')
     def comptute_project_ids(self):
+        _logger.info('-- comptute_project_ids form analytic.mixin')
         for rec in self:
             project_ids_res = []
             #for analytic_account in self.env['account.analytic.account'].browse(rec.analytic_distribution.keys()):
             if rec.analytic_distribution:
                 for analytic_account_id in rec.analytic_distribution.keys():
-                    analytic_account = self.env['account.analytic.account'].search([('id', '=', analytic_account_id)])[0]
-                    if len(analytic_account.project_ids):
-                        for project_id in analytic_account.project_ids:
-                            project_ids_res.append(project_id.id)
+                    analytic_account_ids = self.env['account.analytic.account'].search([('id', '=', analytic_account_id)])
+                    if len(analytic_account_ids) :
+                        analytic_account = analytic_account_ids[0]
+                        if len(analytic_account.project_ids):
+                            for project_id in analytic_account.project_ids:
+                                project_ids_res.append(project_id.id)
 
+            _logger.info(project_ids_res)            
             if len(project_ids_res):
                 rec.rel_project_ids = [(6, 0, project_ids_res)] 
             else :
@@ -73,3 +77,4 @@ class AnalyticMixin(models.AbstractModel):
         _logger.info("mmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
 
     rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
+    #TODO : stocker la valeur de ce champ : store=True
