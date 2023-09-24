@@ -136,6 +136,7 @@ class projectAccountProject(models.Model):
         _logger.info('====================================================================== project.py COMPUTE')
         for rec in self:
             _logger.info(str(rec.number) + "=>" +str(rec.name))
+            rec.check_partners_objects_consitency() #forcer l'appel à cette fonction même si cette fonction compute n'écrit rien... car elle est appelée par les lignes de factures/sale.order/purchase.order et assure que tous ces objets liés à ce projet sont bien portés par un res.partner qui est soit le client final, soit un client intermédiaire soit un fournisseur d'un outsourcing_link
             old_default_book_initial = rec.default_book_initial
             old_default_book_current = rec.default_book_current
             old_default_book_end = rec.default_book_end
@@ -182,19 +183,29 @@ class projectAccountProject(models.Model):
             else:
                 rec.outsource_part_marging_rate_initial = 0.0 
                                                                 
-
-            rec.outsource_part_amount_current = 0.0
-            rec.outsource_part_cost_current = 0.0
-            rec.order_to_invoice_outsourcing = 0.0
             rec.order_sum_sale_order_lines = rec.compute_sale_order_total()
             rec.order_to_invoice_company = rec.compute_sale_order_total(with_direct_payment=False)
+
+            outsource_part_amount_current = 0.0
+            outsource_part_cost_current = 0.0
+            order_to_invoice_outsourcing = 0.0
             outsourcing_link_purchase_order_with_draft = 0.0
+            other_part_cost_current = 0.0
             for link in rec.project_outsourcing_link_ids:
-                rec.outsource_part_amount_current += link.outsource_part_amount_current
-                rec.outsource_part_cost_current += link.sum_account_move_lines
-                rec.order_to_invoice_outsourcing += link.order_direct_payment_amount
-                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_sale_order=True)
-                    #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
+                if link.link_type == 'outsourcing' :
+                    outsource_part_amount_current += link.outsource_part_amount_current
+                    outsource_part_cost_current += link.sum_account_move_lines
+                    order_to_invoice_outsourcing += link.order_direct_payment_amount
+                    outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_sale_order=True)
+                        #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
+                elif link.link_type == 'other' :
+                    other_part_cost_current += link.sum_account_move_lines
+                else :
+                    raise ValidationError(_("Type d'achat non géré : %s" % str(link.link_type)))
+
+            rec.outsource_part_amount_current = outsource_part_amount_current
+            rec.outsource_part_cost_current = outsource_part_cost_current
+            rec.order_to_invoice_outsourcing = order_to_invoice_outsourcing
 
             rec.company_to_invoice_left = rec.order_to_invoice_company - rec.company_invoice_sum_move_lines
 
@@ -211,7 +222,7 @@ class projectAccountProject(models.Model):
             else:
                 rec.other_part_marging_rate_initial = 0.0
 
-            rec.other_part_cost_current = rec.get_all_cost_current() - rec.outsource_part_cost_current
+            rec.other_part_cost_current = other_part_cost_current
 
             rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current
             if rec.other_part_amount_current != 0 :
@@ -365,9 +376,9 @@ class projectAccountProject(models.Model):
 
 
     
-    def get_sale_order_line_ids(self):
+    def get_sale_order_line_ids(self, filter_list=[]):
         _logger.info('-- project sale.order.lines computation')
-        query = self.env['sale.order.line']._search([])
+        query = self.env['sale.order.line']._search(filter_list)
         #_logger.info(query)
         if query == []:
             return []
@@ -383,41 +394,56 @@ class projectAccountProject(models.Model):
         return line_ids
 
 
-    def get_all_cost_current(self, filter_list=[]):
-        #TODO : changer de logique : avoir une fonction qui retourne les lignes de vente qui ne sont pas déjà attribuées à un sous-traitant puis sommer à partir de ces ID de lignes
-            # et ajouter un bouton pour voir le détail des lignes affectées
-        _logger.info("--get_all_cost_current")
-        for rec in self :
-            line_ids = rec.get_account_move_line_ids(filter_list + [('move_type', 'in', ['in_refund', 'in_invoice'])])
-            total = 0.0
-            #_logger.info(len(line_ids))
-            for line_id in line_ids:
-                line = rec.env['account.move.line'].browse(line_id)
-                if str(rec.analytic_account_id.id) in line.analytic_distribution.keys():
-                    total += line.price_subtotal_signed * line.analytic_distribution[str(rec.analytic_account_id.id)]/100.0
-            #_logger.info(total)
-            return total
 
+    def get_account_move_line_ids(self, filter_list=[]):
+        _logger.info('--get_account_move_line_ids')
+        query = self.env['account.move.line']._search(filter_list)
+        #_logger.info(query)
+        if query == []:
+            return []
+        query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
+        query.order = None
+        query_string, query_param = query.select('account_move_line.*')
+        #_logger.info(query_string)
+        #_logger.info(query_param)
+        self._cr.execute(query_string, query_param)
+        dic =  self._cr.dictfetchall()
+        line_ids = [line.get('id') for line in dic]
+        #_logger.info(line_ids)
+
+        return line_ids
+
+
+    def get_all_customer_ids(self):
+        return [self.partner_id.id] + self.partner_secondary_ids.ids
+
+    def get_all_supplier_ids(self):
+        outsourcing_link_partner_ids = []
+        for link in self.project_outsourcing_link_ids :
+            outsourcing_link_partner_ids.append(link.partner_id.id)
+        return outsourcing_link_partner_ids
+        
 
     def compute_account_move_total(self, filter_list=[('parent_state', 'in', ['posted'])]):
-        #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         _logger.info("--compute_account_move_total")
-        line_ids = self.get_account_move_line_ids(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice']), ('display_type', 'not in', ['line_note', 'line_section'])])
-            #On ne met pas le partenr_id dans le filtre car dans certains cas, Tasmane ne facture pas le client final, mais un intermédiaire (Sopra par exemple) 
+
+        all_customers = self.get_all_customer_ids()
+        #TODO : ajouter une contrainte => un "client secondaire" ne peut pas avoir de outsourcing_link pour ce projet
+        #TODO : ajouter une contrainte => on ne peut pas avoir une ligne de facture qui porte le compte analytic de ce projet et dont la facture est ni pour le client, ni pour un client secondaire, ni pour partener de 'outsourcing link
+
+        line_ids = self.get_account_move_line_ids(filter_list + [('partner_id', 'in', all_customers), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
         total = 0.0
         paid = 0.0
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
             total += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
             paid += line.amount_paid * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
-        #_logger.info(total)
         return total, paid
 
 
     def action_open_out_account_move_lines(self):
-        line_ids = self.get_account_move_line_ids([('move_type', 'in', ['out_refund', 'out_invoice'])])
-            #On ne met pas le partenr_id dans le filtre car dans certains cas, Tasmane ne facture pas le client final, mais un intermédiaire (Sopra par exemple) 
-            #TODO : on devrait exlure les sous-traitants mais intégrer in_refund, out_invoice.. mais dans ce cas ça mélangerait les factures de frais généraux...
+        all_customers = self.get_all_customer_ids()
+        line_ids = self.get_account_move_line_ids([('partner_id', 'in', all_customers), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
 
         action = {
             'name': _("Lignes de factures / avoirs"),
@@ -467,25 +493,6 @@ class projectAccountProject(models.Model):
         #    action['res_id'] = invoice_ids[0]
 
         return action
-
-
-    def get_account_move_line_ids(self, filter_list=[]):
-        _logger.info('--get_account_move_line_ids')
-        query = self.env['account.move.line']._search(filter_list)
-        #_logger.info(query)
-        if query == []:
-            return []
-        query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
-        query.order = None
-        query_string, query_param = query.select('account_move_line.*')
-        #_logger.info(query_string)
-        #_logger.info(query_param)
-        self._cr.execute(query_string, query_param)
-        dic =  self._cr.dictfetchall()
-        line_ids = [line.get('id') for line in dic]
-        #_logger.info(line_ids)
-
-        return line_ids
 
 
     @api.onchange('book_validation_employee_id')
@@ -538,8 +545,46 @@ class projectAccountProject(models.Model):
             rec.company_part_cost_current = rec.company_part_cost_initial
             rec.other_part_amount_current = rec.other_part_amount_initial
 
+    @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids.partner_id')
+    def check_partners_consistency(self):
+        for rec in self:
+            if rec.partner_id.id in rec.partner_secondary_ids.ids:
+                raise ValidationError(_("Le client final ne peut pas être un client intermédiaire (onglet Facturation)."))
+            
+            supplier_ids = rec.get_all_supplier_ids()
+            if rec.partner_id.id in supplier_ids:
+                raise ValidationError(_("Le client final ne peut pas être un fournisseur (onglet Achats)."))
+            
+            for sp in rec.partner_secondary_ids:
+                if sp.id in supplier_ids:
+                    raise ValidationError(_("Le client intermédiaire (onglet Facturation) ne peut pas être un fournisseur (onglet Achats)."))
+            
+            rec.check_partners_objects_consitency()
+
+    def check_partners_objects_consitency(self):
+        return
+        for rec in self:
+            all_customer = rec.get_all_customer_ids()
+            all_supplier = rec.get_all_supplier_ids()
+            all_partner = all_customer + all_supplier
+
+            account_move_line_ids = self.get_account_move_line_ids([('partner_id', 'not in', all_partner)])
+            if len(account_move_line_ids) :
+                raise ValidationError(_("Enregistrement impossible : les écritures comptables liées à un projet doivent obligatoirement concerner soit le client final, soit le client intermédiaire (onglet Facturation), soit l'un des fourisseurs (onglet Achats) enregistrés sur la fiche du projet."))
+
+            sale_order_line_ids = rec.get_sale_order_line_ids([('partner_id', 'not in', all_customer)])
+            if len(sale_order_line_ids) :
+                raise ValidationError(_("Enregistrement impossible : les bons de commande clients liées à un projet doivent obligatoirement concerner soit le client final, soit le client intermédiaire (onglet Facturation)."))
+                #TODO : réduire au client final ?
+
+            purchase_order_line_ids = self.env['project.outsourcing.link'].get_purchase_order_line_ids(filter_list=[('partner_id', 'not in', all_supplier)], analytic_account_ids=[str(rec.analytic_account_id.id)]) 
+            if len(sale_order_line_ids) :
+                raise ValidationError(_("Enregistrement impossible : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)."))
+
 
     state = fields.Selection(related='stage_id.state')
+    partner_id = fields.Many2one(string='Client final')
+    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
     ######## TOTAL
     order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
     order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")

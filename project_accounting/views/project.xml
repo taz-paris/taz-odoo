@@ -220,6 +220,7 @@
 					<page name="customer_invoicing" string="Facturation client">
 						<group string="Facturation effective de Tasmane au client">
 							<group>
+								<field name="partner_secondary_ids" widget="many2many_tags"/>
             							<field name="order_to_invoice_company" />
             							<field name="company_invoice_sum_move_lines" />
 								<field name="company_to_invoice_left" />
@@ -240,6 +241,7 @@
 								<tree>    
 									<field name="project_id" optional="hide"/>
 									<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
+									<field name="link_type"/>
 									<field name="outsource_part_amount_current" string="Part sous-traitée" sum="Total"/>
 									<field name="order_sum_purchase_order_lines" string="Commandé" sum="Total"/>
 									<field name="order_direct_payment_amount" string="Paiement direct" sum="Total"/>

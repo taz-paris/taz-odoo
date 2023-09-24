@@ -54,15 +54,18 @@ class projectOutsourcingLink(models.Model):
 
         return action
 
-    def get_purchase_order_line_ids(self):
-        #TODO : ajouter un contrôle pour vérifier que la somme des lignes de commande est égale au montant piloté par Tasmane (qui est lui même la somme des 3 montants dispo Tasmane/SST/frais)
-                # Si ça n'est pas égale, afficher un bandeau jaune
+    def get_purchase_order_line_ids(self, filter_list=None, analytic_account_ids=None):
         _logger.info('--get_purchase_order_line_ids')
-        query = self.env['purchase.order.line']._search([('partner_id', '=', self.partner_id.id)])
+        if filter_list == None :
+            filter_list = [('partner_id', '=', self.partner_id.id)]
+        if analytic_account_ids == None:
+            analytic_account_ids=[str(self.project_id.analytic_account_id.id)]
+
+        query = self.env['purchase.order.line']._search(filter_list)
         #_logger.info(query)
         if query == []:
             return []
-        query.add_where('analytic_distribution ? %s', [str(self.project_id.analytic_account_id.id)])
+        query.add_where('analytic_distribution ? %s', analytic_account_ids)
         query.order = None
         query_string, query_param = query.select('purchase_order_line.*')
         #_logger.info(query_string)
@@ -163,6 +166,10 @@ class projectOutsourcingLink(models.Model):
     partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Sous-traitant", required=True)
         #TODO ajouter un contrôle et un domaine => le sous-traitant d'un projet ne peut pas être égal au client final
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id)
+    link_type = fields.Selection([
+            ('outsourcing', 'Sous-traitance'),
+            ('other', 'Autres achats')
+        ], string="Type d'achat", default='outsourcing')
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)

@@ -7,6 +7,7 @@
                 <tree>    
                         <field name="project_id"/>
                         <field name="partner_id"/>
+                        <field name="link_type"/>
                         <field name="order_sum_purchase_order_lines"/>
                         <field name="order_direct_payment_amount"/>
                         <field name="order_company_payment_amount"/>
@@ -23,6 +24,7 @@
 			<group>
 				<field name="project_id"/>
 				<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" options="{'no_quick_create': True}"/>
+				<field name="link_type"/>
 				<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
 			</group>
 			<group string="Commande de Tasmane au S/T">

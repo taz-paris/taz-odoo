@@ -4,7 +4,7 @@
               <field name="name">Project accounting closing</field>
               <field name="model">project.accounting_closing</field>
               <field name="arch" type="xml">
-                <tree create="false">
+                <tree create="true">
                   	<field name="project_id" optional="show"/>
                   	<field name="closing_date" optional="show"/>
 			<field name="previous_closing" optional="hide"/>
@@ -13,42 +13,38 @@
 			<field name="comment" optional="hide" widget="text"/>
 			<field name="comment_previous" optional="hide" widget="text"/>
 			<!-- Facturation -->
-			<field name="invoice_previous_balance" optional="hide"/>
-			<field name="invoice_period_amount" optional="show"/>
-			<field name="invoice_balance" optional="hide"/>
+			<field name="invoice_period_amount" optional="show" sum="Total"/>
 			<!-- Achats-->
-			<field name="purchase_previous_balance" optional="hide"/>
-			<field name="purchase_period_amount" optional="show"/>
-			<field name="purchase_balance" optional="hide"/>
+			<field name="purchase_period_amount" optional="show" sum="Total"/>
 			<!-- Total provision -->
-			<field name="provision_previous_balance_sum" optional="hide"/>
-			<field name="provision_balance_sum" optional="hide"/>
+			<field name="provision_previous_balance_sum" optional="hide" sum="Total"/>
+			<field name="provision_balance_sum" optional="hide" sum="Total"/>
 			<!-- PCA -->
-			<field name="pca_previous_balance" optional="hide"/>
-			<field name="pca_period_amount" optional="show"/>
-			<field name="pca_balance" optional="hide"/>
+			<field name="pca_previous_balance" optional="hide" sum="Total"/>
+			<field name="pca_period_amount" optional="show" sum="Total"/>
+			<field name="pca_balance" optional="hide" sum="Total"/>
 			<!-- FAE -->
-			<field name="fae_previous_balance" optional="hide"/>
-			<field name="fae_period_amount" optional="show"/>
-			<field name="fae_balance" optional="hide"/>
+			<field name="fae_previous_balance" optional="hide" sum="Total"/>
+			<field name="fae_period_amount" optional="show" sum="Total"/>
+			<field name="fae_balance" optional="hide" sum="Total"/>
 			<!-- CCA -->
-			<field name="cca_previous_balance" optional="hide"/>
-			<field name="cca_period_amount" optional="show"/>
-			<field name="cca_balance" optional="hide"/>
+			<field name="cca_previous_balance" optional="hide" sum="Total"/>
+			<field name="cca_period_amount" optional="show" sum="Total"/>
+			<field name="cca_balance" optional="hide" sum="Total"/>
 			<!-- FNP -->
-			<field name="fnp_previous_balance" optional="hide"/>
-			<field name="fnp_period_amount" optional="show"/>
-			<field name="fnp_balance" optional="hide"/>
+			<field name="fnp_previous_balance" optional="hide" sum="Total"/>
+			<field name="fnp_period_amount" optional="show" sum="Total"/>
+			<field name="fnp_balance" optional="hide" sum="Total"/>
 			<!-- Production -->
-			<field name="production_previous_balance" optional="hide"/>
-			<field name="production_period_amount" optional="show"/>
-			<field name="production_stock" optional="show"/>
-			<field name="production_destocking" optional="show"/>
-			<field name="production_balance" optional="hide"/>
+			<field name="production_previous_balance" optional="hide" sum="Total"/>
+			<field name="production_period_amount" optional="show" sum="Total"/>
+			<field name="production_stock" optional="show" sum="Total"/>
+			<field name="production_destocking" optional="show" sum="Total"/>
+			<field name="production_balance" optional="hide" sum="Total"/>
 			<!-- Chiffre d'afffaire -->
-			<field name="gross_revenue" optional="hide"/>
-			<field name="internal_revenue" optional="hide"/>
-			<field name="internal_margin_amount" optional="hide"/>
+			<field name="gross_revenue" optional="hide" sum="Total"/>
+			<field name="internal_revenue" optional="hide" sum="Total"/>
+			<field name="internal_margin_amount" optional="hide" sum="Total"/>
 			<field name="internal_margin_rate" widget="progressbar" optional="hide"/>
                 </tree>
               </field>
@@ -74,14 +70,10 @@
 			</group>
 			<group col="3">
 				<group name="invoice" string="Facturation">
-					<field name="invoice_previous_balance"/>
 					<field name="invoice_period_amount"/>
-					<field name="invoice_balance"/>
 				</group>
 				<group name="purchase" string="Achats">
-					<field name="purchase_previous_balance"/>
 					<field name="purchase_period_amount"/>
-					<field name="purchase_balance"/>
 				</group>
 				<group name="prov" string="Total provisions">
 					<field name="provision_previous_balance_sum"/>
@@ -110,25 +102,27 @@
 					<field name="fnp_balance"/>
 				</group>
 			</group>
-			<group name="prod" string="Production">
-				<group>
-					<field name="production_previous_balance"/>
-					<field name="production_period_amount"/>
-					<field name="production_stock"/>
+			<group>
+				<group name="prod" string="Production">
+					<group>
+						<field name="production_previous_balance"/>
+						<field name="production_period_amount"/>
+						<field name="production_stock"/>
+					</group>
+					<group>
+						<field name="production_destocking"/>
+						<field name="production_balance"/>
+					</group>
 				</group>
-				<group>
-					<field name="production_destocking"/>
-					<field name="production_balance"/>
-				</group>
-			</group>
-			<group name="revenue" string="Chiffre d'affaire">
-				<group>
-					<field name="gross_revenue"/>
-					<field name="internal_revenue"/>
-				</group>
-				<group>
-					<field name="internal_margin_amount"/>
-					<field name="internal_margin_rate" widget="progressbar"/>
+				<group name="revenue" string="Chiffre d'affaire">
+					<group>
+						<field name="gross_revenue"/>
+						<field name="internal_revenue"/>
+					</group>
+					<group>
+						<field name="internal_margin_amount"/>
+						<field name="internal_margin_rate" widget="progressbar"/>
+					</group>
 				</group>
 			</group>
                 </form>
@@ -143,16 +137,8 @@
 			<field name="closing_date" type="col" interval="year"/>
 			<field name="closing_date" type="col" interval="month"/>
 			<field name="project_id" type="row"/>
-			<!--
-			<field name="invoice_previous_balance" type="measure"/>
-			-->
 			<field name="invoice_period_amount" type="measure"/>
-			<field name="invoice_balance" type="measure"/>
-			<!--
-			<field name="purchase_previous_balance" type="measure"/>
-			-->
 			<field name="purchase_period_amount" type="measure"/>
-			<field name="purchase_balance" type="measure"/>
 			<field name="provision_previous_balance_sum" type="measure"/>
 			<field name="provision_balance_sum" type="measure"/>
 			<!--
@@ -222,5 +208,14 @@
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm" />
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_list" parent="project_accounting_closing_menu_root" action="project_accounting_closing_action"/>
 
+   <record id="action_recompute_closing" model="ir.actions.server">
+          <field name="name">recompute_closing</field>
+          <field name="model_id" ref="model_project_accounting_closing"/>
+          <field name="binding_model_id" ref="model_project_accounting_closing"/>
+          <field name="state">code</field>
+          <field name="code">for rec in records:
+                  rec.compute()</field>
+          <field name="groups_id" eval="[(4, ref('base.group_system'))]" />
+  </record>
 	</data>
 </odoo>

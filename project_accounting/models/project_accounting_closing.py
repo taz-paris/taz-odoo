@@ -46,12 +46,18 @@ class projectAccountingClosing(models.Model):
         for rec in self :
             if rec.next_closing :
                 raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
+            if rec.is_validated :
+                if not (len(vals) == 1 and vals.get('is_validated') == False) :
+                    #il faut pouvoir écrire s'il on dévalide
+                    raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée."))
         super().write(vals)
 
 
     def unlink(self):
         if self.next_closing :
             raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car une clôture postérieure existe pour ce projet."))
+        if rec.is_validated :
+            raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car elle est validée."))
         super().unlink()
 
 
@@ -60,6 +66,9 @@ class projectAccountingClosing(models.Model):
     def compute(self):
         _logger.info('-- compute')
         for rec in self :
+            if rec.is_validated :
+                continue
+
             proj_id = rec.project_id #quand on applique la fonction WRITE
             if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)
                 proj_id = rec._origin.project_id
@@ -78,11 +87,12 @@ class projectAccountingClosing(models.Model):
             rec.previous_closing = previous_closing
 
 
-            rec.invoice_period_amount = rec.project_id.compute_account_move_total(previous_closing_date_filter + [('date', '<=', rec.closing_date)])
-            rec.invoice_balance = rec.invoice_previous_balance + rec.invoice_period_amount
+            rec.invoice_period_amount = proj_id.compute_account_move_total(previous_closing_date_filter + [('date', '<=', rec.closing_date)])[0]
 
-            rec.purchase_period_amount = rec.project_id.get_all_cost_current(previous_closing_date_filter + [('date', '<=', rec.closing_date)])
-            rec.purchase_balance = rec.purchase_previous_balance + rec.purchase_period_amount
+            purchase_period_amount = 0.0
+            for link in proj_id.project_outsourcing_link_ids:
+                purchase_period_amount += link.compute_account_move_total_outsourcing_link(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted'])])
+            rec.purchase_period_amount = purchase_period_amount
 
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
             rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
@@ -91,19 +101,23 @@ class projectAccountingClosing(models.Model):
             rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
-            rec.production_period_amount = proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date)])
+            rec.production_period_amount = -1 * proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date)])
 
             rec.production_stock = rec.production_previous_balance + rec.production_period_amount
             rec.production_balance = rec.production_stock - rec.production_destocking
 
             rec.gross_revenue = rec.invoice_period_amount + rec.pca_period_amount + rec.fae_period_amount
-            rec.internal_revenue = rec.gross_revenue - rec.purchase_balance + rec.cca_period_amount + rec.fnp_period_amount
+            rec.internal_revenue = rec.gross_revenue + - rec.purchase_period_amount + rec.cca_period_amount + rec.fnp_period_amount
             rec.internal_margin_amount = rec.internal_revenue - rec.production_destocking
             rec.internal_margin_rate = 0.0
             if rec.internal_revenue :
                 rec.internal_margin_rate = rec.internal_margin_amount / rec.internal_revenue * 100
 
             rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
+
+            #if rec.invoice_period_amount == 0.0 and rec.purchase_period_amount == 0.0 and rec.production_period_amount == 0.0 :
+            #TODO : ça ne suffit pas pour valider car des fois on a ni prod, ni facturation, ni achat sur la période et on destock
+            #    rec.is_validated = True
 
     name = fields.Char('Libellé', compute=compute, store=True)
     is_validated = fields.Boolean('Validé', tracking=True)
@@ -112,20 +126,15 @@ class projectAccountingClosing(models.Model):
     rel_project_partner_id = fields.Many2one(related='project_id.partner_id', store=True)
     rel_project_user_id = fields.Many2one(related='project_id.user_id', store=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
-    closing_date = fields.Date("Date de clôture", required=True, default=_get_default_closing_date)
+    closing_date = fields.Date("Date de clôture", required=False, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)
     next_closing = fields.One2many('project.accounting_closing', 'previous_closing', string="Clôture suivante", readonly=True)
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    invoice_previous_balance = fields.Monetary('Précédent solde facturation', related='previous_closing.invoice_balance')
-    invoice_period_amount = fields.Monetary('Facturation du mois', compute=compute, store=True)
-    invoice_balance = fields.Monetary('Solde de facturation', compute=compute, store=True)
-    
-    purchase_previous_balance = fields.Monetary('Précédent solde achats', related='previous_closing.purchase_balance')
-    purchase_period_amount = fields.Monetary('Achats du mois', compute=compute, store=True)
-    purchase_balance = fields.Monetary('Solde d\'achats', compute=compute, store=True)
+    invoice_period_amount = fields.Monetary('Facturation sur la période', compute=compute, store=True)
+    purchase_period_amount = fields.Monetary('Achats sur la periode', compute=compute, store=True)
     
     pca_previous_balance = fields.Monetary('Précédent solde PCA', related='previous_closing.pca_balance')
     pca_period_amount = fields.Monetary('PCA(-)')
@@ -147,7 +156,7 @@ class projectAccountingClosing(models.Model):
     provision_balance_sum = fields.Monetary('Somme solde prov.', compute=compute, store=True)
     
     production_previous_balance = fields.Monetary('Précédent stock', related='previous_closing.production_balance')
-    production_period_amount = fields.Monetary('Production du mois', compute=compute, store=True)
+    production_period_amount = fields.Monetary('Production sur la période', compute=compute, store=True)
     production_stock = fields.Monetary('Stock total', compute=compute, store=True)
     production_destocking = fields.Monetary('Destockage')
     production_balance = fields.Monetary('Solde prod après destockage', compute=compute, store=True)
