@@ -1094,6 +1094,7 @@ class fitnetProject(models.Model):
 
         mapping_fields_invoice = {
             'invoiceNumber' : {'odoo_field' : 'name'},
+            'odoo_ref' : {'odoo_field' : 'ref'},
             'odoo_supplierId' : {'odoo_field' : 'partner_id'},
             'paymentConditionsId' : {'odoo_field' : 'invoice_payment_term_id'},
             'date' : {'odoo_field' : 'date'},
@@ -1159,6 +1160,7 @@ class fitnetProject(models.Model):
                 invoice['odoo_purchaseId'] = 'supplier_' + str(invoice['orderNumber']) + '_' + str(invoice['purchaseId']) 
                 invoice["invoiceNumber"] += " [" + str(invoice['orderNumber']) +"]"
             invoice.pop('purchaseId')
+            invoice['odoo_ref'] = invoice["invoiceNumber"]
             if invoice['amountBeforeTax'] < 0:
                 #_logger.info('avoir fitnet invoiceId=' + str(invoice['odoo_purchaseId']))
                 invoice['move_type'] = 'in_refund'
@@ -1297,11 +1299,17 @@ class fitnetProject(models.Model):
             statut = 'purchase'
             if invoice['purchaseStatus'] == -1:
                 statut = 'cancel'
+            if 'orderNumber' in contract_invoice_list[0].keys():
+                partner_ref = contract_invoice_list[0]['orderNumber']
+            else:
+                partner_ref = False
+
             sale_order_list.append({
                     'partner_id' : contract_invoice_list[0]['odoo_supplierId'],
                     'order_id' : key_contract_supplier,
                     'odoo_state' : statut,
                     'date_planned' : date_planned,
+                    'partner_ref' : partner_ref,
                     })
 
             sum_contract_invoice_lines = 0.0
@@ -1368,6 +1376,7 @@ class fitnetProject(models.Model):
 
         mapping_fields_sale_order = {
             'partner_id' : {'odoo_field' : 'partner_id'},
+            'partner_ref' : {'odoo_field' : 'partner_ref'},
             'date_planned' : {'odoo_field' : 'date_planned'},
             'odoo_state' : {'odoo_field' : 'state', 'selection_mapping' : {'draft' : 'draft', 'sent' : 'sent', 'to approve':'to approve', 'purchase' : 'purchase', 'done' : 'done', 'cancel' : 'cancel'}},
         }

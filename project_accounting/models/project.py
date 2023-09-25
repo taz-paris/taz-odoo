@@ -545,7 +545,7 @@ class projectAccountProject(models.Model):
             rec.company_part_cost_current = rec.company_part_cost_initial
             rec.other_part_amount_current = rec.other_part_amount_initial
 
-    @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids.partner_id')
+    @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids', 'project_outsourcing_link_ids.partner_id')
     def check_partners_consistency(self):
         for rec in self:
             if rec.partner_id.id in rec.partner_secondary_ids.ids:

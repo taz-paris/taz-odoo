@@ -14,6 +14,8 @@ class projectAccountingResPartner(models.Model):
      def write(self, vals):
          for rec in self :
              if rec._precompute_protected() and not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
+                 _logger.info(rec.name)
+                 _logger.info(vals)
                  raise ValidationError(_("Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut être modifiée que par un ADV.\nVous ne pouvez pas modifier cette fiche entreprise car vous n'être pas ADV."))
          super().write(vals)
 
