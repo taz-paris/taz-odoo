@@ -8,12 +8,16 @@ _logger = logging.getLogger(__name__)
 import re
 import unicodedata
 
-from odoo.addons import base
-base.models.res_partner.ADDRESS_FIELDS = base.models.res_partner.ADDRESS_FIELDS + ('street3',)
 
 class tazResPartner(models.Model):
      _inherit = "res.partner"
      
+     @api.model
+     def _address_fields(self):
+         res = super()._address_fields()
+         res.append("street3")
+         return res
+
      def _get_default_address_format(self):
         return "%(street)s\n%(street2)s\n%(street3)s\n%(zip)s %(city)s %(state_code)s\n%(country_name)s"
 
