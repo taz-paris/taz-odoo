@@ -4,7 +4,7 @@
             <field name="name">project book period</field>
             <field name="model">project.book_period</field>
             <field name="arch" type="xml">
-                <tree editable="top">
+                <tree create="false" edit="false">
                         <field name="project_id"/>
                         <field name="reference_period"/>
                         <field name="period_project_book" sum="Total"/>
@@ -16,7 +16,7 @@
             <field name="name">book employee distribution</field>
             <field name="model">project.book_employee_distribution</field>
             <field name="arch" type="xml">
-                <tree editable="top">
+                <tree create="false" edit="false">
                         <field name="project_id"/>
                         <field name="employee_id"/>
                         <field name="book_factor" sum="Total"/>
@@ -29,7 +29,7 @@
             <field name="name">book employee distribution period</field>
             <field name="model">project.book_employee_distribution_period</field>
             <field name="arch" type="xml">
-                <tree>
+                <tree create="false" edit="false">
                         <field name="project_id"/>
                         <field name="rel_is_book_manually_computed"/>
                         <field name="rel_book_comment"/>

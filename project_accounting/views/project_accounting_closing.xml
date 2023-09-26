@@ -197,8 +197,6 @@
                         <filter string="Client" name="Partner" context="{'group_by': 'rel_project_partner_id'}"/>
                         <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}" />
                     </group>
-		    <!--
-		    -->
                 </search>
             </field>
         </record>

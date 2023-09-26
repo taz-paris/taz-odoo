@@ -863,10 +863,17 @@ class naptaHrContract(models.Model):
             #cjm = user_history['attributes']['daily_cost'] 
             #job_id = self.env['hr.job'].search(['napta_id', '=', user_history['attributes']['user_position_id'])
             #if job_id and (job_id._get_daily_cost_line(user_history['attributes']['date_start']) and job_id._get_daily_cost_line(user_history['attributes']['date_start']).cost == cjm :
+                #TODO : convertir date_start en date avec le même créneau horaire qu'Odoo pour être sur de ne pas avoir le daily_cost du dernier jour de la période précédente
             #    dic['is_daily_cost_overridden'] = False
             #    dic['daily_cost'] = 0.0
 
+
+
+            #TODO : supprimer les user_history qui ont été supprimés sur Napta
+                # Il faut faire cette suppression avant d'essayer d'ajouter les nouveaux hr.contracts car sur TazForce il ne peut pas y avoir de chevauchement entre les périodes de 2 contrats d'un même employé 
+
             create_update_odoo(self.env, 'hr.contract', dic)
+
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
 
 
@@ -1038,6 +1045,7 @@ def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=Fals
 
                 if odoo_field.ttype in ["float", "monetary"] :
                     odoo_value = round(float(napta_value),8)
+                    #Augmentation de la précision décimale à 8 décimales pour comparer les unit_amount des timesheed_period (pointage) car Napta découpe automatiquement les saisies par jour, ce qui peut générer des montants avec bien plus de 2 décimales
 
                 if odoo_field.ttype in ["integer"] :
                     odoo_value = int(napta_value)
