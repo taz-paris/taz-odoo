@@ -37,6 +37,7 @@
         'views/payment.xml',
         'views/account_move.xml',
         'views/wizard_accounting_closing_mass_creation.xml',
+        'views/employee_book_goal.xml',
     ],
 
 

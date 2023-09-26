@@ -294,7 +294,7 @@
 								</field>
 							</group>
 						</group>
-						<field name="book_employee_distribution_period_ids"  context="{'default_project_id':active_id}">
+						<field name="book_employee_distribution_period_ids"  context="{'default_project_id':active_id}"  attrs="{'readonly': [('is_book_manually_computed', '=', False)]}">
 							<tree editable="top">
 								<field name="project_id" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="rel_is_book_manually_computed" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
