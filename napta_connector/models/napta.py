@@ -993,7 +993,7 @@ def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=Fals
                         odoo_value = datetime.datetime.strptime(napta_value, '%Y-%m-%dT%H:%M:%S.%f')
 
                 if odoo_field.ttype in ["float", "monetary"] :
-                    odoo_value = round(float(napta_value),2)
+                    odoo_value = round(float(napta_value),8)
 
                 if odoo_field.ttype in ["integer"] :
                     odoo_value = int(napta_value)

@@ -49,18 +49,15 @@
 					<field name="marging_rate_current" widget="progressbar" />
 				</group>
 			</group>
-			<group string="Paiement direct du client au sous-traitant">
-				<group>
-					<field name="order_direct_payment_done" />
-				</group>
-				<group>
-					<field name="order_direct_payment_done_detail" />
-				</group>
-			</group>
-			<group string="Paiement de Tasmane au sous-traitant">
-				<group>
+			<group>
+				<group string="Paiement de Tasmane au sous-traitant">
+					<field name="sum_account_move_lines_with_tax" />
 					<field name="company_paid" />
 					<field name="company_residual" />
+				</group>
+				<group string="Paiement direct du client au sous-traitant">
+					<field name="order_direct_payment_done" />
+					<field name="order_direct_payment_done_detail" />
 				</group>
 			</group>
 		</form>                                

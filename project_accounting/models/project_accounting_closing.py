@@ -89,11 +89,9 @@ class projectAccountingClosing(models.Model):
 
             rec.invoice_period_amount = proj_id.compute_account_move_total(previous_closing_date_filter + [('date', '<=', rec.closing_date)])[0]
 
-            _logger.info('purchase_period_amount')
             purchase_period_amount = 0.0
             for link in proj_id.project_outsourcing_link_ids:
                 purchase_period_amount += link.compute_account_move_total_outsourcing_link(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted'])])[0]
-                _logger.info(purchase_period_amount)
             rec.purchase_period_amount = purchase_period_amount
 
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount

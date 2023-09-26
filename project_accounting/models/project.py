@@ -141,8 +141,8 @@ class projectAccountProject(models.Model):
             old_default_book_current = rec.default_book_current
             old_default_book_end = rec.default_book_end
 
-            rec.company_invoice_sum_move_lines, rec.company_paid = rec.compute_account_move_total()
-            rec.company_residual = rec.company_invoice_sum_move_lines - rec.company_paid
+            rec.company_invoice_sum_move_lines, rec.company_invoice_sum_move_lines_with_tax, rec.company_paid = rec.compute_account_move_total()
+            rec.company_residual = rec.company_invoice_sum_move_lines_with_tax - rec.company_paid
 
             ######## TOTAL
             rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
@@ -192,6 +192,7 @@ class projectAccountProject(models.Model):
             outsourcing_link_purchase_order_with_draft = 0.0
             other_part_cost_current = 0.0
             for link in rec.project_outsourcing_link_ids:
+                link.compute()
                 if link.link_type == 'outsourcing' :
                     outsource_part_amount_current += link.outsource_part_amount_current
                     outsource_part_cost_current += link.sum_account_move_lines
@@ -432,13 +433,15 @@ class projectAccountProject(models.Model):
         #TODO : ajouter une contrainte => on ne peut pas avoir une ligne de facture qui porte le compte analytic de ce projet et dont la facture est ni pour le client, ni pour un client secondaire, ni pour partener de 'outsourcing link
 
         line_ids = self.get_account_move_line_ids(filter_list + [('partner_id', 'in', all_customers), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
+        subtotal = 0.0
         total = 0.0
         paid = 0.0
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
-            total += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            subtotal += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            total += line.price_total_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
             paid += line.amount_paid * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
-        return total, paid
+        return subtotal, total, paid
 
 
     def action_open_out_account_move_lines(self):
@@ -602,7 +605,8 @@ class projectAccountProject(models.Model):
     order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute, store=True)
 
     order_to_invoice_company = fields.Monetary('Montant à facturer par Tasmane au client', compute=compute, store=True)
-    company_invoice_sum_move_lines = fields.Monetary('Montant déjà facturé par Tasmane au client', compute=compute, store=True)
+    company_invoice_sum_move_lines = fields.Monetary('Montant HT déjà facturé par Tasmane au client', compute=compute, store=True)
+    company_invoice_sum_move_lines_with_tax = fields.Monetary('Montant déjà TTC facturé par Tasmane au client', compute=compute, store=True)
     company_to_invoice_left = fields.Monetary('Montant restant à factuer par Tasmane au client', compute=compute, store=True)
     order_to_invoice_outsourcing = fields.Monetary('Montant S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute, store=True)
 

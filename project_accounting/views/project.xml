@@ -231,6 +231,7 @@
 						</group>
 						<group string="Paiement du client à Tasmane">
 							<group>
+								<field name="company_invoice_sum_move_lines_with_tax" />
 								<field name="company_paid" />
 								<field name="company_residual" />
 							</group>

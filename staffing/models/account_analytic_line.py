@@ -228,19 +228,18 @@ class staffingAnalyticLine(models.Model):
             raise ValidationError(_("Timesheet encoding uom should be either Hours or Days."))
 
         amount = -timesheet.unit_amount * cost
-        amount_converted = timesheet.employee_id.currency_id._convert(
-            amount, timesheet.account_id.currency_id or timesheet.currency_id, self.env.company, timesheet.date)
+        #on ne réalise pas de conversion monaitaire car ça n'est pas utile et que ça force une précision à 2 décimales alors que l'on a besoin de 3 décimales
 
-        return amount_converted, cost_line
+        return amount, cost_line
 
 
     def refresh_amount(self):
         _logger.info("---- refresh_amount")
-        amount_converted, cost_line = self.compute_amount()
-        if self.amount != amount_converted:
+        amount, cost_line = self.compute_amount()
+        if self.amount != amount:
             _logger.info("change amount of line :")
-            _logger.info(self.amount, amount_converted)
-            self.amount = amount_converted
+            _logger.info(self.amount)
+            self.amount = amount
         if self.hr_cost_id != cost_line:
             _logger.info("change hr_cost_id > cost line")
             _logger.info(self.hr_cost_id, cost_line)

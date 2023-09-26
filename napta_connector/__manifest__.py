@@ -13,7 +13,7 @@
     'category': 'Uncategorized',
     'version': '0.1',
 
-    'depends': ['staffing', 'project_accounting', 'project'],
+    'depends': ['staffing', 'project_accounting', 'project', 'analytic'],
 
     'data': [
         'security/ir.model.access.csv',

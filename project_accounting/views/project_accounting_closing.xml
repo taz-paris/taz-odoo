@@ -181,14 +181,18 @@
             <field name="model">project.accounting_closing</field>
             <field name="arch" type="xml">
                 <search string="Search Project accounting closing">
+		    <field name="project_id" string="Projet"/>
                     <field name="rel_project_user_id" string="Directeur de mission (nom de famille)"/>
                     <field name="rel_project_partner_id" string="Client" filter_domain="[('rel_project_partner_id', 'child_of', self)]"/>
                     <separator/>
                     <filter string="Date de la clôture comptable" name="closing_date" date="closing_date"/>
                     <filter string="Clôture validée" name="validated" domain="[('is_validated', '=', True)]"/>
                     <filter string="Clôture non validée" name="not_validated" domain="[('is_validated', '=', False)]"/>
+		    <filter string="Mes clôtures" name="my_project_accounting_closing" domain="[('rel_project_user_id', '=', uid)]"/>
                     <separator/>
                     <group expand="0" string="Group By">
+			<filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
+			<filter string="Date de la clôture comptable" name="closing_date" context="{'group_by': 'closing_date'}"/>
                         <filter string="Directeur de mission" name="Manager" context="{'group_by': 'rel_project_user_id'}"/>
                         <filter string="Client" name="Partner" context="{'group_by': 'rel_project_partner_id'}"/>
                         <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}" />

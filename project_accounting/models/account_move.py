@@ -101,10 +101,18 @@ class projectAccountingAccountMoveLine(models.Model):
         for rec in self:
             rec.price_subtotal_signed = rec.price_subtotal * rec.direction_sign * -1
 
+    @api.depends('price_total', 'direction_sign')
+    def _compute_price_total_signed(self):
+        for rec in self:
+            rec.price_total_signed = rec.price_total * rec.direction_sign * -1
+
     @api.depends('move_id.amount_total', 'move_id.amount_residual', 'price_total')
     def _compute_amount_paid(self):
         for rec in self:
-            if rec.parent_payment_state == 'reversed':
+            if rec.parent_payment_state == 'reversed' :#or rec.parent_state != 'posted':
+                #TODO : vérifier la conséquence si on supprimait la première clause : rec.parent_payment_state == 'reversed'
+                _logger.info(rec.parent_payment_state)
+                _logger.info(rec.parent_state)
                 rec.amount_paid = 0.0
             else:
                 invoice_amount_paid = rec.move_id.amount_total - rec.move_id.amount_residual
@@ -119,6 +127,13 @@ class projectAccountingAccountMoveLine(models.Model):
     price_subtotal_signed = fields.Monetary(
         string='Montant HT (signé)',
         compute='_compute_price_subtotal_signed',
+        store=True,
+        currency_field='currency_id',
+    )
+
+    price_total_signed = fields.Monetary(
+        string='Montant TTC (signé)',
+        compute='_compute_price_total_signed',
         store=True,
         currency_field='currency_id',
     )

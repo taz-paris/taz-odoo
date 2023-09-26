@@ -81,14 +81,17 @@ class projectOutsourcingLink(models.Model):
         _logger.info('compute_account_move_total_outsourcing_link')
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         line_ids = self.project_id.get_account_move_line_ids(filter_list + [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
+
+        subtotal = 0.0
         total = 0.0
         paid = 0.0
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
-            total += line.price_subtotal_signed * line.analytic_distribution[str(self.project_id.analytic_account_id.id)]/100.0
+            subtotal += line.price_subtotal_signed * line.analytic_distribution[str(self.project_id.analytic_account_id.id)]/100.0
+            total += line.price_total_signed * line.analytic_distribution[str(self.project_id.analytic_account_id.id)]/100.0
             paid += line.amount_paid * line.analytic_distribution[str(self.project_id.analytic_account_id.id)]/100.0 
             #vérifier que le montant est cohérent même en cas d'avoir ou si Tasmane facture un apport d'affaire à un fournisseur
-        return -1 * total, -1 * paid
+        return -1 * subtotal, -1 * total, -1 * paid
 
 
     def action_open_account_move_lines(self):
@@ -156,8 +159,9 @@ class projectOutsourcingLink(models.Model):
             if rec.outsource_part_amount_current != 0 :
                 rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
 
-            total, paid = rec.compute_account_move_total_outsourcing_link()
-            rec.sum_account_move_lines = total
+            subtotal, total, paid = rec.compute_account_move_total_outsourcing_link()
+            rec.sum_account_move_lines = subtotal
+            rec.sum_account_move_lines_with_tax = total
             rec.company_paid = paid
             rec.company_residual = total - paid
 
@@ -181,7 +185,8 @@ class projectOutsourcingLink(models.Model):
         #TODO : il va falloir lister les factures validées sur Chorus et checker ce montant
     order_company_payment_amount = fields.Monetary('Montant à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute)
 
-    sum_account_move_lines = fields.Monetary('Total des factures/avoirs', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute)
+    sum_account_move_lines = fields.Monetary('Montant HT déjà facturé', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute)
+    sum_account_move_lines_with_tax = fields.Monetary('Montant TTC déjà facturé', compute=compute, store=True)
 
     outsource_part_amount_current = fields.Monetary('Valorisation de la part sous-traitée', compute=compute)
     marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', compute=compute)
