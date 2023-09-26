@@ -12,7 +12,6 @@
 						<field name="job_id" invisible="0" optional="hide"/>
 						<field name="begin_date"/>
 						<field name="cost"/>
-						<field name="revenue"/>
 						<field name="account_analytic_line_ids" optional="False"/>
 					</tree>
 				</field>

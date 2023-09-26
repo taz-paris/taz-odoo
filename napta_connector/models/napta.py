@@ -405,8 +405,17 @@ class naptaProject(models.Model):
         client = ClientRestNapta(self.env)
         #client.refresh_cache()
 
-
         """
+        begin_of_time = '2022-12-31'
+        contract_ids = self.env['hr.contract'].search([('date_start', '<=', begin_of_time), '|', ('date_end', '>', '2022-12-31'), ('date_end', '=', False)])
+        for contract in contract_ids :
+            _logger.info(contract.id)
+            _logger.info(contract.employee_id.name)
+            _logger.info(contract.napta_id)
+            _logger.info(contract.date_start)
+            _logger.info(contract.date_end)
+            contract.date_end = '2022-12-31'
+
         # RESET des user_history portant les CJM
         users = self.env['res.users'].search([('active', 'in', [True, False])])
         for user in users:
@@ -822,11 +831,47 @@ class naptaJob(models.Model):
 
 class naptaHrContract(models.Model):
     _inherit = 'hr.contract'
-    """
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
+    napta_id = fields.Char("Napta ID")
 
+
+    def create_update_odoo_user_history(self):
+        _logger.info('---- BATCH Create or update Odoo user_history')
+        client = ClientRestNapta(self.env)
+        user_history_list = client.read_cache('user_history')
+        for napta_id, user_history in user_history_list.items():
+            if user_history['attributes']['start_date'] == None:
+                continue
+            if user_history['attributes']['start_date'] < "2023-01-01":
+                continue
+
+            dic = {
+                    'napta_id' : napta_id,
+                    'employee_id' : {'napta_id' : user_history['attributes']['user_id']},
+                    'date_start' : user_history['attributes']['date_start'],
+                    'date_end' : user_history['attributes']['date_end'],
+                    'job_id' : {'napta_id' : user_history['attributes']['user_position_id']},
+                    'is_daily_cost_overridden' : True,
+                    'daily_cost' : user_history['attributes']['daily_cost'],
+                }
+
+            ########## Gestion des surcharges de CJM individuel par rapport au grade
+            #       TODO : ce qui suit n'est utile que si les CJM par grade sont mis à jour dans TazForce (ce qui est l'opposé de l'objectif d'import automatisé depuis Napta)... ou bien importés depuis une structure d'historisation des CJM par grade sur Napta équivalente a l'objet hr.cost TazFortce (ce qqui n'est pas le cas) ==> donc pour le moment autant surcharger le dailycost systématiquement sur le hr.contract TazForce
+
+            #cjm = user_history['attributes']['daily_cost'] 
+            #job_id = self.env['hr.job'].search(['napta_id', '=', user_history['attributes']['user_position_id'])
+            #if job_id and (job_id._get_daily_cost_line(user_history['attributes']['date_start']) and job_id._get_daily_cost_line(user_history['attributes']['date_start']).cost == cjm :
+            #    dic['is_daily_cost_overridden'] = False
+            #    dic['daily_cost'] = 0.0
+
+            create_update_odoo(self.env, 'hr.contract', dic)
+    #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
+
+
+
+    """
     def reset_user_history(self):
         _logger.info('---- RESET Napta user_history')
         client = ClientRestNapta(self.env)
@@ -883,7 +928,6 @@ class naptaHrContract(models.Model):
                 napta_id = res['data']['id']
                 user_history_target['napta_id'] = napta_id
     """
-    #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
 
 class naptaHrDepartment(models.Model):
     _inherit = 'hr.department'

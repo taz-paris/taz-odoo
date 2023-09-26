@@ -95,7 +95,6 @@ class HrCost(models.Model):
     job_id = fields.Many2one('hr.job', string="Poste", required=True)
     begin_date = fields.Date("Date d'effet", required=True)
     cost = fields.Float("CJM", help="Coût journalier moyen imputé sur les lignes de pointage.", required=True)
-    revenue = fields.Float("TJM", help="Taux journalier moyen HT vendu au client (prix catalogue).", required=True)
     #daily_max_timesheet_unit_amount = field.Float("Pointage par jour", help="Exprimé suivant l'unité de pointage défini pour l'entreprise : jour ou heure")
     #weekly_max_timesheet_unit_amount = field.Float("Pointage par semaine", help="Exprimé suivant l'unité de pointage défini pour l'entreprise : jour ou heure")
 

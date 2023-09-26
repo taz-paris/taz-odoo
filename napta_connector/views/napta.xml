@@ -76,7 +76,6 @@
             </field>
         </record>
 
-	<!--			
         <record id="hr_contract_history_view_form_inherit" model="ir.ui.view">
             <field name="name">Contract history</field>
             <field name="model">hr.contract.history</field> 
@@ -99,7 +98,6 @@
                 </field>
             </field>
         </record>
-	-->
 
 <!--
         <record id="hr_employee_fitnet_view_form_inherit" model="ir.ui.view">
