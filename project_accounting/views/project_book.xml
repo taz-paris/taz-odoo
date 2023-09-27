@@ -92,8 +92,8 @@
         </record>
 
 	<menuitem name="Gestion du book" id="project_book_menu" parent="project.menu_main_pm" />
-	<menuitem name="Distribution du book" id="project_book_distribution_menu" parent="project_book_menu" action="project_book_employee_distribution_period_action"/>
-	<menuitem name="Book par période/projet" id="project_book_period_menu" parent="project_book_menu" action="project_book_period_action"/>
+	<menuitem name="Répartition du book par projet/année/consultant" id="project_book_distribution_menu" parent="project_book_menu" action="project_book_employee_distribution_period_action"/>
+	<menuitem name="Book par année/projet" id="project_book_period_menu" parent="project_book_menu" action="project_book_period_action"/>
 	<menuitem name="Facteur de book par consultant/projet" id="project_book_employee_distribution" parent="project_book_menu" action="project_book_employee_distribution_action"/>
    </data>
 </odoo>

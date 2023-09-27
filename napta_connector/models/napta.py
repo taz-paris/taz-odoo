@@ -292,15 +292,23 @@ class ClientRestNapta:
             _logger.info(response.content)
         return response.json()
 
+    def delete_not_found_anymore_object_on_napta(self, odoo_model_name, napta_model_name) :
+        # Cette fonction permet de supprimer sur Odoo les instances qui ont été supprimées sur Napta
+        _logger.info('--- delete_not_found_anymore_object_on_napta')
+        if odoo_model_name == 'account.analytic.line':
+            raise ValidationError(_("Impossible d'utiliser la fonction delete_not_found_anymore_object_on_napta pour l'objet Odoo account.analytic.line car le NaptaID n'est pas unique sur cet objet. Seul le couple (NaptaID,category) est unique pour cet objet."))
+        napta_object_list = self.read_cache(napta_model_name)
 
-    """
-    def delete_napta_ids(self):
-        for obj in[]: # ["project.project", "res.partner", "staffing.need", "account.analytic.line", "res.users", "hr.contract"]: #, "hr.job", "project.project.stage"
-            _logger.info('Suppression des napta_id sur les instance de %s' % obj)
-            list_obj = self.env[obj].search([('napta_id', '!=', None)])
-            for o in list_obj :
-                o.write({'napta_id' : None})
-    """
+        filter_list = [('napta_id', '!=', None), ('napta_id', 'not in', list(napta_object_list.keys()))]
+        odoo_objects = self.env[odoo_model_name].search(filter_list)
+        _logger.info("Nombre d'objets %s qui portent un ID Napta qui n'est plus retourné par l'API Napta : %s" % (odoo_model_name, str(len(odoo_objects))))
+
+        for odoo_objet in odoo_objects:
+            _logger.info(odoo_objet.read())
+            _logger.info("      > Instance du modèle %s sur le point d'être supprimée OdooID %s / NaptaID %s" % (odoo_model_name, odoo_objet.id, odoo_objet.napta_id))
+            odoo_objet.unlink()
+            self.env.cr.commit()
+
 
 class naptaProject(models.Model):
     _inherit = "project.project"
@@ -491,6 +499,9 @@ class naptaProject(models.Model):
         client = ClientRestNapta(self.env)
         client.refresh_cache()
 
+        self.env['hr.department'].create_update_odoo_business_unit()
+        self.env['hr.job'].create_update_odoo_user_position()
+        self.env['project.project.stage'].create_update_odoo_projectstatus()
         self.env['project.project'].create_update_odoo()
         self.env['res.users'].create_update_odoo()
         self.env['staffing.need'].create_update_odoo()
@@ -501,11 +512,7 @@ class naptaProject(models.Model):
                 # les générer jusqu'en 2050 avec https://pypi.org/project/jours-feries-france/ ?
         #TODO : synchro des compétences, les catégories de compétences, les échelles de notations, les valeurs des échelles de notations et les compétences des utilisateurs, les souhaits des utilisateurs
 
-        #TODO : mettre à jour le job_id de l'employee et la date d'embauche/contrat
-            # Gérer le recalcul des montants des analytic lines si le grade ou le CJM change a posteriori
-        #TODO : créer les hr.job manquants
-        #TODO : créer les project.stage manquants
-        #TODO : quid de la synchro des CJM ?
+        # TODO : Gérer le recalcul des montants des analytic lines si le grade ou le CJM change a posteriori
 
         _logger.info('======== synchAllNapta TERMINEE')
 
@@ -542,6 +549,21 @@ class naptaProjectStage(models.Model):
               "name": rec.name,
             }
             client.create_update_api('projectstatus', attributes, rec)
+
+
+    def create_update_odoo_projectstatus(self):
+        _logger.info('---- BATCH Create or update Odoo projectstatus')
+        client = ClientRestNapta(self.env)
+        projectstatus_list = client.read_cache('projectstatus')
+        for napta_id, projectstatus in projectstatus_list.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'name' : projectstatus['attributes']['name'],
+                }
+            create_update_odoo(self.env, 'project.project.stage', dic)
+
+            #TODO : supprimer les business_unit qui ont été supprimés sur Napta
+
 
 class naptaNeed(models.Model):
     _inherit = "staffing.need"
@@ -818,6 +840,19 @@ class naptaJob(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
 
+    def create_update_odoo_user_position(self):
+        _logger.info('---- BATCH Create or update Odoo user_position')
+        client = ClientRestNapta(self.env)
+        user_position_list = client.read_cache('user_position')
+        for napta_id, user_position in user_position_list.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'name' : user_position['attributes']['name'],
+                }
+            create_update_odoo(self.env, 'hr.job', dic)
+
+        client.delete_not_found_anymore_object_on_napta('hr.job', 'user_position')
+
     """
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta user_position')
@@ -841,6 +876,10 @@ class naptaHrContract(models.Model):
         _logger.info('---- BATCH Create or update Odoo user_history')
         client = ClientRestNapta(self.env)
         user_history_list = client.read_cache('user_history')
+
+        client.delete_not_found_anymore_object_on_napta('hr.contract', 'user_history')
+        # Il faut faire cette suppression avant d'essayer d'ajouter les nouveaux hr.contracts car sur TazForce il ne peut pas y avoir de chevauchement entre les périodes de 2 contrats d'un même employé 
+
         for napta_id, user_history in user_history_list.items():
             if user_history['attributes']['start_date'] == None:
                 continue
@@ -855,6 +894,7 @@ class naptaHrContract(models.Model):
                     'job_id' : {'napta_id' : user_history['attributes']['user_position_id']},
                     'is_daily_cost_overridden' : True,
                     'daily_cost' : user_history['attributes']['daily_cost'],
+                    'department_id' : user_history['attributes']['business_unit_id'],
                 }
 
             ########## Gestion des surcharges de CJM individuel par rapport au grade
@@ -866,11 +906,6 @@ class naptaHrContract(models.Model):
                 #TODO : convertir date_start en date avec le même créneau horaire qu'Odoo pour être sur de ne pas avoir le daily_cost du dernier jour de la période précédente
             #    dic['is_daily_cost_overridden'] = False
             #    dic['daily_cost'] = 0.0
-
-
-
-            #TODO : supprimer les user_history qui ont été supprimés sur Napta
-                # Il faut faire cette suppression avant d'essayer d'ajouter les nouveaux hr.contracts car sur TazForce il ne peut pas y avoir de chevauchement entre les périodes de 2 contrats d'un même employé 
 
             create_update_odoo(self.env, 'hr.contract', dic)
 
@@ -943,6 +978,19 @@ class naptaHrDepartment(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
 
+
+    def create_update_odoo_business_unit(self):
+        _logger.info('---- BATCH Create or update Odoo business_unit')
+        client = ClientRestNapta(self.env)
+        business_unit_list = client.read_cache('business_unit')
+        for napta_id, business_unit in business_unit_list.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'name' : business_unit['attributes']['name'],
+                }
+            create_update_odoo(self.env, 'hr.department', dic)
+
+        client.delete_not_found_anymore_object_on_napta('hr.department', 'business_unit')
 
 ########################################################################################
 ########################################################################################
@@ -1149,5 +1197,6 @@ def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=Fals
                 continue
 
         return old_odoo_value, res
+
 
 

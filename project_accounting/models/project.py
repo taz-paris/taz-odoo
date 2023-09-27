@@ -144,22 +144,6 @@ class projectAccountProject(models.Model):
             rec.company_invoice_sum_move_lines, rec.company_invoice_sum_move_lines_with_tax, rec.company_paid = rec.compute_account_move_total()
             rec.company_residual = rec.company_invoice_sum_move_lines_with_tax - rec.company_paid
 
-            ######## TOTAL
-            rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
-            rec.order_amount_current = rec.company_part_amount_current + rec.outsource_part_amount_current + rec.other_part_amount_current
-
-            rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.other_part_cost_initial
-            rec.order_marging_amount_initial = rec.company_part_marging_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
-            rec.order_marging_rate_initial = 0.0
-            if rec.order_amount_initial != 0 : 
-                rec.order_marging_rate_initial = rec.order_marging_amount_initial / rec.order_amount_initial * 100
-
-            rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
-            rec.order_marging_amount_current = rec.company_invoice_sum_move_lines - rec.order_cost_current
-            rec.order_marging_rate_current = 0.0
-            if rec.company_invoice_sum_move_lines != 0 : 
-                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.company_invoice_sum_move_lines * 100
-
             ######## COMPANY PART
 
             rec.company_part_marging_amount_initial =  rec.company_part_amount_initial - rec.company_part_cost_initial
@@ -230,6 +214,26 @@ class projectAccountProject(models.Model):
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
             else:
                 rec.other_part_marging_rate_current = 0.0
+
+            ######## TOTAL
+            rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
+            rec.order_amount_current = rec.company_part_amount_current + rec.outsource_part_amount_current + rec.other_part_amount_current
+
+            rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.other_part_cost_initial
+            rec.order_marging_amount_initial = rec.company_part_marging_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
+            if rec.order_amount_initial != 0 : 
+                rec.order_marging_rate_initial = rec.order_marging_amount_initial / rec.order_amount_initial * 100
+            else:
+                rec.order_marging_rate_initial = 0.0
+
+            rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
+            rec.order_marging_amount_current = rec.company_invoice_sum_move_lines - rec.order_cost_current
+            if rec.company_invoice_sum_move_lines != 0 : 
+                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.company_invoice_sum_move_lines * 100
+            else:
+                rec.order_marging_rate_current = 0.0
+
+
             
             ######## INVOICE DATA CONTROLE
             #TODO : il ne faut regarder que les commandes pour lesquelles on a effectivement reçu un numéro de commande... pas les commandes en brouillon
