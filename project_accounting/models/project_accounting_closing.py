@@ -54,20 +54,19 @@ class projectAccountingClosing(models.Model):
 
 
     def unlink(self):
-        if self.next_closing :
-            raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car une clôture postérieure existe pour ce projet."))
-        if rec.is_validated :
-            raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car elle est validée."))
+        for rec in self:
+            if rec.next_closing :
+                raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car une clôture postérieure existe pour ce projet."))
+            if rec.is_validated :
+                raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car elle est validée."))
         super().unlink()
 
 
 
-    @api.depends('project_id', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
+    @api.depends('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     def compute(self):
         _logger.info('-- compute')
         for rec in self :
-            if rec.is_validated :
-                continue
 
             proj_id = rec.project_id #quand on applique la fonction WRITE
             if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)
@@ -104,6 +103,10 @@ class projectAccountingClosing(models.Model):
             rec.production_period_amount = -1 * proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date)])
 
             rec.production_stock = rec.production_previous_balance + rec.production_period_amount
+            _logger.info('------ prod')
+            _logger.info(rec.production_previous_balance)
+            _logger.info(rec.production_period_amount)
+
             rec.production_balance = rec.production_stock - rec.production_destocking
 
             rec.gross_revenue = rec.invoice_period_amount + rec.pca_period_amount + rec.fae_period_amount

@@ -16,7 +16,7 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
     @api.onchange('date')
     def _onchange_date(self):
         self.project_ids = False
-        p = self.env['project.project'].search([('number', '!=', False), ('stage_id.state', 'in', ['before_launch', 'launched'])])
+        p = self.env['project.project'].search([('number', '!=', False), '|', ('has_provision_running', '=', True), ('stage_id.state', 'in', ['before_launch', 'launched'])])
         #TODO : il faudrait mieux les projets (non TERMINES à cette DATE OU cloturés entre la DATE et le pointage précédent) ET (qui n'ont pas cloture postérieur ou égal à cette date)
         self.project_ids = p.ids
 
@@ -31,10 +31,13 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
 
 
     def action_validate(self):
+        _logger.info('-- wizardAccountingClosingMassCreation > action_validate')
         for project_id in self.project_ids:
             closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', project_id.id), ('closing_date', '=', self.date)])
             if len(closing_ids) == 0:
-                self.env['project.accounting_closing'].create({
+                dic = {
                         'project_id' : project_id.id,
                         'closing_date' : self.date,
-                    })
+                }
+                self.env['project.accounting_closing'].create(dic)
+                _logger.info(dic)

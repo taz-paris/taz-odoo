@@ -312,6 +312,11 @@
 					</page>
 					<page name="account_closing" string="Clôtures comptables">
 						<field name="accounting_closing_ids" context="{'default_project_id':active_id}"/>
+						<group>
+							<group>
+								<field name="has_provision_running"/>
+							</group>
+						</group>
 					</page>
 					<page name="description" string="Description">
 						<group>

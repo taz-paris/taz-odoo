@@ -591,6 +591,15 @@ class projectAccountProject(models.Model):
             if len(purchase_order_line_ids) :
                 raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)." % (rec.number, rec.name)))
 
+    @api.depends('accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance')
+    def compute_has_provision_running(self):
+        for rec in self:
+            rec.has_provision_running = False
+            last_closing_sorted = rec.accounting_closing_ids.filtered(lambda r: r.is_validated==True).sorted(key=lambda r: r.closing_date, reverse=True)
+            if len(last_closing_sorted):
+                last_closing = last_closing_sorted[0]
+                if last_closing.pca_balance or last_closing.fae_balance or last_closing.fnp_balance or last_closing.cca_balance:
+                    rec.has_provision_running = True
 
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')
@@ -704,6 +713,7 @@ class projectAccountProject(models.Model):
 
     # ACCOUNTING CLOSING
     accounting_closing_ids = fields.One2many('project.accounting_closing', 'project_id', 'Clôtures comptables')
+    has_provision_running = fields.Boolean('Provisions en cours', store=True, help="Il y a des provisions courrantes au sein de la dernière cloture VALIDÉE du projet.", compute=compute_has_provision_running)
 
 
     # INVOICING MANAGEMENT DATA
