@@ -4,6 +4,7 @@ from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
 
+import datetime
 
 class HrJob(models.Model):
     _inherit = "hr.job"
@@ -34,7 +35,6 @@ class HrCost(models.Model):
     _sql_constraints = [
         ('begin_date__uniq', 'UNIQUE (begin_date, job_id)',  "Impossible d'enregistrer deux objets pour le même poste et la même date d'effet.")
     ]
-
 
     def unlink(self):
         account_analytic_line_ids = self.account_analytic_line_ids
@@ -91,9 +91,18 @@ class HrCost(models.Model):
                 line.refresh_amount()
         """ 
 
+    def compute_end_date(self):
+        for rec in self:
+            end_date = False
+            cost_lines = self.search([('job_id', '=', rec.job_id.id), ('begin_date', '>', rec.begin_date)], order="begin_date asc")
+            if cost_lines:
+                end_date = cost_lines[0].begin_date - datetime.timedelta(days=1)
+            rec.end_date = end_date
+
 
     job_id = fields.Many2one('hr.job', string="Poste", required=True)
     begin_date = fields.Date("Date d'effet", required=True)
+    end_date = fields.Date("Date de fin", compute=compute_end_date)
     cost = fields.Float("CJM", help="Coût journalier moyen imputé sur les lignes de pointage.", required=True)
     #daily_max_timesheet_unit_amount = field.Float("Pointage par jour", help="Exprimé suivant l'unité de pointage défini pour l'entreprise : jour ou heure")
     #weekly_max_timesheet_unit_amount = field.Float("Pointage par semaine", help="Exprimé suivant l'unité de pointage défini pour l'entreprise : jour ou heure")

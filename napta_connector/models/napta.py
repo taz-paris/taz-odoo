@@ -25,6 +25,9 @@ API_URL_BUSINESS_ENDPOINT = "https://app.napta.io/api/v1/"
 cache_duration_in_minutes = 75
 cache_folder = '/tmp/napta'
 
+EXCLUDED_USERLIST = ['1', '67', '68']
+        #'admin@napta.io' => 1, 'adminapi@tasmane-napta.com' => 67, 'consultant@tasmane-napta.com' => 68
+
 ##################################################################
 ##########                 REST CLIENT                  ##########
 ##################################################################
@@ -497,13 +500,14 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        client.refresh_cache()
+        #client.refresh_cache()
 
         self.env['hr.department'].create_update_odoo_business_unit()
         self.env['hr.job'].create_update_odoo_user_position()
+        self.env['res.users'].create_update_odoo()
+        self.env['hr.contract'].create_update_odoo_user_history()
         self.env['project.project.stage'].create_update_odoo_projectstatus()
         self.env['project.project'].create_update_odoo()
-        self.env['res.users'].create_update_odoo()
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
@@ -778,7 +782,7 @@ class naptaResUsers(models.Model):
         users = client.read_cache('user')
         for napta_id, user in users.items():
             #Utilisateurs techniques qui ne doivent pas être créés sur Odoo
-            if user['attributes']['email'] in ['admin@napta.io', 'adminapi@tasmane-napta.com', 'consultant@tasmane-napta.com']:
+            if napta_id in EXCLUDED_USERLIST :
                 continue
 
             dic = {
@@ -880,36 +884,59 @@ class naptaHrContract(models.Model):
         client.delete_not_found_anymore_object_on_napta('hr.contract', 'user_history')
         # Il faut faire cette suppression avant d'essayer d'ajouter les nouveaux hr.contracts car sur TazForce il ne peut pas y avoir de chevauchement entre les périodes de 2 contrats d'un même employé 
 
+        BEGIN_OF_TIME = "2023-01-01"
+
         for napta_id, user_history in user_history_list.items():
-            if user_history['attributes']['start_date'] == None:
+            if user_history['attributes']['user_id'] in EXCLUDED_USERLIST:
                 continue
-            if user_history['attributes']['start_date'] < "2023-01-01":
+            if user_history['attributes']['end_date'] != None and user_history['attributes']['end_date'] < BEGIN_OF_TIME:
                 continue
 
+            if user_history['attributes']['start_date'] == None  or user_history['attributes']['start_date'] < BEGIN_OF_TIME:
+                user_history['attributes']['start_date'] = BEGIN_OF_TIME
+
+            user = self.env['res.users'].search([('napta_id', '=', user_history['attributes']['user_id'])])
+            name = ""
+            if user:
+                name = user[0].name + " " + user[0].first_name
+            name += " "+ str(user_history['attributes']['start_date'])
             dic = {
                     'napta_id' : napta_id,
+                    'name' : name,
+                    'wage' : 0.0,
                     'employee_id' : {'napta_id' : user_history['attributes']['user_id']},
-                    'date_start' : user_history['attributes']['date_start'],
-                    'date_end' : user_history['attributes']['date_end'],
+                    'date_start' : user_history['attributes']['start_date'],
+                    'date_end' : user_history['attributes']['end_date'],
                     'job_id' : {'napta_id' : user_history['attributes']['user_position_id']},
-                    'is_daily_cost_overridden' : True,
-                    'daily_cost' : user_history['attributes']['daily_cost'],
-                    'department_id' : user_history['attributes']['business_unit_id'],
+                    'department_id' : {'napta_id' : user_history['attributes']['business_unit_id']},
                 }
 
             ########## Gestion des surcharges de CJM individuel par rapport au grade
-            #       TODO : ce qui suit n'est utile que si les CJM par grade sont mis à jour dans TazForce (ce qui est l'opposé de l'objectif d'import automatisé depuis Napta)... ou bien importés depuis une structure d'historisation des CJM par grade sur Napta équivalente a l'objet hr.cost TazFortce (ce qqui n'est pas le cas) ==> donc pour le moment autant surcharger le dailycost systématiquement sur le hr.contract TazForce
 
-            #cjm = user_history['attributes']['daily_cost'] 
-            #job_id = self.env['hr.job'].search(['napta_id', '=', user_history['attributes']['user_position_id'])
-            #if job_id and (job_id._get_daily_cost_line(user_history['attributes']['date_start']) and job_id._get_daily_cost_line(user_history['attributes']['date_start']).cost == cjm :
-                #TODO : convertir date_start en date avec le même créneau horaire qu'Odoo pour être sur de ne pas avoir le daily_cost du dernier jour de la période précédente
-            #    dic['is_daily_cost_overridden'] = False
-            #    dic['daily_cost'] = 0.0
+            job_ids = self.env['hr.job'].search([('napta_id', '=', user_history['attributes']['user_position_id'])])
+            napta_start_date = datetime.datetime.strptime(user_history['attributes']['start_date'], '%Y-%m-%d').date()
+            napta_end_date = False
+            if user_history['attributes']['end_date'] != None :
+                napta_end_date = datetime.datetime.strptime(user_history['attributes']['end_date'], '%Y-%m-%d').date()
 
+            if job_ids :
+                cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)])
+                for cost_line in cost_lines:
+                    if napta_end_date and cost_line.begin_date < napta_end_date:
+                        continue
+                    if cost_line.end_date and cost_line.end_date < napta_start_date:
+                        continue
+                    # Si au moins une cost_line pour ce job_id au cours du contrat a un tarif différent à celui du user_hirtory_napta, alors on passe en mode overriden le contrat
+                    if cost_line.cost != user_history['attributes']['daily_cost']:
+                        _logger.info('      > Surchage du daily_cost au niveau de contrat pour le user avec le napta_id= %s' % str(user_history['attributes']['user_id']))
+                        dic['is_daily_cost_overridden'] = True
+                        dic['daily_cost'] = user_history['attributes']['daily_cost']
+                        break
+                        
             create_update_odoo(self.env, 'hr.contract', dic)
 
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
+    #TODO : intégrer la date de sortie du napta user à la fin du dernier contrat Odoo
 
 
 
