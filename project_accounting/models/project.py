@@ -598,7 +598,7 @@ class projectAccountProject(models.Model):
             last_closing_sorted = rec.accounting_closing_ids.filtered(lambda r: r.is_validated==True).sorted(key=lambda r: r.closing_date, reverse=True)
             if len(last_closing_sorted):
                 last_closing = last_closing_sorted[0]
-                if last_closing.pca_balance or last_closing.fae_balance or last_closing.fnp_balance or last_closing.cca_balance:
+                if last_closing.pca_balance or last_closing.fae_balance or last_closing.fnp_balance or last_closing.cca_balance or last_closing.production_balance :
                     rec.has_provision_running = True
 
     state = fields.Selection(related='stage_id.state')
@@ -713,7 +713,7 @@ class projectAccountProject(models.Model):
 
     # ACCOUNTING CLOSING
     accounting_closing_ids = fields.One2many('project.accounting_closing', 'project_id', 'Clôtures comptables')
-    has_provision_running = fields.Boolean('Provisions en cours', store=True, help="Il y a des provisions courrantes au sein de la dernière cloture VALIDÉE du projet.", compute=compute_has_provision_running)
+    has_provision_running = fields.Boolean('Provisions/stock prod. en cours', store=True, help="Il y a des provisions courrantes ou du stock de production au sein de la dernière cloture VALIDÉE du projet.", compute=compute_has_provision_running)
 
 
     # INVOICING MANAGEMENT DATA

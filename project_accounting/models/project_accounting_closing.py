@@ -126,6 +126,35 @@ class projectAccountingClosing(models.Model):
             #TODO : ça ne suffit pas pour valider car des fois on a ni prod, ni facturation, ni achat sur la période et on destock
             #    rec.is_validated = True
 
+
+    def action_open_out_account_move_lines(self):
+        all_customers = self.get_all_customer_ids()
+        line_ids = self.get_account_move_line_ids(filter_list + [('partner_id', 'in', all_customers), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
+
+        action = {
+            'name': _("Lignes de factures / avoirs"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move.line',
+            #'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'domain': [('id', 'in', line_ids)],
+            'view_type': 'form',
+            'view_mode': 'tree',
+            'target' : 'current',
+            'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
+            'context': {
+                'create': False,
+                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_move_type' : 'out_invoice',
+            }
+        }
+
+        #if len(invoice_ids) == 1:
+        #    action['views'] = [[False, 'form']]
+        #    action['res_id'] = invoice_ids[0]
+
+        return action
+
+
     name = fields.Char('Libellé', compute=compute, store=True)
     is_validated = fields.Boolean('Validé', tracking=True)
     comment = fields.Text("Commentaire")
