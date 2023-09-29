@@ -46,10 +46,10 @@ class projectAccountingClosing(models.Model):
         for rec in self :
             if rec.next_closing :
                 raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
-            if rec.is_validated :
-                if not (len(vals) == 1 and vals.get('is_validated') == False) :
+            #if rec.is_validated :
+            #    if not (len(vals) == 1 and vals.get('is_validated') == False) :
                     #il faut pouvoir écrire s'il on dévalide
-                    raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée."))
+            #       raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée."))
         super().write(vals)
 
 
@@ -63,10 +63,14 @@ class projectAccountingClosing(models.Model):
 
 
 
+    @api.onchange('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     @api.depends('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     def compute(self):
         _logger.info('-- compute')
         for rec in self :
+
+            if rec.is_validated :
+                continue
 
             proj_id = rec.project_id #quand on applique la fonction WRITE
             if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)

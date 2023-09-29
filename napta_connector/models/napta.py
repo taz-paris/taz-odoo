@@ -919,8 +919,18 @@ class naptaHrContract(models.Model):
             if user_history['attributes']['end_date'] != None :
                 napta_end_date = datetime.datetime.strptime(user_history['attributes']['end_date'], '%Y-%m-%d').date()
 
+            override = False
             if job_ids :
-                cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)])
+                cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)], order="begin_date asc")
+                if not cost_lines :
+                    override = True
+                else:
+                    #si les cost_line du job_id ne couvrent pas l'intégralité de la durée du user_history > on surcharge le CJM dans le contrat
+                    if cost_lines[0].begin_date > napta_start_date :
+                        override = True
+                    if cost_lines[len(cost_lines)-1].end_date and napta_end_date and cost_lines[len(cost_lines)-1].end_date < napta_end_date:
+                        override = True
+                
                 for cost_line in cost_lines:
                     if napta_end_date and cost_line.begin_date < napta_end_date:
                         continue
@@ -928,11 +938,14 @@ class naptaHrContract(models.Model):
                         continue
                     # Si au moins une cost_line pour ce job_id au cours du contrat a un tarif différent à celui du user_hirtory_napta, alors on passe en mode overriden le contrat
                     if cost_line.cost != user_history['attributes']['daily_cost']:
-                        _logger.info('      > Surchage du daily_cost au niveau de contrat pour le user avec le napta_id= %s' % str(user_history['attributes']['user_id']))
-                        dic['is_daily_cost_overridden'] = True
-                        dic['daily_cost'] = user_history['attributes']['daily_cost']
+                        override = True
                         break
                         
+            if override:
+                _logger.info('      > Surchage du daily_cost au niveau de contrat pour le user avec le napta_id= %s' % str(user_history['attributes']['user_id']))
+                dic['is_daily_cost_overridden'] = True
+                dic['daily_cost'] = user_history['attributes']['daily_cost']
+                
             create_update_odoo(self.env, 'hr.contract', dic)
 
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
