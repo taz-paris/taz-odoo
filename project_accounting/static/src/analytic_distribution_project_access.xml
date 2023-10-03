@@ -2,8 +2,13 @@
 <templates xml:space="preserve">
 
 	<t t-inherit-mode="extension" t-inherit="analytic.AnalyticDistribution">
-		<xpath expr="//div" position="after">
-			<a class="btn open_tab_widget fa fa-external-link"  t-on-click="open_project_form"  />
+		<xpath expr="//div" position="before">
+				<a
+				    class="btn open_tab_widget fa fa-external-link"
+				    t-on-click="ev => this.getProjectUrl(ev)"
+				    style="padding : 0rem 0rem 0rem 0rem;"
+				>
+				</a>
 		</xpath>
 	</t>
 </templates>

@@ -319,7 +319,7 @@ class naptaProject(models.Model):
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
-    is_prevent_napta_creation = fields.Boolean("Ne pas créer sur sur Napta (dont portage pur)")
+    is_prevent_napta_creation = fields.Boolean("Portage pur (ne remonte pas sur Napta)")
 
     @api.model_create_multi
     def create(self, vals):
@@ -410,6 +410,92 @@ class naptaProject(models.Model):
                 'target': 'new',
             }
     
+    def napta_init_from_odoo(self):
+        _logger.info('======== DEMARRAGE napta_init_from_odoo ')
+
+        client = ClientRestNapta(self.env)
+        #client.refresh_cache()
+
+        """
+        begin_of_time = '2022-12-31'
+        contract_ids = self.env['hr.contract'].search([('date_start', '<=', begin_of_time), '|', ('date_end', '>', '2022-12-31'), ('date_end', '=', False)])
+        for contract in contract_ids :
+            _logger.info(contract.id)
+            _logger.info(contract.employee_id.name)
+            _logger.info(contract.napta_id)
+            _logger.info(contract.date_start)
+            _logger.info(contract.date_end)
+            contract.date_end = '2022-12-31'
+
+        # RESET des user_history portant les CJM
+        users = self.env['res.users'].search([('active', 'in', [True, False])])
+        for user in users:
+            if not user.napta_id :
+                _logger.info("Pas de napta_id pour l'utilisatuer : %s" % user.login)
+                continue
+            for contract in user.employee_id.contract_ids:
+                contract.reset_user_history()
+
+        #supprimer les projets remontés par erreur
+        projects = self.env['project.project'].search([], order="number desc")
+        for project in projects:
+            if not project.napta_id:
+                continue
+            if project.is_project_to_migrate() :
+                _logger.info('projet à migrer %s' % project.number)
+                continue
+            if project.id in [1148,1374,1150,1337,1373,1372,1371] : #1148 = K4M et autres formations Fitnet POUR 2023 uniquement
+                continue
+            #projet avec un napta_id qui ne sont pas à migrer
+            _logger.info('projet à supprimer de napta %s %s (ID ODOO = %s / NaptaID = %s)' % (project.number, project.name, str(project.id), project.napta_id))
+            project.is_prevent_napta_creation = True
+            client.delete_api('project', project)
+            self.env.cr.commit()
+        return
+        """
+
+        """
+        #Synchro du projet 1148 = K4M et autres formations Fitnet POUR 2023 uniquement
+        project = self.env['project.project'].search([('id','=',1148)])[0]
+        _logger.info('======== INITIALISATION PROJET %s %s (odoo_id = %s)' % (project.name, project.number, str(project.id)))
+
+        forecast_lines = self.env['account.analytic.line'].search([('date', '>', datetime.date(2023,1,1)), ('category', '=', 'project_forecast'), ('project_id', '=', project.id)], order="date asc")
+        forecast_lines.create_update_napta_userprojectperiod()
+
+        timesheet_lines = self.env['account.analytic.line'].search([('date', '>', datetime.date(2023,1,1)), ('category', '=', 'project_employee_validated'), ('project_id', '=', project.id)], order="date asc")
+        timesheet_lines.create_update_napta_timesheetperiod()
+
+       
+        #Déterminer les projet à remonter sur Napta
+        projects = self.env['project.project'].search([], order="number desc")
+        for project in projects:
+            _logger.info(project.number)
+            if not project.is_project_to_migrate() :
+                continue
+            if not project.partner_id: #TODO à traiter à la main
+                _logger.info("Projet sans client sur Odoo : non migré vers Napta  %s %s (odoo_id = %s)"% (project.name, project.number, str(project.id)))
+                continue
+            #if project.id not in [1260]:
+            #    continue
+            if project.is_prevent_napta_creation :
+                continue
+
+            _logger.info('======== INITIALISATION PROJET %s %s (odoo_id = %s)' % (project.name, project.number, str(project.id)))
+
+            forecast_lines = self.env['account.analytic.line'].search([('category', '=', 'project_forecast'), ('project_id', '=', project.id)], order="date asc")
+            forecast_lines.create_update_napta_userprojectperiod()
+
+            timesheet_lines = self.env['account.analytic.line'].search([('category', '=', 'project_employee_validated'), ('project_id', '=', project.id)], order="date asc")
+            timesheet_lines.create_update_napta_timesheetperiod()
+
+            if len(forecast_lines) == 0 and len(timesheet_lines) == 0:
+                if project.stage_id.id == 1: #importer les projets en opportunité... et qui n'ont dont PAS ENCORE de staffing
+                    project.create_update_napta()
+        """
+
+
+        _logger.info('======== napta_init_from_odoo TERMINEE')
+
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
@@ -835,7 +921,7 @@ class naptaHrContract(models.Model):
 
             override = False
             if job_ids :
-                cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)], order="begin_date asc")
+                cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id), order="begin_date asc"])
                 if not cost_lines :
                     override = True
                 else:
