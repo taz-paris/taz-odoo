@@ -8,8 +8,10 @@ from datetime import datetime, timedelta
 
 class analyticAccount(models.Model):
     _inherit = 'account.analytic.account'
+    _order = 'display_name'
 
     def name_get(self):
+        res = super().name_get()
         result = []
         for account in self:
             name = account.name
@@ -27,3 +29,12 @@ class analyticAccount(models.Model):
         params = (name2, name2)
         self.env.cr.execute(query, params)
         return [row[0] for row in self.env.cr.fetchall()]
+
+
+    @api.depends('project_ids', 'project_ids.number')
+    def display_name(self):
+        for rec in self:
+            rec.display_name = rec.name_get()[0][1]
+
+
+    display_name = fields.Char('Nom affiché', compute=display_name, store=True)

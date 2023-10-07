@@ -1,7 +1,7 @@
 <odoo>
     <data>
         <record id="project_outsourcing_link_tree" model="ir.ui.view">
-            <field name="name">Project outsourcing link</field>
+            <field name="name">Achat : lien entre le projet et le fournisseur</field>
             <field name="model">project.outsourcing.link</field>
             <field name="arch" type="xml">      
                 <tree>    
@@ -17,7 +17,7 @@
         </record>
 
         <record id="project_outsourcing_link_form" model="ir.ui.view">
-            <field name="name">Project outsourcing link</field>
+            <field name="name">Achat : lien entre le projet et le fournisseur</field>
             <field name="model">project.outsourcing.link</field>
             <field name="arch" type="xml">      
                 <form>    

@@ -122,14 +122,14 @@ class fitnetAccountMove(models.Model):
     _sql_constraints = [
         ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
     ]
-    fitnet_id = fields.Char("Fitnet ID")
+    fitnet_id = fields.Char("Fitnet ID", copy=False)
 
 class fitnetAccountMoveLine(models.Model):
     _inherit = "account.move.line"
     _sql_constraints = [
         ('fitnet_id__uniq', 'UNIQUE (fitnet_id)',  "Impossible d'enregistrer deux objects avec le même Fitnet ID.")
     ]
-    fitnet_id = fields.Char("Fitnet ID")
+    fitnet_id = fields.Char("Fitnet ID", copy=False)
 
 class fitnetAccountPaymentTerm(models.Model):
     _inherit = "account.payment.term"

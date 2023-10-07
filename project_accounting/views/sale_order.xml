@@ -151,7 +151,7 @@
             <field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
             <field name="arch" type="xml">
 		<xpath expr="//filter[@name='to_invoice']" position="before">
-		    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced')]"/>
+		    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced'), ('direct_payment_purchase_order_line_id', '=', False)]"/>
 		    <field string="Projet" name="analytic_distribution" />
 		    <filter string="Échéances antérieures à la fin de ce mois" name="this_month" domain="[('previsional_invoice_date', '&lt;', ((context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d')))]"/>
 		</xpath>
@@ -236,7 +236,9 @@
 			<field name="invoice_status" optional="hide" />
 			<field name="state" optional="show" widget="badge" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'"/>
 			<field name="comment" optional="show"/>
+			<!--
 			<button type="object" name="force_invoice_status_full_invoiced_out_refund" string="force_invoice_status_full_invoiced_out_refund" groups="base.group_system"/>
+			-->
 		</tree>
 	    </field>
 	</record>
