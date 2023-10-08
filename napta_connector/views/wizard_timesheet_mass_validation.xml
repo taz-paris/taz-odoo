@@ -27,7 +27,9 @@
 	    <field name="context"></field>
 	</record>
 	
+	<!-- Denis utilisera les IHM de Napta pour verrouiller les feuilles de temps
 	<menuitem name="Clôturer les feuilles de temps Napta" id="project_accounting_closing_menu_close_napta_timesheet" parent="project_accounting.project_accounting_closing_menu_root" action="launch_timesheet_mass_validation"/>
+	-->
 
 	</data>
 </odoo>
