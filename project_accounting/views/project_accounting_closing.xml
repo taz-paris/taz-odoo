@@ -209,6 +209,7 @@
 
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm" />
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_list" parent="project_accounting_closing_menu_root" action="project_accounting_closing_action"/>
+	<menuitem name="Sociétés" id="project_accounting_closing_menu_res_company" parent="project_accounting_closing_menu_root" action="base.action_res_company_form"/>
 
    <record id="action_recompute_closing" model="ir.actions.server">
           <field name="name">recompute_closing</field>
