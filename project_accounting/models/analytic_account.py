@@ -31,7 +31,7 @@ class analyticAccount(models.Model):
         return [row[0] for row in self.env.cr.fetchall()]
 
 
-    @api.depends('project_ids', 'project_ids.number')
+    @api.depends('project_ids', 'project_ids.number', 'project_ids.name', 'name')
     def display_name(self):
         for rec in self:
             rec.display_name = rec.name_get()[0][1]

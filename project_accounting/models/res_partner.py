@@ -68,3 +68,5 @@ class projectAccountingResPartner(models.Model):
              string="Compte bancaire de paiement", 
              help="Compte bancaire qui apparaitra par défaut sur les factures envoyées à ce client, et sur lequel le client devra payer la facture.", 
              domain=_get_default_invoice_payement_bank_account_domain)
+
+     external_auxiliary_code = fields.Char('Code auxiliaire CEGB - Quadratus', help="Code permettant d'identifier le tiers sur Quadratus. Exporté chaque mois avec les facture clients par CEGB") 

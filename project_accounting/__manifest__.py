@@ -32,6 +32,7 @@
         'views/project_book.xml',
         'views/report_invoice.xml',
         'views/sale_order.xml',
+        'views/res_company.xml',
         'views/purchase_order.xml',
         'views/project_accounting_closing.xml',
         'views/payment.xml',
