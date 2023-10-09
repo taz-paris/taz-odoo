@@ -320,6 +320,11 @@ class naptaProject(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
     is_prevent_napta_creation = fields.Boolean("Ne pas créer sur sur Napta (dont portage pur)")
+    napta_billing_method = fields.Selection([
+        ('fixed_price', 'Forfait'),
+        ('time_and_materials', 'Régie'),
+        ('none', 'Autre'),
+        ], string="Méthode de facturation Napta", default='fixed_price')
 
     @api.model_create_multi
     def create(self, vals):
@@ -363,7 +368,7 @@ class naptaProject(models.Model):
               "name": "[%s] %s" % (rec.number or "", rec.name or ""),
               "projectstatus_id" : rec.stage_id.napta_id,
               "description" : rec.description or "",
-              "billing_method" : "fixed_price",
+              "billing_method" : rec.napta_billing_method,
               "client_id" : rec.partner_id.napta_id,
               "external_id" : str(rec.id),
               "sold_budget" : rec.company_part_amount_initial,

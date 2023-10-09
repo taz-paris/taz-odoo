@@ -12,6 +12,7 @@
                 	</field>
                 	<field name="partner_id" position="after">
 				<field name="is_prevent_napta_creation" attrs="{'readonly': [('napta_id', '!=', False)]}"/>
+				<field name="napta_billing_method" />
                 	</field>
                 	<field name="date_start" position="attributes">
 				<attribute name="attrs">{'readonly': [('is_prevent_napta_creation','=',False)] }</attribute>

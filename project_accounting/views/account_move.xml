@@ -24,6 +24,27 @@
             </field>
         </record>
 
+        <record id="view_move_line_tree_inherit" model="ir.ui.view">
+            <field name="name">Account move line</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_move_line_tree"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="attributes">
+                        <attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+                </field>
+          </field>
+        </record>
+
+        <record id="view_account_move_line_filter_inherit" model="ir.ui.view">
+            <field name="name">Account move line</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_account_move_line_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='to_check']" position="before">
+			<filter string="Partenaire sans code auxiliaire externe" name="partner_without_external_auxiliary_code" domain="[('partner_id.external_auxiliary_code', '=', False)]"/>
+                </xpath>
+          </field>
+        </record>
 
 	<record id="view_invoicelines_tree" model="ir.ui.view">
             <field name="name">Account move line</field>

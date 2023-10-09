@@ -69,8 +69,9 @@ class projectAccountingClosing(models.Model):
         _logger.info('-- compute')
         for rec in self :
 
-            if rec.is_validated :
-                continue
+            #if rec.is_validated :
+            #    continue
+                #Désactivé car celà empéchait certains recalcul quand l'utilisateur cochait la case de validation et saisissait des données en même temps
 
             proj_id = rec.project_id #quand on applique la fonction WRITE
             if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)

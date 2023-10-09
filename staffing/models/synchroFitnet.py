@@ -344,11 +344,12 @@ class fitnetProject(models.Model):
         #self.correct_leave_timesheet_stock(client)
 
 
-        self.sync_suppliers(client)
-        self.sync_customers(client)
-        self.sync_contracts(client) #projets
-        self.sync_supplier_invoices(client)
-        self.sync_customer_invoices(client)
+        return
+        #self.sync_suppliers(client)
+        #self.sync_customers(client)
+        #self.sync_contracts(client) #projets
+        #self.sync_supplier_invoices(client)
+        #self.sync_customer_invoices(client)
 
 
 
