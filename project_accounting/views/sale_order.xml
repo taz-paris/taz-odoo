@@ -15,6 +15,10 @@
 			</group>
 		</field>
 
+
+		<xpath expr="//button[@name='action_preview_sale_order']" position='replace'>
+		</xpath>
+
 		<field name="client_order_ref" position="attributes">
  			<attribute name="placeholder">Référence client du Bon de commande</attribute>
 		</field>
@@ -154,6 +158,7 @@
 		    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced'), ('direct_payment_purchase_order_line_id', '=', False)]"/>
 		    <field string="Projet" name="analytic_distribution" />
 		    <filter string="Échéances antérieures à la fin de ce mois" name="this_month" domain="[('previsional_invoice_date', '&lt;', ((context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d')))]"/>
+		    <filter string="Échéances antérieures à la date du jour" name="before_today" domain="[('previsional_invoice_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
 		</xpath>
             </field>
         </record>

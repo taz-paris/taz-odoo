@@ -39,25 +39,25 @@
 					<field name="order_company_payment_amount"/>
 				</group>
 			</group>
-			<group string="Facturation Tasmane / sous-traitant">
-				<group>
+			<group>
+				<group string="Facturation Tasmane / sous-traitant">
 					<field name="sum_account_move_lines"/>
-					<button type="object" name="action_open_account_move_lines" string="Voir les lignes de facture/avoir"/>
-				</group>
-				<group>
+					<button type="object" colspan="2" name="action_open_account_move_lines" string="Voir les lignes de facture/avoir"/>
 					<field name="marging_amount_current" />
 					<field name="marging_rate_current" widget="progressbar" />
 				</group>
-			</group>
-			<group>
 				<group string="Paiement de Tasmane au sous-traitant">
 					<field name="sum_account_move_lines_with_tax" />
 					<field name="company_paid" />
 					<field name="company_residual" />
 				</group>
+
+			</group>
+			<group>
 				<group string="Paiement direct du client au sous-traitant">
 					<field name="order_direct_payment_done" />
 					<field name="order_direct_payment_done_detail" />
+					<field name="order_direct_payment_to_do" />
 				</group>
 			</group>
 		</form>                                

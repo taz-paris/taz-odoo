@@ -31,6 +31,9 @@
                         <field name="napta_id" readonly="1"/>
 			<button type="object" name="delete_on_napta" string="Supprimer sur Napta" colspan="2" attrs="{'invisible': [('napta_id', '=', False)]}" groups="base.group_system"/>
                 </field>
+                <field name="active" position="after">
+                        <field name="napta_id" readonly="1" invisible="1"/>
+                </field>
             </field>
         </record>
 

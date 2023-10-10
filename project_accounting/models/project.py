@@ -78,6 +78,7 @@ class projectAccountProject(models.Model):
 
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
     color_rel = fields.Selection(related="stage_id.color", store=True)
+    rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id')
     number = fields.Char('Numéro', readonly=True, required=False, copy=False, default='')
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
@@ -370,6 +371,7 @@ class projectAccountProject(models.Model):
             'context': {
                 'create': False,
                 'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'search_default_order' : 1,
             }
         }
 
@@ -466,6 +468,7 @@ class projectAccountProject(models.Model):
                 'create': False,
                 'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
                 'default_move_type' : 'out_invoice',
+                'search_default_group_by_move' : 1,
             }
         }
 
@@ -605,9 +608,9 @@ class projectAccountProject(models.Model):
     partner_id = fields.Many2one(string='Client final')
     partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
     ######## TOTAL
-    order_amount_initial = fields.Monetary('Montant piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
-    order_amount_current = fields.Monetary('Montant piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
-    order_sum_sale_order_lines = fields.Monetary('Total commandé à Tasmane', store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
+    order_amount_initial = fields.Monetary('Montant HT piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
+    order_amount_current = fields.Monetary('Montant HT piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
+    order_sum_sale_order_lines = fields.Monetary('Total HT commandé à Tasmane', store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute, store=True)
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute, store=True)
@@ -617,17 +620,17 @@ class projectAccountProject(models.Model):
     order_marging_amount_current = fields.Monetary('Marge totale (€) actuelle', compute=compute, store=True)
     order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute, store=True)
 
-    order_to_invoice_company = fields.Monetary('Montant à facturer par Tasmane au client', compute=compute, store=True)
+    order_to_invoice_company = fields.Monetary('Montant HT à facturer par Tasmane au client', compute=compute, store=True)
     company_invoice_sum_move_lines = fields.Monetary('Montant HT déjà facturé par Tasmane au client', compute=compute, store=True)
     company_invoice_sum_move_lines_with_tax = fields.Monetary('Montant déjà TTC facturé par Tasmane au client', compute=compute, store=True)
-    company_to_invoice_left = fields.Monetary('Montant restant à factuer par Tasmane au client', compute=compute, store=True)
-    order_to_invoice_outsourcing = fields.Monetary('Montant S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute, store=True)
+    company_to_invoice_left = fields.Monetary('Montant HT restant à factuer par Tasmane au client', compute=compute, store=True)
+    order_to_invoice_outsourcing = fields.Monetary('Montant HT S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute, store=True)
 
-    company_paid = fields.Monetary('Montant déjà payé par le client à Tasmane', compute=compute, store=True)
-    company_residual = fields.Monetary('Montant restant à payer par le client à Tasmane', compute=compute, store=True)
+    company_paid = fields.Monetary('Montant TTC déjà payé par le client à Tasmane', compute=compute, store=True)
+    company_residual = fields.Monetary('Montant TTC restant à payer par le client à Tasmane', compute=compute, store=True)
 
     ######## COMPANY PART
-    company_part_amount_initial = fields.Monetary('Montant dispositif Tasmane initial', 
+    company_part_amount_initial = fields.Monetary('Montant HT dispositif Tasmane initial', 
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
@@ -640,7 +643,7 @@ class projectAccountProject(models.Model):
     company_part_marging_amount_initial = fields.Monetary('Marge sur dispo Tasmane (€) initiale', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
     company_part_marging_rate_initial = fields.Float('Marge sur dispo Tasmane (%) initiale', store=True, compute=compute)
 
-    company_part_amount_current = fields.Monetary('Montant dispositif Tasmane actuel', 
+    company_part_amount_current = fields.Monetary('Montant HT dispositif Tasmane actuel', 
             states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
             tracking=True,
             help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
@@ -652,7 +655,7 @@ class projectAccountProject(models.Model):
     company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) actuelle', store=True, compute=compute)
 
     ######## OUTSOURCE PART
-    outsource_part_amount_initial = fields.Monetary('Montant de la part sous-traitée initial', 
+    outsource_part_amount_initial = fields.Monetary('Montant HT de la part sous-traitée initial', 
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
@@ -665,7 +668,7 @@ class projectAccountProject(models.Model):
     outsource_part_marging_amount_initial = fields.Monetary('Marge sur part sous-traitée (€) initiale', store=True, compute=compute)
     outsource_part_marging_rate_initial = fields.Float('Marge sur part sous-traitée (%) initiale', store=True, compute=compute)
 
-    outsource_part_amount_current = fields.Monetary('Montant de la part sous-traitée actuel', help="Montant produit par les sous-traitants de Tasmane : part produite par les sous-traitants que Tasmane paye à l'acte", store=True, compute=compute)
+    outsource_part_amount_current = fields.Monetary('Montant HT de la part sous-traitée actuel', help="Montant produit par les sous-traitants de Tasmane : part produite par les sous-traitants que Tasmane paye à l'acte", store=True, compute=compute)
     outsource_part_cost_current = fields.Monetary('Coût de revient de la part sous-traitée actuel', store=True, compute=compute)
     outsource_part_marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', store=True, compute=compute)
     outsource_part_marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', store=True, compute=compute)

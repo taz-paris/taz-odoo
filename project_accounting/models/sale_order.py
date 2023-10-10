@@ -67,7 +67,7 @@ class projectAccountingSaleOrder(models.Model):
                 rec.rel_project_ids = False
 
     rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
-    target_amount = fields.Monetary("Montant cible - à répartir")
+    target_amount = fields.Monetary("Montant cible HT - à répartir")
 
 
 
@@ -224,3 +224,6 @@ class projectAccountingSaleOrderLine(models.Model):
     order_partner_invoice_id = fields.Many2one(string='Adresse de facturation', related="order_id.partner_invoice_id")
     qty_delivered = fields.Float(string="Qté livrée")
     comment = fields.Text("Commentaire lien ADV/facturation")
+    price_subtotal = fields.Monetary(string="Sous-total HT")
+    untaxed_amount_to_invoice = fields.Monetary(string="Montant HT à facturer")
+    untaxed_amount_invoiced = fields.Monetary(string="Montant HT facturé")

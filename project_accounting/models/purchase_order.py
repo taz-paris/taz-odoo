@@ -123,12 +123,13 @@ class projectAccountingPurchaseOrderLine(models.Model):
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",
             help = "Ligne de la commande du client final")
-    order_direct_payment_validated_amount = fields.Monetary('Montant facture paiement direct validé', help='Somme factures en paiement direct validées par Tasmane')
+    order_direct_payment_validated_amount = fields.Monetary('Montant HT facture paiement direct validé', help='Somme factures en paiement direct validées par Tasmane')
         #TODO : ajouter contrôles : order_direct_payment_validated_amount ne peut pas être supérieur à subtotal et doit être nul si direct_payment_sale_order_line_id = False
     order_direct_payment_validated_detail = fields.Text("Commentaire paiement direct", help='Détail des factures en paiement direct validées par Tasmane')
 
     # TODO : ajouter reselling_unit_price en le prenant sur la fiche article (valeur par défaut mais modifiable) et faire la multiplication
-    reselling_subtotal = fields.Monetary('Montant de revente', help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
+    reselling_subtotal = fields.Monetary('Montant HT de revente', help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
     margin_amount = fields.Monetary('Marge €', compute=compute)
     margin_rate = fields.Monetary('Marge %', compute=compute)
 
+    price_subtotal = fields.Monetary(string="Sous-total HT")

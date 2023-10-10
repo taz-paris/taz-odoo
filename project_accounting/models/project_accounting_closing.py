@@ -63,7 +63,7 @@ class projectAccountingClosing(models.Model):
 
 
 
-    @api.onchange('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
+    #@api.onchange('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     @api.depends('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     def compute(self):
         _logger.info('-- compute')
@@ -135,7 +135,7 @@ class projectAccountingClosing(models.Model):
     comment_previous = fields.Text("Commentaire clôture précédente", related='previous_closing.comment')
     rel_project_partner_id = fields.Many2one(related='project_id.partner_id', store=True)
     rel_project_user_id = fields.Many2one(related='project_id.user_id', store=True)
-    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
+    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='restrict')
     closing_date = fields.Date("Date de clôture", required=False, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)
     next_closing = fields.One2many('project.accounting_closing', 'previous_closing', string="Clôture suivante", readonly=True)
@@ -143,8 +143,8 @@ class projectAccountingClosing(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    invoice_period_amount = fields.Monetary('Facturation sur la période', compute=compute, store=True)
-    purchase_period_amount = fields.Monetary('Achats sur la periode', compute=compute, store=True)
+    invoice_period_amount = fields.Monetary('Facturation HT sur la période', compute=compute, store=True)
+    purchase_period_amount = fields.Monetary('Achats HT sur la periode', compute=compute, store=True)
     
     pca_previous_balance = fields.Monetary('Précédent solde PCA', related='previous_closing.pca_balance')
     pca_period_amount = fields.Monetary('PCA(-)')

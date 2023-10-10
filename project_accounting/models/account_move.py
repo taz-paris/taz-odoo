@@ -137,3 +137,5 @@ class projectAccountingAccountMoveLine(models.Model):
         store=True,
         currency_field='currency_id',
     )
+
+    price_subtotal = fields.Monetary(string="Sous-total HT")

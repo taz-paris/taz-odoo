@@ -9,10 +9,11 @@
                     <field name="name" string="N° ou nom du projet" filter_domain="['|', ('number', 'ilike', self), ('name', 'ilike', self)]"/>
                     <field name="project_director_employee_id" string="Directeur de mission (nom de famille)"/>
                     <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
+		    <field name="rel_partner_industry_id" string="Business domain" />
                     <field name="stage_id" groups="project.group_project_stages"/>
                     <field name="project_group_id" string="Groupe de projets"/>
                     <filter string="Mes projets" name="own_projects" domain="[('user_enrolled_ids', 'in', uid)]"/>
-                    <filter string="Projet à revoir avec le DM et l'ADV" name="is_review_needed" domain="[('is_review_needed', '=', True)]"/>
+                    <filter string="Projet à revoir entre le DM et l'ADV" name="is_review_needed" domain="[('is_review_needed', '=', True), ('stage_id.state', '!=', 'closed')]"/>
                     <filter string="Projets ayant changé de statut depuis 7 jours" name="recent_project_changed" domain="[('state_last_change_date', '&gt;=', ((context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')))]"/>
                     <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
@@ -22,6 +23,7 @@
                     <group expand="0" string="Group By">
                         <filter string="Directeur de mission" name="Manager" context="{'group_by': 'project_director_employee_id'}"/>
                         <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
+                        <filter string="Business domain" name="groupby_rel_partner_industry_id" context="{'group_by': 'rel_partner_industry_id'}"/>
                         <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
                     </group>
                 </search>
@@ -118,6 +120,12 @@
 				<div class="alert alert-warning mb-0" role="alert" attrs="{'invisible': [('is_consistant_outsourcing', '=', True)]}">
 					Le champ "Type de sous-traitance" n'est pas renseigné, ou bien il manque des achats sur ce projet."
 				</div>
+				<field name="is_constistant_order_amount" invisible="1"/>
+				<field name="is_validated_order" invisible="1"/>
+				<field name="is_validated_book" invisible="1"/>
+				<field name="is_consistant_outsourcing" invisible="1"/>
+				<field name="is_validated_purchase_order" invisible="1"/>
+				<field name="is_review_needed" invisible="1"/>
 
 					
 				<div class="oe_title">
@@ -130,6 +138,7 @@
 					<group>
 					    <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 					    <field name="stage_id" required="1"/>
+					    <field name="state_last_change_date" readonly="1"/>
 					    <field name="outsourcing"/>
 					    <field name="agreement_id"/>
 					    <field name="state" invisible="1"/>
@@ -145,6 +154,8 @@
 						<field name="date" widget="daterange" options="{&quot;related_start_date&quot;: &quot;date_start&quot;}"/>
 					    </div>
 					    <field name="project_group_id"/>
+					    <field name="remark"/>
+					    <field name="invoicing_comment" groups="account.group_account_manager"/>
 					</group>
 				   </group>
 				<notebook>
@@ -218,19 +229,21 @@
 						</group>
 					</page>
 					<page name="customer_invoicing" string="Facturation client">
-						<group string="Facturation effective de Tasmane au client">
+						<group>
 							<group>
 								<field name="partner_secondary_ids" widget="many2many_tags"/>
+								<button type="object" colspan="2" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
+							</group>
+							<group>
+							</group>
+						</group>
+						<group>
+							<group string="Facturation effective de Tasmane au client">
             							<field name="order_to_invoice_company" />
             							<field name="company_invoice_sum_move_lines" />
 								<field name="company_to_invoice_left" />
 							</group>
-							<group>
-								<button type="object" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
-							</group>
-						</group>
-						<group string="Paiement du client à Tasmane">
-							<group>
+							<group string="Paiement du client à Tasmane">
 								<field name="company_invoice_sum_move_lines_with_tax" />
 								<field name="company_paid" />
 								<field name="company_residual" />
@@ -243,10 +256,10 @@
 									<field name="project_id" optional="hide"/>
 									<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 									<field name="link_type"/>
-									<field name="outsource_part_amount_current" string="Part sous-traitée" sum="Total"/>
-									<field name="order_sum_purchase_order_lines" string="Commandé" sum="Total"/>
-									<field name="order_direct_payment_amount" string="Paiement direct" sum="Total"/>
-									<field name="order_company_payment_amount" string="Paiement Tasmane" sum="Total"/>
+									<field name="outsource_part_amount_current" string="Prix revente HT" sum="Total"/>
+									<field name="order_sum_purchase_order_lines" string="Commandé par Tasmane HT" sum="Total"/>
+									<field name="order_direct_payment_amount" string="Part en paiement direct HT" sum="Total"/>
+									<field name="order_company_payment_amount" string="Part en paiement Tasmane HT" sum="Total"/>
 									<field name="sum_account_move_lines" sum="Total"/>
 								</tree>                                
 							</field>
@@ -318,26 +331,10 @@
 							</group>
 						</group>
 					</page>
-					<page name="description" string="Description">
+					<page string="Autres info et contrôles (debug admin)"  groups="base.group_system">
 						<group>
 							<group>
-					    		    <field name="description" options="{'resizable': false}" placeholder="Description du projet..."/>
-							    <field name="remark"/>
-							    <field name="invoicing_comment" groups="account.group_account_manager"/>
-								<field name="is_review_needed"/>
-							</group>
-							<group string="Contrôles automatisés">
-								<field name="is_constistant_order_amount"/>
-								<field name="is_validated_order"/>
-								<field name="is_validated_book"/>
-								<field name="is_consistant_outsourcing"/>
-								<field name="is_validated_purchase_order"/>
-							</group>
-						</group>
-					</page>
-					<page string="A SUPPRIMER - Info de facturation">
-						<group>
-							<group>
+					    		    <field name="description" options="{'resizable': true}" placeholder="Description du projet..."/>
 							    <field name="is_purchase_order_received"/>
 							    <field name="purchase_order_number"/>
 							    <field name="amount"/>
@@ -347,8 +344,16 @@
 							<group>
 					    			<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
 					    			<field name="analytic_account_id" readonly="1"/>
-								<field name="state_last_change_date"/>
 							</group>
+							<group string="Contrôles automatisés">
+								<field name="is_constistant_order_amount"/>
+								<field name="is_validated_order"/>
+								<field name="is_validated_book"/>
+								<field name="is_consistant_outsourcing"/>
+								<field name="is_validated_purchase_order"/>
+								<field name="is_review_needed"/>
+							</group>
+
 						</group>
 					</page>
 				</notebook>
