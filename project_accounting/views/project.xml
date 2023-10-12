@@ -237,13 +237,15 @@
 							<group>
 							</group>
 						</group>
-						<group>
-							<group string="Facturation effective de Tasmane au client">
+						<group col="3">
+							<group string="Facturation HT de Tasmane au client">
             							<field name="order_to_invoice_company" />
             							<field name="company_invoice_sum_move_lines" />
 								<field name="company_to_invoice_left" />
 							</group>
-							<group string="Paiement du client à Tasmane">
+							<group string="Facturation TTC de Tasmane au client">
+							</group>
+							<group string="Paiement TTC du client à Tasmane">
 								<field name="company_invoice_sum_move_lines_with_tax" />
 								<field name="company_paid" />
 								<field name="company_residual" />

@@ -353,7 +353,7 @@ class staffingEmployee(models.Model):
     def list_work_days_period(self, date_start, date_end):
         res = []
         date = date_start
-        while (date <= date_end):
+        while (date != False and date <= date_end):
             user_tz = self.env.user.tz or str(pytz.utc)
             local = pytz.timezone(user_tz)
             search_public_holiday_begin = datetime(date.year, date.month, date.day, 0, 0, 0)
