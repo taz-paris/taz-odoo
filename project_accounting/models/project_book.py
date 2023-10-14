@@ -30,7 +30,7 @@ class projectBookPeriod(models.Model):
         while year != datetime.date.today().year +1 : 
             year_list.append((str(year), str(year)))
             year += 1
-        return year_list
+        return year_list.reverse()
     
     @api.model
     def year_default(self):
@@ -45,8 +45,7 @@ class projectBookPeriod(models.Model):
     def _get_default_period_project_book(self):
         _logger.info("---_get_default_period_project_book")
         project = self.env['project.project'].browse(self._get_default_project_id())
-        res = project.default_book_initial
-            #TODO : pourquoi pas default_book_final ? Prendre default_book_cuurent s'il n'est pas nul ?
+        res = project.default_book_end
         for book_period in project.book_period_ids:
             if book_period.id == self.id :
                 continue

@@ -269,10 +269,6 @@
 					<page name="book" string="Book">
 						<group string="Book brut du projet">
 							<group>
-								<!--
-								<field name="default_book_initial" />
-								<field name="default_book_current" />
-								-->
 								<field name="default_book_end" />
 								<field name="is_book_manually_computed" groups="account.group_account_manager" />
 								<field name="is_book_manually_computed" invisible="1"/>

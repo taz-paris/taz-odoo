@@ -127,7 +127,6 @@ class projectAccountProject(models.Model):
 	'project_outsourcing_link_ids',
 	'other_part_amount_initial',
 	'other_part_cost_initial',
-	'company_part_amount_current',
 	'other_part_amount_current',
 	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
 	'accounting_closing_ids',
@@ -138,28 +137,16 @@ class projectAccountProject(models.Model):
         for rec in self:
             _logger.info(str(rec.number) + "=>" +str(rec.name))
             rec.check_partners_objects_consitency() #forcer l'appel à cette fonction même si cette fonction compute n'écrit rien... car elle est appelée par les lignes de factures/sale.order/purchase.order et assure que tous ces objets liés à ce projet sont bien portés par un res.partner qui est soit le client final, soit un client intermédiaire soit un fournisseur d'un outsourcing_link
-            old_default_book_initial = rec.default_book_initial
-            old_default_book_current = rec.default_book_current
             old_default_book_end = rec.default_book_end
 
             rec.company_invoice_sum_move_lines, rec.company_invoice_sum_move_lines_with_tax, rec.company_paid = rec.compute_account_move_total()
             rec.company_residual = rec.company_invoice_sum_move_lines_with_tax - rec.company_paid
 
-            ######## COMPANY PART
+            rec.order_sum_sale_order_lines = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=False)[0]
+            rec.order_sum_sale_order_lines_with_draft = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True)[0]
+            rec.order_to_invoice_company, rec.order_to_invoice_company_with_tax = rec.compute_sale_order_total(with_direct_payment=False, with_draft_sale_order=False)
 
-            rec.company_part_marging_amount_initial =  rec.company_part_amount_initial - rec.company_part_cost_initial
-            if rec.company_part_amount_initial != 0 :
-                rec.company_part_marging_rate_initial = rec.company_part_marging_amount_initial / rec.company_part_amount_initial * 100
-            else :
-                rec.company_part_marging_rate_initial = 0.0
-    
-            rec.company_part_cost_current = -rec.get_production_cost()
-            rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
-            if rec.company_part_amount_current != 0 :
-                rec.company_part_marging_rate_current = rec.company_part_marging_amount_current / rec.company_part_amount_current * 100
-            else :
-                rec.company_part_marging_rate_current = 0.0
-    
+   
 
             ######## OUTSOURCE PART
             rec.outsource_part_marging_amount_initial =  rec.outsource_part_amount_initial - rec.outsource_part_cost_initial
@@ -168,14 +155,11 @@ class projectAccountProject(models.Model):
             else:
                 rec.outsource_part_marging_rate_initial = 0.0 
                                                                 
-            rec.order_sum_sale_order_lines = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=False)[0]
-            rec.order_sum_sale_order_lines_with_draft = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True)[0]
-            rec.order_to_invoice_company, rec.order_to_invoice_company_with_tax = rec.compute_sale_order_total(with_direct_payment=False, with_draft_sale_order=False)
-
             outsource_part_amount_current = 0.0
             outsource_part_cost_current = 0.0
             order_to_invoice_outsourcing = 0.0
             outsourcing_link_purchase_order_with_draft = 0.0
+            other_part_amount_current = 0.0
             other_part_cost_current = 0.0
             for link in rec.project_outsourcing_link_ids:
                 link.compute()
@@ -184,9 +168,9 @@ class projectAccountProject(models.Model):
                     outsource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     order_to_invoice_outsourcing += link.order_direct_payment_amount
                     outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_sale_order=True)
-                        #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
                 elif link.link_type == 'other' :
-                    other_part_cost_current += link.sum_account_move_lines
+                    other_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
+                    other_part_amount_current += link.outsource_part_amount_current
                 else :
                     raise ValidationError(_("Type d'achat non géré : %s" % str(link.link_type)))
 
@@ -211,6 +195,7 @@ class projectAccountProject(models.Model):
                 rec.other_part_marging_rate_initial = 0.0
 
             rec.other_part_cost_current = other_part_cost_current
+            rec.other_part_amount_current = other_part_amount_current
 
             rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current
             if rec.other_part_amount_current != 0 :
@@ -218,6 +203,22 @@ class projectAccountProject(models.Model):
             else:
                 rec.other_part_marging_rate_current = 0.0
 
+            ######## COMPANY PART
+
+            rec.company_part_marging_amount_initial =  rec.company_part_amount_initial - rec.company_part_cost_initial
+            if rec.company_part_amount_initial != 0 :
+                rec.company_part_marging_rate_initial = rec.company_part_marging_amount_initial / rec.company_part_amount_initial * 100
+            else :
+                rec.company_part_marging_rate_initial = 0.0
+    
+            rec.company_part_amount_current = rec.order_sum_sale_order_lines_with_draft - rec.outsource_part_amount_current - rec.other_part_amount_current
+            rec.company_part_cost_current = -rec.get_production_cost()
+            rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
+            if rec.company_part_amount_current != 0 :
+                rec.company_part_marging_rate_current = rec.company_part_marging_amount_current / rec.company_part_amount_current * 100
+            else :
+                rec.company_part_marging_rate_current = 0.0
+ 
             ######## TOTAL
             rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
 
@@ -281,8 +282,6 @@ class projectAccountProject(models.Model):
                 rec.is_review_needed = False
 
             #BOOK
-            rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
-            rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
             if rec.stage_is_part_of_booking :
                 rec.default_book_end = rec.order_sum_sale_order_lines_with_draft - outsourcing_link_purchase_order_with_draft
             else :
@@ -535,14 +534,6 @@ class projectAccountProject(models.Model):
         return production_period_amount
 
 
-    @api.onchange('company_part_amount_initial', 'company_part_cost_initial', 'other_part_amount_initial')
-    def copy_initial_current(self):
-        for rec in self :
-            #if rec.stage_id.state == 'before_launch':
-            rec.company_part_amount_current = rec.company_part_amount_initial
-            rec.company_part_cost_current = rec.company_part_cost_initial
-            rec.other_part_amount_current = rec.other_part_amount_initial
-
     @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids', 'project_outsourcing_link_ids.partner_id')
     def check_partners_consistency(self):
         for rec in self:
@@ -597,7 +588,7 @@ class projectAccountProject(models.Model):
     partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
     ######## TOTAL
     order_amount_initial = fields.Monetary('Montant HT piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
-    order_sum_sale_order_lines_with_draft = fields.Monetary("Total HT piloté commandé (y/c BCC à l'état Devis)", store=True, compute=compute)
+    order_sum_sale_order_lines_with_draft = fields.Monetary("Total HT commandé à Tasmane (y/c BCC à l'état Devis)", store=True, compute=compute)
     order_sum_sale_order_lines = fields.Monetary("Total HT commandé à Tasmane (uniquement à l'état BDC)", store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute, store=True)
@@ -634,13 +625,9 @@ class projectAccountProject(models.Model):
     company_part_marging_rate_initial = fields.Float('Marge sur dispo Tasmane (%) initiale', store=True, compute=compute)
 
     company_part_amount_current = fields.Monetary('Montant HT dispositif Tasmane actuel', 
-            states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
-            tracking=True,
+            compute=compute,
             help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
     company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', store=True, compute=compute, help="Montant du pointage Tasmaame valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
-    #company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', 
-    #        states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
-    #        help="Montant du pointage Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) actuelle', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
     company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) actuelle', store=True, compute=compute)
 
@@ -682,8 +669,7 @@ class projectAccountProject(models.Model):
     other_part_marging_rate_initial = fields.Float('Marge sur les autres prestations (%) initiale', store=True, compute=compute)
 
     other_part_amount_current = fields.Monetary('Montant HT de la part "autres prestations" actuel', 
-            states={'before_launch' : [('readonly', True)], 'launched':[('readonly', False)], 'closed':[('readonly', True)]},
-            tracking=True,
+            compute=compute,
             help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
     other_part_cost_current = fields.Monetary('Coût de revient HT des autres prestations actuel', store=True, compute=compute)
     other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) actuelle', store=True, compute=compute)
@@ -691,8 +677,6 @@ class projectAccountProject(models.Model):
 
 
     ######## BOOK
-    default_book_initial = fields.Monetary('Valeur du book par défaut initial', store=True, compute=compute, help="Somme du dispositif Tasmane prévu initialement + markup S/T prévu initialement + marge ventes autres prévue initialement")
-    default_book_current = fields.Monetary('Valeur du book par défaut actuel', store=True, compute=compute, help="Valeur du book par défaut actualisée suivant les commandes/factures/avoirs effectivement reçus")
     default_book_end = fields.Monetary('Valeur du book par défaut à terminaison', store=True, compute=compute, help="Si l'étape projet est paramétrée pour compter dans le book, ce champ correspond à la valeur du book par défaut projetée à terminaison : somme des commandes clients (validées ou non) diminuée des commandes d'achats (validées ou non). Sinon ce champ a une valeur nulle.")
     is_book_manually_computed = fields.Boolean('Book géré manuellement')
     book_comment = fields.Text('Commentaire sur le book')

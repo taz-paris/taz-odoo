@@ -364,6 +364,11 @@ class naptaProject(models.Model):
             rec.partner_id.create_update_napta()
             rec.stage_id.create_update_napta()
 
+            if rec.order_sum_sale_order_lines_with_draft :
+                sold_budget = rec.company_part_amount_current
+            else :
+                sold_budget = rec.company_part_amount_initial
+
             attributes = {
               "name": "[%s] %s" % (rec.number or "", rec.name or ""),
               "projectstatus_id" : rec.stage_id.napta_id,
@@ -371,7 +376,7 @@ class naptaProject(models.Model):
               "billing_method" : rec.napta_billing_method,
               "client_id" : rec.partner_id.napta_id,
               "external_id" : str(rec.id),
-              "sold_budget" : rec.company_part_amount_initial,
+              "sold_budget" : sold_budget,
               "target_margin_rate" : round(rec.company_part_marging_rate_initial/100.0,2),
               #"estimated_start_date" : str(rec.date_start) if rec.date_start else None,
               #"estimated_end_date" : str(rec.date) if rec.date else None,
