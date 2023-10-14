@@ -157,7 +157,7 @@ class staffingProject(models.Model):
             rec.margin_text = margin_text
 
     def margin_landing_date(self, date):
-        if not self.order_amount_current or self.order_amount_current == 0.0:
+        if not self.order_sum_sale_order_lines_with_draft or self.order_sum_sale_order_lines_with_draft == 0.0:
             return 0.0, 0.0, ""
        
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=None, date_end=None, filters=[('project_id', '=', self.id)])
@@ -168,7 +168,7 @@ class staffingProject(models.Model):
         negative_total_costs = timesheet_total_amount
         date = fields.Date(string="Date de fin")
 
-        margin_landing_rate = (self.order_amount_current + negative_total_costs) / self.order_amount_current * 100
+        margin_landing_rate = (self.order_sum_sale_order_lines_with_draft + negative_total_costs) / self.order_sum_sale_order_lines_with_draft * 100
         margin_text = "Projection à terminaison en date du %(monday_pivot_date)s :\n    - %(validated_timesheet_unit_amount).2f jours pointés (%(validated_timesheet_amount).2f €)\n    - %(previsional_timesheet_unit_amount).2f jours prévisionnels (%(previsional_timesheet_amount).2f €)" % timesheets_data
         return negative_total_costs, margin_landing_rate, margin_text
 

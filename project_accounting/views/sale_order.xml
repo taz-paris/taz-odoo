@@ -81,6 +81,18 @@
 			<field name="comment" optional="show"  on_change="1" />
 		</xpath>
 
+		<xpath expr="//tree/field[@name='product_uom_qty']" position="attributes">
+			<attribute name="sum">Total</attribute>
+		</xpath>
+
+		<xpath expr="//tree/field[@name='qty_delivered']" position="attributes">
+			<attribute name="sum">Total</attribute>
+		</xpath>
+
+		<xpath expr="//tree/field[@name='qty_invoiced']" position="attributes">
+			<attribute name="sum">Total</attribute>
+		</xpath>
+
 		<xpath expr="//tree/field[@name='analytic_distribution']" position="attributes">
 			<attribute name="optional">show</attribute>
 		</xpath>
@@ -168,6 +180,9 @@
             <field name="model">sale.order.line</field>
             <field name="inherit_id" ref="sale.view_order_line_tree"/>
 	    <field name="arch" type="xml">
+		<xpath expr="//tree" position="attributes">
+			<attribute name="expand">1</attribute>
+		</xpath>
 		<field name="order_id"  position="attributes">
 			<attribute name="widget">many2one</attribute>
 		</field>

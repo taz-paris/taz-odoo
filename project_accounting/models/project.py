@@ -168,8 +168,9 @@ class projectAccountProject(models.Model):
             else:
                 rec.outsource_part_marging_rate_initial = 0.0 
                                                                 
-            rec.order_sum_sale_order_lines = rec.compute_sale_order_total()
-            rec.order_to_invoice_company = rec.compute_sale_order_total(with_direct_payment=False)
+            rec.order_sum_sale_order_lines = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=False)[0]
+            rec.order_sum_sale_order_lines_with_draft = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True)[0]
+            rec.order_to_invoice_company, rec.order_to_invoice_company_with_tax = rec.compute_sale_order_total(with_direct_payment=False, with_draft_sale_order=False)
 
             outsource_part_amount_current = 0.0
             outsource_part_cost_current = 0.0
@@ -180,7 +181,7 @@ class projectAccountProject(models.Model):
                 link.compute()
                 if link.link_type == 'outsourcing' :
                     outsource_part_amount_current += link.outsource_part_amount_current
-                    outsource_part_cost_current += link.sum_account_move_lines
+                    outsource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     order_to_invoice_outsourcing += link.order_direct_payment_amount
                     outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_sale_order=True)
                         #TODO : plutot lire le paiement direct sur le sale.order... ça sera plus fialble si on a pas créer le outsourcing_link
@@ -194,6 +195,7 @@ class projectAccountProject(models.Model):
             rec.order_to_invoice_outsourcing = order_to_invoice_outsourcing
 
             rec.company_to_invoice_left = rec.order_to_invoice_company - rec.company_invoice_sum_move_lines
+            rec.company_to_invoice_left_with_tax = rec.order_to_invoice_company_with_tax - rec.company_invoice_sum_move_lines_with_tax
 
             rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current
             if rec.outsource_part_amount_current != 0 :
@@ -218,7 +220,6 @@ class projectAccountProject(models.Model):
 
             ######## TOTAL
             rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
-            rec.order_amount_current = rec.company_part_amount_current + rec.outsource_part_amount_current + rec.other_part_amount_current
 
             rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.other_part_cost_initial
             rec.order_marging_amount_initial = rec.company_part_marging_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
@@ -228,9 +229,9 @@ class projectAccountProject(models.Model):
                 rec.order_marging_rate_initial = 0.0
 
             rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
-            rec.order_marging_amount_current = rec.company_invoice_sum_move_lines - rec.order_cost_current
-            if rec.company_invoice_sum_move_lines != 0 : 
-                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.company_invoice_sum_move_lines * 100
+            rec.order_marging_amount_current = rec.order_sum_sale_order_lines - rec.order_cost_current
+            if rec.order_sum_sale_order_lines != 0 : 
+                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_sum_sale_order_lines * 100
             else:
                 rec.order_marging_rate_current = 0.0
 
@@ -238,10 +239,6 @@ class projectAccountProject(models.Model):
             
             ######## INVOICE DATA CONTROLE
             #TODO : il ne faut regarder que les commandes pour lesquelles on a effectivement reçu un numéro de commande... pas les commandes en brouillon
-            is_constistant_order_amount = True
-            if rec.order_amount_current != rec.order_sum_sale_order_lines :
-                is_constistant_order_amount = False
-            rec.is_constistant_order_amount = is_constistant_order_amount
 
             is_validated_order = True
             line_ids = rec.get_sale_order_line_ids()
@@ -278,7 +275,7 @@ class projectAccountProject(models.Model):
             """
             rec.is_validated_purchase_order = is_validated_purchase_order
 
-            if rec.invoicing_comment or not(rec.is_constistant_order_amount) or not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_validated_book) or not(rec.is_consistant_outsourcing):
+            if rec.invoicing_comment or not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_validated_book) or not(rec.is_consistant_outsourcing):
                 rec.is_review_needed = True
             else :
                 rec.is_review_needed = False
@@ -287,7 +284,7 @@ class projectAccountProject(models.Model):
             rec.default_book_initial = rec.company_part_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             rec.default_book_current = rec.company_part_amount_current + rec.outsource_part_marging_amount_current + rec.other_part_marging_amount_current
             if rec.stage_is_part_of_booking :
-                rec.default_book_end = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True) - outsourcing_link_purchase_order_with_draft
+                rec.default_book_end = rec.order_sum_sale_order_lines_with_draft - outsourcing_link_purchase_order_with_draft
             else :
                 rec.default_book_end = 0.0
 
@@ -333,15 +330,11 @@ class projectAccountProject(models.Model):
 
     def compute_sale_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
         _logger.info('----------compute_sale_order_total => with_direct_payment=' + str(with_direct_payment))
-        #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         self.ensure_one()
         rec = self
-        # avec un utilisateur avec un ID != celui d'aurélien, ça crash :
-        #       Record does not exist or has been deleted
-        #       (Record: sale.order.line(1,), Field : sale.order.line.price_subtotal, User: 2) 
-        # renvoyé par sudo vim /usr/lib/python3/dist-packages/odoo/fields.py ligne 1191
         line_ids = rec.get_sale_order_line_ids()
         total = 0.0
+        total_with_tax = 0.0
 
         status_list_to_keep = ['sale']
         if with_draft_sale_order :
@@ -353,10 +346,11 @@ class projectAccountProject(models.Model):
                 continue
             if line.state not in status_list_to_keep:
                 continue
-            total += line.product_uom_qty * line.price_unit * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            total += line.price_subtotal * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            total_with_tax += line.price_total * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         #_logger.info(total)
         _logger.info('----------END compute_sale_order_total')
-        return total
+        return total, total_with_tax
         
     def action_open_sale_order_lines(self):
         line_ids = self.get_sale_order_line_ids()
@@ -517,11 +511,6 @@ class projectAccountProject(models.Model):
         _logger.info('--- create_sale_order')
         self.ensure_one()
         
-        price_unit = 0.0
-        #TODO : déduire le montant des sale order en état draft ?
-        if self.order_amount_current - self.order_sum_sale_order_lines > 0:
-            price_unit = self.order_amount_current - self.order_sum_sale_order_lines
-
         return  {
             'res_model': 'sale.order',
             'type': 'ir.actions.act_window',
@@ -534,7 +523,6 @@ class projectAccountProject(models.Model):
                 'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
                 'default_previsional_invoice_date' : self.date,
                 #'default_price_unit' : price_unit,
-                'default_target_amount' : price_unit,
             }
         }
 
@@ -609,8 +597,8 @@ class projectAccountProject(models.Model):
     partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
     ######## TOTAL
     order_amount_initial = fields.Monetary('Montant HT piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
-    order_amount_current = fields.Monetary('Montant HT piloté par Tasmane actuel', store=True, compute=compute,  help="Montant à réaliser par Tasmane actuel : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
-    order_sum_sale_order_lines = fields.Monetary('Total HT commandé à Tasmane', store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
+    order_sum_sale_order_lines_with_draft = fields.Monetary("Total HT piloté commandé (y/c BCC à l'état Devis)", store=True, compute=compute)
+    order_sum_sale_order_lines = fields.Monetary("Total HT commandé à Tasmane (uniquement à l'état BDC)", store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute, store=True)
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute, store=True)
@@ -621,9 +609,11 @@ class projectAccountProject(models.Model):
     order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute, store=True)
 
     order_to_invoice_company = fields.Monetary('Montant HT à facturer par Tasmane au client', compute=compute, store=True)
+    order_to_invoice_company_with_tax = fields.Monetary('Montant TTC à facturer par Tasmane au client', compute=compute, store=True)
     company_invoice_sum_move_lines = fields.Monetary('Montant HT déjà facturé par Tasmane au client', compute=compute, store=True)
     company_invoice_sum_move_lines_with_tax = fields.Monetary('Montant déjà TTC facturé par Tasmane au client', compute=compute, store=True)
     company_to_invoice_left = fields.Monetary('Montant HT restant à facturer par Tasmane au client', compute=compute, store=True)
+    company_to_invoice_left_with_tax = fields.Monetary('Montant TTC restant à facturer par Tasmane au client', compute=compute, store=True)
     order_to_invoice_outsourcing = fields.Monetary('Montant HT S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute, store=True)
 
     company_paid = fields.Monetary('Montant TTC déjà payé par le client à Tasmane', compute=compute, store=True)
@@ -720,7 +710,6 @@ class projectAccountProject(models.Model):
 
 
     # INVOICING MANAGEMENT DATA
-    is_constistant_order_amount = fields.Boolean('Cohérence commande client/ventilation mission', store=True, compute=compute, help="Faux lorsque le montant total des lignes de commandes est différent de la somme de la part Dispositifi Tasmane+part sous-traitée+part autres prestations")
     is_validated_order = fields.Boolean("BC clients tous validés", store=True, compute=compute, help="VRAI si tous les BC clients sont à l'état 'Bon de commande'.")
     is_validated_purchase_order = fields.Boolean("BC fournisseurs tous validés", store=True, compute=compute, help="VRAI si tous les BC fournissuers sont à l'état 'Bon de commande'.")
     is_validated_book = fields.Boolean("Répartition book validée", store=True, compute=compute, help="VRAI si la répartition du book est validée.")

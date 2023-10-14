@@ -120,6 +120,11 @@ class projectAccountingPurchaseOrderLine(models.Model):
             if line._context.get('default_analytic_distribution'):
                 line.analytic_distribution = line._context.get('default_analytic_distribution')
 
+    @api.depends('reselling_price_unit', 'product_qty')
+    def _compute_reselling_subtotal(self):
+        for rec in self:
+            rec.reselling_subtotal = rec.reselling_price_unit * rec.product_qty
+
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",
             help = "Ligne de la commande du client final")
@@ -127,8 +132,10 @@ class projectAccountingPurchaseOrderLine(models.Model):
         #TODO : ajouter contrôles : order_direct_payment_validated_amount ne peut pas être supérieur à subtotal et doit être nul si direct_payment_sale_order_line_id = False
     order_direct_payment_validated_detail = fields.Text("Commentaire paiement direct", help='Détail des factures en paiement direct validées par Tasmane')
 
+    previsional_invoice_date = fields.Date('Date prev. de facturation', states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
     # TODO : ajouter reselling_unit_price en le prenant sur la fiche article (valeur par défaut mais modifiable) et faire la multiplication
-    reselling_subtotal = fields.Monetary('Montant HT de revente', help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
+    reselling_price_unit = fields.Float('PU HT de revente')
+    reselling_subtotal = fields.Monetary('Sous-total HT de revente', compute=_compute_reselling_subtotal, help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
     margin_amount = fields.Monetary('Marge €', compute=compute)
     margin_rate = fields.Monetary('Marge %', compute=compute)
 

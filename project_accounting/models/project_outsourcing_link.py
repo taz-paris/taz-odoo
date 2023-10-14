@@ -133,6 +133,7 @@ class projectOutsourcingLink(models.Model):
                 'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
                 'default_partner_id' : self.partner_id.id,
                 'default_date_planned' : self.project_id.date,
+                'default_previsional_invoice_date' : self.project_id.date,
             }
         }
 
