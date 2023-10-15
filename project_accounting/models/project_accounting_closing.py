@@ -146,17 +146,6 @@ class projectAccountingClosing(models.Model):
         else : 
             raise ValidationError(_("Ce projet n'est lié à aucun identifiant Napta : impossible d'ouvrir sa page Napta."))
 
-    def action_open_project_form(self):
-        return {
-            #'name': _('Lignes de commande client'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'project.project',
-            'views': [[False, 'form']],
-            'target' : 'current',
-            'res_id' : self.project_id.id,
-        }
-
-
     name = fields.Char('Libellé', compute=compute, store=True)
     is_validated = fields.Boolean('Validée', tracking=True)
     comment = fields.Text("Commentaire")

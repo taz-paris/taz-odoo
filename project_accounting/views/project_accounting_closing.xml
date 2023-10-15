@@ -66,7 +66,6 @@
 					<field name="rel_project_date" widget="daterange" />
 				    </div>
 					<field name="rel_project_stage_id"/>
-					<button type="object" name="action_open_project_form" string="Voir le projet" colspan="2"/>
 					<button type="object" name="goto_napta" string="Voir sur Napta" colspan="2"/>
 				</group>
 				<group string="Clôture précédente">
