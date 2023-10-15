@@ -154,6 +154,42 @@
 					</group>
 				   </group>
 				<notebook>
+					<page name="dashboard" string="Synthèse À DATE">
+						<group>
+							<group string="Somme dispositif Tasmane + Sous-traitance + autres">
+								<field name="order_sum_sale_order_lines" />
+								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
+								<button type="object" name="create_sale_order" string="Créer commande client" /> 
+								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
+                                                        </group>
+							<group string="Marge actuelle">
+                                                                <field name="order_sum_sale_order_lines_with_draft"/>
+                                                                <field name="order_cost_current"/>
+                                                                <field name="order_marging_amount_current"/>
+                                                                <field name="order_marging_rate_current" widget="progressbar"/>
+							</group>
+						</group>
+						<group col="3">
+							<group string="Production par le dispositif Tasmane">
+					    			<field name="company_part_amount_current" force_save="1"/>
+					    			<field name="company_part_cost_current" force_save="1"/>
+					    			<field name="company_part_marging_amount_current"/>
+					    			<field name="company_part_marging_rate_current" widget="progressbar"/>
+							</group>
+                                                	<group string="Production sous-traitée par Tasmane">
+                                                                <field name="outsource_part_amount_current" />
+                                                                <field name="outsource_part_cost_current"/>
+                                                                <field name="outsource_part_marging_amount_current"/>
+                                                                <field name="outsource_part_marging_rate_current" widget="progressbar"/>
+                                                        </group>
+                                                	<group string="Autres prestations (exemple : séminaire chez Tasmane)">
+                                                                <field name="other_part_amount_current" force_save="1"/>
+                                                                <field name="other_part_cost_current"/>
+                                                                <field name="other_part_marging_amount_current"/>
+                                                                <field name="other_part_marging_rate_current" widget="progressbar"/>
+                                                        </group>
+						</group>
+					</page>
 					<page name="project_structure" string="Structure INITIALE du projet">
 						<group string="Somme dispositif Tasmane + Sous-traitance + autres">
 							<group>
@@ -184,43 +220,6 @@
 							</group>  
 						</group>
 
-					</page>
-
-					<page name="dashboard" string="Synthèse À DATE">
-						<group>
-							<group string="Somme dispositif Tasmane + Sous-traitance + autres">
-								<field name="order_sum_sale_order_lines" />
-								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
-								<button type="object" name="create_sale_order" string="Créer commande client" /> 
-								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
-                                                        </group>
-							<group string="Marge actuelle">
-                                                                <field name="order_sum_sale_order_lines_with_draft"/>
-                                                                <field name="order_cost_current"/>
-                                                                <field name="order_marging_amount_current"/>
-                                                                <field name="order_marging_rate_current" widget="progressbar"/>
-							</group>
-						</group>
-						<group col="3">
-							<group string="Production par le dispositif Tasmane">
-					    			<field name="company_part_amount_current" force_save="1"/>
-					    			<field name="company_part_cost_current" force_save="1"/>
-					    			<field name="company_part_marging_amount_current"/>
-					    			<field name="company_part_marging_rate_current" widget="progressbar"/>
-							</group>
-                                                	<group string="Production sous-traitée par Tasmane">
-                                                                <field name="outsource_part_amount_current"/>
-                                                                <field name="outsource_part_cost_current"/>
-                                                                <field name="outsource_part_marging_amount_current"/>
-                                                                <field name="outsource_part_marging_rate_current" widget="progressbar"/>
-                                                        </group>
-                                                	<group string="Autres prestations (exemple : séminaire chez Tasmane)">
-                                                                <field name="other_part_amount_current" force_save="1"/>
-                                                                <field name="other_part_cost_current"/>
-                                                                <field name="other_part_marging_amount_current"/>
-                                                                <field name="other_part_marging_rate_current" widget="progressbar"/>
-                                                        </group>
-						</group>
 					</page>
 					<page name="customer_invoicing" string="Facturation client">
 						<group>

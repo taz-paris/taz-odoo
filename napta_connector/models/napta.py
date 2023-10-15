@@ -419,6 +419,9 @@ class naptaProject(models.Model):
                 'url': 'https://app.napta.io/projects/%s' % (self.napta_id),
                 'target': 'new',
             }
+        else : 
+            raise ValidationError(_("Ce projet n'est lié à aucun identifiant Napta : impossible d'ouvrir sa page Napta."))
+
     
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')

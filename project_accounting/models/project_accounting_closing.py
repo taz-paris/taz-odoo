@@ -127,15 +127,48 @@ class projectAccountingClosing(models.Model):
             #TODO : ça ne suffit pas pour valider car des fois on a ni prod, ni facturation, ni achat sur la période et on destock
             #    rec.is_validated = True
 
+    @api.model_create_multi
+    def create(self, vals):
+        closing = super().create(vals)
+        for rec in closing:
+            if rec.project_id:
+                rec.original_stage_id = rec.project_id.stage_id.id
+        return closing
+
+
+    def goto_napta(self):
+        if self.project_id.napta_id:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': 'https://app.napta.io/projects/%s?view=financial' % (self.project_id.napta_id),
+                'target': 'new',
+            }
+        else : 
+            raise ValidationError(_("Ce projet n'est lié à aucun identifiant Napta : impossible d'ouvrir sa page Napta."))
+
+    def action_open_project_form(self):
+        return {
+            #'name': _('Lignes de commande client'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'project.project',
+            'views': [[False, 'form']],
+            'target' : 'current',
+            'res_id' : self.project_id.id,
+        }
 
 
     name = fields.Char('Libellé', compute=compute, store=True)
-    is_validated = fields.Boolean('Validé', tracking=True)
+    is_validated = fields.Boolean('Validée', tracking=True)
     comment = fields.Text("Commentaire")
     comment_previous = fields.Text("Commentaire clôture précédente", related='previous_closing.comment')
+    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='restrict')
     rel_project_partner_id = fields.Many2one(related='project_id.partner_id', store=True)
     rel_project_user_id = fields.Many2one(related='project_id.user_id', store=True)
-    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='restrict')
+    rel_project_date_start = fields.Date(related='project_id.date_start')
+    rel_project_date = fields.Date(related='project_id.date')
+    rel_project_stage_id = fields.Many2one(related='project_id.stage_id', string="Statut actuel")
+    rel_project_accounting_closing_ids = fields.One2many(related='project_id.accounting_closing_ids')
+    original_stage_id = fields.Many2one('project.project.stage', readonly=True, string='Statut début clôture', help='Statut du projet à la création de la clôture ("photo")')
     closing_date = fields.Date("Date de clôture", required=False, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)
     next_closing = fields.One2many('project.accounting_closing', 'previous_closing', string="Clôture suivante", readonly=True)
