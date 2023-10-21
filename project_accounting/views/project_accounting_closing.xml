@@ -96,22 +96,22 @@
 					<group col="4">
 						<group name="pca" string="PCA">
 							<field name="pca_previous_balance"/>
-							<field name="pca_period_amount"/>
+							<field name="pca_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
 							<field name="pca_balance"/>
 						</group>
 						<group name="fae" string="FAE">
 							<field name="fae_previous_balance"/>
-							<field name="fae_period_amount"/>
+							<field name="fae_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
 							<field name="fae_balance"/>
 						</group>
 						<group name="cca" string="CCA">
 							<field name="cca_previous_balance"/>
-							<field name="cca_period_amount"/>
+							<field name="cca_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
 							<field name="cca_balance"/>
 						</group>
 						<group name="fnp" string="FNP">
 							<field name="fnp_previous_balance"/>
-							<field name="fnp_period_amount"/>
+							<field name="fnp_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
 							<field name="fnp_balance"/>
 						</group>
 					</group>
@@ -123,7 +123,7 @@
 								<field name="production_stock"/>
 							</group>
 							<group>
-								<field name="production_destocking"/>
+								<field name="production_destocking" attrs="{'readonly':[('is_validated','=',True)]}"/>
 								<field name="production_balance"/>
 							</group>
 						</group>

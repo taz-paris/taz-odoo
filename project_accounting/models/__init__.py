@@ -13,3 +13,4 @@ from . import payment
 from . import wizard_accounting_closing_mass_creation
 from . import analytic_mixin
 from . import employee_book_goal
+from . import account_analytic_line

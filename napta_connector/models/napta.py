@@ -427,7 +427,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        #client.refresh_cache()
+        client.refresh_cache()
 
         self.env['hr.department'].create_update_odoo_business_unit()
         self.env['hr.job'].create_update_odoo_user_position()
@@ -586,14 +586,17 @@ class naptaAnalyticLine(models.Model):
         client = ClientRestNapta(self.env)
         timesheet_list = client.read_cache('timesheet')
         timesheet_periods = client.read_cache('timesheet_period')
+        
+
         for napta_id, timesheet_period in timesheet_periods.items():
             timesheet = timesheet_list[timesheet_period['attributes']['timesheet_id']]
             target_date = datetime.date.fromisocalendar(int(timesheet['attributes']['year']), int(timesheet['attributes']['week']), int(timesheet_period['attributes']['day']))
+            napta_project_id = timesheet_period['attributes']['project_id']
             dic = {
                     'napta_id' : napta_id,
                     'category' : 'project_employee_validated',
                     'employee_id' : {'napta_id' : timesheet['attributes']['user_id']},
-                    'project_id' : {'napta_id' : timesheet_period['attributes']['project_id']},
+                    'project_id' : {'napta_id' : napta_project_id},
                     'date' : target_date,
                     'unit_amount' : timesheet_period['attributes']['worked_days'],
                     'is_timesheet_closed_on_napta' : timesheet['attributes']['closed'],
@@ -611,6 +614,7 @@ class naptaAnalyticLine(models.Model):
             _logger.info("      > Instance supprimée")
         #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
             #TODO ajouter des borne de début/fin renseignées avec les bord d'apel
+
 
 
     """

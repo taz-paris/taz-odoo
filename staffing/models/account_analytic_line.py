@@ -17,13 +17,6 @@ class staffingAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
-        #res = []
-        #_logger.info(vals)
-        #for val in vals:
-        #    _logger.info(val)
-        #    val = self._sync_project(val)
-        #    res.append(val)
-        #super().create(res)
         res = self._sync_project(vals)
         return super().create(res)
 

@@ -30,7 +30,7 @@ class projectBookPeriod(models.Model):
         while year != datetime.date.today().year +1 : 
             year_list.append((str(year), str(year)))
             year += 1
-        return year_list.reverse()
+        return year_list
     
     @api.model
     def year_default(self):
