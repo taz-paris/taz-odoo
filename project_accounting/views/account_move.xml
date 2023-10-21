@@ -42,6 +42,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='to_check']" position="before">
 			<filter string="Partenaire sans code auxiliaire externe" name="partner_without_external_auxiliary_code" domain="[('partner_id.external_auxiliary_code', '=', False)]"/>
+			<filter string="Mois en cours" name="current_month" domain="[('date','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('date','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
+			<filter string="Mois précédent" name="prev_month" domain="[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01')),('date','&lt;',time.strftime('%%Y-%%m-01'))]"/>
                 </xpath>
           </field>
         </record>
@@ -83,5 +85,17 @@
 		</tree>
             </field>
         </record>
+
+        <record id="action_account_moves_previous_month" model="ir.actions.act_window">
+            <field name="context">{'journal_type':'general', 'search_default_posted':1, 'search_default_sales':1, 'search_default_prev_month':1}</field>
+            <field name="name">Écritures comptables</field>
+            <field name="res_model">account.move.line</field>
+            <field name="domain">[('display_type', 'not in', ('line_section', 'line_note')), ('parent_state', '!=', 'cancel')]</field>
+            <field name="view_id" ref="account.view_move_line_tree"/>
+            <field name="view_mode">tree,pivot,graph,kanban</field>
+        </record>
+
+	<menuitem name="Écritures de vente validées du mois M-1" id="project_accounting_closing_account_moves_previous_month" parent="project_accounting_closing_menu_root" action="action_account_moves_previous_month"/>
+	<menuitem name="Écritures de vente validées du mois M-1" id="account_moves_previous_month" action="action_account_moves_previous_month" parent="account.menu_finance_entries_accounting_miscellaneous"/>
   </data>
 </odoo>

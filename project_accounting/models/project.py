@@ -534,7 +534,7 @@ class projectAccountProject(models.Model):
         return production_period_amount
 
 
-    @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids', 'project_outsourcing_link_ids.partner_id')
+    @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids')
     def check_partners_consistency(self):
         for rec in self:
             if rec.partner_id.id in rec.partner_secondary_ids.ids:
@@ -626,6 +626,7 @@ class projectAccountProject(models.Model):
 
     company_part_amount_current = fields.Monetary('Montant HT dispositif Tasmane actuel', 
             compute=compute,
+            store=True,
             help="Montant produit par le dispositif Tasmane : part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
     company_part_cost_current = fields.Monetary('Coût de production dispo Tasmane (€) actuel', store=True, compute=compute, help="Montant du pointage Tasmaame valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge)")
     company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) actuelle', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
@@ -670,6 +671,7 @@ class projectAccountProject(models.Model):
 
     other_part_amount_current = fields.Monetary('Montant HT de la part "autres prestations" actuel', 
             compute=compute,
+            store=True,
             help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
     other_part_cost_current = fields.Monetary('Coût de revient HT des autres prestations actuel', store=True, compute=compute)
     other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) actuelle', store=True, compute=compute)

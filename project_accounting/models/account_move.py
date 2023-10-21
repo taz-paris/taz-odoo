@@ -38,6 +38,11 @@ class projectAccountingAccountMove(models.Model):
             for project in rec.rel_project_ids:
                 project.compute()
 
+    def action_post(self):
+        if self.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and not self.partner_id.external_auxiliary_code:
+            raise ValidationError(_("Impossible de valider la facture/avoir client : le Code auxiliaire CEGB - Quadratus n'est pas défini sur la fiche client.")) 
+        return super().action_post()
+
     def comptute_project_ids(self):
         for rec in self:
             project_ids_res = []
