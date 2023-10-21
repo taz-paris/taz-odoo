@@ -94,85 +94,42 @@
 					</group>
 					<group string="Autres adresses filles">
 					    <field name="lang" invisible="1"/>
-					    <field name="child_ids_address" nolabel="1" colspan="2"  mode="tree" context="{'default_parent_id': active_id, 'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_lang': lang, 'default_user_id': user_id, 'default_type': 'invoice'}">
-						<tree delete="false">
-							  <field name="is_company" invisible="1"/>
-							  <field name="type"/>
-							  <field name="name"/>
-							  <field name="street" optional="hide"/>
-							  <field name="street2" optional="hide"/>
-							  <field name="street3" optional="hide"/>
-							  <field name="zip" optional="show"/>
-							  <field name="city" optional="show"/>
-							  <field name="country_id" optional="show"/>
-							  <field name="phone" optional="hide"/>
-							  <field name="email" optional="hide"/>
-						</tree>
-						<form string="Contact / Address">
-						    <sheet>
-							<field name="type" required="1" widget="radio" options="{'horizontal': true}"/>
-							<field name="parent_id" invisible="1"/>
-							<div class="text-muted oe_edit_only">
-							    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'contact')]}">
-								<span>Use this to organize the contact details of employees of a given company (e.g. CEO, CFO, ...).</span>
-							    </p>
-							    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'invoice')]}">
-								<span>Preferred address for all invoices. Selected by default when you invoice an order that belongs to this company.</span>
-							    </p>
-							    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'delivery')]}">
-								<span>Preferred address for all deliveries. Selected by default when you deliver an order that belongs to this company.</span>
-							    </p>
-							    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'private')]}">
-								<span>Private addresses are only visible by authorized users and contain sensitive data (employee home addresses, ...).</span>
-							    </p>
-							    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'other')]}">
-								<span>Other address for the company (e.g. subsidiary, ...)</span>
-							    </p>
-							</div>
-							<hr/>
-							<group>
-							    <group>
-								<field name="name" string="Contact Name" attrs="{'required' : [('type', '=', 'contact')]}"/>
-								<field name="title" options="{'no_open': True}" placeholder="e.g. Mr."
-								    attrs="{'invisible': [('type','!=', 'contact')]}"/>
-								<field name="function" placeholder="e.g. Sales Director"
-								    attrs="{'invisible': [('type','!=', 'contact')]}"/>
-								<label for="street" string="Address" attrs="{'invisible': [('type','=', 'contact')]}"/>
-								<div attrs="{'invisible': [('type','=', 'contact')]}">
-								    <div class="o_address_format" name="div_address">
-									<field name="street" placeholder="Street..." class="o_address_street"/>
-									<field name="street2" placeholder="Street 2..." class="o_address_street"/>
-									<field name="city" placeholder="City" class="o_address_city"/>
-									<field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
-									<field name="zip" placeholder="ZIP" class="o_address_zip"/>
-									<field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
-								    </div>
-								</div>
-							    </group>
-							    <group>
-								<field name="email" widget="email"/>
-								<field name="phone" widget="phone"/>
-								<field name="mobile" widget="phone"/>
-								<field name="company_id" invisible="1"/>
-							    </group>
-							</group>
-							<group>
-							    <field name="comment" placeholder="Internal notes..." nolabel="1" colspan="2"/>
-							</group>
-							<field name="lang" invisible="True"/>
-							<field name="user_id" invisible="True"/>
-						    </sheet>
-						</form>
-					    </field>
+					    <field name="child_ids_address" nolabel="1" colspan="1"  mode="tree" context="{
+						    'tree_view_ref':'taz-common.address_tree', 
+						    'form_view_ref':'taz-common.address_form', 
+						    'default_parent_id': active_id, 
+						    'default_street': street, 
+						    'default_street2': street2, 
+						    'default_city': city, 
+						    'default_state_id': state_id, 
+						    'default_zip': zip, 
+						    'default_country_id': country_id, 
+						    'default_lang': lang, 
+						    'default_user_id': user_id, 
+						    'default_type': 'invoice'}">
+							<tree delete="false">
+								  <field name="is_company" invisible="1"/>
+								  <field name="type"/>
+								  <field name="name"/>
+								  <field name="street" optional="hide"/>
+								  <field name="street2" optional="hide"/>
+								  <field name="street3" optional="hide"/>
+								  <field name="zip" optional="show"/>
+								  <field name="city" optional="show"/>
+								  <field name="country_id" optional="show"/>
+								  <field name="phone" optional="hide"/>
+								  <field name="email" optional="hide"/>
+							</tree>
+					     </field>
 					</group>
 					<group name="misc" string="Identifiants">
 		      				<field name="is_company" default="1" invisible="0"/>
 						<field name="ref" string="Référence interne"/>
 					    	<field name="vat" placeholder="Num TVA intracom UE" attrs="{'readonly': [('parent_id','!=',False)]}"/>
 						<field name="company_registry" on_change="1" invisible="1"/>
-						<field name="siret" on_change="1" />
 						<field name="siren" on_change="1" />
 						<field name="nic" on_change="1" />
+						<field name="siret" on_change="1" />
 						<field name="parent_is_company" invisible="1" />
 					</group>
 				</group>
@@ -295,9 +252,6 @@
                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),
                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),
 			      ]" />
-      <field name="help" type="html">
-		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
-      </field>
       <field name="domain">[('is_company', '=', True)]</field> 
       <field name="filter">[('is_company', '=', True)]</field> 
     </record>
@@ -491,9 +445,124 @@
                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),
                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),
 			      ]" />
-      <field name="domain">[('is_company', '=', False),('user_ids', '=', False),('employee_ids', '=', False)]</field> 
+      <field name="domain">[('is_company', '=', False),('user_ids', '=', False),('employee_ids', '=', False), ('type', '=', 'contact')]</field> 
       <field name="filter">[('is_company', '!=', True)]</field> 
     </record>
+
+
+    <!-- ADDRESS -->
+    <record model="ir.ui.view" id="taz-common.address_tree">
+      <field name="name">Adresses</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+		<tree delete="false">
+			  <field name="is_company" invisible="1"/>
+			  <field name="type"/>
+			  <field name="name"/>
+			  <field name="street" optional="hide"/>
+			  <field name="street2" optional="hide"/>
+			  <field name="street3" optional="hide"/>
+			  <field name="zip" optional="show"/>
+			  <field name="city" optional="show"/>
+			  <field name="country_id" optional="show"/>
+			  <field name="phone" optional="hide"/>
+			  <field name="email" optional="hide"/>
+		</tree>
+      </field>
+    </record>
+	
+    <record model="ir.ui.view" id="taz-common.address_form">
+      <field name="name">Adresses</field>
+      <field name="model">res.partner</field>
+      <field name="arch" type="xml">
+		<form string="Contact / Address">
+		    <sheet>
+			<group>
+				<field name="parent_id" />
+				<field name="type" required="1" widget="radio" options="{'horizontal': true}"/>
+			</group>
+			<div class="text-muted oe_edit_only">
+			    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'contact')]}">
+				<span>Utilisez ceci pour organiser les coordonnées des employés d'une entreprise donnée (par exemple, CEO, CFO, ...).</span>
+			    </p>
+			    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'invoice')]}">
+				<span>Adresse préférée pour toutes les factures. Sélectionnée par défaut lorsque vous facturez une commande qui appartient à cette société.</span>
+			    </p>
+			    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'delivery')]}">
+				<span>Adresse préférée pour toutes les livraisons. Sélectionnée par défaut lorsque vous livrez une commande appartenant à cette société.</span>
+			    </p>
+			    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'private')]}">
+				<span>Les adresses privées ne sont visibles que par les utilisateurs autorisés et contiennent des données sensibles (adresses personnelles des employés, ...).</span>
+			    </p>
+			    <p class="mb-0" attrs="{'invisible': [('type', '!=', 'other')]}">
+				<span>Utilisez ceci pour organiser les coordonnées des employés d'une entreprise donnée (par exemple, CEO, CFO, ...).</span>
+			    </p>
+			</div>
+			<hr/>
+			<group string="Coordonnées">
+			    <group>
+				<field name="name" string="Contact Name" attrs="{'required' : [('type', '=', 'contact')]}"/>
+				<field name="title" options="{'no_open': True}" placeholder="e.g. Mr."
+				    attrs="{'invisible': [('type','!=', 'contact')]}"/>
+				<field name="function" placeholder="e.g. Sales Director"
+				    attrs="{'invisible': [('type','!=', 'contact')]}"/>
+				<label for="street" string="Address" attrs="{'invisible': [('type','=', 'contact')]}"/>
+				<div attrs="{'invisible': [('type','=', 'contact')]}">
+				    <div class="o_address_format" name="div_address">
+					<field name="street" placeholder="Street..." class="o_address_street"/>
+					<field name="street2" placeholder="Street 2..." class="o_address_street"/>
+					<field name="city" placeholder="City" class="o_address_city"/>
+					<field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
+					<field name="zip" placeholder="ZIP" class="o_address_zip"/>
+					<field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
+				    </div>
+				</div>
+			    </group>
+			    <group>
+				<field name="email" widget="email"/>
+				<field name="phone" widget="phone"/>
+				<field name="mobile" widget="phone"/>
+				<field name="company_id" invisible="1"/>
+			    </group>
+			</group>
+			<group string="Identifiants">
+				<field name="ref" string="Référence interne"/>
+				<field name="vat" placeholder="Num TVA intracom UE" attrs="{'readonly': [('parent_id','!=',False)]}"/>
+				<field name="company_registry" on_change="1" invisible="1"/>
+				<field name="siren" on_change="1" />
+				<field name="nic" on_change="1" />
+				<field name="siret" on_change="1" />
+			</group>
+			<group>
+			    <field name="comment" placeholder="Internal notes..." colspan="2"/>
+			</group>
+			<field name="lang" invisible="True"/>
+			<field name="user_id" invisible="True"/>
+		    </sheet>
+		</form>
+      </field>
+    </record>
+
+
+
+    <record model="ir.actions.act_window" id="taz-common.action_partner_address">
+	    <field name="name">Adresses de facturation/livraison</field>
+      <field name="res_model">res.partner</field>
+      <field name="context">{"default_is_company":False}</field>
+      <field name="search_view_id" ref="company_search"/>
+      <field name="view_mode">tree,form,kanban</field>
+		      <field name="view_ids" eval="
+                            [
+                            (5, 0, 0),
+                            (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.address_tree')}),
+                            (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.address_form')}),
+			      ]" />
+      <field name="domain">[('is_company', '=', False), ('type', '!=', 'contact')]</field> 
+      <field name="filter">[('is_company', '=', False)]</field> 
+    </record>
+
+
+    <!-- AUTRES -->
 
     <record id="taz-admin" model="res.groups">
         <field name="name">TAZ-Admin</field>
@@ -532,6 +601,7 @@
     <menuitem name="Commerce" id="taz-common.commerce"/>
     <menuitem name="Contacts" sequence="10" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
     <menuitem name="Entreprises" sequence="70" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
+    <menuitem name="Adresses de facturation/livraison" sequence="71" id="taz-common.partner_address" parent="taz-common.commerce" action="taz-common.action_partner_address"/>
 
     
     <menuitem id="taz-common.res_partner_menu_config"

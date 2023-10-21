@@ -16,7 +16,7 @@
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="taz-common.company_form"/>
             <field name="arch" type="xml">
-                <field name="nic" position="after">
+                <field name="ref" position="after">
                         <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>
