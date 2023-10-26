@@ -427,7 +427,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        client.refresh_cache()
+        #client.refresh_cache()
 
         self.env['hr.department'].create_update_odoo_business_unit()
         self.env['hr.job'].create_update_odoo_user_position()
@@ -1005,7 +1005,10 @@ def get_napta_key_domain_search(odoo_model_name, dic):
 def create_update_odoo(env, odoo_model_name, dic, context={}, only_update=False):
     key_domain_search = get_napta_key_domain_search(odoo_model_name, dic)
     obj_list = env[odoo_model_name].search(key_domain_search)
-
+    if 'lang' not in context.keys():
+        context['lang'] = 'fr_FR' #Nécessaire pour que la mise à jour des champs avec translate=True (stockée sous forme de JSON dans la base postgres) soit prise en compte pour la langue Française, et pas que en en_US.
+        # on ne positionne pas le paramètre tz du context car les heures sont retournées en GMT par Napta, qui est la tz par défaut d'Odoo
+    
     if len(obj_list) > 1 :
         raise ValidationError(_("Several objects are return with this key_attribute_list => So this list in not carriing KEY, because it's not UNIQUE"))
 

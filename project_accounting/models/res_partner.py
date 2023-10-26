@@ -10,9 +10,6 @@ from datetime import datetime
 
 class projectAccountingResPartner(models.Model):
      _inherit = "res.partner"
-     _sql_constraints = [
-         ('external_auxiliary_code_uniq', 'UNIQUE (external_auxiliary_code)',  "Impossible d'enregistrer deux partenaires avec le même code auxiliaire CEGB - Quadratus, y compris sur un partenaire archivé.")
-     ]
 
      def write(self, vals):
          for rec in self :
