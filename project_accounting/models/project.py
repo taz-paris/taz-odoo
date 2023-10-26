@@ -127,7 +127,6 @@ class projectAccountProject(models.Model):
 	'project_outsourcing_link_ids',
 	'other_part_amount_initial',
 	'other_part_cost_initial',
-	'other_part_amount_current',
 	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
 	'accounting_closing_ids',
 	'invoicing_comment',
@@ -239,7 +238,10 @@ class projectAccountProject(models.Model):
 
             
             ######## INVOICE DATA CONTROLE
-            #TODO : il ne faut regarder que les commandes pour lesquelles on a effectivement reçu un numéro de commande... pas les commandes en brouillon
+            is_consistant_prevent_napta_creation = True
+            if rec.is_prevent_napta_creation and (rec.company_part_amount_current != 0.0 or rec.company_part_cost_current != 0.0):
+                is_consistant_prevent_napta_creation = False
+            rec.is_consistant_prevent_napta_creation = is_consistant_prevent_napta_creation
 
             is_validated_order = True
             line_ids = rec.get_sale_order_line_ids()
@@ -250,10 +252,20 @@ class projectAccountProject(models.Model):
                     break
             rec.is_validated_order = is_validated_order
 
+            is_sale_order_with_draft = True
+            if rec.order_sum_sale_order_lines_with_draft == 0.0 and rec.stage_id.is_part_of_booking :
+                is_sale_order_with_draft = False
+            rec.is_sale_order_with_draft = is_sale_order_with_draft
+
             is_validated_book = False
             if rec.book_validation_datetime :
                 is_validated_book = True
             rec.is_validated_book = is_validated_book
+
+            is_affected_book = True
+            if not(rec.is_validated_book) and len(rec.book_employee_distribution_ids) == 0:
+                is_affected_book = False
+            rec.is_affected_book = is_affected_book
 
             is_consistant_outsourcing = True
             if not(rec.outsourcing):
@@ -276,10 +288,20 @@ class projectAccountProject(models.Model):
             """
             rec.is_validated_purchase_order = is_validated_purchase_order
 
-            if rec.invoicing_comment or not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_validated_book) or not(rec.is_consistant_outsourcing):
-                rec.is_review_needed = True
-            else :
+            is_outsource_part_amount_current = True
+            #TODO : implémenter ce controle et et lancer recalcul sur toute la base de projets
+            """
+            #is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme du prix de revente est > 0.")
+            """
+            rec.is_outsource_part_amount_current = is_outsource_part_amount_current
+            
+            if not(rec.number):
                 rec.is_review_needed = False
+            else:
+                if rec.invoicing_comment or not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not (rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not (rec.is_affected_book):
+                    rec.is_review_needed = True
+                else :
+                    rec.is_review_needed = False
 
             #BOOK
             if rec.stage_is_part_of_booking :
@@ -696,10 +718,17 @@ class projectAccountProject(models.Model):
 
 
     # INVOICING MANAGEMENT DATA
+    is_prevent_napta_creation = fields.Boolean("Ne pas créer sur Napta (dont portage pur)")
+
+    is_sale_order_with_draft = fields.Boolean("BC Client existants", store=True, compute=compute, help="FAUX si le projet est en statut Accord client/Commandé/Terminé (on devrait avoir du book) mais que le total des BC client (quelque soit leur statut) est nul")
     is_validated_order = fields.Boolean("BC clients tous validés", store=True, compute=compute, help="VRAI si tous les BC clients sont à l'état 'Bon de commande'.")
     is_validated_purchase_order = fields.Boolean("BC fournisseurs tous validés", store=True, compute=compute, help="VRAI si tous les BC fournissuers sont à l'état 'Bon de commande'.")
     is_validated_book = fields.Boolean("Répartition book validée", store=True, compute=compute, help="VRAI si la répartition du book est validée.")
     is_consistant_outsourcing = fields.Boolean("BCF présents", store=True, compute=compute, help="VRAI si le type de sous-traitance est renseigné et qu'il est cohérent avec les Bons de commande fournisseur du projet.")
+    is_consistant_prevent_napta_creation = fields.Boolean("Absent Napta et pas de prod. Tasmane", store=True, compute=compute, help="FAUX si la case Ne pas créer sur Napta est cochée et que le montant HT du dispositif Tasmane à date n'est pas nul.")
+    is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme du prix de revente est > 0.")
+    is_affected_book = fields.Boolean("Book affecté", store=True, compute=compute, help="VAI si le book est validé OU qu'il existe au moins une ligne de book")
+
     is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
     invoicing_comment = fields.Text("Commentaire ADV")
     project_book_factor = fields.Float("Facteur de bonus/malus", default=1.0)

@@ -29,6 +29,56 @@ class projectAccountingPurchaseOrder(models.Model):
         self.write({'state': 'cancel', 'mail_reminder_confirmed': False})
 
 
+    def action_create_regularisation_invoice(self):
+        """Create a regularisation CUSTOMER invoice associated to the PO if there are negative and received purchase.order.lines.
+        """
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+
+        # 1) Prepare invoice vals and clean-up the section lines
+        invoice_vals_list = []
+        sequence = 10
+        for order in self:
+            if order.invoice_status != 'to invoice':
+                continue
+
+            order = order.with_company(order.company_id)
+            pending_section = None
+            # Invoice values.
+            invoice_vals = order.with_context(default_move_type='out_invoice')._prepare_invoice()
+            # Invoice line values (keep only necessary sections).
+            for line in order.order_line:
+                if line.price_unit >= 0 :
+                    continue
+                if line.display_type == 'line_section':
+                    pending_section = line
+                    continue
+                if not float_is_zero(line.qty_to_invoice, precision_digits=precision):
+                    if pending_section:
+                        line_vals = pending_section._prepare_account_move_line()
+                        line_vals.update({'sequence': sequence})
+                        invoice_vals['invoice_line_ids'].append((0, 0, line_vals))
+                        sequence += 1
+                        pending_section = None
+                    line_vals = line._prepare_account_move_line()
+                    line_vals['price_unit'] = -line_vals['price_unit']
+                    line_vals.update({'sequence': sequence})
+                    invoice_vals['invoice_line_ids'].append((0, 0, line_vals))
+                    sequence += 1
+            if invoice_vals['invoice_line_ids'] != []:
+                invoice_vals_list.append(invoice_vals)
+
+        if not invoice_vals_list:
+            raise UserError(_("Aucune ligne de ce bon de commande fournisseur n'est elligible à la création d'une facture de régularisation (ligne avec une quantité reçue > quantité facturée ET dont le prix unitaire est strictement négatif)."))
+
+        # 3) Create invoices.
+        moves = self.env['account.move']
+        AccountMove = self.env['account.move'].with_context(default_move_type='out_invoice')
+        for vals in invoice_vals_list:
+            moves |= AccountMove.with_company(vals['company_id']).create(vals)
+
+        return self.action_view_invoice(moves)
+
+
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -123,9 +173,9 @@ class projectAccountingPurchaseOrderLine(models.Model):
 
     @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
     def _compute_qty_invoiced(self):
+        #Complément nécessaire pour que les factures de régularisation (Tasmane émet une facture CLIENT vers un Fournisseur : out_invoice/out_refund) soient comptées sur les BC Fournisseurs
+        #       car en natif Odoo, seuls les factures et avoirs FOURNISSEUR (in_invoice et in_refund) sont décomptés de la quantitée facturée/restant à facturée sur le BC FOURNISSEUR
         res = super()._compute_qty_invoiced()
-
-        #Surcharge nécessaire pour que les factures de régularisation (Tasmane émet une facture CLIENT vers un Fournisseur) soient comptées sur les BC Fournisseurs
 
         for line in self:
             # compute qty_invoiced
@@ -154,6 +204,9 @@ class projectAccountingPurchaseOrderLine(models.Model):
     def _compute_reselling_subtotal(self):
         for rec in self:
             rec.reselling_subtotal = rec.reselling_price_unit * rec.product_qty
+
+
+
 
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",

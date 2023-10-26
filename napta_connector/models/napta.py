@@ -319,7 +319,7 @@ class naptaProject(models.Model):
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
-    is_prevent_napta_creation = fields.Boolean("Ne pas créer sur sur Napta (dont portage pur)")
+    is_prevent_napta_creation = fields.Boolean("Ne pas créer sur Napta (dont portage pur)")
     napta_billing_method = fields.Selection([
         ('fixed_price', 'Forfait'),
         ('time_and_materials', 'Régie'),
