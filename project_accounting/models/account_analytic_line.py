@@ -11,7 +11,8 @@ class staffingAnalyticLine(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        self.update_project()
+        for rec in self:
+            rec.update_project()
         return res
 
     @api.model
@@ -21,12 +22,18 @@ class staffingAnalyticLine(models.Model):
         return res
 
     def unlink(self):
-        category = self.category
-        project_id = self.project_id
-        super().unlink()
-        if category == 'project_employee_validated':
-            #self.env['project.project'].search([('id', '=', project_id)])[0].compute()
+        project_to_update = []
+        for rec in self:
+            if rec.category == 'project_employee_validated':
+                if rec.project_id not in project_to_update:
+                    project_to_update.append(rec.project_id)
+
+        res = super().unlink()
+
+        for project_id in project_to_update :
             project_id.compute()
+
+        return res
 
     def update_project(self):
         for rec in self:
