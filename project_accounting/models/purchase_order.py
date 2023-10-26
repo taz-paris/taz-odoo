@@ -120,6 +120,36 @@ class projectAccountingPurchaseOrderLine(models.Model):
             if line._context.get('default_analytic_distribution'):
                 line.analytic_distribution = line._context.get('default_analytic_distribution')
 
+
+    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
+    def _compute_qty_invoiced(self):
+        res = super()._compute_qty_invoiced()
+
+        #Surcharge nécessaire pour que les factures de régularisation (Tasmane émet une facture CLIENT vers un Fournisseur) soient comptées sur les BC Fournisseurs
+
+        for line in self:
+            # compute qty_invoiced
+            qty_invoiced_changed = False
+            for inv_line in line._get_invoice_lines():
+                if inv_line.move_id.state not in ['cancel'] or inv_line.move_id.payment_state == 'invoicing_legacy':
+                    if inv_line.move_id.move_type == 'out_invoice':
+                        line.qty_invoiced += inv_line.product_uom_id._compute_quantity(inv_line.quantity, line.product_uom)
+                        qty_invoiced_changed = True
+                    elif inv_line.move_id.move_type == 'out_refund':
+                        line.qty_invoiced -= inv_line.product_uom_id._compute_quantity(inv_line.quantity, line.product_uom)
+                        qty_invoiced_changed = True
+
+            # compute qty_to_invoice
+            if line.order_id.state in ['purchase', 'done'] and qty_invoiced_changed == True :
+                if line.product_id.purchase_method == 'purchase':
+                    line.qty_to_invoice = line.product_qty - line.qty_invoiced
+                else:
+                    line.qty_to_invoice = line.qty_received - line.qty_invoiced
+                line.qty_to_invoice = 0
+
+        return res
+
+
     @api.depends('reselling_price_unit', 'product_qty')
     def _compute_reselling_subtotal(self):
         for rec in self:
