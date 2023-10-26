@@ -76,7 +76,7 @@
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
 			<field name="untaxed_amount_to_invoice" optional="hide" on_change="1"/>
 			<field name="untaxed_amount_invoiced" optional="hide" on_change="1" />
-			<field name="previsional_invoice_date" optional="show" string="Date prev fact" on_change="1"/>
+			<field name="previsional_invoice_date" optional="show" string="Date prev fact" on_change="1" required="1"/>
 			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
 			<field name="comment" optional="show"  on_change="1" />
 		</xpath>
@@ -213,7 +213,7 @@
 		<field name="price_subtotal" position="after">
 			<field name="untaxed_amount_invoiced" optional="show" string="Facturé (HT)" />
 			<field name="untaxed_amount_to_invoice" optional="show" string="Livré à facturer (HT)"/>
-			<field name="previsional_invoice_date" optional="show"/>
+			<field name="previsional_invoice_date" optional="show" required="1"/>
 			<field name="direct_payment_purchase_order_line_id" optional="show"/>
 			<field name="invoice_lines" optional="hide" widget="many2many_tags"/>
 			<field name="invoice_status" optional="hide"/>

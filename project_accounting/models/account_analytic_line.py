@@ -16,15 +16,16 @@ class staffingAnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
-        res = super().create(res)
+        res = super().create(vals)
         self.update_project()
         return res
 
     def unlink(self):
         category = self.category
         project_id = self.project_id
-        self.unlink()
+        super().unlink()
         if category == 'project_employee_validated':
+            #self.env['project.project'].search([('id', '=', project_id)])[0].compute()
             project_id.compute()
 
     def update_project(self):

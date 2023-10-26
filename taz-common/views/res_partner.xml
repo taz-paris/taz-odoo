@@ -445,7 +445,8 @@
                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),
                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),
 			      ]" />
-      <field name="domain">[('is_company', '=', False),('user_ids', '=', False),('employee_ids', '=', False), ('type', '=', 'contact')]</field> 
+      <field name="domain">[('is_company', '=', False), ('type', '=', 'contact')]</field> 
+	      <!-- ('user_ids', '=', False),('employee_ids', '=', False), -->
       <field name="filter">[('is_company', '!=', True)]</field> 
     </record>
 
