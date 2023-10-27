@@ -68,7 +68,9 @@
 		</xpath>
 
 		<field name="order_line" position="before">
-			<field name="target_amount" onchange="1"/>
+			<group>
+				<field name="target_amount" onchange="1"/>
+			</group>
 		</field>
 
 		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">

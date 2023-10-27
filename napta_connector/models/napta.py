@@ -818,28 +818,46 @@ class naptaHrContract(models.Model):
         BEGIN_OF_TIME = "2023-01-01"
 
         for napta_id, user_history in user_history_list.items():
-            if user_history['attributes']['user_id'] in EXCLUDED_USERLIST:
+            user_napta_id = user_history['attributes']['user_id']
+            if user_napta_id in EXCLUDED_USERLIST:
                 continue
+
+            if user_history['attributes']['end_date'] == None:
+                user_napta = client.read_cache('user', napta_id=user_napta_id)
+                if  user_napta['attributes']['leaving_date'] != None:
+                    user_history['attributes']['end_date'] = user_napta['attributes']['leaving_date']
+
             if user_history['attributes']['end_date'] != None and user_history['attributes']['end_date'] < BEGIN_OF_TIME:
                 continue
 
             if user_history['attributes']['start_date'] == None  or user_history['attributes']['start_date'] < BEGIN_OF_TIME:
                 user_history['attributes']['start_date'] = BEGIN_OF_TIME
 
-            user = self.env['res.users'].search([('napta_id', '=', user_history['attributes']['user_id'])])
+            user = self.env['res.users'].search([('napta_id', '=', user_napta_id)])
             name = ""
             if user:
                 name = user[0].name + " " + user[0].first_name
             name += " "+ str(user_history['attributes']['start_date'])
+            
+
+            if user_history['attributes']['end_date'] != None :
+                state = "close"
+            else:
+                #if user_history['attributes']['start_date'] > today():
+                #    status = "new"
+                state = "open"
+
+
             dic = {
                     'napta_id' : napta_id,
                     'name' : name,
                     'wage' : 0.0,
-                    'employee_id' : {'napta_id' : user_history['attributes']['user_id']},
+                    'employee_id' : {'napta_id' : user_napta_id},
                     'date_start' : user_history['attributes']['start_date'],
                     'date_end' : user_history['attributes']['end_date'],
                     'job_id' : {'napta_id' : user_history['attributes']['user_position_id']},
                     'department_id' : {'napta_id' : user_history['attributes']['business_unit_id']},
+                    'state' : state,
                 }
 
             ########## Gestion des surcharges de CJM individuel par rapport au grade
