@@ -175,19 +175,19 @@
 					<page name="dashboard" string="Synthèse À DATE">
 						<group>
 							<group string="Somme dispositif Tasmane + Sous-traitance + autres">
-								<field name="order_sum_sale_order_lines" />
+                                                                <field name="order_sum_sale_order_lines_with_draft"/>
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
 								<button type="object" name="create_sale_order" string="Créer commande client" /> 
 								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
                                                         </group>
 							<group string="Marge actuelle">
-                                                                <field name="order_sum_sale_order_lines_with_draft"/>
+								<field name="order_sum_sale_order_lines" />
                                                                 <field name="order_cost_current"/>
                                                                 <field name="order_marging_amount_current"/>
                                                                 <field name="order_marging_rate_current" widget="progressbar"/>
 							</group>
 						</group>
-						<group col="3">
+						<group col="4">
 							<group string="Production par le dispositif Tasmane">
 					    			<field name="company_part_amount_current" force_save="1"/>
 					    			<field name="company_part_cost_current" force_save="1"/>
@@ -199,6 +199,12 @@
                                                                 <field name="outsource_part_cost_current"/>
                                                                 <field name="outsource_part_marging_amount_current"/>
                                                                 <field name="outsource_part_marging_rate_current" widget="progressbar"/>
+                                                        </group>
+                                                	<group string="Production co-traitée">
+                                                                <field name="cosource_part_amount_current" />
+                                                                <field name="cosource_part_cost_current"/>
+                                                                <field name="cosource_part_marging_amount_current"/>
+                                                                <field name="cosource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
                                                 	<group string="Autres prestations (exemple : séminaire chez Tasmane)">
                                                                 <field name="other_part_amount_current" force_save="1"/>
@@ -229,6 +235,12 @@
 								<field name="outsource_part_cost_initial"/>
 								<field name="outsource_part_marging_amount_initial"/>
 								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
+							</group>  
+							<group string="Production co-traitée">
+								<field name="cosource_part_amount_initial"/>
+								<field name="cosource_part_cost_initial"/>
+								<field name="cosource_part_marging_amount_initial"/>
+								<field name="cosource_part_marging_rate_initial" widget="progressbar"/>
 							</group>  
 							<group string="Autres prestations (exemple : séminaire chez Tasmane)">
 								<field name="other_part_amount_initial"/>

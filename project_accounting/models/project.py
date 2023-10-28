@@ -124,6 +124,8 @@ class projectAccountProject(models.Model):
 	'company_part_cost_initial',
         'outsource_part_amount_initial',
         'outsource_part_cost_initial',
+        'cosource_part_amount_initial',
+        'cosource_part_cost_initial',
 	'project_outsourcing_link_ids',
 	'other_part_amount_initial',
 	'other_part_cost_initial',
@@ -157,16 +159,22 @@ class projectAccountProject(models.Model):
             outsource_part_amount_current = 0.0
             outsource_part_cost_current = 0.0
             order_to_invoice_outsourcing = 0.0
+            cosource_part_amount_current = 0.0
+            cosource_part_cost_current = 0.0
             outsourcing_link_purchase_order_with_draft = 0.0
             other_part_amount_current = 0.0
             other_part_cost_current = 0.0
             for link in rec.project_outsourcing_link_ids:
                 link.compute()
+                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_purchase_order=True)
                 if link.link_type == 'outsourcing' :
                     outsource_part_amount_current += link.outsource_part_amount_current
                     outsource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     order_to_invoice_outsourcing += link.order_direct_payment_amount
-                    outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_sale_order=True)
+                elif link.link_type == 'cosourcing' :
+                    cosource_part_amount_current += link.outsource_part_amount_current
+                    cosource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
+                    #order_to_invoice_outsourcing += link.order_direct_payment_amount
                 elif link.link_type == 'other' :
                     other_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     other_part_amount_current += link.outsource_part_amount_current
@@ -185,6 +193,22 @@ class projectAccountProject(models.Model):
                 rec.outsource_part_marging_rate_current = rec.outsource_part_marging_amount_current / rec.outsource_part_amount_current * 100
             else :
                 rec.outsource_part_marging_rate_current = 0.0 
+
+            ######## COSOURCE PART
+            rec.cosource_part_marging_amount_initial =  rec.cosource_part_amount_initial - rec.cosource_part_cost_initial
+            if rec.cosource_part_amount_initial != 0 :
+                rec.cosource_part_marging_rate_initial = rec.cosource_part_marging_amount_initial / rec.cosource_part_amount_initial * 100
+            else:
+                rec.cosource_part_marging_rate_initial = 0.0 
+
+            rec.cosource_part_amount_current = cosource_part_amount_current
+            rec.cosource_part_cost_current = cosource_part_cost_current
+
+            rec.cosource_part_marging_amount_current =  rec.cosource_part_amount_current - rec.cosource_part_cost_current
+            if rec.cosource_part_amount_current != 0 :
+                rec.cosource_part_marging_rate_current = rec.cosource_part_marging_amount_current / rec.cosource_part_amount_current * 100
+            else :
+                rec.cosource_part_marging_rate_current = 0.0
 
             ######## OTHER PART
             rec.other_part_marging_amount_initial =  rec.other_part_amount_initial - rec.other_part_cost_initial
@@ -210,7 +234,7 @@ class projectAccountProject(models.Model):
             else :
                 rec.company_part_marging_rate_initial = 0.0
     
-            rec.company_part_amount_current = rec.order_sum_sale_order_lines_with_draft - rec.outsource_part_amount_current - rec.other_part_amount_current
+            rec.company_part_amount_current = rec.order_sum_sale_order_lines_with_draft - rec.outsource_part_amount_current - rec.cosource_part_amount_current - rec.other_part_amount_current
             rec.company_part_cost_current = -rec.get_production_cost()
             rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
             if rec.company_part_amount_current != 0 :
@@ -219,16 +243,16 @@ class projectAccountProject(models.Model):
                 rec.company_part_marging_rate_current = 0.0
  
             ######## TOTAL
-            rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
+            rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.cosource_part_amount_initial + rec.other_part_amount_initial
 
-            rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.other_part_cost_initial
+            rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.cosource_part_cost_initial + rec.other_part_cost_initial
             rec.order_marging_amount_initial = rec.company_part_marging_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
             if rec.order_amount_initial != 0 : 
                 rec.order_marging_rate_initial = rec.order_marging_amount_initial / rec.order_amount_initial * 100
             else:
                 rec.order_marging_rate_initial = 0.0
 
-            rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
+            rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.cosource_part_cost_current + rec.other_part_cost_current
             rec.order_marging_amount_current = rec.order_sum_sale_order_lines - rec.order_cost_current
             if rec.order_sum_sale_order_lines != 0 : 
                 rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_sum_sale_order_lines * 100
@@ -672,9 +696,28 @@ class projectAccountProject(models.Model):
     outsource_part_cost_current = fields.Monetary('Coût de revient de la part sous-traitée actuel', store=True, compute=compute)
     outsource_part_marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', store=True, compute=compute)
     outsource_part_marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', store=True, compute=compute)
-    #quid des co-traitants
 
     project_outsourcing_link_ids = fields.One2many('project.outsourcing.link', 'project_id')
+
+    ######## COSOURCE PART
+    cosource_part_amount_initial = fields.Monetary('Montant HT de la part co-traitée initial', 
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
+            help="Montant produit par les co-traitants de Tasmane : part produite par les co-traitants")
+    cosource_part_cost_initial = fields.Monetary('Coût de revient de la part co-traitée initial',
+            #TODO : reactiver lorsque les DM auront initialisé les données historiques
+            #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
+            tracking=True,
+            )
+    cosource_part_marging_amount_initial = fields.Monetary('Marge sur part co-traitée (€) initiale', store=True, compute=compute)
+    cosource_part_marging_rate_initial = fields.Float('Marge sur part co-traitée (%) initiale', store=True, compute=compute)
+
+    cosource_part_amount_current = fields.Monetary('Montant HT de la part co-traitée actuel', help="Montant produit par les co-traitants de Tasmane : part produite par les co-traitants.", store=True, compute=compute)
+    cosource_part_cost_current = fields.Monetary('Coût de revient de la part co-traitée actuel', store=True, compute=compute)
+    cosource_part_marging_amount_current = fields.Monetary('Marge sur part co-traitée (€) actuelle', store=True, compute=compute)
+    cosource_part_marging_rate_current = fields.Float('Marge sur part co-traitée (%) actuelle', store=True, compute=compute)
+
 
 
     ######## OTHER PART

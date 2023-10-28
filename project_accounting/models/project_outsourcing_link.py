@@ -15,10 +15,10 @@ class projectOutsourcingLink(models.Model):
             ('project_partner_uniq', 'UNIQUE (partner_id, project_id)',  "Impossible d'enregistrer deux fois le même sous-traitant pour un même projet. Ajoutez des commandes à la ligne existantes.")
     ]
 
-    def compute_purchase_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
+    def compute_purchase_order_total(self, with_direct_payment=True, with_draft_purchase_order=False): 
         #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         status_list_to_keep = ['purchase']
-        if with_draft_sale_order :
+        if with_draft_purchase_order :
             status_list_to_keep.append('draft')
         for rec in self:
             #rec.order_sum_purchase_order_lines = 0
@@ -179,6 +179,7 @@ class projectOutsourcingLink(models.Model):
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='restrict')
     link_type = fields.Selection([
             ('outsourcing', 'Sous-traitance'),
+            ('cosourcing', 'Co-traitance'),
             ('other', 'Autres achats')
         ], string="Type d'achat", default='outsourcing')
 
