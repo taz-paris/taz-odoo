@@ -117,7 +117,7 @@
 					Le projet est en statut Accord client/Commandé/Terminé (on devrait avoir du book) mais le total des BC client (quelque soit leur statut) est nul.
 				</div>
 				<div class="alert alert-warning mb-0" role="alert" attrs="{'invisible': [('is_consistant_prevent_napta_creation', '=', True)]}">
-					La case "Ne pas créer sur Napta" est cochée alors que le montant HT du dispositif Tasmane (ou la production Tasmane) à date n'est pas nul.
+					La case "Ne pas créer sur Napta" est cochée alors que le montant HT du dispositif Tasmane (ou la production Tasmane) à date n'est pas nul et que la date de fin de la mission est postérieure au 1er janvier 2023.
 				</div>
 				<div class="alert alert-warning mb-0" role="alert" attrs="{'invisible': [('is_outsource_part_amount_current', '=', True)]}">
 					Le Montant HT du dispositif sous-traité à date n'est pas correct. En effet, la somme des 'Montants HT de revente' des lignes d'au moins un Bon de commande Fournisseur n'est pas strictement positive.
@@ -173,21 +173,28 @@
 				   </group>
 				<notebook>
 					<page name="dashboard" string="Synthèse À DATE">
-						<group>
-							<group string="Somme dispositif Tasmane + Sous-traitance + autres">
+						<group col="3">
+							<group string="Commandes du client à Tasmane">
                                                                 <field name="order_sum_sale_order_lines_with_draft"/>
+								<field name="order_sum_sale_order_lines" />
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
 								<button type="object" name="create_sale_order" string="Créer commande client" /> 
 								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
                                                         </group>
-							<group string="Marge actuelle">
-								<field name="order_sum_sale_order_lines" />
+                                                	<group string="Production co-traitée" attrs="{'invisible': [('cosource_part_amount_current', '=', 0), ('cosource_part_cost_current', '=', 0)]}">
+                                                                <field name="cosource_part_amount_current" />
+                                                                <field name="cosource_part_cost_current"/>
+                                                                <field name="cosource_part_marging_amount_current"/>
+                                                                <field name="cosource_part_marging_rate_current" widget="progressbar"/>
+                                                        </group>
+							<group string="Marge actuelle hors co-traitance">
+                                                                <field name="order_amount_current"/>
                                                                 <field name="order_cost_current"/>
                                                                 <field name="order_marging_amount_current"/>
                                                                 <field name="order_marging_rate_current" widget="progressbar"/>
 							</group>
 						</group>
-						<group col="4">
+						<group col="3">
 							<group string="Production par le dispositif Tasmane">
 					    			<field name="company_part_amount_current" force_save="1"/>
 					    			<field name="company_part_cost_current" force_save="1"/>
@@ -200,12 +207,6 @@
                                                                 <field name="outsource_part_marging_amount_current"/>
                                                                 <field name="outsource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
-                                                	<group string="Production co-traitée">
-                                                                <field name="cosource_part_amount_current" />
-                                                                <field name="cosource_part_cost_current"/>
-                                                                <field name="cosource_part_marging_amount_current"/>
-                                                                <field name="cosource_part_marging_rate_current" widget="progressbar"/>
-                                                        </group>
                                                 	<group string="Autres prestations (exemple : séminaire chez Tasmane)">
                                                                 <field name="other_part_amount_current" force_save="1"/>
                                                                 <field name="other_part_cost_current"/>
@@ -215,8 +216,14 @@
 						</group>
 					</page>
 					<page name="project_structure" string="Structure INITIALE du projet">
-						<group string="Somme dispositif Tasmane + Sous-traitance + autres">
-							<group>
+						<group col="3">
+							<group string="Production co-traitée">
+								<field name="cosource_part_amount_initial"/>
+								<field name="cosource_part_cost_initial"/>
+								<field name="cosource_part_marging_amount_initial"/>
+								<field name="cosource_part_marging_rate_initial" widget="progressbar"/>
+							</group>  
+							<group string="Marge hors co-traitance">
 								<field name="order_amount_initial"/>
 								<field name="order_cost_initial"/>
 								<field name="order_marging_amount_initial"/>
@@ -235,12 +242,6 @@
 								<field name="outsource_part_cost_initial"/>
 								<field name="outsource_part_marging_amount_initial"/>
 								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
-							</group>  
-							<group string="Production co-traitée">
-								<field name="cosource_part_amount_initial"/>
-								<field name="cosource_part_cost_initial"/>
-								<field name="cosource_part_marging_amount_initial"/>
-								<field name="cosource_part_marging_rate_initial" widget="progressbar"/>
 							</group>  
 							<group string="Autres prestations (exemple : séminaire chez Tasmane)">
 								<field name="other_part_amount_initial"/>

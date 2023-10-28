@@ -2,7 +2,7 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import json
 
 import logging
@@ -243,19 +243,20 @@ class projectAccountProject(models.Model):
                 rec.company_part_marging_rate_current = 0.0
  
             ######## TOTAL
-            rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.cosource_part_amount_initial + rec.other_part_amount_initial
+            rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
 
-            rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.cosource_part_cost_initial + rec.other_part_cost_initial
-            rec.order_marging_amount_initial = rec.company_part_marging_amount_initial + rec.outsource_part_marging_amount_initial + rec.other_part_marging_amount_initial
+            rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.other_part_cost_initial
+            rec.order_marging_amount_initial = rec.order_amount_initial - rec.order_cost_initial
             if rec.order_amount_initial != 0 : 
                 rec.order_marging_rate_initial = rec.order_marging_amount_initial / rec.order_amount_initial * 100
             else:
                 rec.order_marging_rate_initial = 0.0
 
-            rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.cosource_part_cost_current + rec.other_part_cost_current
-            rec.order_marging_amount_current = rec.order_sum_sale_order_lines - rec.order_cost_current
-            if rec.order_sum_sale_order_lines != 0 : 
-                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_sum_sale_order_lines * 100
+            rec.order_amount_current = rec.company_part_amount_current + rec.outsource_part_amount_current + rec.other_part_amount_current
+            rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
+            rec.order_marging_amount_current = rec.order_amount_current - rec.order_cost_current
+            if rec.order_amount_current != 0 : 
+                rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_amount_current * 100
             else:
                 rec.order_marging_rate_current = 0.0
 
@@ -263,8 +264,9 @@ class projectAccountProject(models.Model):
             
             ######## INVOICE DATA CONTROLE
             is_consistant_prevent_napta_creation = True
-            if rec.is_prevent_napta_creation and (rec.company_part_amount_current != 0.0 or rec.company_part_cost_current != 0.0):
-                is_consistant_prevent_napta_creation = False
+            if not(rec.date) or rec.date > date(2023,1,1):
+                if rec.is_prevent_napta_creation and (rec.company_part_amount_current != 0.0 or rec.company_part_cost_current != 0.0):
+                    is_consistant_prevent_napta_creation = False
             rec.is_consistant_prevent_napta_creation = is_consistant_prevent_napta_creation
 
             is_validated_order = True
@@ -633,7 +635,8 @@ class projectAccountProject(models.Model):
     partner_id = fields.Many2one(string='Client final')
     partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
     ######## TOTAL
-    order_amount_initial = fields.Monetary('Montant HT piloté par Tasmane initial', store=True, compute=compute,  help="Montant à réaliser par Tasmane initial : dispositif Tasmane + Sous-traitance (qu'elle soit en paiment direct ou non)")
+    order_amount_initial = fields.Monetary('Montant HT piloté par Tasmane initial', store=True, compute=compute)
+    order_amount_current = fields.Monetary('Montant HT piloté par Tasmane actuel', store=True, compute=compute)
     order_sum_sale_order_lines_with_draft = fields.Monetary("Total HT commandé à Tasmane (y/c BCC à l'état Devis)", store=True, compute=compute)
     order_sum_sale_order_lines = fields.Monetary("Total HT commandé à Tasmane (uniquement à l'état BDC)", store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
 
