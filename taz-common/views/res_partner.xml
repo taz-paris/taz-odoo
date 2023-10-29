@@ -295,7 +295,7 @@
 				<field name="first_name" placeholder="Prénom"/>
 				<field name="name" placeholder="Nom"/>
 
-			    <field name="parent_id" options="{'no_quick_create': True}" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True)]" />
+			    <field name="parent_id" options="{'no_quick_create': True}" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True), ('type', '=', 'contact')]" />
 				<field name="is_followed"/>
                         </group>
 			<group>
@@ -495,7 +495,7 @@
 			<hr/>
 			
 			<group>
-				<field name="parent_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
+				<field name="parent_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]" />
 			</group>
 			<group col="6">
 				<group colspan="5">
@@ -542,6 +542,18 @@
 			</group>
 			<group>
 			    <field name="comment" placeholder="Internal notes..." colspan="2"/>
+			</group>
+			<group>
+				<group string="Écritures comptables" name="accounting_entries">
+					<field name="currency_id" modifiers="{'invisible': true, 'readonly': true}"/>
+					<field name="property_account_receivable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
+					<field name="property_account_payable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
+				</group>
+				<group string="Achats/Ventes" name="sale" priority="1">
+					<field string="Conditions de paiement (ventes)" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
+					<field string="Conditions de paiement (achats)" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
+					<field name="property_account_position_id" options="{'no_create': True, 'no_open': True}" can_create="true" can_write="true"/>
+				</group>
 			</group>
 			<field name="lang" invisible="True"/>
 			<field name="user_id" invisible="True"/>
