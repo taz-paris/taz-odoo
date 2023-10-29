@@ -99,11 +99,11 @@
 						    'form_view_ref':'taz-common.address_form', 
 						    'default_parent_id': active_id, 
 						    'default_lang': lang, 
+						    'default_external_auxiliary_code' : external_auxiliary_code,
 						    'default_user_id': user_id, 
 						    'default_is_company' : True,
 						    'default_type': 'invoice'}">
 							<tree delete="false">
-								  <field name="is_company" invisible="1"/>
 								  <field name="type"/>
 								  <field name="name"/>
 								  <field name="street" optional="hide"/>
@@ -125,6 +125,7 @@
 						<field name="siren" on_change="1" />
 						<field name="nic" on_change="1" />
 						<field name="siret" on_change="1" />
+			    			<field name="external_auxiliary_code"/>
 						<field name="parent_is_company" invisible="1" />
 					</group>
 				</group>
@@ -450,8 +451,8 @@
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
 		<tree delete="false">
-			  <field name="is_company" invisible="1"/>
-			  <field name="type"/>
+			  <field name="is_company" optional="show"/>
+			  <field name="type" optional="show"/>
 			  <field name="name"/>
 			  <field name="street" optional="hide"/>
 			  <field name="street2" optional="hide"/>
@@ -537,6 +538,7 @@
 				<field name="siren" on_change="1" />
 				<field name="nic" on_change="1" />
 				<field name="siret" on_change="1" />
+				<field name="external_auxiliary_code" on_change="1" />
 			</group>
 			<group>
 			    <field name="comment" placeholder="Internal notes..." colspan="2"/>

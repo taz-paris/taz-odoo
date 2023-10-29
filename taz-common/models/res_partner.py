@@ -111,6 +111,7 @@ class tazResPartner(models.Model):
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False), ('type', '=', 'contact')]) 
      child_ids_address = fields.One2many('res.partner', 'parent_id', string='Addresses rattchés à cette entreprise', domain=[('active', '=', True), ('type', '!=', 'contact')]) 
+     external_auxiliary_code = fields.Char('Code auxiliaire CEGB - Quadratus', help="Code permettant d'identifier le tiers sur Quadratus. Exporté chaque mois avec les facture clients par CEGB") 
      business_priority = fields.Selection([
          ('not_tracked', 'Non suivi'),
          ('tracked', 'Compte suivi en BDM'),
