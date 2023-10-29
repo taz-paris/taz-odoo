@@ -112,9 +112,36 @@
 		<xpath expr="//tree" position="attributes">
 			<attribute name="expand">1</attribute>
 		</xpath>
+		<field name="date_approve" position="replace">
+			<field name="previsional_invoice_date"/>
+		</field>
+		<field name="product_uom_qty" position="replace">
+			<field name="product_qty" optional="show"/>
+			<field name="qty_received" optional="show"/>
+			<field name="qty_invoiced" optional="show"/>
+			<field name="invoice_lines" widget="many2many_tags" optional="hide"/>
+			<field name="qty_to_invoice" optional="hide"/>
+			<field name="state" optional="show"/>
+		</field>
+		<field name="price_unit" position="replace">
+			<field name="price_subtotal" optional="show"/>
+		</field>
         </field>
     </record>
 
+        <record id="view_purchase_order_line_search_inherit" model="ir.ui.view">
+            <field name="name">Purchase order line search</field>
+            <field name="model">purchase.order.line</field>
+            <field name="inherit_id" ref="purchase.purchase_order_line_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='hide_cancelled']" position="before">
+                    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced'), ('direct_payment_sale_order_line_id', '=', False)]"/>
+                    <field string="Projet" name="analytic_distribution" />
+                    <filter string="Échéances antérieures à la fin de ce mois" name="this_month" domain="['|', ('previsional_invoice_date','=', False), ('previsional_invoice_date', '&lt;', ((context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d')))]"/>
+                    <filter string="Échéances antérieures à la date du jour" name="before_today" domain="['|', ('previsional_invoice_date','=', False), ('previsional_invoice_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                </xpath>
+            </field>
+        </record>
 
     <record id="purchase_order_kpis_tree_inherit" model="ir.ui.view">
         <field name="name">purchase.order.kpis.tree.inherit</field>
@@ -137,5 +164,23 @@
             </field>
         </field>
     </record>
+
+
+	    <record model="ir.actions.act_window" id="action_purchase_order_line">
+	      <field name="name">Échéances de facturation</field>
+	      <field name="res_model">purchase.order.line</field>
+	      <field name="view_mode">tree,form,kanban</field>
+	      <field name="context">{'search_default_to_delivered_or_invoice' : 1, 'search_default_before_today' : 1}</field>
+	      <!--
+			      <field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),
+				      ]" />
+	      -->
+	    </record>
+
+        <menuitem id="menu_action_purchase_order_line" name="Échéances de facturation"
+            parent="purchase.menu_purchase_root" action="action_purchase_order_line"/>
   </data>
 </odoo>

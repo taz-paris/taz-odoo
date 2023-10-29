@@ -3,6 +3,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo import _
 
 from datetime import datetime, timedelta
+from odoo.tools import float_is_zero, float_compare, float_round
 
 import json
 import logging
@@ -205,8 +206,29 @@ class projectAccountingPurchaseOrderLine(models.Model):
         for rec in self:
             rec.reselling_subtotal = rec.reselling_price_unit * rec.product_qty
 
+    @api.depends('state', 'product_uom_qty', 'qty_to_invoice', 'qty_invoiced')
+    def _compute_invoice_status(self):
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        for line in self:
+            if line.state not in ('purchase', 'done'):
+                line.invoice_status = 'no'
+            elif not float_is_zero(line.qty_to_invoice, precision_digits=precision):
+                line.invoice_status = 'to invoice'
+            elif float_compare(line.qty_invoiced, line.product_uom_qty, precision_digits=precision) >= 0:
+                line.invoice_status = 'invoiced'
+            else:
+                line.invoice_status = 'no'
 
-
+    invoice_status = fields.Selection(
+        selection=[
+            ('invoiced', "Fully Invoiced"),
+            ('to invoice', "To Invoice"),
+            ('no', "Nothing to Invoice"),
+        ],
+        string="Invoice Status",
+        compute='_compute_invoice_status',
+        store=True
+        )
 
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",
