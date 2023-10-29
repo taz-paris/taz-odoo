@@ -465,7 +465,7 @@ class projectAccountProject(models.Model):
 
 
     def get_all_customer_ids(self):
-        return [self.partner_id.id] + self.partner_secondary_ids.ids
+        return [self.partner_id.id] + self.partner_secondary_ids.ids + self.partner_id.child_ids_address.ids + self.partner_id.child_ids_company.ids
 
     def get_all_supplier_ids(self):
         outsourcing_link_partner_ids = []
@@ -587,16 +587,19 @@ class projectAccountProject(models.Model):
     @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids')
     def check_partners_consistency(self):
         for rec in self:
-            if rec.partner_id.id in rec.partner_secondary_ids.ids:
-                raise ValidationError(_("Le client final ne peut pas être un client intermédiaire (onglet Facturation)."))
+            for partner_id in [rec.partner_id.id] + rec.partner_id.child_ids_address.ids + rec.partner_id.child_ids_company.ids:
+                if partner_id in rec.partner_secondary_ids.ids:
+                    raise ValidationError(_("Le client final (et ses adresses et filiales) ne peut pas être un client intermédiaire (onglet Facturation)."))
             
             supplier_ids = rec.get_all_supplier_ids()
-            if rec.partner_id.id in supplier_ids:
-                raise ValidationError(_("Le client final ne peut pas être un fournisseur (onglet Achats)."))
+            for partner_id in [rec.partner_id.id] + rec.partner_id.child_ids_address.ids + rec.partner_id.child_ids_company.ids:
+                if partner_id in supplier_ids:
+                    raise ValidationError(_("Le client final (et ses établissement et filiales) ne peut pas être un fournisseur (onglet Achats) pour ce même projet."))
             
-            for sp in rec.partner_secondary_ids:
-                if sp.id in supplier_ids:
-                    raise ValidationError(_("Le client intermédiaire (onglet Facturation) ne peut pas être un fournisseur (onglet Achats)."))
+            for sec_part in rec.partner_secondary_ids:
+                for sp in [sec_part.id] + sec_part.child_ids_address.ids + sec_part.child_ids_company.ids:
+                    if sp.id in supplier_ids:
+                        raise ValidationError(_("Le client intermédiaire (onglet Facturation) ni ses établissements/filiales ne peuvent être fournisseur (onglet Achats) pour ce même projet."))
             
             rec.check_partners_objects_consitency()
 

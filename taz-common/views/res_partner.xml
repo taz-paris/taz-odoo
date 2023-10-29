@@ -94,18 +94,13 @@
 					</group>
 					<group string="Autres adresses filles">
 					    <field name="lang" invisible="1"/>
-					    <field name="child_ids_address" nolabel="1" colspan="1"  mode="tree" context="{
+					    <field name="child_ids_address" nolabel="1" colspan="2"  mode="tree" context="{
 						    'tree_view_ref':'taz-common.address_tree', 
 						    'form_view_ref':'taz-common.address_form', 
 						    'default_parent_id': active_id, 
-						    'default_street': street, 
-						    'default_street2': street2, 
-						    'default_city': city, 
-						    'default_state_id': state_id, 
-						    'default_zip': zip, 
-						    'default_country_id': country_id, 
 						    'default_lang': lang, 
 						    'default_user_id': user_id, 
+						    'default_is_company' : True,
 						    'default_type': 'invoice'}">
 							<tree delete="false">
 								  <field name="is_company" invisible="1"/>
@@ -252,8 +247,7 @@
                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),
                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),
 			      ]" />
-      <field name="domain">[('is_company', '=', True)]</field> 
-      <field name="filter">[('is_company', '=', True)]</field> 
+      <field name="domain">[('is_company', '=', True), ('type', '=', 'contact')]</field> 
     </record>
 
 
@@ -447,7 +441,6 @@
 			      ]" />
       <field name="domain">[('is_company', '=', False), ('type', '=', 'contact')]</field> 
 	      <!-- ('user_ids', '=', False),('employee_ids', '=', False), -->
-      <field name="filter">[('is_company', '!=', True)]</field> 
     </record>
 
 
@@ -479,7 +472,6 @@
 		<form string="Contact / Address">
 		    <sheet>
 			<group>
-				<field name="parent_id" />
 				<field name="type" required="1" widget="radio" options="{'horizontal': true}"/>
 			</group>
 			<div class="text-muted oe_edit_only">
@@ -500,16 +492,28 @@
 			    </p>
 			</div>
 			<hr/>
+			
+			<group>
+				<field name="parent_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
+			</group>
+			<group col="6">
+				<group colspan="5">
+				<field name="name" string="Nom de l'adresse" attrs="{'required' : [('type', '=', 'contact')]}"/>
+				</group>
+				<group colspan="1">
+				<button name="l10n_fr_siret_lookup.fr_siret_lookup_partner_action" type="action" string="Recherche SIRENE/INSEE" />
+				</group>
+			</group>
+
 			<group string="Coordonnées">
-			    <group>
-				<field name="name" string="Contact Name" attrs="{'required' : [('type', '=', 'contact')]}"/>
+			   <group>
 				<field name="title" options="{'no_open': True}" placeholder="e.g. Mr."
 				    attrs="{'invisible': [('type','!=', 'contact')]}"/>
 				<field name="function" placeholder="e.g. Sales Director"
 				    attrs="{'invisible': [('type','!=', 'contact')]}"/>
 				<label for="street" string="Address" attrs="{'invisible': [('type','=', 'contact')]}"/>
 				<div attrs="{'invisible': [('type','=', 'contact')]}">
-				    <div class="o_address_format" name="div_address">
+				    <div class="o_address_format" name="div_address" string="Adresse">
 					<field name="street" placeholder="Street..." class="o_address_street"/>
 					<field name="street2" placeholder="Street 2..." class="o_address_street"/>
 					<field name="city" placeholder="City" class="o_address_city"/>
@@ -549,7 +553,7 @@
     <record model="ir.actions.act_window" id="taz-common.action_partner_address">
 	    <field name="name">Adresses de facturation/livraison</field>
       <field name="res_model">res.partner</field>
-      <field name="context">{"default_is_company":False}</field>
+      <field name="context">{"default_is_company":True, 'default_type' : 'invoice' }</field>
       <field name="search_view_id" ref="company_search"/>
       <field name="view_mode">tree,form,kanban</field>
 		      <field name="view_ids" eval="
@@ -558,8 +562,7 @@
                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.address_tree')}),
                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.address_form')}),
 			      ]" />
-      <field name="domain">[('is_company', '=', False), ('type', '!=', 'contact')]</field> 
-      <field name="filter">[('is_company', '=', False)]</field> 
+      <field name="domain">[('type', '!=', 'contact')]</field> 
     </record>
 
 

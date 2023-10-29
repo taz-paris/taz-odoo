@@ -287,13 +287,13 @@ class ResPartner(models.Model):
         if (
             self.name
             and self.is_company
-            and not self.parent_id
+            #and not self.parent_id
             and not self.siren
             and not self.nic
             and not self.siret
-            and not self.street
-            and not self.city
-            and not self.zip
+            #and not self.street
+            #and not self.city
+            #and not self.zip
         ):
             name = self.name.replace(" ", "")
             if name:

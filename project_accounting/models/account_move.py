@@ -98,6 +98,24 @@ class projectAccountingAccountMove(models.Model):
             move.invoice_outstanding_credits_debits_widget = payments_widget_vals
             move.invoice_has_outstanding = len(new_content)
 
+
+    @api.depends('invoice_line_ids', 'invoice_line_ids.analytic_distribution')
+    @api.onchange('invoice_line_ids')
+    def compute_partner_list(self):
+        for rec in self :
+            partner_ids = []
+            for l in rec.invoice_line_ids:
+                for project in l.rel_project_ids :
+                    for customer_id in project.get_all_customer_ids():
+                        if customer_id not in partner_ids:
+                            partner_ids.append(customer_id)
+            rec.allowed_partner_ids = partner_ids
+
+    allowed_partner_ids = fields.Many2many(
+            'res.partner',
+            compute=compute_partner_list
+            )
+
 class projectAccountingAccountMoveLine(models.Model):
     _inherit = "account.move.line"
  

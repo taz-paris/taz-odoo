@@ -106,10 +106,11 @@ class tazResPartner(models.Model):
 
      first_name = fields.Char(string="Prénom")
      long_company_name = fields.Char(string="Libellé long de société")
+     type = fields.Selection(string="Type de fiche partenaire")
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
-     child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True)]) 
+     child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False), ('type', '=', 'contact')]) 
-     child_ids_address = fields.One2many('res.partner', 'parent_id', string='Addresses rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False), ('type', '!=', 'contact')]) 
+     child_ids_address = fields.One2many('res.partner', 'parent_id', string='Addresses rattchés à cette entreprise', domain=[('active', '=', True), ('type', '!=', 'contact')]) 
      business_priority = fields.Selection([
          ('not_tracked', 'Non suivi'),
          ('tracked', 'Compte suivi en BDM'),
@@ -157,7 +158,7 @@ class tazResPartner(models.Model):
                  if (rec.is_company == False):
                      display_name = "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")
                  else:
-                     display_name = rec.name
+                     display_name = rec.name or ""
                      if (rec.long_company_name):
                          display_name += " - %s" % rec.long_company_name or ""
                      if (rec.parent_id):
