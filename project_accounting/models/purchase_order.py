@@ -164,6 +164,20 @@ class projectAccountingPurchaseOrderLine(models.Model):
             if rec.reselling_subtotal != 0 :
                 rec.margin_rate = rec.margin_amount / rec.reselling_subtotal * 100
 
+    @api.onchange('margin_rate')
+    def _inverse_margin_rate(self):
+        for rec in self:
+            if rec.margin_rate == 100 :
+                #error
+                pass
+            else :
+                rec.reselling_subtotal = (-100 * rec.price_subtotal) / (rec.margin_rate-100)
+            
+    @api.onchange('margin_amount')
+    def _inverse_margin_amount(self):
+        for rec in self : 
+            rec.reselling_subtotal = rec.margin_amount + rec.price_subtotal
+
 
     def _compute_analytic_distribution(self):
         super()._compute_analytic_distribution()
@@ -206,6 +220,11 @@ class projectAccountingPurchaseOrderLine(models.Model):
         for rec in self:
             rec.reselling_subtotal = rec.reselling_price_unit * rec.product_qty
 
+    @api.onchange('reselling_subtotal')
+    def _inverse_reselling_subtotal(self):
+        for rec in self:
+            rec.reselling_price_unit = rec.reselling_subtotal / rec.product_qty
+
     @api.depends('state', 'product_uom_qty', 'qty_to_invoice', 'qty_invoiced')
     def _compute_invoice_status(self):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
@@ -240,8 +259,8 @@ class projectAccountingPurchaseOrderLine(models.Model):
     previsional_invoice_date = fields.Date('Date prev. de facturation', states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
     # TODO : ajouter reselling_unit_price en le prenant sur la fiche article (valeur par défaut mais modifiable) et faire la multiplication
     reselling_price_unit = fields.Float('PU HT de revente')
-    reselling_subtotal = fields.Monetary('Sous-total HT de revente', compute=_compute_reselling_subtotal, help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
-    margin_amount = fields.Monetary('Marge €', compute=compute)
-    margin_rate = fields.Monetary('Marge %', compute=compute)
+    reselling_subtotal = fields.Monetary('Sous-total HT de revente', compute=_compute_reselling_subtotal, inverse=_inverse_reselling_subtotal, help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
+    margin_amount = fields.Monetary('Marge €', compute=compute, inverse=_inverse_margin_amount)
+    margin_rate = fields.Float('Marge %', compute=compute, inverse=_inverse_margin_rate)
 
     price_subtotal = fields.Monetary(string="Sous-total HT")
