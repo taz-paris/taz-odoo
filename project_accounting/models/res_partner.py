@@ -7,16 +7,46 @@ _logger = logging.getLogger(__name__)
 
 from datetime import datetime
 
+PROTECTED_FIELD_LIST = [
+            'name',
+            'long_company_name', 
+            'parent_id',
+            'is_company',
+            'type',
+            'street',
+            'street2',
+            'street3',
+            'city',
+            'state_id',
+            'zip',
+            'country_id',
+            'child_ids_address',
+            'ref',
+            'vat',
+            'company_registry',
+            'siren',
+            'nic',
+            'siret',
+            'external_auxiliary_code',
+            'currency_id',
+            'property_account_receivable_id',
+            'property_account_payable_id',
+            'property_payment_term_id',
+            'property_supplier_payment_term_id',
+            'property_account_position_id',
+            'default_invoice_payement_bank_account',
+        ]
 
 class projectAccountingResPartner(models.Model):
      _inherit = "res.partner"
 
      def write(self, vals):
          for rec in self :
+             #_logger.info(rec.name)
+             #_logger.info(vals)
              if rec._precompute_protected() and not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
-                 _logger.info(rec.name)
-                 _logger.info(vals)
-                 raise ValidationError(_("Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut être modifiée que par un ADV.\nVous ne pouvez pas modifier cette fiche entreprise car vous n'être pas ADV."))
+                 if any(field in PROTECTED_FIELD_LIST for field in vals.keys()):
+                    raise ValidationError(_("Cette fiche est protégée : seul un ADV peut modifier le nom, le libellé long, le groupe, l'adresse postale, et les données comptables (onglet Facturation) de cette fiche."))
          super().write(vals)
 
      def _precompute_protected(self):
@@ -68,11 +98,4 @@ class projectAccountingResPartner(models.Model):
      has_project_started_this_year = fields.Boolean('Un projet a débuté cette année', compute=compute_has_project_started_this_year, store=True)
      is_protected_partner = fields.Boolean('Fiche entreprise protégée', compute=_compute_protected_partner, help="Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut être modifiée que par un ADV.")
 
-     def _get_default_invoice_payement_bank_account_domain(self):
-         return [('partner_id', '=', self.env.company.id)]
-
-     default_invoice_payement_bank_account = fields.Many2one('res.partner.bank', 
-             string="Compte bancaire de paiement", 
-             help="Compte bancaire qui apparaitra par défaut sur les factures envoyées à ce client, et sur lequel le client devra payer la facture.", 
-             domain=_get_default_invoice_payement_bank_account_domain)
 

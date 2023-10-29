@@ -102,6 +102,12 @@
 						    'default_external_auxiliary_code' : external_auxiliary_code,
 						    'default_user_id': user_id, 
 						    'default_is_company' : True,
+						    'default_currency_id' : currency_id,
+						    'default_property_account_receivable_id' : property_account_receivable_id,
+						    'default_property_account_payable_id' : property_account_payable_id,
+						    'default_property_payment_term_id' : property_payment_term_id,
+						    'default_property_account_position_id' : property_account_position_id,
+						    'default_default_invoice_payement_bank_account' : default_invoice_payement_bank_account,
 						    'default_type': 'invoice'}">
 							<tree delete="false">
 								  <field name="type"/>
@@ -140,6 +146,7 @@
 						<field string="Conditions de paiement (ventes)" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
 						<field string="Conditions de paiement (achats)" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
 						<field name="property_account_position_id" options="{'no_create': True, 'no_open': True}" can_create="true" can_write="true"/>
+			    			<field name="default_invoice_payement_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
 					</group>
 				</group>
 			  </page>
@@ -553,6 +560,7 @@
 					<field string="Conditions de paiement (ventes)" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
 					<field string="Conditions de paiement (achats)" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
 					<field name="property_account_position_id" options="{'no_create': True, 'no_open': True}" can_create="true" can_write="true"/>
+			    		<field name="default_invoice_payement_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
 				</group>
 			</group>
 			<field name="lang" invisible="True"/>

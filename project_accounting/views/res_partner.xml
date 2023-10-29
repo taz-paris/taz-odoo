@@ -19,11 +19,10 @@
 		    <field name="active" position="after">
 			    <field name="is_protected_partner" invisible="1"/>
 			    <div class="alert alert-warning mb-0" role="alert" attrs="{'invisible': [('is_protected_partner', '=', False)]}">
-			Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Cette fiche ne peut être modifiée que par un ADV.	
+				Cette fiche est protégée : seul un ADV peut modifier le nom, le libellé long, le groupe, l'adresse postale, et les données comptables (onglet Facturation) de cette fiche.
 			    </div>
 		    </field> 
 		    <field name="property_account_position_id" position="after">
-			    <field name="default_invoice_payement_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
 			    <field name="is_protected_partner"/>
 		    </field>
 		<xpath expr='//notebook' position="inside">
