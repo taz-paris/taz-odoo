@@ -20,6 +20,11 @@
 				<field name="employee_ids"/>
 			</page>
 		</xpath>
+		<field name="name" position="after">
+			<group>
+				<field name="is_project_director" />
+			</group>
+		</field>
             </field>
         </record>
   </data>

@@ -74,6 +74,7 @@ class projectAccountProject(models.Model):
                 user_enrolled_ids.append(rec.user_id.id)
             rec.user_enrolled_ids = [(6, 0, user_enrolled_ids)]
 
+
     user_enrolled_ids = fields.Many2many('res.users', string="Utilisateurs concernés par ce projet", compute=_compute_user_enrolled_ids, store=True)
 
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
@@ -85,7 +86,8 @@ class projectAccountProject(models.Model):
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_group_id = fields.Many2one('project.group', string='Groupe de projets', domain="[('partner_id', '=', partner_id)]")
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
-    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", default=lambda self: self.env.user.employee_id) #TODO : synchroniser cette valeur avec user_id avec un oneChange
+    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission") #TODO : synchroniser cette valeur avec user_id avec un oneChange
+    project_manager = fields.Many2one('hr.employee', "Gestionnaire de la mission", help="Le DM peut déleguer la gestion administrative de la mission via ce champ.")
     user_id = fields.Many2one(compute=_compute_user_id, store=True)
     probability = fields.Selection([
             ('0', '0 %'),

@@ -284,6 +284,7 @@ class staffingEmployee(models.Model):
     annual_evaluator_id = fields.Many2one('res.partner', string="En charge de l'EA")
     cv_link = fields.Char('Lien CV')
     vcard_link = fields.Char('Lien VCard') #TODO : générer la VCARD depuis les données Odoo
+    rel_is_project_director = fields.Boolean(related="job_id.is_project_director", store=True)
     #most_recent_contract = fields.Many2one('hr.contract', 'employee_id', string="Contract le plus récent (ou à venir)", compute=most_recent_contract)
 
     def name_get(self):

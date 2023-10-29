@@ -172,6 +172,13 @@ class staffingProject(models.Model):
         margin_text = "Projection à terminaison en date du %(monday_pivot_date)s :\n    - %(validated_timesheet_unit_amount).2f jours pointés (%(validated_timesheet_amount).2f €)\n    - %(previsional_timesheet_unit_amount).2f jours prévisionnels (%(previsional_timesheet_amount).2f €)" % timesheets_data
         return negative_total_costs, margin_landing_rate, margin_text
 
+    def default_project_director_employee_id(self):
+        #res = super().default_project_director_employee_id()
+        res = self.env.user.employee_id
+        if res and not(res.rel_is_project_director):
+            return False
+        else :
+            return res
    
     favorite_user_ids = fields.Many2many(string="Intéressés par ce projet")
 
@@ -179,6 +186,7 @@ class staffingProject(models.Model):
     margin_text = fields.Text('Détail de la marge', compute=margin_landing_now)
 
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
+    project_director_employee_id = fields.Many2one(domain="[('rel_is_project_director', '=', True)]", default=default_project_director_employee_id)
 
 
     @api.depends('project_director_employee_id', 'staffing_need_ids.staffed_employee_id', 'staffing_need_ids.project_id')

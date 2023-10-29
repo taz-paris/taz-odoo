@@ -25,6 +25,7 @@ class HrJob(models.Model):
         return res
 
     cost_ids = fields.One2many('hr.cost', 'job_id', string="CJM / TJM historisés")
+    is_project_director = fields.Boolean("Peut être directeur de mission")
 
 
 class HrCost(models.Model):
