@@ -1,0 +1,43 @@
+<odoo>
+  <data>
+	<record model="ir.ui.view" id="global_board_form">
+		<field name="name">Cockpit DM/Manager</field>
+		<field name="model">board.board</field>
+		<field name="arch" type="xml">
+			<form string="Dashboard">
+				<board style="1-1">
+					<column>
+						<action string="Mes projets en cours" name="%(project_accounting.project_action)d" context="{'search_default_own_projects':1, 'search_default_groupby_stage': 1}" domain="[('stage_id.state', '!=', 'closed')]"/> 
+						<action string="Mes échéances de facturation du mois" name="%(project_accounting.action_sale_order_line_delivery_validation_month)d" context="{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}"/>
+					</column>
+					<column>
+						<action string="Mes objectifs de book annuels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
+						<action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j_30' : 1}" />
+					</column>
+				</board>
+			</form>
+		</field>
+	</record>
+
+        <record id="global_board_action" model="ir.actions.act_window">
+		<field name="name">Cockpit DM/Manager</field>
+                <field name="res_model">board.board</field>
+                <field name="view_mode">form</field>
+		<field name="usage">menu</field>
+		<field name="view_id" ref="global_board_form"/>
+        </record>
+
+	<record model="ir.ui.menu"
+		id="spreadsheet_dashboard.spreadsheet_dashboard_menu_dashboard">
+		<field name="sequence">10</field>
+		<field name="action" ref="spreadsheet_dashboard.ir_actions_dashboard_action"/>
+	</record>
+	
+	<record model="ir.ui.menu"
+		id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root">
+		<field name="action" ref="dashboard_global.global_board_action"/>
+	</record>
+
+	<menuitem name="Cockpit DM/Manager" id="global_board" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="global_board_action" sequence="5"/>
+   </data>
+</odoo>

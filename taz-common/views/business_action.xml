@@ -105,6 +105,8 @@
 			help="Actions commerciales qui m'ont été assignées"/>
 		    <filter string="Actions avec échéance >= 01/M-2" name="m_2"
 			domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')))]" />
+		    <filter string="Actions avec échéance sous 30 jours" name="j_30"
+			domain="[('date_deadline','&lt;=', ((context_today() + relativedelta(days=30)).strftime('%Y-%m-%d')))]" />
 		    <separator/>
 		    <filter name="filter_deadline_date" date="date_deadline"/>
             	    <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
@@ -177,6 +179,7 @@
         <field name="context">{
                     'search_default_assigned_to_me': 1,
                     'default_user_id': uid,
+		    'search_default_state_not_done_not_cancelled':1,
             }</field>
     </record>
     <record id="taz-common.business_action_action_view_tree" model="ir.actions.act_window.view">

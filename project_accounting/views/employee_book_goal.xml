@@ -22,6 +22,27 @@
                 <field name="view_mode">tree</field>
         </record>
 
+
+    <record model="ir.ui.view" id="employee_book_goal_search">
+        <field name="name">employee.book_goal.search</field>
+        <field name="model">project.employee_book_goal</field>
+        <field name="arch" type="xml">
+           <search string="Project employee book goal">
+		    <field name="employee_id" string="Employé" filter_domain="['|', ('employee_id.name', 'ilike', self), ('employee_id.first_name', 'ilike', self)]"/>
+                    <field name="reference_period" string="Année de référence"/>
+
+		   <filter string="Mes objectifs" name="assigned_to_me" domain="[('employee_id.user_id', '=', uid)]" />
+                    <filter string="Cette année" name="this_year" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
+                    <filter string="L'an dernier" name="previous_year" domain="[('reference_period', '=', (context_today() + relativedelta(years=-1)).strftime('%Y'))]"/>
+
+                    <group expand="0" string="Group By">
+                        <filter string="Employé" name="employe" context="{'group_by': 'employee_id'}"/>
+                        <filter string="Année de référence" name="reference_period" context="{'group_by': 'reference_period'}"/>
+                    </group>
+           </search>
+        </field>
+    </record>
+
 	<menuitem name="Objectifs de book par consultant / année" id="employee_book_goal" parent="project_book_menu" action="employee_book_goal_action"/>
    </data>
 </odoo>
