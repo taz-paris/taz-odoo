@@ -103,12 +103,13 @@
 		    <filter string="Mes actions commerciales" name="assigned_to_me"
 			domain="[('owner_id', '=', uid)]"
 			help="Actions commerciales qui m'ont été assignées"/>
+		    <separator/>
 		    <filter string="Actions avec échéance >= 01/M-2" name="m_2"
 			domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')))]" />
-		    <filter string="Actions avec échéance sous 30 jours" name="j_30"
+		    <filter string="Actions avec échéance sous 30 jours" name="j30"
 			domain="[('date_deadline','&lt;=', ((context_today() + relativedelta(days=30)).strftime('%Y-%m-%d')))]" />
-		    <separator/>
 		    <filter name="filter_deadline_date" date="date_deadline"/>
+		    <separator/>
             	    <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
 		    <separator/>
             	    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>

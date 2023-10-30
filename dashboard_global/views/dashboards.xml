@@ -12,7 +12,7 @@
 					</column>
 					<column>
 						<action string="Mes objectifs de book annuels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
-						<action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j_30' : 1}" />
+						<action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j30' : 1}"/>
 					</column>
 				</board>
 			</form>
