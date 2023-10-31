@@ -63,7 +63,38 @@ class projectAccountProject(models.Model):
         for record in self :
             if 'stage_id' in vals.keys():
                 vals['state_last_change_date'] = datetime.today()
+                stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
+                if stage_id.state == 'closed' :
+                   is_closable, error_message = record.is_closable()
+                   if not is_closable :
+                       raise ValidationError(_(error_message))
         return super().write(vals)
+
+    def is_closable(self):
+        self.ensure_one()
+        error_message = "Impossible de cloturer/annuler le projet :\n"
+        is_closable = True
+        self.compute()
+        self.compute_has_provision_running()
+
+        if not(self.book_validation_employee_id):
+            is_closable = False
+            error_message += "   - Le book n'est pas validé par le DM.\n"
+        if self.is_review_needed:
+            is_closable = False
+            error_message += "   - Au moins l'un des messages d'erreur de la fiche projet n'est pas résolu.\n"
+        if self.company_to_invoice_left != 0.0 :
+            is_closable = False
+            error_message += "   - Le reste à facturer (onglet Facturation) n'est pas nul.\n"
+        if self.company_residual != 0.0 :
+            is_closable = False
+            error_message += "   - Le reste à payer (onglet Facturation) n'est pas nul.\n"
+        if self.has_provision_running :
+            is_closable = False
+            error_message += "   - Il reste des provision ou du stock sur la dernière clôture.\n"
+
+        return is_closable, error_message
+
 
     @api.depends('project_director_employee_id')
     def _compute_user_enrolled_ids(self):
@@ -133,7 +164,6 @@ class projectAccountProject(models.Model):
 	'other_part_cost_initial',
 	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
 	'accounting_closing_ids',
-	'invoicing_comment',
     )
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
@@ -264,7 +294,7 @@ class projectAccountProject(models.Model):
 
 
             
-            ######## INVOICE DATA CONTROLE
+            ######## DATA CONTROL
             is_consistant_prevent_napta_creation = True
             if not(rec.date) or rec.date > date(2023,1,1):
                 if rec.is_prevent_napta_creation and (rec.company_part_amount_current != 0.0 or rec.company_part_cost_current != 0.0):
@@ -272,8 +302,8 @@ class projectAccountProject(models.Model):
             rec.is_consistant_prevent_napta_creation = is_consistant_prevent_napta_creation
 
             is_validated_order = True
-            line_ids = rec.get_sale_order_line_ids()
-            for line_id in line_ids:
+            sale_order_line_ids = rec.get_sale_order_line_ids()
+            for line_id in sale_order_line_ids:
                 line = rec.env['sale.order.line'].browse(line_id)
                 if line.state in ['draft', 'sent']:
                     is_validated_order = False
@@ -305,28 +335,27 @@ class projectAccountProject(models.Model):
             rec.is_consistant_outsourcing = is_consistant_outsourcing
 
             is_validated_purchase_order = True
-            #TODO : à débuger et lancer le recalcul sur toute la base de projets
-            """
+            reselling_subtotal_by_order_id = {}
             for link in rec.project_outsourcing_link_ids:
-                for purchase_order_line in link.get_purchase_order_line_ids():
-                    line = rec.env['purchase.order.line'].browse(line_id)
+                POL_ids = link.get_purchase_order_line_ids()
+                for purchase_order_line in POL_ids:
+                    line = rec.env['purchase.order.line'].browse(purchase_order_line)
                     if line.state in ['draft', 'sent', 'to approve']:
                         is_validated_purchase_order = False
-                        break
-            """
+                    if line.order_id.id not in reselling_subtotal_by_order_id.keys():
+                        reselling_subtotal_by_order_id[line.order_id.id] = 0.0
+                    reselling_subtotal_by_order_id[line.order_id.id] += line.reselling_subtotal
             rec.is_validated_purchase_order = is_validated_purchase_order
 
             is_outsource_part_amount_current = True
-            #TODO : implémenter ce controle et et lancer recalcul sur toute la base de projets
-            """
-            #is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme du prix de revente est > 0.")
-            """
+            if 0.0 in reselling_subtotal_by_order_id.values():
+                is_outsource_part_amount_current = False
             rec.is_outsource_part_amount_current = is_outsource_part_amount_current
             
             if not(rec.number):
                 rec.is_review_needed = False
             else:
-                if rec.invoicing_comment or not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not (rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not (rec.is_affected_book):
+                if not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
                     rec.is_review_needed = True
                 else :
                     rec.is_review_needed = False
@@ -777,7 +806,7 @@ class projectAccountProject(models.Model):
     is_validated_book = fields.Boolean("Répartition book validée", store=True, compute=compute, help="VRAI si la répartition du book est validée.")
     is_consistant_outsourcing = fields.Boolean("BCF présents", store=True, compute=compute, help="VRAI si le type de sous-traitance est renseigné et qu'il est cohérent avec les Bons de commande fournisseur du projet.")
     is_consistant_prevent_napta_creation = fields.Boolean("Absent Napta et pas de prod. Tasmane", store=True, compute=compute, help="FAUX si la case Ne pas créer sur Napta est cochée et que le montant HT du dispositif Tasmane à date n'est pas nul.")
-    is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme du prix de revente est > 0.")
+    is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme des prix de revente n'est pas nulle.")
     is_affected_book = fields.Boolean("Book affecté", store=True, compute=compute, help="VAI si le book est validé OU qu'il existe au moins une ligne de book")
 
     is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
