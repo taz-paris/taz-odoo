@@ -18,7 +18,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management'],
+    'depends': ['base', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart'],
 
     # always loaded
     'data': [
@@ -44,15 +44,8 @@
 
     "assets": {
         "web.assets_backend": [
-            #"web_widget_bokeh_chart/static/src/js/web_widget_bokeh_chart.esm.js",
             "project_accounting/static/src/analytic_distribution_project_access.xml",
             "project_accounting/static/src/analytic_distribution_project_access.js",
         ],
     },
-
-    #'assets': {
-    #    'web.assets_backend': [
-    #        'staffing/static/src/css/style.css',
-    #    ],
-    #}
 }

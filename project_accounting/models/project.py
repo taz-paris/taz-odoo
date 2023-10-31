@@ -8,6 +8,14 @@ import json
 import logging
 _logger = logging.getLogger(__name__)
 
+from bokeh.plotting import figure
+from bokeh.embed import components
+import json
+import pandas as pd
+from bokeh.models import Label, Title, NumeralTickFormatter
+import time
+import locale
+locale.setlocale(locale.LC_ALL, 'fr_FR')
 
 class projectAccountProject(models.Model):
     _inherit = "project.project"
@@ -665,6 +673,133 @@ class projectAccountProject(models.Model):
                 if last_closing.pca_balance or last_closing.fae_balance or last_closing.fnp_balance or last_closing.cca_balance or last_closing.production_balance :
                     rec.has_provision_running = True
 
+
+    def compute_margin_graph(self):
+        _logger.info('---- compute_margin_graph')
+
+        for rec in self:
+            lines = self.env['account.analytic.line'].search([('project_id', '=', rec.id), '|', ('category', '=', 'project_employee_validated'), ('category', '=', 'project_forecast')], order="date asc, category")
+            if len(lines) > 0:
+                date_last_real = lines.filtered(lambda x: x.category == 'project_employee_validated').sorted(key=lambda r: r.date, reverse=True)[0].date
+
+            data_dic = {}
+            cumul_real_amount = 0.0
+            cumul_forecast_amount = 0.0
+            cumul_projected_amount = False
+            cumul_real_unit = 0.0
+            cumul_forecast_unit = 0.0
+            cumul_projected_unit = False
+            for line in lines :
+                date_str = str(line.date)
+                if date_str not in data_dic.keys() :
+                    data_dic[date_str] = {
+                                'date_fr' : line.date.strftime("%A %d %B %Y"),
+                                'real_amount' : 0.0,
+                                'forecast_amount' : 0.0,
+                                'projected_amount' : False,
+                                'real_unit' : 0.0,
+                                'forecast_unit' : 0.0,
+                                'projected_unit' : False,
+                            }
+
+                if line.date > date_last_real :
+                    #if cumul_projected_amount == False :
+                    #    cumul_projected_amount = cumul_real_amount
+                    #if cumul_projected_unit == False :
+                    #    cumul_projected_unit = cumul_real_unit
+                    if line.category == 'project_forecast':
+                        cumul_projected_amount += -line.amount
+                        cumul_projected_unit += line.unit_amount
+                else :
+                    if line.category == 'project_employee_validated':
+                        cumul_projected_amount += -line.amount
+                        cumul_projected_unit += line.unit_amount
+
+
+                if line.category == 'project_employee_validated':
+                    cumul_real_amount += -line.amount
+                    cumul_real_unit += line.unit_amount
+
+                if line.category == 'project_forecast':
+                    cumul_forecast_amount += -line.amount
+                    cumul_forecast_unit += line.unit_amount
+                    
+
+
+                data_dic[date_str]['real_amount'] = cumul_real_amount
+                data_dic[date_str]['real_unit'] = cumul_real_unit
+                data_dic[date_str]['forecast_amount'] = cumul_forecast_amount
+                data_dic[date_str]['forecast_unit'] = cumul_forecast_unit
+                data_dic[date_str]['projected_amount'] = cumul_projected_amount
+                data_dic[date_str]['projected_unit'] = cumul_projected_unit
+            
+            data = {
+                        'date' : [],
+                        'date_fr' : [],
+                        'real_amount' : [],
+                        'forecast_amount' : [],
+                        'projected_amount' : [],
+                        'real_unit' : [],
+                        'forecast_unit' : [],
+                        'projected_unit' : [],
+                    }
+
+            for date, values in data_dic.items():
+                data['date'].append(date)
+                data['date_fr'].append(values['date_fr'])
+                data['real_amount'].append(values['real_amount'])
+                data['forecast_amount'].append(values['forecast_amount'])
+                data['projected_amount'].append(values['projected_amount'])
+                data['real_unit'].append(values['real_unit'])
+                data['forecast_unit'].append(values['forecast_unit'])
+                data['projected_unit'].append(values['projected_unit'])
+
+            df = pd.DataFrame(data)
+            df['date'] = pd.to_datetime(df['date'])
+
+
+            ##################### AMOUNT CHART
+            TOOLTIPS_AMOUNT = [
+                        ("", "@date_fr"),
+                        ("Réel (vert)", "@real_amount{0 0.00 €}"),
+                        ("Prévisionnel (noir)", "@forecast_amount{0 0.00 €}"),
+                        ("Projeté (violet)", "@projected_amount{0 0.00 €}"),
+                    ]
+
+            p = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€)")
+            #p.left[0].formatter.use_scientific = False
+            p.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
+            p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed")
+            p.step(y='projected_amount', x='date', source=df, line_color="darkviolet", line_width=2, line_dash="dashed")
+            p.step(y='real_amount', x='date', source=df, line_color="green", line_width=2)
+
+            #p.segment(df['date'], df['real'], df['date'], df['forecasted'], color="lightgrey", line_width=3)
+            #p.circle(df['date'], df['real'], color="blue", size=5)
+            #p.circle(df['date'], df['forecasted'], color="red", size=5)
+
+            script, div = components(p, wrap_script=False)
+            rec.margin_graph = json.dumps({"div": div, "script": script})
+
+            ##################### UNIT CHART
+            TOOLTIPS_UNIT = [
+                        ("", "@date_fr"),
+                        ("Réel (vert)", "@real_unit{0 0.00 €}"),
+                        ("Prévisionnel (noir)", "@forecast_unit{0 0.00 €}"),
+                        ("Projeté (violet)", "@projected_unit{0 0.00 €}"),
+                    ]
+
+            p2 = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours)")
+            #p2.left[0].formatter.use_scientific = False
+            p2.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
+            p2.step(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed")
+            p2.step(y='projected_unit', x='date', source=df, line_color="darkviolet", line_width=2, line_dash="dashed")
+            p2.step(y='real_unit', x='date', source=df, line_color="green", line_width=2)
+            script, div = components(p2, wrap_script=False)
+            rec.activity_graph = json.dumps({"div": div, "script": script})
+
+
+
+
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')
     partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
@@ -812,3 +947,8 @@ class projectAccountProject(models.Model):
     is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
     invoicing_comment = fields.Text("Commentaire ADV")
     project_book_factor = fields.Float("Facteur de bonus/malus", default=1.0)
+
+
+    # CHART
+    margin_graph = fields.Char("Margin graph", compute=compute_margin_graph)
+    activity_graph = fields.Char("Activity graph", compute=compute_margin_graph)

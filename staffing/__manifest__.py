@@ -36,16 +36,4 @@
         'views/synchroFitnet.xml',
     ],
 
-
-    #"assets": {
-    #    "web.assets_backend": [
-    #        "web_widget_bokeh_chart/static/src/js/web_widget_bokeh_chart.esm.js",
-    #    ],
-    #},
-
-    #'assets': {
-    #    'web.assets_backend': [
-    #        'staffing/static/src/css/style.css',
-    #    ],
-    #}
 }

@@ -10,6 +10,7 @@ _logger = logging.getLogger(__name__)
 
 from warnings import filterwarnings
 filterwarnings(action='ignore', category=DeprecationWarning, message='`np.bool8` is a deprecated alias for `np.bool_`.')
+
 from bokeh.plotting import figure
 from bokeh.embed import components
 import json
