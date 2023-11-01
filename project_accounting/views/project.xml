@@ -357,7 +357,7 @@
 							</group>
 						</group>
 					</page>
-					<page name="margin_graph_tab" string="Graph">
+					<page name="margin_graph_tab" string="Graph - production du Dispositif Tasmane">
 						<div>
 					    		<field name="margin_graph" widget="bokeh_chart" nolabel="1"/>
 						</div>

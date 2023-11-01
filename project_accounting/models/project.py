@@ -742,8 +742,8 @@ class projectAccountProject(models.Model):
                         'projected_unit' : [],
                     }
 
-            for date, values in data_dic.items():
-                data['date'].append(date)
+            for date_str, values in data_dic.items():
+                data['date'].append(date_str)
                 data['date_fr'].append(values['date_fr'])
                 data['real_amount'].append(values['real_amount'])
                 data['forecast_amount'].append(values['forecast_amount'])
@@ -773,6 +773,9 @@ class projectAccountProject(models.Model):
             p.legend.location = "top_left"
             p.legend.click_policy="hide"
 
+            tod = date.today()
+            p.segment(tod, 0, tod, max(df['forecast_amount'].max(), df['projected_amount'].max()), color="red", line_width=2)
+
             #p.segment(df['date'], df['real'], df['date'], df['forecasted'], color="lightgrey", line_width=3)
             #p.circle(df['date'], df['real'], color="blue", size=5)
             #p.circle(df['date'], df['forecasted'], color="red", size=5)
@@ -796,6 +799,9 @@ class projectAccountProject(models.Model):
             p2.line(y='real_unit', x='date', source=df.query('real_unit != False'), line_color="green", line_width=2, legend_label="Réel")
             p2.legend.location = "top_left"
             p2.legend.click_policy="hide"
+
+            tod = date.today()
+            p2.segment(tod, 0, tod, max(df['forecast_unit'].max(), df['projected_unit'].max()), color="red", line_width=2)
             script, div = components(p2, wrap_script=False)
             rec.activity_graph = json.dumps({"div": div, "script": script})
 
