@@ -679,14 +679,17 @@ class projectAccountProject(models.Model):
 
         for rec in self:
             lines = self.env['account.analytic.line'].search([('project_id', '=', rec.id), '|', ('category', '=', 'project_employee_validated'), ('category', '=', 'project_forecast')], order="date asc, category")
-            if len(lines) > 0:
-                date_last_real = lines.filtered(lambda x: x.category == 'project_employee_validated').sorted(key=lambda r: r.date, reverse=True)[0].date
+            if len(lines) > 1:
+                real_lines_reversed = lines.filtered(lambda x: x.category == 'project_employee_validated').sorted(key=lambda r: r.date, reverse=True)
+                date_last_real = real_lines_reversed[0].date
+                date_ante_last_real = real_lines_reversed[1].date
+                _logger.info(date_last_real)
 
             data_dic = {}
-            cumul_real_amount = 0.0
+            cumul_real_amount = False
             cumul_forecast_amount = 0.0
             cumul_projected_amount = False
-            cumul_real_unit = 0.0
+            cumul_real_unit = False
             cumul_forecast_unit = 0.0
             cumul_projected_unit = False
             for line in lines :
@@ -694,45 +697,40 @@ class projectAccountProject(models.Model):
                 if date_str not in data_dic.keys() :
                     data_dic[date_str] = {
                                 'date_fr' : line.date.strftime("%A %d %B %Y"),
-                                'real_amount' : 0.0,
+                                'real_amount' : False,
                                 'forecast_amount' : 0.0,
                                 'projected_amount' : False,
-                                'real_unit' : 0.0,
+                                'real_unit' : False,
                                 'forecast_unit' : 0.0,
                                 'projected_unit' : False,
                             }
 
-                if line.date > date_last_real :
-                    #if cumul_projected_amount == False :
-                    #    cumul_projected_amount = cumul_real_amount
-                    #if cumul_projected_unit == False :
-                    #    cumul_projected_unit = cumul_real_unit
+                if line.date <= date_last_real :
+                    if line.category == 'project_employee_validated':
+                        cumul_real_amount += -line.amount
+                        cumul_real_unit += line.unit_amount
+                        cumul_projected_amount += -line.amount
+                        cumul_projected_unit += line.unit_amount
+                        data_dic[date_str]['real_amount'] = cumul_real_amount
+                        data_dic[date_str]['real_unit'] = cumul_real_unit
+
+
+                if line.date >= date_ante_last_real :
                     if line.category == 'project_forecast':
                         cumul_projected_amount += -line.amount
                         cumul_projected_unit += line.unit_amount
-                else :
-                    if line.category == 'project_employee_validated':
-                        cumul_projected_amount += -line.amount
-                        cumul_projected_unit += line.unit_amount
-
-
-                if line.category == 'project_employee_validated':
-                    cumul_real_amount += -line.amount
-                    cumul_real_unit += line.unit_amount
+                    data_dic[date_str]['projected_amount'] = cumul_projected_amount
+                    data_dic[date_str]['projected_unit'] = cumul_projected_unit
 
                 if line.category == 'project_forecast':
                     cumul_forecast_amount += -line.amount
                     cumul_forecast_unit += line.unit_amount
-                    
 
-
-                data_dic[date_str]['real_amount'] = cumul_real_amount
-                data_dic[date_str]['real_unit'] = cumul_real_unit
                 data_dic[date_str]['forecast_amount'] = cumul_forecast_amount
                 data_dic[date_str]['forecast_unit'] = cumul_forecast_unit
-                data_dic[date_str]['projected_amount'] = cumul_projected_amount
-                data_dic[date_str]['projected_unit'] = cumul_projected_unit
             
+            _logger.info(data_dic)
+
             data = {
                         'date' : [],
                         'date_fr' : [],
@@ -769,9 +767,11 @@ class projectAccountProject(models.Model):
             p = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€)")
             #p.left[0].formatter.use_scientific = False
             p.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
-            p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed")
-            p.step(y='projected_amount', x='date', source=df, line_color="darkviolet", line_width=2, line_dash="dashed")
-            p.step(y='real_amount', x='date', source=df, line_color="green", line_width=2)
+            p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel")
+            p.line(y='projected_amount', x='date', source=df.query('projected_amount != False'), line_color="darkviolet", line_width=2, line_dash="dashed", legend_label="Projeté")
+            p.line(y='real_amount', x='date', source=df.query('real_amount != False'), line_color="green", line_width=2, legend_label="Réel")
+            p.legend.location = "top_left"
+            p.legend.click_policy="hide"
 
             #p.segment(df['date'], df['real'], df['date'], df['forecasted'], color="lightgrey", line_width=3)
             #p.circle(df['date'], df['real'], color="blue", size=5)
@@ -791,9 +791,11 @@ class projectAccountProject(models.Model):
             p2 = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours)")
             #p2.left[0].formatter.use_scientific = False
             p2.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
-            p2.step(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed")
-            p2.step(y='projected_unit', x='date', source=df, line_color="darkviolet", line_width=2, line_dash="dashed")
-            p2.step(y='real_unit', x='date', source=df, line_color="green", line_width=2)
+            p2.line(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel")
+            p2.line(y='projected_unit', x='date', source=df.query('projected_unit != False'), line_color="darkviolet", line_width=2, line_dash="dashed", legend_label="Projeté")
+            p2.line(y='real_unit', x='date', source=df.query('real_unit != False'), line_color="green", line_width=2, legend_label="Réel")
+            p2.legend.location = "top_left"
+            p2.legend.click_policy="hide"
             script, div = components(p2, wrap_script=False)
             rec.activity_graph = json.dumps({"div": div, "script": script})
 
