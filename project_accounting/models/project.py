@@ -12,7 +12,7 @@ from bokeh.plotting import figure
 from bokeh.embed import components
 import json
 import pandas as pd
-from bokeh.models import Label, Title, NumeralTickFormatter
+from bokeh.models import Label, Title, NumeralTickFormatter, Band
 import time
 import locale
 locale.setlocale(locale.LC_ALL, 'fr_FR')
@@ -703,6 +703,7 @@ class projectAccountProject(models.Model):
                                 'real_unit' : False,
                                 'forecast_unit' : 0.0,
                                 'projected_unit' : False,
+                                'margin_amount' : rec.company_part_marging_amount_initial,
                             }
 
                 if line.date <= date_last_real :
@@ -740,6 +741,7 @@ class projectAccountProject(models.Model):
                         'real_unit' : [],
                         'forecast_unit' : [],
                         'projected_unit' : [],
+                        'margin_amount' : []
                     }
 
             for date_str, values in data_dic.items():
@@ -751,6 +753,7 @@ class projectAccountProject(models.Model):
                 data['real_unit'].append(values['real_unit'])
                 data['forecast_unit'].append(values['forecast_unit'])
                 data['projected_unit'].append(values['projected_unit'])
+                data['margin_amount'].append(values['margin_amount'])
 
             df = pd.DataFrame(data)
             df['date'] = pd.to_datetime(df['date'])
@@ -767,14 +770,18 @@ class projectAccountProject(models.Model):
             p = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€)")
             #p.left[0].formatter.use_scientific = False
             p.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
-            p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel")
-            p.line(y='projected_amount', x='date', source=df.query('projected_amount != False'), line_color="darkviolet", line_width=2, line_dash="dashed", legend_label="Projeté")
-            p.line(y='real_amount', x='date', source=df.query('real_amount != False'), line_color="green", line_width=2, legend_label="Réel")
+            p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (€)")
+            p.line(y='projected_amount', x='date', source=df.query('projected_amount != False'), line_color="darkviolet", line_width=2, line_dash="dashed", legend_label="Projeté (€)")
+            p.line(y='real_amount', x='date', source=df.query('real_amount != False'), line_color="green", line_width=2, legend_label="Réel (€)")
+            p.line(y='margin_amount', x='date', source=df, line_color="red", line_width=2, legend_label="Marge prévue (€)")
             p.legend.location = "top_left"
             p.legend.click_policy="hide"
 
             tod = date.today()
-            p.segment(tod, 0, tod, max(df['forecast_amount'].max(), df['projected_amount'].max()), color="red", line_width=2)
+            p.segment(tod, 0, tod, max(df['forecast_amount'].max(), df['projected_amount'].max()), color="red", line_width=2, line_dash="dashed")
+
+            #band = Band(base=df['date'], upper=df['real_amount'], source=df, level='underlay', fill_alpha=0.2, fill_color='#55FF88')
+            #p.add_layout(band)
 
             #p.segment(df['date'], df['real'], df['date'], df['forecasted'], color="lightgrey", line_width=3)
             #p.circle(df['date'], df['real'], color="blue", size=5)
@@ -794,14 +801,14 @@ class projectAccountProject(models.Model):
             p2 = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours)")
             #p2.left[0].formatter.use_scientific = False
             p2.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
-            p2.line(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel")
-            p2.line(y='projected_unit', x='date', source=df.query('projected_unit != False'), line_color="darkviolet", line_width=2, line_dash="dashed", legend_label="Projeté")
-            p2.line(y='real_unit', x='date', source=df.query('real_unit != False'), line_color="green", line_width=2, legend_label="Réel")
+            p2.line(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (j)")
+            p2.line(y='projected_unit', x='date', source=df.query('projected_unit != False'), line_color="darkviolet", line_width=2, line_dash="dashed", legend_label="Projeté (j)")
+            p2.line(y='real_unit', x='date', source=df.query('real_unit != False'), line_color="green", line_width=2, legend_label="Réel (j)")
             p2.legend.location = "top_left"
             p2.legend.click_policy="hide"
 
             tod = date.today()
-            p2.segment(tod, 0, tod, max(df['forecast_unit'].max(), df['projected_unit'].max()), color="red", line_width=2)
+            p2.segment(tod, 0, tod, max(df['forecast_unit'].max(), df['projected_unit'].max()), color="red", line_width=2, line_dash="dashed")
             script, div = components(p2, wrap_script=False)
             rec.activity_graph = json.dumps({"div": div, "script": script})
 
