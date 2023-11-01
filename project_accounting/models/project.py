@@ -683,7 +683,7 @@ class projectAccountProject(models.Model):
                 real_lines_reversed = lines.filtered(lambda x: x.category == 'project_employee_validated').sorted(key=lambda r: r.date, reverse=True)
                 date_last_real = real_lines_reversed[0].date
                 date_ante_last_real = real_lines_reversed[1].date
-                _logger.info(date_last_real)
+                #_logger.info(date_last_real)
 
             data_dic = {}
             cumul_real_amount = False
@@ -730,7 +730,7 @@ class projectAccountProject(models.Model):
                 data_dic[date_str]['forecast_amount'] = cumul_forecast_amount
                 data_dic[date_str]['forecast_unit'] = cumul_forecast_unit
             
-            _logger.info(data_dic)
+            #_logger.info(data_dic)
 
             data = {
                         'date' : [],
@@ -767,7 +767,7 @@ class projectAccountProject(models.Model):
                         ("Projeté (violet)", "@projected_amount{0 0.00 €}"),
                     ]
 
-            p = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€)")
+            p = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€) du dispositif Tasmane")
             #p.left[0].formatter.use_scientific = False
             p.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
             p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (€)")
@@ -798,7 +798,7 @@ class projectAccountProject(models.Model):
                         ("Projeté (violet)", "@projected_unit{0 0.00 €}"),
                     ]
 
-            p2 = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours)")
+            p2 = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours) du dispositif Tasmane")
             #p2.left[0].formatter.use_scientific = False
             p2.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
             p2.line(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (j)")

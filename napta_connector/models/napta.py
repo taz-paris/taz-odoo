@@ -359,6 +359,9 @@ class naptaProject(models.Model):
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project')
+        #TODO : comment gérer l'indisponibilité de l'API 
+            # ne pas prévenir qu'il y a eu une erreur est pas top... mais bloquer toute création/mise à jour de projet (et donc création de BC client...) n'est pas souhaitable non plus
+            # => Faut-il catcher les erreurs et les masquer ?
         client = ClientRestNapta(self.env)
         for rec in self:
             rec.partner_id.create_update_napta()

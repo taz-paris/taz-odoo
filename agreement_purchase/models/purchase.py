@@ -1,18 +1,14 @@
-# © 2017 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-
-
 from odoo import fields, models
 
 
-class SaleOrder(models.Model):
-    _inherit = "sale.order"
+class PurchaseOrder(models.Model):
+    _inherit = "purchase.order"
 
     agreement_id = fields.Many2one(
         comodel_name="agreement",
-        string="Agreement",
+        string="Accord cadre fournisseur",
         ondelete="restrict",
-        domain=[('domain', '=', 'sale')],
+        domain=[('domain', '=', 'purchase')],
         tracking=True,
         readonly=True,
         copy=False,
@@ -22,7 +18,7 @@ class SaleOrder(models.Model):
     agreement_type_id = fields.Many2one(
         comodel_name="agreement.type",
         related="agreement_id.agreement_type_id",
-        string="Agreement Type",
+        string="Type d'accord cadre fournisseur",
         ondelete="restrict",
         tracking=True,
         copy=True,

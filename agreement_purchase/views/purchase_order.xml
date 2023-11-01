@@ -1,0 +1,16 @@
+<odoo>
+    <record id="purchaseorder_agreement_form_view" model="ir.ui.view">
+        <field name="name">purchase.order.agreement.form.view</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form" />
+        <field name="arch" type="xml">
+            <field name="date_planned" position="after">
+                <field name="agreement_id" />
+                <field
+                    name="agreement_type_id"
+                    groups="agreement.group_use_agreement_type"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>
