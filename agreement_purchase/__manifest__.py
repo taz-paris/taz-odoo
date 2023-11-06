@@ -10,6 +10,7 @@
         "security/ir.model.access.csv",
         "views/agreement.xml",
         "views/purchase_order.xml",
+        "report/template_annexeA.xml",
     ],
     "development_status": "Beta",
     "installable": True,

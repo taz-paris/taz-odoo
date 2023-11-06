@@ -679,11 +679,16 @@ class projectAccountProject(models.Model):
 
         for rec in self:
             lines = self.env['account.analytic.line'].search([('project_id', '=', rec.id), '|', ('category', '=', 'project_employee_validated'), ('category', '=', 'project_forecast')], order="date asc, category")
-            if len(lines) > 1:
-                real_lines_reversed = lines.filtered(lambda x: x.category == 'project_employee_validated').sorted(key=lambda r: r.date, reverse=True)
+            real_lines_reversed = lines.filtered(lambda x: x.category == 'project_employee_validated').sorted(key=lambda r: r.date, reverse=True)
+            if len(real_lines_reversed) > 0:
                 date_last_real = real_lines_reversed[0].date
-                date_ante_last_real = real_lines_reversed[1].date
-                #_logger.info(date_last_real)
+                date_ante_last_real = date_last_real
+                if len(real_lines_reversed) > 1:
+                    date_ante_last_real = real_lines_reversed[1].date
+            else :
+                if len(lines) > 0 : 
+                    date_last_real = lines[0].date
+                    date_ante_last_real = lines[0].date
 
             data_dic = {}
             cumul_real_amount = False
