@@ -73,33 +73,54 @@ class projectAccountProject(models.Model):
                 vals['state_last_change_date'] = datetime.today()
                 stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
                 if stage_id.state == 'closed' :
-                   is_closable, error_message = record.is_closable()
+                   is_closable, error_message = record.is_closable(stage_id)
                    if not is_closable :
                        raise ValidationError(_(error_message))
         return super().write(vals)
 
-    def is_closable(self):
+    def is_closable(self, stage_id):
         self.ensure_one()
         error_message = "Impossible de cloturer/annuler le projet :\n"
         is_closable = True
         self.compute()
         self.compute_has_provision_running()
 
-        if not(self.book_validation_employee_id):
-            is_closable = False
-            error_message += "   - Le book n'est pas validé par le DM.\n"
-        if self.is_review_needed:
-            is_closable = False
-            error_message += "   - Au moins l'un des messages d'erreur de la fiche projet n'est pas résolu.\n"
-        if self.company_to_invoice_left != 0.0 :
-            is_closable = False
-            error_message += "   - Le reste à facturer (onglet Facturation) n'est pas nul.\n"
-        if self.company_residual != 0.0 :
-            is_closable = False
-            error_message += "   - Le reste à payer (onglet Facturation) n'est pas nul.\n"
-        if self.has_provision_running :
-            is_closable = False
-            error_message += "   - Il reste des provision ou du stock sur la dernière clôture.\n"
+        if "Termin" in stage_id.name:
+            if not(self.book_validation_employee_id):
+                is_closable = False
+                error_message += "   - Le book n'est pas validé par le DM.\n"
+            if self.is_review_needed:
+                is_closable = False
+                error_message += "   - Au moins l'un des messages d'erreur de la fiche projet n'est pas résolu.\n"
+            if self.company_to_invoice_left != 0.0 :
+                is_closable = False
+                error_message += "   - Le reste à facturer (onglet Facturation) n'est pas nul.\n"
+            if self.company_residual != 0.0 :
+                is_closable = False
+                error_message += "   - Le reste à payer (onglet Facturation) n'est pas nul.\n"
+            if self.has_provision_running :
+                is_closable = False
+                error_message += "   - Il reste des provisions ou du stock sur la dernière clôture.\n"
+
+        if "Annul" in stage_id.name or "Perdu" in stage_id.name:
+            if self.order_sum_sale_order_lines_with_draft != 0.0 :
+                is_closable = False
+                error_message += "   - Il existe au moins un BC client dont le statut n'est pas annulé.\n"
+
+            outsourcing_link_purchase_order_with_draft = 0.0
+            for link in self.project_outsourcing_link_ids:
+                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_purchase_order=True)
+            if outsourcing_link_purchase_order_with_draft != 0.0 :
+                is_closable = False
+                error_message += "   - Il existe au moins un BC fournisseur dont le statut n'est pas annulé.\n"
+
+            if self.company_part_cost_current != 0.0 :
+                is_closable = False
+                error_message += "   - La valorisation du pointage (coût de production du dispositif Tasmane) n'est pas nulle.\n"
+            if self.has_provision_running :
+                is_closable = False
+                error_message += "   - Il reste des provisions ou du stock sur la dernière clôture.\n"
+
 
         return is_closable, error_message
 

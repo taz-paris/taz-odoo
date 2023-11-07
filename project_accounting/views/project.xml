@@ -13,8 +13,11 @@
                     <field name="stage_id" groups="project.group_project_stages"/>
                     <field name="project_group_id" string="Groupe de projets"/>
                     <filter string="Mes projets" name="own_projects" domain="[('user_enrolled_ids', 'in', uid)]"/>
+                    <separator/>
                     <filter string="Projets ni terminés ni annulés" name="open_projects" domain="[('stage_id.state', '!=', 'closed')]"/>
+                    <separator/>
                     <filter string="Projet à revoir (contrôle KO ou commentaire ADV valorisé)" name="is_review_needed" domain="['|', ('is_review_needed', '=', True), ('invoicing_comment', '!=', '')]"/>
+                    <separator/>
                     <filter string="Projets ayant changé de statut depuis 7 jours" name="recent_project_changed" domain="[('state_last_change_date', '&gt;=', ((context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')))]"/>
                     <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
