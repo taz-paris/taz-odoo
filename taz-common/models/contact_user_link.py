@@ -207,7 +207,7 @@ class ContactUserLink(models.Model):
     last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=True)
     date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=False)
     next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=True)
-    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce tasmanien auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=True, default=False) #TODO :impossible de stocker la valeur de is_late car sa valeur reposer sur la date du jour
+    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce tasmanien auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=True, default=False) #impossible de stocker la valeur de is_late car sa valeur reposer sur la date du jour (sauf à créer un traitement batch)
     next_meeting_before = fields.Date('À revoir avant le', compute=_compute_date_business_action, store=True)
     
     #RDV to plan before

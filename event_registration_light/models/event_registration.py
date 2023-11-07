@@ -57,7 +57,11 @@ class eventRegistration(models.Model):
         if not self.event_id.invitation_mail_template :
                 raise ValidationError(_("Un administrateur du module Evènement doit définir le template du mail sur la fiche évènement."))
 
-        mail_body = self.env['ir.ui.view']._render_template(self.event_id.invitation_mail_template.xml_id, {
+        template_xml_id = self.event_id.sudo().invitation_mail_template.get_metadata()[0].get('xmlid')
+        if template_xml_id in [False, None, ""]:
+            template_xml_id = self.event_id.sudo().invitation_mail_template.export_data(['id']).get('datas')[0][0]
+
+        mail_body = self.env['ir.ui.view'].sudo()._render_template(template_xml_id, {
                 'event': self.event_id,
                 'registration' : self,
                 'formality' : form,

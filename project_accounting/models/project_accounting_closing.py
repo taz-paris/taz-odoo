@@ -123,9 +123,6 @@ class projectAccountingClosing(models.Model):
 
             rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
 
-            #if rec.invoice_period_amount == 0.0 and rec.purchase_period_amount == 0.0 and rec.production_period_amount == 0.0 :
-            #TODO : ça ne suffit pas pour valider car des fois on a ni prod, ni facturation, ni achat sur la période et on destock
-            #    rec.is_validated = True
 
     @api.model_create_multi
     def create(self, vals):

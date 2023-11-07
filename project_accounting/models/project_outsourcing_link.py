@@ -16,12 +16,10 @@ class projectOutsourcingLink(models.Model):
     ]
 
     def compute_purchase_order_total(self, with_direct_payment=True, with_draft_purchase_order=False): 
-        #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         status_list_to_keep = ['purchase']
         if with_draft_purchase_order :
             status_list_to_keep.append('draft')
         for rec in self:
-            #rec.order_sum_purchase_order_lines = 0
             line_ids = rec.get_purchase_order_line_ids()
             total = 0.0
             for line_id in line_ids:
@@ -80,7 +78,6 @@ class projectOutsourcingLink(models.Model):
 
     def compute_account_move_total_outsourcing_link(self, filter_list=[('parent_state', 'in', ['posted'])]): 
         _logger.info('compute_account_move_total_outsourcing_link')
-        #TODO : gérer les statuts du sale.order => ne prendre que les lignes des sale.order validés ?
         line_ids = self.project_id.get_account_move_line_ids(filter_list + [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
 
         subtotal = 0.0
@@ -175,7 +172,6 @@ class projectOutsourcingLink(models.Model):
         return self.env.context.get('default_project_id') or self.env.context.get('active_id')
 
     partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Sous-traitant", required=True)
-        #TODO ajouter un contrôle et un domaine => le sous-traitant d'un projet ne peut pas être égal au client final
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='restrict')
     link_type = fields.Selection([
             ('outsourcing', 'Sous-traitance'),
@@ -188,7 +184,6 @@ class projectOutsourcingLink(models.Model):
 
     order_sum_purchase_order_lines = fields.Monetary('Total HT des commandes de Tasmane enregistrées', compute=compute)
     order_direct_payment_amount = fields.Monetary('Montant HT paiement direct', compute=compute, help="Montant payé directement par le client final au sous-traitant de Tasmane")
-        #TODO : il va falloir lister les factures validées sur Chorus et checker ce montant
     order_company_payment_amount = fields.Monetary('Montant HT à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute)
 
     sum_account_move_lines = fields.Monetary('Montant HT déjà facturé', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute)
