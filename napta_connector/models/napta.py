@@ -735,6 +735,8 @@ class naptaResUsers(models.Model):
                     odoo_user.action_create_employee()
                     _logger.info("Création de l'employée depuis l'utilsiateur avec le login=%s" % odoo_user.login)
 
+            #TODO : désactiver le hr.employee s'il n'a aucun contrat de travail actif
+
 
 
     """
@@ -843,7 +845,7 @@ class naptaHrContract(models.Model):
             name += " "+ str(user_history['attributes']['start_date'])
             
 
-            if user_history['attributes']['end_date'] != None :
+            if user_history['attributes']['end_date'] != None : #TODO (pour éviter de mettre inactif un salarié avec une date de fin de contrat positionnée dans le futur) : and user_history['attributes']['end_date'] < today()
                 state = "close"
             else:
                 #if user_history['attributes']['start_date'] > today():
