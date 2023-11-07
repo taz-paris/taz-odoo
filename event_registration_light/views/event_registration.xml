@@ -48,6 +48,7 @@
                         </field>
 			<field name="email" position="after">
 				<field name="mail_auto" />
+				<field name="state" readonly="0"/>
 				<field name="contact_user_link_id" options="{'no_quick_create' : True}" context="{'default_partner_id' : partner_id}"/>
 				<field name="registration_user_id" invisible="1" />
 				<field name="last_office365_mail_draft" invisible="1" />
@@ -60,7 +61,7 @@
                                 <button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
                                         attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
 				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-					attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', '!=', False), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+					attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', 'not in', [False, '']), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
                         </xpath>
 		    </field>
 		</record>
