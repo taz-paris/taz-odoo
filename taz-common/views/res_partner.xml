@@ -41,6 +41,7 @@
 		      <field name="name"/>
 		      <field name="long_company_name"/>
 		      <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
+                      <field name="comment"/>
 		  </group>
 		  <group>
 		      <field name="user_id" options="{'no_create': True, 'no_create_edit':True}" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>

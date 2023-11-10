@@ -314,7 +314,7 @@ class projectAccountProject(models.Model):
                 rec.company_part_marging_rate_initial = 0.0
     
             rec.company_part_amount_current = rec.order_sum_sale_order_lines_with_draft - rec.outsource_part_amount_current - rec.cosource_part_amount_current - rec.other_part_amount_current
-            rec.company_part_cost_current = -rec.get_production_cost()
+            rec.company_part_cost_current = -rec.get_production_cost()[0]
             rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
             if rec.company_part_amount_current != 0 :
                 rec.company_part_marging_rate_current = rec.company_part_marging_amount_current / rec.company_part_amount_current * 100
@@ -553,6 +553,7 @@ class projectAccountProject(models.Model):
     def compute_account_move_total(self, filter_list=[('parent_state', 'in', ['posted'])]):
         _logger.info("--compute_account_move_total")
         all_customers = self.get_all_customer_ids()
+        _logger.info(all_customers)
         return self.compute_account_move_total_all_partners(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('partner_id', 'in', all_customers)])
 
 
@@ -651,12 +652,14 @@ class projectAccountProject(models.Model):
         }
 
 
-    def get_production_cost(self, filters=[]):
+    def get_production_cost(self, filters=[], force_recompute_amount=False):
         production_period_amount = 0.0
         lines = self.env['account.analytic.line'].search(filters + [('project_id', '=', self.id), ('category', '=', 'project_employee_validated')])
         for line in lines :
+            if force_recompute_amount :
+                line.refresh_amount()
             production_period_amount += line.amount
-        return production_period_amount
+        return production_period_amount, lines
 
 
     @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids')

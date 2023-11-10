@@ -78,7 +78,7 @@ class projectOutsourcingLink(models.Model):
 
     def compute_account_move_total_outsourcing_link(self, filter_list=[('parent_state', 'in', ['posted'])]): 
         _logger.info('compute_account_move_total_outsourcing_link')
-        subtotal, total, paid = self.project_id.compute_account_move_total_all_partners(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('partner_id', 'in', self.partner_id.id)])
+        subtotal, total, paid = self.project_id.compute_account_move_total_all_partners(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('partner_id', 'in', [self.partner_id.id])])
         return -1 * subtotal, -1 * total, -1 * paid
 
 

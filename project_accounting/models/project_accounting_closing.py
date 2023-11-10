@@ -49,7 +49,7 @@ class projectAccountingClosing(models.Model):
             if rec.is_validated :
                 if not (len(vals) == 1 and vals.get('is_validated') == False) :
                     #il faut pouvoir écrire s'il on dévalide
-                   raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée."))
+                    raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée."))
         super().write(vals)
 
 
@@ -101,7 +101,8 @@ class projectAccountingClosing(models.Model):
             rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
-            rec.production_period_amount = -1 * proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date)])
+            production_period_amount, analytic_lines = proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date)], force_recompute_amount=True)
+            rec.production_period_amount = -1 * production_period_amount
 
             rec.production_stock = rec.production_previous_balance + rec.production_period_amount
             _logger.info('------ prod')
