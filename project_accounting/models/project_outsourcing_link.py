@@ -78,17 +78,7 @@ class projectOutsourcingLink(models.Model):
 
     def compute_account_move_total_outsourcing_link(self, filter_list=[('parent_state', 'in', ['posted'])]): 
         _logger.info('compute_account_move_total_outsourcing_link')
-        line_ids = self.project_id.get_account_move_line_ids(filter_list + [('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
-
-        subtotal = 0.0
-        total = 0.0
-        paid = 0.0
-        for line_id in line_ids:
-            line = self.env['account.move.line'].browse(line_id)
-            subtotal += line.price_subtotal_signed * line.analytic_distribution[str(self.project_id.analytic_account_id.id)]/100.0
-            total += line.price_total_signed * line.analytic_distribution[str(self.project_id.analytic_account_id.id)]/100.0
-            paid += line.amount_paid * line.analytic_distribution[str(self.project_id.analytic_account_id.id)]/100.0 
-            #vérifier que le montant est cohérent même en cas d'avoir ou si Tasmane facture un apport d'affaire à un fournisseur
+        subtotal, total, paid = self.project_id.compute_account_move_total_all_partners(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('partner_id', 'in', self.partner_id.id)])
         return -1 * subtotal, -1 * total, -1 * paid
 
 

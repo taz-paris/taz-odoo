@@ -78,6 +78,24 @@ class projectAccountProject(models.Model):
                        raise ValidationError(_(error_message))
         return super().write(vals)
 
+    """
+    def corriger_vendor_facture(self, stage_id):
+        self.ensure_one()
+        for invoice in self.env['account.move'].search([]) :
+            if invoice.invoice_user_id.id not in [1, 2]:
+                _logger.info(invoice.invoice_user_id.id)
+                continue
+            project_id = None
+            for line in invoice.invoice_line_ids :
+                if len(line.rel_project_ids) > 0:
+                    project_id = line.rel_project_ids[0]
+                    break
+            if project_id and project_id.user_id:
+                invoice.invoice_user_id = project_id.user_id.id
+                self.env.cr.commit()
+        _logger.info(' ==================== FIN revue invoice.invoice_user_id')
+    """
+
     def is_closable(self, stage_id):
         self.ensure_one()
         error_message = "Impossible de cloturer/annuler le projet :\n"
@@ -146,7 +164,7 @@ class projectAccountProject(models.Model):
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_group_id = fields.Many2one('project.group', string='Groupe de projets', domain="[('partner_id', '=', partner_id)]")
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
-    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission") #TODO : synchroniser cette valeur avec user_id avec un oneChange
+    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=True) #TODO : synchroniser cette valeur avec user_id avec un oneChange
     project_manager = fields.Many2one('hr.employee', "Gestionnaire de la mission", help="Le DM peut déleguer la gestion administrative de la mission via ce champ.")
     user_id = fields.Many2one(compute=_compute_user_id, store=True)
     probability = fields.Selection([
@@ -534,12 +552,12 @@ class projectAccountProject(models.Model):
 
     def compute_account_move_total(self, filter_list=[('parent_state', 'in', ['posted'])]):
         _logger.info("--compute_account_move_total")
-
         all_customers = self.get_all_customer_ids()
-        #TODO : ajouter une contrainte => un "client secondaire" ne peut pas avoir de outsourcing_link pour ce projet
-        #TODO : ajouter une contrainte => on ne peut pas avoir une ligne de facture qui porte le compte analytic de ce projet et dont la facture est ni pour le client, ni pour un client secondaire, ni pour partener de 'outsourcing link
+        return self.compute_account_move_total_all_partners(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('partner_id', 'in', all_customers)])
 
-        line_ids = self.get_account_move_line_ids(filter_list + [('partner_id', 'in', all_customers), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
+
+    def compute_account_move_total_all_partners(self, filter_list):
+        line_ids = self.get_account_move_line_ids(filter_list + [('display_type', 'not in', ['line_note', 'line_section'])])
         subtotal = 0.0
         total = 0.0
         paid = 0.0
@@ -549,7 +567,6 @@ class projectAccountProject(models.Model):
             total += line.price_total_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
             paid += line.amount_paid * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         return subtotal, total, paid
-
 
     def action_open_out_account_move_lines(self):
         all_customers = self.get_all_customer_ids()
@@ -656,7 +673,7 @@ class projectAccountProject(models.Model):
             
             for sec_part in rec.partner_secondary_ids:
                 for sp in [sec_part.id] + sec_part.child_ids_address.ids + sec_part.child_ids_company.ids:
-                    if sp.id in supplier_ids:
+                    if sp in supplier_ids:
                         raise ValidationError(_("Le client intermédiaire (onglet Facturation) ni ses établissements/filiales ne peuvent être fournisseur (onglet Achats) pour ce même projet."))
             
             rec.check_partners_objects_consitency()

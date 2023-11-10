@@ -56,6 +56,10 @@ class projectAccountingResPartner(models.Model):
                 protected = True
         return protected
         
+     def _fields_sync(self, values):
+         _logger.info('============================ A')
+         super().sudo()._fields_sync(values)
+         _logger.info('============================ B')
 
      @api.depends('invoice_ids', 'sale_order_ids', 'purchase_order_count')
      def _compute_protected_partner(self):
