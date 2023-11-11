@@ -1,3 +1,13 @@
+############################################################################################################################
+############################################################################################################################
+############################################################################################################################
+###
+###       Allow to change postal address of a partner related to a user by a user without write acces on res.users.
+###
+############################################################################################################################
+############################################################################################################################
+############################################################################################################################
+
 from odoo import models, fields, api
 from odoo.addons.base.models.res_partner import Partner as PartnerInherit_base
 from odoo.addons.auth_signup.models.res_partner import ResPartner as PartnerInherit_auth_signup
@@ -93,3 +103,4 @@ def _compute_signup_url(self):
          partner.signup_url = result.get(partner.id, False)
 
 PartnerInherit_auth_signup._compute_signup_url = _compute_signup_url
+

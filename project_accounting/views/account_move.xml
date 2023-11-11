@@ -26,6 +26,10 @@
 
 		<xpath expr="//button[@name='preview_invoice']" position="replace">
 		</xpath>
+
+		<field name="ref" position="after">
+			<field name="invoice_user_id"/>
+		</field>
             </field>
         </record>
 
