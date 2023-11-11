@@ -12,3 +12,4 @@ from . import controller
 from . import wizard_partner_category
 from . import contact_user_link
 from . import res_country
+from . import monkey_patch_res_partner

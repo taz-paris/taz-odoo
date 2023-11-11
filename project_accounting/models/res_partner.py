@@ -56,11 +56,6 @@ class projectAccountingResPartner(models.Model):
                 protected = True
         return protected
         
-     def _fields_sync(self, values):
-         _logger.info('============================ A')
-         super().sudo()._fields_sync(values)
-         _logger.info('============================ B')
-
      @api.depends('invoice_ids', 'sale_order_ids', 'purchase_order_count')
      def _compute_protected_partner(self):
          for rec in self:
@@ -97,7 +92,6 @@ class projectAccountingResPartner(models.Model):
              if rec.external_auxiliary_code and len(rec.external_auxiliary_code) > 8:
                  raise ValidationError(_("Le code auxiliaire CEGB - Quadratus ne peut pas faire plus de 8 caractères."))
             
-
      project_ids = fields.One2many('project.project', 'partner_id', string="Projets")
      has_project_started_this_year = fields.Boolean('Un projet a débuté cette année', compute=compute_has_project_started_this_year, store=True)
      is_protected_partner = fields.Boolean('Fiche entreprise protégée', compute=_compute_protected_partner, help="Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut être modifiée que par un ADV.")
