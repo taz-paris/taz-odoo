@@ -12,6 +12,7 @@
 		<field name="fiscal_position_id" position="after">
 			<group>
 				<field name="name"/>
+				<field name="user_id"/>
 			</group>
 		</field>
 

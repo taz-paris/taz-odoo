@@ -165,7 +165,6 @@
         </field>
     </record>
 
-
 	    <record model="ir.actions.act_window" id="action_purchase_order_line">
 	      <field name="name">Échéances de facturation</field>
 	      <field name="res_model">purchase.order.line</field>
