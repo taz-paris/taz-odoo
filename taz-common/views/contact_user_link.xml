@@ -139,6 +139,19 @@
 
     <menuitem name="Mon plan d'intimité client" id="taz-common.my_partner_intimity" sequence="20" parent="taz-common.commerce" action="taz-common.action_intimity_plan"/>
 
+    <record model="ir.actions.act_window" id="taz-common.action_contact_user_link">
+      <field name="name">Tous les liens Tasmaniens/contacts</field>
+      <field name="res_model">taz.contact_user_link</field>
+      <field name="view_mode">tree</field>
+      <field name="view_ids" eval="
+	    [
+	    (5, 0, 0),
+	    (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_user_link_tree_intimity_plan')}),
+	      ]" />
+    </record>
+
+    <menuitem name="Tous les liens Tasmaniens/contacts" id="taz-common.contact_user_link_menu" sequence="91" parent="taz-common.commerce" action="taz-common.action_contact_user_link"/>
+
     <record model="ir.ui.view" id="taz-common.contact_user_link_frequency_tree">
       <field name="name">Lien Contact Utilisateur - Fréquence de contact</field>
       <field name="model">taz.contact_user_link_frequency</field>
