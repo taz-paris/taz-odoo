@@ -16,7 +16,7 @@
                     <separator/>
                     <filter string="Projets ni terminés ni annulés" name="open_projects" domain="[('stage_id.state', '!=', 'closed')]"/>
                     <separator/>
-                    <filter string="Projet à revoir (contrôle KO ou commentaire ADV valorisé)" name="is_review_needed" domain="['|', ('is_review_needed', '=', True), ('invoicing_comment', 'not in', [False, ''])]"/>
+                    <filter string="Projet à revoir (contrôle KO ou commentaire ADV valorisé)" name="is_review_needed" domain="['|', ('is_review_needed', '=', True), ('invoicing_comment', 'not in', [False, '', None])]"/>
                     <separator/>
                     <filter string="Projets ayant changé de statut depuis 7 jours" name="recent_project_changed" domain="[('state_last_change_date', '&gt;=', ((context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')))]"/>
                     <separator/>
@@ -157,7 +157,6 @@
 					    <field name="outsourcing"/>
 					    <field name="agreement_id"/>
 					    <field name="state" invisible="1"/>
-					    <field name="probability"/>
 					</group>
 					<group>
 					    <field name="project_director_employee_id" attrs="{'readonly':[('active','=',False)]}" />
@@ -184,13 +183,13 @@
 								<button type="object" name="create_sale_order" string="Créer commande client" /> 
 								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
                                                         </group>
-							<group string="Production co-traitée">
+							<group string="Production pilotée par un co-traitant">
                                                                 <field name="cosource_part_amount_current" />
                                                                 <field name="cosource_part_cost_current"/>
                                                                 <field name="cosource_part_marging_amount_current"/>
                                                                 <field name="cosource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
-							<group string="Marge actuelle hors co-traitance">
+							<group string="Production pilotée par Tasmane (yc S/T)">
                                                                 <field name="order_amount_current"/>
                                                                 <field name="order_cost_current"/>
                                                                 <field name="order_marging_amount_current"/>
@@ -218,15 +217,15 @@
                                                         </group>
 						</group>
 					</page>
-					<page name="project_structure" string="Structure INITIALE du projet">
+					<page name="project_structure" string="Structure au lancement">
 						<group col="3">
-							<group string="Production co-traitée">
+							<group string="Production pilotée par un co-traitant">
 								<field name="cosource_part_amount_initial"/>
 								<field name="cosource_part_cost_initial"/>
 								<field name="cosource_part_marging_amount_initial"/>
 								<field name="cosource_part_marging_rate_initial" widget="progressbar"/>
 							</group>  
-							<group string="Marge hors co-traitance">
+							<group string="Production pilotée par Tasmane (yc S/T)">
 								<field name="order_amount_initial"/>
 								<field name="order_cost_initial"/>
 								<field name="order_marging_amount_initial"/>

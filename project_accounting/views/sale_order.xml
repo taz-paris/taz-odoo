@@ -90,6 +90,12 @@
 
 		<xpath expr="//tree/field[@name='qty_delivered']" position="attributes">
 			<attribute name="sum">Total</attribute>
+			<!--
+			<attribute name="attrs">attrs="{
+				'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
+				'readonly': [('qty_delivered_method', '!=', 'manual')]
+				}</attribute>
+			-->
 		</xpath>
 
 		<xpath expr="//tree/field[@name='qty_invoiced']" position="attributes">

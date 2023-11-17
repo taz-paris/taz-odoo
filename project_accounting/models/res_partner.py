@@ -9,6 +9,7 @@ from datetime import datetime
 
 PROTECTED_FIELD_LIST = [
             'name',
+            'active', 
             'long_company_name', 
             'parent_id',
             'is_company',

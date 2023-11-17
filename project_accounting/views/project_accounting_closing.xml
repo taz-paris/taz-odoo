@@ -204,8 +204,11 @@
                     <field name="rel_project_partner_id" string="Client" filter_domain="[('rel_project_partner_id', 'child_of', self)]"/>
                     <separator/>
                     <filter string="Date de la clôture comptable" name="closing_date" date="closing_date"/>
+                    <separator/>
                     <filter string="Clôture validée" name="validated" domain="[('is_validated', '=', True)]"/>
+                    <separator/>
                     <filter string="Clôture non validée" name="not_validated" domain="[('is_validated', '=', False)]"/>
+                    <separator/>
 		    <filter string="Mes clôtures" name="my_project_accounting_closing" domain="[('rel_project_user_id', '=', uid)]"/>
                     <separator/>
                     <group expand="0" string="Group By">

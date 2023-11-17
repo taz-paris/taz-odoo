@@ -305,6 +305,7 @@
 
 			    <field name="parent_id" options="{'no_quick_create': True}" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True), ('type', '=', 'contact')]" />
 				<field name="is_followed"/>
+				<field name="type"/>
                         </group>
 			<group>
                             <field name="function" attrs="{'invisible': [('is_company','=', True)]}"/>
@@ -341,15 +342,6 @@
 			</page>
 			<page name="contact_channels" string="Coordonnées">
 				<group>
-					<group>
-						<field name="mailchimp_status"/>
-						<field name="phone" widget="phone"/>
-						<field name="mobile" widget="phone"/>
-			    			<field name="assistant"/>
-						<field name="personal_phone" widget="phone"/>
-						<field name="personal_email" widget="email"/>
-						<field name="user_ids" invisible="1"/>
-					</group>
 					<group string="Adresse postale">
 					    <span class="o_form_label o_td_label" name="address_name">
 						    <!--
@@ -368,8 +360,41 @@
 						</div>
 					    </div>
 					</group>
-					<label for="former_email_address" string="Anciennes adresses email"/>
-					<field name="former_email_address"/>
+					<group string="Autres adresses filles">
+					    <field name="lang" invisible="1"/>
+					    <field name="child_ids_address" nolabel="1" colspan="2"  mode="tree" context="{
+						    'tree_view_ref':'taz-common.address_tree', 
+						    'form_view_ref':'taz-common.address_form', 
+						    'default_parent_id': active_id, 
+						    'default_lang': lang, 
+						    'default_user_id': user_id, 
+						    'default_type': 'private'}">
+							<tree delete="false">
+								  <field name="type"/>
+								  <field name="name"/>
+								  <field name="street" optional="hide"/>
+								  <field name="street2" optional="hide"/>
+								  <field name="street3" optional="hide"/>
+								  <field name="zip" optional="show"/>
+								  <field name="city" optional="show"/>
+								  <field name="country_id" optional="show"/>
+								  <field name="phone" optional="hide"/>
+								  <field name="email" optional="hide"/>
+							</tree>
+					     </field>
+					</group>
+					<group>
+						<field name="mailchimp_status"/>
+						<field name="phone" widget="phone"/>
+						<field name="mobile" widget="phone"/>
+			    			<field name="assistant"/>
+						<field name="personal_phone" widget="phone"/>
+						<field name="personal_email" widget="email"/>
+						<field name="user_ids" invisible="1"/>
+					</group>
+					<group>
+						<field name="former_email_address"/>
+					</group>
 				</group>
 			</page>
 

@@ -92,7 +92,7 @@ class projectAccountingClosing(models.Model):
 
 
             rec.invoice_period_amount = proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['out_refund', 'out_invoice'])])[0]
-            rec.purchase_period_amount = proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])[0]
+            rec.purchase_period_amount = -1 * proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])[0]
 
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
             rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
