@@ -20,7 +20,7 @@ class projectAccountingSaleOrder(models.Model):
             rec.final_customer_order_amount = rec.other_company_amount + rec.amount_untaxed
 
     final_customer_order_amount = fields.Monetary('Montant HT du bon de commande client final', compute=compute_final_customer_order_amount, help="Montant total commandé par le client final (supérieur au montant piloté par Tasmane si Tasmane est sous-traitant. Egal au montant piloté par Tasmne sinon.)")
-    other_company_amount = fields.Monetary('Montant HT de la commande piloté par un partenaire', help="Part du bon de commande du client final non piloté par Tasmane, facturé par le partneraire au client final.\nCas de cotraitraitance où Tasmane n'est pas le madnataire ou de missions dont Tasmane est lui-même sous-traitant (dans ce cas ce montant porte le markup que fait le partenaire sur la prestation Tasmane et qu'il se fera payer en direct).")
+    other_company_amount = fields.Monetary('Montant HT de la commande pour le sur-traitant/co-traitant non mandataire', help="Dans le cas où Tasmane est sous-traitant/co-traitant d'un tiers (on ne valide pas les facture du tiers, donc ce tiers n'est pas géré comme un co-traitant), saisir ici le montant qui sera facturé par ce tiers au client final.")
 
     advance_payment_ids = fields.One2many('account.payment', 'advance_sale_order_id', string="Paiements d'avance (sans facture)", help="Paiement en avance mais sans facture, notamment dans le cas de commandes publiques")
 

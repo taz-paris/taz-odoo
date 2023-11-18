@@ -174,7 +174,7 @@
 					</group>
 				   </group>
 				<notebook>
-					<page name="dashboard" string="Synthèse À DATE">
+					<page name="dashboard" string="Synthèse à date">
 						<group col="3">
 							<group string="Commandes du client à Tasmane">
                                                                 <field name="order_sum_sale_order_lines_with_draft"/>
@@ -190,7 +190,7 @@
                                                                 <field name="cosource_part_marging_amount_current"/>
                                                                 <field name="cosource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
-							<group string="Production pilotée par Tasmane (yc S/T)" attrs="{'invisible' : [('order_amount_current', '=', 0), ('order_cost_current', '=', 0), ('order_cost_futur', '=', 0)]}">
+							<group string="Production pilotée par Tasmane (yc S/T)" style="background-color:#abdbff;" attrs="{'invisible' : [('order_amount_current', '=', 0), ('order_cost_current', '=', 0), ('order_cost_futur', '=', 0)]}">
                                                                 <field name="order_amount_current"/>
                                                                 <field name="order_cost_current"/>
                                                                 <field name="order_cost_futur"/>
@@ -240,9 +240,7 @@
 								<field name="other_part_marging_amount_initial"/>
 								<field name="other_part_marging_rate_initial" widget="progressbar"/>
 							</group>  
-						</group>
-						<group col="3">
-							<group string="Production pilotée par Tasmane (yc S/T)">
+							<group string="Production pilotée par Tasmane (yc S/T)" style="background-color:#abdbff;">
 								<field name="order_amount_initial"/>
 								<field name="order_cost_initial"/>
 								<field name="order_marging_amount_initial"/>
