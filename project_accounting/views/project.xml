@@ -219,6 +219,16 @@
                                                                 <field name="other_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
 						</group>
+						<group name="margin_graph_tab" string="Graphique de production Tasmane"  attrs="{'invisible' : [('company_part_amount_current', '=', 0), ('company_part_cost_current', '=', 0), ('company_part_cost_futur', '=', 0)]}">
+							<div>
+								<field name="margin_graph" widget="bokeh_chart" nolabel="1"/>
+							</div>
+							<br/>
+							<div>
+								<field name="activity_graph" widget="bokeh_chart" nolabel="1"/>
+							</div>
+						</group>
+
 					</page>
 					<page name="project_structure" string="Structure au lancement">
 						<group col="3">
@@ -359,14 +369,6 @@
 								<field name="has_provision_running"/>
 							</group>
 						</group>
-					</page>
-					<page name="margin_graph_tab" string="Graph prod Tasmane">
-						<div>
-					    		<field name="margin_graph" widget="bokeh_chart" nolabel="1"/>
-						</div>
-						<div>
-					    		<field name="activity_graph" widget="bokeh_chart" nolabel="1"/>
-						</div>
 					</page>
 					<page string="Autres info et contrôles (debug admin)"  groups="base.group_system">
 						<group>
