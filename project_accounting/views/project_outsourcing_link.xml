@@ -31,6 +31,8 @@
 				<group>
 					<field name="order_sum_purchase_order_lines"/>
 					<field name="outsource_part_amount_current"/>
+					<field name="marging_amount_current" />
+					<field name="marging_rate_current" widget="progressbar" />
 					<button type="object" name="action_open_purchase_order_lines" string="Voir les lignes de commande"/>
 					<button type="object" name="create_purchase_order" string="Créer commande fournisseur"/>
 				</group>
@@ -42,9 +44,8 @@
 			<group>
 				<group string="Facturation Tasmane / sous-traitant">
 					<field name="sum_account_move_lines"/>
+					<field name="order_company_payment_to_invoice"/>
 					<button type="object" colspan="2" name="action_open_account_move_lines" string="Voir les lignes de facture/avoir"/>
-					<field name="marging_amount_current" />
-					<field name="marging_rate_current" widget="progressbar" />
 				</group>
 				<group string="Paiement de Tasmane au sous-traitant">
 					<field name="sum_account_move_lines_with_tax" />

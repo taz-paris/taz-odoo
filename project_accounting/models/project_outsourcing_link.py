@@ -145,7 +145,8 @@ class projectOutsourcingLink(models.Model):
 
             rec.order_sum_purchase_order_lines = rec.compute_purchase_order_total()
             rec.order_company_payment_amount = rec.order_sum_purchase_order_lines - rec.order_direct_payment_amount
-            rec.marging_amount_current =  rec.outsource_part_amount_current - rec.sum_account_move_lines
+
+            rec.marging_amount_current =  rec.outsource_part_amount_current - rec.order_sum_purchase_order_lines
             rec.marging_rate_current = 0.0 
             if rec.outsource_part_amount_current != 0 :
                 rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
@@ -157,6 +158,7 @@ class projectOutsourcingLink(models.Model):
             rec.company_residual = total - paid
 
             rec.order_direct_payment_to_do = rec.order_direct_payment_amount - rec.order_direct_payment_done
+            rec.order_company_payment_to_invoice = rec.order_company_payment_amount - rec.sum_account_move_lines
 
 
     def _get_default_project_id(self):
@@ -177,8 +179,9 @@ class projectOutsourcingLink(models.Model):
     order_direct_payment_amount = fields.Monetary('Montant HT paiement direct', compute=compute, help="Montant payé directement par le client final au sous-traitant de Tasmane")
     order_company_payment_amount = fields.Monetary('Montant HT à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute)
 
-    sum_account_move_lines = fields.Monetary('Montant HT déjà facturé', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute)
-    sum_account_move_lines_with_tax = fields.Monetary('Montant TTC déjà facturé', compute=compute, store=True)
+    sum_account_move_lines = fields.Monetary('Montant HT déjà facturé à Tasmane', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute)
+    order_company_payment_to_invoice = fields.Monetary('Montant HT restant à facturer à Tasmane')
+    sum_account_move_lines_with_tax = fields.Monetary('Montant TTC déjà facturé à Tasmane', compute=compute, store=True)
 
     outsource_part_amount_current = fields.Monetary('Valorisation HT de la part sous-traitée', compute=compute)
     marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', compute=compute)

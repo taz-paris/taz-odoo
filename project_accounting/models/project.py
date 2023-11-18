@@ -197,9 +197,9 @@ class projectAccountProject(models.Model):
         'outsource_part_cost_initial',
         'cosource_part_amount_initial',
         'cosource_part_cost_initial',
-	'project_outsourcing_link_ids',
 	'other_part_amount_initial',
 	'other_part_cost_initial',
+	'project_outsourcing_link_ids',
 	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
 	'accounting_closing_ids',
     )
@@ -217,7 +217,46 @@ class projectAccountProject(models.Model):
             rec.order_sum_sale_order_lines_with_draft = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=True)[0]
             rec.order_to_invoice_company, rec.order_to_invoice_company_with_tax = rec.compute_sale_order_total(with_direct_payment=False, with_draft_sale_order=False)
 
-   
+            rec.company_to_invoice_left = rec.order_to_invoice_company - rec.company_invoice_sum_move_lines
+            rec.company_to_invoice_left_with_tax = rec.order_to_invoice_company_with_tax - rec.company_invoice_sum_move_lines_with_tax
+
+
+            ###### COMMON project_outsourcing_link computations
+                                                               
+            outsource_part_amount_current = 0.0
+            outsource_part_cost_current = 0.0
+            outsource_part_cost_futur = 0.0
+            order_to_invoice_outsourcing = 0.0
+            cosource_part_amount_current = 0.0
+            cosource_part_cost_current = 0.0
+            cosource_part_cost_futur = 0.0
+            outsourcing_link_purchase_order_with_draft = 0.0
+            other_part_amount_current = 0.0
+            other_part_cost_current = 0.0
+            other_part_cost_futur = 0.0
+            for link in rec.project_outsourcing_link_ids:
+                link.compute()
+                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_purchase_order=True)
+                if link.link_type == 'outsourcing' :
+                    outsource_part_amount_current += link.outsource_part_amount_current
+                    outsource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
+                    outsource_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
+                    order_to_invoice_outsourcing += link.order_direct_payment_amount
+                elif link.link_type == 'cosourcing' :
+                    cosource_part_amount_current += link.outsource_part_amount_current
+                    cosource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
+                    cosource_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
+                    #order_to_invoice_outsourcing += link.order_direct_payment_amount
+                elif link.link_type == 'other' :
+                    other_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
+                    other_part_amount_current += link.outsource_part_amount_current
+                    other_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
+                    #order_to_invoice_outsourcing += link.order_direct_payment_amount
+                else :
+                    raise ValidationError(_("Type d'achat non géré : %s" % str(link.link_type)))
+
+            rec.outsourcing_link_purchase_order_with_draft = outsourcing_link_purchase_order_with_draft
+
 
             ######## OUTSOURCE PART
             rec.outsource_part_marging_amount_initial =  rec.outsource_part_amount_initial - rec.outsource_part_cost_initial
@@ -225,42 +264,14 @@ class projectAccountProject(models.Model):
                 rec.outsource_part_marging_rate_initial = rec.outsource_part_marging_amount_initial / rec.outsource_part_amount_initial * 100
             else:
                 rec.outsource_part_marging_rate_initial = 0.0 
-                                                                
-            outsource_part_amount_current = 0.0
-            outsource_part_cost_current = 0.0
-            order_to_invoice_outsourcing = 0.0
-            cosource_part_amount_current = 0.0
-            cosource_part_cost_current = 0.0
-            outsourcing_link_purchase_order_with_draft = 0.0
-            other_part_amount_current = 0.0
-            other_part_cost_current = 0.0
-            for link in rec.project_outsourcing_link_ids:
-                link.compute()
-                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_purchase_order=True)
-                if link.link_type == 'outsourcing' :
-                    outsource_part_amount_current += link.outsource_part_amount_current
-                    outsource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
-                    order_to_invoice_outsourcing += link.order_direct_payment_amount
-                elif link.link_type == 'cosourcing' :
-                    cosource_part_amount_current += link.outsource_part_amount_current
-                    cosource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
-                    #order_to_invoice_outsourcing += link.order_direct_payment_amount
-                elif link.link_type == 'other' :
-                    other_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
-                    other_part_amount_current += link.outsource_part_amount_current
-                else :
-                    raise ValidationError(_("Type d'achat non géré : %s" % str(link.link_type)))
-
-            rec.outsourcing_link_purchase_order_with_draft = outsourcing_link_purchase_order_with_draft
-
+ 
             rec.outsource_part_amount_current = outsource_part_amount_current
             rec.outsource_part_cost_current = outsource_part_cost_current
+            rec.outsource_part_cost_futur = outsource_part_cost_futur
+
             rec.order_to_invoice_outsourcing = order_to_invoice_outsourcing
 
-            rec.company_to_invoice_left = rec.order_to_invoice_company - rec.company_invoice_sum_move_lines
-            rec.company_to_invoice_left_with_tax = rec.order_to_invoice_company_with_tax - rec.company_invoice_sum_move_lines_with_tax
-
-            rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current
+            rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current - rec.outsource_part_cost_futur
             if rec.outsource_part_amount_current != 0 :
                 rec.outsource_part_marging_rate_current = rec.outsource_part_marging_amount_current / rec.outsource_part_amount_current * 100
             else :
@@ -275,8 +286,9 @@ class projectAccountProject(models.Model):
 
             rec.cosource_part_amount_current = cosource_part_amount_current
             rec.cosource_part_cost_current = cosource_part_cost_current
+            rec.cosource_part_cost_futur = cosource_part_cost_futur
 
-            rec.cosource_part_marging_amount_current =  rec.cosource_part_amount_current - rec.cosource_part_cost_current
+            rec.cosource_part_marging_amount_current =  rec.cosource_part_amount_current - rec.cosource_part_cost_current - rec.cosource_part_cost_futur
             if rec.cosource_part_amount_current != 0 :
                 rec.cosource_part_marging_rate_current = rec.cosource_part_marging_amount_current / rec.cosource_part_amount_current * 100
             else :
@@ -291,8 +303,9 @@ class projectAccountProject(models.Model):
 
             rec.other_part_cost_current = other_part_cost_current
             rec.other_part_amount_current = other_part_amount_current
+            rec.other_part_cost_futur = other_part_cost_futur
 
-            rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current
+            rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current - rec.other_part_cost_futur
             if rec.other_part_amount_current != 0 :
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
             else:
@@ -307,8 +320,12 @@ class projectAccountProject(models.Model):
                 rec.company_part_marging_rate_initial = 0.0
     
             rec.company_part_amount_current = rec.order_sum_sale_order_lines_with_draft - rec.outsource_part_amount_current - rec.cosource_part_amount_current - rec.other_part_amount_current
-            rec.company_part_cost_current = -rec.get_production_cost()[0]
-            rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current
+
+            last_monday = (datetime.today() - timedelta(days=datetime.today().weekday())).date() #Chez Tasmane, on pointe en fin de chaque semaine, donc on compte le forecast pour la semaine en cours
+            rec.company_part_cost_current = -rec.get_production_cost(filters=[('category', '=', 'project_employee_validated'), ('date', '<', last_monday)])[0]
+            rec.company_part_cost_futur = -rec.get_production_cost(filters=[('category', '=', 'project_forecast'), ('date', '>=', last_monday)])[0]
+
+            rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current - rec.company_part_cost_futur
             if rec.company_part_amount_current != 0 :
                 rec.company_part_marging_rate_current = rec.company_part_marging_amount_current / rec.company_part_amount_current * 100
             else :
@@ -316,6 +333,7 @@ class projectAccountProject(models.Model):
  
             ######## TOTAL
             rec.order_amount_initial = rec.company_part_amount_initial + rec.outsource_part_amount_initial + rec.other_part_amount_initial
+            rec.sale_order_amount_initial = rec.order_amount_initial + rec.cosource_part_amount_initial
 
             rec.order_cost_initial = rec.company_part_cost_initial + rec.outsource_part_cost_initial + rec.other_part_cost_initial
             rec.order_marging_amount_initial = rec.order_amount_initial - rec.order_cost_initial
@@ -326,7 +344,8 @@ class projectAccountProject(models.Model):
 
             rec.order_amount_current = rec.company_part_amount_current + rec.outsource_part_amount_current + rec.other_part_amount_current
             rec.order_cost_current = rec.company_part_cost_current + rec.outsource_part_cost_current + rec.other_part_cost_current
-            rec.order_marging_amount_current = rec.order_amount_current - rec.order_cost_current
+            rec.order_cost_futur = rec.company_part_cost_futur + rec.outsource_part_cost_futur + rec.other_part_cost_futur
+            rec.order_marging_amount_current = rec.order_amount_current - rec.order_cost_current - rec.order_cost_futur
             if rec.order_amount_current != 0 : 
                 rec.order_marging_rate_current = rec.order_marging_amount_current / rec.order_amount_current * 100
             else:
@@ -648,7 +667,7 @@ class projectAccountProject(models.Model):
 
     def get_production_cost(self, filters=[], force_recompute_amount=False):
         production_period_amount = 0.0
-        lines = self.env['account.analytic.line'].search(filters + [('project_id', '=', self.id), ('category', '=', 'project_employee_validated')])
+        lines = self.env['account.analytic.line'].search(filters + [('project_id', '=', self.id)])
         for line in lines :
             if force_recompute_amount :
                 line.refresh_amount()
@@ -859,6 +878,7 @@ class projectAccountProject(models.Model):
     partner_id = fields.Many2one(string='Client final')
     partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
     ######## TOTAL
+    sale_order_amount_initial = fields.Monetary('Montant HT commandé par le client', store=True, compute=compute)
     order_amount_initial = fields.Monetary('Montant HT piloté par Tasmane initial', store=True, compute=compute)
     order_amount_current = fields.Monetary('Montant HT piloté par Tasmane actuel', store=True, compute=compute)
     order_sum_sale_order_lines_with_draft = fields.Monetary("Total HT commandé à Tasmane (y/c BCC à l'état Devis)", store=True, compute=compute)
@@ -868,9 +888,10 @@ class projectAccountProject(models.Model):
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute, store=True)
     order_marging_rate_initial = fields.Float('Marge totale (%) initiale', compute=compute, store=True)
 
-    order_cost_current = fields.Monetary('Coût total actuel', compute=compute, store=True)
-    order_marging_amount_current = fields.Monetary('Marge totale (€) actuelle', compute=compute, store=True)
-    order_marging_rate_current = fields.Float('Marge totale (%) actuelle', compute=compute, store=True)
+    order_cost_current = fields.Monetary('Somme des coûts actuels', compute=compute, store=True)
+    order_cost_futur = fields.Monetary('Somme des coûts à venir ', compute=compute, store=True)
+    order_marging_amount_current = fields.Monetary('Marge totale (€) projetée', compute=compute, store=True)
+    order_marging_rate_current = fields.Float('Marge totale (%) projetée', compute=compute, store=True)
 
     order_to_invoice_company = fields.Monetary('Montant HT à facturer par Tasmane au client', compute=compute, store=True)
     order_to_invoice_company_with_tax = fields.Monetary('Montant TTC à facturer par Tasmane au client', compute=compute, store=True)
@@ -901,9 +922,10 @@ class projectAccountProject(models.Model):
             compute=compute,
             store=True,
             help="Valorisation de la part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
-    company_part_cost_current = fields.Monetary('Valo des pointages Tasmane (€) actuel', store=True, compute=compute, help="Montant du pointage Tasmaame valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge) : CJM * nombre de jours pointés")
-    company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) actuelle', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
-    company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) actuelle', store=True, compute=compute)
+    company_part_cost_current = fields.Monetary('Valo des pointages Tasmane (€) actuelle', store=True, compute=compute, help="Montant du pointage Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge) : CJM * nombre de jours pointés. Seuls les pointage strictement antérieur au dernier lundi sont pris en compte.")
+    company_part_cost_futur = fields.Monetary('Valo des pointages Tasmane (€) à venir', store=True, compute=compute, help="Montant du staffing futur Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge) : CJM * nombre de jours staffés. Seul le staffing postérieur ou égal au dernier lundi sont pris en compte.")
+    company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) projetée', store=True, compute=compute)
+    company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) projetée', store=True, compute=compute)
 
     ######## OUTSOURCE PART
     outsource_part_amount_initial = fields.Monetary('Montant HT de revente S/T initial', 
@@ -919,11 +941,12 @@ class projectAccountProject(models.Model):
     outsource_part_marging_amount_initial = fields.Monetary('Marge sur part sous-traitée (€) initiale', store=True, compute=compute)
     outsource_part_marging_rate_initial = fields.Float('Marge sur part sous-traitée (%) initiale', store=True, compute=compute)
 
-    outsource_part_amount_current = fields.Monetary('Montant HT de revente S/T actuel', help="Montant de revente de ce qui est produit par les sous-traitants de Tasmane", store=True, compute=compute)
-    outsource_part_cost_current = fields.Monetary('Montant HT acheté au S/T actuel', store=True, compute=compute)
+    outsource_part_amount_current = fields.Monetary('Montant HT de revente S/T actuel', help="Montant de revente de ce qui est produit par les sous-traitants de Tasmane, fondé sur les BC fournisseurs enregistrés sur TaskForce", store=True, compute=compute)
+    outsource_part_cost_current = fields.Monetary('Montant HT facturé par le S/T actuel', help="En cas de paiement direct par le client au S/T, ce montant comprend les factures émises par le S/T vers le client et qui ont été validées par Tasmane sous Chorus", store=True, compute=compute)
+    outsource_part_cost_futur = fields.Monetary('Montant HT restant à facturer par le S/T', help="En cas de paiement direct par le client au S/T, ce montant comprend les factures restant à émettre par le S/T vers le client et qui devront être validées par Tasmane sous Chorus", store=True, compute=compute)
     outsourcing_link_purchase_order_with_draft = fields.Monetary('Somme de toutes les lignes d\'achats', store=True, compute=compute)
-    outsource_part_marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', store=True, compute=compute)
-    outsource_part_marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', store=True, compute=compute)
+    outsource_part_marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) projetée', store=True, compute=compute)
+    outsource_part_marging_rate_current = fields.Float('Marge sur part sous-traitée (%) projetée', store=True, compute=compute)
 
     project_outsourcing_link_ids = fields.One2many('project.outsourcing.link', 'project_id')
 
@@ -933,7 +956,7 @@ class projectAccountProject(models.Model):
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
             help="Montant produit par les co-traitants de Tasmane : part produite par les co-traitants")
-    cosource_part_cost_initial = fields.Monetary('Coût de revient de la part co-traitée initial',
+    cosource_part_cost_initial = fields.Monetary('Montant HT facturé par le co-traitant au client final',
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
@@ -942,9 +965,10 @@ class projectAccountProject(models.Model):
     cosource_part_marging_rate_initial = fields.Float('Marge sur part co-traitée (%) initiale', store=True, compute=compute)
 
     cosource_part_amount_current = fields.Monetary('Montant HT de la part co-traitée actuel', help="Montant produit par les co-traitants de Tasmane : part produite par les co-traitants.", store=True, compute=compute)
-    cosource_part_cost_current = fields.Monetary('Coût de revient de la part co-traitée actuel', store=True, compute=compute)
-    cosource_part_marging_amount_current = fields.Monetary('Marge sur part co-traitée (€) actuelle', store=True, compute=compute)
-    cosource_part_marging_rate_current = fields.Float('Marge sur part co-traitée (%) actuelle', store=True, compute=compute)
+    cosource_part_cost_current = fields.Monetary('Montant HT des factures du co-traitant validées par Tasmane sur Chorus', store=True, compute=compute)
+    cosource_part_cost_futur = fields.Monetary('Montant HT restant à valider par Tasmane sur Chorus', store=True, compute=compute)
+    cosource_part_marging_amount_current = fields.Monetary('Marge sur part co-traitée (€) projetée', store=True, compute=compute)
+    cosource_part_marging_rate_current = fields.Float('Marge sur part co-traitée (%) projetée', store=True, compute=compute)
 
 
 
@@ -953,7 +977,7 @@ class projectAccountProject(models.Model):
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
-            help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
+            help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane ou des frais de déplacement par exemple.")
     other_part_cost_initial = fields.Monetary('Montant HT acheté "autres presta." initial',
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
@@ -965,10 +989,11 @@ class projectAccountProject(models.Model):
     other_part_amount_current = fields.Monetary('Montant HT de revente "autres presta" actuel', 
             compute=compute,
             store=True,
-            help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane par exemple.")
-    other_part_cost_current = fields.Monetary('Montant HT acheté "autres presta." actuel', store=True, compute=compute)
-    other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) actuelle', store=True, compute=compute)
-    other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) actuelle', store=True, compute=compute)
+            help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane ou des frais de déplacement par exemple.")
+    other_part_cost_current = fields.Monetary('Montant HT facturés par les prestataires actuel', store=True, compute=compute)
+    other_part_cost_futur = fields.Monetary('Montant HT restant à facturer par les pretataires actuel', store=True, compute=compute)
+    other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) projetée', store=True, compute=compute)
+    other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) projetée', store=True, compute=compute)
 
 
     ######## BOOK

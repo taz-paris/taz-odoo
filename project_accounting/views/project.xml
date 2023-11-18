@@ -183,55 +183,44 @@
 								<button type="object" name="create_sale_order" string="Créer commande client" /> 
 								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
                                                         </group>
-							<group string="Production pilotée par un co-traitant">
+							<group string="Production pilotée par un co-traitant" attrs="{'invisible' : [('cosource_part_amount_current', '=', 0), ('cosource_part_cost_current', '=', 0), ('cosource_part_cost_futur', '=', 0)]}">
                                                                 <field name="cosource_part_amount_current" />
                                                                 <field name="cosource_part_cost_current"/>
+                                                                <field name="cosource_part_cost_futur"/>
                                                                 <field name="cosource_part_marging_amount_current"/>
                                                                 <field name="cosource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
-							<group string="Production pilotée par Tasmane (yc S/T)">
+							<group string="Production pilotée par Tasmane (yc S/T)" attrs="{'invisible' : [('order_amount_current', '=', 0), ('order_cost_current', '=', 0), ('order_cost_futur', '=', 0)]}">
                                                                 <field name="order_amount_current"/>
                                                                 <field name="order_cost_current"/>
+                                                                <field name="order_cost_futur"/>
                                                                 <field name="order_marging_amount_current"/>
                                                                 <field name="order_marging_rate_current" widget="progressbar"/>
 							</group>
-						</group>
-						<group col="3">
-							<group string="Production par le dispositif Tasmane">
+							<group string="Production par le dispositif Tasmane" attrs="{'invisible' : [('company_part_amount_current', '=', 0), ('company_part_cost_current', '=', 0), ('company_part_cost_futur', '=', 0)]}">
 					    			<field name="company_part_amount_current" force_save="1"/>
 					    			<field name="company_part_cost_current" force_save="1"/>
+					    			<field name="company_part_cost_futur" force_save="1"/>
 					    			<field name="company_part_marging_amount_current"/>
 					    			<field name="company_part_marging_rate_current" widget="progressbar"/>
 							</group>
-                                                	<group string="Production sous-traitée par Tasmane">
+                                                	<group string="Production sous-traitée par Tasmane" attrs="{'invisible' : [('outsource_part_amount_current', '=', 0), ('outsource_part_cost_current', '=', 0), ('outsource_part_cost_futur', '=', 0)]}">
                                                                 <field name="outsource_part_amount_current" />
                                                                 <field name="outsource_part_cost_current"/>
+                                                                <field name="outsource_part_cost_futur"/>
                                                                 <field name="outsource_part_marging_amount_current"/>
                                                                 <field name="outsource_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
-                                                	<group string="Autres prestations (exemple : séminaire chez Tasmane)">
+                                                	<group string="Autres prestations (exemple : séminaire chez Tasmane, frais de déplacement, etc.)" attrs="{'invisible' : [('other_part_amount_current', '=', 0), ('other_part_cost_current', '=', 0), ('other_part_cost_futur', '=', 0)]}">
                                                                 <field name="other_part_amount_current" force_save="1"/>
                                                                 <field name="other_part_cost_current"/>
+                                                                <field name="other_part_cost_futur"/>
                                                                 <field name="other_part_marging_amount_current"/>
                                                                 <field name="other_part_marging_rate_current" widget="progressbar"/>
                                                         </group>
 						</group>
 					</page>
 					<page name="project_structure" string="Structure au lancement">
-						<group col="3">
-							<group string="Production pilotée par un co-traitant">
-								<field name="cosource_part_amount_initial"/>
-								<field name="cosource_part_cost_initial"/>
-								<field name="cosource_part_marging_amount_initial"/>
-								<field name="cosource_part_marging_rate_initial" widget="progressbar"/>
-							</group>  
-							<group string="Production pilotée par Tasmane (yc S/T)">
-								<field name="order_amount_initial"/>
-								<field name="order_cost_initial"/>
-								<field name="order_marging_amount_initial"/>
-								<field name="order_marging_rate_initial" widget="progressbar"/>
-							</group>
-						</group>
 						<group col="3">
 							<group string="Dispositif Tasmane">
 								<field name="company_part_amount_initial"/>
@@ -245,14 +234,30 @@
 								<field name="outsource_part_marging_amount_initial"/>
 								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
 							</group>  
-							<group string="Autres prestations (exemple : séminaire chez Tasmane)">
+							<group string="Autres prestations (exemple : séminaire chez Tasmane, frais de déplacement, etc.)">
 								<field name="other_part_amount_initial"/>
 								<field name="other_part_cost_initial"/>
 								<field name="other_part_marging_amount_initial"/>
 								<field name="other_part_marging_rate_initial" widget="progressbar"/>
 							</group>  
 						</group>
-
+						<group col="3">
+							<group string="Production pilotée par Tasmane (yc S/T)">
+								<field name="order_amount_initial"/>
+								<field name="order_cost_initial"/>
+								<field name="order_marging_amount_initial"/>
+								<field name="order_marging_rate_initial" widget="progressbar"/>
+							</group>
+							<group string="Production pilotée par un co-traitant">
+								<field name="cosource_part_amount_initial"/>
+								<field name="cosource_part_cost_initial"/>
+								<field name="cosource_part_marging_amount_initial"/>
+								<field name="cosource_part_marging_rate_initial" widget="progressbar"/>
+							</group>  
+							<group string="Commandes du client à Tasmane">
+                                                                <field name="sale_order_amount_initial"/>
+							</group>
+						</group>
 					</page>
 					<page name="customer_invoicing" string="Facturation client">
 						<group>
