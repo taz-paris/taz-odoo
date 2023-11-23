@@ -20,6 +20,9 @@
                     <separator/>
                     <filter string="Projets ayant changé de statut depuis 7 jours" name="recent_project_changed" domain="[('state_last_change_date', '&gt;=', ((context_today() + relativedelta(days=-7)).strftime('%Y-%m-%d')))]"/>
                     <separator/>
+                    <filter string="Book non validé par le DM" name="book_not_validated" domain="[('book_validation_datetime', '=', False)]"/>
+                    <filter string="Book validé par le DM" name="book_validated" domain="[('book_validation_datetime', '!=', False)]"/>
+                    <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
                     <filter string="Date de fin" name="end_date" date="date"/>
                     <separator/>
@@ -55,6 +58,7 @@
 			  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
 			  />
 		  <field name="color_rel" invisible="1" />
+		  <field name="book_employee_distribution_ids" optional="show" widget="many2many_tags" />
 		  <field name="order_sum_sale_order_lines" optional="show" />
 		  <field name="remark" optional="hide" />
 		  <field name="invoicing_comment" optional="show" groups="account.group_account_manager"/>
@@ -223,7 +227,7 @@
 							<div>
 								<field name="margin_graph" widget="bokeh_chart" nolabel="1"/>
 							</div>
-							<br/>
+								<!-- <br/>-->
 							<div>
 								<field name="activity_graph" widget="bokeh_chart" nolabel="1"/>
 							</div>

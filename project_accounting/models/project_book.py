@@ -106,10 +106,16 @@ class projectBookEmployeeDistribution(models.Model):
         for rec in self:
             rec.final_book_factor = rec.book_factor * rec.project_id.project_book_factor
 
+    @api.depends('employee_id.name', 'book_factor')
+    def compute_display_name(self):
+        for rec in self:
+            rec.display_name = str(rec.final_book_factor) + ' > ' + str(rec.employee_id.name)
+
     employee_id = fields.Many2one('hr.employee', domain=[('active', '=', True)], string="Salarié", ondelete='restrict')
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade')
     book_factor = fields.Float("Coefficient", required=True)
     final_book_factor = fields.Float("Coefficient avec bonus/malus", store=True, compute=compute)
+    display_name = fields.Char("Display name", compute=compute_display_name)#, store=True)
 
 
 class projectBookEmployeeDistributionPeriod(models.Model):

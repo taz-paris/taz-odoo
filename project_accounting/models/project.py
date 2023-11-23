@@ -762,7 +762,7 @@ class projectAccountProject(models.Model):
                                 'real_unit' : False,
                                 'forecast_unit' : 0.0,
                                 'projected_unit' : False,
-                                'margin_amount' : rec.company_part_marging_amount_initial,
+                                'margin_amount' : rec.company_part_cost_initial,
                             }
 
                 if line.date <= date_last_real :
@@ -826,13 +826,13 @@ class projectAccountProject(models.Model):
                         ("Projeté (violet)", "@projected_amount{0 0.00 €}"),
                     ]
 
-            p = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€) du dispositif Tasmane")
+            p = figure(width=600, height=300, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€) du dispositif Tasmane")
             #p.left[0].formatter.use_scientific = False
             p.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
             p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (€)")
             p.line(y='projected_amount', x='date', source=df.query('projected_amount != False'), line_color="darkviolet", line_width=2, line_dash="dashed", legend_label="Projeté (€)")
             p.line(y='real_amount', x='date', source=df.query('real_amount != False'), line_color="green", line_width=2, legend_label="Réel (€)")
-            p.line(y='margin_amount', x='date', source=df, line_color="red", line_width=2, legend_label="Marge prévue (€)")
+            p.line(y='margin_amount', x='date', source=df, line_color="red", line_width=2, legend_label="Coût prévu/staf. init. (€)")
             p.legend.location = "top_left"
             p.legend.click_policy="hide"
 
@@ -857,7 +857,7 @@ class projectAccountProject(models.Model):
                         ("Projeté (violet)", "@projected_unit{0 0.00 €}"),
                     ]
 
-            p2 = figure(width=1200, height=400, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours) du dispositif Tasmane")
+            p2 = figure(width=600, height=300, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours) du dispositif Tasmane")
             #p2.left[0].formatter.use_scientific = False
             p2.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
             p2.line(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (j)")
