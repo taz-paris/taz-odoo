@@ -1,4 +1,5 @@
 import requests
+import math
 import time
 import zlib
 import os
@@ -262,7 +263,7 @@ class ClientRestNapta:
         _logger.info(response.status_code)
 
 
-    def get_api(self, napta_type, page_size=1000000, filter=None):
+    def get_api(self, napta_type, filter=None):
         """ 
         #Exemple de format du dictionnaire FILTER
         filter=[
@@ -277,23 +278,37 @@ class ClientRestNapta:
             'authorization': 'Bearer '+self.get_access_token(),
             'content-type': 'application/json'
         }
-        params = {
-            'page[size]' : page_size,
-        }
         if filter :
             params['filter'] = json.dumps(filter)
 
         _logger.info("GET "+self.API_URL_BUSINESS_ENDPOINT+napta_type)
-        response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
-        if response.status_code == 429:
-            _logger.info("GET 429 too many requests : attente de 60 secondes")
-            time.sleep(60)
+
+        page_size = 100
+
+        last_page_number = False
+        page_number = 1
+        response_list = []
+
+        while last_page_number == False or page_number <= last_page_number :
+            _logger.info("      > Page %s sur %s" % (page_number, str(last_page_number)))
+            params = {
+                'page[size]' : page_size,
+                'page[number]' : page_number,
+            }
             response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
-        elif response.status_code != 200 :
-            _logger.info(response.status_code)
-            _logger.info(response.reason)
-            _logger.info(response.content)
-        return response.json()
+            if response.status_code == 429:
+                _logger.info("GET 429 too many requests : attente de 60 secondes")
+                time.sleep(60)
+                response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
+            elif response.status_code != 200 :
+                _logger.info(response.status_code)
+                _logger.info(response.reason)
+                _logger.info(response.content)
+            response_json = response.json()
+            response_list = response_list + response_json['data']
+            last_page_number = math.ceil(response_json['meta']['count'] / page_size)
+            page_number = page_number + 1
+        return {'data' : response_list}
 
     def delete_not_found_anymore_object_on_napta(self, odoo_model_name, napta_model_name) :
         # Cette fonction permet de supprimer sur Odoo les instances qui ont été supprimées sur Napta
