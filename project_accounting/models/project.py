@@ -161,7 +161,8 @@ class projectAccountProject(models.Model):
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_group_id = fields.Many2one('project.group', string='Groupe de projets', domain="[('partner_id', '=', partner_id)]")
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
-    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=True) #TODO : synchroniser cette valeur avec user_id avec un oneChange
+    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False) #Si required=True ça bloque la création de nouvelle company 
+    #TODO : synchroniser cette valeur avec user_id avec un oneChange
     project_manager = fields.Many2one('hr.employee', "Contact ADV", help="Personne à contatcer par l'ADV, notamment lors des clôtures comptables mensuelles.")
     user_id = fields.Many2one(compute=_compute_user_id, store=True)
     remark = fields.Text("Remarques")

@@ -15,6 +15,9 @@ from odoo import _
 
 import logging
 _logger = logging.getLogger(__name__)
+
+import traceback
+import sys
           
 ##################################################################
 ##########                SET PARAMETERS                ##########
@@ -335,6 +338,7 @@ class naptaProject(models.Model):
     ]
     napta_id = fields.Char("Napta ID")
     is_prevent_napta_creation = fields.Boolean("Ne pas créer sur Napta (dont portage pur)")
+    napta_to_sync = fields.Boolean("Données à envoyer sur Napta")
     napta_billing_method = fields.Selection([
         ('fixed_price', 'Forfait'),
         ('time_and_materials', 'Régie'),
@@ -347,14 +351,26 @@ class naptaProject(models.Model):
         projects = super().create(vals)
         for rec in projects:
             if not rec.is_prevent_napta_creation:
-                rec.create_update_napta()
+                rec.napta_to_sync = True
+                try : 
+                    rec.create_update_napta()
+                    rec.napta_to_sync = False
+                except Exception as err:
+                    _logger.warning("Napta : error while sending data from Odoo project %s %s (id=%s) to Napta" % (rec.number or "", rec.name or "", str(rec.id)))
+                    _logger.warning(traceback.format_exc())
         return projects
 
     def write(self, vals):
         res = super().write(vals)
         for rec in self:
-            if not rec.is_prevent_napta_creation:
-                rec.create_update_napta()
+            if not rec.is_prevent_napta_creation and not self.env.context.get('ignore_napta_write'):
+                rec.with_context(ignore_napta_write=True).napta_to_sync = True
+                try:
+                    rec.create_update_napta()
+                    rec.with_context(ignore_napta_write=True).napta_to_sync = False
+                except Exception as err:
+                    _logger.warning("Napta : error while sending data from Odoo project %s %s (id=%s) to Napta" % (rec.number or "", rec.name or "", str(rec.id)))
+                    _logger.warning(traceback.format_exc())
         return res
 
     def unlink(self):
@@ -446,6 +462,15 @@ class naptaProject(models.Model):
 
         client = ClientRestNapta(self.env)
         client.refresh_cache()
+
+        #### Retreive project that previous sync failled
+        projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
+        _logger.info('>>>>>  Retreive project that previous sync to Napta failled %s projets => %s' % (str(len(projects_to_sync)), str(projects_to_sync.ids)))
+        for project_to_sync in projects_to_sync:
+            _logger.info('Try to sync to Napta project that previous sync failled : %s %s (id odoo = %s)' % (project_to_sync.number or "", project_to_sync.name or "", str(project_to_sync.id)))
+            project_to_sync.create_update_napta()
+            project_to_sync.with_context(ignore_napta_write=True).napta_to_sync = False
+            self.env.cr.commit()
 
         self.env['hr.department'].create_update_odoo_business_unit()
         self.env['hr.job'].create_update_odoo_user_position()

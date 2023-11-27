@@ -186,7 +186,7 @@ class staffingProject(models.Model):
 
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
     project_director_employee_id = fields.Many2one(domain="[('rel_is_project_director', '=', True)]", default=default_project_director_employee_id)
-    project_manager = fields.Many2one(default=default_project_director_employee_id, required=True)
+    project_manager = fields.Many2one(default=default_project_director_employee_id, required=False) #Si required=True ça bloque la création de nouvelle company
 
 
     @api.depends('project_director_employee_id', 'staffing_need_ids.staffed_employee_id', 'staffing_need_ids.project_id')
