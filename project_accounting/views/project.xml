@@ -133,7 +133,7 @@
 				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_affected_book', '=', True)]}">
 					Il n'existe aucune ligne de répartition du book par employé (et le book n'est pas validé). Si le book de cette mission n'est pas attribuable à des salariés, merci de valider le book. Sinon, merci de renseigner la répartition du book entre les Tasmaniens.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" attrs="{'invisible': [('is_validated_book', '=', True)]}">
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_validated_book', '=', True)]}">
 					Le DM n'a pas validé la répartition du book.
 				</div>
 				<field name="is_validated_order" invisible="1"/>

@@ -416,7 +416,7 @@ class projectAccountProject(models.Model):
             if not(rec.number):
                 rec.is_review_needed = False
             else:
-                if not(rec.is_validated_order) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
+                if not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
                     rec.is_review_needed = True
                 else :
                     rec.is_review_needed = False
