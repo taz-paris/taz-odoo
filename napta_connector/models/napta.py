@@ -276,11 +276,6 @@ class ClientRestNapta:
             ]))
             """
 
-        #_logger.info('------ get API')
-        headers = {
-            'authorization': 'Bearer '+self.get_access_token(),
-            'content-type': 'application/json'
-        }
         if filter :
             params['filter'] = json.dumps(filter)
 
@@ -294,6 +289,10 @@ class ClientRestNapta:
 
         while last_page_number == False or page_number <= last_page_number :
             _logger.info("      > Page %s sur %s" % (page_number, str(last_page_number)))
+            headers = {
+                'authorization': 'Bearer '+self.get_access_token(),
+                'content-type': 'application/json'
+            }
             params = {
                 'page[size]' : page_size,
                 'page[number]' : page_number,

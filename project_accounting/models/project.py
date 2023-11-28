@@ -679,14 +679,15 @@ class projectAccountProject(models.Model):
     @api.constrains('partner_id', 'partner_secondary_ids', 'project_outsourcing_link_ids')
     def check_partners_consistency(self):
         for rec in self:
-            for partner_id in [rec.partner_id.id] + rec.partner_id.child_ids_address.ids + rec.partner_id.child_ids_company.ids:
-                if partner_id in rec.partner_secondary_ids.ids:
-                    raise ValidationError(_("Le client final (et ses adresses et filiales) ne peut pas être un client intermédiaire (onglet Facturation)."))
+
+            if rec.partner_id.id in rec.partner_secondary_ids.ids:
+                raise ValidationError(_("Le client final ne peut pas être un client intermédiaire (onglet Facturation)."))
+                # Nota bene : on peut avoir des projets avec un BCC pour la maison mère et un BCC pour l'une de ses filiales, comme sur le projet 23138 commandé en partie par Total Energies et en partie par TGITS
             
             supplier_ids = rec.get_all_supplier_ids()
             for partner_id in [rec.partner_id.id] + rec.partner_id.child_ids_address.ids + rec.partner_id.child_ids_company.ids:
                 if partner_id in supplier_ids:
-                    raise ValidationError(_("Le client final (et ses établissement et filiales) ne peut pas être un fournisseur (onglet Achats) pour ce même projet."))
+                    raise ValidationError(_("Le client final (et ses établissements/filiales) ne peut pas être un fournisseur (onglet Achats) pour ce même projet."))
             
             for sec_part in rec.partner_secondary_ids:
                 for sp in [sec_part.id] + sec_part.child_ids_address.ids + sec_part.child_ids_company.ids:
