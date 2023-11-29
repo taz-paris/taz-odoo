@@ -9,6 +9,7 @@ class Agreement(models.Model):
     _name = "agreement"
     _description = "Agreement"
     _inherit = ["mail.thread", "mail.activity.mixin"]
+    _check_company_auto = True
 
     code = fields.Char(required=True, tracking=True)
     name = fields.Char(required=True, tracking=True)

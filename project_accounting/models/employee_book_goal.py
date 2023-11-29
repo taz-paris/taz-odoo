@@ -11,6 +11,7 @@ class employeeBookGoal(models.Model):
     _sql_constraints = [
         ('employee_year_uniq', 'UNIQUE (employee_id, reference_period)',  "Impossible d'avoir deux objectifs différents pour le même salarié et la même année.")
     ]
+    _check_company_auto = True
 
     @api.model
     def year_selection(self):
@@ -46,8 +47,8 @@ class employeeBookGoal(models.Model):
             else :
                 rec.period_rate = rec.period_book / rec.period_goal * 100.0
 
-    employee_id = fields.Many2one('hr.employee', string="Tasmanien", ondelete='restrict', required=True)
-    rel_job_id = fields.Many2one(related='employee_id.job_id', string="Grade", store=True)
+    employee_id = fields.Many2one('hr.employee', string="Tasmanien", ondelete='restrict', required=True, check_company=True)
+    rel_job_id = fields.Many2one(related='employee_id.job_id', string="Grade", store=True, check_company=True)
     reference_period = fields.Selection(
         year_selection,
         string="Année de référence",

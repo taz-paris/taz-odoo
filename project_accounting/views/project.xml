@@ -32,6 +32,7 @@
                         <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
                         <filter string="Business domain" name="groupby_rel_partner_industry_id" context="{'group_by': 'rel_partner_industry_id'}"/>
                         <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
+			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
             </field>
@@ -49,6 +50,8 @@
 		  <field name="id" widget="open_tab"/>
 		  <field name="number"/>
 		  <field name="name" />
+		  <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+		  <field name="company_id" invisible="1"/>
 		  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 		  <field name="project_director_employee_id" optional="show" />
 		  <field name="outsourcing" optional="show"/>
@@ -59,6 +62,7 @@
 			  />
 		  <field name="color_rel" invisible="1" />
 		  <field name="book_employee_distribution_ids" optional="show" widget="many2many_tags" />
+		  <field name="is_validated_book" optional="show" />
 		  <field name="order_sum_sale_order_lines" optional="show" />
 		  <field name="remark" optional="hide" />
 		  <field name="invoicing_comment" optional="show" groups="account.group_account_manager"/>
@@ -69,19 +73,6 @@
 		</tree>
 	      </field>
 	    </record>
-
-	<record id="seq_project" model="ir.sequence">
-		<field name="name">Preject number sequence</field>
-		<field name="code">project.project</field>
-		<field name="active">True</field>
-		<field name="prefix">%(y)s</field>
-		<field name="number_increment">1</field>
-			<!--	DO NOT UPDATE THE SEQUENCE NUMBER NEXT AFTER CREATION #TODO : move to sequence dedicated XML and set "no update" flag
-				<field name="number_next">1</field>
-			-->
-		<field name="padding">3</field>
-		<field name="implementation">standard</field>
-	</record>
 
 
 	   <record model="ir.ui.view" id="project_accounting.project_form">
@@ -155,6 +146,8 @@
                     		</div>
 				    <group>
 					<group>
+					    <field name="company_id" invisible="1"/>
+					    <field name="company_id" groups="base.group_multi_company"/>
 					    <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]" />
 					    <field name="stage_id" required="1"/>
 					    <field name="state_last_change_date" invisible="1" readonly="1"/>
@@ -325,6 +318,8 @@
 							<group>
 								<field name="book_period_ids" colspan="2" nolabel="1" context="{'default_project_id':active_id}" attrs="{'readonly': [('is_book_manually_computed', '=', False)]}">
 									<tree editable="top">
+										<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+										<field name="company_id" invisible="1"/>
 										<field name="project_id" invisible="1"/>
 										<field name="reference_period"/>
 										<field name="period_project_book" sum="Total"/>
@@ -342,6 +337,8 @@
 							<group>
 								<field name="book_employee_distribution_ids" colspan="2" nolabel="1" context="{'default_project_id':active_id}" attrs="{'invisible': [('is_book_manually_computed', '=', True)]}">
 									<tree editable="top">
+										<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+										<field name="company_id" invisible="1"/>
 										<field name="project_id" invisible="1"/>
 										<field name="employee_id"/>
 										<field name="book_factor" sum="Total"/>
@@ -352,6 +349,8 @@
 						</group>
 						<field name="book_employee_distribution_period_ids"  context="{'default_project_id':active_id}"  attrs="{'readonly': [('is_book_manually_computed', '=', False)]}">
 							<tree editable="top">
+								<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+								<field name="company_id" invisible="1"/>
 								<field name="project_id" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="rel_is_book_manually_computed" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="rel_book_comment" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
@@ -459,6 +458,7 @@
                     <field name="last_update_status"/>
                     <field name="tag_ids"/>
                     <field name="number"/>
+                    <field name="company_id"/>
                     <progressbar field="last_update_status" colors="{&quot;on_track&quot;: &quot;success&quot;, &quot;at_risk&quot;: &quot;warning&quot;, &quot;off_track&quot;: &quot;danger&quot;, &quot;on_hold&quot;: &quot;info&quot;}"/>
                     <field name="sequence" widget="handle"/>
                     <templates>

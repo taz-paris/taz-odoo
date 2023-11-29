@@ -15,6 +15,7 @@ class projectAccountingClosing(models.Model):
     _sql_constraints = [
         ('project_date_uniq', 'UNIQUE (project_id, closing_date)',  "Impossible d'avoir deux clôtures à une même date pour un même projet.")
     ]
+    _check_company_auto = True
 
     def _get_default_project_id(self):
         return self.env.context.get('default_project_id') or self.env.context.get('active_id')
@@ -144,7 +145,7 @@ class projectAccountingClosing(models.Model):
     is_validated = fields.Boolean('Validée', tracking=True)
     comment = fields.Text("Commentaire")
     comment_previous = fields.Text("Commentaire clôture précédente", related='previous_closing.comment')
-    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='restrict')
+    project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')
     rel_project_partner_id = fields.Many2one(related='project_id.partner_id', store=True)
     rel_project_user_id = fields.Many2one(related='project_id.user_id', store=True)
     rel_project_date_start = fields.Date(related='project_id.date_start')

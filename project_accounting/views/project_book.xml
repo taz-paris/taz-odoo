@@ -5,6 +5,8 @@
             <field name="model">project.book_period</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
+			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+			<field name="company_id" invisible="1"/>
                         <field name="project_id"/>
                         <field name="reference_period"/>
                         <field name="period_project_book" sum="Total"/>
@@ -17,6 +19,8 @@
             <field name="model">project.book_employee_distribution</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
+			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+			<field name="company_id" invisible="1"/>
                         <field name="project_id"/>
                         <field name="employee_id"/>
                         <field name="book_factor" sum="Total"/>
@@ -30,6 +34,8 @@
             <field name="model">project.book_employee_distribution_period</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
+			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+			<field name="company_id" invisible="1"/>
                         <field name="project_id"/>
                         <field name="rel_is_book_manually_computed"/>
                         <field name="rel_book_comment"/>
@@ -49,6 +55,7 @@
 		<field name="name">Distribution du book projet/salarié/année</field>
                 <field name="res_model">project.book_employee_distribution_period</field>
                 <field name="view_mode">tree</field>
+		<field name="context">{'search_default_my_book' : 1, 'search_default_this_year' : 1}</field>
         </record>
 
         <record id="project_book_period_action" model="ir.actions.act_window">
@@ -75,10 +82,12 @@
 
 
                     <filter string="Les projets dont je suis DM" name="own_projects" domain="[('project_id.project_director_employee_id.user_id.id', '=', uid)]"/>
-                    <filter string="Mon book" name="my_book" domain="[('employee_id.user_id', '=', uid)]"/>
+		    <separator/>
+                    <filter string="Mon book" name="my_book" domain="[('employee_id.user_id.id', '=', uid)]"/>
+		    <separator/>
                     <filter string="Book calculé manuellement" name="is_book_manually_computed" domain="[('rel_is_book_manually_computed', '=', True)]"/>
                     <filter string="Book calculé automatiquement" name="is_book_manually_computed_false" domain="[('rel_is_book_manually_computed', '=', False)]"/>
-
+		    <separator/>
                     <filter string="Cette année" name="this_year" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
                     <filter string="L'an dernier" name="previous_year" domain="[('reference_period', '=', (context_today() + relativedelta(years=-1)).strftime('%Y'))]"/>
 
@@ -86,6 +95,7 @@
                         <filter string="Employé" name="employe" context="{'group_by': 'employee_id'}"/>
                         <filter string="Année de référence" name="reference_period" context="{'group_by': 'reference_period'}"/>
                         <filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
+			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
             </field>

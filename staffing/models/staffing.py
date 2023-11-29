@@ -9,6 +9,7 @@ class staffingNeed(models.Model):
     _name = "staffing.need"
     _description = "Record the staffing need"
     _order = 'project_id'
+    _check_company_auto = True
 
     @api.depends('project_id')
     def _compute_name(self):
@@ -61,15 +62,16 @@ class staffingNeed(models.Model):
         for rec in self :
             rec.staffing_proposal_other_job_ids = self.env['staffing.proposal'].search([('employee_job', '!=', rec.job_id.id), ('staffing_need_id', '=', rec.id)])
 
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     name = fields.Char("Nom", compute=_compute_name)
 
-    project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True)
+    project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True, check_company=True)
     project_stage = fields.Many2one(related='project_id.stage_id')
-    job_id = fields.Many2one('hr.job', string="Grade souhaité") #TODO : impossible de le mettre en required dans le modèle car la synchro fitnet importe des assignments qui n'ont pas de job_id
+    job_id = fields.Many2one('hr.job', string="Grade souhaité", check_company=True) #TODO : impossible de le mettre en required dans le modèle car la synchro fitnet importe des assignments qui n'ont pas de job_id
     skill_ids = fields.Many2many('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
-    considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)")
+    considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)", check_company=True)
     #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
-    staffed_employee_id = fields.Many2one('hr.employee', string='Équipier satffé')
+    staffed_employee_id = fields.Many2one('hr.employee', string='Équipier satffé', check_company=True)
     begin_date = fields.Date('Date début', compute=compute, store=True)
     end_date = fields.Date('Date fin', compute=compute, store=True) #La date de fin n'est pas requise car pour les activités hors mission on a pas à mettre de date de fin
     nb_days_needed = fields.Float('Nb jours')
@@ -143,6 +145,7 @@ class staffingProposal(models.Model):
     _name = "staffing.proposal"
     _description = "Computed staffing proposal"
     _order = "ranked_proposal desc"
+    _check_company_auto = True
 
     _sql_constraints = [
         ('need_employee_uniq', 'UNIQUE (staffing_need_id, employee_id)',  "Impossible d'enregistrer deux propositions de staffing pour le même besoin et le même consultant.")
@@ -222,14 +225,15 @@ class staffingProposal(models.Model):
             }
 
     name = fields.Char("Nom", compute=_compute_name)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     is_staffed = fields.Boolean('Staffé', compute=_compute_is_staffed, store=True)
     is_considered = fields.Boolean('Envisagé', compute=_compute_is_considered, store=True)
     #Ajouter un lien vers les autres staffing proposal en concurrence (même personne, même période avec une quotité totale de temps > 100%)
-    staffing_need_id = fields.Many2one('staffing.need', ondelete="cascade")
+    staffing_need_id = fields.Many2one('staffing.need', ondelete="cascade", check_company=True)
     staffing_need_state = fields.Selection(related='staffing_need_id.state')
     employee_id = fields.Many2one('hr.employee')
 
-    employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id') #TODO : remplacer le hr.employee.job_id par une fonction qui retourne get_job_id()
+    employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id', check_company=True) #TODO : remplacer le hr.employee.job_id par une fonction qui retourne get_job_id()
     #employee_skill_ids = fields.One2many(string="Compétences", related='employee_id.employee_skill_ids')
     employee_staffing_wishes = fields.Html(string="Souhaits de staffing COD", related='employee_id.staffing_wishes')
 
@@ -245,7 +249,7 @@ class staffingProposal(models.Model):
 
     #Champs related pour le Kanban
     employee_image = fields.Binary(related="employee_id.image_128")
-    employee_job = fields.Many2one(related="employee_id.job_id") #TODO : remplacer cette ligne par une conditin de recherche lorsque la job_id aura été transformé en fonction
-    employee_coach = fields.Many2one(related="employee_id.coach_id")
+    employee_job = fields.Many2one(related="employee_id.job_id", check_company=True) #TODO : remplacer cette ligne par une conditin de recherche lorsque la job_id aura été transformé en fonction
+    employee_coach = fields.Many2one(related="employee_id.coach_id", check_company=True)
     staffing_need_nb_days_needed = fields.Float(related="staffing_need_id.nb_days_needed")
 

@@ -8,5 +8,20 @@
         	<field name="name">Staffing readonly</field>
         	<field name="comment">Staffing readonly</field>
 	</record>
+    <record model="ir.rule" id="staffing_need_comp_rule">
+        <field name="name">Staffing need: multi-company</field>
+        <field name="model_id" ref="model_staffing_need"/>
+        <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+    </record>
+    <record model="ir.rule" id="staffing_proposal_comp_rule">
+        <field name="name">Staffing proposal: multi-company</field>
+        <field name="model_id" ref="model_staffing_proposal"/>
+        <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+    </record>
+    <record model="ir.rule" id="hr_cost_comp_rule">
+        <field name="name">HR cost: multi-company</field>
+        <field name="model_id" ref="model_hr_cost"/>
+        <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+    </record>
   </data>
 </odoo>

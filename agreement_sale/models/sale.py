@@ -17,6 +17,7 @@ class SaleOrder(models.Model):
         readonly=True,
         copy=False,
         states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
+        check_company=True,
     )
 
     agreement_type_id = fields.Many2one(

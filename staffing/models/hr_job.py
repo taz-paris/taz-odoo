@@ -32,6 +32,7 @@ class HrCost(models.Model):
     _name = "hr.cost"
     _description = "Cost history"
     _order = 'begin_date desc'
+    _check_company_auto = True
 
     _sql_constraints = [
         ('begin_date__uniq', 'UNIQUE (begin_date, job_id)',  "Impossible d'enregistrer deux objets pour le même poste et la même date d'effet.")
@@ -101,7 +102,8 @@ class HrCost(models.Model):
             rec.end_date = end_date
 
 
-    job_id = fields.Many2one('hr.job', string="Poste", required=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    job_id = fields.Many2one('hr.job', string="Poste", required=True, check_company=True)
     begin_date = fields.Date("Date d'effet", required=True)
     end_date = fields.Date("Date de fin", compute=compute_end_date)
     cost = fields.Float("CJM", help="Coût journalier moyen imputé sur les lignes de pointage.", required=True)

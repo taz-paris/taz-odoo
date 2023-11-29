@@ -6,6 +6,8 @@
       <field name="model">project.employee_book_goal</field>
       <field name="arch" type="xml">
          <tree editable="top">
+		  <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+		  <field name="company_id" invisible="1"/>
                   <field name="employee_id" required="1" />
                   <field name="rel_job_id" optional="show"/>
                   <field name="reference_period" optional="show"/>
@@ -38,6 +40,7 @@
                     <group expand="0" string="Group By">
                         <filter string="Employé" name="employe" context="{'group_by': 'employee_id'}"/>
                         <filter string="Année de référence" name="reference_period" context="{'group_by': 'reference_period'}"/>
+			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
            </search>
         </field>

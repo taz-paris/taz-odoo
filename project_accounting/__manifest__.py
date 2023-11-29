@@ -22,10 +22,11 @@
 
     # always loaded
     'data': [
-        #'security/security.xml',
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/project_stage.xml',
         'views/project_group.xml',
+        'data/project_data.xml',
         'views/project.xml',
         'views/res_partner.xml',
         'views/project_outsourcing_link.xml',

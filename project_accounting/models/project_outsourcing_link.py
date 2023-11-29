@@ -14,6 +14,7 @@ class projectOutsourcingLink(models.Model):
     _sql_constraints = [
             ('project_partner_uniq', 'UNIQUE (partner_id, project_id)',  "Impossible d'enregistrer deux fois le même sous-traitant pour un même projet. Ajoutez des commandes à la ligne existantes.")
     ]
+    _check_company_auto = True
 
     def compute_purchase_order_total(self, with_direct_payment=True, with_draft_purchase_order=False): 
         status_list_to_keep = ['purchase']
@@ -117,6 +118,7 @@ class projectOutsourcingLink(models.Model):
             'view_mode': 'form',
             'context': {
                 'create': False,
+                'default_company_id' : self.company_id.id,
                 'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
                 'default_partner_id' : self.partner_id.id,
                 'default_date_planned' : self.project_id.date,
@@ -165,7 +167,7 @@ class projectOutsourcingLink(models.Model):
         return self.env.context.get('default_project_id') or self.env.context.get('active_id')
 
     partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Sous-traitant", required=True)
-    project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='restrict')
+    project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')
     link_type = fields.Selection([
             ('outsourcing', 'Sous-traitance'),
             ('cosourcing', 'Co-traitance'),

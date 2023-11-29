@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 class projectGroup(models.Model):
     _name = 'project.group'
     _description = 'A project group is use for data consolidation purpose'
+    _check_company_auto = True
 
     def compute(self):
         for rec in self:
@@ -41,6 +42,7 @@ class projectGroup(models.Model):
 
 
     #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     name = fields.Char('Nom', required=True)
     partner_id = fields.Many2one('res.partner', string="Client", required=True, domain=[('is_company', '=', True), ('active', '=', True)])
     #TODO pré-remplir le partner_id avec celui du project lorsqu'on crée le project.group à partir du project

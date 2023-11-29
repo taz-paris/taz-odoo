@@ -5,6 +5,8 @@
             <field name="model">project.outsourcing.link</field>
             <field name="arch" type="xml">      
                 <tree>    
+			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+			<field name="company_id" invisible="1"/>
                         <field name="project_id"/>
                         <field name="partner_id"/>
                         <field name="link_type"/>
@@ -22,6 +24,8 @@
             <field name="arch" type="xml">      
                 <form>    
 			<group>
+				<field name="company_id" invisible="1"/>
+				<field name="company_id" groups="base.group_multi_company"/>
 				<field name="project_id"/>
 				<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" options="{'no_quick_create': True}"/>
 				<field name="link_type"/>

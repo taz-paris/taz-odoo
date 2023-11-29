@@ -159,11 +159,11 @@ class projectAccountProject(models.Model):
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
-    project_group_id = fields.Many2one('project.group', string='Groupe de projets', domain="[('partner_id', '=', partner_id)]")
+    project_group_id = fields.Many2one('project.group', string='Groupe de projets', domain="[('partner_id', '=', partner_id)]", check_company=True)
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
-    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False) #Si required=True ça bloque la création de nouvelle company 
+    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False, check_company=True) #Si required=True ça bloque la création de nouvelle company 
     #TODO : synchroniser cette valeur avec user_id avec un oneChange
-    project_manager = fields.Many2one('hr.employee', "Contact ADV", help="Personne à contatcer par l'ADV, notamment lors des clôtures comptables mensuelles.")
+    project_manager = fields.Many2one('hr.employee', "Contact ADV", help="Personne à contatcer par l'ADV, notamment lors des clôtures comptables mensuelles.", check_company=True)
     user_id = fields.Many2one(compute=_compute_user_id, store=True)
     remark = fields.Text("Remarques")
 
@@ -186,6 +186,7 @@ class projectAccountProject(models.Model):
         tracking=True,
         readonly=False,
         copy=False,
+        check_company=True,
     ) #Attribut temporaire Fitnet à supprimer (l'agreement_id est sur le bon de commande client et non sur le projet en cible)
 
 
@@ -656,6 +657,7 @@ class projectAccountProject(models.Model):
             'view_mode': 'form',
             'context': {
                 'create': False,
+                'default_company_id' : self.company_id.id,
                 'default_partner_id' : self.partner_id.id,
                 'default_agreement_id' : self.agreement_id.id,
                 'default_user_id' : self.user_id.id,

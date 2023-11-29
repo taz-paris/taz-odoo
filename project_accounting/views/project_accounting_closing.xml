@@ -5,6 +5,8 @@
               <field name="model">project.accounting_closing</field>
               <field name="arch" type="xml">
                 <tree create="true">
+			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="company_id" invisible="1"/>
                   	<field name="project_id" optional="show"/>
                   	<field name="closing_date" optional="show"/>
 			<field name="previous_closing" optional="hide"/>
@@ -58,6 +60,8 @@
                 <form>
 			<group name="general" col="3">
 				<group string="Projet">
+					<field name="company_id" invisible="1"/>
+					<field name="company_id" groups="base.group_multi_company"/>
 					<field name="project_id" attrs="{'readonly':[('project_id','!=',False)]}"/>
 				    <label for="rel_project_date_start" string="Dates de début/fin"/>
 				    <div name="dates" class="o_row">
@@ -217,6 +221,7 @@
                         <filter string="Directeur de mission" name="Manager" context="{'group_by': 'rel_project_user_id'}"/>
                         <filter string="Client" name="Partner" context="{'group_by': 'rel_project_partner_id'}"/>
                         <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}" />
+		        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
             </field>
