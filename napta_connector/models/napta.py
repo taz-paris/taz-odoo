@@ -860,12 +860,14 @@ def get_napta_key_domain_search(odoo_model_name, dic):
     return key_domain_search
 
 
-def create_update_odoo(env, odoo_model_name, dic, context={}, only_update=False):
+def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=False):
     key_domain_search = get_napta_key_domain_search(odoo_model_name, dic)
     obj_list = env[odoo_model_name].search(key_domain_search)
-    if 'lang' not in context.keys():
-        context['lang'] = 'fr_FR' #Nécessaire pour que la mise à jour des champs avec translate=True (stockée sous forme de JSON dans la base postgres) soit prise en compte pour la langue Française, et pas que en en_US.
+    if 'lang' not in env.context.keys():
+        env.context['lang'] = 'fr_FR' #Nécessaire pour que la mise à jour des champs avec translate=True (stockée sous forme de JSON dans la base postgres) soit prise en compte pour la langue Française, et pas que en en_US.
         # on ne positionne pas le paramètre tz du context car les heures sont retournées en GMT par Napta, qui est la tz par défaut d'Odoo
+    for k,v in context_add.items():
+        env.context[k] = v
     
     if len(obj_list) > 1 :
         raise ValidationError(_("Several objects are return with this key_attribute_list => So this list in not carriing KEY, because it's not UNIQUE"))
@@ -877,14 +879,14 @@ def create_update_odoo(env, odoo_model_name, dic, context={}, only_update=False)
         if len(dict_dif):
             _logger.info("Mise à jour de l'objet %s ID= %s (napta key = %s) avec les valeurs %s" % (odoo_model_name, str(odoo_object.id), str(key_domain_search), str(dict_dif)))
             _logger.info("      > Old odoo values : %s" % str(old_odoo_values))
-            odoo_object.with_context(context).write(dict_dif)
+            odoo_object.with_context(env.context).write(dict_dif)
             env.cr.commit()
 
     else : #creation
         if only_update == False:
             old_odoo_values, dic = prepare_update_from_napta_values(env, odoo_model_name, dic)
             _logger.info("Create odoo_objet=%s with fields %s" % (odoo_model_name, str(dic)))
-            odoo_object = env[odoo_model_name].with_context(context).create(dic)
+            odoo_object = env[odoo_model_name].with_context(env.context).create(dic)
             _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
             env.cr.commit()
         else:

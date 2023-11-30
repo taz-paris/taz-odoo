@@ -1,6 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import AccessDenied, UserError, ValidationError
 import datetime
+import json
 from dateutil.relativedelta import relativedelta
 from odoo import _
 import logging
@@ -190,6 +191,19 @@ class ContactUserLink(models.Model):
                 p_name = rec.partner_id.name_get()[0][1]
             rec.name = rec.user_id.name_get()[0][1] + ' / ' + p_name
 
+    @api.depends('communication_preference', 'mail_template', 'last_office365_mail_draft')
+    def compute_can_generate_office365_mail_draft(self):
+        for rec in self :
+            last_draft_date = False
+            if rec.last_office365_mail_draft:
+                last_draft_date = json.loads(rec.last_office365_mail_draft)
+                last_draft_date = datetime.datetime.strptime(last_draft_date['createdDateTime'], "%Y-%m-%dT%H:%M:%SZ")
+                last_draft_date = datetime.date(last_draft_date.year, last_draft_date.month, last_draft_date.day)
+            if (rec.communication_preference != 'email_perso') or (last_draft_date and (last_draft_date > datetime.date.today() + relativedelta(months=-2, day=1))) or (self.env.user.id != rec.user_id.id) or not rec.mail_template :
+                rec.can_generate_office365_mail_draft = False 
+            else :
+                rec.can_generate_office365_mail_draft = True
+
 
     name = fields.Char('Nom du lien', compute='_compute_name')
     user_id = fields.Many2one('res.users', string='Tasmanien', required=True, default=lambda self: self.env.user)
@@ -230,3 +244,67 @@ class ContactUserLink(models.Model):
             ('paper_auto', "papier auto"),
             ('paper_perso', "papier personalisé"),
         ], string="Pref. com. voeux") 
+    mail_template = fields.Many2one('ir.ui.view', "Modèle mail voeux", domain=[('name', 'ilike', 'voeux'), ('type', '=', 'qweb')])
+    last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
+    can_generate_office365_mail_draft = fields.Boolean("Peut générer brouillon", compute=compute_can_generate_office365_mail_draft)
+
+
+    def get_html_mail(self):
+        self.ensure_one()
+        
+        form = ""
+        if self.formality :
+            if self.formality in ['tu_prenom','vous_prenom'] :
+                form = self.partner_id.first_name
+            elif self.formality == 'vous_nom' :
+                if self.partner_id.title.name :
+                    form = self.partner_id.title.name + ' ' + self.partner_id.name
+      
+        if not self.mail_template :
+                raise ValidationError(_("Aucun template mail de voeux n'est défini pour ce lien Tasmanien-Contact. Vous devez en sélectionner un pour pouvoir générer un brouillon de mail."))
+
+        template_xml_id = self.sudo().mail_template.get_metadata()[0].get('xmlid')
+        if template_xml_id in [False, None, ""]:
+            template_xml_id = self.sudo().mail_template.export_data(['id']).get('datas')[0][0]
+
+        mail_body = self.env['ir.ui.view'].sudo()._render_template(template_xml_id, {
+                'contact_user_link' : self,
+                'target_year' : str(self.get_target_year()),
+                'formality' : form,
+                'closing' : self.partner_id.first_name + ' ' + self.partner_id.name
+            })
+
+        _logger.info(mail_body)
+
+        return mail_body
+
+    def get_target_year(self):
+        today = datetime.date.today()
+        if today.month > 6 :
+            target_year = today.year + 1
+        else :
+            target_year = today.year
+        return target_year
+
+    def create_office365_mail_draft(self):
+        for rec in self :
+            if self.env.user.id != rec.user_id.id:
+                raise ValidationError(_("Seul l'utilisateur responsable de l'invitation peut générer le brouillon sur sa boîte email."))
+
+            mail_dict = {
+                    "subject":"Meilleurs voeux " +  str(self.get_target_year()),
+                    #"importance":"Low",
+                    "body":{
+                        "contentType":"HTML",
+                        "content": self.get_html_mail(),
+                    },
+                    "toRecipients":[
+                        {
+                            "emailAddress":{
+                                "address": rec.partner_id.email,
+                            }
+                        }
+                    ],
+                }
+            office365_mail_draft = self.env.user._msgraph_post_draft_mail(mail_dict)
+            rec.last_office365_mail_draft = json.dumps(office365_mail_draft)

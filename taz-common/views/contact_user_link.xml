@@ -68,6 +68,11 @@
 		  <field name="comment" optional="show" />
 		  <field name="formality" optional="show" />
 		  <field name="communication_preference" optional="show" />
+		  <field name="mail_template" optional="show" />
+		  <field name="last_office365_mail_draft" optional="hide" readonly="1"/>
+		  <field name="can_generate_office365_mail_draft" invisible="1" />
+		  <button name="create_office365_mail_draft" string="Générer brouillon mail Voeux" type="object" icon="fa-envelope"
+			  attrs="{'invisible': [('can_generate_office365_mail_draft', '=', False)]}"/>
         </tree>
       </field>
     </record>
