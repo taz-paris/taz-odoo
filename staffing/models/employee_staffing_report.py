@@ -124,6 +124,8 @@ class HrEmployeeStaffingReport(models.TransientModel):
             #('year', 'Année'),
         ], string="Périodicité", default='week')
     employee_id = fields.Many2one('hr.employee', string="Consultant")
+    rel_job_id = fields.Many2one(related='employee_id.job_id', store=True)
+
     start_date = fields.Date('Date de début')
     end_date = fields.Date('Date de fin', compute=compute_end_date, store=True)
  

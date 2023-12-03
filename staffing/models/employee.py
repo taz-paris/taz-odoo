@@ -69,91 +69,6 @@ class staffingEmployee(models.Model):
         return res
 
 
-    def availability(self):
-        d = datetime.now()
-        curent_monday =  d - timedelta(days=d.weekday())
-
-        work_days_prev_period_1_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-1*7)), curent_monday + timedelta(days=-1))
-        work_days_prev_period_4_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-4*7)), curent_monday + timedelta(days=-1))
-        work_days_prev_period_3_weeks = self.number_work_days_period(curent_monday + timedelta(days=(-3*7)), curent_monday + timedelta(days=-1))
-        work_days_next_period_5_weeks = self.number_work_days_period(curent_monday, curent_monday + timedelta(days=(5*7)-1))
-
-        for rec in self:
-            _logger.info('--refresh availability employee %s' % rec.name)
-            rec.availability_prev_week_4 = rec.availability_week(curent_monday + timedelta(days=(-4*7)))
-            rec.availability_prev_week_3 = rec.availability_week(curent_monday + timedelta(days=(-3*7)))
-            rec.availability_prev_week_2 = rec.availability_week(curent_monday + timedelta(days=(-2*7)))
-            rec.availability_prev_week_1 = rec.availability_week(curent_monday + timedelta(days=(-1*7)))
-            rec.availability_current_week = rec.availability_week(curent_monday)
-            rec.availability_next_week_1 = rec.availability_week(curent_monday + timedelta(days=(1*7)))
-            rec.availability_next_week_2 = rec.availability_week(curent_monday + timedelta(days=(2*7)))
-            rec.availability_next_week_3 = rec.availability_week(curent_monday + timedelta(days=(3*7)))
-            rec.availability_next_week_4 = rec.availability_week(curent_monday + timedelta(days=(4*7)))
-
-            rec.availability_prev_period_4_weeks = (rec.availability_prev_week_4 + rec.availability_prev_week_3 + rec.availability_prev_week_2 + rec.availability_prev_week_1)/work_days_prev_period_4_weeks * 100
-            rec.availability_next_period_5_weeks = (rec.availability_current_week + rec.availability_next_week_1 + rec.availability_next_week_2 + rec.availability_next_week_3 + rec.availability_next_week_4)/work_days_next_period_5_weeks * 100
-
-            dic = [('employee_id', '=', rec.id)]
-            pivot_date = datetime.today()
-
-
-            ####### Stat sur les 3 dernières semaines
-            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-3*7)), filters=dic)
-
-            rec.prev_3_weeks_hollidays = lines['holiday_timesheet_unit_amount']
-            rec.prev_3_weeks_workdays = work_days_prev_period_3_weeks
-            rec.prev_3_weeks_activity_days = work_days_prev_period_3_weeks - rec.prev_3_weeks_hollidays
-            rec.prev_3_weeks_project_days = lines['validated_timesheet_unit_amount'] 
-            rec.prev_3_weeks_learning_internal_days = rec.prev_3_weeks_activity_days - rec.prev_3_weeks_project_days
-            if rec.prev_3_weeks_activity_days :
-                rec.prev_3_weeks_activity_rate = rec.prev_3_weeks_project_days / rec.prev_3_weeks_activity_days * 100
-            else : 
-                rec.prev_3_weeks_activity_rate = None
-
-            
-            ####### Stat sur les 4 dernières semaines
-            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-4*7)), filters=dic)
-
-            rec.prev_4_weeks_hollidays = lines['holiday_timesheet_unit_amount']
-            rec.prev_4_weeks_workdays = work_days_prev_period_4_weeks
-            rec.prev_4_weeks_activity_days = work_days_prev_period_4_weeks - rec.prev_4_weeks_hollidays
-            rec.prev_4_weeks_project_days = lines['validated_timesheet_unit_amount'] 
-            rec.prev_4_weeks_learning_internal_days = rec.prev_4_weeks_activity_days - rec.prev_4_weeks_project_days
-            if rec.prev_4_weeks_activity_days :
-                rec.prev_4_weeks_activity_rate = rec.prev_4_weeks_project_days / rec.prev_4_weeks_activity_days * 100
-            else : 
-                rec.prev_4_weeks_activity_rate = None
-
-            ####### Stat sur la dernière semaine
-            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_end=curent_monday, date_start=curent_monday + timedelta(days=(-1*7)), filters=dic)
-
-            rec.prev_1_weeks_hollidays = lines['holiday_timesheet_unit_amount']
-            rec.prev_1_weeks_workdays = work_days_prev_period_1_weeks
-            rec.prev_1_weeks_activity_days = work_days_prev_period_1_weeks - rec.prev_1_weeks_hollidays
-            rec.prev_1_weeks_project_days = lines['validated_timesheet_unit_amount'] 
-            rec.prev_1_weeks_learning_internal_days = rec.prev_1_weeks_activity_days - rec.prev_1_weeks_project_days
-            if rec.prev_1_weeks_activity_days :
-                rec.prev_1_weeks_activity_rate = rec.prev_1_weeks_project_days / rec.prev_1_weeks_activity_days * 100
-            else : 
-                rec.prev_1_weeks_activity_rate = None
-
-
-            
-            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date + timedelta(days=(-1*7)), date_end=curent_monday, date_start=curent_monday + timedelta(days=(-1*7)), filters=dic)
-            act = work_days_prev_period_1_weeks - lines['holiday_timesheet_unit_amount']
-            rec.prev_1_weeks_activity_previsionnal_project_days = lines['previsional_timesheet_unit_amount']
-            rec.prev_1_weeks_activity_delta_previsionnal_project_days = rec.prev_1_weeks_activity_previsionnal_project_days - rec.prev_1_weeks_project_days
-            if act :
-                rec.prev_1_weeks_activity_previsionnal_rate = lines['previsional_timesheet_unit_amount'] / act * 100
-            else :
-                rec.prev_1_weeks_activity_previsionnal_rate = None
-
-
-            proposals = self.env['staffing.proposal'].search([('employee_id', '=', rec.id), ('staffing_need_state', 'in', ['wait', 'open'])])
-            proposals.compute()
-            #TODO : un changmenet de public_holidays pourrait aussi changer la dispo au niveau employé et proposal
-
-
     def availability_4_weeks_graph(self):
         pass
         """    
@@ -236,46 +151,6 @@ class staffingEmployee(models.Model):
     first_name = fields.Char(string="Prénom")
     staffing_wishes = fields.Html("Souhaits de staffing COD")
     staffing_need_ids = fields.One2many('staffing.need', 'staffed_employee_id', string="Affectations")
-    availability_prev_week_4 = fields.Float("J. dispo S-4", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-4", compute=availability, store=True)
-    availability_prev_week_3 = fields.Float("J. dispo S-3", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-3", compute=availability, store=True)
-    availability_prev_week_2 = fields.Float("J. dispo S-2", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-2", compute=availability, store=True)
-    availability_prev_week_1 = fields.Float("J. dispo S-1", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S-1", compute=availability, store=True)
-    availability_prev_period_4_weeks = fields.Float("% dispo 4 dernières semaines", help="%age de dispo entre le lundi de la semaine S-4 et le dimanche de la semaine S-1", compute=availability, store=True, group_operator='avg')
-    availability_current_week = fields.Float("J. dispo semaine courante", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine courante", compute=availability, store=True)
-    availability_next_week_1 = fields.Float("J. dispo S+1", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+1", compute=availability, store=True)
-    availability_next_week_2 = fields.Float("J. dispo S+2", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+2", compute=availability, store=True)
-    availability_next_week_3 = fields.Float("J. dispo S+3", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+3", compute=availability, store=True)
-    availability_next_week_4 = fields.Float("J. dispo S+4", help="Nombre de jours disponibles entre le lundi et le dimanche de la semaine S+4", compute=availability, store=True)
-    availability_next_period_5_weeks = fields.Float("% dispo semaine en cours et 4 prochaines semaines", help="%age de dispo entre le lundi de la semaine en cours et le dimanche de la semaine S+4 (5 semaines au total)", compute=availability, store=True, group_operator='avg')
-
-    prev_3_weeks_hollidays = fields.Float("Congés 3 dernières semaines", compute=availability, store=True)
-    prev_3_weeks_workdays = fields.Float("Jours ouvrés 3 dernières semaines", compute=availability, store=True)
-    prev_3_weeks_activity_days = fields.Float("Jours facturables 3 dernières semaines", compute=availability, store=True)
-    prev_3_weeks_learning_internal_days = fields.Float("Jours internes + formation 3 dernières semaines", compute=availability, store=True)
-    prev_3_weeks_project_days = fields.Float("Jours imputés 3 dernières semaines", compute=availability, store=True)
-    prev_3_weeks_activity_rate = fields.Float("Taux d'activité 3 dernières semaines", compute=availability, store=True, group_operator='avg')
-
-    prev_4_weeks_hollidays = fields.Float("Congés 4 dernières semaines", compute=availability, store=True)
-    prev_4_weeks_workdays = fields.Float("Jours ouvrés 4 dernières semaines", compute=availability, store=True)
-    prev_4_weeks_activity_days = fields.Float("Jours facturables 4 dernières semaines", compute=availability, store=True)
-    prev_4_weeks_learning_internal_days = fields.Float("Jours internes + formation 4 dernières semaines", compute=availability, store=True)
-    prev_4_weeks_project_days = fields.Float("Jours imputés 4 dernières semaines", compute=availability, store=True)
-    prev_4_weeks_activity_rate = fields.Float("Taux d'activité 4 dernières semaines", compute=availability, store=True, group_operator='avg')
-
-    prev_1_weeks_hollidays = fields.Float("Congés", help="Congés dernière semaine", compute=availability, store=True)
-    prev_1_weeks_workdays = fields.Float("J. ouvrés", help="Jours ouvrés dernière semaine", compute=availability, store=True)
-    prev_1_weeks_activity_days = fields.Float("J. facturables", help="Jours facturables dernière semaine", compute=availability, store=True)
-    prev_1_weeks_learning_internal_days = fields.Float("j. internes+fomations", help="Jours internes + formation dernière semaine", compute=availability, store=True)
-    prev_1_weeks_project_days = fields.Float("J. pointés", help="Jours imputés dernière semaine", compute=availability, store=True)
-    prev_1_weeks_activity_rate = fields.Float("% pointé", help="Taux d'activité dernière semaine", compute=availability, store=True, group_operator='avg')
-
-    prev_1_weeks_activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel dernière semaine", compute=availability, store=True, group_operator='avg')
-    prev_1_weeks_activity_previsionnal_project_days = fields.Float('Prév. (j)', compute=availability, store=True)
-    prev_1_weeks_activity_delta_previsionnal_project_days = fields.Float('Delta prev-pointé (j)', compute=availability, store=True)
-
-    availability_4_weeks_graph = fields.Char("Graph dispo S+4", compute=availability_4_weeks_graph)
-
-
 
     last_validated_timesheet_date = fields.Date("Date du dernier pointage validé", compute=last_validated_timesheet_date)
     is_consultant = fields.Boolean("Est consultant", default="True")
