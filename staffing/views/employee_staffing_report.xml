@@ -43,9 +43,6 @@
                         <filter string="Consultant" name="group_employee_id" context="{'group_by': 'employee_id'}"/>
                         <filter string="Grade" name="group_rel_job_id" context="{'group_by': 'rel_job_id'}"/>
                         <filter string="Date de début" name="group_start_date_year" context="{'group_by': 'start_date'}"/>
-                        <filter string="Date de début" invisible="1" name="group_start_date_year" context="{'group_by': 'start_date:year'}"/>
-                        <filter string="Date de début" invisible="1" name="group_start_date_month" context="{'group_by': 'start_date:month'}"/>
-                        <filter string="Date de début" invisible="1" name="group_start_date_week" context="{'group_by': 'start_date:week'}"/>
 			<filter string="Date de fin" name="group_end_date" context="{'group_by': 'end_date'}"/>
                     </group>
                 </search>
@@ -57,7 +54,7 @@
             <field name="name">Rapports d'activité (hebdo)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree</field>
-	    <field name="context">{'search_default_group_employee_id' : True, 'search_default_my_employee_staffing_report' : False, 'search_default_this_year' : True, 'search_default_group_start_date_month' : True, 'search_default_group_start_date_week' : True}</field>
+	    <field name="context">{'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : 'week', 'search_default_this_year' : True}</field>
             <field name="domain">[('periodicity', '=', 'week')]</field>
         </record>
         
