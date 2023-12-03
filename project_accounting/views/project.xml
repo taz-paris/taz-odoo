@@ -327,7 +327,7 @@
 							<group>
 								<field name="book_validation_employee_id" />
 								<field name="book_validation_datetime" readonly="1" force_save="1"/>
-								<field name="project_book_factor"/>
+								<field name="project_book_factor"  attrs="{'readonly': [('book_validation_datetime', '!=', False)]}"/>
 								<field name="book_comment" attrs="{'invisible': [('is_book_manually_computed', '=', False)]}"/>
 							</group>
 							<group>
@@ -347,16 +347,17 @@
 							<tree editable="top">
 								<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
 								<field name="company_id" invisible="1"/>
+								<field name="employee_id" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
+									<!--
 								<field name="project_id" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="rel_is_book_manually_computed" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="rel_book_comment" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
-								<field name="employee_id" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
-									<!--
 								<field name="reference_period" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 									-->
+								<field name="rel_is_book_manually_computed" invisible="1"/>
 								<field name="project_book_period_id" domain="[('project_id', '=', context.get('default_project_id'))]" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
-								<field name="period_project_book" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
-								<field name="final_book_factor" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
+								<field name="period_project_book" attrs="{'column_invisible' : [('parent.is_book_manually_computed', '=', True)], 'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
+								<field name="final_book_factor" attrs="{'column_invisible' : [('parent.is_book_manually_computed', '=', True)],'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="period_project_book_employee" sum="Total" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 							</tree>    
 						</field>
