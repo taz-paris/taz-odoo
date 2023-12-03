@@ -92,8 +92,10 @@ class projectAccountingClosing(models.Model):
             rec.previous_closing = previous_closing
 
 
-            rec.invoice_period_amount = proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['out_refund', 'out_invoice'])])[0]
-            rec.purchase_period_amount = -1 * proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])[0]
+            #rec.invoice_period_amount = proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['out_refund', 'out_invoice'])])[0]
+            #rec.purchase_period_amount = -1 * proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])[0]
+            rec.invoice_period_amount = rec.get_invoice_period(proj_id, previous_closing_date_filter, rec.closing_date)[0]
+            rec.purchase_period_amount = -1 * rec.get_purchase_period(proj_id, previous_closing_date_filter, rec.closing_date)[0]
 
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
             rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
@@ -102,7 +104,8 @@ class projectAccountingClosing(models.Model):
             rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
-            production_period_amount, analytic_lines = proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date), ('category', '=', 'project_employee_validated')], force_recompute_amount=True)
+            #production_period_amount, analytic_lines = proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date), ('category', '=', 'project_employee_validated')], force_recompute_amount=True)
+            production_period_amount, analytic_lines = rec.get_production_period(proj_id, previous_closing_date_filter, rec.closing_date)
             rec.production_period_amount = -1 * production_period_amount
 
             rec.production_stock = rec.production_previous_balance + rec.production_period_amount
@@ -121,6 +124,84 @@ class projectAccountingClosing(models.Model):
 
             rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
 
+
+    def get_invoice_period(self, proj_id, previous_closing_date_filter, closing_date):
+        self.ensure_one()
+        return proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['out_refund', 'out_invoice'])])
+
+    def get_purchase_period(self, proj_id, previous_closing_date_filter, closing_date):
+        self.ensure_one()
+        return proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])
+
+    def get_production_period(self, proj_id, previous_closing_date_filter, closing_date):
+        self.ensure_one()
+        return proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', closing_date), ('category', '=', 'project_employee_validated')], force_recompute_amount=True)
+
+    def action_open_out_account_move_lines(self):
+        previous_closing_date_filter = []
+        if self.previous_closing : 
+            previous_closing_date_filter = [('date', '>', self.previous_closing.closing_date)]
+        subtotal, total, paid, line_ids = self.get_invoice_period(self.project_id, previous_closing_date_filter, self.closing_date)
+        action = {
+            'name': _("Lignes de factures / avoirs"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move.line',
+            #'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'domain': [('id', 'in', line_ids)],
+            'view_type': 'form',
+            'view_mode': 'tree',
+            'target' : 'current',
+            'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
+            'context': {
+                'create': False,
+                #'search_default_group_by_move' : 1,
+            }
+        }
+        
+        #if len(invoice_ids) == 1:
+        #    action['views'] = [[False, 'form']]
+        #    action['res_id'] = invoice_ids[0]
+        
+        return action
+
+    def action_open_in_account_move_lines(self):
+        previous_closing_date_filter = []
+        if self.previous_closing : 
+            previous_closing_date_filter = [('date', '>', self.previous_closing.closing_date)]
+        subtotal, total, paid, line_ids = self.get_purchase_period(self.project_id, previous_closing_date_filter, self.closing_date)
+
+        action = {
+            'name': _('Lignes de factures / avoirs fournisseurs'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move.line',
+            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'domain': [('id', 'in', line_ids)],
+            'context': {
+                'create': False,
+                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'search_default_group_by_move' : 1,
+            }
+        }
+
+        #if len(invoice_ids) == 1:
+        #    action['views'] = [[False, 'form']]
+        #    action['res_id'] = invoice_ids[0]
+
+        return action
+
+    def action_open_analytic_lines(self):
+        production_period_amount, analytic_lines = self.get_production_period(self.project_id, [('date', '>', self.previous_closing.closing_date)], self.closing_date)
+        view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Pointage du mois',
+                'res_model': 'account.analytic.line',
+                'view_type': 'tree',
+                'view_mode': 'tree',
+                'view_id': view_id.id,
+                'target': 'current',
+                'domain': [('id', 'in', analytic_lines.ids)],
+            }
 
     @api.model_create_multi
     def create(self, vals):

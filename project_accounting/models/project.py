@@ -243,7 +243,7 @@ class projectAccountProject(models.Model):
             rec.check_partners_objects_consitency() #forcer l'appel à cette fonction même si cette fonction compute n'écrit rien... car elle est appelée par les lignes de factures/sale.order/purchase.order et assure que tous ces objets liés à ce projet sont bien portés par un res.partner qui est soit le client final, soit un client intermédiaire soit un fournisseur d'un outsourcing_link
             old_default_book_end = rec.default_book_end
 
-            rec.company_invoice_sum_move_lines, rec.company_invoice_sum_move_lines_with_tax, rec.company_paid = rec.compute_account_move_total()
+            rec.company_invoice_sum_move_lines, rec.company_invoice_sum_move_lines_with_tax, rec.company_paid, lines = rec.compute_account_move_total()
             rec.company_residual = rec.company_invoice_sum_move_lines_with_tax - rec.company_paid
 
             rec.order_sum_sale_order_lines = rec.compute_sale_order_total(with_direct_payment=True, with_draft_sale_order=False)[0]
@@ -608,7 +608,7 @@ class projectAccountProject(models.Model):
             subtotal += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
             total += line.price_total_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
             paid += line.amount_paid * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
-        return subtotal, total, paid
+        return subtotal, total, paid, line_ids
 
     def action_open_out_account_move_lines(self):
         all_customers = self.get_all_customer_ids()

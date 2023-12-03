@@ -86,11 +86,13 @@
 			<notebook>
 				<page name="closing_data" string="Données de clôture">
 					<group col="3">
-						<group name="invoice" string="Facturation">
+						<group name="invoice" string="Facturation client">
 							<field name="invoice_period_amount"/>
+							<button type="object" name="action_open_out_account_move_lines" colspan="2" string="Voir les lignes de facturation client"/>
 						</group>
-						<group name="purchase" string="Achats">
+						<group name="purchase" string="Facturation fournisseurs">
 							<field name="purchase_period_amount"/>
+							<button type="object" name="action_open_in_account_move_lines" colspan="2" string="Voir les lignes de facturation fournisseur"/>
 						</group>
 						<group name="prov" string="Total provisions">
 							<field name="provision_previous_balance_sum"/>
@@ -129,6 +131,7 @@
 							<group>
 								<field name="production_destocking" attrs="{'readonly':[('is_validated','=',True)]}"/>
 								<field name="production_balance"/>
+								<button type="object" name="action_open_analytic_lines" colspan="2" string="Voir les lignes de pointage"/>
 							</group>
 						</group>
 						<group name="revenue" string="Chiffre d'affaire">
