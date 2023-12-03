@@ -94,10 +94,27 @@ class projectAccountProject(models.Model):
                 invoice.invoice_user_id = project_id.user_id.id
                 self.env.cr.commit()
         _logger.info(' ==================== FIN revue invoice.invoice_user_id')
+
+    def corriger_vendor_PO(self):
+        self.ensure_one()
+        for purchase_order in self.env['purchase.order'].search([]) :
+            if purchase_order.user_id.id not in [1, 2, 105]:
+                _logger.info(purchase_order.user_id.id)
+                continue
+            project_id = None
+            for line in purchase_order.order_line :
+                if len(line.rel_project_ids) > 0:
+                    project_id = line.rel_project_ids[0]
+                    break
+            if project_id and project_id.user_id:
+                purchase_order.user_id = project_id.user_id.id
+                self.env.cr.commit()
+        _logger.info(' ==================== FIN revue purchase_order.user_id')
     """
 
     def is_closable(self, stage_id):
         self.ensure_one()
+
         error_message = "Impossible de cloturer/annuler le projet :\n"
         is_closable = True
         self.compute()
@@ -372,7 +389,7 @@ class projectAccountProject(models.Model):
             rec.is_validated_order = is_validated_order
 
             is_sale_order_with_draft = True
-            if rec.order_sum_sale_order_lines_with_draft == 0.0 and rec.stage_id.is_part_of_booking :
+            if len(sale_order_line_ids) == 0 and rec.stage_id.is_part_of_booking :
                 is_sale_order_with_draft = False
             rec.is_sale_order_with_draft = is_sale_order_with_draft
 

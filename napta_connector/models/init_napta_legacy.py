@@ -242,3 +242,58 @@ class naptaHrContract(models.Model):
                 user_history_target['napta_id'] = napta_id
     """
 
+
+class naptaHrLeave(models.Model):
+    _inherit = "hr.leave"
+
+    def init_leave_pairing(self):
+        _logger.info('---- BATCH Create or update Odoo user_holiday')
+        client = ClientRestNapta(self.env)
+        user_holiday_list = client.read_cache('user_holiday')
+       
+        """
+        #Init napta_id on existing Odoo leave (previously imported from Fitnet)
+        for napta_id, user_holiday in user_holiday_list.items():
+            res_user = self.env['res.users'].search([('napta_id', '=', str(user_holiday['attributes']['user_id']))])
+            employee = res_user.employee_id
+
+            request_date_from_period = 'am'
+            if user_holiday['attributes']['start_date_from_morning'] == False : 
+                request_date_from_period = 'pm'
+            request_date_to_period = 'pm'
+            if user_holiday['attributes']['end_date_until_afternoon'] == False :
+                request_date_to_period = 'am'
+            l = self.env['hr.leave'].search([
+                ('napta_id', '=', False), 
+                ('employee_id', '=', employee.id), 
+                ('state', 'not in', ['refuse', 'canceled']),
+                ('request_date_from', '=', user_holiday['attributes']['start_date']), 
+                ('request_date_to', '=', user_holiday['attributes']['end_date']), 
+                ('request_date_from_period', '=', request_date_from_period),
+                ('request_date_to_period', '=', request_date_to_period),
+                ])
+            if len(l) == 0:
+                _logger.info("Pas de congés pour napta_id=%s" % str(napta_id))
+            else :
+                _logger.info("Napta_id=%s => odoo_id=%s" % (str(napta_id), str(l.id)))
+                _logger.info(l.read())
+                l.napta_id = napta_id 
+
+        #Set to Refuse state the 2023 holidays that have not been linked to a napta id (due to date differences between Fitnet and Sylae/Lucca)
+        orphan_holidays_2023 = self.env['hr.leave'].search([
+                ('napta_id', '=', False),
+                ('state', 'not in', ['refuse', 'canceled']),
+                ('request_date_from', '>=', datetime.date(2023, 1, 1)),
+                ])
+
+        for h in orphan_holidays_2023:
+            _logger.info('Désactivation du congés odoo_id=%s' % str(h.id))
+            #_logger.info(h.read())
+            if h.name:
+                h.name += " /// Refusé lors de l'initialisation de l'appairage avec les congés Lucca/Napta"
+            else :
+                h.name = " /// Refusé lors de l'initialisation de l'appairage avec les congés Lucca/Napta"
+
+            h.action_refuse()
+        """
+

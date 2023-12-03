@@ -460,6 +460,8 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
+        self.env['hr.leave'].create_update_odoo_user_holiday()
+        return
         client.refresh_cache()
 
         #### Retreive project that previous sync failled
@@ -470,8 +472,8 @@ class naptaProject(models.Model):
             project_to_sync.create_update_napta()
             project_to_sync.with_context(ignore_napta_write=True).napta_to_sync = False
             self.env.cr.commit()
-
         self.env['hr.department'].create_update_odoo_business_unit()
+        self.env['hr.leave.type'].create_update_odoo_user_holiday_category()
         self.env['hr.job'].create_update_odoo_user_position()
         self.env['res.users'].create_update_odoo()
         self.env['hr.contract'].create_update_odoo_user_history()
@@ -480,7 +482,6 @@ class naptaProject(models.Model):
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
-        #TODO : synchro des congés et les catégories de jours de congés
         #TODO : quid de la synchro des jours fériés avec Napta ?
                 # les générer jusqu'en 2050 avec https://pypi.org/project/jours-feries-france/ ?
         #TODO : synchro des compétences, les catégories de compétences, les échelles de notations, les valeurs des échelles de notations et les compétences des utilisateurs, les souhaits des utilisateurs
@@ -567,7 +568,7 @@ class naptaNeed(models.Model):
 class naptaEmployee(models.Model):
     _inherit = 'hr.employee'
     #Dans le modele employee, le napta_id est un related field car Napta ne différencie par l'objet employé de l'objet utilisateur
-    napta_id = fields.Char("Napta ID", related='user_id.napta_id')
+    napta_id = fields.Char("Napta ID", related='user_id.napta_id', store=True)
 
 class naptaAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -821,6 +822,67 @@ class naptaHrDepartment(models.Model):
 
         client.delete_not_found_anymore_object_on_napta('hr.department', 'business_unit')
 
+class naptaHrLeave(models.Model):
+    _inherit = "hr.leave"
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+    def create_update_odoo_user_holiday(self):
+        _logger.info('---- BATCH Create or update Odoo user_holiday')
+        client = ClientRestNapta(self.env)
+        user_holiday_list = client.read_cache('user_holiday')
+        for napta_id, user_holiday in user_holiday_list.items():
+            request_date_from_period = 'am'
+            if user_holiday['attributes']['start_date_from_morning'] == False :
+                request_date_from_period = 'pm'
+            request_date_to_period = 'pm'
+            if user_holiday['attributes']['end_date_until_afternoon'] == False :
+                request_date_to_period = 'am'
+
+            start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
+            end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
+            numberOfDays = self.env['hr.employee'].number_work_days_period(start_date, end_date)
+            dic = {
+                    'napta_id' : napta_id,
+                    'employee_id' : {'napta_id' : user_holiday['attributes']['user_id']},
+                    'request_date_from' : start_date, 
+                    'date_from' : user_holiday['attributes']['start_date'] + "T00:03:00.000",
+                    'request_date_from_period' : request_date_from_period,
+                    'request_date_to' : end_date, 
+                    'date_to' : user_holiday['attributes']['end_date'] + "T21:59:59.000",
+                    'request_date_to_period' : request_date_to_period,
+                    'holiday_status_id' : {'napta_id' : user_holiday['attributes']['user_holiday_category_id']},
+                    'number_of_days' : numberOfDays,
+                }
+            create_update_odoo(self.env, 'hr.leave', dic, context_add={'leave_skip_state_check' : True, 'leave_skip_date_check' : True})  #'leave_fast_create' : True})
+
+        #client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday')
+
+
+class naptaHrLeaveType(models.Model):
+    _inherit = 'hr.leave.type'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+
+    def create_update_odoo_user_holiday_category(self):
+        _logger.info('---- BATCH Create or update Odoo user_holiday_category')
+        client = ClientRestNapta(self.env)
+        user_holiday_category_list = client.read_cache('user_holiday_category')
+        for napta_id, user_holiday_category in user_holiday_category_list.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'name' : business_unit['attributes']['name'],
+                }
+            create_update_odoo(self.env, 'hr.leave.type', dic)
+
+        client.delete_not_found_anymore_object_on_napta('hr.leave.type', 'user_holiday_category')
+
+
 ########################################################################################
 ########################################################################################
 ###########
@@ -862,13 +924,18 @@ def get_napta_key_domain_search(odoo_model_name, dic):
 
 def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=False):
     key_domain_search = get_napta_key_domain_search(odoo_model_name, dic)
-    obj_list = env[odoo_model_name].search(key_domain_search)
-    if 'lang' not in env.context.keys():
-        env.context['lang'] = 'fr_FR' #Nécessaire pour que la mise à jour des champs avec translate=True (stockée sous forme de JSON dans la base postgres) soit prise en compte pour la langue Française, et pas que en en_US.
+
+    context = env.context.copy()
+    if 'lang' not in context.keys():
+        context.update({'lang' : 'fr_FR'}) #Nécessaire pour que la mise à jour des champs avec translate=True (stockée sous forme de JSON dans la base postgres) soit prise en compte pour la langue Française, et pas que en en_US.
         # on ne positionne pas le paramètre tz du context car les heures sont retournées en GMT par Napta, qui est la tz par défaut d'Odoo
-    for k,v in context_add.items():
-        env.context[k] = v
-    
+    if 'tz' not in context.keys():
+        context.update({'tz' : 'Europe/Paris'})
+    context.update(context_add)
+    env.context = context
+    #_logger.info("Context %s" % str(env.context))
+
+    obj_list = env[odoo_model_name].search(key_domain_search)
     if len(obj_list) > 1 :
         raise ValidationError(_("Several objects are return with this key_attribute_list => So this list in not carriing KEY, because it's not UNIQUE"))
 
@@ -879,14 +946,14 @@ def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=Fa
         if len(dict_dif):
             _logger.info("Mise à jour de l'objet %s ID= %s (napta key = %s) avec les valeurs %s" % (odoo_model_name, str(odoo_object.id), str(key_domain_search), str(dict_dif)))
             _logger.info("      > Old odoo values : %s" % str(old_odoo_values))
-            odoo_object.with_context(env.context).write(dict_dif)
+            odoo_object.write(dict_dif)
             env.cr.commit()
 
     else : #creation
         if only_update == False:
             old_odoo_values, dic = prepare_update_from_napta_values(env, odoo_model_name, dic)
             _logger.info("Create odoo_objet=%s with fields %s" % (odoo_model_name, str(dic)))
-            odoo_object = env[odoo_model_name].with_context(env.context).create(dic)
+            odoo_object = env[odoo_model_name].create(dic)
             _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
             env.cr.commit()
         else:

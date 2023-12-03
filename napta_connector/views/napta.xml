@@ -66,7 +66,7 @@
             <field name="inherit_id" ref="hr.view_hr_job_form"/>
             <field name="arch" type="xml">
                 <field name="contract_type_id" position="after">
-                        <field name="napta_id" readonly="0"/>
+                        <field name="napta_id" readonly="1"/>
                 </field>
             </field>
     </record>
@@ -77,7 +77,7 @@
             <field name="inherit_id" ref="hr.view_department_form"/>
             <field name="arch" type="xml">
                 <field name="parent_id" position="after">
-                        <field name="napta_id" readonly="0"/>
+                        <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
@@ -100,10 +100,33 @@
             <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
             <field name="arch" type="xml">
                 <field name="hr_responsible_id" position="after">
+                        <field name="napta_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="hr_leave_view_form_inherit" model="ir.ui.view">
+            <field name="name">Congés</field>
+            <field name="model">hr.leave</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_view_form_manager"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                        <field name="napta_id" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="hr_leave_type_fitnet_view_form_inherit" model="ir.ui.view">
+            <field name="name">Type de congés</field>
+            <field name="model">hr.leave.type</field>
+            <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
+            <field name="arch" type="xml">
+                <field name="icon_id" position="after">
                         <field name="napta_id" readonly="0"/>
                 </field>
             </field>
         </record>
+
 
 <!--
         <record id="hr_employee_fitnet_view_form_inherit" model="ir.ui.view">
@@ -124,28 +147,6 @@
             <field name="inherit_id" ref="staffing.need_form"/>
             <field name="arch" type="xml">
                 <field name="staffing_proposal_ids" position="after">
-                        <field name="fitnet_id" readonly="1"/>
-                </field>
-            </field>
-        </record>
-
-        <record id="hr_leave_type_fitnet_view_form_inherit" model="ir.ui.view">
-            <field name="name">Type de congés</field>
-            <field name="model">hr.leave.type</field>
-            <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
-            <field name="arch" type="xml">
-                <field name="icon_id" position="after">
-                        <field name="fitnet_id" readonly="1"/>
-                </field>
-            </field>
-        </record>
-
-        <record id="hr_leave_fitnet_view_form_inherit" model="ir.ui.view">
-            <field name="name">Congés</field>
-            <field name="model">hr.leave</field>
-            <field name="inherit_id" ref="hr_holidays.hr_leave_view_form_manager"/>
-            <field name="arch" type="xml">
-                <field name="name" position="after">
                         <field name="fitnet_id" readonly="1"/>
                 </field>
             </field>

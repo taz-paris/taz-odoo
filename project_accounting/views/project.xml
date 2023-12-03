@@ -104,7 +104,7 @@
 				<field name="active" invisible="1"/>
 
 				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_sale_order_with_draft', '=', True)]}">
-					Le projet est en statut Accord client/Commandé/Terminé (on devrait avoir du book) mais le total des BC client (quelque soit leur statut) est nul.
+					Le projet est en statut Accord client/Commandé/Terminé (on devrait avoir du book) mais il n'existe aucun BC client (quelque soit leur statut).
 				</div>
 				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_validated_order', '=', True)]}">
 					Au moins un bon de commande client n'est pas à l'état 'Bon de commande'.

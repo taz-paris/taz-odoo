@@ -199,7 +199,7 @@ class ContactUserLink(models.Model):
                 last_draft_date = json.loads(rec.last_office365_mail_draft)
                 last_draft_date = datetime.datetime.strptime(last_draft_date['createdDateTime'], "%Y-%m-%dT%H:%M:%SZ")
                 last_draft_date = datetime.date(last_draft_date.year, last_draft_date.month, last_draft_date.day)
-            if (rec.communication_preference != 'email_perso') or (last_draft_date and (last_draft_date > datetime.date.today() + relativedelta(months=-2, day=1))) or (self.env.user.id != rec.user_id.id) or not rec.mail_template :
+            if (rec.communication_preference not in ['email_perso', 'email_auto']) or (last_draft_date and (last_draft_date > datetime.date.today() + relativedelta(months=-2, day=1))) or (self.env.user.id != rec.user_id.id) or not rec.mail_template :
                 rec.can_generate_office365_mail_draft = False 
             else :
                 rec.can_generate_office365_mail_draft = True
@@ -271,7 +271,7 @@ class ContactUserLink(models.Model):
                 'contact_user_link' : self,
                 'target_year' : str(self.get_target_year()),
                 'formality' : form,
-                'closing' : self.partner_id.first_name + ' ' + self.partner_id.name
+                'closing' : self.user_id.first_name + ' ' + self.user_id.name
             })
 
         _logger.info(mail_body)
