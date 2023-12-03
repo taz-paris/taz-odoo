@@ -460,8 +460,6 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        self.env['hr.leave'].create_update_odoo_user_holiday()
-        return
         client.refresh_cache()
 
         #### Retreive project that previous sync failled
@@ -479,6 +477,7 @@ class naptaProject(models.Model):
         self.env['hr.contract'].create_update_odoo_user_history()
         self.env['project.project.stage'].create_update_odoo_projectstatus()
         self.env['project.project'].create_update_odoo()
+        self.env['hr.leave'].create_update_odoo_user_holiday()
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
@@ -876,7 +875,7 @@ class naptaHrLeaveType(models.Model):
         for napta_id, user_holiday_category in user_holiday_category_list.items():
             dic = {
                     'napta_id' : napta_id,
-                    'name' : business_unit['attributes']['name'],
+                    'name' : user_holiday_category['attributes']['name'],
                 }
             create_update_odoo(self.env, 'hr.leave.type', dic)
 

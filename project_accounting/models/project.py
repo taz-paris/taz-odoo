@@ -73,9 +73,9 @@ class projectAccountProject(models.Model):
                 vals['state_last_change_date'] = datetime.today()
                 stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
                 if stage_id.state == 'closed' :
-                   is_closable, error_message = record.is_closable(stage_id)
-                   if not is_closable :
-                       raise ValidationError(_(error_message))
+                    is_closable, error_message = record.is_closable(stage_id)
+                    if not is_closable :
+                        raise ValidationError(_(error_message))
         return super().write(vals)
 
     """
@@ -120,7 +120,9 @@ class projectAccountProject(models.Model):
         self.compute()
         self.compute_has_provision_running()
 
-        if "Termin" in stage_id.name:
+        if "Termin" in stage_id.name: #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
+            if not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
+                raise ValidationError(_("Seul un ADV peut paser un projet au statut Temriné."))
             if not(self.book_validation_employee_id):
                 is_closable = False
                 error_message += "   - Le book n'est pas validé par le DM.\n"
@@ -136,8 +138,20 @@ class projectAccountProject(models.Model):
             if self.has_provision_running :
                 is_closable = False
                 error_message += "   - Il reste des provisions ou du stock sur la dernière clôture.\n"
+            for link in self.project_outsourcing_link_ids:
+                if link.order_company_payment_to_invoice != 0.0 :
+                    is_closable = False
+                    error_message += "   - Il reste des factures founisseur à venir de "+str(link.partner_id.name)+" (ou des factures de régularisation à émettre par Tasmane envers ce fournisseur).\n"
+                if link.company_residual != 0.0 :
+                    is_closable = False
+                    error_message += "   - Il reste des factures founisseur à payer pour "+str(link.partner_id.name)+" (ou des factures de régularisation à payer à Tasmane par ce fournisseur).\n"
+                if link.order_direct_payment_to_do != 0.0 :
+                    is_closable = False
+                    error_message += "   - Il reste des factures founisseur en paiement direct à déposer par/valider pour "+str(link.partner_id.name)+".\n"
 
-        if "Annul" in stage_id.name or "Perdu" in stage_id.name:
+
+
+        if "Annul" in stage_id.name or "Perdu" in stage_id.name: #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
             if self.order_sum_sale_order_lines_with_draft != 0.0 :
                 is_closable = False
                 error_message += "   - Il existe au moins un BC client dont le statut n'est pas annulé.\n"
@@ -245,7 +259,6 @@ class projectAccountProject(models.Model):
             outsource_part_amount_current = 0.0
             outsource_part_cost_current = 0.0
             outsource_part_cost_futur = 0.0
-            order_to_invoice_outsourcing = 0.0
             cosource_part_amount_current = 0.0
             cosource_part_cost_current = 0.0
             cosource_part_cost_futur = 0.0
@@ -260,17 +273,14 @@ class projectAccountProject(models.Model):
                     outsource_part_amount_current += link.outsource_part_amount_current
                     outsource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     outsource_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
-                    order_to_invoice_outsourcing += link.order_direct_payment_amount
                 elif link.link_type == 'cosourcing' :
                     cosource_part_amount_current += link.outsource_part_amount_current
                     cosource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     cosource_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
-                    #order_to_invoice_outsourcing += link.order_direct_payment_amount
                 elif link.link_type == 'other' :
                     other_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     other_part_amount_current += link.outsource_part_amount_current
                     other_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
-                    #order_to_invoice_outsourcing += link.order_direct_payment_amount
                 else :
                     raise ValidationError(_("Type d'achat non géré : %s" % str(link.link_type)))
 
@@ -288,7 +298,6 @@ class projectAccountProject(models.Model):
             rec.outsource_part_cost_current = outsource_part_cost_current
             rec.outsource_part_cost_futur = outsource_part_cost_futur
 
-            rec.order_to_invoice_outsourcing = order_to_invoice_outsourcing
 
             rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current - rec.outsource_part_cost_futur
             if rec.outsource_part_amount_current != 0 :
@@ -920,7 +929,6 @@ class projectAccountProject(models.Model):
     company_invoice_sum_move_lines_with_tax = fields.Monetary('Montant déjà TTC facturé par Tasmane au client', compute=compute, store=True)
     company_to_invoice_left = fields.Monetary('Montant HT restant à facturer par Tasmane au client', compute=compute, store=True)
     company_to_invoice_left_with_tax = fields.Monetary('Montant TTC restant à facturer par Tasmane au client', compute=compute, store=True)
-    order_to_invoice_outsourcing = fields.Monetary('Montant HT S/T paiement direct', help="Montant à facturer par les sous-traitants de Tasmane directement au client", compute=compute, store=True)
 
     company_paid = fields.Monetary('Montant TTC déjà payé par le client à Tasmane', compute=compute, store=True)
     company_residual = fields.Monetary('Montant TTC restant à payer par le client à Tasmane', compute=compute, store=True)

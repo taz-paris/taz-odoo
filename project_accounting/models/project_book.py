@@ -69,6 +69,12 @@ class projectBookPeriod(models.Model):
 
     period_project_book = fields.Monetary('Montant book HT')#, default=_get_default_period_project_book)
     display_name = fields.Char('Name', compute=compute_name)
+    rel_book_comment = fields.Text(related='project_id.book_comment')
+    rel_is_book_manually_computed = fields.Boolean(related="project_id.is_book_manually_computed")
+    rel_project_director_employee_id = fields.Many2one(related="project_id.project_director_employee_id", store=True)
+    rel_stage_id = fields.Many2one(related="project_id.stage_id", store=True)
+    rel_book_validation_employee_id = fields.Many2one(related="project_id.book_validation_employee_id", store=True)
+    rel_book_validation_datetime = fields.Datetime(related="project_id.book_validation_datetime", store=True)
 
 
 class projectBookEmployeeDistribution(models.Model):
@@ -119,6 +125,12 @@ class projectBookEmployeeDistribution(models.Model):
     book_factor = fields.Float("Coefficient", required=True)
     final_book_factor = fields.Float("Coefficient avec bonus/malus", store=True, compute=compute)
     display_name = fields.Char("Display name", compute=compute_display_name)#, store=True)
+    rel_book_comment = fields.Text(related='project_id.book_comment')
+    rel_is_book_manually_computed = fields.Boolean(related="project_id.is_book_manually_computed")
+    rel_project_director_employee_id = fields.Many2one(related="project_id.project_director_employee_id", store=True)
+    rel_stage_id = fields.Many2one(related="project_id.stage_id", store=True)
+    rel_book_validation_employee_id = fields.Many2one(related="project_id.book_validation_employee_id", store=True)
+    rel_book_validation_datetime = fields.Datetime(related="project_id.book_validation_datetime", store=True)
 
 
 class projectBookEmployeeDistributionPeriod(models.Model):
@@ -169,3 +181,7 @@ class projectBookEmployeeDistributionPeriod(models.Model):
     period_project_book = fields.Monetary(related="project_book_period_id.period_project_book", string="Book HT du projet pour l'année", store=True, readonly=False, group_operator=False)
     rel_book_comment = fields.Text(related='project_id.book_comment')
     rel_is_book_manually_computed = fields.Boolean(related="project_id.is_book_manually_computed")
+    rel_project_director_employee_id = fields.Many2one(related="project_id.project_director_employee_id", store=True)
+    rel_stage_id = fields.Many2one(related="project_id.stage_id", store=True)
+    rel_book_validation_employee_id = fields.Many2one(related="project_id.book_validation_employee_id", store=True)
+    rel_book_validation_datetime = fields.Datetime(related="project_id.book_validation_datetime", store=True)

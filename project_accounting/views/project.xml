@@ -303,10 +303,6 @@
 									<field name="sum_account_move_lines" sum="Total"/>
 								</tree>                                
 							</field>
-
-						<group>
-            						<field name="order_to_invoice_outsourcing" />
-						</group>
 					</page>
 					<page name="book" string="Book">
 						<group string="Book brut du projet">
