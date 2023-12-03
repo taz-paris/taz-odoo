@@ -268,6 +268,7 @@ class staffingEmployee(models.Model):
     prev_1_weeks_learning_internal_days = fields.Float("j. internes+fomations", help="Jours internes + formation dernière semaine", compute=availability, store=True)
     prev_1_weeks_project_days = fields.Float("J. pointés", help="Jours imputés dernière semaine", compute=availability, store=True)
     prev_1_weeks_activity_rate = fields.Float("% pointé", help="Taux d'activité dernière semaine", compute=availability, store=True, group_operator='avg')
+
     prev_1_weeks_activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel dernière semaine", compute=availability, store=True, group_operator='avg')
     prev_1_weeks_activity_previsionnal_project_days = fields.Float('Prév. (j)', compute=availability, store=True)
     prev_1_weeks_activity_delta_previsionnal_project_days = fields.Float('Delta prev-pointé (j)', compute=availability, store=True)
@@ -354,6 +355,8 @@ class staffingEmployee(models.Model):
 
     def list_work_days_period(self, date_start, date_end):
         res = []
+        if date_start > date_end :
+            raise ValidationError(_("Start date should be <= end date"))
         date = date_start
         while (date != False and date <= date_end):
             user_tz = self.env.user.tz or str(pytz.utc)
@@ -369,7 +372,7 @@ class staffingEmployee(models.Model):
             public_holidays = self.env['resource.calendar.leaves'].search([('resource_id', '=', False), ('time_type', '=', 'leave'), ('date_from', '>=', search_public_holiday_begin), ('date_to', '<=', search_public_holiday_end)])
             #_logger.info('Date begin = %s / date end = %s / Public holidays : %s' % (str(search_public_holiday_begin), str(search_public_holiday_end),  str(public_holidays.read())))
             if len(public_holidays) ==  0:
-                if date.strftime('%A') not in ['Saturday', 'Sunday']:
+                if date.isoweekday() not in [6, 7]:
                     res.append(date)
             date = date + timedelta(days = 1) #TODO : ajouter 24h au lieu d'un jour => impact lorsque lors du changement d'heure ? (garder la même heure en passant de GMT +2 à +1 ... ou bien changer d'heure en gardant le même offste ce qui reveint au même pour les comparaisons)
         #_logger.info("       > %s" % str(count))

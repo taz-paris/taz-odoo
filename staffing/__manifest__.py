@@ -34,6 +34,7 @@
         'data/cron_fitnet_sync.xml',
         'data/cron_employee_availability.xml',
         'views/synchroFitnet.xml',
+        'views/employee_staffing_report.xml',
     ],
 
 }

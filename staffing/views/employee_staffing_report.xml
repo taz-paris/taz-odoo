@@ -1,0 +1,65 @@
+<odoo>
+        <data>
+            <record model="ir.ui.view" id="employee_staffing_report_tree">
+              <field name="name">Rapports d'activité</field>
+              <field name="model">hr.employee_staffing_report</field>
+              <field name="arch" type="xml">
+		      <tree>	
+			      <field name="employee_id"/>
+			      <field name="start_date"/>
+			      <field name="end_date"/>
+			      <field name="hollidays"/>
+			      <field name="workdays"/>
+			      <field name="activity_days"/>
+			      <field name="learning_internal_days"/>
+			      <field name="project_days"/>
+			      <field name="activity_rate" widget="progressbar"/>
+			      <field name="available_days"/>
+			      <field name="activity_previsionnal_rate" widget="progressbar"/>
+			      <field name="activity_previsionnal_project_days"/>
+			      <field name="delta_previsionnal_project_days"/>
+			      <button type="object" name="action_open_analytic_lines" string="Voir les lignes"/>
+		      </tree>
+              </field>
+            </record>
+              
+        <record id="view_employee_staffing_report_tree_search" model="ir.ui.view">
+            <field name="name">Rapports d'activité</field>
+            <field name="model">hr.employee_staffing_report</field>
+            <field name="arch" type="xml">
+                <search string="Search Project accounting closing">
+                    <field name="employee_id" string="Consultant"/>
+                    <separator/>
+                    <filter string="Date de début" name="start_date" date="start_date"/>
+                    <separator/>
+                    <filter string="Date de fin" name="end_date" date="end_date"/>
+                    <separator/>
+                    <filter string="Mes rapports" name="my_employee_staffing_report" domain="[('employee_id.user_id.id', '=', uid)]"/>
+                    <separator/>
+		    <filter string="Cette année (date de début)" name="this_year" domain="[('start_date', '&gt;=', time.strftime('%%Y-01-01')), ('start_date', '&lt;=', time.strftime('%%Y-12-31'))]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Consultant" name="group_employee_id" context="{'group_by': 'employee_id'}"/>
+                        <filter string="Date de début" name="group_start_date_year" context="{'group_by': 'start_date'}"/>
+                        <filter string="Date de début" invisible="1" name="group_start_date_year" context="{'group_by': 'start_date:year'}"/>
+                        <filter string="Date de début" invisible="1" name="group_start_date_month" context="{'group_by': 'start_date:month'}"/>
+                        <filter string="Date de début" invisible="1" name="group_start_date_week" context="{'group_by': 'start_date:week'}"/>
+			<filter string="Date de fin" name="group_end_date" context="{'group_by': 'end_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="employee_staffing_report_action" model="ir.actions.act_window">
+            <field name="name">Rapports d'activité (hebdo)</field>
+            <field name="res_model">hr.employee_staffing_report</field>
+            <field name="view_mode">tree</field>
+	    <field name="context">{'search_default_group_employee_id' : True, 'search_default_my_employee_staffing_report' : True, 'search_default_this_year' : True, 'search_default_group_start_date_month' : True, 'search_default_group_start_date_week' : True}</field>
+            <field name="domain">[('periodicity', '=', 'week')]</field>
+        </record>
+        
+        <menuitem name="Rapports d'activité (hebdo)" id="employee_staffing_report_menu" parent="staffing.staffing_root" action="employee_staffing_report_action"/>
+
+        </data>
+</odoo>

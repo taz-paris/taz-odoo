@@ -140,6 +140,10 @@ class projectAccountProject(models.Model):
                 error_message += "   - Il reste des provisions ou du stock sur la dernière clôture.\n"
             for link in self.project_outsourcing_link_ids:
                 if link.order_company_payment_to_invoice != 0.0 :
+                    #Ce contrôle est partculièrement important car il permet d'assurer que pour tout type de outsourcing link (notamment les type "other" en cas de frais mission divers) 
+                        # qu'un BC Fournisseur existe et que son montant correspond au montant facturé en fin de mission.
+                        # Ce qui permet d'assurer que le montant de book calculé par année pour le projet (qui se fonde sur la somme des BCC et des BCF et non pas des factures) est bon.
+                        # ==> En synthèse, il n'est pas possible "d'oublier" de déduire des factures fournisseurs puisqu'elles ont toutes un BCF.
                     is_closable = False
                     error_message += "   - Il reste des factures founisseur à venir de "+str(link.partner_id.name)+" (ou des factures de régularisation à émettre par Tasmane envers ce fournisseur).\n"
                 if link.company_residual != 0.0 :
