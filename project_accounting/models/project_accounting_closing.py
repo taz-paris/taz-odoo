@@ -67,7 +67,7 @@ class projectAccountingClosing(models.Model):
     #@api.onchange('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     @api.depends('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     def compute(self):
-        _logger.info('-- compute')
+        _logger.info('-- compute project_accounting_closing')
         for rec in self :
 
             #if rec.is_validated :

@@ -66,10 +66,11 @@ class projectAccountProject(models.Model):
             rec.user_id = rec.project_director_employee_id.user_id if rec.project_director_employee_id else False
 
     def write(self, vals):
-        #_logger.info('----- projet WRITE')
+        #_logger.info('----- projet WRITE odooID=%s' % str(self.id))
         #_logger.info(vals)
         for record in self :
             if 'stage_id' in vals.keys():
+                #_logger.info('stage ID est dans le dic vals')
                 vals['state_last_change_date'] = datetime.today()
                 stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
                 if stage_id.state == 'closed' :
@@ -114,11 +115,14 @@ class projectAccountProject(models.Model):
 
     def is_closable(self, stage_id):
         self.ensure_one()
+        #_logger.info('----- is_closable ID odoo = %s' % str(self.id))
 
-        error_message = "Impossible de cloturer/annuler le projet :\n"
+        error_message = "Impossible de cloturer/annuler le projet %s :\n" % (str(self.number))
         is_closable = True
         self.compute()
         self.compute_has_provision_running()
+
+        #_logger.info('----- stage_id.name %s' % str(stage_id.name))
 
         if "Termin" in stage_id.name: #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
             if not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
@@ -238,7 +242,6 @@ class projectAccountProject(models.Model):
 	'other_part_cost_initial',
 	'project_outsourcing_link_ids',
 	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
-	'accounting_closing_ids',
     )
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
@@ -532,6 +535,8 @@ class projectAccountProject(models.Model):
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
             'target' : 'current',
+            'limit' : 150,
+            'groups_limit' : 150,
             'context': {
                 'create': False,
                 'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
@@ -627,6 +632,8 @@ class projectAccountProject(models.Model):
             'view_type': 'form',
             'view_mode': 'tree',
             'target' : 'current',
+            'limit' : 150,
+            'groups_limit' : 150,
             'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
             'context': {
                 'create': False,

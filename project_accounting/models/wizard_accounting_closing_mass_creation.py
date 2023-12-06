@@ -42,5 +42,6 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
                         'company_id' : project_id.company_id.id,
                         'closing_date' : self.date,
                 }
+                _logger.info(dic)
                 self.env['project.accounting_closing'].create(dic)
                 _logger.info(dic)

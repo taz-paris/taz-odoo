@@ -39,13 +39,6 @@ class AnalyticMixin(models.AbstractModel):
                 project.compute()
         return res
     
-    """
-    @api.ondelete(at_uninstall=False)
-    def _ondelete(self):
-        _logger.info('---- @api.ondelete analytic.mixin')
-        self._compute_linked_projects()
-    """
-
     def _compute_linked_projects(self):
         for rec in self:
             for project in rec.rel_project_ids:

@@ -5,6 +5,7 @@
     <field name="name">SIREN Lookup</field>
     <field name="res_model">fr.siret.lookup</field>
     <field name="view_mode">form</field>
+    <field name="view_id" ref="l10n_fr_siret_lookup.fr_siret_lookup_form"/>
     <field name="target">new</field>
     <field name="groups_id" eval="[(4, ref('base.group_user'))]" />
     <field name="binding_model_id" ref="base.model_res_partner" />

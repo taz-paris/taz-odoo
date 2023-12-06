@@ -41,6 +41,8 @@ class projectOutsourcingLink(models.Model):
             'res_model': 'purchase.order.line',
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
+            'limit' : 150,
+            'groups_limit' : 150,
             'context': {
                 'create': False,
                 'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
@@ -92,6 +94,8 @@ class projectOutsourcingLink(models.Model):
             'res_model': 'account.move.line',
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
+            'limit' : 150,
+            'groups_limit' : 150,
             'context': {
                 'create': False,
                 'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
