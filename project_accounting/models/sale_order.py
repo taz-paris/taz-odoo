@@ -194,16 +194,6 @@ class projectAccountingSaleOrderLine(models.Model):
             #_logger.info(line_ids)
             self.allowed_direct_payment_purchase_order_line_ids = line_ids
 
-    """
-    def force_invoice_status_full_invoiced_out_refund(self):
-        _logger.info('force_invoice_status_full_invoiced_out_refund')
-        #fonction utilitaire uniquement pour la migration
-        #TODO : à supprimer en octobre 2023
-        for rec in self:
-            _logger.info(rec.name)
-            rec.qty_invoiced = -1 * rec.qty_invoiced
-            #rec.invoice_status = 'invoiced'
-    """
 
     allowed_direct_payment_purchase_order_line_ids = fields.Many2many(
             'purchase.order.line',

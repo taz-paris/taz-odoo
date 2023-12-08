@@ -265,9 +265,6 @@
 			<field name="invoice_status" optional="hide" />
 			<field name="state" optional="show" widget="badge" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'"/>
 			<field name="comment" optional="show"/>
-			<!--
-			<button type="object" name="force_invoice_status_full_invoiced_out_refund" string="force_invoice_status_full_invoiced_out_refund" groups="base.group_system"/>
-			-->
 		</tree>
 	    </field>
 	</record>

@@ -122,9 +122,6 @@
 			<field name="invoice_lines" widget="many2many_tags" optional="hide"/>
 			<field name="qty_to_invoice" optional="hide"/>
 			<field name="state" optional="show"/>
-			<!--
-			<button type="object" name="force_invoice_status_full_invoiced_out_refund" string="force_invoice_status_full_invoiced_out_refund" groups="base.group_system"/>
-			-->
 		</field>
 		<field name="price_unit" position="replace">
 			<field name="price_subtotal" optional="show"/>
