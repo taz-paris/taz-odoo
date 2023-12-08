@@ -87,11 +87,12 @@ class HrEmployeeStaffingReport(models.TransientModel):
                 rec.activity_rate = rec.project_days / rec.activity_days * 100
             else : 
                 rec.activity_rate = None
+            if rec.workdays :
+                rec.activity_rate_with_holidays = rec.project_days / rec.workdays * 100
+            else :
+                rec.activity_rate_with_holidays = None
 
-            if rec.periodicity == 'week' :
-                rec.available_days = rec.employee_id.availability_week(rec.start_date)
-            else  :
-                raise ValidationError(_("Seule la périodicité hebdomadaire est prise en charge pour le moment.")) #TODO
+            rec.available_days = rec.employee_id.number_days_available_period(rec.start_date, rec.end_date)
 
             rec.activity_previsionnal_project_days = lines['previsional_timesheet_unit_amount']
             rec.delta_previsionnal_project_days = rec.activity_previsionnal_project_days - rec.project_days
@@ -131,12 +132,17 @@ class HrEmployeeStaffingReport(models.TransientModel):
  
     analytic_lines = fields.Many2many('account.analytic.line', string='Lignes')
 
+    workdays = fields.Float("J. ouvrés", help="Jours ouvrés sur la période couverts par un contrat de travail.", compute=availability, store=True)
     hollidays = fields.Float("Congés", help="Jours de congés sur la période", compute=availability, store=True)
-    workdays = fields.Float("J. ouvrés", help="Jours ouvrés sur la période", compute=availability, store=True)
-    activity_days = fields.Float("J. facturables", help="Jours facturables sur la période", compute=availability, store=True)
-    learning_internal_days = fields.Float("j. internes+fomations", help="Jours internes + formation sur la période", compute=availability, store=True)
-    project_days = fields.Float("J. pointés", help="Jours imputés sur la période", compute=availability, store=True)
-    activity_rate = fields.Float("% pointé", help="Taux d'activité sur la période", compute=availability, store=True, group_operator=False) #TODO : surcharger la fonction read_group pour calculer ce ration sur les agrégats
+    activity_days = fields.Float("J. facturables", help="Jours facturables sur la période = nb jours ouvrés - nb jours congés", compute=availability, store=True)
+    learning_internal_days = fields.Float("J. internes+fomations", help="Jours internes + formation sur la période", compute=availability, store=True)
+    project_days = fields.Float("J. produits mission", help="Jours produits en mission sur la période (y compris les missions de la fondation)", compute=availability, store=True)
+    activity_rate = fields.Float("TACE", 
+            help="Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", 
+            compute=availability, store=True, group_operator=False) #TODO : surcharger la fonction read_group pour calculer ce ration sur les agrégats
+    activity_rate_with_holidays = fields.Float("TACI", 
+            help="% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
+            compute=availability, store=True, group_operator=False) #TODO : surcharger la fonction read_group pour calculer ce ration sur les agrégats
 
     available_days = fields.Float("J. dispo", help="Nombre de jours disponibles sur la période", compute=availability, store=True)
     activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel sur la période", compute=availability, store=True, group_operator=False) #TODO : surcharger la fonction read_group pour calculer ce ration sur les agrégats

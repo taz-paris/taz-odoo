@@ -9,15 +9,16 @@
 			      <field name="rel_job_id" optional="show"/>
 			      <field name="start_date" optional="show"/>
 			      <field name="end_date" optional="show"/>
-			      <field name="hollidays" optional="show"/>
 			      <field name="workdays" optional="show"/>
+			      <field name="hollidays" optional="show"/>
 			      <field name="activity_days" optional="show"/>
-			      <field name="learning_internal_days" optional="show"/>
 			      <field name="project_days" optional="show"/>
 			      <field name="activity_rate" widget="progressbar" optional="show"/>
+			      <field name="activity_rate_with_holidays" widget="progressbar" optional="show"/>
+			      <field name="learning_internal_days" optional="show"/>
 			      <field name="available_days" optional="show"/>
-			      <field name="activity_previsionnal_rate" widget="progressbar" optional="show"/>
 			      <field name="activity_previsionnal_project_days" optional="show" />
+			      <field name="activity_previsionnal_rate" widget="progressbar" optional="show"/>
 			      <field name="delta_previsionnal_project_days" optional="show"/>
 			      <button type="object" name="action_open_analytic_lines" string="Voir les lignes"/>
 		      </tree>

@@ -493,8 +493,6 @@ class projectAccountProject(models.Model):
 
                     if book_period_current_year.period_project_book != default_current_year_book_amount:
                         book_period_current_year.period_project_book = default_current_year_book_amount
-                        rec.book_validation_employee_id = False
-                        rec.book_validation_datetime = False
 
                     #TODO : provque une erreur "Enregistrement inexistant ou supprimé.(Enregistrement : project.book_period(380,), Utilisateur : 2) "
                     #if book_period_current_year.period_project_book == 0.0 :
@@ -621,7 +619,7 @@ class projectAccountProject(models.Model):
 
     def action_open_out_account_move_lines(self):
         all_customers = self.get_all_customer_ids()
-        line_ids = self.get_account_move_line_ids([('partner_id', 'in', all_customers), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
+        line_ids = self.get_account_move_line_ids([('partner_id', 'in', all_customers), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'in', ['product'])])
 
         action = {
             'name': _("Lignes de factures / avoirs"),

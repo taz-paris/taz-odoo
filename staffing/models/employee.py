@@ -63,12 +63,6 @@ class staffingEmployee(models.Model):
         employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : rafraichir aussi ceux dont le contrat n'a pas encore commencé
         employees.availability()
 
-    def availability_week(self, monday):
-        sunday = monday + timedelta(days=6)
-        res = self.number_days_available_period(monday, sunday) #/ self.number_work_days_period(monday, sunday) * 100
-        return res
-
-
     def availability_4_weeks_graph(self):
         pass
         """    
@@ -204,6 +198,7 @@ class staffingEmployee(models.Model):
 
     def number_days_available_period(self, date_start, date_end):
         #_logger.info('number_days_available_period %s' % self.name)
+        self.ensure_one()
         if date_start > date_end :
             raise ValidationError(_("Start date should be <= end date"))
         res = self.number_work_days_period(date_start, date_end) - self.number_not_available_period(date_start, date_end)
@@ -212,6 +207,7 @@ class staffingEmployee(models.Model):
 
     def number_not_available_period(self, date_start, date_end):
         #_logger.info("number_not_available_period")
+        self.ensure_one()
         if date_start > date_end :
             raise ValidationError(_("Start date should be <= end date"))
         dic = [('employee_id', '=', self.id)]
@@ -222,13 +218,20 @@ class staffingEmployee(models.Model):
         return c
 
     def number_work_days_period(self, date_start, date_end):
-        #TODO : en théorie on ne devrait pas compter les jours au cours desquels le salarié n'était pas encore / plus en contrat avec Tasmne
-                #Cependant s'il on fait ça, on fait dépendre le retour de cette fonction du salarié sur lequel on l'applique... et on ne pourra plus mutualiser
         #_logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
         count = len(self.list_work_days_period(date_start, date_end))
         return count
 
     def list_work_days_period(self, date_start, date_end):
+        self.ensure_one()
+        list_work_days_period_common = self.list_work_days_period_common(date_start, date_end)
+        res = []
+        for day in list_work_days_period_common :
+            if self._get_contract(day) :
+                res.append(day)
+        return res
+
+    def list_work_days_period_common(self, date_start, date_end):
         res = []
         if date_start > date_end :
             raise ValidationError(_("Start date should be <= end date"))
@@ -250,9 +253,8 @@ class staffingEmployee(models.Model):
                 if date.isoweekday() not in [6, 7]:
                     res.append(date)
             date = date + timedelta(days = 1) #TODO : ajouter 24h au lieu d'un jour => impact lorsque lors du changement d'heure ? (garder la même heure en passant de GMT +2 à +1 ... ou bien changer d'heure en gardant le même offste ce qui reveint au même pour les comparaisons)
-        #_logger.info("       > %s" % str(count))
+        #_logger.info("       > %s" % str(len(res)))
         return res
-
 
     def open_employee_pivot_timesheets(self):
         date = datetime.today()

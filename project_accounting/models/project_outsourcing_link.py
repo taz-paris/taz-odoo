@@ -86,7 +86,7 @@ class projectOutsourcingLink(models.Model):
 
 
     def action_open_account_move_lines(self):
-        line_ids = self.project_id.get_account_move_line_ids([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'not in', ['line_note', 'line_section'])])
+        line_ids = self.project_id.get_account_move_line_ids([('partner_id', '=', self.partner_id.id), ('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('display_type', 'in', ['product'])])
 
         action = {
             'name': _('Lignes de factures / avoirs fournisseurs'),

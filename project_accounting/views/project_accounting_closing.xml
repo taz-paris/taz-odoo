@@ -241,13 +241,13 @@
 	<menuitem name="Sociétés" id="project_accounting_closing_menu_res_company" parent="project_accounting_closing_menu_root" action="base.action_res_company_form"/>
 
    <record id="action_recompute_closing" model="ir.actions.server">
-          <field name="name">recompute_closing</field>
+          <field name="name">Recalculer les données de cette fiche cloture</field>
           <field name="model_id" ref="model_project_accounting_closing"/>
           <field name="binding_model_id" ref="model_project_accounting_closing"/>
           <field name="state">code</field>
           <field name="code">for rec in records:
                   rec.compute()</field>
-          <field name="groups_id" eval="[(4, ref('base.group_system'))]" />
+          <field name="groups_id" eval="[(4, ref('account.group_account_manager'))]" />
   </record>
 	</data>
 </odoo>

@@ -92,8 +92,6 @@ class projectAccountingClosing(models.Model):
             rec.previous_closing = previous_closing
 
 
-            #rec.invoice_period_amount = proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['out_refund', 'out_invoice'])])[0]
-            #rec.purchase_period_amount = -1 * proj_id.compute_account_move_total_all_partners(previous_closing_date_filter + [('date', '<=', rec.closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])[0]
             rec.invoice_period_amount = rec.get_invoice_period(proj_id, previous_closing_date_filter, rec.closing_date)[0]
             rec.purchase_period_amount = -1 * rec.get_purchase_period(proj_id, previous_closing_date_filter, rec.closing_date)[0]
 
@@ -104,7 +102,6 @@ class projectAccountingClosing(models.Model):
             rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
-            #production_period_amount, analytic_lines = proj_id.get_production_cost(previous_closing_date_filter+[('date', '<=', rec.closing_date), ('category', '=', 'project_employee_validated')], force_recompute_amount=True)
             production_period_amount, analytic_lines = rec.get_production_period(proj_id, previous_closing_date_filter, rec.closing_date)
             rec.production_period_amount = -1 * production_period_amount
 
@@ -143,18 +140,21 @@ class projectAccountingClosing(models.Model):
             previous_closing_date_filter = [('date', '>', self.previous_closing.closing_date)]
         subtotal, total, paid, line_ids = self.get_invoice_period(self.project_id, previous_closing_date_filter, self.closing_date)
         action = {
-            'name': _("Lignes de factures / avoirs"),
+            'name': _("Lignes de factures / avoirs clients"),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
-            #'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
-            'domain': [('id', 'in', line_ids)],
+            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'domain': [('id', 'in', line_ids), ('display_type', 'in', ['product'])],
             'view_type': 'form',
             'view_mode': 'tree',
             'target' : 'current',
             'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
+            'limit' : 150,
+            'groups_limit' : 150,
             'context': {
                 'create': False,
-                #'search_default_group_by_move' : 1,
+                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'search_default_group_by_move' : 1,
             }
         }
         
@@ -175,7 +175,13 @@ class projectAccountingClosing(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
             'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
-            'domain': [('id', 'in', line_ids)],
+            'domain': [('id', 'in', line_ids), ('display_type', 'in', ['product'])],
+            'view_type': 'form',
+            'view_mode': 'tree',
+            'target' : 'current',
+            'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
+            'limit' : 150,
+            'groups_limit' : 150,
             'context': {
                 'create': False,
                 'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},

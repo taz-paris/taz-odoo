@@ -842,7 +842,8 @@ class naptaHrLeave(models.Model):
 
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
-            numberOfDays = self.env['hr.employee'].number_work_days_period(start_date, end_date)
+            odoo_user = self.env['res.users'].search([('napta_id','=', user_holiday['attributes']['user_id'])])
+            numberOfDays = odoo_user.number_work_days_period(start_date, end_date)
             dic = {
                     'napta_id' : napta_id,
                     'employee_id' : {'napta_id' : user_holiday['attributes']['user_id']},

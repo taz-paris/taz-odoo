@@ -19,14 +19,17 @@
                 	</field>
 
                 	<field name="probability" position="after">
-				<field name="margin_landing" widget="progressbar"/>
-				<field name="margin_text"/>
 				<field name="favorite_user_ids" widget="many2many_tags"/>
                 	</field>
 			-->
 			<xpath expr="//notebook" position="inside">
 					<page string="Besoins/staffing">
 						<field name="id" invisible="1"/>
+						<group>
+							<group>
+								<field name="staffing_aggregation"/>
+							</group>
+						</group>
 						<field name="staffing_need_ids" context="{'default_project_id': id}">
 							<tree editable="top">
 								  <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>

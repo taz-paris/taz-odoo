@@ -18,19 +18,19 @@ class staffingNeed(models.Model):
             if record.staffed_employee_id:
                 record.name = "%s - %s %s" % (record.project_id.name or "", record.staffed_employee_id.first_name or "", record.staffed_employee_id.name or "")
 
-    """
     @api.onchange('project_id')
     def onchange_project_id(self):
         if self.project_id:
+            """
             need_ids = self.env['staffing.need'].search([('project_id', '=', self.project_id.id), ('state', 'in', ['waitt', 'open'])])
             if len(need_ids) > 0 :
                 need = need_ids[0]
                 self.begin_date = need.begin_date
                 self.end_date = need.end_date
             else: 
-                self.begin_date = self.project_id.date_start
-                self.end_date = self.project_id.date
-    """
+            """
+            self.begin_date = self.project_id.date_start
+            self.end_date = self.project_id.date
 
     @api.depends('analytic_line_forecast_ids')
     def compute(self):
@@ -50,7 +50,7 @@ class staffingNeed(models.Model):
     def onchnage_dates(self):
         #if not self.nb_days_needed:
         if self.begin_date and self.end_date:
-            nb = self.env['hr.employee'].number_work_days_period(self.begin_date, self.end_date)
+            nb = len(self.env['hr.employee'].list_work_days_period_common(self.begin_date, self.end_date))
             #_logger.info("onchange_project_id NB jours : %s" % str(nb))
             self.nb_days_needed = nb
 

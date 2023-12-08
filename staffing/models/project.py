@@ -150,28 +150,6 @@ class staffingProject(models.Model):
                 'context' : {'employee_id' : employ.id},
             }
 
-    def margin_landing_now(self):
-        for rec in self :
-            negative_total_costs, margin_landing_rate, margin_text = rec.margin_landing_date(datetime.today())
-            rec.margin_landing = margin_landing_rate
-            rec.margin_text = margin_text
-
-    def margin_landing_date(self, date):
-        if not self.order_sum_sale_order_lines_with_draft or self.order_sum_sale_order_lines_with_draft == 0.0:
-            return 0.0, 0.0, ""
-       
-        timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=None, date_end=None, filters=[('project_id', '=', self.id)])
-        _logger.info(timesheets_data)
-        timesheet_total_amount = timesheets_data['validated_timesheet_amount'] + timesheets_data['previsional_timesheet_amount']
-
-        #partner_id = fields.Many2one(required=True, ondelete="restrict")
-        negative_total_costs = timesheet_total_amount
-        date = fields.Date(string="Date de fin")
-
-        margin_landing_rate = (self.order_sum_sale_order_lines_with_draft + negative_total_costs) / self.order_sum_sale_order_lines_with_draft * 100
-        margin_text = "Projection à terminaison en date du %(monday_pivot_date)s :\n    - %(validated_timesheet_unit_amount).2f jours pointés (%(validated_timesheet_amount).2f €)\n    - %(previsional_timesheet_unit_amount).2f jours prévisionnels (%(previsional_timesheet_amount).2f €)" % timesheets_data
-        return negative_total_costs, margin_landing_rate, margin_text
-
     def default_project_director_employee_id(self):
         res = self.env.user.employee_id
         if res and not(res.rel_is_project_director):
@@ -181,12 +159,16 @@ class staffingProject(models.Model):
    
     favorite_user_ids = fields.Many2many(string="Intéressés par ce projet")
 
-    margin_landing = fields.Float('Marge à terminaison (%)', compute=margin_landing_now)
-    margin_text = fields.Text('Détail de la marge', compute=margin_landing_now)
-
     staffing_need_ids = fields.One2many('staffing.need', 'project_id')
     project_director_employee_id = fields.Many2one(domain="[('rel_is_project_director', '=', True)]", default=default_project_director_employee_id)
     project_manager = fields.Many2one(default=default_project_director_employee_id, required=False) #Si required=True ça bloque la création de nouvelle company
+    staffing_aggregation = fields.Selection([
+                                    ('mission', 'Mission'),
+                                    ('training', 'Formation (activité interne)'),
+                                    ('sales', 'Avant-vente/commerce (activité interne)'),
+                                    ('other_internal', 'Autre activité interne'),
+                                    ('unavailability', 'Indisponibilité (réduit le nombre de jours facturable)'),
+                                ], string='Agrégat de staffing', default='mission')
 
 
     @api.depends('project_director_employee_id', 'staffing_need_ids.staffed_employee_id', 'staffing_need_ids.project_id')

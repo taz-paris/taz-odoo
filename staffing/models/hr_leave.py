@@ -88,7 +88,7 @@ class staffingLeave(models.Model):
                 _logger.info(date_start)
                 _logger.info(date_end)
 
-                list_work_days = self.env['hr.employee'].list_work_days_period(date_start, date_end) 
+                list_work_days = leave.employee_id.list_work_days_period(date_start, date_end) 
 
                 _logger.info(list_work_days)
 
