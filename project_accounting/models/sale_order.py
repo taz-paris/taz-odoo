@@ -80,19 +80,14 @@ class projectAccountingSaleOrderLine(models.Model):
 
 
 
-    #TODO ATTENTION :
-    #  POINT PAS CLAIR : sur les sale.order et purchase.order seule la QUANTITE restant à facturer sur chaque ligne détermine si la ligne a un reliquat de facturation et en aucun cas le MONTANT
-    #       Si c'est vrai, alors quand on veut facturer partiellement une ligne il faut modifier la QUANTITE sur la facture et non pas le MONTANT => Sinon la qté restant à facturer sur la SOL=0 et donc le SO passe au statut facturé, même si tout le montant n'a pas été facturé.
-    #même avec les lignes ci-dessous on est bloqué dans l'assistant de création de facture, qui dit qu'il n'y a plus rien à facture... car les QTE restant à facturer sont nulles
-    """
-    @api.depends('state', 'product_uom_qty', 'qty_delivered', 'qty_to_invoice', 'qty_invoiced', 'is_downpayment', 'untaxed_amount_to_invoice')
-    def _compute_invoice_status(self):
-        super()._compute_invoice_status()
-        for line in self:
-            if line.is_downpayment and line.untaxed_amount_to_invoice != 0:
-                line.invoice_status = 'to invoice'
-    """
+    #ATTENTION :
+    #  Sur les sale.order et purchase.order seule la QUANTITE restant à facturer sur chaque ligne détermine si la ligne a un reliquat de facturation et en aucun cas le MONTANT
+    #       Donc quand on veut facturer partiellement une ligne il faut modifier la QUANTITE sur la facture et non pas le MONTANT => Sinon la qté restant à facturer sur la SOL=0 et donc le SO passe au statut facturé, même si tout le montant n'a pas été facturé.
     @api.onchange('product_id')
+
+
+
+
     def _onchange_product_id_taz(self):
         if not self.product_id:
             return
@@ -117,6 +112,7 @@ class projectAccountingSaleOrderLine(models.Model):
 
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
     def _compute_price_unit(self):
+        #TODO : fonction surchargée pour pré-remplir le montant de la order.line en fonction du montant total du BDC attendu
         _logger.info('_compute_price_unit')
         super()._compute_price_unit()
         for line in self:
