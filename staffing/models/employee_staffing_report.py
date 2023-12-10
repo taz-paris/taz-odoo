@@ -28,6 +28,7 @@ class HrEmployeeStaffingReport(models.TransientModel):
         if self.search([], count=True) == 0 :
             lines = self.env['account.analytic.line'].search([
                     #('employee_id', '=', 11), 
+                    ('employee_id', '!=', False), 
                     ('project_id', '!=', False), 
                     ('category', 'in', ['project_forecast', 'project_employee_validated', 'other']),
                     ('project_id', '!=', False)
@@ -95,11 +96,11 @@ class HrEmployeeStaffingReport(models.TransientModel):
             rec.available_days = rec.employee_id.number_days_available_period(rec.start_date, rec.end_date)
 
             rec.activity_previsionnal_project_days = lines['previsional_timesheet_unit_amount']
-            rec.delta_previsionnal_project_days = rec.activity_previsionnal_project_days - rec.project_days
             if rec.activity_days :
-                rec.activity_previsionnal_rate = lines['previsional_timesheet_unit_amount'] / rec.activity_days * 100
+                rec.activity_previsionnal_rate = rec.activity_previsionnal_project_days / rec.activity_days * 100
             else :
                 rec.activity_previsionnal_rate = None
+            rec.delta_previsionnal_project_days = rec.activity_previsionnal_project_days - rec.project_days
 
     def action_open_analytic_lines(self):
         analytic_lines = self.analytic_lines
@@ -115,6 +116,60 @@ class HrEmployeeStaffingReport(models.TransientModel):
                 'domain': [('id', 'in', analytic_lines.ids)],
                 'context' : {'search_default_group_category' : True, 'search_default_group_project' : True},
             }
+
+
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        _logger.info('============================================= read_group employee_staffing_report.py')
+        _logger.info(fields)
+        """
+        This is a hack to allow us to correctly calculate the average activity rate.
+        """
+        if 'activity_rate' in fields:
+            fields.extend(['aggregated_project_days:array_agg(project_days)'])
+            fields.extend(['aggregated_activity_days:array_agg(activity_days)'])
+
+        if 'activity_rate_with_holidays' in fields:
+            fields.extend(['aggregated_project_days2:array_agg(project_days)'])
+            fields.extend(['aggregated_workdays:array_agg(workdays)'])
+        
+        if 'activity_previsionnal_rate' in fields :
+            fields.extend(['aggregated_activity_previsionnal_project_days:array_agg(activity_previsionnal_project_days)'])
+            fields.extend(['aggregated_activity_days2:array_agg(activity_days)'])
+
+
+        res = []
+        if fields:
+            res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
+        if 'activity_rate' in fields:
+            for data in res:
+                if data['aggregated_project_days'] and data['aggregated_activity_days']:
+                    total_project_days = sum(float(project_days) for project_days in data['aggregated_project_days'] if project_days)
+                    total_activity_days = sum(float(activity_days) for activity_days in data['aggregated_activity_days'] if activity_days)
+                    data['activity_rate'] = ((total_project_days / total_activity_days) if total_activity_days else 0) * 100
+                    _logger.info(total_project_days, total_project_days, data['activity_rate'])
+                del data['aggregated_project_days']
+                del data['aggregated_activity_days']
+
+        if 'activity_rate_with_holidays' in fields:
+            for data in res:
+                if data['aggregated_project_days2'] and data['aggregated_workdays']:
+                    total_project_days = sum(float(project_days) for project_days in data['aggregated_project_days2'] if project_days)
+                    total_workdays = sum(float(workdays) for workdays in data['aggregated_workdays'] if workdays)
+                    data['activity_rate_with_holidays'] = ((total_project_days / total_workdays) if total_workdays else 0) * 100
+                del data['aggregated_project_days2']
+                del data['aggregated_workdays']
+
+        if 'activity_previsionnal_rate' in fields :
+            for data in res:
+                if data['aggregated_activity_previsionnal_project_days'] and data['aggregated_activity_days2']:
+                    total_activity_previsionnal_project_days = sum(float(activity_previsionnal_project_days) for activity_previsionnal_project_days in data['aggregated_activity_previsionnal_project_days'] if activity_previsionnal_project_days)
+                    total_activity_days = sum(float(activity_days) for activity_days in data['aggregated_activity_days2'] if activity_days)
+                    data['activity_previsionnal_rate'] = ((total_activity_previsionnal_project_days / total_activity_days) if total_activity_days else 0) * 100
+                del data['aggregated_activity_previsionnal_project_days']
+                del data['aggregated_activity_days2']
+
+        return res
 
 
     periodicity = fields.Selection([
@@ -139,12 +194,12 @@ class HrEmployeeStaffingReport(models.TransientModel):
     project_days = fields.Float("J. produits mission", help="Jours produits en mission sur la période (y compris les missions de la fondation)", compute=availability, store=True)
     activity_rate = fields.Float("TACE", 
             help="Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", 
-            compute=availability, store=True, group_operator=False) #TODO : surcharger la fonction read_group pour calculer ce ration sur les agrégats
+            compute=availability, store=True, group_operator='avg')
     activity_rate_with_holidays = fields.Float("TACI", 
             help="% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
-            compute=availability, store=True, group_operator=False) #TODO : surcharger la fonction read_group pour calculer ce ration sur les agrégats
+            compute=availability, store=True, group_operator='avg')
 
     available_days = fields.Float("J. dispo", help="Nombre de jours disponibles sur la période", compute=availability, store=True)
-    activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel sur la période", compute=availability, store=True, group_operator=False) #TODO : surcharger la fonction read_group pour calculer ce ration sur les agrégats
+    activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", compute=availability, store=True, group_operator='avg')
     activity_previsionnal_project_days = fields.Float('Prév. (j)', compute=availability, store=True)
     delta_previsionnal_project_days = fields.Float('Delta prev-pointé (j)', compute=availability, store=True)
