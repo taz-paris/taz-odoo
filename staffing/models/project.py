@@ -167,7 +167,7 @@ class staffingProject(models.Model):
                                     ('training', 'Formation (activité interne)'),
                                     ('sales', 'Avant-vente/commerce (activité interne)'),
                                     ('other_internal', 'Autre activité interne'),
-                                    ('unavailability', 'Indisponibilité (réduit le nombre de jours facturable)'),
+                                    ('unavailability', 'Indisponibilité (réduit le nombre de jours ouvrés)'),
                                 ], string='Agrégat de staffing', default='mission')
 
 

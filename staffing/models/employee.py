@@ -218,7 +218,7 @@ class staffingEmployee(models.Model):
         return c
 
     def number_work_days_period(self, date_start, date_end):
-        _logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
+        #_logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))
         self.ensure_one()
         count = len(self.list_work_days_period(date_start, date_end))
         return count

@@ -43,11 +43,13 @@ class staffingAnalyticLine(models.Model):
         ])
 
     staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")
+    rel_project_staffing_aggregation = fields.Selection(related='project_id.staffing_aggregation', store=True)
     hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
     date_end = fields.Date("Date de fin")
 
 
+           
 
     def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):
         # Usage de cette fonction :
@@ -80,8 +82,14 @@ class staffingAnalyticLine(models.Model):
         #_logger.info(timesheets)
 
         previsional_timesheet_ids = []
+        previsional_timesheet_before_pivot_date_ids = []
         validated_timesheet_ids = []
         holiday_timesheet_ids = []
+        validated_learning_ids = []
+        validated_sales_ids = []
+        validated_other_internal_ids = []
+        unavailability_timesheet_ids = []
+
 
         # Modèle de données :
         #   - La base de données stock des lignes analytic différentes pour le pointage réalisé et le prévisionnel, qui sont conservées en parallèle dans le temps
@@ -103,30 +111,44 @@ class staffingAnalyticLine(models.Model):
             if timesheet.encoding_uom_id != self.env.ref("uom.product_uom_day"):
                 continue
             if timesheet.project_id.id == 1147 :
-                #ne pas compter les pointage sur "Complément pour soumettre"
+                #ne pas compter les pointage sur "Complément pour soumettre" => plus utilisé depuis la bascule Napta
                 #TODO : pas propre de hardoder l'ID : soit avoir un booléen des lignes à exclure ... soit supprimer ce projet, les staffing.need et les analytics account.line qui vont avec !
                 continue
-            elif timesheet.project_id.id == 1148 : #Formation dont K4M
-                continue
-            elif timesheet.project_id.id == 1134 : #23004 TAZ_AVT pour les Experts => ce temps est compté dans leurs objectifs perso mais il ne doit pas être compté comme de l'activité dans Odoo
-                continue
-            elif timesheet.project_id.id == 1146 : #Autre absence
+
+            if timesheet.holiday_id:
+                holiday_timesheet_ids.append(timesheet)
+            #elif timesheet.project_id.id == 1148 : #Formation dont K4M
+            elif timesheet.rel_project_staffing_aggregation == 'training':
+                if timesheet.date < monday_pivot_date:
+                    validated_learning_ids.append(timesheet)
+            #elif timesheet.project_id.id == 1134 : #23004 TAZ_AVT pour les Experts => ce temps est compté dans leurs objectifs perso mais il ne doit pas être compté comme de l'activité dans Odoo
+            elif timesheet.rel_project_staffing_aggregation == 'sales':
+                if timesheet.date < monday_pivot_date:
+                    validated_sales_ids.append(timesheet)
+            elif timesheet.rel_project_staffing_aggregation == 'other_internal':
+                if timesheet.date < monday_pivot_date:
+                    validated_other_internal_ids.append(timesheet)
+            #elif timesheet.project_id.id == 1146 : #Autre absence
+            elif timesheet.rel_project_staffing_aggregation == 'unavailability':
+                # pour ces projets comme pour les missions, le consultant valide les pointages chaque semaine
                 if timesheet.category == 'project_employee_validated':
                     if timesheet.date < monday_pivot_date:
-                        holiday_timesheet_ids.append(timesheet)
+                        unavailability_timesheet_ids.append(timesheet)
                 if timesheet.category == 'project_forecast':
                     if timesheet.date >= monday_pivot_date:
-                        holiday_timesheet_ids.append(timesheet)
-            elif timesheet.category == 'project_employee_validated':
-                if timesheet.date < monday_pivot_date:
-                    validated_timesheet_ids.append(timesheet)
-            elif timesheet.category == 'project_forecast':
-                if timesheet.date >= monday_pivot_date:
-                    previsional_timesheet_ids.append(timesheet)
+                        unavailability_timesheet_ids.append(timesheet)
+            elif timesheet.rel_project_staffing_aggregation == 'mission':
+                if timesheet.category == 'project_employee_validated': #pointage mission validé
+                    if timesheet.date < monday_pivot_date:
+                        validated_timesheet_ids.append(timesheet)
+                elif timesheet.category == 'project_forecast': #pointage mission prévisionnel
+                    if timesheet.date >= monday_pivot_date:
+                        previsional_timesheet_ids.append(timesheet)
+                    else : 
+                        previsional_timesheet_before_pivot_date_ids.append(timesheet)
                 # Est-ce qu'on garde les prévisionnels antérieurs à la date pivot si rien n'a été pointé ? => NON, on ne bidouille pas : le consultant n'avait qu'à pointer.
                     # => OPTION :  on retourne un indicateur montrant qu'il y a un manque de pointage sur une période antéireure à la date pivot
-            elif timesheet.holiday_id:
-                holiday_timesheet_ids.append(timesheet)
+
                 # En théorie, le prévisionnel devrait être diminumé des congés par le consultant ou le manager, mais ça peut ne pas être le cas 
                     # => pour une semaine calendaire donnée :
                         # si ***antérieur à monday_pivot*** => alors rien à faire : le pointage validé tient forcément compte des comgés, on ne peut structurellement pas compter 2 fois
@@ -153,6 +175,27 @@ class staffingAnalyticLine(models.Model):
         for line in holiday_timesheet_ids:
             holiday_timesheet_unit_amount += line.unit_amount
 
+        previsional_timesheet_before_pivot_date_unit_amount = 0.0
+        for line in previsional_timesheet_before_pivot_date_ids :
+            previsional_timesheet_before_pivot_date_unit_amount += line.unit_amount
+
+        validated_learning_unit_amount = 0.0
+        for line in validated_learning_ids :
+            validated_learning_unit_amount += line.unit_amount
+
+        validated_sales_unit_amount = 0.0
+        for line in validated_sales_ids :
+            validated_sales_unit_amount += line.unit_amount
+
+        validated_other_internal_unit_amount = 0.0
+        for line in validated_other_internal_ids :
+            validated_other_internal_unit_amount += line.unit_amount
+
+        unavailability_unit_amount = 0.0
+        for line in unavailability_timesheet_ids :
+            unavailability_unit_amount += line.unit_amount
+
+
         res = {
                 'monday_pivot_date' : monday_pivot_date,
                 'previsional_timesheet_ids' : previsional_timesheet_ids, 
@@ -163,6 +206,16 @@ class staffingAnalyticLine(models.Model):
                 'previsional_timesheet_unit_amount' : previsional_timesheet_unit_amount,
                 'holiday_timesheet_ids' : holiday_timesheet_ids,
                 'holiday_timesheet_unit_amount' : holiday_timesheet_unit_amount,
+                'previsional_timesheet_before_pivot_date_ids' : previsional_timesheet_before_pivot_date_ids,
+                'previsional_timesheet_before_pivot_date_unit_amount' : previsional_timesheet_before_pivot_date_unit_amount,
+                'validated_learning_ids' : validated_learning_ids,
+                'validated_learning_unit_amount' : validated_learning_unit_amount,
+                'validated_sales_ids' : validated_sales_ids,
+                'validated_sales_unit_amount' : validated_sales_unit_amount,
+                'validated_other_internal_ids' : validated_other_internal_ids,
+                'validated_other_internal_unit_amount' : validated_other_internal_unit_amount,
+                'unavailability_timesheet_ids' : unavailability_timesheet_ids,
+                'unavailability_unit_amount' : unavailability_unit_amount,
                 }
         #_logger.info(res)
         return res
