@@ -189,7 +189,8 @@ class staffingEmployee(models.Model):
             raise ValidationError(_("Start date should be <= end date"))
         date = date_start
         while (date != False and date <= date_end):
-            user_tz = self.env.user.tz or str(pytz.utc)
+            #user_tz = self.env.user.tz or str(pytz.utc)
+            user_tz = 'Europe/Paris'
             local = pytz.timezone(user_tz)
             search_public_holiday_begin = datetime(date.year, date.month, date.day, 0, 0, 0)
             search_public_holiday_begin = local.localize(search_public_holiday_begin, is_dst=None)
@@ -206,6 +207,7 @@ class staffingEmployee(models.Model):
                     res.append(date)
             date = date + timedelta(days = 1) #TODO : ajouter 24h au lieu d'un jour => impact lorsque lors du changement d'heure ? (garder la même heure en passant de GMT +2 à +1 ... ou bien changer d'heure en gardant le même offste ce qui reveint au même pour les comparaisons)
         #_logger.info("       > %s" % str(len(res)))
+        #_logger.info("       > %s" % res)
         return res
 
     def open_employee_pivot_timesheets(self):

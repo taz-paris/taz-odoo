@@ -460,7 +460,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        client.refresh_cache()
+        #client.refresh_cache()
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -471,20 +471,17 @@ class naptaProject(models.Model):
             project_to_sync.with_context(ignore_napta_write=True).napta_to_sync = False
             self.env.cr.commit()
         self.env['hr.department'].create_update_odoo_business_unit()
-        self.env['hr.leave.type'].create_update_odoo_user_holiday_category()
         self.env['hr.job'].create_update_odoo_user_position()
         self.env['res.users'].create_update_odoo()
+        self.env['hr.leave.type'].create_update_odoo_user_holiday_category()
+        self.env['hr.leave'].create_update_odoo_user_holiday()
         self.env['hr.contract'].create_update_odoo_user_history()
         self.env['project.project.stage'].create_update_odoo_projectstatus()
         self.env['project.project'].create_update_odoo()
-        #self.env['hr.leave'].create_update_odoo_user_holiday() #TODO : corriger
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
-        #TODO : quid de la synchro des jours fériés avec Napta ?
-                # les générer jusqu'en 2050 avec https://pypi.org/project/jours-feries-france/ ?
-        #TODO : synchro des compétences, les catégories de compétences, les échelles de notations, les valeurs des échelles de notations et les compétences des utilisateurs, les souhaits des utilisateurs
-
+        # TODO : synchro des compétences, les catégories de compétences, les échelles de notations, les valeurs des échelles de notations et les compétences des utilisateurs, les souhaits des utilisateurs
         # TODO : Gérer le recalcul des montants des analytic lines si le grade ou le CJM change a posteriori
 
         _logger.info('======== synchAllNapta TERMINEE')
@@ -833,32 +830,61 @@ class naptaHrLeave(models.Model):
         client = ClientRestNapta(self.env)
         user_holiday_list = client.read_cache('user_holiday')
         for napta_id, user_holiday in user_holiday_list.items():
+            _logger.info(napta_id)
+            #if str(napta_id) != '3':
+            #    continue
+            #if str(napta_id) not in ['1052']:
+            #    continue
+            start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
+            end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
+            odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
+            numberOfDays = odoo_user.number_work_days_period(start_date, end_date) #TODO
             request_date_from_period = 'am'
             if user_holiday['attributes']['start_date_from_morning'] == False :
                 request_date_from_period = 'pm'
+                numberOfDays -= 0.5
             request_date_to_period = 'pm'
             if user_holiday['attributes']['end_date_until_afternoon'] == False :
                 request_date_to_period = 'am'
+                numberOfDays -= 0.5
 
-            start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
-            end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
-            odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id'])])
-            #numberOfDays = odoo_user.number_work_days_period(start_date, end_date) #TODO
+
             dic = {
                     'napta_id' : napta_id,
                     'employee_id' : {'napta_id' : user_holiday['attributes']['user_id']},
                     'request_date_from' : start_date, 
-                    'date_from' : user_holiday['attributes']['start_date'] + "T00:03:00.000",
+                    'date_from' : user_holiday['attributes']['start_date'] + "T00:03:00.000",#TODO : corriger l'heure
                     'request_date_from_period' : request_date_from_period,
                     'request_date_to' : end_date, 
-                    'date_to' : user_holiday['attributes']['end_date'] + "T21:59:59.000",
+                    'date_to' : user_holiday['attributes']['end_date'] + "T21:59:59.000",#TODO : corriger l'heure
                     'request_date_to_period' : request_date_to_period,
                     'holiday_status_id' : {'napta_id' : user_holiday['attributes']['user_holiday_category_id']},
-                    #'number_of_days' : numberOfDays,
+                    'active' : True,
+                    'number_of_days' : max(0, numberOfDays),
                 }
-            create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
+            create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
+        #self.correct_leave_timesheet_stock()
+        a = 1/0
 
         #client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday') #TODO
+
+
+    def correct_leave_timesheet_stock(self):
+        _logger.info('---- correct_leave_timesheet_stock')
+        leaves = self.env['hr.leave'].search([('napta_id', '!=', None), ('state', '=', "validate"), ('request_date_from', '>', '2022-12-31')])
+        for leave in leaves:
+            if leave.id not in [4454]:
+                continue
+            count = 0.0
+            timesheets = self.env['account.analytic.line'].search([('holiday_id', '=', leave.id)])
+            for timesheet in timesheets:
+                count += timesheet.unit_amount
+            if count != leave.number_of_days:
+                _logger.info('Incohérence : leave_id=%s pour %s (statut : %s) => duréee =%s alors que total des timesheet=%s. Debut le %s' % (str(leave.id), leave.employee_id.name, leave.state, str(leave.number_of_days), str(count), str(leave.request_date_from)))
+                _logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
+                leave.number_of_days = leave.number_of_days 
+                _logger.info('      Corrigé')
+            self.env.cr.commit()
 
 
 class naptaHrLeaveType(models.Model):
@@ -915,7 +941,7 @@ def get_napta_key_domain_search(odoo_model_name, dic):
             raise ValidationError(_("values of the key attributes %s shouldn't be null/false/none %s for the odoo_model_name=%s" % (key_attribute, str(dic[key_attribute]), odoo_model_name)))
         key_domain_search.append((key_attribute, '=', dic[key_attribute]))
 
-    if odoo_model_name in ['hr.employee', 'res.users']:
+    if odoo_model_name in ['hr.employee', 'res.users', 'hr.leave']:
         tup = ('active', 'in', [True, False])
         key_domain_search.append(tup)
 

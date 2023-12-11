@@ -29,7 +29,8 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
     def unlink(self):
         report_to_update = []
         for rec in self:
-            report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', self.employee_id.id), ('start_date', '<=', self.date), ('end_date', '>=', self.date)])
+            report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.employee_id.id), ('start_date', '<=', rec.date), ('end_date', '>=', rec.date)])
+                #TODO : les critères de dates ne fonctionnent pas si les prévisionnels sont à cheval sur plusieurs semainees/mois
             for report_id in report_ids: #one report by periodicity type (week, month, quarter, semestre, year...)
                 report_to_update.append(report_id)
 
