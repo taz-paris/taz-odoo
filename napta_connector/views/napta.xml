@@ -100,6 +100,7 @@
             <field name="arch" type="xml">
                 <field name="hr_responsible_id" position="after">
                         <field name="napta_id" readonly="1"/>
+                        <field name="work_location_id" />
                 </field>
             </field>
         </record>

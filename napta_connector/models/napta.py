@@ -326,7 +326,7 @@ class ClientRestNapta:
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
             _logger.info("      > Instance du modèle %s sur le point d'être supprimée OdooID %s / NaptaID %s" % (odoo_model_name, odoo_objet.id, odoo_objet.napta_id))
-            odoo_objet.unlink()
+            #odoo_objet.unlink()
             self.env.cr.commit()
 
 
@@ -475,6 +475,7 @@ class naptaProject(models.Model):
         self.env['res.users'].create_update_odoo()
         self.env['hr.leave.type'].create_update_odoo_user_holiday_category()
         self.env['hr.leave'].create_update_odoo_user_holiday()
+        self.env['hr.work.location'].create_update_odoo_location()
         self.env['hr.contract'].create_update_odoo_user_history()
         self.env['project.project.stage'].create_update_odoo_projectstatus()
         self.env['project.project'].create_update_odoo()
@@ -701,6 +702,7 @@ class naptaHrContract(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
+    work_location_id = fields.Many2one('hr.work.location')
 
 
     def create_update_odoo_user_history(self):
@@ -754,6 +756,7 @@ class naptaHrContract(models.Model):
                     'job_id' : {'napta_id' : user_history['attributes']['user_position_id']},
                     'department_id' : {'napta_id' : user_history['attributes']['business_unit_id']},
                     'state' : state,
+                    #'work_location_id' : {'napta_id' : user_history['attributes']['location_id']},
                 }
 
             ########## Gestion des surcharges de CJM individuel par rapport au grade
@@ -830,11 +833,6 @@ class naptaHrLeave(models.Model):
         client = ClientRestNapta(self.env)
         user_holiday_list = client.read_cache('user_holiday')
         for napta_id, user_holiday in user_holiday_list.items():
-            _logger.info(napta_id)
-            #if str(napta_id) != '3':
-            #    continue
-            #if str(napta_id) not in ['1052']:
-            #    continue
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
@@ -861,20 +859,21 @@ class naptaHrLeave(models.Model):
                     'holiday_status_id' : {'napta_id' : user_holiday['attributes']['user_holiday_category_id']},
                     'active' : True,
                     'number_of_days' : max(0, numberOfDays),
+                        # max => évite d'avoir un nombre de jours de congés négatif (ce qui est interdit techniquement) dans le cas où un congés d'une demie-journée posée dans Napta sur un jour non-ouvré
+                        # TODO : doit-on obligatoirement envoyer cet attribut à Odoo... qui doit le reclaculer de son côté...
+                    'state' : 'validate',
                 }
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
-        #self.correct_leave_timesheet_stock()
-        a = 1/0
+        #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
         #client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday') #TODO
 
 
+    """
     def correct_leave_timesheet_stock(self):
         _logger.info('---- correct_leave_timesheet_stock')
         leaves = self.env['hr.leave'].search([('napta_id', '!=', None), ('state', '=', "validate"), ('request_date_from', '>', '2022-12-31')])
         for leave in leaves:
-            if leave.id not in [4454]:
-                continue
             count = 0.0
             timesheets = self.env['account.analytic.line'].search([('holiday_id', '=', leave.id)])
             for timesheet in timesheets:
@@ -885,6 +884,7 @@ class naptaHrLeave(models.Model):
                 leave.number_of_days = leave.number_of_days 
                 _logger.info('      Corrigé')
             self.env.cr.commit()
+    """
 
 
 class naptaHrLeaveType(models.Model):
@@ -907,6 +907,28 @@ class naptaHrLeaveType(models.Model):
             create_update_odoo(self.env, 'hr.leave.type', dic)
 
         client.delete_not_found_anymore_object_on_napta('hr.leave.type', 'user_holiday_category')
+
+
+class naptaHrWorkLocation(models.Model):
+    _inherit = 'hr.work.location'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID")
+
+
+    def create_update_odoo_location(self):
+        _logger.info('---- BATCH Create or update Odoo work location')
+        client = ClientRestNapta(self.env)
+        location_list = client.read_cache('location')
+        for napta_id, location in location_list.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'name' : location['attributes']['name'],
+                }
+            create_update_odoo(self.env, 'hr.work.location', dic)
+
+        client.delete_not_found_anymore_object_on_napta('hr.work.location', 'location')
 
 
 ########################################################################################
