@@ -14,14 +14,16 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        for rec in res :
+        for rec in self :
             rec.create_update_timesheet_report()
+            #TODO : si la date ou l'employee change il faut aussi mettre à jour l'ancien rapport pour décrémenter, et pas que le nouveau
         return res
+
 
     @api.model
     def create(self, vals):
         res = super().create(vals)
-        self.create_update_timesheet_report()
+        res.create_update_timesheet_report()
         return res
 
     def unlink(self):
@@ -42,6 +44,8 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
     def create_update_timesheet_report(self):
         group_dic = {}
         for line in self :
+            if not line.employee_id :
+                continue
             #### periodicity = week
             monday = line.date - relativedelta(days=line.date.weekday())
             key = 'week_' + str(line.employee_id.id) + '_' + str(monday)
@@ -304,10 +308,10 @@ class HrEmployeeStaffingReport(models.Model):
             ('semester', 'Semestre'),
             ('year', 'Année'),
         ], string="Périodicité", default='week')
-    employee_id = fields.Many2one('hr.employee', string="Consultant")
+    employee_id = fields.Many2one('hr.employee', string="Consultant", required=True)
     rel_job_id = fields.Many2one('hr.job', string='Grade', compute=compute_job, store=True, help="Grade du consultant au début de la période")
 
-    start_date = fields.Date('Date de début')
+    start_date = fields.Date('Date de début', required=True)
     end_date = fields.Date('Date de fin', compute=compute_end_date, store=True)
  
     analytic_lines = fields.Many2many('account.analytic.line', string='Lignes')

@@ -477,7 +477,7 @@ class naptaProject(models.Model):
         self.env['hr.contract'].create_update_odoo_user_history()
         self.env['project.project.stage'].create_update_odoo_projectstatus()
         self.env['project.project'].create_update_odoo()
-        self.env['hr.leave'].create_update_odoo_user_holiday()
+        #self.env['hr.leave'].create_update_odoo_user_holiday() #TODO : corriger
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
@@ -843,7 +843,7 @@ class naptaHrLeave(models.Model):
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id'])])
-            numberOfDays = odoo_user.number_work_days_period(start_date, end_date)
+            #numberOfDays = odoo_user.number_work_days_period(start_date, end_date) #TODO
             dic = {
                     'napta_id' : napta_id,
                     'employee_id' : {'napta_id' : user_holiday['attributes']['user_id']},
@@ -854,11 +854,11 @@ class naptaHrLeave(models.Model):
                     'date_to' : user_holiday['attributes']['end_date'] + "T21:59:59.000",
                     'request_date_to_period' : request_date_to_period,
                     'holiday_status_id' : {'napta_id' : user_holiday['attributes']['user_holiday_category_id']},
-                    'number_of_days' : numberOfDays,
+                    #'number_of_days' : numberOfDays,
                 }
-            create_update_odoo(self.env, 'hr.leave', dic, context_add={'leave_skip_state_check' : True, 'leave_skip_date_check' : True})  #'leave_fast_create' : True})
+            create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
 
-        #client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday')
+        #client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday') #TODO
 
 
 class naptaHrLeaveType(models.Model):
@@ -930,7 +930,7 @@ def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=Fa
         context.update({'lang' : 'fr_FR'}) #Nécessaire pour que la mise à jour des champs avec translate=True (stockée sous forme de JSON dans la base postgres) soit prise en compte pour la langue Française, et pas que en en_US.
         # on ne positionne pas le paramètre tz du context car les heures sont retournées en GMT par Napta, qui est la tz par défaut d'Odoo
     if 'tz' not in context.keys():
-        context.update({'tz' : 'Europe/Paris'})
+        context.update({'tz' : 'UTC'})
     context.update(context_add)
     env.context = context
     #_logger.info("Context %s" % str(env.context))

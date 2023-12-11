@@ -178,7 +178,6 @@
 								<field name="order_sum_sale_order_lines" />
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
 								<button type="object" name="create_sale_order" string="Créer commande client" /> 
-								<button type="object" name="compute" string="Forcer recalcul" groups="base.group_system"/> 
                                                         </group>
 							<group string="Production pilotée par un co-traitant" attrs="{'invisible' : [('cosource_part_amount_current', '=', 0), ('cosource_part_cost_current', '=', 0), ('cosource_part_cost_futur', '=', 0)]}">
                                                                 <field name="cosource_part_amount_current" />
@@ -501,13 +500,13 @@
 	   </record>
 		
     <record id="action_recompute_project" model="ir.actions.server">
-          <field name="name">recompute_project</field>
+          <field name="name">Recalculer les agrégats du projet</field>
           <field name="model_id" ref="model_project_project"/>
           <field name="binding_model_id" ref="model_project_project"/>
           <field name="state">code</field>
           <field name="code">for rec in records:
                   rec.compute()</field>
-          <field name="groups_id" eval="[(4, ref('base.group_system'))]" />
+          <field name="groups_id" eval="[(4, ref('account.group_account_manager'))]" />
   </record>
 
 	    <!-- ACTION APPLICAQUE AUX UTILISATUER QUI ONT LE droit de gestion des étapes du projet (ie admin) -->

@@ -40,58 +40,9 @@ class staffingEmployee(models.Model):
             vals['context']['default_partner_id'] = self.work_contact_id
         return vals
 
-    def refresh_availability_all_employees(self):
-        # TODO : correct the flow (so that the timesheet will be deleted on hr.leave cancelation) and then remove thoses lines
-        leaves = self.env['hr.leave'].search([('state', '=', 'canceled')])
-        for leave in leaves :
-            if leave.timesheet_ids :
-                _logger.info("Leave cancelled for %s - duration %s" % (leave.employee_id.name, str(leave.number_of_days)))
-            for timesheet in leave.timesheet_ids:
-                _logger.info("      > Deleting timesheet ID=%d because the related hr.leave has been cancelled" % timesheet.id)
-                timesheet.sudo().holiday_id = False
-                timesheet.unlink()
-
-        leaves = self.env['hr.leave'].search([('state', '=', 'refuse')])
-        for leave in leaves :
-            if leave.timesheet_ids :
-                _logger.info("Leave refused for %s - duration %s" % (leave.employee_id.name, str(leave.number_of_days)))
-            for timesheet in leave.timesheet_ids:
-                _logger.info("      > Deleting timesheet ID=%d because the related hr.leave has been refused" % timesheet.id)
-                timesheet.sudo().holiday_id = False
-                timesheet.unlink()
-
-        employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : rafraichir aussi ceux dont le contrat n'a pas encore commencé
-        employees.availability()
 
     def availability_4_weeks_graph(self):
         pass
-        """    
-        for rec in self:
-            # Design your bokeh figure:
-            fruits = ['Apples', 'Pears', 'Nectarines', 'Plums', 'Grapes', 'Strawberries']
-            years = ["2015", "2016", "2017"]
-
-            data = {'fruits' : fruits,
-                    '2015'   : [2, 1, 4, 3, 2, 4],
-                    '2016'   : [5, 3, 4, 2, 4, 6],
-                    '2017'   : [3, 2, 4, 4, 5, 3]}
-
-            p = figure(x_range=fruits, height=250, title="Fruit Counts by Year", toolbar_location=None, tools="hover", tooltips="$name @fruits: @$name")
-
-            p.vbar_stack(years, x='fruits', width=0.9, source=data,
-                         legend_label=years)
-
-            p.y_range.start = 0
-            p.x_range.range_padding = 0.1
-            p.xgrid.grid_line_color = None
-            p.axis.minor_tick_line_color = None
-            p.outline_line_color = None
-            p.legend.location = "top_left"
-            p.legend.orientation = "horizontal"
-            # fill the record field with both markup and the script of a chart.
-            script, div = components(p, wrap_script=False)
-            rec.availability_4_weeks_graph = json.dumps({"div": div, "script": script})
-        """
     
     
     def last_validated_timesheet_date(self):
