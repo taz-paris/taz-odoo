@@ -53,7 +53,7 @@
             <field name="model">res.users</field>
             <field name="inherit_id" ref="base.view_users_form"/>
             <field name="arch" type="xml">
-                <field name="karma" position="after">
+                <field name="company_id" position="after">
                         <field name="napta_id" readonly="1"/>
                 </field>
             </field>
@@ -116,7 +116,7 @@
             </field>
         </record>
 
-        <record id="hr_leave_type_fitnet_view_form_inherit" model="ir.ui.view">
+        <record id="hr_leave_type_view_form_inherit" model="ir.ui.view">
             <field name="name">Type de congés</field>
             <field name="model">hr.leave.type</field>
             <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
@@ -127,6 +127,17 @@
             </field>
         </record>
 
+
+        <record id="hr_work_location_view_form_inherit" model="ir.ui.view">
+            <field name="name">Lieu de travail</field>
+            <field name="model">hr.work.location</field>
+            <field name="inherit_id" ref="hr.hr_work_location_form_view"/>
+            <field name="arch" type="xml">
+                <field name="location_number" position="after">
+                        <field name="napta_id" readonly="0"/>
+                </field>
+            </field>
+        </record>
 
 <!--
         <record id="hr_employee_fitnet_view_form_inherit" model="ir.ui.view">

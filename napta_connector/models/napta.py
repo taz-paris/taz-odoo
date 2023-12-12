@@ -326,7 +326,7 @@ class ClientRestNapta:
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
             _logger.info("      > Instance du modèle %s sur le point d'être supprimée OdooID %s / NaptaID %s" % (odoo_model_name, odoo_objet.id, odoo_objet.napta_id))
-            #odoo_objet.unlink()
+            odoo_objet.unlink()
             self.env.cr.commit()
 
 
@@ -460,7 +460,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        #client.refresh_cache()
+        client.refresh_cache()
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -756,7 +756,7 @@ class naptaHrContract(models.Model):
                     'job_id' : {'napta_id' : user_history['attributes']['user_position_id']},
                     'department_id' : {'napta_id' : user_history['attributes']['business_unit_id']},
                     'state' : state,
-                    #'work_location_id' : {'napta_id' : user_history['attributes']['location_id']},
+                    'work_location_id' : {'napta_id' : user_history['attributes']['location_id']},
                 }
 
             ########## Gestion des surcharges de CJM individuel par rapport au grade
@@ -864,9 +864,8 @@ class naptaHrLeave(models.Model):
                     'state' : 'validate',
                 }
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
+        client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday') #TODO
         #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
-
-        #client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday') #TODO
 
 
     """
@@ -915,6 +914,7 @@ class naptaHrWorkLocation(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
+    address_id = fields.Many2one(required=False)
 
 
     def create_update_odoo_location(self):
