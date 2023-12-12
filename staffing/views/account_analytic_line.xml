@@ -10,23 +10,47 @@
 			<field name="date_end"/>
 			<field name="employee_id"/>
 			<field name="category"/>
-			<field name="amount"/>
+			<field name="rel_project_staffing_aggregation"/>
+			<field name="amount" sum="Total"/>
 		</field>
                 <field name="unit_amount" position="replace">
 			<!-- suppression du widget timesheet_uom qui empêche de saisir tous les montants-->
-			<field name="unit_amount" optional="show" sum="Total" decoration-danger="unit_amount &gt; 1 or unit_amount &lt; 0"/>
+			<field name="unit_amount" optional="show" sum="Total" />
                 </field>
             </field>
         </record>
 
     <record id="action_recompute_timesheet_amount" model="ir.actions.server">
-          <field name="name">recompute_timesheet_amount</field>
+          <field name="name">Recalculer le montant des feuilles de temps</field>
           <field name="model_id" ref="model_account_analytic_line"/>
           <field name="binding_model_id" ref="model_account_analytic_line"/>
           <field name="state">code</field>
 	  <field name="code">for rec in records:
 		  rec.refresh_amount()</field>
-          <field name="groups_id" eval="[(4, ref('base.group_system'))]" />
+          <field name="groups_id" eval="[(4, ref('account.group_account_manager'))]" />
    </record>
+
+
+        <record id="hr_timesheet_line_tree_period_depending" model="ir.ui.view">
+            <field name="name">account.analytic.line.tree.hr_timesheet</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+		 <tree>
+		    <field name="date" />
+                    <field name="date_end"/>
+                    <field name="employee_id"/>
+                    <field name="category"/>
+                    <field name="rel_project_staffing_aggregation"/>
+                    <field name="amount" sum="Total" optional="hide"/>
+                    <field name="unit_amount" sum="Total" optional="hide"/>
+                    <field name="period_unit_amount" sum="Total"/>
+                    <field name="period_amount" sum="Total"/>
+		    <field name="project_id" />
+                    <field name="name" optional="hide"/>
+		    <!--
+		    -->
+                </tree>
+            </field>
+        </record>
   </data>
 </odoo>

@@ -6,7 +6,7 @@
             <field name="inherit_id" ref="hr.view_hr_job_form"/>
             <field name="arch" type="xml">
 		<xpath expr="//notebook" position="inside">
-			<page string="CJM/TJM">
+			<page string="CJM">
 				<field name="cost_ids" context="{'default_job_id':active_id}">
 					<tree editable="top">
 						<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>

@@ -83,15 +83,13 @@ class HrCost(models.Model):
         _logger.info(date_oldest)
         lines = self.env['account.analytic.line'].search([('date', '>=', date_oldest), ('project_id', '!=', False)])
         _logger.info(len(lines))
-        #on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
-        """
+        #TODO on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
         for line in lines:
             job = line.employee_id._get_job_id(line.date)
             if not job:
                 continue
             if job.id == self.job_id.id:
                 line.refresh_amount()
-        """ 
 
     def compute_end_date(self):
         for rec in self:

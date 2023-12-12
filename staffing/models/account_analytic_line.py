@@ -48,8 +48,46 @@ class staffingAnalyticLine(models.Model):
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
     date_end = fields.Date("Date de fin")
 
+ 
+    def compute_period_amounts(self):
+        _logger.info('---------- compute_period_amounts >> account_analytic_line.py')
+        for line in self :
+            date_start = self.env.context.get('period_date_start')
+            date_end = self.env.context.get('period_date_end')
 
-           
+            if not(date_start) or not(date_end):
+                line.period_unit_amount = 0
+                line.period_amount = 0
+                continue
+
+            date_start = datetime.strptime(str(date_start), '%Y-%m-%d').date()
+            date_end = datetime.strptime(str(date_end), '%Y-%m-%d').date()
+
+            if date_start > date_end :
+                raise ValidationError(_("Start date should be <= end date"))
+
+            if line.date >= date_start and (not line.date_end or line.date_end <= date_end):
+                line.period_unit_amount = line.unit_amount
+                line.period_amount = line.amount
+
+            line_date_end = line.date_end
+            if not line_date_end :
+                line_date_end = line.date
+
+            work_days_line = line.employee_id.number_work_days_period(line.date, line_date_end)
+            work_days_line_in_period = line.employee_id.number_work_days_period(max(line.date, date_start), min(line_date_end, date_end))
+
+            if work_days_line != 0:
+                line.period_unit_amount = work_days_line_in_period/work_days_line * line.unit_amount 
+                line.period_amount = work_days_line_in_period/work_days_line * line.amount
+            else : 
+                line.period_unit_amount = 0
+                line.period_amount = 0
+
+
+    period_unit_amount = fields.Float("J. période", group_operator='sum', help="Nombre de jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(18,8), compute=compute_period_amounts)
+    period_amount = fields.Float("Montant période", group_operator='sum', help="Valorisation en € des jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(13,3), compute=compute_period_amounts)
+          
 
     def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):
         # Cette fonction force les date de début/fin à un lundi/dimanche pour éviter de couper les semaines, notamment car le prévisionné est enregistré à la semaine
@@ -95,10 +133,10 @@ class staffingAnalyticLine(models.Model):
                 raise ValidationError(_("Start date should be <= end date"))
 
         dic = [('category', '!=', 'project_draft')]
-        if date_start:
-            dic.append(('date', '>=', date_start))
         if date_end :
             dic.append(('date', '<', date_end))
+        if date_start:
+            dic += ['|', '&', ('date_end', '!=', False), ('date_end', '>=', date_start), ('date', '>=', date_start)]
 
         if filters:
             for condition in filters:
@@ -173,25 +211,15 @@ class staffingAnalyticLine(models.Model):
                             # ... ou alors on ajoute un contrôle lors de la pose des congés par le salarié (recontrôlé à la validation par Denis) pour que congés+prévisionnel ne dépasse pas nb jour ouvré sur la semaine ===> mais ça ne peut fonctionner que si la demande de congés est gérée dans Odoo => tant qu'on importe de Fitnet il peut y avoir des cas où congés+prévisionel > nb jours ouvrés
                             # TODO une fois la synchro Fitnet terminée : déclencher un wizzard à la validation du congès par le consultant qui lui affiche son prévisionnel et lui demande de l'ajuster
 
+        holiday_timesheet_unit_amount = 0.0
+        for line in holiday_timesheet_ids:
+            holiday_timesheet_unit_amount += line.unit_amount
+
         validated_timesheet_amount = 0.0
         validated_timesheet_unit_amount = 0.0
         for line in validated_timesheet_ids:
             validated_timesheet_amount += line.amount
             validated_timesheet_unit_amount += line.unit_amount
-
-        previsional_timesheet_amount = 0.0
-        previsional_timesheet_unit_amount = 0.0
-        for line in previsional_timesheet_ids:
-            previsional_timesheet_amount += line.amount
-            previsional_timesheet_unit_amount += line.unit_amount
-
-        holiday_timesheet_unit_amount = 0.0
-        for line in holiday_timesheet_ids:
-            holiday_timesheet_unit_amount += line.unit_amount
-
-        previsional_timesheet_before_pivot_date_unit_amount = 0.0
-        for line in previsional_timesheet_before_pivot_date_ids :
-            previsional_timesheet_before_pivot_date_unit_amount += line.unit_amount
 
         validated_learning_unit_amount = 0.0
         for line in validated_learning_ids :
@@ -205,9 +233,22 @@ class staffingAnalyticLine(models.Model):
         for line in validated_other_internal_ids :
             validated_other_internal_unit_amount += line.unit_amount
 
+        ##### Contrairement aux pointages validés, une période d'affectation sur Napta n'est obligatoirement à la maille du jour, et peut être à cheval avec la période visée
+        ######### Donc on passe par une fonction pouur calculer le nombre de jours (et montant) affectés à la période ciblée
+
+        previsional_timesheet_amount = 0.0
+        previsional_timesheet_unit_amount = 0.0
+        for line in previsional_timesheet_ids:
+            previsional_timesheet_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_amount
+            previsional_timesheet_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
+
+        previsional_timesheet_before_pivot_date_unit_amount = 0.0
+        for line in previsional_timesheet_before_pivot_date_ids :
+            previsional_timesheet_before_pivot_date_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
+
         unavailability_unit_amount = 0.0
         for line in unavailability_timesheet_ids :
-            unavailability_unit_amount += line.unit_amount
+            unavailability_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
 
 
         res = {
@@ -232,6 +273,27 @@ class staffingAnalyticLine(models.Model):
                 'unavailability_unit_amount' : unavailability_unit_amount,
                 }
         #_logger.info(res)
+        return res
+
+
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        #_logger.info('======================= read_group account_analytic_line.py')
+        res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+        if 'period_unit_amount' in fields or 'period_amount' in fields:
+            for line in res:
+                if '__domain' in line:
+                    lines = self.search(line['__domain'])
+                    if 'period_unit_amount' in fields:
+                        period_unit_amount = 0.0
+                        for record in lines:
+                            period_unit_amount += record.period_unit_amount
+                        line['period_unit_amount'] = period_unit_amount
+
+                    if 'period_amount' in fields:
+                        period_amount = 0.0
+                        for record in lines:
+                            period_amount += record.period_amount
+                        line['period_amount'] = period_amount
         return res
 
     #override to deal with uom in days

@@ -205,7 +205,8 @@ class HrEmployeeStaffingReport(models.Model):
                 analytic_lines_list_ids.append(l.id)
             rec.analytic_lines = [(6, 0, analytic_lines_list_ids)]
 
-
+            _logger.info(lines)
+ 
             rec.workdays = rec.employee_id.number_work_days_period(rec.start_date, rec.end_date) - lines['unavailability_unit_amount']
             rec.hollidays = lines['holiday_timesheet_unit_amount']
             rec.activity_days = rec.workdays - rec.hollidays
@@ -233,17 +234,17 @@ class HrEmployeeStaffingReport(models.Model):
 
     def action_open_analytic_lines(self):
         analytic_lines = self.analytic_lines
-        view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
+        view_id = self.env.ref("staffing.hr_timesheet_line_tree_period_depending")
         return {                                        
                 'type': 'ir.actions.act_window',                
-                'name': 'Lignes',
+                'name': 'Lignes valorisée sur la période du %s au %s' % (self.start_date, self.end_date),
                 'res_model': 'account.analytic.line',
                 'view_type': 'tree',
                 'view_mode': 'tree',
                 'view_id': view_id.id,          
                 'target': 'current',                    
                 'domain': [('id', 'in', analytic_lines.ids)],
-                'context' : {'search_default_group_category' : True, 'search_default_group_project' : True},
+                'context' : {'no_create' : True, 'period_date_start' : self.start_date, 'period_date_end' : self.end_date, 'search_default_group_category' : True, 'search_default_group_project' : True},
             }
 
 

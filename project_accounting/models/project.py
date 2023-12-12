@@ -232,6 +232,7 @@ class projectAccountProject(models.Model):
     #le modèle analytic_mixin est surchargé dans ce module project_accounting afin d'appeller cette fonction compute lorsqu'une ligne avec une distribution analytque liée à ce projet est créée/modifiée
     @api.depends(
 	'state',
+        'outsourcing',
 	'company_part_amount_initial',
 	'company_part_cost_initial',
         'outsource_part_amount_initial',
