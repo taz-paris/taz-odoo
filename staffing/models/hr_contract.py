@@ -23,6 +23,7 @@ class HrContract(models.Model):
 
     is_daily_cost_overridden = fields.Boolean("Surcharger le CJM du grade")
     daily_cost = fields.Float("CJM du contrat")
+    work_location_id = fields.Many2one('hr.work.location', string="Bureau")
 
 
     def unlink(self):

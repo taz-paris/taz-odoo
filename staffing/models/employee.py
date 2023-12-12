@@ -132,6 +132,12 @@ class staffingEmployee(models.Model):
                 res = contract
         return res
 
+    def _get_work_location_id(self, date):
+        contract = self._get_contract(date)
+        if contract :
+            return contract.work_location_id
+        return False
+
     def _get_job_id(self, date):
         contract = self._get_contract(date)
         if contract :

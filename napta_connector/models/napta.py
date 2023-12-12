@@ -702,7 +702,6 @@ class naptaHrContract(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID")
-    work_location_id = fields.Many2one('hr.work.location')
 
 
     def create_update_odoo_user_history(self):
@@ -722,8 +721,9 @@ class naptaHrContract(models.Model):
 
             if user_history['attributes']['end_date'] == None:
                 user_napta = client.read_cache('user', napta_id=user_napta_id)
-                if  user_napta['attributes']['leaving_date'] != None:
-                    user_history['attributes']['end_date'] = user_napta['attributes']['leaving_date']
+                if  user_napta['attributes']['leaving_date'] != None :
+                    if user_history['attributes']['start_date'] == None or user_napta['attributes']['leaving_date'] > user_history['attributes']['start_date']:
+                        user_history['attributes']['end_date'] = user_napta['attributes']['leaving_date']
 
             if user_history['attributes']['end_date'] != None and user_history['attributes']['end_date'] < BEGIN_OF_TIME:
                 continue
