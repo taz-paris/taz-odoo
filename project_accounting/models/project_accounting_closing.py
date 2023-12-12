@@ -102,7 +102,7 @@ class projectAccountingClosing(models.Model):
             rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
 
-            production_period_amount, analytic_lines = rec.get_production_period(proj_id, previous_closing_date_filter, rec.closing_date, get_production_period=True)
+            production_period_amount, analytic_lines = rec.get_production_period(proj_id, previous_closing_date_filter, rec.closing_date, force_recompute_amount=True)
             rec.production_period_amount = -1 * production_period_amount
 
             rec.production_stock = rec.production_previous_balance + rec.production_period_amount
@@ -196,7 +196,7 @@ class projectAccountingClosing(models.Model):
         return action
 
     def action_open_analytic_lines(self):
-        production_period_amount, analytic_lines = self.get_production_period(self.project_id, [('date', '>', self.previous_closing.closing_date)], self.closing_date, get_production_period=False)
+        production_period_amount, analytic_lines = self.get_production_period(self.project_id, [('date', '>', self.previous_closing.closing_date)], self.closing_date, force_recompute_amount=False)
         view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
         return {
                 'type': 'ir.actions.act_window',
