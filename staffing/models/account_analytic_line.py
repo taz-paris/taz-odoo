@@ -52,44 +52,29 @@ class staffingAnalyticLine(models.Model):
            
 
     def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):
-        # Usage de cette fonction :
-        #   - Calculer le temps pointé / prévisionnel d'un consultant
-        #   - Calculer la disponibilité d'un consultant sur une période (passé, présente ou future)
+        # Cette fonction force les date de début/fin à un lundi/dimanche pour éviter de couper les semaines, notamment car le prévisionné est enregistré à la semaine
+
         if date_start and date_end :
             if date_start > date_end :
                 raise ValidationError(_("Start date should be <= end date"))
 
-        dic = [('category', '!=', 'project_draft')]
-
-        date_start_substracted_days = 0.0
         if date_start:
             date_start_substracted_days = date_start.weekday()
             date_start_monday = date_start - timedelta(days=date_start_substracted_days)
-            dic.append(('date', '>=', date_start_monday))
-        date_end_added_days = 0.0
         if date_end :
             date_end_added_days = 6-date_end.weekday()
             date_end_sunday = date_end + timedelta(days=date_end_added_days)
-            dic.append(('date', '<', date_end))
 
-        if filters:
-            for condition in filters:
-                if condition[0] in ['category', 'date']:
-                    raise ValidationError(_('Valeur interdite dans le filtre : %s' % condition[0]))
-                dic.append(condition)
-        timesheets = self.env['account.analytic.line'].search(dic)
-        #_logger.info(dic)
-        #_logger.info(timesheets)
+        monday_pivot_date =  pivot_date - timedelta(days=pivot_date.weekday())
+        monday_pivot_date = monday_pivot_date.date()
 
-        previsional_timesheet_ids = []
-        previsional_timesheet_before_pivot_date_ids = []
-        validated_timesheet_ids = []
-        holiday_timesheet_ids = []
-        validated_learning_ids = []
-        validated_sales_ids = []
-        validated_other_internal_ids = []
-        unavailability_timesheet_ids = []
+        return self.get_timesheet_grouped_raw(monday_pivot_date, date_start=date_start_monday, date_end=date_end_sunday, filters=filters)
 
+
+    def get_timesheet_grouped_raw(self, pivot_date, date_start=None, date_end=None, filters=None):
+        # Usage de cette fonction :
+        #   - Calculer le temps pointé / prévisionnel d'un consultant
+        #   - Calculer la disponibilité d'un consultant sur une période (passé, présente ou future)
 
         # Modèle de données :
         #   - La base de données stock des lignes analytic différentes pour le pointage réalisé et le prévisionnel, qui sont conservées en parallèle dans le temps
@@ -104,8 +89,37 @@ class staffingAnalyticLine(models.Model):
         #TODO : interdire les affectations hors de la période du projet => ATTENTION : c'est autorisé sur Fitnet donc risque de blocage
                 # En revanche : laisser la possibilité de pointer après la date de fin de l'affectation initiale, sinon ça ne sera pas pratique
 
-        monday_pivot_date =  pivot_date - timedelta(days=pivot_date.weekday())
-        monday_pivot_date = monday_pivot_date.date()
+
+        if date_start and date_end :
+            if date_start > date_end :
+                raise ValidationError(_("Start date should be <= end date"))
+
+        dic = [('category', '!=', 'project_draft')]
+        if date_start:
+            dic.append(('date', '>=', date_start))
+        if date_end :
+            dic.append(('date', '<', date_end))
+
+        if filters:
+            for condition in filters:
+                if condition[0] in ['category', 'date']:
+                    raise ValidationError(_('Valeur interdite dans le filtre : %s' % condition[0]))
+                dic.append(condition)
+        timesheets = self.env['account.analytic.line'].search(dic)
+        #_logger.info(dic)
+        #_logger.info(timesheets)
+
+        pivot_date = pivot_date.date()
+
+        previsional_timesheet_ids = []
+        previsional_timesheet_before_pivot_date_ids = []
+        validated_timesheet_ids = []
+        holiday_timesheet_ids = []
+        validated_learning_ids = []
+        validated_sales_ids = []
+        validated_other_internal_ids = []
+        unavailability_timesheet_ids = []
+
 
         for timesheet in timesheets:
             if timesheet.encoding_uom_id != self.env.ref("uom.product_uom_day"):
@@ -119,30 +133,30 @@ class staffingAnalyticLine(models.Model):
                 holiday_timesheet_ids.append(timesheet)
             #elif timesheet.project_id.id == 1148 : #Formation dont K4M
             elif timesheet.rel_project_staffing_aggregation == 'training':
-                if timesheet.date < monday_pivot_date:
+                if timesheet.date < pivot_date:
                     validated_learning_ids.append(timesheet)
             #elif timesheet.project_id.id == 1134 : #23004 TAZ_AVT pour les Experts => ce temps est compté dans leurs objectifs perso mais il ne doit pas être compté comme de l'activité dans Odoo
             elif timesheet.rel_project_staffing_aggregation == 'sales':
-                if timesheet.date < monday_pivot_date:
+                if timesheet.date < pivot_date:
                     validated_sales_ids.append(timesheet)
             elif timesheet.rel_project_staffing_aggregation == 'other_internal':
-                if timesheet.date < monday_pivot_date:
+                if timesheet.date < pivot_date:
                     validated_other_internal_ids.append(timesheet)
             #elif timesheet.project_id.id == 1146 : #Autre absence
             elif timesheet.rel_project_staffing_aggregation == 'unavailability':
                 # pour ces projets comme pour les missions, le consultant valide les pointages chaque semaine
                 if timesheet.category == 'project_employee_validated':
-                    if timesheet.date < monday_pivot_date:
+                    if timesheet.date < pivot_date:
                         unavailability_timesheet_ids.append(timesheet)
                 if timesheet.category == 'project_forecast':
-                    if timesheet.date >= monday_pivot_date:
+                    if timesheet.date >= pivot_date:
                         unavailability_timesheet_ids.append(timesheet)
             elif timesheet.rel_project_staffing_aggregation == 'mission':
                 if timesheet.category == 'project_employee_validated': #pointage mission validé
-                    if timesheet.date < monday_pivot_date:
+                    if timesheet.date < pivot_date:
                         validated_timesheet_ids.append(timesheet)
                 elif timesheet.category == 'project_forecast': #pointage mission prévisionnel
-                    if timesheet.date >= monday_pivot_date:
+                    if timesheet.date >= pivot_date:
                         previsional_timesheet_ids.append(timesheet)
                     else : 
                         previsional_timesheet_before_pivot_date_ids.append(timesheet)
@@ -197,7 +211,7 @@ class staffingAnalyticLine(models.Model):
 
 
         res = {
-                'monday_pivot_date' : monday_pivot_date,
+                'pivot_date' : pivot_date,
                 'previsional_timesheet_ids' : previsional_timesheet_ids, 
                 'validated_timesheet_ids' : validated_timesheet_ids,
                 'validated_timesheet_amount' : validated_timesheet_amount,

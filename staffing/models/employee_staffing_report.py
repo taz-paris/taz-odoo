@@ -194,7 +194,10 @@ class HrEmployeeStaffingReport(models.Model):
             dic = [('employee_id', '=', rec.employee_id.id)]
             pivot_date = datetime.today()
 
-            lines = rec.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_start=rec.start_date, date_end=rec.end_date, filters=dic)
+            lines = rec.env['account.analytic.line'].get_timesheet_grouped_raw(pivot_date, date_start=rec.start_date, date_end=rec.end_date, filters=dic)
+                #On appelle get_timesheet_grouped_raw et non pas get_timesheet_grouped_raw car pour les periodicité mensuelle car on veut borner strictement aux paramètres passés en paramètres
+                    #on ne veut pas intégrer les prévisionnels qui ont commencés le lundi 27 novembre pour le rapport du mois de déccembre
+                    #... oui mais dans ce cas est-ce qu'il manquera le prédisionnel pour le vendredi 1er décembre ==> normalement non car les périodes prévisionnels sont générées par Napta (SAUF FORÇAGE) par semaine et bout de semaine en cas de semaines à cheval sur deux mois ==> à vérifier #TODO
 
             analytic_lines_list = lines['previsional_timesheet_ids'] + lines['validated_timesheet_ids'] + lines['holiday_timesheet_ids'] + lines['unavailability_timesheet_ids'] + lines['validated_learning_ids'] + lines['validated_sales_ids'] + lines['validated_other_internal_ids'] + lines['previsional_timesheet_before_pivot_date_ids']
             analytic_lines_list_ids = []
