@@ -8,31 +8,98 @@ import pytz
 import logging
 _logger = logging.getLogger(__name__)
 
+def get_period_begin_date(periodicity, date):
+    begin_date = None
+    if periodicity == 'week' :
+        begin_date = date - relativedelta(days=date.weekday())
+    elif periodicity == 'month' :
+        begin_date = date.replace(day=1)
+    elif periodicity == 'quarter' :
+        if date.month < 4:
+            quarter_begin_month = 1
+        elif date.month < 7:
+            quarter_begin_month = 4
+        elif date.month < 10:
+            quarter_begin_month = 7
+        else :
+            quarter_begin_month = 10
+        begin_date = date.replace(day=1).replace(month=quarter_begin_month)
+    elif periodicity == 'semester' :
+        if date.month < 7:
+            semester_begin_month = 1
+        else :
+            semester_begin_month = 7
+        begin_date = date.replace(day=1).replace(month=semester_begin_month)
+    elif periodicity == 'year' :
+        begin_date = date.replace(day=1).replace(month=1)
+    else :
+        raise ValidationError(_("Seule la périodicité hebdomadaire est prise en charge pour le moment."))
+    return begin_date
+
+def get_period_end_date(periodicity, period_begin_date):
+    end_date = None
+    if periodicity == 'week' :
+        if period_begin_date.isoweekday() != 1:
+            raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité hebdomadaire devrait être un lundi (le premier jour de la semaine en occident)."))
+        end_date = period_begin_date + relativedelta(days=6)
+    elif periodicity == 'month' :
+        if period_begin_date.day != 1:
+            raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité mensuelle devrait être le premier jour du mois."))
+        end_date = period_begin_date + relativedelta(months=1) - relativedelta(days=1)
+    elif periodicity == 'quarter' :
+        if period_begin_date.day != 1 or period_begin_date.month not in [1, 4, 7, 10]:
+            raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité trimestrielle devrait être le premier jour de janvier, avril, juillet ou octobre."))
+        end_date = period_begin_date + relativedelta(months=3) - relativedelta(days=1)
+    elif periodicity == 'semester' :
+        if period_begin_date.day != 1 or period_begin_date.month not in [1, 7]:
+            raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité semestrielle devrait être le premier jour de janvier ou de juillet."))
+        end_date = period_begin_date + relativedelta(months=6) - relativedelta(days=1)
+    elif periodicity == 'year' :
+        if period_begin_date.day != 1 or period_begin_date.month != 1:
+            raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité annuelle devrait être le 1er janvier."))
+        end_date = period_begin_date + relativedelta(years=1) - relativedelta(days=1)
+    else :
+        raise ValidationError(_("Seule la périodicité hebdomadaire est prise en charge pour le moment."))
+    return end_date
+
 
 class staffingAnalyticLine_employee_staffing_report(models.Model):
     _inherit = 'account.analytic.line'
 
     def write(self, vals):
+        _logger.info('---------- write account.analytic.line employee_staffing_report.py')
+        report_to_update = []
+        for rec in self:
+            line_end_date = rec.date_end
+            if not line_end_date :
+                line_end_date = rec.date
+            report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.employee_id.id), ('start_date', '<=', line_end_date), ('end_date', '>=', rec.date)])
+            report_to_update += report_ids #one report by periodicity type (week, month, quarter, semestre, year...)
+
         res = super().write(vals)
+
         for rec in self :
-            rec.create_update_timesheet_report()
-            #TODO : si la date ou l'employee change il faut aussi mettre à jour l'ancien rapport pour décrémenter, et pas que le nouveau
+            # Si la date ou l'employee change il faut aussi mettre à jour les rapports de l'ancien enmployee ou de l'ancinne période qui n'est plus couverte par la nouvelle (pour décrémenter ces "anciens" rapports, et pas seulement créer/mettre à jours les nouveaux)
+            rec.create_update_timesheet_report(force_report_to_update_ids=report_to_update)
         return res
 
 
     @api.model
     def create(self, vals):
+        _logger.info('---------- create account.analytic.line employee_staffing_report.py')
         res = super().create(vals)
         res.create_update_timesheet_report()
         return res
 
     def unlink(self):
+        _logger.info('---------- unlink account.analytic.line employee_staffing_report.py')
         report_to_update = []
         for rec in self:
-            report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.employee_id.id), ('start_date', '<=', rec.date), ('end_date', '>=', rec.date)])
-                #TODO : les critères de dates ne fonctionnent pas si les prévisionnels sont à cheval sur plusieurs semainees/mois
-            for report_id in report_ids: #one report by periodicity type (week, month, quarter, semestre, year...)
-                report_to_update.append(report_id)
+            line_end_date = rec.date_end
+            if not line_end_date :
+                line_end_date = rec.date
+            report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.employee_id.id), ('start_date', '<=', line_end_date), ('end_date', '>=', rec.date)])
+            report_to_update += report_ids #one report by periodicity type (week, month, quarter, semestre, year...)
 
         res = super().unlink()
 
@@ -42,84 +109,41 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
         return res
 
 
-    def create_update_timesheet_report(self):
+    def create_update_timesheet_report(self, force_report_to_update_ids=[]):
         group_dic = {}
         for line in self :
             if not line.employee_id :
                 continue
-            #### periodicity = week
-            monday = line.date - relativedelta(days=line.date.weekday())
-            key = 'week_' + str(line.employee_id.id) + '_' + str(monday)
-            if key not in group_dic.keys():
-                group_dic[key] = {
-                        'employee_id' : line.employee_id.id,
-                        'start_date' : monday,
-                        'periodicity' : 'week',
-                }
-            #### periodicity = month
-            first_of_month = line.date.replace(day=1)
-            key = 'month_' + str(line.employee_id.id) + '_' + str(first_of_month)
-            if key not in group_dic.keys():
-                group_dic[key] = {
-                        'employee_id' : line.employee_id.id,
-                        'start_date' : first_of_month,
-                        'periodicity' : 'month',
-                }
-            #### periodicity = quarter
-            if line.date.month < 4:
-                quarter_begin_month = 1
-            elif line.date.month < 7:
-                quarter_begin_month = 4
-            elif line.date.month < 10:
-                quarter_begin_month = 7
-            else :
-                quarter_begin_month = 10
 
-            first_of_quarter = line.date.replace(day=1).replace(month=quarter_begin_month)
-            key = 'quarter_' + str(line.employee_id.id) + '_' + str(first_of_quarter)
-            if key not in group_dic.keys():
-                group_dic[key] = {
-                        'employee_id' : line.employee_id.id,
-                        'start_date' : first_of_quarter,
-                        'periodicity' : 'quarter',
-                }
-            #### periodicity = semester
-            if line.date.month < 7:
-                semester_begin_month = 1
-            else :
-                semester_begin_month = 7
-            first_of_semester = line.date.replace(day=1).replace(month=semester_begin_month)
-            key = 'semester_' + str(line.employee_id.id) + '_' + str(first_of_semester)
-            if key not in group_dic.keys():
-                group_dic[key] = {
-                        'employee_id' : line.employee_id.id,
-                        'start_date' : first_of_semester,
-                        'periodicity' : 'semester',
-                }
-            #### periodicity = month
-            first_of_year = line.date.replace(day=1).replace(month=1)
-            key = 'year_' + str(line.employee_id.id) + '_' + str(first_of_year)
-            if key not in group_dic.keys():
-                group_dic[key] = {
-                        'employee_id' : line.employee_id.id,
-                        'start_date' : first_of_year,
-                        'periodicity' : 'year',
-                }
+            line_end_date = line.date_end
+            if not line_end_date :
+                line_end_date = line.date
+
+            for periodicity in ['week', 'month', 'quarter', 'semester', 'year']:
+                period_begin_date = get_period_begin_date(periodicity, line.date)
+                while period_begin_date <= line_end_date:
+                    key = periodicity + str(line.employee_id.id) + '_' + str(period_begin_date)
+                    if key not in group_dic.keys():
+                        group_dic[key] = {
+                                'employee_id' : line.employee_id.id,
+                                'start_date' : period_begin_date,
+                                'periodicity' : periodicity,
+                        }
+                    period_begin_date = get_period_end_date(periodicity, period_begin_date) + relativedelta(days=1)
 
         _logger.info("Nombre d'agrégats : %s" % str(len(group_dic.keys())))
-
+        
         for report_dic in group_dic.values():
-            #_logger.info(report_dic)
+            _logger.info(report_dic)
             report = self.env['hr.employee_staffing_report'].search([('employee_id', '=', report_dic['employee_id']), ('periodicity', '=', report_dic['periodicity']), ('start_date', '=', report_dic['start_date'])])
-            #TODO : BUG cette condition ne suffit pas pour gérer les mises à jour de prévisionnels à cheval sur plsuieurs report.
-                # exemple : création d'un prévisionnel du mercredi 27 décembre 2023 au jeudi 11 janvier 2023
-                # il faut mettre à jour les rapports : 2023, 2024, S2-2023, Q4-2023, S52-2023, S1-2024, S2-2024, Q1-2024, S1-2024
             if len(report):
                 report[0].sudo().availability()
+                force_report_to_update_ids.remove(report[0])
             else :
                 self.env['hr.employee_staffing_report'].sudo().create(report_dic)
- 
 
+        for r in force_report_to_update_ids:
+            r.sudo().availability()
 
 
 
@@ -167,29 +191,7 @@ class HrEmployeeStaffingReport(models.Model):
     @api.depends('periodicity', 'start_date')
     def compute_end_date(self):
         for rec in self :
-            if rec.periodicity == 'week' :
-                if rec.start_date.isoweekday() != 1:
-                    raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité hebdomadaire devrait être un lundi (le premier jour de la semaine en occident)."))
-                rec.end_date = rec.start_date + relativedelta(days=6)
-            elif rec.periodicity == 'month' :
-                if rec.start_date.day != 1:
-                    raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité mensuelle devrait être le premier jour du mois."))
-                rec.end_date = rec.start_date + relativedelta(months=1) - relativedelta(days=1)
-            elif rec.periodicity == 'quarter' :
-                if rec.start_date.day != 1 or rec.start_date.month not in [1, 4, 7, 10]:
-                    raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité trimestrielle devrait être le premier jour de janvier, avril, juillet ou octobre."))
-                rec.end_date = rec.start_date + relativedelta(months=3) - relativedelta(days=1)
-            elif rec.periodicity == 'semester' :
-                if rec.start_date.day != 1 or rec.start_date.month not in [1, 7]:
-                    raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité semestrielle devrait être le premier jour de janvier ou de juillet."))
-                rec.end_date = rec.start_date + relativedelta(months=6) - relativedelta(days=1)
-            elif rec.periodicity == 'year' :
-                if rec.start_date.day != 1 or rec.start_date.month != 1:
-                    raise ValidationError(_("La date de début d'un rapport d'activité avec une périodicité annuelle devrait être le 1er janvier."))
-                rec.end_date = rec.start_date + relativedelta(years=1) - relativedelta(days=1)
-            else :
-                raise ValidationError(_("Seule la périodicité hebdomadaire est prise en charge pour le moment.")) #TODO
-
+            rec.end_date = get_period_end_date(rec.periodicity, rec.start_date)
 
     @api.depends('periodicity', 'start_date', 'end_date', 'employee_id')
     def availability(self):
@@ -208,7 +210,7 @@ class HrEmployeeStaffingReport(models.Model):
                 analytic_lines_list_ids.append(l.id)
             rec.analytic_lines = [(6, 0, analytic_lines_list_ids)]
 
-            _logger.info(lines)
+            #_logger.info(lines)
  
             rec.workdays = rec.employee_id.number_work_days_period(rec.start_date, rec.end_date) - lines['unavailability_unit_amount']
             rec.hollidays = lines['holiday_timesheet_unit_amount']

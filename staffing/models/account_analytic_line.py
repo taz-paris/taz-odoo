@@ -21,6 +21,7 @@ class staffingAnalyticLine(models.Model):
         return super().create(res)
 
     def _sync_project(self, vals):
+        _logger.info('---------- _sync_project account.analytic.line account_analytic_line.py')
         #_logger.info(vals)
         #TODO : si le projet change, changer le staffing_need_id
         if 'staffing_need_id' not in vals:
@@ -42,6 +43,8 @@ class staffingAnalyticLine(models.Model):
         for line in self :
             date_start = self.env.context.get('period_date_start')
             date_end = self.env.context.get('period_date_end')
+            _logger.info('%%%% context_date_start' + str(date_start))
+            _logger.info('%%%% context_date_end' + str(date_end))
 
             if not(date_start) or not(date_end):
                 line.period_unit_amount = 0
@@ -51,26 +54,38 @@ class staffingAnalyticLine(models.Model):
             date_start = datetime.strptime(str(date_start), '%Y-%m-%d').date()
             date_end = datetime.strptime(str(date_end), '%Y-%m-%d').date()
 
+            line.period_unit_amount, line.period_amount = line.compute_period_amounts_raw(date_start, date_end)
+
+
+    def compute_period_amounts_raw(self, date_start, date_end):
+            line = self
             if date_start > date_end :
                 raise ValidationError(_("Start date should be <= end date"))
 
             if line.date >= date_start and (not line.date_end or line.date_end <= date_end):
-                line.period_unit_amount = line.unit_amount
-                line.period_amount = line.amount
+                period_unit_amount = line.unit_amount
+                period_amount = line.amount
 
-            line_date_end = line.date_end
-            if not line_date_end :
-                line_date_end = line.date
+            else :
+                line_date_end = line.date_end
+                if not line_date_end :
+                    line_date_end = line.date
 
-            work_days_line = line.employee_id.number_work_days_period(line.date, line_date_end)
-            work_days_line_in_period = line.employee_id.number_work_days_period(max(line.date, date_start), min(line_date_end, date_end))
+                work_days_line = line.employee_id.number_work_days_period(line.date, line_date_end)
+                work_days_line_in_period = line.employee_id.number_work_days_period(max(line.date, date_start), min(line_date_end, date_end))
+                #_logger.info('work_days_line %s' % work_days_line)
+                #_logger.info('work_days_line_in_period %s' % work_days_line_in_period)
+                #_logger.info('line.unit_amount %s' % line.unit_amount)
 
-            if work_days_line != 0:
-                line.period_unit_amount = work_days_line_in_period/work_days_line * line.unit_amount 
-                line.period_amount = work_days_line_in_period/work_days_line * line.amount
-            else : 
-                line.period_unit_amount = 0
-                line.period_amount = 0
+                if work_days_line != 0:
+                    period_unit_amount = work_days_line_in_period/work_days_line * line.unit_amount 
+                    period_amount = work_days_line_in_period/work_days_line * line.amount
+                else : 
+                    period_unit_amount = 0
+                    period_amount = 0
+
+            return period_unit_amount, period_amount 
+
 
     category = fields.Selection(selection_add=[
             ('project_forecast', 'Prévisionnel'), 
@@ -89,7 +104,7 @@ class staffingAnalyticLine(models.Model):
 
     def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):
         # Cette fonction force les date de début/fin à un lundi/dimanche pour éviter de couper les semaines, notamment car le prévisionné est enregistré à la semaine
-
+ 
         if date_start and date_end :
             if date_start > date_end :
                 raise ValidationError(_("Start date should be <= end date"))
@@ -107,6 +122,7 @@ class staffingAnalyticLine(models.Model):
 
 
     def get_timesheet_grouped_raw(self, pivot_date, date_start=None, date_end=None, filters=None):
+        _logger.info('------ get_timesheet_grouped_raw date_start=%s, date_end=%s' % (date_start, date_end))
         # Usage de cette fonction :
         #   - Calculer le temps pointé / prévisionnel d'un consultant
         #   - Calculer la disponibilité d'un consultant sur une période (passé, présente ou future)
@@ -230,30 +246,39 @@ class staffingAnalyticLine(models.Model):
         for line in validated_other_internal_ids :
             validated_other_internal_unit_amount += line.unit_amount
 
-        ##### Contrairement aux pointages validés, une période d'affectation sur Napta n'est obligatoirement à la maille du jour, et peut être à cheval avec la période visée
+        ##### Contrairement aux pointages validés et aux congés, une période d'affectation sur Napta n'est obligatoirement à la maille du jour, et peut être à cheval avec la période visée
         ######### Donc on passe par une fonction pouur calculer le nombre de jours (et montant) affectés à la période ciblée
 
         previsional_timesheet_amount = 0.0
         previsional_timesheet_unit_amount = 0.0
         for line in previsional_timesheet_ids:
-            previsional_timesheet_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_amount
-            previsional_timesheet_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
+            period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
+            previsional_timesheet_amount += period_amount
+            previsional_timesheet_unit_amount += period_unit_amount
+            #previsional_timesheet_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
+            #previsional_timesheet_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_amount
 
         previsional_timesheet_before_pivot_date_unit_amount = 0.0
         for line in previsional_timesheet_before_pivot_date_ids :
-            previsional_timesheet_before_pivot_date_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
+            period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
+            previsional_timesheet_before_pivot_date_unit_amount += period_unit_amount
+            #previsional_timesheet_before_pivot_date_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
 
         unavailability_unit_amount = 0.0
         for line in unavailability_timesheet_ids :
-            unavailability_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
+            period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
+            unavailability_unit_amount += period_unit_amount
+            #unavailability_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
 
 
         res = {
                 'pivot_date' : pivot_date,
-                'previsional_timesheet_ids' : previsional_timesheet_ids, 
+                'start_date' : date_start,
+                'end_date' : date_end,
                 'validated_timesheet_ids' : validated_timesheet_ids,
                 'validated_timesheet_amount' : validated_timesheet_amount,
                 'validated_timesheet_unit_amount' : validated_timesheet_unit_amount,
+                'previsional_timesheet_ids' : previsional_timesheet_ids, 
                 'previsional_timesheet_amount' : previsional_timesheet_amount,
                 'previsional_timesheet_unit_amount' : previsional_timesheet_unit_amount,
                 'holiday_timesheet_ids' : holiday_timesheet_ids,
@@ -269,7 +294,7 @@ class staffingAnalyticLine(models.Model):
                 'unavailability_timesheet_ids' : unavailability_timesheet_ids,
                 'unavailability_unit_amount' : unavailability_unit_amount,
                 }
-        #_logger.info(res)
+        _logger.info(res)
         return res
 
 

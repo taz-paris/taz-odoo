@@ -73,7 +73,7 @@ class staffingProject(models.Model):
 
     def open_forecast_pivot_timesheets(self):
         date = datetime.today()
-        timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=date+timedelta(days=-21), date_end=date+timedelta(days=90), filters=[])
+        timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=(date+timedelta(days=-21)).date(), date_end=(date+timedelta(days=90)).date(), filters=[])
         rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids'] + timesheets_data['holiday_timesheet_ids']
 
         rec_id = []
@@ -81,6 +81,7 @@ class staffingProject(models.Model):
             rec_id.append(i.id)
 
         view_id = self.env.ref("staffing.view_forecast_pivot")
+        _logger.info('========================== OKKKKKKK')
         return {
                 'type': 'ir.actions.act_window',
                 'name': 'Forecast',
