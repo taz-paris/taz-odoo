@@ -242,7 +242,7 @@ class projectAccountProject(models.Model):
 	'other_part_amount_initial',
 	'other_part_cost_initial',
 	'project_outsourcing_link_ids',
-	'book_period_ids', 'book_employee_distribution_ids', 'book_employee_distribution_period_ids', 'book_validation_employee_id', 'book_validation_datetime',
+	'book_employee_distribution_ids', 'book_validation_datetime',
     )
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
@@ -501,7 +501,7 @@ class projectAccountProject(models.Model):
 
 
     def compute_sale_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
-        _logger.info('----------compute_sale_order_total => with_direct_payment=' + str(with_direct_payment))
+        _logger.info('----------compute_sale_order_total => with_direct_payment= %s =>with_draft_sale_order= %s' % (with_direct_payment, with_draft_sale_order))
         self.ensure_one()
         rec = self
         line_ids = rec.get_sale_order_line_ids()
@@ -760,6 +760,7 @@ class projectAccountProject(models.Model):
     @api.depends('accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance')
     def compute_has_provision_running(self):
         for rec in self:
+            _logger.info('=======compute_has_provision_running')
             rec.has_provision_running = False
             last_closing_sorted = rec.accounting_closing_ids.filtered(lambda r: r.is_validated==True).sorted(key=lambda r: r.closing_date, reverse=True)
             if len(last_closing_sorted):
