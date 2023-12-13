@@ -18,7 +18,6 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
     def _onchange_date(self):
         self.project_ids = False
         p = self.env['project.project'].search([('number', '!=', False), ('company_id', '=', self.company_id.id), '|', ('has_provision_running', '=', True), ('stage_id.state', 'in', ['before_launch', 'launched'])])
-        #TODO : il faudrait mieux les projets (non TERMINES à cette DATE OU cloturés entre la DATE et le pointage précédent) ET (qui n'ont pas cloture postérieur ou égal à cette date)
         self.project_ids = p.ids
 
     def _default_date(self):
@@ -28,7 +27,7 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     date = fields.Date('Date de clôture', default=_default_date)
-    project_ids = fields.Many2many('project.project', check_company=True)
+    project_ids = fields.Many2many('project.project', check_company=False)
 
 
 

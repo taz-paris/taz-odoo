@@ -133,7 +133,7 @@ class projectOutsourcingLink(models.Model):
 
 
 
-    @api.depends('project_id', 'partner_id', 'order_sum_purchase_order_lines', 'order_direct_payment_amount', 'sum_account_move_lines')
+    @api.depends('project_id', 'partner_id')
     def compute(self):
         _logger.info('--compute project_outsourcing_link')
         for rec in self :
@@ -181,20 +181,20 @@ class projectOutsourcingLink(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    order_sum_purchase_order_lines = fields.Monetary('Total HT des commandes de Tasmane enregistrées', compute=compute)
-    order_direct_payment_amount = fields.Monetary('Montant HT paiement direct', compute=compute, help="Montant payé directement par le client final au sous-traitant de Tasmane")
-    order_company_payment_amount = fields.Monetary('Montant HT à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute)
+    order_sum_purchase_order_lines = fields.Monetary('Total HT des commandes de Tasmane enregistrées', compute=compute, store=True)
+    order_direct_payment_amount = fields.Monetary('Montant HT paiement direct', compute=compute, store=True, help="Montant payé directement par le client final au sous-traitant de Tasmane")
+    order_company_payment_amount = fields.Monetary('Montant HT à payer à ce sous-traitant par Tasmane', help="Différence entre le total des commandes de Tasmane à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute, store=True)
 
-    sum_account_move_lines = fields.Monetary('Montant HT déjà facturé à Tasmane', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute)
-    order_company_payment_to_invoice = fields.Monetary('Montant HT restant à facturer à Tasmane')
+    sum_account_move_lines = fields.Monetary('Montant HT déjà facturé à Tasmane', help="Somme des factures envoyées par le sous-traitant à Tasmane moins la somme des avoirs dûs par Tasmane à ce sous traitant pour ce projet.", compute=compute, store=True)
+    order_company_payment_to_invoice = fields.Monetary('Montant HT restant à facturer à Tasmane', compute=compute, store=True)
     sum_account_move_lines_with_tax = fields.Monetary('Montant TTC déjà facturé à Tasmane', compute=compute, store=True)
 
-    outsource_part_amount_current = fields.Monetary('Valorisation HT de la part sous-traitée', compute=compute)
-    marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', compute=compute)
-    marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', compute=compute)
+    outsource_part_amount_current = fields.Monetary('Valorisation HT de la part sous-traitée', compute=compute, store=True)
+    marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) actuelle', compute=compute, store=True)
+    marging_rate_current = fields.Float('Marge sur part sous-traitée (%) actuelle', compute=compute, store=True)
 
-    order_direct_payment_done = fields.Monetary('Somme HT factures en paiement direct validées par Tasmane', compute=compute)
-    order_direct_payment_done_detail = fields.Text('Détail des factures en paiement direct validées par Tasmane', compute=compute)
+    order_direct_payment_done = fields.Monetary('Somme HT factures en paiement direct validées par Tasmane', compute=compute, store=True)
+    order_direct_payment_done_detail = fields.Text('Détail des factures en paiement direct validées par Tasmane', compute=compute, store=True)
     order_direct_payment_to_do = fields.Monetary('Montant HT restant à valider par Tasmane', compute=compute, store=True)
 
     company_paid = fields.Monetary('Montant TTC déjà payé par Tasmane au S/T', compute=compute, store=True)

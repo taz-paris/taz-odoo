@@ -111,6 +111,9 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
         for report_dic in group_dic.values():
             #_logger.info(report_dic)
             report = self.env['hr.employee_staffing_report'].search([('employee_id', '=', report_dic['employee_id']), ('periodicity', '=', report_dic['periodicity']), ('start_date', '=', report_dic['start_date'])])
+            #TODO : BUG cette condition ne suffit pas pour gérer les mises à jour de prévisionnels à cheval sur plsuieurs report.
+                # exemple : création d'un prévisionnel du mercredi 27 décembre 2023 au jeudi 11 janvier 2023
+                # il faut mettre à jour les rapports : 2023, 2024, S2-2023, Q4-2023, S52-2023, S1-2024, S2-2024, Q1-2024, S1-2024
             if len(report):
                 report[0].sudo().availability()
             else :

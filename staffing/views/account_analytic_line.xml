@@ -45,10 +45,8 @@
                     <field name="unit_amount" sum="Total" optional="hide"/>
                     <field name="period_unit_amount" sum="Total"/>
                     <field name="period_amount" sum="Total"/>
-		    <field name="project_id" />
+		    <field name="project_id" optional="hide"/>
                     <field name="name" optional="hide"/>
-		    <!--
-		    -->
                 </tree>
             </field>
         </record>

@@ -53,6 +53,7 @@ class ContactUserLink(models.Model):
                 link.formality = 'vous_nom'
         """
 
+        """
         dict_tags = {
             'Voeux_ADU_email_perso' : {'user_id' : 6, 'communication_preference' : 'email_perso'},
             'Voeux_ADU_papier_perso' : {'user_id' : 6, 'communication_preference' : 'paper_perso'},
@@ -122,7 +123,7 @@ class ContactUserLink(models.Model):
                 #        contact_user_links[0].communication_preference = dic['communication_preference']
 
         _logger.info("FIN init_from_taggs")
-
+        """
 
 
     @api.model
@@ -150,6 +151,7 @@ class ContactUserLink(models.Model):
                ], order="date_deadline desc")
             #_logger.info(passed_business_action)
             rec.is_late = False
+            rec.next_meeting_before = False
             if len(passed_business_action):
                 rec.last_business_action_id = passed_business_action[0]
                 rec.date_last_business_action = passed_business_action[0].date_deadline
@@ -218,11 +220,11 @@ class ContactUserLink(models.Model):
          ('4', "4 - Décideur -  peut décider par lui-même"),
          ], store=True, string="Niveau d'influence chez le client", compute="_compute_rel_inhouse_influence_level", inverse="_inverse_rel_inhouse_influence_level") 
 
-    last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=True)
-    date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=False)
-    next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=True)
-    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce tasmanien auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=True, default=False) #impossible de stocker la valeur de is_late car sa valeur reposer sur la date du jour (sauf à créer un traitement batch)
+    last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=False)
+    next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce tasmanien avec ce contact.", compute=_compute_date_business_action, store=False)
     next_meeting_before = fields.Date('À revoir avant le', compute=_compute_date_business_action, store=True)
+    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce tasmanien auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=True, default=False) #impossible de stocker la valeur de is_late car sa valeur reposer sur la date du jour (sauf à créer un traitement batch)
+    date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=False)
     
     #RDV to plan before
     proximity_level = fields.Selection([

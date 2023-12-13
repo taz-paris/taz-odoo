@@ -37,18 +37,6 @@ class staffingAnalyticLine(models.Model):
         vals['employee_id'] =  need.staffed_employee_id.id
         return vals
 
-    category = fields.Selection(selection_add=[
-            ('project_forecast', 'Prévisionnel'), 
-            ('project_employee_validated', 'Pointage (validé ou non)'),
-        ])
-
-    staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")
-    rel_project_staffing_aggregation = fields.Selection(related='project_id.staffing_aggregation', store=True)
-    hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
-    employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
-    date_end = fields.Date("Date de fin")
-
- 
     def compute_period_amounts(self):
         _logger.info('---------- compute_period_amounts >> account_analytic_line.py')
         for line in self :
@@ -84,6 +72,16 @@ class staffingAnalyticLine(models.Model):
                 line.period_unit_amount = 0
                 line.period_amount = 0
 
+    category = fields.Selection(selection_add=[
+            ('project_forecast', 'Prévisionnel'), 
+            ('project_employee_validated', 'Pointage (validé ou non)'),
+        ])
+
+    staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")
+    rel_project_staffing_aggregation = fields.Selection(related='project_id.staffing_aggregation', store=True)
+    hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
+    employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
+    date_end = fields.Date("Date de fin")
 
     period_unit_amount = fields.Float("J. période", group_operator='sum', help="Nombre de jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(18,8), compute=compute_period_amounts)
     period_amount = fields.Float("Montant période", group_operator='sum', help="Valorisation en € des jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(13,3), compute=compute_period_amounts)
@@ -104,7 +102,6 @@ class staffingAnalyticLine(models.Model):
             date_end_sunday = date_end + timedelta(days=date_end_added_days)
 
         monday_pivot_date =  pivot_date - timedelta(days=pivot_date.weekday())
-        monday_pivot_date = monday_pivot_date.date()
 
         return self.get_timesheet_grouped_raw(monday_pivot_date, date_start=date_start_monday, date_end=date_end_sunday, filters=filters)
 
@@ -277,7 +274,7 @@ class staffingAnalyticLine(models.Model):
 
 
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        #_logger.info('======================= read_group account_analytic_line.py')
+        _logger.info('======================= read_group account_analytic_line.py')
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         if 'period_unit_amount' in fields or 'period_amount' in fields:
             for line in res:

@@ -247,7 +247,7 @@ class projectAccountProject(models.Model):
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
         for rec in self:
-            _logger.info(str(rec.number) + "=>" +str(rec.name))
+            _logger.info(str(rec.number) + "==========================================>" +str(rec.name))
             rec.check_partners_objects_consitency() #forcer l'appel à cette fonction même si cette fonction compute n'écrit rien... car elle est appelée par les lignes de factures/sale.order/purchase.order et assure que tous ces objets liés à ce projet sont bien portés par un res.partner qui est soit le client final, soit un client intermédiaire soit un fournisseur d'un outsourcing_link
             old_default_book_end = rec.default_book_end
 
@@ -286,8 +286,8 @@ class projectAccountProject(models.Model):
                     cosource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     cosource_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
                 elif link.link_type == 'other' :
-                    other_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     other_part_amount_current += link.outsource_part_amount_current
+                    other_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done
                     other_part_cost_futur += link.order_company_payment_to_invoice + link.order_direct_payment_to_do
                 else :
                     raise ValidationError(_("Type d'achat non géré : %s" % str(link.link_type)))
