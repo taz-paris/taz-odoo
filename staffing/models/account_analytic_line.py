@@ -21,7 +21,7 @@ class staffingAnalyticLine(models.Model):
         return super().create(res)
 
     def _sync_project(self, vals):
-        _logger.info('---------- _sync_project account.analytic.line account_analytic_line.py')
+        #_logger.info('---------- _sync_project account.analytic.line account_analytic_line.py')
         #_logger.info(vals)
         #TODO : si le projet change, changer le staffing_need_id
         if 'staffing_need_id' not in vals:
@@ -39,12 +39,12 @@ class staffingAnalyticLine(models.Model):
         return vals
 
     def compute_period_amounts(self):
-        _logger.info('---------- compute_period_amounts >> account_analytic_line.py')
+        #_logger.info('---------- compute_period_amounts >> account_analytic_line.py')
         for line in self :
             date_start = self.env.context.get('period_date_start')
             date_end = self.env.context.get('period_date_end')
-            _logger.info('%%%% context_date_start' + str(date_start))
-            _logger.info('%%%% context_date_end' + str(date_end))
+            #_logger.info('%%%% context_date_start' + str(date_start))
+            #_logger.info('%%%% context_date_end' + str(date_end))
 
             if not(date_start) or not(date_end):
                 line.period_unit_amount = 0
@@ -129,14 +129,14 @@ class staffingAnalyticLine(models.Model):
 
         # Modèle de données :
         #   - La base de données stock des lignes analytic différentes pour le pointage réalisé et le prévisionnel, qui sont conservées en parallèle dans le temps
-        #   - Le prévisionnel est exprimé à la semaine : le prévisionnel de la semaine est sur une ligne analytic (voire 2 si cession entre 2 mois au cour de la semaine)
-        #   - Le pointé peut être exprimé par jour ou à la semaine
-        # Conséquence : la date pivot qui sert à catégoriser et filtrer les lignes doit être exprimée en début de semaine, sinon on risque de compter du prévisionnel ET du pointé pour la même semaine
+        #   - Le prévisionnel possède une date de fin : il est souvent exprimé à la semaine sur Napta mais posséder n'importe quelle date de début et de fin
+        #           # Donc sa période peut être à cheval sur plusieurs semaine/mois/années.
+        #   - Le pointé est toujours exprimé sur un jour précis
+        #   - Les demandes de congés validées sont converties en pointage à la maille de la journée par Odoo
 
         #TODO : interdire de modifier le prévisionnel après la fin de la semaine
         #TODO : interdire d'avoir plus d'une ligne d'une catégorie, d'un projet / tesk et d'un employé par date
         #TODO : passer le pointage à validé pour toute la semaine et tous les projets en même temps
-           
         #TODO : interdire les affectations hors de la période du projet => ATTENTION : c'est autorisé sur Fitnet donc risque de blocage
                 # En revanche : laisser la possibilité de pointer après la date de fin de l'affectation initiale, sinon ça ne sera pas pratique
 
@@ -145,11 +145,17 @@ class staffingAnalyticLine(models.Model):
             if date_start > date_end :
                 raise ValidationError(_("Start date should be <= end date"))
 
-        dic = [('category', '!=', 'project_draft')]
+        dic = [
+                ('employee_id', '!=', False),
+                ('project_id', '!=', False),
+                ('category', 'in', ['project_forecast', 'project_employee_validated', 'other']),
+                ('rel_project_staffing_aggregation', '!=', False),
+              ]
+
         if date_end :
-            dic.append(('date', '<', date_end))
+            dic.append(('date', '<=', date_end))
         if date_start:
-            dic += ['|', '&', ('date_end', '!=', False), ('date_end', '>=', date_start), ('date', '>=', date_start)]
+            dic += ['|', '&', ('date_end', '=', False), ('date_end', '>=', date_start), ('date', '>=', date_start)]
 
         if filters:
             for condition in filters:
@@ -162,6 +168,42 @@ class staffingAnalyticLine(models.Model):
 
         pivot_date = pivot_date.date()
 
+        aggreation = {}
+        #### first level = project taffing_aggregation
+        ###### second level = timesheet.category
+        ######## third level = list of timesheets / sum_period_unit_amount, sum_period_amount
+        for aggregation_key in dict(self.env['project.project']._fields['staffing_aggregation'].selection).keys():
+                aggreation[aggregation_key] = {}
+                for category_key in dict(self.env['account.analytic.line']._fields['category'].selection).keys():
+                    aggreation[aggregation_key][category_key] = {
+                            'timesheet_ids' : [],
+                            'sum_period_unit_amount' : 0.0,
+                            'sum_period_amount' : 0.0,
+                        }
+            
+        for timesheet in timesheets:
+            if timesheet.encoding_uom_id.id != self.env.ref("uom.product_uom_day").id:
+                # L'encoding_uom_id n'est pas stocké, donc on ne peut pas le mettre dans le filtre de la requête SQL
+                continue
+
+            agg = aggreation[timesheet.rel_project_staffing_aggregation]
+            agg[timesheet.category]['timesheet_ids'] += timesheet
+
+            period_unit_amount, period_amount = timesheet.compute_period_amounts_raw(date_start, date_end)
+            agg[timesheet.category]['sum_period_unit_amount'] += period_unit_amount
+            agg[timesheet.category]['sum_period_amount'] += period_amount
+
+        res = {
+                'pivot_date' : pivot_date,
+                'start_date' : date_start,
+                'end_date' : date_end,
+                'aggreation_by_project_type' : aggreation,
+              }
+
+        _logger.info(res)
+        return res
+
+        """
         previsional_timesheet_ids = []
         previsional_timesheet_before_pivot_date_ids = []
         validated_timesheet_ids = []
@@ -177,7 +219,6 @@ class staffingAnalyticLine(models.Model):
                 continue
             if timesheet.project_id.id == 1147 :
                 #ne pas compter les pointage sur "Complément pour soumettre" => plus utilisé depuis la bascule Napta
-                #TODO : pas propre de hardoder l'ID : soit avoir un booléen des lignes à exclure ... soit supprimer ce projet, les staffing.need et les analytics account.line qui vont avec !
                 continue
 
             if timesheet.holiday_id:
@@ -199,7 +240,7 @@ class staffingAnalyticLine(models.Model):
                 if timesheet.category == 'project_employee_validated':
                     if timesheet.date < pivot_date:
                         unavailability_timesheet_ids.append(timesheet)
-                if timesheet.category == 'project_forecast':
+                elif timesheet.category == 'project_forecast':
                     if timesheet.date >= pivot_date:
                         unavailability_timesheet_ids.append(timesheet)
             elif timesheet.rel_project_staffing_aggregation == 'mission':
@@ -211,18 +252,7 @@ class staffingAnalyticLine(models.Model):
                         previsional_timesheet_ids.append(timesheet)
                     else : 
                         previsional_timesheet_before_pivot_date_ids.append(timesheet)
-                # Est-ce qu'on garde les prévisionnels antérieurs à la date pivot si rien n'a été pointé ? => NON, on ne bidouille pas : le consultant n'avait qu'à pointer.
-                    # => OPTION :  on retourne un indicateur montrant qu'il y a un manque de pointage sur une période antéireure à la date pivot
 
-                # En théorie, le prévisionnel devrait être diminumé des congés par le consultant ou le manager, mais ça peut ne pas être le cas 
-                    # => pour une semaine calendaire donnée :
-                        # si ***antérieur à monday_pivot*** => alors rien à faire : le pointage validé tient forcément compte des comgés, on ne peut structurellement pas compter 2 fois
-                            # ==> ... sauf si la période de congés est enregistrée après la validation du pointage de la semaine considérée ==> le contrôle de jour max de pointage devrait empêcher la validation du congés tant que le pointage validé n'est pas corrigé => vérifier que le message d'erreur lors de la tentative de validation du congés après la vidation du poointage est compréhensible
-
-
-                        # si ***postérieur ou égal à monday_pivot*** => si la somme congés+previsionnel pour une semaine > nb jours ouvrés de la semaine (aleternative : si (congés+previsionel) > (nb jour pointage max par semaine - nb jours férié sur les jours ouvrés de la semaine) : diminuer le prévisionnel de la différence ==> Bof : pas terrible de faire des choses automatiquement dans le dos du consultant, en plus ça n'est pas pédagogique
-                            # ... ou alors on ajoute un contrôle lors de la pose des congés par le salarié (recontrôlé à la validation par Denis) pour que congés+prévisionnel ne dépasse pas nb jour ouvré sur la semaine ===> mais ça ne peut fonctionner que si la demande de congés est gérée dans Odoo => tant qu'on importe de Fitnet il peut y avoir des cas où congés+prévisionel > nb jours ouvrés
-                            # TODO une fois la synchro Fitnet terminée : déclencher un wizzard à la validation du congès par le consultant qui lui affiche son prévisionnel et lui demande de l'ajuster
 
         holiday_timesheet_unit_amount = 0.0
         for line in holiday_timesheet_ids:
@@ -238,8 +268,10 @@ class staffingAnalyticLine(models.Model):
         for line in validated_learning_ids :
             validated_learning_unit_amount += line.unit_amount
 
+        _logger.info("==== Sales")
         validated_sales_unit_amount = 0.0
         for line in validated_sales_ids :
+            _logger.info(line.unit_amount)
             validated_sales_unit_amount += line.unit_amount
 
         validated_other_internal_unit_amount = 0.0
@@ -248,27 +280,22 @@ class staffingAnalyticLine(models.Model):
 
         ##### Contrairement aux pointages validés et aux congés, une période d'affectation sur Napta n'est obligatoirement à la maille du jour, et peut être à cheval avec la période visée
         ######### Donc on passe par une fonction pouur calculer le nombre de jours (et montant) affectés à la période ciblée
-
         previsional_timesheet_amount = 0.0
         previsional_timesheet_unit_amount = 0.0
         for line in previsional_timesheet_ids:
             period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
             previsional_timesheet_amount += period_amount
             previsional_timesheet_unit_amount += period_unit_amount
-            #previsional_timesheet_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
-            #previsional_timesheet_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_amount
 
         previsional_timesheet_before_pivot_date_unit_amount = 0.0
         for line in previsional_timesheet_before_pivot_date_ids :
             period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
             previsional_timesheet_before_pivot_date_unit_amount += period_unit_amount
-            #previsional_timesheet_before_pivot_date_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
 
         unavailability_unit_amount = 0.0
         for line in unavailability_timesheet_ids :
             period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
             unavailability_unit_amount += period_unit_amount
-            #unavailability_unit_amount += line.with_context(period_date_start=date_start, period_date_end=date_end).period_unit_amount
 
 
         res = {
@@ -296,10 +323,11 @@ class staffingAnalyticLine(models.Model):
                 }
         _logger.info(res)
         return res
+        """       
 
 
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        _logger.info('======================= read_group account_analytic_line.py')
+        #_logger.info('======================= read_group account_analytic_line.py')
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         if 'period_unit_amount' in fields or 'period_amount' in fields:
             for line in res:
@@ -355,14 +383,11 @@ class staffingAnalyticLine(models.Model):
         if not self.employee_id :
             return False,False
         
-        #self.employee_id.availability()
-        #TODO : surcharger unlink pour recalculer l'availability
-
         if timesheet.holiday_id :
             return False,False
 
         encoding_uom_id = self.encoding_uom_id
-        #self.env.company.timesheet_encode_uom_id
+
         if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
             cost = timesheet._hourly_cost()
             cost_line = False

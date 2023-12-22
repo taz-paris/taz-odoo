@@ -63,13 +63,6 @@ class projectAccountingAccountMove(models.Model):
         for move in self:
             if move.partner_id.default_invoice_payement_bank_account:
                 move.partner_bank_id = move.partner_id.default_invoice_payement_bank_account
-            #else :
-            #    bank_ids = move.bank_partner_id.bank_ids.filtered(
-            #        lambda bank: not bank.company_id or bank.company_id == move.company_id)
-            #    move.partner_bank_id = bank_ids[0] if bank_ids else False
-    # TODO : rendre le move.partner_bank_id obligatoire pour les factures clients (out_invoice)
-        # si le partenr n'a pas de compte par defaut, l'ADV devra en mettre un manuellement sur la facture
-    # TODO : quand move.partner_bank_id change ; sur le compte bancaire par défaut sur le partenaire n'est pas renseigner, proposer à l'utilisateur de l'ajouter sur la fiche du partner (wizzard de validation) 
     
     def _compute_payments_widget_to_reconcile_info(self):
         _logger.info('_compute_payments_widget_to_reconcile_info')
@@ -129,17 +122,25 @@ class projectAccountingAccountMoveLine(models.Model):
         for rec in self:
             rec.price_total_signed = rec.price_total * rec.direction_sign * -1
 
-    @api.depends('move_id.amount_total', 'move_id.amount_residual', 'price_total')
+    @api.depends('parent_payment_state', 'parent_state', 'move_id.amount_total', 'move_id.amount_residual', 'price_total', 'direction_sign')
     def _compute_amount_paid(self):
+        _logger.info('--- _compute_amount_paid')
         for rec in self:
             if rec.parent_payment_state == 'reversed' :#or rec.parent_state != 'posted':
                 #TODO : vérifier la conséquence si on supprimait la première clause : rec.parent_payment_state == 'reversed'
-                _logger.info(rec.parent_payment_state)
-                _logger.info(rec.parent_state)
+                #_logger.info(rec.parent_payment_state)
+                #_logger.info(rec.parent_state)
                 rec.amount_paid = 0.0
             else:
+                #_logger.info('rec.move_id.amount_total ' + str(rec.move_id.amount_total))
+                #_logger.info('rec.move_id.amount_residual ' + str(rec.move_id.amount_residual))
+                #_logger.info('rec.price_total ' + str(rec.price_total))
+                #_logger.info('rec.move_id.amount_total ' + str(rec.move_id.amount_total))
                 invoice_amount_paid = rec.move_id.amount_total - rec.move_id.amount_residual
-                rec.amount_paid = invoice_amount_paid * rec.direction_sign * -1 * (rec.price_total / rec.move_id.amount_total)
+                rate = 1
+                if rec.move_id.amount_total : 
+                    rate = rec.price_total / rec.move_id.amount_total
+                rec.amount_paid = invoice_amount_paid * rec.direction_sign * -1 * rate
 
     parent_payment_state = fields.Selection(related='move_id.payment_state', store=True, string="État du paiement (fature)")
     parent_state = fields.Selection(string="État (fature)")

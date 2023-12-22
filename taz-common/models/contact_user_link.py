@@ -199,8 +199,9 @@ class ContactUserLink(models.Model):
             last_draft_date = False
             if rec.last_office365_mail_draft:
                 last_draft_date = json.loads(rec.last_office365_mail_draft)
-                last_draft_date = datetime.datetime.strptime(last_draft_date['createdDateTime'], "%Y-%m-%dT%H:%M:%SZ")
-                last_draft_date = datetime.date(last_draft_date.year, last_draft_date.month, last_draft_date.day)
+                if last_draft_date and 'createdDateTime' in last_draft_date.keys() :
+                    last_draft_date = datetime.datetime.strptime(last_draft_date['createdDateTime'], "%Y-%m-%dT%H:%M:%SZ")
+                    last_draft_date = datetime.date(last_draft_date.year, last_draft_date.month, last_draft_date.day)
             if (rec.communication_preference not in ['email_perso', 'email_auto']) or (last_draft_date and (last_draft_date > datetime.date.today() + relativedelta(months=-2, day=1))) or (self.env.user.id != rec.user_id.id) or not rec.mail_template :
                 rec.can_generate_office365_mail_draft = False 
             else :
@@ -249,6 +250,7 @@ class ContactUserLink(models.Model):
     mail_template = fields.Many2one('ir.ui.view', "Modèle mail voeux", domain=[('name', 'ilike', 'voeux'), ('type', '=', 'qweb')])
     last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
     can_generate_office365_mail_draft = fields.Boolean("Peut générer brouillon", compute=compute_can_generate_office365_mail_draft)
+    mail_sent = fields.Boolean("Voeux envoyé", help="Case pouvant être cochée manuellement par l'utilsiateur une fois qu'il a envoyé le mail - pour faciliter le suivi.")
 
 
     def get_html_mail(self):

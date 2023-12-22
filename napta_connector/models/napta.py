@@ -335,7 +335,7 @@ class naptaProject(models.Model):
     _sql_constraints = [
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
     is_prevent_napta_creation = fields.Boolean("Ne pas créer sur Napta (dont portage pur)")
     napta_to_sync = fields.Boolean("Données à envoyer sur Napta")
     napta_billing_method = fields.Selection([
@@ -460,7 +460,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        client.refresh_cache()
+        #client.refresh_cache()
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -475,6 +475,7 @@ class naptaProject(models.Model):
         self.env['res.users'].create_update_odoo()
         self.env['hr.leave.type'].create_update_odoo_user_holiday_category()
         self.env['hr.leave'].create_update_odoo_user_holiday()
+        a=1/0
         self.env['hr.work.location'].create_update_odoo_location()
         self.env['hr.contract'].create_update_odoo_user_history()
         self.env['project.project.stage'].create_update_odoo_projectstatus()
@@ -493,7 +494,7 @@ class naptaPartner(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta customer')
@@ -510,7 +511,7 @@ class naptaProjectStage(models.Model):
     _sql_constraints = [
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project stage')
@@ -541,7 +542,7 @@ class naptaNeed(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
 
     def create_update_odoo(self):
@@ -574,7 +575,7 @@ class naptaAnalyticLine(models.Model):
         # ATTENTION : le pointé et le préviionnel sont deux objets sur Napta => donc c'est la clé composée qui est unique. ==> Quels impacts sur le futur ? TODO
             #TODO : surcharger la méthode de recherche pour retourner une erreur si on cherche sur le champ napta_id sans avoir valorisé category avec une seule valeur ?
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
     is_timesheet_closed_on_napta = fields.Boolean("Feuille de temps validée sur Napta")
 
 
@@ -645,7 +646,7 @@ class naptaResUsers(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
     def create_update_odoo(self):
         _logger.info('---- BATCH Create or update Odoo user')
@@ -680,7 +681,7 @@ class naptaJob(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
     def create_update_odoo_user_position(self):
         _logger.info('---- BATCH Create or update Odoo user_position')
@@ -701,7 +702,7 @@ class naptaHrContract(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
 
     def create_update_odoo_user_history(self):
@@ -805,7 +806,7 @@ class naptaHrDepartment(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
 
     def create_update_odoo_business_unit(self):
@@ -826,7 +827,7 @@ class naptaHrLeave(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
     def create_update_odoo_user_holiday(self):
         _logger.info('---- BATCH Create or update Odoo user_holiday')
@@ -837,15 +838,17 @@ class naptaHrLeave(models.Model):
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
             numberOfDays = odoo_user.number_work_days_period(start_date, end_date) #TODO
+            _logger.info(numberOfDays)
             request_date_from_period = 'am'
             if user_holiday['attributes']['start_date_from_morning'] == False :
                 request_date_from_period = 'pm'
                 numberOfDays -= 0.5
+            _logger.info(numberOfDays)
             request_date_to_period = 'pm'
             if user_holiday['attributes']['end_date_until_afternoon'] == False :
                 request_date_to_period = 'am'
                 numberOfDays -= 0.5
-
+            _logger.info(numberOfDays)
 
             dic = {
                     'napta_id' : napta_id,
@@ -863,6 +866,7 @@ class naptaHrLeave(models.Model):
                         # TODO : doit-on obligatoirement envoyer cet attribut à Odoo... qui doit le reclaculer de son côté...
                     'state' : 'validate',
                 }
+            _logger.info(dic)
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday') #TODO
         #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
@@ -891,7 +895,7 @@ class naptaHrLeaveType(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
 
 
     def create_update_odoo_user_holiday_category(self):
@@ -913,7 +917,7 @@ class naptaHrWorkLocation(models.Model):
     _sql_constraints = [
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
-    napta_id = fields.Char("Napta ID")
+    napta_id = fields.Char("Napta ID", copy=False)
     address_id = fields.Many2one(required=False)
 
 

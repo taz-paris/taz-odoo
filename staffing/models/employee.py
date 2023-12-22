@@ -169,8 +169,8 @@ class staffingEmployee(models.Model):
             raise ValidationError(_("Start date should be <= end date"))
         dic = [('employee_id', '=', self.id)]
         pivot_date = datetime.today()
-        lines = self.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_start=date_start, date_end=date_end, filters=dic)
-        c = lines['validated_timesheet_unit_amount'] + lines['previsional_timesheet_unit_amount'] + lines['holiday_timesheet_unit_amount']
+        lines = self.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_start=date_start, date_end=date_end, filters=dic)['aggreation_by_project_type']
+        c = lines['mission']['project_employee_validated']['sum_period_unit_amount'] + lines['mission']['project_forecast']['sum_period_unit_amount'] + lines['holidays']['other']['sum_period_unit_amount']
         #_logger.info("       > %s" % str(c))
         return c
 
@@ -219,12 +219,13 @@ class staffingEmployee(models.Model):
     def open_employee_pivot_timesheets(self):
         date = datetime.today()
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=None, date_end=None, filters=[('employee_id', '=', self.id)])
-        rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids'] + timesheets_data['holiday_timesheet_ids']
-        #TODO : il peut y avoir un recouvrement entre des congés et du prévisionnel...
+        lines = timesheets_data['aggreation_by_project_type']
 
-        rec_id = []
-        for i in rec_ids:
-            rec_id.append(i.id)
+        analytic_lines_list_ids = []
+        for aggregation in lines.values() :
+            for category in aggregation.values() :
+                for timesheet in category['timesheet_ids']:
+                    analytic_lines_list_ids.append(timesheet.id)
 
         view_id = self.env.ref("staffing.view_employee_pivot")
         return {
@@ -234,7 +235,7 @@ class staffingEmployee(models.Model):
                 'view_type': 'pivot',
                 'view_mode': 'pivot',
                 'view_id': view_id.id,
-                'domain' : [('id', 'in', rec_id)],
+                'domain' : [('id', 'in', analytic_lines_list_ids)],
                 'context': {'search_default_history_3months' : 1},
                 'target': 'current',
             }

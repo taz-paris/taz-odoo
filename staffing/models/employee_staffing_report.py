@@ -66,6 +66,7 @@ def get_period_end_date(periodicity, period_begin_date):
 class staffingAnalyticLine_employee_staffing_report(models.Model):
     _inherit = 'account.analytic.line'
 
+    """
     def write(self, vals):
         _logger.info('---------- write account.analytic.line employee_staffing_report.py')
         report_to_update = []
@@ -108,6 +109,7 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
 
         return res
 
+    """
 
     def create_update_timesheet_report(self, force_report_to_update_ids=[]):
         group_dic = {}
@@ -138,7 +140,8 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
             report = self.env['hr.employee_staffing_report'].search([('employee_id', '=', report_dic['employee_id']), ('periodicity', '=', report_dic['periodicity']), ('start_date', '=', report_dic['start_date'])])
             if len(report):
                 report[0].sudo().availability()
-                force_report_to_update_ids.remove(report[0])
+                if report[0] in force_report_to_update_ids:
+                    force_report_to_update_ids.remove(report[0])
             else :
                 self.env['hr.employee_staffing_report'].sudo().create(report_dic)
 
@@ -168,7 +171,6 @@ class HrEmployeeStaffingReport(models.Model):
                     ('employee_id', '!=', False), 
                     ('project_id', '!=', False), 
                     ('category', 'in', ['project_forecast', 'project_employee_validated', 'other']),
-                    ('project_id', '!=', False)
                 ], order="date asc")
             _logger.info('Nombre de lignes pointées/previsionnelles : %s' % str(len(lines)))
             lines.create_update_timesheet_report()
@@ -199,26 +201,28 @@ class HrEmployeeStaffingReport(models.Model):
             dic = [('employee_id', '=', rec.employee_id.id)]
             pivot_date = datetime.today()
 
-            lines = rec.env['account.analytic.line'].get_timesheet_grouped_raw(pivot_date, date_start=rec.start_date, date_end=rec.end_date, filters=dic)
+            timesheet_grouped_raw = rec.env['account.analytic.line'].get_timesheet_grouped_raw(pivot_date, date_start=rec.start_date, date_end=rec.end_date, filters=dic)
                 #On appelle get_timesheet_grouped_raw et non pas get_timesheet_grouped_raw car pour les periodicité mensuelle car on veut borner strictement aux paramètres passés en paramètres
                     #on ne veut pas intégrer les prévisionnels qui ont commencés le lundi 27 novembre pour le rapport du mois de déccembre
                     #... oui mais dans ce cas est-ce qu'il manquera le prédisionnel pour le vendredi 1er décembre ==> normalement non car les périodes prévisionnels sont générées par Napta (SAUF FORÇAGE) par semaine et bout de semaine en cas de semaines à cheval sur deux mois ==> à vérifier #TODO
+            lines = timesheet_grouped_raw['aggreation_by_project_type']
 
-            analytic_lines_list = lines['previsional_timesheet_ids'] + lines['validated_timesheet_ids'] + lines['holiday_timesheet_ids'] + lines['unavailability_timesheet_ids'] + lines['validated_learning_ids'] + lines['validated_sales_ids'] + lines['validated_other_internal_ids'] + lines['previsional_timesheet_before_pivot_date_ids']
             analytic_lines_list_ids = []
-            for l in analytic_lines_list :
-                analytic_lines_list_ids.append(l.id)
+            for aggregation in lines.values() :
+                for category in aggregation.values() :
+                    for timesheet in category['timesheet_ids']:
+                        analytic_lines_list_ids.append(timesheet.id)
             rec.analytic_lines = [(6, 0, analytic_lines_list_ids)]
 
             #_logger.info(lines)
  
-            rec.workdays = rec.employee_id.number_work_days_period(rec.start_date, rec.end_date) - lines['unavailability_unit_amount']
-            rec.hollidays = lines['holiday_timesheet_unit_amount']
+            rec.workdays = rec.employee_id.number_work_days_period(rec.start_date, rec.end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
+            rec.hollidays = lines['holidays']['other']['sum_period_unit_amount']
             rec.activity_days = rec.workdays - rec.hollidays
-            rec.project_days = lines['validated_timesheet_unit_amount'] 
-            rec.learning_internal_days = lines['validated_learning_unit_amount']
-            rec.sales_internal_days = lines['validated_sales_unit_amount']
-            rec.other_internal_days = lines['validated_other_internal_unit_amount']
+            rec.project_days = lines['mission']['project_employee_validated']['sum_period_unit_amount']
+            rec.learning_internal_days = lines['training']['project_employee_validated']['sum_period_unit_amount']
+            rec.sales_internal_days = lines['sales']['project_employee_validated']['sum_period_unit_amount']
+            rec.other_internal_days = lines['other_internal']['project_employee_validated']['sum_period_unit_amount']
             if rec.activity_days :
                 rec.activity_rate = rec.project_days / rec.activity_days * 100
             else : 
@@ -230,7 +234,7 @@ class HrEmployeeStaffingReport(models.Model):
 
             rec.available_days = rec.activity_days - rec.project_days # ce qui est égal à rec.learning_internal_days + rec.sales_internal_days + rec.other_internal_days + LE NON POINTÉ (sur Napta il n'est pas obligé de pointer 100% des jours
 
-            rec.activity_previsionnal_project_days = lines['previsional_timesheet_unit_amount'] + lines['previsional_timesheet_before_pivot_date_unit_amount']
+            rec.activity_previsionnal_project_days = lines['mission']['project_forecast']['sum_period_unit_amount']
             if rec.activity_days :
                 rec.activity_previsionnal_rate = rec.activity_previsionnal_project_days / rec.activity_days * 100
             else :
@@ -242,7 +246,7 @@ class HrEmployeeStaffingReport(models.Model):
         view_id = self.env.ref("staffing.hr_timesheet_line_tree_period_depending")
         return {                                        
                 'type': 'ir.actions.act_window',                
-                'name': 'Lignes valorisée sur la période du %s au %s' % (self.start_date, self.end_date),
+                'name': 'Lignes valorisées sur la période du %s au %s' % (self.start_date.strftime("%d/%m/%Y"), self.end_date.strftime("%d/%m/%Y")),
                 'res_model': 'account.analytic.line',
                 'view_type': 'tree',
                 'view_mode': 'tree',
@@ -332,13 +336,13 @@ class HrEmployeeStaffingReport(models.Model):
  
     analytic_lines = fields.Many2many('account.analytic.line', string='Lignes')
 
-    workdays = fields.Float("J. ouvrés", help="Jours ouvrés sur la période couverts par un contrat de travail.", compute=availability, store=True)
+    workdays = fields.Float("J. ouvrés", help="nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.", compute=availability, store=True)
     hollidays = fields.Float("Congés", help="Jours de congés sur la période", compute=availability, store=True)
-    activity_days = fields.Float("J. facturables", help="Jours facturables sur la période = nb jours ouvrés - nb jours congés", compute=availability, store=True)
-    learning_internal_days = fields.Float("J. formations", help="Jours de formation sur la période", compute=availability, store=True)
-    sales_internal_days = fields.Float("J. avant-vente", help="Jours avant-vente (experts) sur la période", compute=availability, store=True)
-    other_internal_days = fields.Float("J. autres activités internes", help="Jours autres activités internes sur la période", compute=availability, store=True)
-    project_days = fields.Float("J. produits mission", help="Jours produits en mission sur la période (y compris les missions de la fondation)", compute=availability, store=True)
+    activity_days = fields.Float("J. facturables", help="Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés", compute=availability, store=True)
+    learning_internal_days = fields.Float("J. formations", help="Nombre de jours de formation du consultant (et non les actions écoles) sur la période", compute=availability, store=True)
+    sales_internal_days = fields.Float("J. avant-vente", help="Nombre de jours avant-vente (experts) sur la période", compute=availability, store=True)
+    other_internal_days = fields.Float("J. autres activités internes", help="Nombre de jours autres activités internes sur la période", compute=availability, store=True)
+    project_days = fields.Float("J. produits mission", help="Nombre de jours produits en mission sur la période (y compris les missions de la fondation)", compute=availability, store=True)
     activity_rate = fields.Float("TACE", 
             help="Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", 
             compute=availability, store=True, group_operator='avg')

@@ -50,10 +50,14 @@ class staffingProject(models.Model):
         rec_id = []
 
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=None, date_end=None, filters=[('project_id', '=', self.id)])
-        rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids']
+        lines = timesheets_data['aggreation_by_project_type']
 
-        for i in rec_ids:
-            rec_id.append(i.id)
+        analytic_lines_list_ids = []
+        for aggregation in lines.values() :
+            for category in aggregation.values() :
+                for timesheet in category['timesheet_ids']:
+                    analytic_lines_list_ids.append(timesheet.id)
+
 
         pivot_view_id = self.env.ref("staffing.view_project_pivot")
         tree_view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
@@ -65,7 +69,7 @@ class staffingProject(models.Model):
                 'view_type': 'pivot',
                 'view_mode': 'pivot,tree',
                 'view_id': [pivot_view_id.id, tree_view_id.id],
-                'domain' : [('id', 'in', rec_id)],
+                'domain' : [('id', 'in', analytic_lines_list_ids)],
                 'context': {},
                 'target': 'current',
             }
@@ -74,11 +78,13 @@ class staffingProject(models.Model):
     def open_forecast_pivot_timesheets(self):
         date = datetime.today()
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=(date+timedelta(days=-21)).date(), date_end=(date+timedelta(days=90)).date(), filters=[])
-        rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids'] + timesheets_data['holiday_timesheet_ids']
+        lines = timesheets_data['aggreation_by_project_type']
 
-        rec_id = []
-        for i in rec_ids:
-            rec_id.append(i.id)
+        analytic_lines_list_ids = []
+        for aggregation in lines.values() :
+            for category in aggregation.values() :
+                for timesheet in category['timesheet_ids']:
+                    analytic_lines_list_ids.append(timesheet.id)
 
         view_id = self.env.ref("staffing.view_forecast_pivot")
         _logger.info('========================== OKKKKKKK')
@@ -90,7 +96,7 @@ class staffingProject(models.Model):
                 'view_type': 'pivot',
                 'view_mode': 'pivot',
                 'view_id': view_id.id,
-                'domain' : [('id', 'in', rec_id)],
+                'domain' : [('id', 'in', analytic_lines_list_ids)],
                 'context': {'pivot_measures': ['unit_amount']},
                 'target': 'current',
             }
@@ -133,11 +139,15 @@ class staffingProject(models.Model):
         #TODO : si employ == False : ouvrir le wizzard de sélection de l'emplpoyee/date
         date = datetime.today()
         timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=new_current_monday, date_end=sunday, filters=[('employee_id', '=', employ.id)])
-        rec_ids = timesheets_data['previsional_timesheet_ids'] + timesheets_data['validated_timesheet_ids'] + timesheets_data['holiday_timesheet_ids']
-        rec_id = []
-        for i in rec_ids:
-            rec_id.append(i.id)
-        domain = [('date', '>=', new_current_monday), ('date', '<=', sunday), ('id', 'in', rec_id)]
+        lines = timesheets_data['aggreation_by_project_type']
+
+        analytic_lines_list_ids = []
+        for aggregation in lines.values() :
+            for category in aggregation.values() :
+                for timesheet in category['timesheet_ids']:
+                    analytic_lines_list_ids.append(timesheet.id)
+
+        domain = [('date', '>=', new_current_monday), ('date', '<=', sunday), ('id', 'in', analytic_lines_list_ids)]
 
         return {
                 'type': 'ir.actions.act_window',
@@ -168,8 +178,9 @@ class staffingProject(models.Model):
                                     ('training', 'Formation (activité interne)'),
                                     ('sales', 'Avant-vente/commerce (activité interne)'),
                                     ('other_internal', 'Autre activité interne'),
+                                    ('holidays', 'Congés'),
                                     ('unavailability', 'Indisponibilité (réduit le nombre de jours ouvrés)'),
-                                ], string='Agrégat de staffing', default='mission')
+                                ], string='Agrégat de staffing', default='mission', tracking=True)
 
 
     @api.depends('project_director_employee_id', 'staffing_need_ids.staffed_employee_id', 'staffing_need_ids.project_id')
