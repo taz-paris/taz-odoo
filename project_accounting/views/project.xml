@@ -418,6 +418,29 @@
 		    <field name="user_id"/>
 		    <field name="stage_id"/>
 		    <field name="partner_id"/>
+		    <field name="order_sum_sale_order_lines_with_draft" type="measure"/>
+
+		    <field name="order_amount_current" type="measure"/>
+		    <field name="order_cost_current" type="measure"/>
+		    <field name="order_cost_futur" type="measure"/>
+		    <field name="order_marging_amount_current" type="measure"/>
+
+		    <field name="company_part_amount_current" type="measure"/>
+		    <field name="company_part_cost_current" type="measure"/>
+		    <field name="company_part_cost_futur" type="measure"/>
+		    <field name="company_part_marging_amount_current" type="measure"/>
+
+		    <field name="outsource_part_amount_current" type="measure"/>
+		    <field name="outsource_part_cost_current" type="measure"/>
+		    <field name="outsource_part_cost_futur" type="measure"/>
+		    <field name="outsource_part_marging_amount_current" type="measure"/>
+
+		    <field name="other_part_amount_current" type="measure"/>
+		    <field name="other_part_cost_current" type="measure"/>
+		    <field name="other_part_cost_futur" type="measure"/>
+		    <field name="other_part_marging_amount_current" type="measure"/>
+		    <!--
+		    -->
 		</pivot>
 	      </field>
 	  </record>
