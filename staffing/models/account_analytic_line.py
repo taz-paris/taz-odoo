@@ -12,7 +12,7 @@ class staffingAnalyticLine(models.Model):
     def write(self, vals):
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
-        _logger.info(vals)
+        #_logger.info(vals)
         return super().write(vals)
 
     @api.model
@@ -163,8 +163,6 @@ class staffingAnalyticLine(models.Model):
                     raise ValidationError(_('Valeur interdite dans le filtre : %s' % condition[0]))
                 dic.append(condition)
         timesheets = self.env['account.analytic.line'].search(dic)
-        #_logger.info(dic)
-        #_logger.info(timesheets)
 
         pivot_date = pivot_date.date()
 
@@ -199,131 +197,7 @@ class staffingAnalyticLine(models.Model):
                 'end_date' : date_end,
                 'aggreation_by_project_type' : aggreation,
               }
-
-        _logger.info(res)
         return res
-
-        """
-        previsional_timesheet_ids = []
-        previsional_timesheet_before_pivot_date_ids = []
-        validated_timesheet_ids = []
-        holiday_timesheet_ids = []
-        validated_learning_ids = []
-        validated_sales_ids = []
-        validated_other_internal_ids = []
-        unavailability_timesheet_ids = []
-
-
-        for timesheet in timesheets:
-            if timesheet.encoding_uom_id != self.env.ref("uom.product_uom_day"):
-                continue
-            if timesheet.project_id.id == 1147 :
-                #ne pas compter les pointage sur "Complément pour soumettre" => plus utilisé depuis la bascule Napta
-                continue
-
-            if timesheet.holiday_id:
-                holiday_timesheet_ids.append(timesheet)
-            #elif timesheet.project_id.id == 1148 : #Formation dont K4M
-            elif timesheet.rel_project_staffing_aggregation == 'training':
-                if timesheet.date < pivot_date:
-                    validated_learning_ids.append(timesheet)
-            #elif timesheet.project_id.id == 1134 : #23004 TAZ_AVT pour les Experts => ce temps est compté dans leurs objectifs perso mais il ne doit pas être compté comme de l'activité dans Odoo
-            elif timesheet.rel_project_staffing_aggregation == 'sales':
-                if timesheet.date < pivot_date:
-                    validated_sales_ids.append(timesheet)
-            elif timesheet.rel_project_staffing_aggregation == 'other_internal':
-                if timesheet.date < pivot_date:
-                    validated_other_internal_ids.append(timesheet)
-            #elif timesheet.project_id.id == 1146 : #Autre absence
-            elif timesheet.rel_project_staffing_aggregation == 'unavailability':
-                # pour ces projets comme pour les missions, le consultant valide les pointages chaque semaine
-                if timesheet.category == 'project_employee_validated':
-                    if timesheet.date < pivot_date:
-                        unavailability_timesheet_ids.append(timesheet)
-                elif timesheet.category == 'project_forecast':
-                    if timesheet.date >= pivot_date:
-                        unavailability_timesheet_ids.append(timesheet)
-            elif timesheet.rel_project_staffing_aggregation == 'mission':
-                if timesheet.category == 'project_employee_validated': #pointage mission validé
-                    if timesheet.date < pivot_date:
-                        validated_timesheet_ids.append(timesheet)
-                elif timesheet.category == 'project_forecast': #pointage mission prévisionnel
-                    if timesheet.date >= pivot_date:
-                        previsional_timesheet_ids.append(timesheet)
-                    else : 
-                        previsional_timesheet_before_pivot_date_ids.append(timesheet)
-
-
-        holiday_timesheet_unit_amount = 0.0
-        for line in holiday_timesheet_ids:
-            holiday_timesheet_unit_amount += line.unit_amount
-
-        validated_timesheet_amount = 0.0
-        validated_timesheet_unit_amount = 0.0
-        for line in validated_timesheet_ids:
-            validated_timesheet_amount += line.amount
-            validated_timesheet_unit_amount += line.unit_amount
-
-        validated_learning_unit_amount = 0.0
-        for line in validated_learning_ids :
-            validated_learning_unit_amount += line.unit_amount
-
-        _logger.info("==== Sales")
-        validated_sales_unit_amount = 0.0
-        for line in validated_sales_ids :
-            _logger.info(line.unit_amount)
-            validated_sales_unit_amount += line.unit_amount
-
-        validated_other_internal_unit_amount = 0.0
-        for line in validated_other_internal_ids :
-            validated_other_internal_unit_amount += line.unit_amount
-
-        ##### Contrairement aux pointages validés et aux congés, une période d'affectation sur Napta n'est obligatoirement à la maille du jour, et peut être à cheval avec la période visée
-        ######### Donc on passe par une fonction pouur calculer le nombre de jours (et montant) affectés à la période ciblée
-        previsional_timesheet_amount = 0.0
-        previsional_timesheet_unit_amount = 0.0
-        for line in previsional_timesheet_ids:
-            period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
-            previsional_timesheet_amount += period_amount
-            previsional_timesheet_unit_amount += period_unit_amount
-
-        previsional_timesheet_before_pivot_date_unit_amount = 0.0
-        for line in previsional_timesheet_before_pivot_date_ids :
-            period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
-            previsional_timesheet_before_pivot_date_unit_amount += period_unit_amount
-
-        unavailability_unit_amount = 0.0
-        for line in unavailability_timesheet_ids :
-            period_unit_amount, period_amount = line.compute_period_amounts_raw(date_start, date_end)
-            unavailability_unit_amount += period_unit_amount
-
-
-        res = {
-                'pivot_date' : pivot_date,
-                'start_date' : date_start,
-                'end_date' : date_end,
-                'validated_timesheet_ids' : validated_timesheet_ids,
-                'validated_timesheet_amount' : validated_timesheet_amount,
-                'validated_timesheet_unit_amount' : validated_timesheet_unit_amount,
-                'previsional_timesheet_ids' : previsional_timesheet_ids, 
-                'previsional_timesheet_amount' : previsional_timesheet_amount,
-                'previsional_timesheet_unit_amount' : previsional_timesheet_unit_amount,
-                'holiday_timesheet_ids' : holiday_timesheet_ids,
-                'holiday_timesheet_unit_amount' : holiday_timesheet_unit_amount,
-                'previsional_timesheet_before_pivot_date_ids' : previsional_timesheet_before_pivot_date_ids,
-                'previsional_timesheet_before_pivot_date_unit_amount' : previsional_timesheet_before_pivot_date_unit_amount,
-                'validated_learning_ids' : validated_learning_ids,
-                'validated_learning_unit_amount' : validated_learning_unit_amount,
-                'validated_sales_ids' : validated_sales_ids,
-                'validated_sales_unit_amount' : validated_sales_unit_amount,
-                'validated_other_internal_ids' : validated_other_internal_ids,
-                'validated_other_internal_unit_amount' : validated_other_internal_unit_amount,
-                'unavailability_timesheet_ids' : unavailability_timesheet_ids,
-                'unavailability_unit_amount' : unavailability_unit_amount,
-                }
-        _logger.info(res)
-        return res
-        """       
 
 
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):

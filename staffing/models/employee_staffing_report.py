@@ -66,7 +66,6 @@ def get_period_end_date(periodicity, period_begin_date):
 class staffingAnalyticLine_employee_staffing_report(models.Model):
     _inherit = 'account.analytic.line'
 
-    """
     def write(self, vals):
         _logger.info('---------- write account.analytic.line employee_staffing_report.py')
         report_to_update = []
@@ -109,7 +108,6 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
 
         return res
 
-    """
 
     def create_update_timesheet_report(self, force_report_to_update_ids=[]):
         group_dic = {}

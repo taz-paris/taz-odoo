@@ -66,9 +66,9 @@
 		  <field name="order_sum_sale_order_lines" optional="show" />
 		  <field name="remark" optional="hide" />
 		  <field name="invoicing_comment" optional="show" groups="account.group_account_manager"/>
-            	  <field name="order_to_invoice_company" optional="hide" />
-            	  <field name="company_invoice_sum_move_lines" optional="hide" />
-		  <field name="company_to_invoice_left" optional="hide" />
+            	  <field name="order_to_invoice_company" optional="hide" sum="Total"/>
+            	  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
+		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
 		  <field name="agreement_id" optional="show"/>
 		</tree>
 	      </field>
