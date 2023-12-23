@@ -439,8 +439,6 @@
 		    <field name="other_part_cost_current" type="measure"/>
 		    <field name="other_part_cost_futur" type="measure"/>
 		    <field name="other_part_marging_amount_current" type="measure"/>
-		    <!--
-		    -->
 		</pivot>
 	      </field>
 	  </record>
