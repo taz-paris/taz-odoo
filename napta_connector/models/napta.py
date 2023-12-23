@@ -312,9 +312,14 @@ class ClientRestNapta:
             page_number = page_number + 1
         return {'data' : response_list}
 
-    def delete_not_found_anymore_object_on_napta(self, odoo_model_name, napta_model_name) :
+    def delete_not_found_anymore_object_on_napta(self, odoo_model_name, napta_model_name, context_add={}) :
         # Cette fonction permet de supprimer sur Odoo les instances qui ont été supprimées sur Napta
         _logger.info('--- delete_not_found_anymore_object_on_napta')
+
+        context = self.env.context.copy()
+        context.update(context_add)
+        self.env.context = context
+
         if odoo_model_name == 'account.analytic.line':
             raise ValidationError(_("Impossible d'utiliser la fonction delete_not_found_anymore_object_on_napta pour l'objet Odoo account.analytic.line car le NaptaID n'est pas unique sur cet objet. Seul le couple (NaptaID,category) est unique pour cet objet."))
         napta_object_list = self.read_cache(napta_model_name)
@@ -460,7 +465,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        #client.refresh_cache()
+        client.refresh_cache()
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -475,7 +480,6 @@ class naptaProject(models.Model):
         self.env['res.users'].create_update_odoo()
         self.env['hr.leave.type'].create_update_odoo_user_holiday_category()
         self.env['hr.leave'].create_update_odoo_user_holiday()
-        a=1/0
         self.env['hr.work.location'].create_update_odoo_location()
         self.env['hr.contract'].create_update_odoo_user_history()
         self.env['project.project.stage'].create_update_odoo_projectstatus()
@@ -829,6 +833,11 @@ class naptaHrLeave(models.Model):
     ]
     napta_id = fields.Char("Napta ID", copy=False)
 
+    def _unlink_if_correct_states(self):
+        # Allow to delete leaves on Odoo that are not anymore on Napta, even if there state is 'validate' in Odoo
+        if self.context.get('leave_skip_state_check') == False:
+            super().leave_skip_date_check()
+
     def create_update_odoo_user_holiday(self):
         _logger.info('---- BATCH Create or update Odoo user_holiday')
         client = ClientRestNapta(self.env)
@@ -837,18 +846,15 @@ class naptaHrLeave(models.Model):
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
-            numberOfDays = odoo_user.number_work_days_period(start_date, end_date) #TODO
-            _logger.info(numberOfDays)
+            numberOfDays = odoo_user.number_work_days_period(start_date, end_date)
             request_date_from_period = 'am'
             if user_holiday['attributes']['start_date_from_morning'] == False :
                 request_date_from_period = 'pm'
                 numberOfDays -= 0.5
-            _logger.info(numberOfDays)
             request_date_to_period = 'pm'
             if user_holiday['attributes']['end_date_until_afternoon'] == False :
                 request_date_to_period = 'am'
                 numberOfDays -= 0.5
-            _logger.info(numberOfDays)
 
             dic = {
                     'napta_id' : napta_id,
@@ -866,9 +872,8 @@ class naptaHrLeave(models.Model):
                         # TODO : doit-on obligatoirement envoyer cet attribut à Odoo... qui doit le reclaculer de son côté...
                     'state' : 'validate',
                 }
-            _logger.info(dic)
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
-        client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday') #TODO
+        client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
         #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
 
