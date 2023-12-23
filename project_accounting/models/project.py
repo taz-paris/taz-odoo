@@ -179,13 +179,17 @@ class projectAccountProject(models.Model):
         return is_closable, error_message
 
 
-    @api.depends('project_director_employee_id')
+    @api.depends('project_director_employee_id', 'project_manager')
     def _compute_user_enrolled_ids(self):
         #surchargée dans le module staffing
         for rec in self:
             user_enrolled_ids = []
             if rec.user_id :
                 user_enrolled_ids.append(rec.user_id.id)
+            if rec.project_manager:
+                if rec.project_manager.user_id:
+                    if rec.project_manager.user_id.id not in user_enrolled_ids:
+                        user_enrolled_ids.append(rec.project_manager.user_id.id)
             rec.user_enrolled_ids = [(6, 0, user_enrolled_ids)]
 
 
@@ -206,11 +210,13 @@ class projectAccountProject(models.Model):
     user_id = fields.Many2one(compute=_compute_user_id, store=True)
     remark = fields.Text("Remarques")
 
+    # Champs Fitnet à supprimer
     amount = fields.Float('Montant net S/T Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
     billed_amount = fields.Float('Montant facturé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
     payed_amount = fields.Float('Montant payé Fitnet', readonly=True) #Attribut temporaire Fitnet à supprime
     is_purchase_order_received = fields.Boolean('Bon de commande reçu Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer
     purchase_order_number = fields.Char('Numéro du bon de commande Fitnet', readonly=True) #Attribut temporaire Fitnet à supprimer (le numéro de BC est sur le bon de commande client et non sur le projet en cible)
+
     outsourcing = fields.Selection([
             ('no-outsourcing', 'Sans sous-traitance'),
             ('co-sourcing', 'Avec Co-traitance'),

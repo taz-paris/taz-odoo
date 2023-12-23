@@ -408,6 +408,20 @@
 	      </field>
 	    </record>
 
+
+           <record model="ir.ui.view" id="project_pivot">
+              <field name="name">Project</field>
+	      <field name="model">project.project</field>
+	      <field name="arch" type="xml">
+		<pivot string="Projet">
+		    <field name="name" type="row"/>
+		    <field name="user_id"/>
+		    <field name="stage_id"/>
+		    <field name="partner_id"/>
+		</pivot>
+	      </field>
+	  </record>
+
 	    <record id="project_action" model="ir.actions.act_window">
 		<field name="name">Projets</field>
 		<field name="res_model">project.project</field>
@@ -418,6 +432,7 @@
 				    (5, 0, 0),
 				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
 				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+				    (0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),
 				      ]" />
 	    </record>
 
@@ -519,6 +534,7 @@
 				    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
 				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
 				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+				    (0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),
 				      ]" />
 	    </record>
 
@@ -532,6 +548,7 @@
 				    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
 				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
 				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+				    (0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),
 				      ]" />
 	    </record>
 
