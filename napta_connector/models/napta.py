@@ -838,6 +838,14 @@ class naptaHrLeave(models.Model):
         if self.context.get('leave_skip_state_check') == False:
             super().leave_skip_date_check()
 
+    def unlink(self):
+        """ Remove the timesheets linked to the refused holidays """
+        timesheets = self.sudo().mapped('timesheet_ids')
+        timesheets.write({'holiday_id': False})
+        timesheets.unlink()
+        result = super().unlink()
+        return result
+
     def create_update_odoo_user_holiday(self):
         _logger.info('---- BATCH Create or update Odoo user_holiday')
         client = ClientRestNapta(self.env)
