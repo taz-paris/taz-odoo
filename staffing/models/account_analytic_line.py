@@ -59,31 +59,37 @@ class staffingAnalyticLine(models.Model):
 
     def compute_period_amounts_raw(self, date_start, date_end):
             line = self
+
+            
+            if not date_start and not date_end :
+                period_unit_amount = line.unit_amount
+                period_amount = line.amount
+                return period_unit_amount, period_amount 
+
+
             if date_start > date_end :
                 raise ValidationError(_("Start date should be <= end date"))
 
             if line.date >= date_start and (not line.date_end or line.date_end <= date_end):
                 period_unit_amount = line.unit_amount
                 period_amount = line.amount
+                return period_unit_amount, period_amount 
 
-            else :
-                line_date_end = line.date_end
-                if not line_date_end :
-                    line_date_end = line.date
+            line_date_end = line.date_end
+            if not line_date_end :
+                line_date_end = line.date
+            work_days_line = line.employee_id.number_work_days_period(line.date, line_date_end)
+            work_days_line_in_period = line.employee_id.number_work_days_period(max(line.date, date_start), min(line_date_end, date_end))
+            #_logger.info('work_days_line %s' % work_days_line)
+            #_logger.info('work_days_line_in_period %s' % work_days_line_in_period)
+            #_logger.info('line.unit_amount %s' % line.unit_amount)
 
-                work_days_line = line.employee_id.number_work_days_period(line.date, line_date_end)
-                work_days_line_in_period = line.employee_id.number_work_days_period(max(line.date, date_start), min(line_date_end, date_end))
-                #_logger.info('work_days_line %s' % work_days_line)
-                #_logger.info('work_days_line_in_period %s' % work_days_line_in_period)
-                #_logger.info('line.unit_amount %s' % line.unit_amount)
-
-                if work_days_line != 0:
-                    period_unit_amount = work_days_line_in_period/work_days_line * line.unit_amount 
-                    period_amount = work_days_line_in_period/work_days_line * line.amount
-                else : 
-                    period_unit_amount = 0
-                    period_amount = 0
-
+            if work_days_line != 0:
+                period_unit_amount = work_days_line_in_period/work_days_line * line.unit_amount 
+                period_amount = work_days_line_in_period/work_days_line * line.amount
+            else : 
+                period_unit_amount = 0
+                period_amount = 0
             return period_unit_amount, period_amount 
 
 
@@ -104,6 +110,8 @@ class staffingAnalyticLine(models.Model):
 
     def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):
         # Cette fonction force les date de début/fin à un lundi/dimanche pour éviter de couper les semaines, notamment car le prévisionné est enregistré à la semaine
+        date_start_monday = None
+        date_end_sunday = None
  
         if date_start and date_end :
             if date_start > date_end :

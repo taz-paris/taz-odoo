@@ -606,6 +606,7 @@ class naptaAnalyticLine(models.Model):
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
             odoo_objet.unlink()
+            self.env.cr.commit()
             _logger.info("      > Instance supprimée")
         #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
             #TODO ajouter des borne de début/fin renseignées avec les bord d'apel
@@ -641,6 +642,7 @@ class naptaAnalyticLine(models.Model):
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
             odoo_objet.unlink()
+            self.env.cr.commit()
             _logger.info("      > Instance supprimée")
         #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
             #TODO ajouter des borne de début/fin renseignées avec les bord d'apel
@@ -668,16 +670,20 @@ class naptaResUsers(models.Model):
                     'first_name' : user['attributes']['first_name'],
                     'active' : user['attributes']['active'],
                 }
-            odoo_object = create_update_odoo(self.env, 'res.users', dic)
+            odoo_user = create_update_odoo(self.env, 'res.users', dic)
 
             #Create hr.employee
-            odoo_user = self.env['res.users'].search([('id','=',odoo_object.id)])
-            if len(odoo_user) == 1:
-                if not odoo_user.employee_id:
+            employee_list = self.env['hr.employee'].search([('user_id', '=', odoo_user.id), ('active', 'in', [True, False])])
+
+            if odoo_user.active :
+                if len(employee_list) == 0:
                     odoo_user.action_create_employee()
                     _logger.info("Création de l'employée depuis l'utilsiateur avec le login=%s" % odoo_user.login)
 
-            #TODO : désactiver le hr.employee s'il n'a aucun contrat de travail actif
+            for employee in employee_list:
+                if odoo_user.active != employee.active :
+                    employee.active = odoo_user.active
+                    _logger.info("L'employé associé à l'utilsiateur avec le login=%s a maintenant l'attribut active=%s" % (odoo_user.login, str(odoo_user.active)))
 
 
 class naptaJob(models.Model):

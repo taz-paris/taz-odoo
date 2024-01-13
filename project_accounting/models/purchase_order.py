@@ -260,7 +260,7 @@ class projectAccountingPurchaseOrderLine(models.Model):
     previsional_invoice_date = fields.Date('Date prev. de facturation', states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
     # TODO : ajouter reselling_unit_price en le prenant sur la fiche article (valeur par défaut mais modifiable) et faire la multiplication
     reselling_price_unit = fields.Float('PU HT de revente')
-    reselling_subtotal = fields.Monetary('Sous-total HT de revente', compute=_compute_reselling_subtotal, inverse=_inverse_reselling_subtotal, help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
+    reselling_subtotal = fields.Monetary('Sous-total HT de revente', default=0.0, compute=_compute_reselling_subtotal, inverse=_inverse_reselling_subtotal, help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")
     margin_amount = fields.Monetary('Marge €', compute=compute, inverse=_inverse_margin_amount)
     margin_rate = fields.Float('Marge %', compute=compute, inverse=_inverse_margin_rate)
 
