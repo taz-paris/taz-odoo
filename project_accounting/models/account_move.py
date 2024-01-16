@@ -122,20 +122,14 @@ class projectAccountingAccountMoveLine(models.Model):
         for rec in self:
             rec.price_total_signed = rec.price_total * rec.direction_sign * -1
 
-    @api.depends('parent_payment_state', 'parent_state', 'move_id.amount_total', 'move_id.amount_residual', 'price_total', 'direction_sign')
+    @api.depends('parent_payment_state', 'parent_state', 'move_id.reversed_entry_id', 'move_id.amount_total', 'move_id.amount_residual', 'price_total', 'direction_sign')
     def _compute_amount_paid(self):
         _logger.info('--- _compute_amount_paid')
         for rec in self:
-            if rec.parent_payment_state == 'reversed' :#or rec.parent_state != 'posted':
-                #TODO : vérifier la conséquence si on supprimait la première clause : rec.parent_payment_state == 'reversed'
-                #_logger.info(rec.parent_payment_state)
-                #_logger.info(rec.parent_state)
+            if rec.parent_payment_state == 'reversed' or rec.move_id.reversed_entry_id :
+                #TODO : vérifier la conséquence si on supprimait ce bloc IF : rec.parent_payment_state == 'reversed' or rec.move_id.reversed_entry_id
                 rec.amount_paid = 0.0
             else:
-                #_logger.info('rec.move_id.amount_total ' + str(rec.move_id.amount_total))
-                #_logger.info('rec.move_id.amount_residual ' + str(rec.move_id.amount_residual))
-                #_logger.info('rec.price_total ' + str(rec.price_total))
-                #_logger.info('rec.move_id.amount_total ' + str(rec.move_id.amount_total))
                 invoice_amount_paid = rec.move_id.amount_total - rec.move_id.amount_residual
                 rate = 1
                 if rec.move_id.amount_total : 
