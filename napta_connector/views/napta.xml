@@ -1,14 +1,25 @@
 <odoo>
   <data>
 	<record id="action_server_synchro_napta" model="ir.actions.server">
-          <field name="name">Synchro Napta</field>
+          <field name="name">Synchro Napta - tous les projets : batch complet</field>
           <field name="model_id" ref="model_project_project"/>
+          <field name="binding_model_id" />
           <field name="state">code</field>
-	  <field name="code">action =  env.ref('napta_connector.napta_sync_scheduler').sudo().method_direct_trigger()</field>
+	  <field name="code">action =  env['project.project'].sudo().synchAllNapta()</field>
           <field name="groups_id" eval="[(4, ref('base.group_system')), (4,ref('account.group_account_manager'))]" />
      </record>
 
 	<menuitem name="Synchro Napta manuelle" id="project_accounting_closing_menu_napta_sync" parent="project_accounting.project_accounting_closing_menu_root" action="napta_connector.action_server_synchro_napta"/>
+
+   <record id="action_resync_napta_project_list" model="ir.actions.server">
+          <field name="name">Forcer l'envoi des données à Napta pour ce projet (liste des projets sélectionnés)</field>
+          <field name="model_id" ref="model_project_project"/>
+          <field name="binding_model_id" ref="model_project_project"/>
+          <field name="state">code</field>
+          <field name="code">for rec in records:
+                  rec.create_update_napta()</field>
+          <field name="groups_id" eval="[(4, ref('base.group_system')), (4, ref('account.group_account_manager'))]" />
+  </record>
 
         <record id="res_partner_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Partner</field>

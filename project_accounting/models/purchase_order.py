@@ -224,7 +224,10 @@ class projectAccountingPurchaseOrderLine(models.Model):
     @api.onchange('reselling_subtotal')
     def _inverse_reselling_subtotal(self):
         for rec in self:
-            rec.reselling_price_unit = rec.reselling_subtotal / rec.product_qty
+            if rec.product_qty != 0 :
+                rec.reselling_price_unit = rec.reselling_subtotal / rec.product_qty
+            else :
+                rec.reselling_price_unit = 0
 
     @api.depends('state', 'product_uom_qty', 'qty_to_invoice', 'qty_invoiced')
     def _compute_invoice_status(self):

@@ -63,7 +63,8 @@ class HrContract(models.Model):
         return res
 
     def refresh_analytic_lines(self, employee_id, date_start, date_end):
-        _logger.info('-- hr.contract > refresh_analytic_lines employee_id=%s date_start=%s date_end=%s' % (str(employee_id), str(date_start), str(date_end)))
-        lines = self.env['account.analytic.line'].search([('project_id', '!=', False), ('holiday_id', '=', False), ('employee_id', '=', employee_id), ('date', '>=', date_start), ('date', '<=', date_end)])
-        for line in lines :
-            line.refresh_amount()
+        pass #TODO : restaurer cette fonction
+        #_logger.info('-- hr.contract > refresh_analytic_lines employee_id=%s date_start=%s date_end=%s' % (str(employee_id), str(date_start), str(date_end)))
+        #lines = self.env['account.analytic.line'].search([('project_id', '!=', False), ('holiday_id', '=', False), ('employee_id', '=', employee_id), ('date', '>=', date_start), ('date', '<=', date_end)])
+        #for line in lines :
+        #    line.refresh_amount()

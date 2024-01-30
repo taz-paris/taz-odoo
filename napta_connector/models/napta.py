@@ -166,7 +166,9 @@ class ClientRestNapta:
         changes_dic = {}
         if cache_value :
             for attribute_key, attribute_value in attributes.items():
-                if str(cache_value['attributes'][attribute_key]) != str(attribute_value):
+                if isinstance(attribute_value, float):
+                    attribute_value = round(attribute_value, 2)
+                if cache_value['attributes'][attribute_key] != attribute_value:
                     changes_dic[attribute_key] = {'old_value' : cache_value['attributes'][attribute_key], 'new_value' : attribute_value}
         return changes_dic, cache_value
 
