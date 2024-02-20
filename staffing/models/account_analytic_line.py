@@ -13,12 +13,24 @@ class staffingAnalyticLine(models.Model):
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
         #_logger.info(vals)
-        return super().write(vals)
+        res = super().write(vals)
+        self.check_accounting_closed(vals)
+        return res
 
     @api.model
     def create(self, vals):
         res = self._sync_project(vals)
-        return super().create(res)
+        res = super().create(res)
+        res.check_accounting_closed(vals)
+        return res
+
+    def check_accounting_closed(self, vals):
+        if 'amount' in vals.keys():
+            if self.category in ['project_employee_validated', 'project_forecast']: #les changements sont possibles a postériori pour les timesheet liées aux congés
+                company = self.env['res.company'].browse(self.company_id.id)[0]
+                if company.fiscalyear_lock_date > self.date:
+                    raise ValidationError(_("Une écriture analytique de la catégorie Pointage ne peut changer de montant après la clôture comptable."))
+
 
     def _sync_project(self, vals):
         #_logger.info('---------- _sync_project account.analytic.line account_analytic_line.py')

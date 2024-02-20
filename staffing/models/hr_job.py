@@ -81,7 +81,8 @@ class HrCost(models.Model):
                 date_oldest = former_date
 
         _logger.info(date_oldest)
-        lines = self.env['account.analytic.line'].search([('date', '>=', date_oldest), ('project_id', '!=', False)])
+        lines = self.env['account.analytic.line'].search([('date', '>=', date_oldest), ('project_id', '!=', False), ('holiday_id', '=', False)])
+
         _logger.info(len(lines))
         #TODO on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
         for line in lines:

@@ -198,7 +198,7 @@ class projectAccountProject(models.Model):
 
 
     user_enrolled_ids = fields.Many2many('res.users', string="Utilisateurs concernés par ce projet", compute=_compute_user_enrolled_ids, store=True)
-    stage_id = fields.Many2one(required=True)
+    stage_id = fields.Many2one(required=True, string="Étape")
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
     color_rel = fields.Selection(related="stage_id.color", store=True)
     rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id')

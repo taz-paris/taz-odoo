@@ -29,6 +29,7 @@ class staffingLeave(models.Model):
 
     def write(self_list, vals):
         for self in self_list :
+            _logger.info(" write hr leave %s" % str(vals))
             old_state = self.state
             if old_state == "validate":
                 #TODO : avec cette fonction on met bien à jour les timesheet, mais on ne corrige pas les 'resource.calendar.leaves' associés au congés
@@ -40,11 +41,17 @@ class staffingLeave(models.Model):
                         l.holiday_status_id.timesheet_task_id and
                         l.holiday_status_id.timesheet_project_id.sudo().company_id == (l.holiday_status_id.company_id or self.env.company))
 
-                    # Unlink previous timesheets do avoid doublon
+                    # Unlink previous timesheets to avoid doublon
+                    _logger.info("====== Change on hr.leave : Unlink previous timesheets to avoid doublon")
+                    _logger.info(holidays)
+                    _logger.info(holidays.sudo().timesheet_ids)
+
                     old_timesheets = holidays.sudo().timesheet_ids
                     if old_timesheets:
                         old_timesheets.holiday_id = False
+                        _logger.info("PREPARNG old timesheet to be unlinked %s" % str(old_timesheets.ids))
                         old_timesheets.unlink()
+                        _logger.info("old timesheet unlinked %s" % str(old_timesheets.ids))
 
                     # create the timesheet on the vacation project
                     holidays._timesheet_create_lines()

@@ -725,7 +725,6 @@ class naptaHrContract(models.Model):
         _logger.info('---- BATCH Create or update Odoo user_history')
         client = ClientRestNapta(self.env)
         user_history_list = client.read_cache('user_history')
-
         client.delete_not_found_anymore_object_on_napta('hr.contract', 'user_history')
         # Il faut faire cette suppression avant d'essayer d'ajouter les nouveaux hr.contracts car sur TazForce il ne peut pas y avoir de chevauchement entre les périodes de 2 contrats d'un même employé 
 
@@ -774,6 +773,8 @@ class naptaHrContract(models.Model):
                     'department_id' : {'napta_id' : user_history['attributes']['business_unit_id']},
                     'state' : state,
                     'work_location_id' : {'napta_id' : user_history['attributes']['location_id']},
+                    'is_daily_cost_overridden' : False,
+                    'daily_cost' : 0.0,
                 }
 
             ########## Gestion des surcharges de CJM individuel par rapport au grade
@@ -789,15 +790,12 @@ class naptaHrContract(models.Model):
                 cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)], order="begin_date asc")
                 if not cost_lines :
                     override = True
-                    _logger.info('override = True A')
                 else:
                     #si les cost_line du job_id ne couvrent pas l'intégralité de la durée du user_history > on surcharge le CJM dans le contrat
                     if cost_lines[0].begin_date > napta_start_date :
                         override = True
-                        _logger.info('override = True B')
                     if cost_lines[len(cost_lines)-1].end_date and napta_end_date and cost_lines[len(cost_lines)-1].end_date < napta_end_date:
                         override = True
-                        _logger.info('override = True C')
                 
                 for cost_line in cost_lines:
                     if napta_end_date and cost_line.begin_date < napta_end_date:
@@ -807,14 +805,8 @@ class naptaHrContract(models.Model):
                     # Si au moins une cost_line pour ce job_id au cours du contrat a un tarif différent à celui du user_hirtory_napta, alors on passe en mode overriden le contrat
                     if cost_line.cost != user_history['attributes']['daily_cost']:
                         override = True
-                        _logger.info('override = True D')
-
-                        _logger.info(cost_line.cost)
-                        _logger.info(user_history['attributes']['daily_cost'])
-                        _logger.info(napta_id)
-                        _logger.info(user_history['attributes'])
                         break
-                        
+             
             if override:
                 _logger.info('      > Surchage du daily_cost au niveau de contrat pour le user avec le napta_id= %s' % str(user_history['attributes']['user_id']))
                 dic['is_daily_cost_overridden'] = True
@@ -872,6 +864,8 @@ class naptaHrLeave(models.Model):
         client = ClientRestNapta(self.env)
         user_holiday_list = client.read_cache('user_holiday')
         for napta_id, user_holiday in user_holiday_list.items():
+            #if str(napta_id) != "982":
+            #    continue
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
@@ -907,7 +901,7 @@ class naptaHrLeave(models.Model):
 
 
     def correct_leave_timesheet_stock(self):
-        _logger.info('---- correct_leave_timesheet_stock')
+        _logger.info('=========== Détection des incohérences entre hr.leave et analytic.line')
         leaves = self.env['hr.leave'].search([('napta_id', '!=', None), ('state', '=', "validate"), ('request_date_from', '>', '2022-12-31')])
         for leave in leaves:
             count = 0.0
