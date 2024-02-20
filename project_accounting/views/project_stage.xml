@@ -10,6 +10,7 @@
                         <field name="is_part_of_booking" />
                         <field name="state" />
 			<field name="color"/>
+			<field name="allowed_next_stage_ids" widget="many2many_tags"/>
                 </field>
             </field>
         </record>
@@ -23,6 +24,7 @@
                         <field name="is_part_of_booking" />
                         <field name="state" />
 			<field name="color" />
+			<field name="allowed_next_stage_ids" widget="many2many_tags"/>
                 </field>
             </field>
         </record>

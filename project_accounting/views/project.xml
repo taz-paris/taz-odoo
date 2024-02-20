@@ -48,6 +48,8 @@
 			  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
 			      >
 		  <field name="id" widget="open_tab"/>
+		  <field name="is_review_needed" invisible="1"/>
+		  <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" attrs="{'invisible': [('is_review_needed', '=', False)]}"/>
 		  <field name="number"/>
 		  <field name="name" />
 		  <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>

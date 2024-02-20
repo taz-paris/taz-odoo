@@ -33,6 +33,7 @@ class staffingLeave(models.Model):
             if old_state == "validate":
                 #TODO : avec cette fonction on met bien à jour les timesheet, mais on ne corrige pas les 'resource.calendar.leaves' associés au congés
                 if any(x in ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to', 'date_from', 'date_to', 'number_of_days', 'request_date_from_period', 'request_date_to_period', 'state'] for x in vals.keys()):
+                    _logger.info("Changement sur le congés conduisant à supprimer et recréer les timesheets liées. %s" % str(vals))
                     holidays = self.filtered(
                         lambda l: l.holiday_type == 'employee' and
                         l.holiday_status_id.timesheet_project_id and

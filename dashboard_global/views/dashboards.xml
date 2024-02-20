@@ -7,11 +7,12 @@
 			<form string="Dashboard">
 				<board style="1-1">
 					<column>
+						<action string="Mes objectifs de book annuels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
 						<action string="Mes projets en cours" name="%(project_accounting.project_action)d" context="{'search_default_own_projects':1, 'search_default_groupby_stage': 1}" domain="[('stage_id.state', '!=', 'closed')]"/> 
-						<action string="Mes échéances de facturation du mois" name="%(project_accounting.action_sale_order_line_delivery_validation_month)d" context="{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}"/>
 					</column>
 					<column>
-						<action string="Mes objectifs de book annuels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
+						<action string="Mes échéances de facturation du mois" name="%(project_accounting.action_sale_order_line_delivery_validation_month)d" context="{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}"/>
+						<action string="Factures impayées et en retard de mes missions" name="%(account.action_move_out_invoice_type)d" context="{'search_default_late' : 1, 'search_default_myinvoices' : 1}" domain="[('move_type', '=', 'out_invoice')]"/>
 						<action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j30' : 1}"/>
 					</column>
 				</board>
@@ -38,6 +39,19 @@
 		<field name="action" ref="dashboard_global.global_board_action"/>
 	</record>
 
+	    <record id="open_view_project_new_form" model="ir.actions.act_window">
+		<field name="name">Projets</field>
+		<field name="res_model">project.project</field>
+		<field name="view_mode">form</field>
+		<field name="view_ids" eval="
+				    [
+				    (5, 0, 0),
+				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+				      ]" />
+	    </record>
+
 	<menuitem name="Cockpit DM/Manager" id="global_board" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="global_board_action" sequence="5"/>
+	<menuitem name="Créer un projet" id="new_project" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="open_view_project_new_form" sequence="6"/>
+	<menuitem id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="1"/>
    </data>
 </odoo>

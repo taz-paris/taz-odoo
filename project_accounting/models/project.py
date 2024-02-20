@@ -72,9 +72,15 @@ class projectAccountProject(models.Model):
             if 'stage_id' in vals.keys():
                 #_logger.info('stage ID est dans le dic vals')
                 vals['state_last_change_date'] = datetime.today()
-                stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
-                if stage_id.state == 'closed' :
-                    is_closable, error_message = record.is_closable(stage_id)
+                new_stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
+                current_stage_id = record.stage_id
+
+                if new_stage_id not in current_stage_id.allowed_next_stage_ids:
+                    if not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
+                        raise ValidationError(_("Seul un ADV peut paser un projet du statut %s au statut %s." %(current_stage_id.name, new_stage_id.name)))
+
+                if new_stage_id.state == 'closed' :
+                    is_closable, error_message = record.is_closable(new_stage_id)
                     if not is_closable :
                         raise ValidationError(_(error_message))
         return super().write(vals)
@@ -113,7 +119,7 @@ class projectAccountProject(models.Model):
         _logger.info(' ==================== FIN revue purchase_order.user_id')
     """
 
-    def is_closable(self, stage_id):
+    def is_closable(self, new_stage_id):
         self.ensure_one()
         #_logger.info('----- is_closable ID odoo = %s' % str(self.id))
 
@@ -122,11 +128,9 @@ class projectAccountProject(models.Model):
         self.compute()
         self.compute_has_provision_running()
 
-        #_logger.info('----- stage_id.name %s' % str(stage_id.name))
+        #_logger.info('----- new_stage_id.name %s' % str(new_stage_id.name))
 
-        if "Termin" in stage_id.name: #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
-            if not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
-                raise ValidationError(_("Seul un ADV peut paser un projet au statut Temriné."))
+        if new_stage_id.id == 3: #statut 6-Clos #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
             if not(self.book_validation_employee_id):
                 is_closable = False
                 error_message += "   - Le book n'est pas validé par le DM.\n"
@@ -159,7 +163,7 @@ class projectAccountProject(models.Model):
 
 
 
-        if "Annul" in stage_id.name or "Perdu" in stage_id.name: #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
+        if new_stage_id.id in [8, 4]: #status Perdu ou Annulé or "Perdu" #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
             if self.order_sum_sale_order_lines_with_draft != 0.0 :
                 is_closable = False
                 error_message += "   - Il existe au moins un BC client dont le statut n'est pas annulé.\n"
@@ -194,7 +198,7 @@ class projectAccountProject(models.Model):
 
 
     user_enrolled_ids = fields.Many2many('res.users', string="Utilisateurs concernés par ce projet", compute=_compute_user_enrolled_ids, store=True)
-
+    stage_id = fields.Many2one(required=True)
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
     color_rel = fields.Selection(related="stage_id.color", store=True)
     rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id')
@@ -206,7 +210,7 @@ class projectAccountProject(models.Model):
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False, check_company=True) #Si required=True ça bloque la création de nouvelle company 
     #TODO : synchroniser cette valeur avec user_id avec un oneChange
-    project_manager = fields.Many2one('hr.employee', "Contact ADV", help="Personne à contatcer par l'ADV, notamment lors des clôtures comptables mensuelles.", check_company=True)
+    project_manager = fields.Many2one('hr.employee', "Manager en appui du DM", help="Personne à contatcer par l'ADV, notamment lors des clôtures comptables mensuelles.", check_company=True)
     user_id = fields.Many2one(compute=_compute_user_id, store=True)
     remark = fields.Text("Remarques")
 

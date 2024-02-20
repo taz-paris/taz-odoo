@@ -467,6 +467,9 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
+        #self.env['hr.leave'].create_update_odoo_user_holiday()
+        #self.env['hr.contract'].create_update_odoo_user_history()
+        #a=1/0
         client.refresh_cache()
 
         #### Retreive project that previous sync failled
@@ -477,6 +480,7 @@ class naptaProject(models.Model):
             project_to_sync.create_update_napta()
             project_to_sync.with_context(ignore_napta_write=True).napta_to_sync = False
             self.env.cr.commit()
+
         self.env['hr.department'].create_update_odoo_business_unit()
         self.env['hr.job'].create_update_odoo_user_position()
         self.env['res.users'].create_update_odoo()
@@ -785,12 +789,15 @@ class naptaHrContract(models.Model):
                 cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)], order="begin_date asc")
                 if not cost_lines :
                     override = True
+                    _logger.info('override = True A')
                 else:
                     #si les cost_line du job_id ne couvrent pas l'intégralité de la durée du user_history > on surcharge le CJM dans le contrat
                     if cost_lines[0].begin_date > napta_start_date :
                         override = True
+                        _logger.info('override = True B')
                     if cost_lines[len(cost_lines)-1].end_date and napta_end_date and cost_lines[len(cost_lines)-1].end_date < napta_end_date:
                         override = True
+                        _logger.info('override = True C')
                 
                 for cost_line in cost_lines:
                     if napta_end_date and cost_line.begin_date < napta_end_date:
@@ -800,6 +807,12 @@ class naptaHrContract(models.Model):
                     # Si au moins une cost_line pour ce job_id au cours du contrat a un tarif différent à celui du user_hirtory_napta, alors on passe en mode overriden le contrat
                     if cost_line.cost != user_history['attributes']['daily_cost']:
                         override = True
+                        _logger.info('override = True D')
+
+                        _logger.info(cost_line.cost)
+                        _logger.info(user_history['attributes']['daily_cost'])
+                        _logger.info(napta_id)
+                        _logger.info(user_history['attributes'])
                         break
                         
             if override:
@@ -890,10 +903,9 @@ class naptaHrLeave(models.Model):
                 }
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
-        #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
+        self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
 
-    """
     def correct_leave_timesheet_stock(self):
         _logger.info('---- correct_leave_timesheet_stock')
         leaves = self.env['hr.leave'].search([('napta_id', '!=', None), ('state', '=', "validate"), ('request_date_from', '>', '2022-12-31')])
@@ -905,10 +917,9 @@ class naptaHrLeave(models.Model):
             if count != leave.number_of_days:
                 _logger.info('Incohérence : leave_id=%s pour %s (statut : %s) => duréee =%s alors que total des timesheet=%s. Debut le %s' % (str(leave.id), leave.employee_id.name, leave.state, str(leave.number_of_days), str(count), str(leave.request_date_from)))
                 _logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
-                leave.number_of_days = leave.number_of_days 
-                _logger.info('      Corrigé')
+                #leave.number_of_days = leave.number_of_days 
+                #_logger.info('      Corrigé')
             self.env.cr.commit()
-    """
 
 
 class naptaHrLeaveType(models.Model):
