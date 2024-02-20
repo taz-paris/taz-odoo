@@ -163,7 +163,7 @@ class projectAccountProject(models.Model):
 
 
 
-        if new_stage_id.id in [8, 4]: #status Perdu ou Annulé or "Perdu" #TODO : rendre plus robuste cette condition (si le nom du statut change ou que son ID change...)
+        if new_stage_id.id in [8, 4]: #status Perdu ou Annulé or "Perdu" #TODO : rendre plus robuste cette condition (si son ID change...)
             if self.order_sum_sale_order_lines_with_draft != 0.0 :
                 is_closable = False
                 error_message += "   - Il existe au moins un BC client dont le statut n'est pas annulé.\n"

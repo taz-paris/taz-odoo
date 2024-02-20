@@ -176,13 +176,6 @@
            <search string="Besoins de staffing">
                     <field name="project_id" string="Projet"/>
                     <field name="state" string="Statut"/>
-		    <!--
-                    <filter string="Mes actions commerciales" name="assigned_to_me"
-                        domain="[('user_ids', 'in', uid)]"
-                        help="Actions commerciales qui m'ont été assignées"/>
-			  </field>
-			-->
-                    <separator/>
                     <filter name="state_open" string="Besoins ouverts" domain="[('state', '=', 'open')]"/>
                     <group expand="0" string="Group By">
                         <filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
@@ -204,7 +197,7 @@
             }</field>
     </record>
 
-    <menuitem name="Staffing" id="staffing.staffing_root" groups="staffing_admin"/> 
+    <menuitem name="Staffing" id="staffing.staffing_root" groups="staffing_readonly"/> 
     <menuitem name="Besoins de staffing" id="staffing.staffing_need" parent="staffing.staffing_root" action="staffing.need"/> 
   </data>
 </odoo>

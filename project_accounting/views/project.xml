@@ -48,15 +48,16 @@
 			  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
 			      >
 		  <field name="id" widget="open_tab"/>
+		  <field name="number"/>
 		  <field name="is_review_needed" invisible="1"/>
 		  <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" attrs="{'invisible': [('is_review_needed', '=', False)]}"/>
-		  <field name="number"/>
+			  <!-- Ce panneau attetion n'est pas compatible avec le module web_remember_tree_column_width => celà conduit à des colonnes trop larges -->
 		  <field name="name" />
-		  <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+		  <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
 		  <field name="company_id" invisible="1"/>
 		  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
 		  <field name="project_director_employee_id" optional="show" />
-		  <field name="outsourcing" optional="show"/>
+		  <field name="outsourcing" optional="hide"/>
 		  <field name="stage_id" 
 			  widget="badge" optional="show"
 			  decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'"
@@ -64,14 +65,14 @@
 			  />
 		  <field name="color_rel" invisible="1" />
 		  <field name="book_employee_distribution_ids" optional="show" widget="many2many_tags" />
-		  <field name="is_validated_book" optional="show" />
-		  <field name="order_sum_sale_order_lines" optional="show" />
+		  <field name="is_validated_book" optional="hide" />
+		  <field name="order_sum_sale_order_lines" optional="show" string="€ commandés"/>
 		  <field name="remark" optional="hide" />
 		  <field name="invoicing_comment" optional="show" groups="account.group_account_manager"/>
             	  <field name="order_to_invoice_company" optional="hide" sum="Total"/>
             	  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
 		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
-		  <field name="agreement_id" optional="show"/>
+		  <field name="agreement_id" optional="hide"/>
 		</tree>
 	      </field>
 	    </record>
@@ -493,6 +494,7 @@
                     <field name="tag_ids"/>
                     <field name="number"/>
                     <field name="company_id"/>
+		    <field name="is_review_needed" />
                     <progressbar field="last_update_status" colors="{&quot;on_track&quot;: &quot;success&quot;, &quot;at_risk&quot;: &quot;warning&quot;, &quot;off_track&quot;: &quot;danger&quot;, &quot;on_hold&quot;: &quot;info&quot;}"/>
                     <field name="sequence" widget="handle"/>
                     <templates>
@@ -523,6 +525,10 @@
                                                     <field name="rating_avg_percentage" widget="percentage"/>
                                                 </div>
                                                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+						<span t-if="record.is_review_needed.raw_value" class="o_text_overflow text-muted">
+							<span title="warning_is_review_needed" class="fa fa-exclamation-triangle me-2" aria-label="Partner" ></span>
+							Contrôle(s) en échec
+						</span>
                                             </div>
                                         </div>
                                     </div>
