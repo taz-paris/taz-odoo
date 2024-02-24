@@ -21,6 +21,7 @@
 
     'data': [
         "views/dashboards.xml",
+        "views/outsourcing_dashboard.xml",
     ],
     'assets': {
         'web.assets_backend': [

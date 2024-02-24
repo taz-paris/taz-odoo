@@ -174,7 +174,7 @@ class projectOutsourcingLink(models.Model):
     project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')
     link_type = fields.Selection([
             ('outsourcing', 'Sous-traitance'),
-            ('cosourcing', 'Co-traitance'),
+            ('cosourcing', 'Co-traitance - Cas avec validation par Tasmane des factures émises par le cotraitant vers le client'),
             ('other', 'Autres achats')
         ], string="Type d'achat", default='outsourcing')
 

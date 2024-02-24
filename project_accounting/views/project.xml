@@ -182,7 +182,7 @@
 								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
 								<button type="object" name="create_sale_order" string="Créer commande client" /> 
                                                         </group>
-							<group string="Production pilotée par un co-traitant" attrs="{'invisible' : [('cosource_part_amount_current', '=', 0), ('cosource_part_cost_current', '=', 0), ('cosource_part_cost_futur', '=', 0)]}">
+							<group string="Production pilotée par un co-traitant (Cas avec validation par Tasmane des factures émises par le cotraitant vers le client)" attrs="{'invisible' : [('cosource_part_amount_current', '=', 0), ('cosource_part_cost_current', '=', 0), ('cosource_part_cost_futur', '=', 0)]}">
                                                                 <field name="cosource_part_amount_current" />
                                                                 <field name="cosource_part_cost_current"/>
                                                                 <field name="cosource_part_cost_futur"/>
@@ -255,7 +255,7 @@
 								<field name="order_marging_amount_initial"/>
 								<field name="order_marging_rate_initial" widget="progressbar"/>
 							</group>
-							<group string="Production pilotée par un co-traitant">
+							<group string="Production pilotée par un co-traitant (Cas avec validation par Tasmane des factures émises par le cotraitant vers le client)">
 								<field name="cosource_part_amount_initial"/>
 								<field name="cosource_part_cost_initial"/>
 								<field name="cosource_part_marging_amount_initial"/>
@@ -305,6 +305,12 @@
 									<field name="sum_account_move_lines" sum="Total"/>
 								</tree>                                
 							</field>
+							<!--
+		  <field name="purchase_line_ids" widget="one2many_list">
+			  <field name="name"/>
+			  <field name="partner_id"/>
+								</field>
+							-->
 					</page>
 					<page name="book" string="Book">
 						<group string="Book brut du projet">

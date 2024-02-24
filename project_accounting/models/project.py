@@ -1083,3 +1083,5 @@ class projectAccountProject(models.Model):
     # CHART
     margin_graph = fields.Char("Margin graph", compute=compute_margin_graph)
     activity_graph = fields.Char("Activity graph", compute=compute_margin_graph)
+
+    purchase_line_ids = fields.One2many('purchase.order.line', 'rel_project_ids')

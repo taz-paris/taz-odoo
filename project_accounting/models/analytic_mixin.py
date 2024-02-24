@@ -66,5 +66,4 @@ class AnalyticMixin(models.AbstractModel):
             else :
                 rec.rel_project_ids = False
    
-    rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
-    #TODO : stocker la valeur de ce champ : store=True
+    rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids, store=True)

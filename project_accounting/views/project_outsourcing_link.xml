@@ -69,5 +69,12 @@
             </field>                                    
         </record>
 
+    <record id="project_outsourcing_link_tree_action" model="ir.actions.act_window">
+        <field name="name">Liens projet-fournisseur</field>
+        <field name="res_model">project.outsourcing.link</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+   <menuitem name="Liens projet-fournisseur" sequence="40" id="project_outsourcing_link_list_menu" parent="project.menu_main_pm" action="project_outsourcing_link_tree_action"/>
 </data>
 </odoo>

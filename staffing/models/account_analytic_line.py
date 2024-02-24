@@ -14,7 +14,7 @@ class staffingAnalyticLine(models.Model):
             vals = self._sync_project(vals)
         #_logger.info(vals)
         res = super().write(vals)
-        self.check_accounting_closed(vals)
+        #self.check_accounting_closed(vals)
         return res
 
     @api.model
