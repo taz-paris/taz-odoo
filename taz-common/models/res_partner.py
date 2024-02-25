@@ -113,9 +113,10 @@ class tazResPartner(models.Model):
      child_ids_address = fields.One2many('res.partner', 'parent_id', string='Addresses rattchés à cette entreprise', domain=[('active', '=', True), ('type', '!=', 'contact')]) 
      external_auxiliary_code = fields.Char('Code auxiliaire CEGB - Quadratus', help="Code permettant d'identifier le tiers sur Quadratus. Exporté chaque mois avec les facture clients par CEGB") 
      business_priority = fields.Selection([
-         ('not_tracked', 'Non suivi'),
+         ('not_tracked', 'Non actif ni suivi ni prioritaire'),
          ('tracked', 'Compte suivi en BDM'),
-         ('priority_target', 'Compte à ouvrir')], "Niveau de priorité", default='not_tracked')
+         ('active', 'Compte actif'),
+         ('priority_target', 'Compte prioritaire')], "Niveau de priorité", default='not_tracked')
      former_email_address = fields.Char("Anciennes adresses email", readonly=True)
      is_followed = fields.Boolean("Contact à suivre en BDM")
 

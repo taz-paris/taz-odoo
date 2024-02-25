@@ -14,7 +14,7 @@
                     <field name="project_group_id" string="Groupe de projets"/>
                     <filter string="Mes projets" name="own_projects" domain="[('user_enrolled_ids', 'in', uid)]"/>
                     <separator/>
-                    <filter string="Projets ni terminés ni annulés" name="open_projects" domain="[('stage_id.state', '!=', 'closed')]"/>
+                    <filter string="Projets ni terminés, ni annulés, ni perdus" name="open_projects" domain="[('stage_id.state', '!=', 'closed')]"/>
                     <separator/>
                     <filter string="Projet à revoir (contrôle KO ou commentaire ADV valorisé)" name="is_review_needed" domain="['|', ('is_review_needed', '=', True), ('invoicing_comment', 'not in', [False, '', None])]"/>
                     <separator/>
@@ -25,6 +25,9 @@
                     <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
                     <filter string="Date de fin" name="end_date" date="date"/>
+                    <separator/>
+		    <filter string="Projets non annulés avec date de passage gagné/perdu cette année ou non valorisée" name="win_loose_this_year" 
+			    domain="[('stage_id.id', '!=', 4), '|', ('date_win_loose', '=', False), '&amp;', ('date_win_loose', '&gt;=', time.strftime('%%Y-01-01')), ('date_win_loose', '&lt;=', time.strftime('%%Y-12-31'))]"/>
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                     <group expand="0" string="Group By">
@@ -154,6 +157,7 @@
 					    <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]" />
 					    <field name="stage_id" required="1"/>
 					    <field name="state_last_change_date" invisible="1" readonly="1"/>
+					    <field name="date_win_loose" invisible="0" />
 					    <field name="outsourcing"/>
 					    <field name="agreement_id"/>
 					    <field name="state" invisible="1"/>

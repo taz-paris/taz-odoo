@@ -83,7 +83,47 @@ class projectAccountProject(models.Model):
                     is_closable, error_message = record.is_closable(new_stage_id)
                     if not is_closable :
                         raise ValidationError(_(error_message))
-        return super().write(vals)
+
+                ### Toper le passage le plus récent à Perdu ou à un statut du groupe Gagné {Accord client / Commandé / Prod terminée / Clos}
+                if new_stage_id.id in [1, 7, 4]: #statut Avt-froid / avt-chaud / annulée
+                    if record.date_win_loose != False:
+                        vals['date_win_loose'] = False
+                if new_stage_id.id in [8]:
+                    if record.stage_id.id not in [8]:
+                        vals['date_win_loose'] = datetime.now() 
+                elif new_stage_id.id in [6, 2, 9, 3]:
+                    if record.stage_id.id not in [6, 2, 9, 3]: #du statut Avt-froid / avt-chaud / perdu / annulée  vers un statuts Accord client / Commandé / Prod terminée / Clos
+                        vals['date_win_loose'] = datetime.now() 
+
+        res = super().write(vals)
+        return res
+
+
+    """
+    def init_date_win_loose(self):
+        for rec in self:
+            res = False
+
+            if rec.stage_id.id in [6, 2, 9, 3, 8] :
+                project_model_id = self.env['ir.model'].search([('model', '=', 'project.project')])[0]
+                project_stage_id_field_id = self.env['ir.model.fields'].search([('name', '=', 'stage_id'), ('model_id', '=', project_model_id.id)])[0]
+
+                message_list = self.env['mail.message'].search([('model', '=', 'project.project'), ('res_id', '=', rec.id)], order="date DESC")
+                for message in message_list :
+                    for track in message.tracking_value_ids:
+                        if track.field.id == project_stage_id_field_id.id:
+                            if rec.stage_id.id == 8 and track.new_value_integer == 8 :#statut perdu
+                                res = message.date
+                            else:
+                                if track.old_value_integer in [1, 7, 8, 4] and track.new_value_integer in [6, 2, 9, 3] : #du statut Avt-froid / avt-chaud / perdu / annulée  vers un statuts Accord client / Commandé / Prod terminée / Clos
+                                    res = message.date
+                    if res != False:
+                        break #on parcours les message du plus récent au plus ancien => quand on a trouvé une valeur, on s'arrête
+                if res == False : #si le projet a directement été créé à un statut [6, 2, 9, 3, 8]
+                    res = rec.create_date
+
+            rec.date_win_loose = res
+    """
 
     """
     def corriger_vendor_facture(self, stage_id):
@@ -200,8 +240,12 @@ class projectAccountProject(models.Model):
     user_enrolled_ids = fields.Many2many('res.users', string="Utilisateurs concernés par ce projet", compute=_compute_user_enrolled_ids, store=True)
     stage_id = fields.Many2one(required=True, string="Étape")
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
+    date_win_loose = fields.Datetime("Date passage gagné ou perdu",
+                help="Date de la dernière fois que le projet a basculé dans le groupe de statuts {3, 4} ou en perdu",
+                )
     color_rel = fields.Selection(related="stage_id.color", store=True)
-    rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id')
+    rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id', store=True)
+    rel_partner_business_priority = fields.Selection(related='partner_id.business_priority', store=True)
     number = fields.Char('Numéro', readonly=True, required=False, copy=False, default='')
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")

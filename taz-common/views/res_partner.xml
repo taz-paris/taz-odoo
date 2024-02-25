@@ -229,9 +229,10 @@
 
 		<filter string="Archivée" name="inactive" domain="[('active', '=', False)]"/>
 		<separator/>
-            	    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
-            	    <filter name="not_tracked" string="Comptes non suivis" domain="[('business_priority', '=', 'not_tracked')]"/>
+            	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
+            	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
             	    <filter name="priority_target" string="Comptes suivis en BDM" domain="[('business_priority', '=', 'tracked')]"/>
+            	    <filter name="not_tracked" string="Comptes ni actifs, ni suivis, ni prioritaires" domain="[('business_priority', '=', 'not_tracked')]"/>
 		<separator/>
 		<separator/>
 		<group expand="0" string="Group By">

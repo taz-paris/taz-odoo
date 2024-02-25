@@ -117,8 +117,8 @@
 		    <filter name="communication_preference_paper_auto" string="Préférence de com. = papier auto" domain="[('communication_preference', '=', 'paper_auto')]" />
 		    <filter name="communication_preference_paper_perso" string="Préférence de com. = papier perso" domain="[('communication_preference', '=', 'paper_perso')]" />
 		    <!--
-                    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
-                    <filter name="not_tracked" string="Comptes non suivis" domain="[('business_priority', '=', 'not_tracked')]"/>
+                    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
+                    <filter name="not_tracked" string="Comptes ni actifs non suivis ni prioritaires" domain="[('business_priority', '=', 'not_tracked')]"/>
                     <separator/>
 			-->
                     <group expand="0" string="Group By">

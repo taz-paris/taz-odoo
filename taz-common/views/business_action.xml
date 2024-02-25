@@ -112,9 +112,10 @@
 		    <separator/>
             	    <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
 		    <separator/>
-            	    <filter name="priority_target" string="Comptes à ouvrir" domain="[('business_priority', '=', 'priority_target')]"/>
-            	    <filter name="not_tracked" string="Comptes non suivis" domain="[('business_priority', '=', 'not_tracked')]"/>
+            	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
+            	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
             	    <filter name="priority_target" string="Comptes suivis en BDM" domain="[('business_priority', '=', 'tracked')]"/>
+            	    <filter name="not_tracked" string="Comptes ni actifs, ni suivis, ni prioritaires" domain="[('business_priority', '=', 'not_tracked')]"/>
 		    <separator/>
 		    <filter name="state_not_done_not_cancelled" string="Non terminées ni annulées" domain="[('state', '!=', 'done'), ('state', '!=', 'cancelled')]"/>
 		    <group expand="0" string="Group By">
