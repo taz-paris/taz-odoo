@@ -118,7 +118,7 @@ td.tright{
 </head>
 <body>
 
-<h1>Projets avec des achats de <span t-esc="supplier"/></h1>
+<h1>Projets avec des achats à <span t-esc="supplier"/></h1>
 
 <ul id="myUL">
   <li t-foreach="data" t-as="customer"><span class="caret"><span t-esc="customer['name']"/></span>
@@ -176,7 +176,7 @@ td.tright{
 							<td><span t-esc="invoice_line['ref']"/></td>
 							<td class="tright"><span class="currency" t-esc="invoice_line['price_unit']"/></td>
 							<td class="tright"><span t-esc="invoice_line['quantity']"/></td>
-							<td class="tright"><span class="currency" t-esc="invoice_line['price_subtotal_signed'] * -1"/></td>
+							<td class="tright"><span class="currency" t-esc="invoice_line['price_subtotal_signed']"/></td>
 							<td><span t-esc="invoice_line['parent_payment_state']"/></td>
 							<td><span class="br" t-out="invoice_line['name']"/></td>
 						</tr>
@@ -188,7 +188,7 @@ td.tright{
 		<li>
                       <table class="master"><tr class="master"><td class="master">
                                 <table>
-                                        <caption>Lignes de commande fournisseur</caption>
+                                        <caption>Lignes de commande fournisseur <span t-esc="supplier"/></caption>
 					<tr>
 						<th>Ref</th>
 						<th>PU HT</th>
@@ -210,7 +210,7 @@ td.tright{
                                 </table>
                         </td><td class="master">
                                 <table>
-                                        <caption>Lignes de facture fournisseur</caption>
+                                        <caption>Lignes de facture fournisseur <span t-esc="supplier"/></caption>
                                         <tr>
                                                 <th>Date</th>
                                                 <th>Ref</th>
