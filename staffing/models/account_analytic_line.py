@@ -14,23 +14,27 @@ class staffingAnalyticLine(models.Model):
             vals = self._sync_project(vals)
         #_logger.info(vals)
         res = super().write(vals)
-        #self.check_accounting_closed(vals)
+        if 'amount' in vals.keys():
+            self.check_accounting_closed()
         return res
 
     @api.model
     def create(self, vals):
         res = self._sync_project(vals)
         res = super().create(res)
-        res.check_accounting_closed(vals)
+        if 'amount' in vals.keys():
+            res.check_accounting_closed()
         return res
 
-    def check_accounting_closed(self, vals):
-        if 'amount' in vals.keys():
-            if self.category in ['project_employee_validated', 'project_forecast']: #les changements sont possibles a postériori pour les timesheet liées aux congés
-                company = self.env['res.company'].browse(self.company_id.id)[0]
-                if company.fiscalyear_lock_date > self.date:
-                    raise ValidationError(_("Une écriture analytique de la catégorie Pointage ne peut changer de montant après la clôture comptable."))
+    def check_accounting_closed(self):
+        if self.category in ['project_employee_validated', 'project_forecast']: #les changements sont possibles a postériori pour les timesheet liées aux congés
+            company = self.env['res.company'].browse(self.company_id.id)[0]
+            if company.fiscalyear_lock_date > self.date:
+                raise ValidationError(_("Une écriture analytique de la catégorie Pointage ne peut changer de montant après la clôture comptable."))
 
+    def unlink(self):
+        self.check_accounting_closed()
+        return super().unlink()
 
     def _sync_project(self, vals):
         #_logger.info('---------- _sync_project account.analytic.line account_analytic_line.py')

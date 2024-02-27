@@ -133,7 +133,7 @@ td.tright{
 		    <span class="gray badge" t-if="project['stage_id'][0] == 3" t-esc="project['stage_id'][1]"/>
 		    <span class="red badge" t-if="project['stage_id'][0] == 8" t-esc="project['stage_id'][1]"/>
 		    <span class="red badge" t-if="project['stage_id'][0] == 4" t-esc="project['stage_id'][1]"/>
-		    <span class="bold" t-esc="project['number']"/> <span t-esc="project['name']"/> du <span t-esc="project['date_start']"/> au <span t-esc="project['date']"/> (<span t-esc="project['project_director_employee_id'][1]"/>)</span>
+		    <span class="bold" t-esc="project['number']"/> <span t-esc="project['name']"/> du <span class="date" t-esc="project['date_start']"/> au <span class="date" t-esc="project['date']"/> (<span t-esc="project['project_director_employee_id'][1]"/>)</span>
         <ul class="nested">
 		<li>
 		      <table class="master"><tr class="master"><td class="master">

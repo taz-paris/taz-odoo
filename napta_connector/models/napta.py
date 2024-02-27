@@ -1,4 +1,5 @@
 import requests
+from requests import HTTPError
 import math
 import time
 import zlib
@@ -26,7 +27,7 @@ import sys
 API_URL_TOKEN_ENDPOINT = "https://pickyourskills.eu.auth0.com/oauth/token"
 API_URL_BUSINESS_ENDPOINT = "https://app.napta.io/api/v1/"
 
-cache_duration_in_minutes = 75
+cache_duration_in_minutes = 60 * 12 +15
 cache_folder = '/tmp/napta'
 
 EXCLUDED_USERLIST = ['1', '67', '68']
@@ -170,6 +171,8 @@ class ClientRestNapta:
                     attribute_value = round(attribute_value, 2)
                 if cache_value['attributes'][attribute_key] != attribute_value:
                     changes_dic[attribute_key] = {'old_value' : cache_value['attributes'][attribute_key], 'new_value' : attribute_value}
+        else : 
+            raise Exception('Object to update not in cache : %s id_napta=%s.' % (napta_type, str(napta_id)))
         return changes_dic, cache_value
 
 
@@ -268,7 +271,7 @@ class ClientRestNapta:
         _logger.info(response.status_code)
 
 
-    def get_api(self, napta_type, filter=None):
+    def get_api(self, napta_type, filter=None, napta_id=None):
         """ 
         #Exemple de format du dictionnaire FILTER
         filter=[
@@ -281,7 +284,10 @@ class ClientRestNapta:
         if filter :
             params['filter'] = json.dumps(filter)
 
-        _logger.info("GET "+self.API_URL_BUSINESS_ENDPOINT+napta_type)
+        url = self.API_URL_BUSINESS_ENDPOINT+napta_type
+        if napta_id != None :
+            url += "/"+str(napta_id)
+        _logger.info("GET "+url)
 
         page_size = 100
 
@@ -299,17 +305,23 @@ class ClientRestNapta:
                 'page[size]' : page_size,
                 'page[number]' : page_number,
             }
-            response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
+            response = requests.get(url, params=params,  headers=headers)
             if response.status_code == 429:
                 _logger.info("GET 429 too many requests : attente de 60 secondes")
                 time.sleep(60)
-                response = requests.get(self.API_URL_BUSINESS_ENDPOINT+napta_type, params=params,  headers=headers)
+                response = requests.get(url, params=params,  headers=headers)
+            elif response.status_code == 404:
+                _logger.info("GET 404 not found : objet doesn't exist on Napta : %s id_napta=%s." % (napta_type, str(napta_id)))
+                response.raise_for_status()
             elif response.status_code != 200 :
                 _logger.info(response.status_code)
                 _logger.info(response.reason)
                 _logger.info(response.content)
             response_json = response.json()
-            response_list = response_list + response_json['data']
+            if napta_id == None:
+                response_list = response_list + response_json['data']
+            else :
+                response_list = response_list + [response_json['data']]
             last_page_number = math.ceil(response_json['meta']['count'] / page_size)
             page_number = page_number + 1
         return {'data' : response_list}
@@ -369,7 +381,7 @@ class naptaProject(models.Model):
     def write(self, vals):
         res = super().write(vals)
         for rec in self:
-            if not rec.is_prevent_napta_creation and not self.env.context.get('ignore_napta_write'):
+            if not rec.is_prevent_napta_creation and not self.env.context.get('ignore_napta_write') and rec.partner_id :
                 rec.with_context(ignore_napta_write=True).napta_to_sync = True
                 try:
                     rec.create_update_napta()
@@ -386,13 +398,26 @@ class naptaProject(models.Model):
 
     def delete_on_napta(self):
         self.ensure_one()
+
         if not self.napta_id:
            raise ValidationError(_("Impossible de supprimer ce projet sur Napta car son id_napta est inconnu.")) 
         _logger.info('Projet à supprimer de napta %s %s (ID ODOO = %s / NaptaID = %s)' % (self.number, self.name, str(self.id), self.napta_id))
+
         client = ClientRestNapta(self.env)
-        self.is_prevent_napta_creation = True
-        client.delete_api('project', self)
-        self.env.cr.commit()
+        try :
+            napta_project = client.get_api('project', napta_id=self.napta_id)
+            self.is_prevent_napta_creation = True
+            self.napta_to_sync = False
+            client.delete_api('project', self)
+            self.env.cr.commit()
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                _logger.info('Le projet n\'existe plus sur Napta napta %s %s (ID ODOO = %s / NaptaID = %s) => il a été supprimé directement sur Napta => le champ napta_id du projet va être vidé sur Odoo' % (self.number, self.name, str(self.id), self.napta_id))
+                self.is_prevent_napta_creation = True
+                self.napta_to_sync = False
+                self.napta_id = False
+                self.env.cr.commit()
+            
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project')
@@ -437,6 +462,7 @@ class naptaProject(models.Model):
                             contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
                 #On ne supprime pas de Napta les contributors qui ne sont pas/plus DM dans Odoo
 
+
     def create_update_odoo(self):
         _logger.info('---- Get project begin/begin dates from Napta')
         client = ClientRestNapta(self.env)
@@ -477,8 +503,15 @@ class naptaProject(models.Model):
         _logger.info('>>>>>  Retreive project that previous sync to Napta failled %s projets => %s' % (str(len(projects_to_sync)), str(projects_to_sync.ids)))
         for project_to_sync in projects_to_sync:
             _logger.info('Try to sync to Napta project that previous sync failled : %s %s (id odoo = %s)' % (project_to_sync.number or "", project_to_sync.name or "", str(project_to_sync.id)))
-            project_to_sync.create_update_napta()
-            project_to_sync.with_context(ignore_napta_write=True).napta_to_sync = False
+            if project_to_sync.is_prevent_napta_creation == True:
+                project_to_sync.napta_to_sync = False
+            else:
+                try :
+                    project_to_sync.create_update_napta()
+                    project_to_sync.with_context(ignore_napta_write=True).napta_to_sync = False
+                except Exception as err:
+                    _logger.warning("Napta : error while sending data from Odoo project %s %s (id=%s) to Napta" % (project_to_sync.number or "", project_to_sync.name or "", str(project_to_sync.id)))
+                    _logger.warning(traceback.format_exc())
             self.env.cr.commit()
 
         self.env['hr.department'].create_update_odoo_business_unit()
