@@ -95,7 +95,7 @@ class staffingEmployee(models.Model):
     is_late_validated_timesheet = fields.Boolean("Pointage en retard", compute=is_late_validated_timesheet)
     is_associate = fields.Boolean("Est associé")
     mentee_ids = fields.One2many('hr.employee', 'coach_id', string="Mentees")
-    sector_ids = fields.Many2many('res.partner.industry', string="Business Domain")
+    sector_ids = fields.Many2many('res.partner.industry', string="Compte (ex BD)")
     annual_evaluator_id = fields.Many2one('res.partner', string="En charge de l'EA")
     cv_link = fields.Char('Lien CV')
     vcard_link = fields.Char('Lien VCard') #TODO : générer la VCARD depuis les données Odoo

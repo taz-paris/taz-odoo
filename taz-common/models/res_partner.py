@@ -109,16 +109,12 @@ class tazResPartner(models.Model):
      type = fields.Selection(string="Type de fiche partenaire")
      parent_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='parent_id.industry_id', store=True)
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
-     child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattchés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False), ('type', '=', 'contact')]) 
-     child_ids_address = fields.One2many('res.partner', 'parent_id', string='Addresses rattchés à cette entreprise', domain=[('active', '=', True), ('type', '!=', 'contact')]) 
+     child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattachés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False), ('type', '=', 'contact')]) 
+     child_ids_address = fields.One2many('res.partner', 'parent_id', string='Addresses rattachés à cette entreprise', domain=[('active', '=', True), ('type', '!=', 'contact')]) 
      external_auxiliary_code = fields.Char('Code auxiliaire CEGB - Quadratus', help="Code permettant d'identifier le tiers sur Quadratus. Exporté chaque mois avec les facture clients par CEGB") 
-     business_priority = fields.Selection([
-         ('not_tracked', 'Non actif ni suivi ni prioritaire'),
-         ('tracked', 'Compte suivi en BDM'),
-         ('active', 'Compte actif'),
-         ('priority_target', 'Compte prioritaire')], "Niveau de priorité", default='not_tracked')
+     business_priority = fields.Selection(related='parent_industry_id.business_priority', store=True)
      former_email_address = fields.Char("Anciennes adresses email", readonly=True)
-     is_followed = fields.Boolean("Contact à suivre en BDM")
+     is_followed = fields.Boolean("Contact à suivre en Revue de plan de compte")
 
      assistant = fields.Html('Assistant(e)')
      user_id = fields.Many2one(string="Propriétaire") #override the string of the native field

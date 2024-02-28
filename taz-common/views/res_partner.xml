@@ -216,7 +216,7 @@
         <field name="arch" type="xml">
            <search string="Entreprises">
                 <field name="name" string="Nom ou libellé long de l'entreprise" filter_domain="['|', ('long_company_name', 'ilike', self), ('name', 'ilike', self)]"/>
-		<field name="industry_id" string="Business Domain"/>
+		<field name="industry_id" string="Compte (ex BD)"/>
             	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
             	<filter name="no_industry_id" string="Sans business domain" domain="[('industry_id', '=', False)]"/>
             	<filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
@@ -231,12 +231,12 @@
 		<separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
-            	    <filter name="priority_target" string="Comptes suivis en BDM" domain="[('business_priority', '=', 'tracked')]"/>
-            	    <filter name="not_tracked" string="Comptes ni actifs, ni suivis, ni prioritaires" domain="[('business_priority', '=', 'not_tracked')]"/>
+            	    <filter name="not_tracked" string="Comptes ni prioritaires, ni actifs" domain="[('business_priority', 'not in', ['priority_target', 'active'])]"/>
 		<separator/>
 		<separator/>
 		<group expand="0" string="Group By">
-			<filter string="Business domain" name="group_industry" context="{'group_by': 'industry_id'}"/>
+			<filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'industry_id'}"/>
+			<filter string="Niveau de priorité du compte" name="group_business_priority" context="{'group_by': 'business_priority'}"/>
 			<filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
 		</group>
         </search>
@@ -429,8 +429,8 @@
                 <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
                 <field name="email" string="Email" filter_domain="[('email', 'ilike', self)]"/>
 		<field name="category_id" string="Étiquette" />
-		<field name="parent_industry_id" string="Business Domain"/>
-	    <filter string="Contact à suivre en BDM" name="is_followed" domain="[('is_followed', '=', True)]"/>
+		<field name="parent_industry_id" string="Compte (ex BD)"/>
+	    <filter string="Contact à suivre en Revue de plan de compte" name="is_followed" domain="[('is_followed', '=', True)]"/>
             <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"
                 help="Contacts qui m'ont été assignés en vendeur principal"/>
@@ -451,7 +451,7 @@
             <separator/>
 	    <filter name="no_update_12months" string="Pas MAJ depuis > 12 mois" domain="[('write_date','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
             <group expand="0" string="Group By">
-            	<filter string="Business domain" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
+            	<filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
             	<filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
 		<filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
             </group>
@@ -661,7 +661,7 @@
     <menuitem id="taz-common.res_partner_menu_config"
         name="Configuration"
         parent="taz-common.commerce"
-        groups="taz-common.taz-admin"
+        groups="taz-common.taz-admin,taz-common.taz-management"
         sequence="100"/>
 
     <menuitem id="taz-common.menu_partner_category_form"

@@ -87,7 +87,7 @@
            <search string="Lien tasmanien-client">
                     <field name="partner_id" string="Contact"/>
                     <field name="parent_partner_id" string="Entreprise"/>
-                    <field name="parent_partner_industry_id" string="Business Domain"/>
+                    <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
 		<!-- Inutile car la page du plan d'intimité ne permet de voir que ses propres liens
                     <filter string="Mes liens tasmanien-client" name="my_link"
                         domain="[('user_id', '=', uid)]"/>
@@ -123,7 +123,7 @@
 			-->
                     <group expand="0" string="Group By">
                         <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
-                        <filter string="Business domain" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
+                        <filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
                         <filter string="A revoir avant le" name="group_next_meeting_before" context="{'group_by': 'next_meeting_before'}"/>
                         <filter name="group_target_contact_frequency_id" context="{'group_by': 'target_contact_frequency_id'}"/>
                         <filter name="group_proximity_level" context="{'group_by': 'proximity_level'}"/>

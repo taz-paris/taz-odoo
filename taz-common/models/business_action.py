@@ -195,7 +195,7 @@ class tazBusinessAction(models.Model):
     ms_planner_task_data = fields.Char("Data de la tâche M$ Planner")
     is_rdv_to_be_taken_by_assistant = fields.Boolean("RDV à planifier par Executive Access")
     is_rdv_taken_by_assistant = fields.Boolean("RDV planifié par Executive Access")
-    business_priority = fields.Selection(string='Niveau de priorité', related='parent_partner_id.business_priority', store=False)
+    business_priority = fields.Selection(string='Niveau de priorité', related='parent_partner_id.business_priority', store=True)
 
     def open_record(self):
         # first you need to get the id of your record

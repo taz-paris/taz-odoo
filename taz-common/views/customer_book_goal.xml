@@ -75,14 +75,14 @@
         <field name="model">taz.customer_book_followup</field>
         <field name="arch" type="xml">
            <search string="Suivi du book">
-		    <field name="partner_industry_id" string="Business Domain"/>
+		    <field name="partner_industry_id" string="Compte (ex BD)"/>
 		    <field name="partner_id" string="Contact"/>
 		    <separator/>
 		    <filter name="filter_date_update" date="date_update"/>
 		    <separator/>
 		    <separator/>
 		    <group expand="0" string="Group By">
-			<filter string="Business Domain" name="group_industry_id" context="{'group_by': 'partner_industry_id'}"/>
+			<filter string="Compte (ex BD)" name="group_industry_id" context="{'group_by': 'partner_industry_id'}"/>
 			<filter string="Entreprise" name="group_partner" context="{'group_by': 'partner_id'}"/>
 		    </group>
            </search>

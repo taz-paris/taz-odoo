@@ -11,6 +11,8 @@
 			<field name="pillar_id"/>
 			<field name="user_id"/>
 			<field name="coordinator_id"/>
+			<field name="business_priority"/>
+			<field name="account_plan_url" widget="url"/>
 			<field colspan="3" name="partner_ids" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
 				<tree delete="false">
 				  <field name="is_company" invisible="1"/>
@@ -34,7 +36,10 @@
 			<field name="pillar_id" optional="show"/>
 			<field name="user_id"  optional="show"/>
 			<field name="coordinator_id"  optional="show"/>
-			<field name="partner_ids" optional="show"/>
+			<field name="business_priority" optional="show"/>
+			<field name="account_plan_url" widget="url" optional="show"/>
+			<field name="partner_ids" optional="show" widget="many2many_tags"/>
+		  	<field name="id" widget="open_tab"/>
 		</field>
             </field>
         </record>

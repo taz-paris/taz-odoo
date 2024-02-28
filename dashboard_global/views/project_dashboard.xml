@@ -1,28 +1,26 @@
 <odoo>
     <data>
            <record model="ir.ui.view" id="project_win_loose_pivot">
-	      <field name="name">Projets passés dans un statut gagné/perdu par mois de bascule</field>
+	      <field name="name">pivot.project_win_loose_pivot</field>
 	      <field name="model">project.project</field>
 	      <field name="arch" type="xml">
-		<pivot string="Projet" display_quantity="1">
-		    <field name="rel_partner_business_priority" type="row"/>
-		    <field name="rel_partner_industry_id" />
-		    <field name="stage_id" type="row"/>
-		    <field name="user_id"/>
-		    <field name="partner_id"/>
+		<pivot string="Projet" display_quantity="1" default_order="rel_industry_business_priority asc">
+		    <field name="rel_industry_business_priority" type="row"/>
+		    <field name="rel_partner_industry_id" type="row"/>
 
 		    <field name="date_win_loose" interval="month" type="col"/>
-		    <field name="company_part_amount_current" type="measure" string="CA interne commandé"/>
-		    <field name="outsource_part_marging_amount_current" type="measure" string="Markup commandé"/>
-		    <field name="company_part_amount_initial" type="measure" string="CA interne estimé"/>
-		    <field name="outsource_part_marging_amount_initial" type="measure" string="Markup estimé"/>
+
+		    <field name="reporting_company_part_amount_initial_only_code_3" type="measure" string="CA interne estimé (code 3)"/>
+		    <field name="reporting_outsource_part_marging_amount_initial_only_code_3" type="measure" string="Markup estimé (code 3)"/>
+		    <field name="reporting_company_part_amount_current_at_least_code_4" type="measure" string="CA interne commandé (code 4+)"/>
+		    <field name="reporting_outsource_part_marging_amount_current_at_least_code_4" type="measure" string="Markup commandé (code 4+)"/>
 
 		</pivot>
 	      </field>
 	  </record>
 
 	    <record id="open_view_project_win_loose_action" model="ir.actions.act_window">
-	        <field name="name">Projets passés dans un statut gagné/perdu par mois de bascule</field>
+		<field name="name">Projets passés dans un statut Accord client/Commandé+ par mois de bascule</field>
 		<field name="res_model">project.project</field>
 		<field name="view_mode">pivot</field>
 		<field name="context">{'search_default_win_loose_this_year':1}</field>
@@ -33,7 +31,7 @@
 				      ]" />
 	    </record>
 
-	    <menuitem name="Projets gagnés/perdus" id="project_win_loose" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="open_view_project_win_loose_action" sequence="7"/>
+	    <menuitem name="Suivi de la prise de commande" id="project_win_loose" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="open_view_project_win_loose_action" sequence="7"/>
 
 
    </data>

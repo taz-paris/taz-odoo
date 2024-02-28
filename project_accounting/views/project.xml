@@ -9,7 +9,7 @@
                     <field name="name" string="N° ou nom du projet" filter_domain="['|', ('number', 'ilike', self), ('name', 'ilike', self)]"/>
                     <field name="project_director_employee_id" string="Directeur de mission (nom de famille)"/>
                     <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
-		    <field name="rel_partner_industry_id" string="Business domain" />
+		    <field name="rel_partner_industry_id" string="Compte (commerce)" />
                     <field name="stage_id" groups="project.group_project_stages"/>
                     <field name="project_group_id" string="Groupe de projets"/>
                     <filter string="Mes projets" name="own_projects" domain="[('user_enrolled_ids', 'in', uid)]"/>
@@ -26,14 +26,19 @@
                     <filter string="Date de début" name="start_date" date="date_start"/>
                     <filter string="Date de fin" name="end_date" date="date"/>
                     <separator/>
-		    <filter string="Projets non annulés avec date de passage gagné/perdu cette année ou non valorisée" name="win_loose_this_year" 
-			    domain="[('stage_id.id', '!=', 4), '|', ('date_win_loose', '=', False), '&amp;', ('date_win_loose', '&gt;=', time.strftime('%%Y-01-01')), ('date_win_loose', '&lt;=', time.strftime('%%Y-12-31'))]"/>
+                    <filter string="Projets de comptes prioritaires" name="priority_target" domain="[('rel_industry_business_priority', '=', 'priority_target')]"/>
+                    <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>
+                    <filter string="Projets de comptes ni prioritaires, ni actifs" name="active" domain="[('rel_industry_business_priority', 'not in', ['priority_target','active'])]"/>
+                    <separator/>
+		    <filter string="Projets non annulés/non perdus avec date de passage 3-Accord client/4-Commandé+ cette année ou non valorisée" name="win_loose_this_year" 
+			    domain="[('stage_id.id', 'not in', [4,8]), '|', ('date_win_loose', '=', False), '&amp;', ('date_win_loose', '&gt;=', time.strftime('%%Y-01-01')), ('date_win_loose', '&lt;=', time.strftime('%%Y-12-31'))]"/>
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Directeur de mission" name="Manager" context="{'group_by': 'project_director_employee_id'}"/>
                         <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
-                        <filter string="Business domain" name="groupby_rel_partner_industry_id" context="{'group_by': 'rel_partner_industry_id'}"/>
+                        <filter string="Compte (ex BD)" name="groupby_rel_partner_industry_id" context="{'group_by': 'rel_partner_industry_id'}"/>
+                        <filter string="Niveau de priorité du compte" name="groupby_rel_industry_business_priority" context="{'group_by': 'rel_industry_business_priority'}"/>
                         <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
 			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
@@ -309,12 +314,6 @@
 									<field name="sum_account_move_lines" sum="Total"/>
 								</tree>                                
 							</field>
-							<!--
-		  <field name="purchase_line_ids" widget="one2many_list">
-			  <field name="name"/>
-			  <field name="partner_id"/>
-								</field>
-							-->
 					</page>
 					<page name="book" string="Book">
 						<group string="Book brut du projet">

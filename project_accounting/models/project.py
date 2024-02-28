@@ -245,7 +245,7 @@ class projectAccountProject(models.Model):
                 )
     color_rel = fields.Selection(related="stage_id.color", store=True)
     rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id', store=True)
-    rel_partner_business_priority = fields.Selection(related='partner_id.business_priority', store=True)
+    rel_industry_business_priority = fields.Selection(related='rel_partner_industry_id.business_priority', store=True)
     number = fields.Char('Numéro', readonly=True, required=False, copy=False, default='')
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
@@ -967,6 +967,24 @@ class projectAccountProject(models.Model):
             rec.activity_graph = json.dumps({"div": div, "script": script})
 
 
+    @api.depends('stage_id', 'outsource_part_marging_amount_initial', 'company_part_amount_initial', 'outsource_part_marging_amount_current', 'company_part_amount_current')
+    def compute_reporting_shortcuts(self):
+        for rec in self :
+            ### COMPUTE REPOTING SHORTCUTS
+            if rec.stage_id.id == 6 : #code_3 = Accord client
+                rec.reporting_outsource_part_marging_amount_initial_only_code_3 = rec.outsource_part_marging_amount_initial
+                rec.reporting_company_part_amount_initial_only_code_3 = rec.company_part_amount_initial
+            else :
+                rec.reporting_outsource_part_marging_amount_initial_only_code_3 = 0.0
+                rec.reporting_company_part_amount_initial_only_code_3 = 0.0
+
+            if rec.stage_id.id in [2, 9, 3]: #code_4 = Commandé + code 5=Production terminée + code 6 = Clos comptablement
+                rec.reporting_outsource_part_marging_amount_current_at_least_code_4 = rec.outsource_part_marging_amount_current
+                rec.reporting_company_part_amount_current_at_least_code_4 = rec.company_part_amount_current
+            else:
+                rec.reporting_outsource_part_marging_amount_current_at_least_code_4 = 0.0
+                rec.reporting_company_part_amount_current_at_least_code_4 = 0.0
+
 
 
     state = fields.Selection(related='stage_id.state')
@@ -1124,8 +1142,12 @@ class projectAccountProject(models.Model):
     project_book_factor = fields.Float("Facteur de bonus/malus", default=1.0)
 
 
-    # CHART
+    # CHART AN DREPORTING USE
     margin_graph = fields.Char("Margin graph", compute=compute_margin_graph)
     activity_graph = fields.Char("Activity graph", compute=compute_margin_graph)
 
-    purchase_line_ids = fields.One2many('purchase.order.line', 'rel_project_ids')
+    reporting_outsource_part_marging_amount_initial_only_code_3 = fields.Float('Markup estimé si code 3 sinon 0', compute=compute_reporting_shortcuts, store=True)
+    reporting_outsource_part_marging_amount_current_at_least_code_4 = fields.Float('Markup commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
+    reporting_company_part_amount_initial_only_code_3 = fields.Float('CA interne estimé si code 3 sinon 0', compute=compute_reporting_shortcuts, store=True)
+    reporting_company_part_amount_current_at_least_code_4 = fields.Float('CA interne commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
+    #purchase_line_ids = fields.One2many('purchase.order.line', 'rel_project_ids')
