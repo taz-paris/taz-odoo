@@ -14,23 +14,26 @@ class staffingAnalyticLine(models.Model):
             vals = self._sync_project(vals)
         #_logger.info(vals)
         res = super().write(vals)
-#        if 'amount' in vals.keys():
-#            self.check_accounting_closed()
+        if 'amount' in vals.keys() or 'unit_amount' in vals.keys(): #TODO : contrôler si elle change de date ou de catégorie ?
+            self.check_accounting_closed()
         return res
 
     @api.model
     def create(self, vals):
         res = self._sync_project(vals)
         res = super().create(res)
-        if 'amount' in vals.keys():
-            res.check_accounting_closed()
+        res.check_accounting_closed()
         return res
 
     def check_accounting_closed(self):
-        if self.category in ['project_employee_validated', 'project_forecast']: #les changements sont possibles a postériori pour les timesheet liées aux congés
-            company = self.env['res.company'].browse(self.company_id.id)[0]
-            if company.fiscalyear_lock_date > self.date:
-                raise ValidationError(_("Une écriture analytique de la catégorie Pointage ne peut changer de montant après la clôture comptable."))
+        for rec in self :
+            if rec.category in ['project_employee_validated', 'project_forecast']: #les changements sont possibles a postériori pour les timesheet liées aux congés
+                company = rec.env['res.company'].browse(rec.company_id.id)[0]
+                if company.fiscalyear_lock_date > rec.date:
+                    if rec.category == 'project_employee_validated' :
+                        raise ValidationError(_("Une écriture analytique de la catégorie Pointage ne peut être créée ou changer de nombre de jours/valorisation après la clôture comptable. : %s" % str(rec.read())))
+                    elif rec.category == 'project_forecast' :
+                        _logger.info("Cette écriture analytique de type PREVISIONNEL a changé de montant/unit_amount après la date de cloture comptable : %s" % str(rec.read()))
 
     def unlink(self):
         self.check_accounting_closed()

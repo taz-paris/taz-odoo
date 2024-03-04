@@ -81,6 +81,7 @@
             	  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
 		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
 		  <field name="agreement_id" optional="hide"/>
+		  <field name="default_book_end" optional="hide"/>
 		</tree>
 	      </field>
 	    </record>

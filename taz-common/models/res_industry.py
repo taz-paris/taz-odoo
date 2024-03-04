@@ -20,5 +20,5 @@ class tazResIndustry(models.Model):
     business_priority = fields.Selection([
          ('priority_target', '1-Compte prioritaire'),
          ('active', '2-Compte actif'),
-         ('not_tracked', '4-Ni prioritaire, ni actif'),
+         ('not_tracked', '3-Ni prioritaire, ni actif'),
     ], "Niveau de priorité", default='not_tracked')
