@@ -33,6 +33,9 @@ class projectAccountProject(models.Model):
             vals['state_last_change_date'] = datetime.today()
             #_logger.info('Numéro de projet auto : %s' % str(vals['number']))
             projects |= super().create(vals)
+            if 'stage_id' in vals.keys():
+                if vals['stage_id'] in [6, 2, 9, 3, 8]: # statuts Accord client / Commandé / Prod terminée / Clos /Perdu
+                    vals['date_win_loose'] = datetime.now()
         return projects
 
     def name_get(self):
@@ -242,6 +245,7 @@ class projectAccountProject(models.Model):
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
     date_win_loose = fields.Datetime("Date passage gagné ou perdu",
                 help="Date de la dernière fois que le projet a basculé dans le groupe de statuts {3, 4} ou en perdu",
+                readonly=True
                 )
     color_rel = fields.Selection(related="stage_id.color", store=True)
     rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id', store=True)
@@ -985,6 +989,8 @@ class projectAccountProject(models.Model):
                 rec.reporting_outsource_part_marging_amount_current_at_least_code_4 = 0.0
                 rec.reporting_company_part_amount_current_at_least_code_4 = 0.0
 
+            rec.reporting_sum_company_outsource_code3_code_4 = rec.reporting_outsource_part_marging_amount_initial_only_code_3 + rec.reporting_company_part_amount_initial_only_code_3 + rec.reporting_outsource_part_marging_amount_current_at_least_code_4 + rec.reporting_company_part_amount_current_at_least_code_4
+
 
 
     state = fields.Selection(related='stage_id.state')
@@ -1150,4 +1156,5 @@ class projectAccountProject(models.Model):
     reporting_outsource_part_marging_amount_current_at_least_code_4 = fields.Float('Markup commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
     reporting_company_part_amount_initial_only_code_3 = fields.Float('CA interne estimé si code 3 sinon 0', compute=compute_reporting_shortcuts, store=True)
     reporting_company_part_amount_current_at_least_code_4 = fields.Float('CA interne commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
+    reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', help='Somme CA interne + markup commandé code 3/4/5/6', compute=compute_reporting_shortcuts, store=True)
     #purchase_line_ids = fields.One2many('purchase.order.line', 'rel_project_ids')

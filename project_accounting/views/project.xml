@@ -74,14 +74,14 @@
 		  <field name="color_rel" invisible="1" />
 		  <field name="book_employee_distribution_ids" optional="show" widget="many2many_tags" />
 		  <field name="is_validated_book" optional="hide" />
-		  <field name="order_sum_sale_order_lines" optional="show" string="€ commandés"/>
+		  <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés"/>
 		  <field name="remark" optional="hide" />
 		  <field name="invoicing_comment" optional="show" groups="account.group_account_manager"/>
             	  <field name="order_to_invoice_company" optional="hide" sum="Total"/>
             	  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
 		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
 		  <field name="agreement_id" optional="hide"/>
-		  <field name="default_book_end" optional="hide"/>
+		  <field name="reporting_sum_company_outsource_code3_code_4" sum="Total" optional="show"/>
 		</tree>
 	      </field>
 	    </record>
