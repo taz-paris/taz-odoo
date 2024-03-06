@@ -110,9 +110,11 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
 
 
     def create_update_timesheet_report(self, force_report_to_update_ids=[]):
+        #_logger.info('---------- create_update_timesheet_report account.analytic.line employee_staffing_report.py')
         group_dic = {}
         for line in self :
             if not line.employee_id :
+                _logger.info("Employee_id non defini pour la ligne %s" % str(line.read()))
                 continue
 
             line_end_date = line.date_end
@@ -134,16 +136,18 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
         _logger.info("Nombre d'agrégats : %s" % str(len(group_dic.keys())))
         
         for report_dic in group_dic.values():
-            _logger.info(report_dic)
+            #_logger.info(report_dic)
             report = self.env['hr.employee_staffing_report'].search([('employee_id', '=', report_dic['employee_id']), ('periodicity', '=', report_dic['periodicity']), ('start_date', '=', report_dic['start_date'])])
             if len(report):
+                #_logger.info('report %s' % str(report[0].read()))
                 report[0].sudo().availability()
                 if report[0] in force_report_to_update_ids:
                     force_report_to_update_ids.remove(report[0])
             else :
+                #_logger.info('create report')
                 self.env['hr.employee_staffing_report'].sudo().create(report_dic)
 
-        for r in force_report_to_update_ids:
+        for r in force_report_to_update_ids: #Voiture balai pour forcer la MAJ de l'employee_staffing_report
             r.sudo().availability()
 
 

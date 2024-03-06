@@ -41,7 +41,7 @@
                     <separator/>
                     <filter string="Mes rapports" name="my_employee_staffing_report" domain="[('employee_id.user_id.id', '=', uid)]"/>
                     <separator/>
-                    <filter string="Bureau = 'Paris' ou non défini" name="location_paris" domain="['|', ('rel_work_location_id.name', '=', False), ('rel_work_location_id.name', '=', 'Paris')]"/>
+                    <filter string="Bureau = 'Paris' ou non défini" name="location_paris" domain="['|', ('rel_work_location_id', '=', False), ('rel_work_location_id.name', '=', 'Paris')]"/>
                     <separator/>
 		    <filter string="Cette année (date de début)" name="this_year" domain="[('start_date', '&gt;=', time.strftime('%%Y-01-01')), ('start_date', '&lt;=', time.strftime('%%Y-12-31'))]"/>
                     <separator/>

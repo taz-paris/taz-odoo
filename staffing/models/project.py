@@ -45,6 +45,16 @@ class staffingProject(models.Model):
     _inherit = "project.project"
     _order = "number desc"
 
+    def write(self, vals):
+        res = super().write(vals)
+        for rec in self :
+            #Quand la valeur de l'attribut staffing_aggregation change, tous les aggrégats liées aux timesheets de ce projet doivent être recalculés
+            #   la mise à jour du champ related stored rel_project_staffing_aggregation de l'objet account.analytic.line se fait par SQL et ne trigger par la fonction write de l'objet account.analytic.line
+            #   cette surcharge de write de project.project
+            if "staffing_aggregation" in vals.keys():
+                analytic_lines = self.env['account.analytic.line'].search([('project_id', '=', rec.id)])
+                analytic_lines.create_update_timesheet_report()
+
     def open_project_pivot_timesheets(self):
         date = datetime.today()
         rec_id = []
