@@ -10,9 +10,15 @@ class staffingAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
     def write(self, vals):
+        _logger.info('---------- write account.analytic.line project_accounting/model/account_analytic_line.py')
+        if not('amount' in vals.keys () or 'date' in vals.keys() or 'date_end' in vals.keys() or 'project_id' in vals.keys() or 'category' in vals.keys()):
+            return super().write(vals)
+
+        if 'project_id' in vals.keys():
+            # si le project_id change il faut appeler update_project *avant* et après l'enregistrement de l'analytic.line pour que les deux projets soient à jour
+            self.update_project()
         res = super().write(vals)
-        for rec in self:
-            rec.update_project()
+        self.update_project()
         return res
 
     @api.model

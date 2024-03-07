@@ -526,6 +526,9 @@ class naptaProject(models.Model):
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
+        #Recalculer les staffing report
+        self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
+
         # TODO : synchro des compétences, les catégories de compétences, les échelles de notations, les valeurs des échelles de notations et les compétences des utilisateurs, les souhaits des utilisateurs
         # TODO : Gérer le recalcul des montants des analytic lines si le grade ou le CJM change a posteriori
 
@@ -636,7 +639,7 @@ class naptaAnalyticLine(models.Model):
                     'date_end' : userprojectperiod['attributes']['end_date'],
                     'unit_amount' : userprojectperiod['attributes']['staffed_days'],
                 }
-            create_update_odoo(self.env, 'account.analytic.line', dic)
+            create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True})
 
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
         filter_list = [('napta_id', '!=', None), ('category', '=', 'project_forecast'), ('napta_id', 'not in', list(userprojectperiods.keys()))]
@@ -644,7 +647,7 @@ class naptaAnalyticLine(models.Model):
         _logger.info("Nombre d'objets %s qui portent un ID Napta qui n'est plus retourné par l'API Napta : %s" % ('staffing prévisionnel', str(len(odoo_objects))))
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
-            odoo_objet.unlink()
+            odoo_objet.with_context(do_not_update_staffing_report=True).unlink()
             self.env.cr.commit()
             _logger.info("      > Instance supprimée")
         #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
@@ -671,7 +674,7 @@ class naptaAnalyticLine(models.Model):
                     'unit_amount' : timesheet_period['attributes']['worked_days'],
                     'is_timesheet_closed_on_napta' : timesheet['attributes']['closed'],
                 }
-            create_update_odoo(self.env, 'account.analytic.line', dic)
+            create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True})
 
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
         filter_list = [('napta_id', '!=', None), ('category', '=', 'project_employee_validated'), ('napta_id', 'not in', list(timesheet_periods.keys()))]
@@ -680,7 +683,7 @@ class naptaAnalyticLine(models.Model):
 
         for odoo_objet in odoo_objects:
             _logger.info(odoo_objet.read())
-            odoo_objet.unlink()
+            odoo_objet.with_context(do_not_update_staffing_report=True).unlink()
             self.env.cr.commit()
             _logger.info("      > Instance supprimée")
         #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées

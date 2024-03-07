@@ -67,20 +67,26 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
     _inherit = 'account.analytic.line'
 
     def write(self, vals):
+        if not ('unit_amount' in vals.keys () or 'date' in vals.keys() or 'date_end' in vals.keys() or 'employee_id' in vals.keys() or 'category' in vals.keys()):
+            return super().write(vals)
+
         _logger.info('---------- write account.analytic.line employee_staffing_report.py')
-        report_to_update = []
+        #_logger.info(str(vals))
         for rec in self:
-            line_end_date = rec.date_end
-            if not line_end_date :
-                line_end_date = rec.date
-            report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.employee_id.id), ('start_date', '<=', line_end_date), ('end_date', '>=', rec.date)])
-            report_to_update += report_ids #one report by periodicity type (week, month, quarter, semestre, year...)
+            # Si la date ou l'employee change il faut aussi mettre à jour les rapports de l'ancien employee ou de l'ancienne période qui n'est plus couverte par la nouvelle (pour décrémenter ces "anciens" rapports, et pas seulement créer/mettre à jours les nouveaux)
+            if 'date' in vals.keys() or 'date_end' in vals.keys() or 'employee_id' in vals.keys():
+                line_end_date = rec.date_end
+                if not line_end_date :
+                    line_end_date = rec.date
+                report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.employee_id.id), ('start_date', '<=', line_end_date), ('end_date', '>=', rec.date)])
+                report_ids.sudo().has_to_be_recomputed = True
 
         res = super().write(vals)
 
         for rec in self :
-            # Si la date ou l'employee change il faut aussi mettre à jour les rapports de l'ancien enmployee ou de l'ancinne période qui n'est plus couverte par la nouvelle (pour décrémenter ces "anciens" rapports, et pas seulement créer/mettre à jours les nouveaux)
-            rec.create_update_timesheet_report(force_report_to_update_ids=report_to_update)
+            rec.create_update_timesheet_report()
+
+        #_logger.info('---------- END write account.analytic.line employee_staffing_report.py')
         return res
 
 
@@ -93,23 +99,22 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
 
     def unlink(self):
         _logger.info('---------- unlink account.analytic.line employee_staffing_report.py')
-        report_to_update = []
         for rec in self:
             line_end_date = rec.date_end
             if not line_end_date :
                 line_end_date = rec.date
             report_ids = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.employee_id.id), ('start_date', '<=', line_end_date), ('end_date', '>=', rec.date)])
-            report_to_update += report_ids #one report by periodicity type (week, month, quarter, semestre, year...)
+            report_ids.sudo().has_to_be_recomputed = True
 
         res = super().unlink()
 
-        for report in report_to_update :
-            report.availability()
+        if self.env.context.get('do_not_update_staffing_report') != True:
+            self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
 
         return res
 
 
-    def create_update_timesheet_report(self, force_report_to_update_ids=[]):
+    def create_update_timesheet_report(self):
         #_logger.info('---------- create_update_timesheet_report account.analytic.line employee_staffing_report.py')
         group_dic = {}
         for line in self :
@@ -139,16 +144,12 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
             #_logger.info(report_dic)
             report = self.env['hr.employee_staffing_report'].search([('employee_id', '=', report_dic['employee_id']), ('periodicity', '=', report_dic['periodicity']), ('start_date', '=', report_dic['start_date'])])
             if len(report):
-                #_logger.info('report %s' % str(report[0].read()))
-                report[0].sudo().availability()
-                if report[0] in force_report_to_update_ids:
-                    force_report_to_update_ids.remove(report[0])
+                report.sudo().has_to_be_recomputed = True
             else :
-                #_logger.info('create report')
                 self.env['hr.employee_staffing_report'].sudo().create(report_dic)
 
-        for r in force_report_to_update_ids: #Voiture balai pour forcer la MAJ de l'employee_staffing_report
-            r.sudo().availability()
+        if self.env.context.get('do_not_update_staffing_report') != True:
+            self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
 
 
 
@@ -199,6 +200,7 @@ class HrEmployeeStaffingReport(models.Model):
 
     @api.depends('periodicity', 'start_date', 'end_date', 'employee_id')
     def availability(self):
+        _logger.info('--- Compute availability Staffing report')
         for rec in self :
             dic = [('employee_id', '=', rec.employee_id.id)]
             pivot_date = datetime.today()
@@ -242,6 +244,9 @@ class HrEmployeeStaffingReport(models.Model):
             else :
                 rec.activity_previsionnal_rate = None
             rec.delta_previsionnal_project_days = rec.activity_previsionnal_project_days - rec.project_days
+
+            if rec.has_to_be_recomputed :
+                rec.has_to_be_recomputed = False
 
     def action_open_analytic_lines(self):
         analytic_lines = self.analytic_lines
@@ -311,6 +316,11 @@ class HrEmployeeStaffingReport(models.Model):
 
         return res
 
+    def recompute_if_has_to_be_recomputed(self):
+        _logger.info('--- recompute_if_has_to_be_recomputed')
+        reports = self.env['hr.employee_staffing_report'].search([('has_to_be_recomputed', '=', True)])
+        _logger.info('Nombre de rapports de staffing à recalculer : %s' % str(len(reports)))
+        reports.availability()
 
     @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.job_id')
     def compute_job(self):
@@ -336,23 +346,24 @@ class HrEmployeeStaffingReport(models.Model):
     start_date = fields.Date('Date de début', required=True)
     end_date = fields.Date('Date de fin', compute=compute_end_date, store=True)
  
+    has_to_be_recomputed = fields.Boolean('A recalculer', default=True)
     analytic_lines = fields.Many2many('account.analytic.line', string='Lignes')
 
-    workdays = fields.Float("J. ouvrés", help="nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.", compute=availability, store=True)
-    hollidays = fields.Float("Congés", help="Jours de congés sur la période", compute=availability, store=True)
-    activity_days = fields.Float("J. facturables", help="Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés", compute=availability, store=True)
-    learning_internal_days = fields.Float("J. formations", help="Nombre de jours de formation du consultant (et non les actions écoles) sur la période", compute=availability, store=True)
-    sales_internal_days = fields.Float("J. avant-vente", help="Nombre de jours avant-vente (experts) sur la période", compute=availability, store=True)
-    other_internal_days = fields.Float("J. autres activités internes", help="Nombre de jours autres activités internes sur la période", compute=availability, store=True)
-    project_days = fields.Float("J. produits mission", help="Nombre de jours produits en mission sur la période (y compris les missions de la fondation)", compute=availability, store=True)
+    workdays = fields.Float("J. ouvrés", help="nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.", store=True)
+    hollidays = fields.Float("Congés", help="Jours de congés sur la période", store=True)
+    activity_days = fields.Float("J. facturables", help="Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés", store=True)
+    learning_internal_days = fields.Float("J. formations", help="Nombre de jours de formation du consultant (et non les actions écoles) sur la période", store=True)
+    sales_internal_days = fields.Float("J. avant-vente", help="Nombre de jours avant-vente (experts) sur la période", store=True)
+    other_internal_days = fields.Float("J. autres activités internes", help="Nombre de jours autres activités internes sur la période", store=True)
+    project_days = fields.Float("J. produits mission", help="Nombre de jours produits en mission sur la période (y compris les missions de la fondation)", store=True)
     activity_rate = fields.Float("TACE", 
             help="Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", 
-            compute=availability, store=True, group_operator='avg')
+            store=True, group_operator='avg')
     activity_rate_with_holidays = fields.Float("TACI", 
             help="% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
-            compute=availability, store=True, group_operator='avg')
+            store=True, group_operator='avg')
 
-    available_days = fields.Float("J. dispo", help="Nombre de jours facturables - nombre de jours pointés en mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.) sur la période", compute=availability, store=True)
-    activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", compute=availability, store=True, group_operator='avg')
-    activity_previsionnal_project_days = fields.Float('Prév. (j)', compute=availability, store=True)
-    delta_previsionnal_project_days = fields.Float('Delta prev-pointé (j)', compute=availability, store=True)
+    available_days = fields.Float("J. dispo", help="Nombre de jours facturables - nombre de jours pointés en mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.) sur la période", store=True)
+    activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", store=True, group_operator='avg')
+    activity_previsionnal_project_days = fields.Float('Prév. (j)', store=True)
+    delta_previsionnal_project_days = fields.Float('Delta prev-pointé (j)', store=True)
