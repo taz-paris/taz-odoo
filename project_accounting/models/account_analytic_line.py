@@ -35,7 +35,7 @@ class staffingAnalyticLine(models.Model):
         res = super().unlink()
 
         if self.env.context.get('do_not_update_project') != True:
-            rec.project_id.recompute_if_has_to_be_recomputed()
+            self.env['project.project'].recompute_if_has_to_be_recomputed()
 
         return res
 
@@ -45,4 +45,4 @@ class staffingAnalyticLine(models.Model):
                 continue
             rec.project_id.has_to_be_recomputed = True
             if self.env.context.get('do_not_update_project') != True:
-                rec.project_id.recompute_if_has_to_be_recomputed()
+                self.env['project.project'].recompute_if_has_to_be_recomputed()

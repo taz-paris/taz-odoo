@@ -932,7 +932,7 @@ class naptaHrLeave(models.Model):
                         # TODO : doit-on obligatoirement envoyer cet attribut à Odoo... qui doit le reclaculer de son côté...
                     'state' : 'validate',
                 }
-            create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
+            create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True, 'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
         self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 

@@ -28,6 +28,8 @@ class staffingLeave(models.Model):
 
 
     def write(self_list, vals):
+        res = super().write(vals)
+
         for self in self_list :
             _logger.info(" write hr leave %s" % str(vals))
             old_state = self.state
@@ -56,7 +58,6 @@ class staffingLeave(models.Model):
                     # create the timesheet on the vacation project
                     holidays._timesheet_create_lines()
 
-        res = super().write(vals)
         return res
 
 
@@ -67,19 +68,6 @@ class staffingLeave(models.Model):
         for leave in self:
             if not leave.employee_id:
                 continue
-            _logger.info(leave.date_from)
-            _logger.info(leave.date_to)
-            """
-            work_hours_data = leave.employee_id.list_work_time_per_day(
-                leave.date_from,
-                leave.date_to) 
-                #BUG : la fonction list_work_time_per_day ne retourne pas le 2 janvier 2023 alors que c'est un lundi 
-                    # pour un congés du 2023-01-01 23:00:01 au 2023-01-06 22:59:59
-                    # [(datetime.date(2023, 1, 3), 7.0), (datetime.date(2023, 1, 4), 7.0), (datetime.date(2023, 1, 5), 7.0), (datetime.date(2023, 1, 6), 7.0)] 
-
-
-            _logger.info(work_hours_data)
-            """
 
             encoding_uom_id = self.env.company.timesheet_encode_uom_id
             if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
@@ -93,12 +81,8 @@ class staffingLeave(models.Model):
                 date_start = leave.date_from.astimezone(local).date() #Ne garder que date sinon, pour le congés de Gaëlle avant le changement d'heure d'octobre on téiat en GMT+2... et en janvier en GMT+1 et donc on avait toujours le 25/01/2023 car ajouter un jour à GMT+2 restait e GMT+2 même si on passait le 31/10
                 date_end = leave.date_to.astimezone(local).date()
 
-                _logger.info(date_start)
-                _logger.info(date_end)
-
                 list_work_days = leave.employee_id.list_work_days_period(date_start, date_end) 
 
-                _logger.info(list_work_days)
 
                 for index, (day_date) in enumerate(list_work_days):
                     work_days_count = 1.0
@@ -106,9 +90,6 @@ class staffingLeave(models.Model):
                         work_days_count += -0.5
                     if index == len(list_work_days)-1 and leave.request_date_to_period == "am":
                         work_days_count += -0.5
-                    _logger.info(index)
-                    _logger.info(day_date)
-                    _logger.info(work_days_count)
                     vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_date, work_days_count))
             else : 
                 raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
@@ -117,7 +98,7 @@ class staffingLeave(models.Model):
 
 
 
-    #mieux gérer les contrôles de conflit : pas possible d'avoir 2 demis jours 
+    #TODO : mieux gérer les contrôles de conflit : pas possible d'avoir 2 demis jours 
     """
     @api.constrains('date_from', 'date_to', 'employee_id')
     def _check_date(self):
