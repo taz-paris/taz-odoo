@@ -54,6 +54,7 @@ class staffingProject(models.Model):
             if "staffing_aggregation" in vals.keys():
                 analytic_lines = self.env['account.analytic.line'].search([('project_id', '=', rec.id)])
                 analytic_lines.create_update_timesheet_report()
+        return res
 
     def open_project_pivot_timesheets(self):
         date = datetime.today()

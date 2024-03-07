@@ -39,6 +39,8 @@
                     <separator/>
                     <filter string="Date de fin" name="end_date" date="end_date"/>
                     <separator/>
+		    <filter string="Périodes terminées (date de fin &lt; date du jour)" name="passed_periods" domain="[('end_date', '&lt;=', (context_today().strftime('%Y-%m-%d')))]"/>
+                    <separator/>
                     <filter string="Mes rapports" name="my_employee_staffing_report" domain="[('employee_id.user_id.id', '=', uid)]"/>
                     <separator/>
                     <filter string="Bureau = 'Paris' ou non défini" name="location_paris" domain="['|', ('rel_work_location_id', '=', False), ('rel_work_location_id.name', '=', 'Paris')]"/>
