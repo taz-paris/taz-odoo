@@ -54,7 +54,7 @@
                         <strong>N° de bon de commande</strong>
 		</xpath>
 
-		<!-- Chez Tasmane les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande 
+		<!-- Chez nous les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande 
 			=> C'est à dire si au moins une des lignes de la facture a un article qui appartient à un marché public
 			=> TODO : remplace display_quantity_price_unit par cette condition lorsque l'on aura développé l'objet marché public et le lien avec les articles
 

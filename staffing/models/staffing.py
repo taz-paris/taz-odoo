@@ -122,7 +122,7 @@ class staffingNeed(models.Model):
         if self.state != 'open':
             return
 
-        employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : montrer ceux qui seront présent à date de début de la mission mais pas encore chez Tasmane
+        employees = self.env['hr.employee'].search([('active', '=', True)]) #TODO : montrer ceux qui seront présent à date de début de la mission mais pas encore arrivé (contrat non débuté)
         for employee in employees:
             if not self.begin_date:
                 continue

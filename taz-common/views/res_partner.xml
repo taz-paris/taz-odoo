@@ -338,7 +338,7 @@
 					</tree> 
 				</field>
 			</page>
-			<page string="Tasmaniens en contact">
+			<page string="Collaborateurs en contact">
 				<field name="contact_user_link_ids" context="{'default_partner_id': active_id}"/>
 			</page>
 			<page name="contact_channels" string="Coordonnées">

@@ -17,7 +17,7 @@ class projectAccountingPurchaseOrder(models.Model):
     #TODO : 
     #   - ajouter marge globale PO
     #   - ajouter montant restant à validé sur Chorus pour paiement direct global sur PO
-    #   - ajouter un statut s'il reste des factures à valider sur Chorus alors que Tasmane a payé sa part (et ajuster la liste de suivi des PO)
+    #   - ajouter un statut s'il reste des factures à valider sur Chorus alors qu'on a payé sa part (et ajuster la liste de suivi des PO)
 
 
     def button_cancel(self):
@@ -189,7 +189,7 @@ class projectAccountingPurchaseOrderLine(models.Model):
 
     @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
     def _compute_qty_invoiced(self):
-        #Complément nécessaire pour que les factures de régularisation (Tasmane émet une facture CLIENT vers un Fournisseur : out_invoice/out_refund) soient comptées sur les BC Fournisseurs
+        #Complément nécessaire pour que les factures de régularisation (on émet une facture CLIENT vers un Fournisseur : out_invoice/out_refund) soient comptées sur les BC Fournisseurs
         #       car en natif Odoo, seuls les factures et avoirs FOURNISSEUR (in_invoice et in_refund) sont décomptés de la quantitée facturée/restant à facturée sur le BC FOURNISSEUR
         res = super()._compute_qty_invoiced()
 
@@ -256,9 +256,9 @@ class projectAccountingPurchaseOrderLine(models.Model):
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",
             help = "Ligne de la commande du client final")
-    order_direct_payment_validated_amount = fields.Monetary('Montant HT facture paiement direct validé', help='Somme factures en paiement direct validées par Tasmane')
+    order_direct_payment_validated_amount = fields.Monetary('Montant HT facture paiement direct validé', help='Somme factures en paiement direct validées')
         #TODO : ajouter contrôles : order_direct_payment_validated_amount ne peut pas être supérieur à subtotal et doit être nul si direct_payment_sale_order_line_id = False
-    order_direct_payment_validated_detail = fields.Text("Commentaire paiement direct", help='Détail des factures en paiement direct validées par Tasmane')
+    order_direct_payment_validated_detail = fields.Text("Commentaire paiement direct", help='Détail des factures en paiement direct validées')
 
     previsional_invoice_date = fields.Date('Date prev. de facturation', states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
     # TODO : ajouter reselling_unit_price en le prenant sur la fiche article (valeur par défaut mais modifiable) et faire la multiplication

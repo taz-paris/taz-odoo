@@ -47,7 +47,7 @@ class employeeBookGoal(models.Model):
             else :
                 rec.period_rate = rec.period_book / rec.period_goal * 100.0
 
-    employee_id = fields.Many2one('hr.employee', string="Tasmanien", ondelete='restrict', required=True, check_company=True)
+    employee_id = fields.Many2one('hr.employee', string="Collaborateur", ondelete='restrict', required=True, check_company=True)
     rel_job_id = fields.Many2one(related='employee_id.job_id', string="Grade", store=True, check_company=True)
     reference_period = fields.Selection(
         year_selection,

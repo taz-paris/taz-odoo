@@ -19,8 +19,8 @@ class projectAccountingSaleOrder(models.Model):
         for rec in self:
             rec.final_customer_order_amount = rec.other_company_amount + rec.amount_untaxed
 
-    final_customer_order_amount = fields.Monetary('Montant HT du bon de commande client final', compute=compute_final_customer_order_amount, help="Montant total commandé par le client final (supérieur au montant piloté par Tasmane si Tasmane est sous-traitant. Egal au montant piloté par Tasmne sinon.)")
-    other_company_amount = fields.Monetary('Montant HT de la commande pour le sur-traitant/co-traitant non mandataire', help="Dans le cas où Tasmane est sous-traitant/co-traitant d'un tiers (on ne valide pas les facture du tiers, donc ce tiers n'est pas géré comme un co-traitant), saisir ici le montant qui sera facturé par ce tiers au client final.")
+    final_customer_order_amount = fields.Monetary('Montant HT du bon de commande client final', compute=compute_final_customer_order_amount, help="Montant total commandé par le client final (supérieur au montant piloté si nous sommes sous-traitants. Egal au montant que nous pilotons sinon.)")
+    other_company_amount = fields.Monetary('Montant HT de la commande pour le sur-traitant/co-traitant non mandataire', help="Dans le cas où nous sommes sous-traitant/co-traitant-non-mandataire d'un tiers (on ne valide pas les facture du tiers, donc ce tiers n'est pas géré comme un co-traitant), saisir ici le montant qui sera facturé par ce tiers au client final.")
 
     advance_payment_ids = fields.One2many('account.payment', 'advance_sale_order_id', string="Paiements d'avance (sans facture)", help="Paiement en avance mais sans facture, notamment dans le cas de commandes publiques")
 
@@ -202,7 +202,7 @@ class projectAccountingSaleOrderLine(models.Model):
 
     direct_payment_purchase_order_line_id = fields.Many2one('purchase.order.line', 
             string="Paiement direct",
-            help = "Ligne de la commande au sous-traitant qui sera en tout ou partie payée directement par le client final et non par Tasmane",
+            help = "Ligne de la commande au sous-traitant qui sera en tout ou partie payée directement par le client final",
             domain="[('id', 'in', allowed_direct_payment_purchase_order_line_ids)]",
             )
 

@@ -125,7 +125,7 @@ class tazResPartner(models.Model):
      inhouse_influence_level = fields.Selection([
          ('1', "1 - Réseau - pas de lien direct"),
          ('2', "2 - Eclaireur - peut donner de l'information sur un compte à potentiel"),
-         ('3', "3 - Prescripteur - peut pousser Tasmane vers un interlocuteur décideur"),
+         ('3', "3 - Prescripteur - peut nous pousser vers un interlocuteur décideur"),
          ('4', "4 - Décideur -  peut décider par lui-même"),
          ], string="Niveau d'influence chez le client")
 

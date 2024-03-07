@@ -196,10 +196,10 @@ class projectAccountProject(models.Model):
                         # Ce qui permet d'assurer que le montant de book calculé par année pour le projet (qui se fonde sur la somme des BCC et des BCF et non pas des factures) est bon.
                         # ==> En synthèse, il n'est pas possible "d'oublier" de déduire des factures fournisseurs puisqu'elles ont toutes un BCF.
                     is_closable = False
-                    error_message += "   - Il reste des factures founisseur à venir de "+str(link.partner_id.name)+" (ou des factures de régularisation à émettre par Tasmane envers ce fournisseur).\n"
+                    error_message += "   - Il reste des factures founisseur à venir de "+str(link.partner_id.name)+" (ou des factures de régularisation à émettre envers ce fournisseur).\n"
                 if link.company_residual != 0.0 :
                     is_closable = False
-                    error_message += "   - Il reste des factures founisseur à payer pour "+str(link.partner_id.name)+" (ou des factures de régularisation à payer à Tasmane par ce fournisseur).\n"
+                    error_message += "   - Il reste des factures founisseur à payer pour "+str(link.partner_id.name)+" (ou des factures de régularisation à payer par ce fournisseur).\n"
                 if link.order_direct_payment_to_do != 0.0 :
                     is_closable = False
                     error_message += "   - Il reste des factures founisseur en paiement direct à déposer par/valider pour "+str(link.partner_id.name)+".\n"
@@ -217,7 +217,7 @@ class projectAccountProject(models.Model):
 
             if self.company_part_cost_current != 0.0 :
                 is_closable = False
-                error_message += "   - La valorisation du pointage (coût de production du dispositif Tasmane) n'est pas nulle.\n"
+                error_message += "   - La valorisation du pointage (coût de production du dispositif interne) n'est pas nulle.\n"
             if self.has_provision_running :
                 is_closable = False
                 error_message += "   - Il reste des provisions ou du stock sur la dernière clôture.\n"
@@ -273,8 +273,8 @@ class projectAccountProject(models.Model):
             ('no-outsourcing', 'Sans sous-traitance'),
             ('co-sourcing', 'Avec Co-traitance'),
             ('direct-paiement-outsourcing', 'Sous-traitance paiement direct'),
-            ('direct-paiement-outsourcing-company', 'Sous-traitance paiement direct + Tasmane'),
-            ('outsourcing', 'Sous-traitance paiement Tasmane'),
+            ('direct-paiement-outsourcing-company', 'Sous-traitance paiement direct + paiement classique'),
+            ('outsourcing', 'Sous-traitance paiement classique (pas de paiement direct)'),
         ], string="Type de sous-traitance") #Attribut temporaire Fitnet à supprimer
     agreement_id = fields.Many2one(
         comodel_name="agreement",
@@ -928,7 +928,7 @@ class projectAccountProject(models.Model):
                         ("Projeté (violet)", "@projected_amount{0 0.00 €}"),
                     ]
 
-            p = figure(width=600, height=300, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€) du dispositif Tasmane")
+            p = figure(width=600, height=300, x_axis_type="datetime", tooltips=TOOLTIPS_AMOUNT, title="Coûts des pointages cumulés (€) du dispositif interne")
             #p.left[0].formatter.use_scientific = False
             p.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
             p.line(y='forecast_amount', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (€)")
@@ -959,7 +959,7 @@ class projectAccountProject(models.Model):
                         ("Projeté (violet)", "@projected_unit{0 0.00 €}"),
                     ]
 
-            p2 = figure(width=600, height=300, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours) du dispositif Tasmane")
+            p2 = figure(width=600, height=300, x_axis_type="datetime", tooltips=TOOLTIPS_UNIT, title="Charges des pointages cumulés (jours) du dispositif interne")
             #p2.left[0].formatter.use_scientific = False
             p2.left[0].formatter = NumeralTickFormatter(format="0 0 €", language="fr")
             p2.line(y='forecast_unit', x='date', source=df, line_color="black", line_width=2, line_dash="dashed", legend_label="Prévisionnel (j)")
@@ -1006,76 +1006,77 @@ class projectAccountProject(models.Model):
     has_to_be_recomputed = fields.Boolean('À recalculer', default=False)
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')
-    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
+    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé. Un client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
+
     ######## TOTAL
     sale_order_amount_initial = fields.Monetary('Montant HT commandé par le client', store=True, compute=compute)
-    order_amount_initial = fields.Monetary('Montant HT piloté par Tasmane initial', store=True, compute=compute)
-    order_amount_current = fields.Monetary('Montant HT piloté par Tasmane actuel', store=True, compute=compute)
-    order_sum_sale_order_lines_with_draft = fields.Monetary("Total HT commandé à Tasmane (y/c BCC à l'état Devis)", store=True, compute=compute)
-    order_sum_sale_order_lines = fields.Monetary("Total HT commandé à Tasmane (uniquement à l'état BDC)", store=True, compute=compute, help="Somme des commandes passées à Tasmane par le client final ou bien le sur-traitant")
+    order_amount_initial = fields.Monetary('Montant HT piloté initial', store=True, compute=compute)
+    order_amount_current = fields.Monetary('Montant HT piloté actuel', store=True, compute=compute)
+    order_sum_sale_order_lines_with_draft = fields.Monetary("Total HT commandé par le client (y/c BCC à l'état Devis)", store=True, compute=compute)
+    order_sum_sale_order_lines = fields.Monetary("Total HT commandé par le client (uniquement à l'état BDC)", store=True, compute=compute)
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute, store=True)
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute, store=True)
     order_marging_rate_initial = fields.Float('Marge totale (%) initiale', compute=compute, store=True)
 
-    order_cost_current = fields.Monetary('Somme des coûts actuels', compute=compute, store=True)
-    order_cost_futur = fields.Monetary('Somme des coûts à venir ', compute=compute, store=True)
+    order_cost_current = fields.Monetary('Coût de revient actuel piloté', compute=compute, store=True)
+    order_cost_futur = fields.Monetary('Coût de revient à venir piloté', compute=compute, store=True)
     order_marging_amount_current = fields.Monetary('Marge totale (€) projetée', compute=compute, store=True)
     order_marging_rate_current = fields.Float('Marge totale (%) projetée', compute=compute, store=True)
 
-    order_to_invoice_company = fields.Monetary('Montant HT à facturer par Tasmane au client', compute=compute, store=True)
-    order_to_invoice_company_with_tax = fields.Monetary('Montant TTC à facturer par Tasmane au client', compute=compute, store=True)
-    company_invoice_sum_move_lines = fields.Monetary('Montant HT déjà facturé par Tasmane au client', compute=compute, store=True)
-    company_invoice_sum_move_lines_with_tax = fields.Monetary('Montant déjà TTC facturé par Tasmane au client', compute=compute, store=True)
-    company_to_invoice_left = fields.Monetary('Montant HT restant à facturer par Tasmane au client', compute=compute, store=True)
-    company_to_invoice_left_with_tax = fields.Monetary('Montant TTC restant à facturer par Tasmane au client', compute=compute, store=True)
+    order_to_invoice_company = fields.Monetary('Montant HT à facturer au client', compute=compute, store=True)
+    order_to_invoice_company_with_tax = fields.Monetary('Montant TTC à facturer au client', compute=compute, store=True)
+    company_invoice_sum_move_lines = fields.Monetary('Montant HT déjà facturé au client', compute=compute, store=True)
+    company_invoice_sum_move_lines_with_tax = fields.Monetary('Montant déjà TTC facturé au client', compute=compute, store=True)
+    company_to_invoice_left = fields.Monetary('Montant HT restant à facturer au client', compute=compute, store=True)
+    company_to_invoice_left_with_tax = fields.Monetary('Montant TTC restant à facturer au client', compute=compute, store=True)
 
-    company_paid = fields.Monetary('Montant TTC déjà payé par le client à Tasmane', compute=compute, store=True)
-    company_residual = fields.Monetary('Montant TTC restant à payer par le client à Tasmane', compute=compute, store=True)
+    company_paid = fields.Monetary('Montant TTC déjà payé par le client', compute=compute, store=True)
+    company_residual = fields.Monetary('Montant TTC restant à payer par le client', compute=compute, store=True)
 
     ######## COMPANY PART
-    company_part_amount_initial = fields.Monetary('Montant HT dispositif Tasmane initial', 
+    company_part_amount_initial = fields.Monetary('Montant HT dispositif interne initial', 
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
-            tracking=True,
-            help="Valorisation de la part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
-    company_part_cost_initial = fields.Monetary('Valo des pointages Tasmane (€) initial', 
+            tracking=True)
+    company_part_cost_initial = fields.Monetary('Coût de revient dispositif interne (€) initial', 
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
-            tracking=True,
-            help="Montant du pointage Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge) : CJM * nombre de jours pointés")
-    company_part_marging_amount_initial = fields.Monetary('Marge sur dispo Tasmane (€) initiale', store=True, compute=compute, help="Montant dispositif Tasmane - Coût de production dispo Tasmane") 
-    company_part_marging_rate_initial = fields.Float('Marge sur dispo Tasmane (%) initiale', store=True, compute=compute)
+            tracking=True)
+    company_part_marging_amount_initial = fields.Monetary('Marge sur dispositif interne (€) initiale', store=True, compute=compute)
+    company_part_marging_rate_initial = fields.Float('Marge sur dispositif interne (%) initiale', store=True, compute=compute)
 
-    company_part_amount_current = fields.Monetary('Montant HT dispositif Tasmane actuel', 
+    company_part_amount_current = fields.Monetary('Montant HT dispositif interne actuel', 
             compute=compute,
-            store=True,
-            help="Valorisation de la part produite par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge")
-    company_part_cost_current = fields.Monetary('Valo des pointages Tasmane (€) actuelle', store=True, compute=compute, help="Montant du pointage Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge) : CJM * nombre de jours pointés. Seuls les pointage strictement antérieur au dernier lundi sont pris en compte.")
-    company_part_cost_futur = fields.Monetary('Valo des pointages Tasmane (€) à venir', store=True, compute=compute, help="Montant du staffing futur Tasmane valorisé (pointage par les salariés Tasmane ou bien les sous-traitants payés au mois indépedemment de leur charge) : CJM * nombre de jours staffés. Seul le staffing postérieur ou égal au dernier lundi sont pris en compte.")
-    company_part_marging_amount_current = fields.Monetary('Marge sur dispo Tasmane (€) projetée', store=True, compute=compute)
-    company_part_marging_rate_current = fields.Float('Marge sur dispo Tasmane (%) projetée', store=True, compute=compute)
+            store=True)
+    company_part_cost_current = fields.Monetary('Coût de revient du dispositif interne (€) actuel', store=True, compute=compute)
+    company_part_cost_futur = fields.Monetary('Coût de revient du dispositif interne (€) à venir', store=True, compute=compute)
+    company_part_marging_amount_current = fields.Monetary('Marge sur dispositif interne (€) projetée', store=True, compute=compute)
+    company_part_marging_rate_current = fields.Float('Marge sur dispositif interne (%) projetée', store=True, compute=compute)
 
     ######## OUTSOURCE PART
     outsource_part_amount_initial = fields.Monetary('Montant HT de revente S/T initial', 
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
-            tracking=True,
-            help="Montant de revevent de ce qui est produit par les sous-traitants de Tasmane")
-    outsource_part_cost_initial = fields.Monetary('Montant HT acheté au S/T initial',
+            tracking=True)
+    outsource_part_cost_initial = fields.Monetary('Coût de revient HT de la part S/T initial',
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
             )
-    outsource_part_marging_amount_initial = fields.Monetary('Marge sur part sous-traitée (€) initiale', store=True, compute=compute)
-    outsource_part_marging_rate_initial = fields.Float('Marge sur part sous-traitée (%) initiale', store=True, compute=compute)
+    outsource_part_marging_amount_initial = fields.Monetary('Marge sur la part S/T (€) initiale', store=True, compute=compute)
+    outsource_part_marging_rate_initial = fields.Float('Marge sur la part S/T (%) initiale', store=True, compute=compute)
 
-    outsource_part_amount_current = fields.Monetary('Montant HT de revente S/T actuel', help="Montant de revente de ce qui est produit par les sous-traitants de Tasmane, fondé sur les BC fournisseurs enregistrés sur TaskForce", store=True, compute=compute)
-    outsource_part_cost_current = fields.Monetary('Montant HT facturé par le S/T actuel', help="En cas de paiement direct par le client au S/T, ce montant comprend les factures émises par le S/T vers le client et qui ont été validées par Tasmane sous Chorus", store=True, compute=compute)
-    outsource_part_cost_futur = fields.Monetary('Montant HT restant à facturer par le S/T', help="En cas de paiement direct par le client au S/T, ce montant comprend les factures restant à émettre par le S/T vers le client et qui devront être validées par Tasmane sous Chorus", store=True, compute=compute)
+    outsource_part_amount_current = fields.Monetary('Montant HT de revente de la part S/T actuel', store=True, compute=compute)
+    outsource_part_cost_current = fields.Monetary('Coût de revient HT de la part S/T actuel', 
+            #help="En cas de paiement direct par le client au S/T, ce montant comprend les factures émises par le S/T vers le client et qui ont été validées par Tasmane sous Chorus", 
+            store=True, compute=compute)
+    outsource_part_cost_futur = fields.Monetary('Coût de revient sur la part S/T (€) à venir', 
+            #help="En cas de paiement direct par le client au S/T, ce montant comprend les factures restant à émettre par le S/T vers le client et qui devront être validées par Tasmane sous Chorus", 
+            store=True, compute=compute)
     outsourcing_link_purchase_order_with_draft = fields.Monetary('Somme de toutes les lignes d\'achats', store=True, compute=compute)
-    outsource_part_marging_amount_current = fields.Monetary('Marge sur part sous-traitée (€) projetée', store=True, compute=compute)
-    outsource_part_marging_rate_current = fields.Float('Marge sur part sous-traitée (%) projetée', store=True, compute=compute)
+    outsource_part_marging_amount_current = fields.Monetary('Marge sur la part S/T (€) projetée', store=True, compute=compute)
+    outsource_part_marging_rate_current = fields.Float('Marge sur la part S/T (%) projetée', store=True, compute=compute)
 
     project_outsourcing_link_ids = fields.One2many('project.outsourcing.link', 'project_id')
 
@@ -1083,21 +1084,20 @@ class projectAccountProject(models.Model):
     cosource_part_amount_initial = fields.Monetary('Montant HT de la part co-traitée initial', 
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
-            tracking=True,
-            help="Montant produit par les co-traitants de Tasmane : part produite par les co-traitants")
+            tracking=True)
     cosource_part_cost_initial = fields.Monetary('Montant HT facturé par le co-traitant au client final',
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
             )
-    cosource_part_marging_amount_initial = fields.Monetary('Marge sur part co-traitée (€) initiale', store=True, compute=compute)
-    cosource_part_marging_rate_initial = fields.Float('Marge sur part co-traitée (%) initiale', store=True, compute=compute)
+    cosource_part_marging_amount_initial = fields.Monetary('Marge sur la part co-traitée (€) initiale', store=True, compute=compute)
+    cosource_part_marging_rate_initial = fields.Float('Marge sur la part co-traitée (%) initiale', store=True, compute=compute)
 
-    cosource_part_amount_current = fields.Monetary('Montant HT de la part co-traitée actuel', help="Montant produit par les co-traitants de Tasmane : part produite par les co-traitants.", store=True, compute=compute)
-    cosource_part_cost_current = fields.Monetary('Montant HT des factures du co-traitant validées par Tasmane sur Chorus', store=True, compute=compute)
-    cosource_part_cost_futur = fields.Monetary('Montant HT restant à valider par Tasmane sur Chorus', store=True, compute=compute)
-    cosource_part_marging_amount_current = fields.Monetary('Marge sur part co-traitée (€) projetée', store=True, compute=compute)
-    cosource_part_marging_rate_current = fields.Float('Marge sur part co-traitée (%) projetée', store=True, compute=compute)
+    cosource_part_amount_current = fields.Monetary('Montant HT de la part co-traitée actuel', help="Montant produit par les co-traitants : part produite par les co-traitants.", store=True, compute=compute)
+    cosource_part_cost_current = fields.Monetary('Montant HT des factures du co-traitant validées sur Chorus', store=True, compute=compute)
+    cosource_part_cost_futur = fields.Monetary('Montant HT restant à valider sur Chorus', store=True, compute=compute)
+    cosource_part_marging_amount_current = fields.Monetary('Marge sur la part co-traitée (€) projetée', store=True, compute=compute)
+    cosource_part_marging_rate_current = fields.Float('Marge sur la part co-traitée (%) projetée', store=True, compute=compute)
 
 
 
@@ -1106,8 +1106,8 @@ class projectAccountProject(models.Model):
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
-            help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane ou des frais de déplacement par exemple.")
-    other_part_cost_initial = fields.Monetary('Montant HT acheté "autres presta." initial',
+            help="Les autres prestations peuvent être la facturation d'un séminaire dans nos locaux ou des frais de déplacement par exemple.")
+    other_part_cost_initial = fields.Monetary('Coût de revient HT de la part "autres presta." initial',
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
@@ -1118,9 +1118,9 @@ class projectAccountProject(models.Model):
     other_part_amount_current = fields.Monetary('Montant HT de revente "autres presta" actuel', 
             compute=compute,
             store=True,
-            help="Les autres prestations peuvent être la facturation d'un séminaire dans les locaux de Tasmane ou des frais de déplacement par exemple.")
-    other_part_cost_current = fields.Monetary('Montant HT facturés par les prestataires actuel', store=True, compute=compute)
-    other_part_cost_futur = fields.Monetary('Montant HT restant à facturer par les pretataires actuel', store=True, compute=compute)
+            help="Les autres prestations peuvent être la facturation d'un séminaire dans nos locaux ou des frais de déplacement par exemple.")
+    other_part_cost_current = fields.Monetary('Coût de revient HT de la part "autres presta" actuel', store=True, compute=compute)
+    other_part_cost_futur = fields.Monetary('Coût de revient HT de la part "autres presta" à venir', store=True, compute=compute)
     other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) projetée', store=True, compute=compute)
     other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) projetée', store=True, compute=compute)
 
@@ -1150,7 +1150,7 @@ class projectAccountProject(models.Model):
     is_validated_purchase_order = fields.Boolean("BC fournisseurs tous validés", store=True, compute=compute, help="VRAI si tous les BC fournissuers sont à l'état 'Bon de commande'.")
     is_validated_book = fields.Boolean("Répartition book validée", store=True, compute=compute, help="VRAI si la répartition du book est validée.")
     is_consistant_outsourcing = fields.Boolean("BCF présents", store=True, compute=compute, help="VRAI si le type de sous-traitance est renseigné et qu'il est cohérent avec les Bons de commande fournisseur du projet.")
-    is_consistant_prevent_napta_creation = fields.Boolean("Absent Napta et pas de prod. Tasmane", store=True, compute=compute, help="FAUX si la case Ne pas créer sur Napta est cochée et que le montant HT du dispositif Tasmane à date n'est pas nul.")
+    is_consistant_prevent_napta_creation = fields.Boolean("Absent Napta et pas de prod. interne", store=True, compute=compute, help="FAUX si la case Ne pas créer sur Napta est cochée et que le montant HT du dispositif interne à date n'est pas nul.")
     is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme des prix de revente n'est pas nulle.")
     is_affected_book = fields.Boolean("Book affecté", store=True, compute=compute, help="VAI si le book est validé OU qu'il existe au moins une ligne de book")
 

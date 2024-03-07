@@ -37,7 +37,7 @@
 		</field>
 
 		<field name="order_line" position="before">
-			<group string="Lignes de commande de la part pilotée par Tasmane"/>
+			<group string="Lignes de commande de la part que nous pilotons (y/c co-traitance pour laquelle nous sommes mandataires)"/>
 		</field>
 
 

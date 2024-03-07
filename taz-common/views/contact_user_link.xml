@@ -84,12 +84,12 @@
         <field name="name">taz.contact_user_link.search</field>
         <field name="model">taz.contact_user_link</field>
         <field name="arch" type="xml">
-           <search string="Lien tasmanien-client">
+           <search string="Lien collaborateur-contact">
                     <field name="partner_id" string="Contact"/>
                     <field name="parent_partner_id" string="Entreprise"/>
                     <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
 		<!-- Inutile car la page du plan d'intimité ne permet de voir que ses propres liens
-                    <filter string="Mes liens tasmanien-client" name="my_link"
+                    <filter string="Mes liens collaborateur-contact" name="my_link"
                         domain="[('user_id', '=', uid)]"/>
 		-->
                     <separator/>
