@@ -28,16 +28,14 @@ class staffingAnalyticLine(models.Model):
         return res
 
     def unlink(self):
-        project_to_update = []
         for rec in self:
             if rec.category == 'project_employee_validated':
-                if rec.project_id not in project_to_update:
-                    project_to_update.append(rec.project_id)
+                rec.project_id.has_to_be_recomputed = True
 
         res = super().unlink()
 
-        for project_id in project_to_update :
-            project_id.compute()
+        if self.env.context.get('do_not_update_project') != True:
+            rec.project_id.recompute_if_has_to_be_recomputed()
 
         return res
 
@@ -45,4 +43,6 @@ class staffingAnalyticLine(models.Model):
         for rec in self:
             if rec.category != 'project_employee_validated':
                 continue
-            rec.project_id.compute()
+            rec.project_id.has_to_be_recomputed = True
+            if self.env.context.get('do_not_update_project') != True:
+                rec.project_id.recompute_if_has_to_be_recomputed()

@@ -528,6 +528,7 @@ class naptaProject(models.Model):
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
         #Recalculer les staffing report
         self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
+        self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()
 
         # TODO : synchro des compétences, les catégories de compétences, les échelles de notations, les valeurs des échelles de notations et les compétences des utilisateurs, les souhaits des utilisateurs
         # TODO : Gérer le recalcul des montants des analytic lines si le grade ou le CJM change a posteriori
@@ -639,7 +640,7 @@ class naptaAnalyticLine(models.Model):
                     'date_end' : userprojectperiod['attributes']['end_date'],
                     'unit_amount' : userprojectperiod['attributes']['staffed_days'],
                 }
-            create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True})
+            create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
 
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
         filter_list = [('napta_id', '!=', None), ('category', '=', 'project_forecast'), ('napta_id', 'not in', list(userprojectperiods.keys()))]
@@ -674,7 +675,7 @@ class naptaAnalyticLine(models.Model):
                     'unit_amount' : timesheet_period['attributes']['worked_days'],
                     'is_timesheet_closed_on_napta' : timesheet['attributes']['closed'],
                 }
-            create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True})
+            create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
 
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
         filter_list = [('napta_id', '!=', None), ('category', '=', 'project_employee_validated'), ('napta_id', 'not in', list(timesheet_periods.keys()))]

@@ -119,7 +119,7 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
         group_dic = {}
         for line in self :
             if not line.employee_id :
-                _logger.info("Employee_id non defini pour la ligne %s" % str(line.read()))
+                #_logger.info("Employee_id non defini pour la ligne %s" % str(line.read()))
                 continue
 
             line_end_date = line.date_end

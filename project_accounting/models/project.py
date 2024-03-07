@@ -557,6 +557,9 @@ class projectAccountProject(models.Model):
                     #if book_period_current_year.period_project_book == 0.0 :
                     #    book_period_current_year.unlink()
 
+            if rec.has_to_be_recomputed :
+                rec.has_to_be_recomputed = False
+
 
     def compute_sale_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
         _logger.info('----------compute_sale_order_total => with_direct_payment= %s =>with_draft_sale_order= %s' % (with_direct_payment, with_draft_sale_order))
@@ -993,6 +996,14 @@ class projectAccountProject(models.Model):
 
 
 
+    def recompute_if_has_to_be_recomputed(self):
+        _logger.info('--- recompute_if_has_to_be_recomputed')
+        projects = self.env['project.project'].search([('has_to_be_recomputed', '=', True)])
+        _logger.info('Nombre de projets à recalculer : %s' % str(len(projects)))
+        projects.compute()
+
+
+    has_to_be_recomputed = fields.Boolean('À recalculer', default=False)
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')
     partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé par Tasmane. Un client intermédie Tasmane. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
