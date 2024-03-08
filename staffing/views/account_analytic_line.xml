@@ -25,8 +25,12 @@
           <field name="model_id" ref="model_account_analytic_line"/>
           <field name="binding_model_id" ref="model_account_analytic_line"/>
           <field name="state">code</field>
-	  <field name="code">for rec in records:
-		  rec.refresh_amount()</field>
+	  <field name="code">
+for rec in records:
+    rec.with_context(do_not_update_staffing_report=True, do_not_update_project=True).refresh_amount()
+env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
+env['project.project'].sudo().recompute_if_has_to_be_recomputed()
+  	  </field>
           <field name="groups_id" eval="[(4, ref('account.group_account_manager'))]" />
    </record>
 
