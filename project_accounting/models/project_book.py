@@ -8,7 +8,7 @@ import datetime
 class projectBookPeriod(models.Model):
     _name = "project.book_period"
     _description = "Project book period"
-    _order = "reference_period desc"
+    _order = "project_id_number desc, reference_period desc"
     _rec_name = "display_name"
     _sql_constraints = [
         ('project_year_uniq', 'UNIQUE (project_id, reference_period)',  "Impossible d'avoir deux book annuels différents pour un même projet.")
@@ -58,6 +58,7 @@ class projectBookPeriod(models.Model):
             rec.display_name = rec.reference_period + " [" + str(rec.project_id.number) + "]"
 
     project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, ondelete='cascade', default=_get_default_project_id)
+    project_id_number = fields.Char(related='project_id.number', store=True)
     reference_period = fields.Selection(
         year_selection,
         string="Année de référence",
@@ -80,6 +81,7 @@ class projectBookPeriod(models.Model):
 class projectBookEmployeeDistribution(models.Model):
     _name = "project.book_employee_distribution"
     _description = "Project book employee distribution"
+    _order = "project_id_number desc"
     _sql_constraints = [
         ('project_employee_uniq', 'UNIQUE (project_id, employee_id)',  "Impossible d'avoir deux book différents pour un même salarié.")
     ]
@@ -122,6 +124,7 @@ class projectBookEmployeeDistribution(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     employee_id = fields.Many2one('hr.employee', domain=[('active', '=', True)], string="Salarié", ondelete='restrict', check_company=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade', check_company=True)
+    project_id_number = fields.Char(related='project_id.number', store=True)
     book_factor = fields.Float("Coefficient", required=True)
     final_book_factor = fields.Float("Coefficient avec bonus/malus", store=True, compute=compute)
     display_name = fields.Char("Display name", compute=compute_display_name)#, store=True)
@@ -136,6 +139,7 @@ class projectBookEmployeeDistribution(models.Model):
 class projectBookEmployeeDistributionPeriod(models.Model):
     _name = "project.book_employee_distribution_period"
     _description = "Project book employee distribution PERIOD"
+    _order = "project_id_number desc"
     _sql_constraints = [
         ('proj_employ_period', 'UNIQUE (project_id, book_employee_distribution_id, project_book_period_id)',  "Impossible d'avoir deux book différents pour un même salarié/période.")
     ]
@@ -175,6 +179,7 @@ class projectBookEmployeeDistributionPeriod(models.Model):
 
     # Related project_book_period_id
     project_id = fields.Many2one('project.project', related='project_book_period_id.project_id', string="Projet", store=True, check_company=True)
+    project_id_number = fields.Char(related='project_id.number', store=True)
     reference_period = fields.Selection(related='project_book_period_id.reference_period', store=True)
     company_id = fields.Many2one('res.company', related="project_book_period_id.company_id")
     currency_id = fields.Many2one('res.currency', related="project_book_period_id.currency_id")
