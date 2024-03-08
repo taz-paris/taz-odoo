@@ -33,6 +33,9 @@ cache_folder = '/tmp/napta'
 EXCLUDED_USERLIST = ['1', '67', '68']
         #'admin@napta.io' => 1, 'adminapi@tasmane-napta.com' => 67, 'consultant@tasmane-napta.com' => 68
 
+
+TASMANE_ODOO_COMPANY_ID = 1
+
 ##################################################################
 ##########                 REST CLIENT                  ##########
 ##################################################################
@@ -271,7 +274,7 @@ class ClientRestNapta:
         _logger.info(response.status_code)
 
 
-    def get_api(self, napta_type, filter=None, napta_id=None):
+    def get_api(self, napta_type, filter=None, napta_id=None, include=None):
         """ 
         #Exemple de format du dictionnaire FILTER
         filter=[
@@ -281,19 +284,23 @@ class ClientRestNapta:
             ]))
             """
 
+        page_size = 100
+        params = {}
+
         if filter :
             params['filter'] = json.dumps(filter)
+        if include:
+            params['include'] = ','.join(include)
 
         url = self.API_URL_BUSINESS_ENDPOINT+napta_type
         if napta_id != None :
             url += "/"+str(napta_id)
-        _logger.info("GET "+url)
-
-        page_size = 100
+        #_logger.info("ENDPOINT : "+url)
 
         last_page_number = False
         page_number = 1
         response_list = []
+        response_list_included = []
 
         while last_page_number == False or page_number <= last_page_number :
             _logger.info("      > Page %s sur %s" % (page_number, str(last_page_number)))
@@ -301,11 +308,12 @@ class ClientRestNapta:
                 'authorization': 'Bearer '+self.get_access_token(),
                 'content-type': 'application/json'
             }
-            params = {
+            params.update({
                 'page[size]' : page_size,
                 'page[number]' : page_number,
-            }
+            })
             response = requests.get(url, params=params,  headers=headers)
+            #_logger.info("url : "+response.url)
             if response.status_code == 429:
                 _logger.info("GET 429 too many requests : attente de 60 secondes")
                 time.sleep(60)
@@ -317,14 +325,29 @@ class ClientRestNapta:
                 _logger.info(response.status_code)
                 _logger.info(response.reason)
                 _logger.info(response.content)
+
             response_json = response.json()
-            if napta_id == None:
+            if type(response_json['data']) is list:
                 response_list = response_list + response_json['data']
             else :
                 response_list = response_list + [response_json['data']]
+
+            if  'included' in response_json.keys():
+                if type(response_json['included']) is list :
+                    response_list_included = response_list_included + response_json['included']
+                else :
+                    response_list_included = response_list_included + [response_json['included']]
+
+            if not(os.path.exists(cache_folder)):
+                os.mkdir(cache_folder)
+            path = os.path.join(cache_folder, 'GET_'+napta_type.replace('/','_')+'_page_'+str(page_number))
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(response.url)
+                json.dump(response_json, f, indent=4)
+
             last_page_number = math.ceil(response_json['meta']['count'] / page_size)
             page_number = page_number + 1
-        return {'data' : response_list}
+        return {'data' : response_list, 'included' : response_list_included}
 
     def delete_not_found_anymore_object_on_napta(self, odoo_model_name, napta_model_name, context_add={}) :
         # Cette fonction permet de supprimer sur Odoo les instances qui ont été supprimées sur Napta
@@ -421,9 +444,6 @@ class naptaProject(models.Model):
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project')
-        #TODO : comment gérer l'indisponibilité de l'API 
-            # ne pas prévenir qu'il y a eu une erreur est pas top... mais bloquer toute création/mise à jour de projet (et donc création de BC client...) n'est pas souhaitable non plus
-            # => Faut-il catcher les erreurs et les masquer ?
         client = ClientRestNapta(self.env)
         for rec in self:
             rec.partner_id.create_update_napta()
@@ -475,7 +495,6 @@ class naptaProject(models.Model):
                 }
             create_update_odoo(self.env, 'project.project', dic, only_update=True)
 
-        #TODO : supprimer les user_project qui ont été supprimées sur Napta
 
 
     def goto_napta(self):
@@ -495,6 +514,8 @@ class naptaProject(models.Model):
         client = ClientRestNapta(self.env)
         #self.env['hr.leave'].create_update_odoo_user_holiday()
         #self.env['hr.contract'].create_update_odoo_user_history()
+        #self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
+        #self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
         #a=1/0
         client.refresh_cache()
 
@@ -526,6 +547,8 @@ class naptaProject(models.Model):
         self.env['staffing.need'].create_update_odoo()
         self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
+        #Suppression du staffing.need une fois la dernière account.analytic.line supprimée
+        client.delete_not_found_anymore_object_on_napta('staffing.need', 'user_project')
         #Recalculer les staffing report
         self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
         self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()
@@ -581,7 +604,6 @@ class naptaProjectStage(models.Model):
                 }
             create_update_odoo(self.env, 'project.project.stage', dic)
 
-            #TODO : supprimer les business_unit qui ont été supprimés sur Napta
 
 
 class naptaNeed(models.Model):
@@ -607,7 +629,7 @@ class naptaNeed(models.Model):
                     #userproject_status_id
                 }
             create_update_odoo(self.env, 'staffing.need', dic)
-        #TODO : supprimer les user_project qui ont été supprimées sur Napta
+            
 
 
 class naptaEmployee(models.Model):
@@ -630,8 +652,14 @@ class naptaAnalyticLine(models.Model):
     def create_update_odoo_userprojectperiod(self):
         _logger.info('---- BATCH Create or update Odoo userprojectperiod')
         client = ClientRestNapta(self.env)
-        userprojectperiods = client.read_cache('userprojectperiod')
-        for napta_id, userprojectperiod in userprojectperiods.items():
+        company = self.env['res.company'].browse(TASMANE_ODOO_COMPANY_ID)[0] #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
+        DATE_OLDEST_USERPROJECTPERIOD = str(company.fiscalyear_lock_date)
+
+        filt = [{"name" : "end_date", "op" : "gt", "val" : DATE_OLDEST_USERPROJECTPERIOD}]
+        userprojectperiods = client.get_api('userprojectperiod', filter=filt)['data']
+
+        for userprojectperiod in userprojectperiods:
+            napta_id = userprojectperiod['id']
             dic = {
                     'napta_id' : napta_id,
                     'category' : 'project_forecast',
@@ -643,7 +671,8 @@ class naptaAnalyticLine(models.Model):
             create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
 
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
-        filter_list = [('napta_id', '!=', None), ('category', '=', 'project_forecast'), ('napta_id', 'not in', list(userprojectperiods.keys()))]
+        napta_ids = [d['id'] for d in userprojectperiods]
+        filter_list = [('date_end', '>', DATE_OLDEST_USERPROJECTPERIOD), ('napta_id', '!=', None), ('category', '=', 'project_forecast'), ('napta_id', 'not in', napta_ids)]
         odoo_objects = self.env['account.analytic.line'].search(filter_list)
         _logger.info("Nombre d'objets %s qui portent un ID Napta qui n'est plus retourné par l'API Napta : %s" % ('staffing prévisionnel', str(len(odoo_objects))))
         for odoo_objet in odoo_objects:
@@ -658,13 +687,42 @@ class naptaAnalyticLine(models.Model):
     def create_update_odoo_timesheetperiod(self):
         _logger.info('---- BATCH Create or update Odoo timesheet_period')
         client = ClientRestNapta(self.env)
-        timesheet_list = client.read_cache('timesheet')
-        timesheet_periods = client.read_cache('timesheet_period')
-        
+        company = self.env['res.company'].browse(TASMANE_ODOO_COMPANY_ID)[0] #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
+        DATE_OLDEST_TIMESHEETPERIOD = company.fiscalyear_lock_date
 
-        for napta_id, timesheet_period in timesheet_periods.items():
-            timesheet = timesheet_list[timesheet_period['attributes']['timesheet_id']]
-            target_date = datetime.date.fromisocalendar(int(timesheet['attributes']['year']), int(timesheet['attributes']['week']), int(timesheet_period['attributes']['day']))
+        filt = [{'or' : [
+                            {"name" : "year", "op" : "gt", "val" : DATE_OLDEST_TIMESHEETPERIOD.year},
+                            {'and' : [
+                                {"name" : "year", "op" : "eq", "val" : DATE_OLDEST_TIMESHEETPERIOD.year},
+                                {"name" : "week", "op" : "ge", "val" : DATE_OLDEST_TIMESHEETPERIOD.isocalendar()[1]},
+                                ]
+                            }
+                        ]
+                }]
+        timesheet_api_return = client.get_api('timesheet', filter=filt, include=['timesheet_periods'])
+        
+        #on crée un indexe des timesheet_periode included
+        included_timesheet_periods = {}
+        for included_object in timesheet_api_return['included']:
+            if included_object['type'] == 'timesheet_period':
+                included_timesheet_periods[included_object['id']] = included_object
+
+        timesheet_periods = [] 
+        # on intègre la timesheet à chaque timesheet_periode, et on intègres les timesheet_periodes strictement postérieures à la date de la dernière cloture comptable dans la liste timesheet_periods
+        for timesheet in timesheet_api_return['data'] :
+            for timesheet_period_reference in timesheet['relationships']['timesheet_periods']['data']:
+                timesheet_period = included_timesheet_periods[timesheet_period_reference['id']]
+                target_date = datetime.date.fromisocalendar(int(timesheet['attributes']['year']), int(timesheet['attributes']['week']), int(timesheet_period['attributes']['day']))
+                if target_date > DATE_OLDEST_TIMESHEETPERIOD: #on ignore les timesheet_period qui sont entre le lundi de la semaine de la dernière cloture, et le jour de la dernière cloture
+                    timesheet_period['timesheet'] = timesheet
+                    timesheet_period['target_date'] = target_date
+                    timesheet_periods.append(timesheet_period)
+
+        # on crée / met à jours sur Odoo les timesheet_periods retenues
+        for timesheet_period in timesheet_periods:
+            napta_id = timesheet_period['id']
+            timesheet = timesheet_period['timesheet']
+            target_date = timesheet_period['target_date']
             napta_project_id = timesheet_period['attributes']['project_id']
             dic = {
                     'napta_id' : napta_id,
@@ -678,7 +736,8 @@ class naptaAnalyticLine(models.Model):
             create_update_odoo(self.env, 'account.analytic.line', dic, context_add={'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
 
         #Suppression des objects supprimés sur Napta depuis leur import sur Odoo
-        filter_list = [('napta_id', '!=', None), ('category', '=', 'project_employee_validated'), ('napta_id', 'not in', list(timesheet_periods.keys()))]
+        napta_ids = [d['id'] for d in timesheet_periods]
+        filter_list = [('date', '>', DATE_OLDEST_TIMESHEETPERIOD), ('napta_id', '!=', None), ('category', '=', 'project_employee_validated'), ('napta_id', 'not in', napta_ids)]
         odoo_objects = self.env['account.analytic.line'].search(filter_list)
         _logger.info("Nombre d'objets %s qui portent un ID Napta qui n'est plus retourné par l'API Napta : %s" % ('pointages valides', str(len(odoo_objects))))
 

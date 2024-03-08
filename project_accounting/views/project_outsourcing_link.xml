@@ -46,12 +46,12 @@
 				</group>
 			</group>
 			<group>
-				<group string="Facturation du sous-traitant">
+				<group string="Facturation 'classique' du sous-traitant">
 					<field name="sum_account_move_lines"/>
 					<field name="order_company_payment_to_invoice"/>
 					<button type="object" colspan="2" name="action_open_account_move_lines" string="Voir les lignes de facture/avoir"/>
 				</group>
-				<group string="Paiement au sous-traitant">
+				<group string="Paiement 'classique' au sous-traitant">
 					<field name="sum_account_move_lines_with_tax" />
 					<field name="company_paid" />
 					<field name="company_residual" />

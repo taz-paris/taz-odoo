@@ -176,8 +176,11 @@ class HrEmployeeStaffingReport(models.Model):
                     ('category', 'in', ['project_forecast', 'project_employee_validated', 'other']),
                 ], order="date asc")
             _logger.info('Nombre de lignes pointées/previsionnelles : %s' % str(len(lines)))
-            lines.create_update_timesheet_report()
-            _logger.info('--- END reset_all_reports')
+            lines.with_context(do_not_update_staffing_report=True).create_update_timesheet_report()
+        
+        self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
+        
+        _logger.info('--- END reset_all_reports')
 
 
     # s'il on vient de supprimer de la base de donnée la dernière analytic line pour la la période/employé => supprimer le rapport (plutôt que le garder à 0 ?)

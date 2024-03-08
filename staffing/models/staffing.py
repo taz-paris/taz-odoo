@@ -66,7 +66,7 @@ class staffingNeed(models.Model):
     name = fields.Char("Nom", compute=_compute_name)
 
     project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True, check_company=True)
-    project_stage = fields.Many2one(related='project_id.stage_id')
+    project_stage = fields.Many2one(related='project_id.stage_id') #TODO : mettre l'attribut state du staffing_need à canceled lorsque le projet passe à perdu / annulé / clos comptablement
     job_id = fields.Many2one('hr.job', string="Grade souhaité", check_company=True) #TODO : impossible de le mettre en required dans le modèle car la synchro fitnet importe des assignments qui n'ont pas de job_id
     skill_ids = fields.Many2many('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
     considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)", check_company=True)
@@ -103,6 +103,11 @@ class staffingNeed(models.Model):
 
     @api.model
     def create(self, vals):
+        if "staffed_employee_id" in vals: #TODO ne vaudrait-il pas mieux avoir une action manuelle ou un statut en plus pour publier l'affecation (la rendre visible au consultant)
+            if vals["staffed_employee_id"] :
+                self.state = 'done'
+            else :
+                self.state = 'open'
         needs = super().create(vals)
         for need in needs:
             need.generate_staffing_proposal()
