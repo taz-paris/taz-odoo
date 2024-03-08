@@ -121,6 +121,14 @@ class staffingNeed(models.Model):
                 self.state = 'done'
             else :
                 self.state = 'open'
+        if "project_id" in vals :
+            for rec in self: #Si le staffing_need change de project_id on doit changer le project_id de toutes les analityc_line pré-existantes liées à ce staffing_need
+                analytic_lines = self.env['account.analytic.line'].search([('staffing_need_id', '=', rec.id)])
+                analytic_lines.project_id = rec.project_id
+        if "staffed_employee_id" in vals:
+            for rec in self :
+                analytic_lines = self.env['account.analytic.line'].search([('staffing_need_id', '=', rec.id)])
+                analytic_lines.employee_id = rec.staffed_employee_id.id
         return res
 
     def generate_staffing_proposal(self):

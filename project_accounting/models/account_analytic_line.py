@@ -29,7 +29,7 @@ class staffingAnalyticLine(models.Model):
 
     def unlink(self):
         for rec in self:
-            if rec.category == 'project_employee_validated':
+            if rec.category in ['project_employee_validated', 'project_forecast']:
                 rec.project_id.has_to_be_recomputed = True
 
         res = super().unlink()
@@ -41,7 +41,7 @@ class staffingAnalyticLine(models.Model):
 
     def update_project(self):
         for rec in self:
-            if rec.category != 'project_employee_validated':
+            if rec.category not in ['project_employee_validated', 'project_forecast']:
                 continue
             rec.project_id.has_to_be_recomputed = True
             if self.env.context.get('do_not_update_project') != True:

@@ -12,6 +12,8 @@ class staffingAnalyticLine(models.Model):
     def write(self, vals):
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
+        if 'project_id' in vals.keys() and 'account_id' not in vals.keys():
+            vals['account_id'] = self.env['project.project'].browse([vals['project_id']])[0].analytic_account_id.id
         #_logger.info(vals)
         res = super().write(vals)
         if 'amount' in vals.keys() or 'unit_amount' in vals.keys(): #TODO : contrôler si elle change de date ou de catégorie ?
@@ -306,6 +308,8 @@ class staffingAnalyticLine(models.Model):
     def refresh_amount(self):
         _logger.info("---- refresh_amount")
         amount, cost_line = self.compute_amount()
+        #_logger.info(str(self.amount) + '_' +str(self.hr_cost_id))
+        #_logger.info(str(amount) +'_'+ str(cost_line))
         if self.amount != round(amount,3):
             _logger.info("change amount of line :")
             _logger.info(self.amount)

@@ -516,6 +516,7 @@ class naptaProject(models.Model):
         #self.env['hr.contract'].create_update_odoo_user_history()
         #self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
         #self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
+        #client.read_cache('userprojectperiod')
         #a=1/0
         client.refresh_cache()
 
