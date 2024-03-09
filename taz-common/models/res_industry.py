@@ -4,6 +4,8 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo import _
 
+import datetime 
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -22,3 +24,22 @@ class tazResIndustry(models.Model):
          ('active', '2-Compte actif'),
          ('not_tracked', '3-Ni prioritaire, ni actif'),
     ], "Niveau de priorité", default='not_tracked')
+
+    customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
+    customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
+
+
+    def get_book_by_year(self, year):
+        begin_date = datetime.datetime(year, 1, 1) 
+        end_date = datetime.datetime(year, 12, 31)
+        project_ids = self.env['project.project'].search([
+            ('stage_is_part_of_booking', '=', True), 
+            ('partner_id', 'in', self.partner_ids.ids),
+            ('date_win_loose', '>=', begin_date),
+            ('date_win_loose', '<=', end_date),
+            ('reporting_sum_company_outsource_code3_code_4', '!=', False),
+        ])
+        res = 0.0
+        for project in project_ids:
+            res += project.reporting_sum_company_outsource_code3_code_4
+        return res

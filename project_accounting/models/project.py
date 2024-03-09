@@ -55,13 +55,6 @@ class projectAccountProject(models.Model):
         return self._search(args, limit=limit, access_rights_uid=name_get_uid)
 
 
-    def get_book_by_year(self, year):
-        #_logger.info('-- RES.PARTNER get_book_by_year')
-        for book_period_id in self.book_period_ids:
-            if book_period_id.reference_period == str(year):
-                return book_period_id.period_project_book
-        return 0.0
-
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
     @api.depends('project_director_employee_id')
     def _compute_user_id(self):

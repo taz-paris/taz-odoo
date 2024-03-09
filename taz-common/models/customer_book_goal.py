@@ -2,27 +2,27 @@ from odoo import models, fields, api
 import logging
 _logger = logging.getLogger(__name__)
 
-import datetime    
+import datetime 
 
 class tazCustomerBookGoal(models.Model):
     _name = "taz.customer_book_goal"
     _description = "Customer book goal"
-    _order = "reference_period desc"
+    _order = "reference_period desc, industry_id"
     _sql_constraints = [
-        ('partner_year_uniq', 'UNIQUE (partner_id, reference_period)',  "Impossible d'avoir deux objectifs différents pour la même entreprise et la même année.")
+        ('partner_year_uniq', 'UNIQUE (industry_id, reference_period)',  "Impossible d'avoir deux objectifs différents pour le même compte et la même année.")
     ]
 
     @api.model
     def create(self, vals):
-        if not vals.get("partner_id"):
-            vals["partner_id"] = self._context.get("default_partner_id")
+        if not vals.get("industry_id"):
+            vals["industry_id"] = self._context.get("default_industry_id")
         return super().create(vals)
 
     @api.model
     def year_selection(self):
         year = 2019 # replace 2000 with your a start year
         year_list = []
-        while year != datetime.date.today().year + 2: # replace 2030 with your end year
+        while year != datetime.date.today().year + 2: 
             year_list.append((str(year), str(year)))
             year += 1
         return year_list
@@ -34,20 +34,19 @@ class tazCustomerBookGoal(models.Model):
         #self.reference_period = datetime.date.today().year
         return str(y)
 
-    @api.depends('partner_id', 'reference_period')
+    @api.depends('industry_id', 'reference_period')
     def _compute_name(self):
         for rec in self :
-            rec.name =  "%s - %s" % (rec.reference_period or "", rec.partner_id.name or "") 
+            rec.name =  "%s - %s" % (rec.reference_period or "", rec.industry_id.name or "") 
 
 
-    partner_id = fields.Many2one('res.partner', string="Entreprise", domain="[('is_company', '=', True)]", ondelete='restrict') #, required=True
-    parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Secteur du parent', related='partner_id.industry_id')  #store=True
+    industry_id = fields.Many2one('res.partner.industry', string="Compte", ondelete='restrict') #, required=True
     reference_period = fields.Selection(
         year_selection,
         string="Année de référence",
-        default=year_default, # as a default value it would be 2019
+        default=year_default,
         )
-    name = fields.Char("Entreprise - Période", compute=_compute_name)
+    name = fields.Char("Compte - Période", compute=_compute_name)
 
     book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi du book")
 
@@ -75,27 +74,25 @@ class tazCustomerBookFollowup(models.Model):
             else :
                 record.period_ratio = 0.0
 
-    #@api.model
-    #def date_default(self):
-    #    return datetime.date.today()
-
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
 
         res['date_update'] = datetime.date.today()
 
-        partner_default_id = self._context.get("default_partner_id")
-        if partner_default_id:
-            partner_default = self.env['res.partner'].search([('id', '=', partner_default_id)])[0]
-            bgl = self.env['taz.customer_book_goal'].search([('partner_id', '=', partner_default.id)], order="reference_period desc")
+        industry_default_id = self._context.get("default_industry_id")
+        if industry_default_id:
+            industry_default = self.env['res.partner.industry'].search([('id', '=', industry_default_id)])[0]
+            bgl = self.env['taz.customer_book_goal'].search([('industry_id', '=', industry_default.id)], order="reference_period desc")
             if len(bgl)>0:
                 bg_last = bgl[0]
                 res['customer_book_goal_id'] = bg_last.id
-                res['period_book'] = partner_default.get_book_by_year(int(bg_last.reference_period))
+                res['period_book'] = industry_default.get_book_by_year(int(bg_last.reference_period))
 
         _logger.info(res)
         return res
+
+           
 
     #@api.model
     #def book_goal_id_default(self):
@@ -106,17 +103,16 @@ class tazCustomerBookFollowup(models.Model):
     #            return bgl[0].id
     #    return False 
 
-    @api.depends('partner_id', 'date_update')
+    @api.depends('industry_id', 'date_update')
     def _compute_name(self):
         for record in self:
-            record.name = "%s - %s" % (record.partner_id.name or "", record.date_update or "") 
+            record.name = "%s - %s" % (record.industry_id.name or "", record.date_update or "") 
 
     name = fields.Char("Nom", compute=_compute_name)
 
-    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=True, ondelete='restrict')
+    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=False, ondelete='restrict')
     period_goal = fields.Float("Montant obj", related="customer_book_goal_id.period_goal", store=True)
-    partner_id = fields.Many2one(string="Entreprise", related="customer_book_goal_id.partner_id", store=True)
-    partner_industry_id = fields.Many2one(related="customer_book_goal_id.partner_id.industry_id", store=True)
+    industry_id = fields.Many2one(related="customer_book_goal_id.industry_id", store=True)
 
     date_update = fields.Date("Date de valeur", readonly=True)
     period_book = fields.Float("Book à date", readonly=True)

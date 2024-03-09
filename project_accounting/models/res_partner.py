@@ -79,13 +79,6 @@ class projectAccountingResPartner(models.Model):
                  res = True
              rec.has_project_started_this_year = res
 
-     def get_book_by_year(self, year):
-         #_logger.info('-- RES.PARTNER get_book_by_year')
-         res = 0.0
-         for project in self.project_ids:
-             res += project.get_book_by_year(year)
-         #_logger.info(res)
-         return res
 
      @api.constrains('external_auxiliary_code')
      def check_external_auxiliary_code_consistency(self):

@@ -6,23 +6,40 @@
       <field name="model">taz.customer_book_goal</field>
       <field name="arch" type="xml">
 	 <tree editable="top">
-		  <field name="partner_id" required="1" optional="show"/>
+		  <field name="industry_id" required="1" optional="show"/>
 		  <field name="reference_period" optional="show"/>
 		  <field name="period_goal" optional="show"/>
         </tree>
       </field>
     </record>
 
+
+    <record model="ir.ui.view" id="taz-common.customer_book_goal_search">
+        <field name="name">taz.customer_book_goal.search</field>
+        <field name="model">taz.customer_book_goal</field>
+        <field name="arch" type="xml">
+           <search string="Objectif de book">
+		    <field name="industry_id" string="Compte (ex BD)"/>
+		    <separator/>
+		    <filter name="filter_this_year" string="Objectifs de l'année en cours" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
+		    <separator/>
+		    <group expand="0" string="Group By">
+			<filter string="Compte (ex BD)" name="group_industry_id" context="{'group_by': 'industry_id'}"/>
+			<filter string="Période de référence" name="group_reference_period" context="{'group_by': 'reference_period'}"/>
+		    </group>
+           </search>
+        </field>
+    </record>
+
     <record model="ir.ui.view" id="taz-common.customer_book_followup_tree">
       <field name="name">Suivi du book</field>
       <field name="model">taz.customer_book_followup</field>
       <field name="arch" type="xml">
-	 <tree editable="top">
-	      <field name="customer_book_goal_id" optional="show"/>
-	      <field name="partner_id" optional="hide" context="{'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-	      <field name="partner_industry_id" optional="hide"/>
+	 <tree editable="top" create="true">
+	      <field name="industry_id" optional="hide"/>
+	      <field name="customer_book_goal_id" force_save="1" optional="show" />
 	      <field name="date_update" optional="show"/>
-	      <field name="period_book" optional="show" widget='monetary'/>
+	      <field name="period_book" force_save="1" optional="show" widget='monetary'/>
 	      <field name="period_futur_book" optional="show" widget='monetary'/>
 	      <field name="period_landing" optional="show" widget='monetary'/>
 	      <field name="period_goal" optional="show"/>
@@ -41,8 +58,7 @@
       <field name="arch" type="xml">
 	<pivot string="Suivi du book">
 	    <field name="date_update" interval="month" type="col"/>
-	    <field name="partner_industry_id" type="row"/>
-	    <field name="partner_id" type="row"/>
+	    <field name="industry_id" type="row"/>
 	    <field name="period_book"  type="measure"/>
 	    <field name="period_futur_book"  type="measure"/>
 	    <field name="period_landing"  type="measure"/>
@@ -59,8 +75,7 @@
       <field name="arch" type="xml">
 	<graph type="line" string="Suivi du book">
 	    <field name="date_update" interval="month"/>
-	    <field name="partner_industry_id" invisible="1" />
-	    <field name="partner_id" />
+	    <field name="industry_id" />
 	    <field name="period_book"  type="measure"/>
 	    <field name="period_futur_book"  type="measure"/>
 	    <field name="period_landing"  type="measure"/>
@@ -75,15 +90,13 @@
         <field name="model">taz.customer_book_followup</field>
         <field name="arch" type="xml">
            <search string="Suivi du book">
-		    <field name="partner_industry_id" string="Compte (ex BD)"/>
-		    <field name="partner_id" string="Contact"/>
+		    <field name="industry_id" string="Compte (ex BD)"/>
 		    <separator/>
-		    <filter name="filter_date_update" date="date_update"/>
-		    <separator/>
+		    <filter name="filter_this_year" string="Objectifs de l'année en cours" domain="[('date_update', '&gt;=', time.strftime('%%Y-01-01')), ('date_update', '&lt;=', time.strftime('%%Y-12-31'))]"/>
 		    <separator/>
 		    <group expand="0" string="Group By">
-			<filter string="Compte (ex BD)" name="group_industry_id" context="{'group_by': 'partner_industry_id'}"/>
-			<filter string="Entreprise" name="group_partner" context="{'group_by': 'partner_id'}"/>
+			<filter string="Compte (ex BD)" name="group_industry_id" context="{'group_by': 'industry_id'}"/>
+			<filter string="Date" name="group_date_update" context="{'group_by': 'date_update'}"/>
 		    </group>
            </search>
         </field>
@@ -105,8 +118,13 @@
 	-->
     </record>
 
-    <menuitem name="Suivi des objectifs commerciaux" sequence="50" id="taz-common.customer_book_followup" parent="taz-common.commerce" action="taz-common.customer_book_followup_action" groups="taz-common.taz-admin"/>
-    <menuitem name="Objectifs commerciaux" sequence="60"  id="taz-common.customer_book_goal" parent="taz-common.commerce" action="taz-common.customer_book_goal_action" groups="taz-common.taz-admin"/>
+    <menuitem name="Objectifs commerciaux" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
+    <menuitem name="Suivi des objectifs commerciaux" sequence="10" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
+    <menuitem name="Objectifs commerciaux" sequence="20"  id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
+
+    <menuitem id="taz-common.res_partner_industry_menu" name="Comptes (ex BD)"
+        action="base.res_partner_industry_action" parent="taz-common.customer_book"
+        sequence="90"/>
 
   </data>
 </odoo>

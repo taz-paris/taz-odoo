@@ -142,9 +142,6 @@ class tazResPartner(models.Model):
      business_action_ids = fields.One2many('taz.business_action', 'partner_id') 
      child_mail_address_domain_list = fields.Char('Liste domaines mail', compute=_compute_child_mail_address_domain_list, store=True)
 
-     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'partner_id')  
-     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'partner_id')  
-
      mailchimp_status = fields.Selection([('cleaned', 'cleaned'), ('nonsubscribed', 'nonsubscribed'), ('subscribed', 'subscribed'), ('unsubscribed', 'unsubscribed')], "Statut Mailchimp lors de l'import")
 
      contact_user_link_ids = fields.One2many("taz.contact_user_link", 'partner_id', string="Liens contacts-utilisateurs")

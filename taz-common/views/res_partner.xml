@@ -151,34 +151,6 @@
 					</group>
 				</group>
 			  </page>
-			  <page string="Objectifs commerciaux" groups="taz-common.taz-admin">
-				  <label for="customer_book_goal_ids" string="Objectifs annuels"/>
-				  <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_partner_id': active_id}">
-					<tree editable="top">
-					  <field name="partner_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
-					  <field name="reference_period" optional="show"/>
-					  <field name="period_goal" optional="show"/>
-					</tree> 
-				  </field>
-				  <label for="customer_book_followup_ids" string="Suivi des objectifs annuels"/>
-				  <field name="customer_book_followup_ids" string="Suivi des objectifs annuels" context="{'default_partner_id': active_id}">
-					  <!--
-					  <tree editable="top">
-					      <field name="customer_book_goal_id" optional="show"/>
-					      <field name="partner_id" optional="hide" context="{'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-					      <field name="partner_industry_id" optional="hide"/>
-					      <field name="date_update" optional="show"/>
-					      <field name="period_book" optional="show" widget='monetary'/>
-					      <field name="period_futur_book" optional="show" widget='monetary'/>
-					      <field name="period_landing" optional="show" widget='monetary'/>
-					      <field name="period_goal" optional="show"/>
-					      <field name="period_delta" optional="show" widget='monetary'/>
-					      <field name="period_ratio" optional="show" widget="progressbar" />
-					      <field name="comment" optional="hide"/>
-					  </tree>
-				  	  -->
-				  </field>
-			  </page>
 			  <page string="Autres informations">
 				<group>
 					<field name="child_mail_address_domain_list"/>
@@ -673,10 +645,6 @@
         action="base.action_partner_title_contact"
         name="Contact Titles" parent="taz-common.res_partner_menu_config"
         sequence="3"/>
-
-    <menuitem id="taz-common.res_partner_industry_menu" name="Industries"
-        action="base.res_partner_industry_action" parent="taz-common.res_partner_menu_config"
-        sequence="4"/>
 
     <menuitem id="taz-common.menu_localisation" name="Localization"
         parent="taz-common.res_partner_menu_config" sequence="5"/>
