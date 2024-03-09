@@ -417,7 +417,7 @@ class projectAccountProject(models.Model):
 
             last_monday = (datetime.today() - timedelta(days=datetime.today().weekday())).date() #Chez Tasmane, on pointe en fin de chaque semaine, donc on compte le forecast pour la semaine en cours
             rec.company_part_cost_current = -rec.get_production_cost(filters=[('category', '=', 'project_employee_validated'), ('date', '<', last_monday)])[0]
-            rec.company_part_cost_futur = -rec.get_production_cost(filters=[('category', '=', 'project_forecast'), ('date', '>=', last_monday)])[0]
+            rec.company_part_cost_futur = -rec.get_production_cost(filters=[('category', '=', 'project_forecast'), ('date_end', '>=', last_monday)])[0]
 
             rec.company_part_marging_amount_current =  rec.company_part_amount_current - rec.company_part_cost_current - rec.company_part_cost_futur
             if rec.company_part_amount_current != 0 :
@@ -765,7 +765,55 @@ class projectAccountProject(models.Model):
         }
 
 
+    def cron_update_margin_weekly(self):
+        # Chez Tasmane, on pointe la semaine N (et on affine le prévisionnel des 3 suivantes) entre le jeudi N et le lundi matin (avant 10h) N+1
+        #       Lors de la synchro avec Napta (dans les 12h qui suivent la saisie) la création/suppression/modification des pointages/prévisionnels provoque une mise à jour du projet
+        #       Cette mise à jour du projet permet :
+        #           - d'intégrer au coût de revient du dispositif interne actuel (à date du début de semaine) le rattrapage des pointages < lundi N
+        #           - d'intégrer au coût de revient du dispositif interne à venir (à date du début de semaine) les prévisionnels avec un date de fin >= lundi N
+        #       En revanche, il est nécessaire de forcer le recalcule chaque lundi matin des projets :
+        #           - qui ont du pointage sur la semaine N-1
+        #           - OU qui ont du prévisionnel postérieur à la semaine N-1
+
+        _logger.info("DEBUT cron_update_margin_weekly")
+
+        if datetime.today().weekday() == 0 : # nous sommes lundi - cas nominal
+            current_monday = datetime.today()
+        else : # dans le cas où le cron a planté le lundi, mais que l'on retente le lendemain par exemple
+            current_monday = (datetime.today() - timedelta(days=datetime.today().weekday())).date()
+        _logger.info("      Current monday %s" % current_monday)
+        target_week_monday = (current_monday - timedelta(days=7))
+        _logger.info("      Target_week_monday %s" % target_week_monday)
+
+        validated_lines = self.env['account.analytic.line'].search([
+			('project_id', '!=', False), 
+			('category', '=', 'project_employee_validated'), 
+			('date', '>=', target_week_monday), 
+                        ('date', '<', current_monday), 
+			])
+        _logger.info("      Nombre de lignes de pointage sur la semaine visée %s" % len(validated_lines))
+
+        forecast_lines = self.env['account.analytic.line'].search([
+			('project_id', '!=', False), 
+			('category', '=', 'project_forecast'), 
+			('date_end', '>=', current_monday), 
+			])
+        _logger.info("      Nombre de lignes de prévisionnel postérieures à la semaine visée %s" % len(forecast_lines))
+
+        for line in validated_lines+forecast_lines :
+            if not line.project_id.has_to_be_recomputed :
+                line.project_id.has_to_be_recomputed = True
+
+        self.env['project.project'].recompute_if_has_to_be_recomputed()
+
+        _logger.info("FIN cron_update_margin_weekly")
+
+
     def get_production_cost(self, filters=[], force_recompute_amount=False):
+        #dans le modèle Napta, il y a une timesheet_period par jour, la date est définie mais la date_end ne l'est pas => donc il suffit de filtrer sur date <= today
+        #dans le modèle Napta un userproject_period a une date de début et de fin (potentiellement à cheval sur plusieurs semaines/mois/années
+            # TODO : on gère mal les prévisionnels a cheval sur plusieurs semaines => leur "montont" compte en intégralité en prévisionnel jusqu'à la dernière semaine
+
         production_period_amount = 0.0
         lines = self.env['account.analytic.line'].search(filters + [('project_id', '=', self.id)])
         for line in lines :
@@ -1049,8 +1097,8 @@ class projectAccountProject(models.Model):
     company_part_amount_current = fields.Monetary('Montant HT dispositif interne actuel', 
             compute=compute,
             store=True)
-    company_part_cost_current = fields.Monetary('Coût de revient du dispositif interne (€) actuel', store=True, compute=compute)
-    company_part_cost_futur = fields.Monetary('Coût de revient du dispositif interne (€) à venir', store=True, compute=compute)
+    company_part_cost_current = fields.Monetary('Coût de revient du dispositif interne (€) < semaine actuelle', store=True, compute=compute)
+    company_part_cost_futur = fields.Monetary('Coût de revient du dispositif interne (€) >= semaine actuelle', store=True, compute=compute)
     company_part_marging_amount_current = fields.Monetary('Marge sur dispositif interne (€) projetée', store=True, compute=compute)
     company_part_marging_rate_current = fields.Float('Marge sur dispositif interne (%) projetée', store=True, compute=compute)
 
@@ -1107,7 +1155,7 @@ class projectAccountProject(models.Model):
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
             help="Les autres prestations peuvent être la facturation d'un séminaire dans nos locaux ou des frais de déplacement par exemple.")
-    other_part_cost_initial = fields.Monetary('Coût de revient HT de la part "autres presta." initial',
+    other_part_cost_initial = fields.Monetary('Coût de revient de la part "autres presta." initial',
             #TODO : reactiver lorsque les DM auront initialisé les données historiques
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True,
@@ -1120,7 +1168,7 @@ class projectAccountProject(models.Model):
             store=True,
             help="Les autres prestations peuvent être la facturation d'un séminaire dans nos locaux ou des frais de déplacement par exemple.")
     other_part_cost_current = fields.Monetary('Coût de revient HT de la part "autres presta" actuel', store=True, compute=compute)
-    other_part_cost_futur = fields.Monetary('Coût de revient HT de la part "autres presta" à venir', store=True, compute=compute)
+    other_part_cost_futur = fields.Monetary('Coût de revient de la part "autres presta." à venir', store=True, compute=compute)
     other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) projetée', store=True, compute=compute)
     other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) projetée', store=True, compute=compute)
 

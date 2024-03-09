@@ -10,5 +10,18 @@
 			<field name="padding">3</field>
 			<field name="implementation">standard</field>
 		</record>
+
+	    <record model="ir.cron" forcecreate="True" id="update_project_margin_projection">
+		<field name="name">Update project each monday morning to update margin projection</field>
+		<field name="model_id" ref="model_project_project"/>
+		<field name="state">code</field>
+		<field name="code">model.cron_update_margin_weekly()</field>
+		<field name="user_id" ref="base.user_root"/>
+		<field name="interval_number">1</field>
+		<field name="interval_type">weeks</field>
+		<field name="nextcall" eval="(datetime.now() + timedelta(days=7-datetime.today().weekday())).replace(hour=7, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')" />
+		<field name="numbercall">-1</field>
+		<field name="doall" eval="True" />
+	    </record>
 	</data>
 </odoo>
