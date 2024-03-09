@@ -29,9 +29,7 @@ class tazResIndustry(models.Model):
     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
 
 
-    def get_book_by_year(self, year):
-        begin_date = datetime.datetime(year, 1, 1) 
-        end_date = datetime.datetime(year, 12, 31)
+    def get_book_by_period(self, begin_date, end_date):
         project_ids = self.env['project.project'].search([
             ('stage_is_part_of_booking', '=', True), 
             ('partner_id', 'in', self.partner_ids.ids),
@@ -43,3 +41,11 @@ class tazResIndustry(models.Model):
         for project in project_ids:
             res += project.reporting_sum_company_outsource_code3_code_4
         return res
+
+    def get_number_of_opportunities(self):
+        project_count = self.env['project.project'].search_count([
+            ('partner_id', 'in', self.partner_ids.ids),
+            ('stage_is_part_of_booking', '=', False),
+            ('state', '=', 'before_launch'),
+        ])
+        return project_count

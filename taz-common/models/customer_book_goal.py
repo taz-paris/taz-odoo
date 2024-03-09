@@ -3,6 +3,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 import datetime 
+from dateutil.relativedelta import relativedelta
 
 class tazCustomerBookGoal(models.Model):
     _name = "taz.customer_book_goal"
@@ -39,20 +40,65 @@ class tazCustomerBookGoal(models.Model):
         for rec in self :
             rec.name =  "%s - %s" % (rec.reference_period or "", rec.industry_id.name or "") 
 
+    @api.model
+    def compute(self):
+        for record in self:
+            begin_year = datetime.datetime(int(record.reference_period), 1, 1) 
+            end_year = datetime.datetime(int(record.reference_period), 12, 31)
+            record.period_book = record.industry_id.get_book_by_period(begin_year, end_year)
+
+            record.period_delta = record.period_goal - record.period_book
+            if (record.period_goal and record.period_goal != 0.0):
+                record.period_ratio = (record.period_book / record.period_goal)*100.0
+            else :
+                record.period_ratio = 0.0
+            record.book_last_month = record.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today())
+            record.number_of_opportunities = record.industry_id.get_number_of_opportunities()
+
+
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
+        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities']
+        for data in res:
+            customer_book_goals = self.search(data['__domain']).read(COMPUTED_FIELD_LIST)
+
+            for computed_non_stored_field in COMPUTED_FIELD_LIST :
+                data[computed_non_stored_field] = 0.0
+                for book_goal in customer_book_goals:
+                    data[computed_non_stored_field] += book_goal[computed_non_stored_field]
+
+            data['period_ratio'] = 0.0
+            if data['period_goal'] != 0.0:
+                data['period_ratio'] = data['period_book']/data['period_goal'] * 100
+            
+            for computed_non_stored_field in COMPUTED_FIELD_LIST:
+                if computed_non_stored_field not in fields:
+                    del data[computed_non_stored_field]
+
+        return res
+
 
     industry_id = fields.Many2one('res.partner.industry', string="Compte", ondelete='restrict') #, required=True
+    rel_business_priority = fields.Selection(related='industry_id.business_priority', store=True)
     reference_period = fields.Selection(
         year_selection,
         string="Année de référence",
         default=year_default,
         )
     name = fields.Char("Compte - Période", compute=_compute_name)
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, readonly=True)
 
-    book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi du book")
+    book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des objectifs")
 
-    period_goal = fields.Float("Objectif annuel")
+    period_goal = fields.Monetary("Objectif annuel")
     #TODO remonter les valeur du customer_book_followup le plus réceent
 
+    period_book = fields.Monetary("Prise de commande à date", compute=compute)
+    period_delta = fields.Monetary("Delta objectif", compute=compute)
+    period_ratio = fields.Float("Ratio objectif", compute=compute)
+    book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
+    number_of_opportunities = fields.Integer("Nb avant-ventes", compute=compute)
 
 class tazCustomerBookFollowup(models.Model):
     _name = "taz.customer_book_followup"
@@ -66,7 +112,6 @@ class tazCustomerBookFollowup(models.Model):
     @api.model
     def landing(self):
         for record in self:
-            _logger.info('==> LANDING')
             record.period_landing = record.period_book + record.period_futur_book
             record.period_delta = record.period_goal - record.period_landing
             if (record.period_goal and record.period_goal != 0.0):
@@ -87,39 +132,33 @@ class tazCustomerBookFollowup(models.Model):
             if len(bgl)>0:
                 bg_last = bgl[0]
                 res['customer_book_goal_id'] = bg_last.id
-                res['period_book'] = industry_default.get_book_by_year(int(bg_last.reference_period))
+                begin_year = datetime.datetime(int(bg_last.reference_period), 1, 1) 
+                end_year = datetime.datetime(int(bg_last.reference_period), 12, 31)
+                res['period_book'] = industry_default.get_book_by_period(begin_year, end_year)
 
         _logger.info(res)
         return res
 
            
-
-    #@api.model
-    #def book_goal_id_default(self):
-    #    partner_default = self._context.get("default_partner_id")
-    #    if partner_default:
-    #        bgl = self.env['taz.customer_book_goal'].search([('partner_id', '=', partner_default)], order="reference_period desc")
-    #        if len(bgl)>0:
-    #            return bgl[0].id
-    #    return False 
-
     @api.depends('industry_id', 'date_update')
     def _compute_name(self):
         for record in self:
             record.name = "%s - %s" % (record.industry_id.name or "", record.date_update or "") 
 
     name = fields.Char("Nom", compute=_compute_name)
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, readonly=True)
 
     customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=False, ondelete='restrict')
-    period_goal = fields.Float("Montant obj", related="customer_book_goal_id.period_goal", store=True)
+    period_goal = fields.Monetary("Montant obj", related="customer_book_goal_id.period_goal", store=True)
     industry_id = fields.Many2one(related="customer_book_goal_id.industry_id", store=True)
+    rel_business_priority = fields.Selection(related='industry_id.business_priority', store=True)
 
     date_update = fields.Date("Date de valeur", readonly=True)
-    period_book = fields.Float("Book à date", readonly=True)
-    period_futur_book = fields.Float("Intime conviction", help="Montant que l'on estime pouvoir book en plus d'ici la fin de l'année.")
+    period_book = fields.Monetary("Prise de commande", readonly=True)
+    period_futur_book = fields.Monetary("Intime conviction", help="Montant HT que l'on estime pouvoir prendre en commande en plus d'ici la fin de l'année.")
 
-    period_landing = fields.Float("Atterissage annuel", compute=landing, store=True)
-    period_delta = fields.Float("Delta aterrissage vs objectif", compute=landing, store=True)
+    period_landing = fields.Monetary("Atterissage annuel", compute=landing, store=True)
+    period_delta = fields.Monetary("Delta aterrissage vs objectif", compute=landing, store=True)
     period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing, store=True)
     comment = fields.Text("Commentaire")
     #TODO : ajouter des champ de delta par rapport au mois précédent
