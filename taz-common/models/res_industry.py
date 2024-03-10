@@ -28,7 +28,7 @@ class tazResIndustry(models.Model):
 
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
-    business_partner_company_ids = fields.Many2many('res.company', string="Galaxie")
+    business_partner_company_ids = fields.Many2many('res.partner', domain=[('ref_company_ids', '!=', False)], string="Galaxie")
 
 
     def get_book_by_period(self, begin_date, end_date):

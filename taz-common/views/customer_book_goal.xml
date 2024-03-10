@@ -56,7 +56,8 @@
 				  <button colspan="2" type="object" name="action_open_project_opportunities" icon="fa-eye" string="Voir opportunités" title="open_project_opportunitie"/>
 			  </group>
 		  </group>
-		  <field name="book_followup_ids" />
+		  <label for="book_followup_ids" string="Photos des objectifs annuels"/>
+		  <field name="book_followup_ids" context="{'default_customer_book_goal_id': active_id}"/>
 	    </sheet>
         </form>
       </field>
@@ -93,7 +94,7 @@
       <field name="arch" type="xml">
 	 <tree editable="top" create="true">
 	      <field name="industry_id" optional="hide"/>
-	      <field name="customer_book_goal_id" force_save="1" optional="show" />
+	      <field name="customer_book_goal_id" force_save="1" optional="show" attrs="{'readonly': [('id','!=', False)]}"/>
 	      <field name="date_update" optional="show"/>
 	      <field name="period_book" force_save="1" optional="show"/>
 	      <field name="period_futur_book" optional="show"/>
@@ -163,25 +164,25 @@
         </field>
     </record>
     <record id="taz-common.customer_book_goal_action" model="ir.actions.act_window">
-        <field name="name">Objectif commercial</field>
+        <field name="name">Objectifs commerciaux annuels</field>
         <field name="res_model">taz.customer_book_goal</field>
         <field name="view_mode">tree,form,pivot,graph</field>
 	<field name="context">{'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}</field>
     </record>
     <record id="taz-common.customer_book_followup_action" model="ir.actions.act_window">
-        <field name="name">Suivi objectif commercial</field>
+        <field name="name">Photos des objectifs commerciaux</field>
         <field name="res_model">taz.customer_book_followup</field>
         <field name="view_mode">tree,form,pivot,graph</field>
 	<field name="context">{'search_default_filter_this_year' : True}</field>
     </record>
 
     <menuitem name="Objectifs commerciaux" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
-    <menuitem name="Suivi des objectifs commerciaux" sequence="10" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
-    <menuitem name="Objectifs commerciaux" sequence="20"  id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
+    <menuitem name="Photo des objectifs commerciaux" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
+    <menuitem name="Objectifs commerciaux annuels" sequence="20"  id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
 
     <menuitem id="taz-common.res_partner_industry_menu" name="Comptes (ex BD)"
         action="base.res_partner_industry_action" parent="taz-common.customer_book"
-        sequence="90"/>
+        sequence="10"/>
 
   </data>
 </odoo>

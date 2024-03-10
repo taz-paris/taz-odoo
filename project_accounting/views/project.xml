@@ -41,6 +41,7 @@
                         <filter string="Niveau de priorité du compte" name="groupby_rel_industry_business_priority" context="{'group_by': 'rel_industry_business_priority'}"/>
                         <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
 			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+			<filter string="Nom de projet" name="project_name" context="{'group_by': 'name'}" />
                     </group>
                 </search>
             </field>

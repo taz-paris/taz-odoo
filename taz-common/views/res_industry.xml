@@ -40,8 +40,8 @@
 							  <field name="number_of_opportunities" optional="show" sum="Total"/>
 							</tree> 
 						  </field>
-						  <label for="customer_book_followup_ids" string="Suivi des objectifs annuels"/>
-						  <field name="customer_book_followup_ids" string="Suivi des objectifs annuels" context="{'default_industry_id': active_id}">
+						  <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>
+						  <field name="customer_book_followup_ids" context="{'default_industry_id': active_id}">
 							 <tree editable="top" create="true">
 							      <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
 							      <field name="customer_book_goal_id" force_save="1" optional="hide" readonly="1"/>
@@ -106,6 +106,11 @@
 	    <field name="inherit_id" ref="base.res_partner_industry_view_search"/>
             <field name="arch" type="xml">
 		<xpath expr="//filter[@name='inactive']" position="after">
+            	    <field name="user_id" string="Responsable du compte (nom de famille)"/>
+            	    <field name="challenger_id" string="Compte challenger (nom de famille)"/>
+            	    <field name="contributor_ids" string="Contributeurs (nom de famille)"/>
+		    <field name="business_partner_company_ids"/>
+            	    <field name="partner_ids" />
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
             	    <filter name="not_tracked" string="Comptes ni prioritaires, ni actifs" domain="[('business_priority', 'not in', ['priority_target', 'active'])]"/>
@@ -115,6 +120,8 @@
 		    <separator/>
                     <group expand="0" string="Group By">
                         <filter string="Niveau de priorité" name="group_business_priority" context="{'group_by': 'business_priority'}"/>
+                        <filter string="Responsable du compte" name="group_user_id" context="{'group_by': 'user_id'}"/>
+                        <filter string="Compte challenger" name="group_challenger_id" context="{'group_by': 'challenger_id'}"/>
                     </group>
 		</xpath>
             </field>

@@ -171,6 +171,9 @@ class tazCustomerBookFollowup(models.Model):
 
         res['date_update'] = datetime.date.today()
 
+        customer_book_goal = False
+
+        #Utilisé pour le formulaire du res.parent.industry
         industry_default_id = self._context.get("default_industry_id")
         if industry_default_id:
             industry_default = self.env['res.partner.industry'].search([('id', '=', industry_default_id)])[0]
@@ -178,9 +181,18 @@ class tazCustomerBookFollowup(models.Model):
             if len(bgl)>0:
                 bg_last = bgl[0]
                 res['customer_book_goal_id'] = bg_last.id
-                begin_year = datetime.datetime(int(bg_last.reference_period), 1, 1) 
-                end_year = datetime.datetime(int(bg_last.reference_period), 12, 31)
-                res['period_book'], period_project_ids = industry_default.get_book_by_period(begin_year, end_year)
+                customer_book_goal = bg_last
+
+        #Utilisé pour le formulaire du taz.customer_book_goal
+        default_customer_book_goal_id = self._context.get("default_customer_book_goal_id")
+        if default_customer_book_goal_id:
+            res['customer_book_goal_id']  = default_customer_book_goal_id
+            customer_book_goal = self.env['taz.customer_book_goal'].search([('id', '=', default_customer_book_goal_id)])[0]
+
+        if customer_book_goal:
+            begin_year = datetime.datetime(int(customer_book_goal.reference_period), 1, 1) 
+            end_year = datetime.datetime(int(customer_book_goal.reference_period), 12, 31)
+            res['period_book'], period_project_ids = customer_book_goal.industry_id.get_book_by_period(begin_year, end_year)
 
         _logger.info(res)
         return res
