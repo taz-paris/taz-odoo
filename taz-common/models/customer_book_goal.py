@@ -45,15 +45,15 @@ class tazCustomerBookGoal(models.Model):
         for record in self:
             begin_year = datetime.datetime(int(record.reference_period), 1, 1) 
             end_year = datetime.datetime(int(record.reference_period), 12, 31)
-            record.period_book = record.industry_id.get_book_by_period(begin_year, end_year)
+            record.period_book, period_project_ids = record.industry_id.get_book_by_period(begin_year, end_year)
 
             record.period_delta = record.period_goal - record.period_book
             if (record.period_goal and record.period_goal != 0.0):
                 record.period_ratio = (record.period_book / record.period_goal)*100.0
             else :
                 record.period_ratio = 0.0
-            record.book_last_month = record.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today())
-            record.number_of_opportunities = record.industry_id.get_number_of_opportunities()
+            record.book_last_month, last_month_project_ids = record.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today())
+            record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_number_of_opportunities()
 
 
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -78,12 +78,58 @@ class tazCustomerBookGoal(models.Model):
 
         return res
 
+    def action_open_project_opportunities(self):
+        number_of_opportunities, opportunities_project_ids = self.industry_id.get_number_of_opportunities()
+        view_id = self.env.ref("project_accounting.project_tree")
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Avant-ventes du compte %s' % (self.industry_id.name),
+                'res_model': 'project.project',
+                'view_type': 'tree',
+                'view_mode': 'tree',
+                'view_id': view_id.id,
+                'target': 'current',
+                'domain': [('id', 'in', opportunities_project_ids.ids)],
+                'context' : {'no_create' : True},
+            }
+
+    def action_open_project_booked_last_month(self):
+        book_last_month, last_month_project_ids = self.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today())
+        view_id = self.env.ref("project_accounting.project_tree")
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Prise de commande des 31 derniers jours du compte %s' % (self.industry_id.name),
+                'res_model': 'project.project',
+                'view_type': 'tree',
+                'view_mode': 'tree',
+                'view_id': view_id.id,
+                'target': 'current',
+                'domain': [('id', 'in', last_month_project_ids.ids)],
+                'context' : {'no_create' : True},
+            }
+
+    def action_open_project_booked_this_year(self):
+        begin_year = datetime.datetime(int(self.reference_period), 1, 1)
+        end_year = datetime.datetime(int(self.reference_period), 12, 31)
+        period_book, period_project_ids = self.industry_id.get_book_by_period(begin_year, end_year)
+        view_id = self.env.ref("project_accounting.project_tree")
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Prise de commande sur l\'année %s du compte %s' % (self.reference_period, self.industry_id.name),
+                'res_model': 'project.project',
+                'view_type': 'tree',
+                'view_mode': 'tree',
+                'view_id': view_id.id,
+                'target': 'current',
+                'domain': [('id', 'in', period_project_ids.ids)],
+                'context' : {'no_create' : True},
+            }
 
     industry_id = fields.Many2one('res.partner.industry', string="Compte", ondelete='restrict') #, required=True
     rel_business_priority = fields.Selection(related='industry_id.business_priority', store=True)
     reference_period = fields.Selection(
         year_selection,
-        string="Année de référence",
+        string="Année",
         default=year_default,
         )
     name = fields.Char("Compte - Période", compute=_compute_name)
@@ -94,7 +140,7 @@ class tazCustomerBookGoal(models.Model):
     period_goal = fields.Monetary("Objectif annuel")
     #TODO remonter les valeur du customer_book_followup le plus réceent
 
-    period_book = fields.Monetary("Prise de commande à date", compute=compute)
+    period_book = fields.Monetary("Commande à date", compute=compute)
     period_delta = fields.Monetary("Delta objectif", compute=compute)
     period_ratio = fields.Float("Ratio objectif", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
@@ -134,7 +180,7 @@ class tazCustomerBookFollowup(models.Model):
                 res['customer_book_goal_id'] = bg_last.id
                 begin_year = datetime.datetime(int(bg_last.reference_period), 1, 1) 
                 end_year = datetime.datetime(int(bg_last.reference_period), 12, 31)
-                res['period_book'] = industry_default.get_book_by_period(begin_year, end_year)
+                res['period_book'], period_project_ids = industry_default.get_book_by_period(begin_year, end_year)
 
         _logger.info(res)
         return res

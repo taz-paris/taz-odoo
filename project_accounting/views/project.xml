@@ -391,6 +391,8 @@
 							    <field name="amount"/>
 							    <field name="billed_amount"/>
 							    <field name="payed_amount"/>
+							    <field name="stage_is_part_of_booking"/>
+							    <field name="state"/>
 							</group>
 							<group>
 					    			<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
