@@ -90,10 +90,12 @@
 			<field name="user_id"  optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
 			<field name="challenger_id"  optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
 			<field name="contributor_ids"  optional="show" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
-			<field name="business_priority" optional="show"/>
+			<field name="business_priority" optional="hide"/>
 			<field name="account_plan_url" widget="url" optional="hide"/>
 			<field name="partner_ids" optional="show" widget="many2many_tags"/>
 			<field name="business_partner_company_ids" widget="many2many_tags"/>
+			<field name="account_plan_url" invisible="1"/>
+		  	<button type="object" name="action_open_account_plan_url" icon="fa-eye" string="Plan de compte" title="open_project_opportunitie" attrs="{'invisible': [('account_plan_url','=', False)]}"/>
 		</field>
             </field>
         </record>
@@ -107,6 +109,9 @@
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
             	    <filter name="not_tracked" string="Comptes ni prioritaires, ni actifs" domain="[('business_priority', 'not in', ['priority_target', 'active'])]"/>
+		    <separator/>
+            	    <filter name="no_account_plan_url" string="Sans plan de compte" domain="[('account_plan_url', '=', False)]"/>
+            	    <filter name="with_account_plan_url" string="Avec plan de compte" domain="[('account_plan_url', '!=', False)]"/>
 		    <separator/>
                     <group expand="0" string="Group By">
                         <filter string="Niveau de priorité" name="group_business_priority" context="{'group_by': 'business_priority'}"/>

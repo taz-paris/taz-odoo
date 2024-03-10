@@ -6,18 +6,59 @@
       <field name="model">taz.customer_book_goal</field>
       <field name="arch" type="xml">
 	 <tree editable="top"  expand="1">
-		  <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
-		  <field name="reference_period" optional="show"/>
+		  <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly': [('id','!=', False)]}"/>
+		  <field name="reference_period" optional="hide"/>
 		  <field name="period_goal" optional="show" sum="Total"/>
 		  <field name="period_book" optional="show" sum="Total"/>
-		  <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" />
+		  <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="open_project_booked_this_year"/>
 		  <field name="period_delta" optional="show" sum="Total"/>
 		  <field name="period_ratio" optional="show"  widget="progressbar"/>
 		  <field name="book_last_month" optional="show" string="Commande J-31" sum="Total"/>
-		  <button type="object" name="action_open_project_booked_last_month" icon="fa-eye"/>
-		  <field name="number_of_opportunities" optional="show" sum="Total"/>
-		  <button type="object" name="action_open_project_opportunities" icon="fa-eye"/>
+		  <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
+		  <field name="number_of_opportunities" optional="show" string="Nb AVT" sum="Total"/>
+		  <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
+		  <field name="comment" optional="show" widget="text"/>
         </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="taz-common.customer_book_goal_form">
+      <field name="name">Objectif de book</field>
+      <field name="model">taz.customer_book_goal</field>
+      <field name="arch" type="xml">
+	<form>
+	    <sheet>
+		  <group>
+			<group>
+		  		<field name="industry_id" required="1" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly': [('id','!=', False)]}"/>
+				<field name="period_goal" sum="Total"/>
+			</group>
+			<group col="2">
+		 		<field name="reference_period" />
+		  		<field name="comment" widget="text"/>
+			</group>
+		  </group>
+		  <group col="4">
+			  <group>
+				  <field name="period_book" sum="Total"/>
+				  <button colspan="2" type="object" name="action_open_project_booked_this_year" icon="fa-eye" string="Voir commandes" title="open_project_booked_this_year"/>
+			  </group>
+			  <group>
+				  <field name="period_delta" sum="Total"/>
+				  <field name="period_ratio" widget="progressbar"/>
+			  </group>
+			  <group>
+				  <field name="book_last_month" string="Commande J-31" sum="Total"/>
+				  <button colspan="2" type="object" name="action_open_project_booked_last_month" icon="fa-eye" string="Voir commandes" title="open_project_booked_last_month"/>
+			  </group>
+			  <group>
+				  <field name="number_of_opportunities" string="Nb AVT" sum="Total"/>
+				  <button colspan="2" type="object" name="action_open_project_opportunities" icon="fa-eye" string="Voir opportunités" title="open_project_opportunitie"/>
+			  </group>
+		  </group>
+		  <field name="book_followup_ids" />
+	    </sheet>
+        </form>
       </field>
     </record>
 
@@ -30,6 +71,8 @@
 		    <field name="industry_id" string="Compte (ex BD)"/>
 		    <separator/>
 		    <filter name="filter_this_year" string="Objectifs de l'année en cours" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
+		    <separator/>
+		    <filter name="filter_my_customer_book_goal" string="Objectifs de mes comptes" domain="['|', '|', ('industry_id.contributor_ids', 'in', uid), ('industry_id.user_id', '=', uid), ('industry_id.challenger_id', '=', uid)]"/>
 		    <separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>

@@ -138,13 +138,13 @@ class tazCustomerBookGoal(models.Model):
     book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des objectifs")
 
     period_goal = fields.Monetary("Objectif annuel")
-    #TODO remonter les valeur du customer_book_followup le plus réceent
 
     period_book = fields.Monetary("Commande à date", compute=compute)
     period_delta = fields.Monetary("Delta objectif", compute=compute)
     period_ratio = fields.Float("Ratio objectif", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
-    number_of_opportunities = fields.Integer("Nb avant-ventes", compute=compute)
+    number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
+    comment = fields.Text("Commentaire pour cette année")
 
 class tazCustomerBookFollowup(models.Model):
     _name = "taz.customer_book_followup"
@@ -207,5 +207,3 @@ class tazCustomerBookFollowup(models.Model):
     period_delta = fields.Monetary("Delta aterrissage vs objectif", compute=landing, store=True)
     period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing, store=True)
     comment = fields.Text("Commentaire")
-    #TODO : ajouter des champ de delta par rapport au mois précédent
-

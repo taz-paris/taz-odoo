@@ -7,7 +7,8 @@
 			<form string="Dashboard">
 				<board style="1-1">
 					<column>
-						<action string="Mes objectifs de book annuels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
+						<action string="Mes objectifs de book annuels personnels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
+						<action string="Les objectifs de prise de commande des comptes auxquels je contribue" name="%(taz-common.customer_book_goal_action)d" context="{'search_default_filter_my_customer_book_goal' : 1, 'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}"/>
 						<action string="Mes projets en cours" name="%(project_accounting.project_action)d" context="{'search_default_own_projects':1, 'search_default_groupby_stage': 1}" domain="[('stage_id.state', '!=', 'closed')]"/> 
 					</column>
 					<column>

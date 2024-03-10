@@ -19,7 +19,7 @@ class tazResIndustry(models.Model):
     challenger_id = fields.Many2one('res.users', string='Compte challenger')
     contributor_ids = fields.Many2many('res.users', string='Contributeurs')
     partner_ids = fields.One2many('res.partner', 'industry_id', string="Entreprises", domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
-    account_plan_url = fields.Char("URL vers le PPTX du plan de compte")
+    account_plan_url = fields.Char("Lien vers le dossier du plan de compte")
     business_priority = fields.Selection([
          ('priority_target', '1-Compte prioritaire'),
          ('active', '2-Compte actif'),
@@ -51,3 +51,13 @@ class tazResIndustry(models.Model):
             ('state', '=', 'before_launch'),
         ])
         return len(project_ids), project_ids
+
+    def action_open_account_plan_url(self):
+        if self.account_plan_url:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': self.account_plan_url,
+                'target': 'new',
+            }
+        else :
+            raise ValidationError(_("Ce projet n'est lié à aucun plan de compte : impossible de l'ouvrir."))
