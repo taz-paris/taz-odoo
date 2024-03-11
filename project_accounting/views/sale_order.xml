@@ -147,6 +147,7 @@
 		<field name="name" position="replace">
 		  	<field name="id" widget="open_tab"/>
 			<field name="client_order_ref"/>
+			<field name="rel_project_ids" optional="show" widget="many2many_tags"/>
 		</field> 
             </field>
         </record>
@@ -161,6 +162,7 @@
 		</field> 
 		<field name="name" position="replace">
 			<field name="client_order_ref"/>
+		  	<field name="rel_project_ids" optional="show" widget="many2many_tags"/>
 		</field> 
             </field>
         </record>

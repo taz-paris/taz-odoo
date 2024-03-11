@@ -150,6 +150,7 @@
         <field name="arch" type="xml">
             <field name="name" position="before">
 		  <field name="id" widget="open_tab"/>
+		  <field name="rel_project_ids" optional="show" widget="many2many_tags"/>
             </field>
         </field>
     </record>
@@ -161,6 +162,7 @@
         <field name="arch" type="xml">
             <field name="name" position="before">
 		  <field name="id" widget="open_tab"/>
+		  <field name="rel_project_ids" optional="show" widget="many2many_tags"/>
             </field>
         </field>
     </record>
