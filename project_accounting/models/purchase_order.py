@@ -112,7 +112,7 @@ class projectAccountingPurchaseOrder(models.Model):
     def comptute_project_ids(self):
         for rec in self:
             project_ids_res = []
-            for line in self.order_line:
+            for line in rec.order_line:
                 for p in line.rel_project_ids:
                     if p.id not in project_ids_res:
                         project_ids_res.append(p.id)

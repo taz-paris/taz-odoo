@@ -653,7 +653,7 @@ class naptaAnalyticLine(models.Model):
             #TODO : surcharger la méthode de recherche pour retourner une erreur si on cherche sur le champ napta_id sans avoir valorisé category avec une seule valeur ?
     ]
     napta_id = fields.Char("Napta ID", copy=False)
-    is_timesheet_closed_on_napta = fields.Boolean("Feuille de temps validée sur Napta")
+    is_timesheet_closed_on_napta = fields.Boolean("Validée sur Napta")
 
 
 
@@ -835,6 +835,9 @@ class naptaHrContract(models.Model):
         BEGIN_OF_TIME = "2023-01-01"
 
         for napta_id, user_history in user_history_list.items():
+            #if int(napta_id) != 1237:
+            #    continue
+
             user_napta_id = user_history['attributes']['user_id']
             if user_napta_id in EXCLUDED_USERLIST:
                 continue
@@ -880,7 +883,6 @@ class naptaHrContract(models.Model):
                     'is_daily_cost_overridden' : False,
                     'daily_cost' : 0.0,
                 }
-
             ########## Gestion des surcharges de CJM individuel par rapport au grade
 
             job_ids = self.env['hr.job'].search([('napta_id', '=', user_history['attributes']['user_position_id'])])
@@ -889,8 +891,9 @@ class naptaHrContract(models.Model):
             if user_history['attributes']['end_date'] != None :
                 napta_end_date = datetime.datetime.strptime(user_history['attributes']['end_date'], '%Y-%m-%d').date()
 
+
             override = False
-            if job_ids :
+            if job_ids and user_history['attributes']['daily_cost'] != None:
                 cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)], order="begin_date asc")
                 if not cost_lines :
                     override = True
@@ -902,7 +905,7 @@ class naptaHrContract(models.Model):
                         override = True
                 
                 for cost_line in cost_lines:
-                    if napta_end_date and cost_line.begin_date < napta_end_date:
+                    if napta_end_date and napta_end_date < cost_line.begin_date :
                         continue
                     if cost_line.end_date and cost_line.end_date < napta_start_date:
                         continue
@@ -912,11 +915,15 @@ class naptaHrContract(models.Model):
                         break
              
             if override:
-                _logger.info('      > Surchage du daily_cost au niveau de contrat pour le user avec le napta_id= %s' % str(user_history['attributes']['user_id']))
+                _logger.info('      > Surchage du daily_cost au niveau de contrat napta_id=%s pour le user avec le napta_id= %s : %s' % (str(napta_id), (str(user_history['attributes']['user_id'])), str(user_history['attributes'])))
                 dic['is_daily_cost_overridden'] = True
                 dic['daily_cost'] = user_history['attributes']['daily_cost']
                 
-            create_update_odoo(self.env, 'hr.contract', dic)
+            create_update_odoo(self.env, 'hr.contract', dic, context_add={'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
+            #TODO : les attributs is_daily_cost_overridden et daily_cost ne doivent pas pouvoir changer si la clôture comptable est passée
+                    # il faut créer un controle lors de l'écriture/création des objects hr.contract côté Odoo
+                    # ... mais ça ne doit pas faire planter toute la synchro Napta => donc il faudrait catcher l'exception 
+                    # ... à voir si on fait ces évolutions si jamais on décide que c'est TF qui pousse les CJM sur Napta
 
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
     #TODO : intégrer la date de sortie du napta user à la fin du dernier contrat Odoo

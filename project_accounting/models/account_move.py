@@ -46,7 +46,7 @@ class projectAccountingAccountMove(models.Model):
     def comptute_project_ids(self):
         for rec in self:
             project_ids_res = []
-            for line in self.line_ids:
+            for line in rec.line_ids:
                 for p in line.rel_project_ids:
                     if p.id not in project_ids_res:
                         project_ids_res.append(p.id)
