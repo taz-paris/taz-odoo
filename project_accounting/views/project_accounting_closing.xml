@@ -188,6 +188,26 @@
 		</field>
 	</record>
 
+	<record id="project_accounting.project_accounting_closing_graph" model="ir.ui.view">
+	      <field name="name">project.accounting_closing.graph</field>
+	      <field name="model">project.accounting_closing</field>
+	      <field name="arch" type="xml">
+		<graph type="line" string="Clôtures comptables">
+		    <field name="closing_date" interval="month"/>
+                       <field name="invoice_period_amount" type="measure"/>
+                        <field name="purchase_period_amount" type="measure"/>
+                        <field name="production_period_amount" type="measure"/>
+                        <field name="production_destocking" type="measure"/>
+                        <field name="production_balance" type="measure"/>
+                        <field name="internal_margin_amount" type="measure"/>
+                        <field name="fnp_period_amount" type="measure"/>
+                        <field name="fae_period_amount" type="measure"/>
+                        <field name="pca_period_amount" type="measure"/>
+                        <field name="cca_period_amount" type="measure"/>
+		</graph>
+	      </field>
+    </record>
+
         <record id="view_project_accounting_closing_search" model="ir.ui.view">
             <field name="name">project.accounting_closing</field>
             <field name="model">project.accounting_closing</field>
@@ -220,7 +240,7 @@
         <record id="project_accounting_closing_action" model="ir.actions.act_window">
                 <field name="name">Clôtures comptables par projet</field>
                 <field name="res_model">project.accounting_closing</field>
-                <field name="view_mode">tree,form,pivot</field>
+                <field name="view_mode">tree,form,pivot,graph</field>
 	</record>
 
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm" />

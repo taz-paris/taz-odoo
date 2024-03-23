@@ -458,7 +458,7 @@ class naptaProject(models.Model):
             
 
     def create_update_napta(self):
-        #_logger.info('---- Create or update Napta project')
+        _logger.info('---- Create or update Napta project')
         client = ClientRestNapta(self.env)
         for rec in self:
             rec.partner_id.create_update_napta()
@@ -1147,7 +1147,7 @@ def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=Fa
             env.cr.commit()
         else:
             odoo_object = False
-            _logger.info("Objet existant sur Napta mais non créée sur Odoo dic = %s" % (dic))
+            _logger.info("Objet de type %s existant sur Napta mais non créée sur Odoo dic = %s" % (odoo_model_name, dic))
 
     return odoo_object
 

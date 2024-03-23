@@ -46,3 +46,7 @@ class staffingAnalyticLine(models.Model):
             rec.project_id.has_to_be_recomputed = True
             if self.env.context.get('do_not_update_project') != True:
                 self.env['project.project'].recompute_if_has_to_be_recomputed()
+
+
+
+    date_end = fields.Date("Date de fin")

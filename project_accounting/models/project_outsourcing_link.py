@@ -157,6 +157,10 @@ class projectOutsourcingLink(models.Model):
             if rec.outsource_part_amount_current != 0 :
                 rec.marging_rate_current = rec.marging_amount_current / rec.outsource_part_amount_current * 100
 
+            rec.markup_rate_current = 0.0
+            if rec.order_sum_purchase_order_lines != 0 :
+                rec.markup_rate_current = rec.marging_amount_current / rec.order_sum_purchase_order_lines * 100
+
             subtotal, total, paid = rec.compute_account_move_total_outsourcing_link()
             rec.sum_account_move_lines = subtotal
             rec.sum_account_move_lines_with_tax = total
@@ -190,8 +194,9 @@ class projectOutsourcingLink(models.Model):
     sum_account_move_lines_with_tax = fields.Monetary('Montant TTC déjà facturé', compute=compute, store=True)
 
     outsource_part_amount_current = fields.Monetary('Valorisation HT de la part sous-traitée', compute=compute, store=True)
-    marging_amount_current = fields.Monetary('Marge sur la part sous-traitée (€) actuelle', compute=compute, store=True)
-    marging_rate_current = fields.Float('Marge sur la part sous-traitée (%) actuelle', compute=compute, store=True)
+    marging_amount_current = fields.Monetary('Marge sur la part sous-traitée (€)', compute=compute, store=True)
+    marging_rate_current = fields.Float('Marge sur la part sous-traitée (%)', compute=compute, store=True, help="Taux de marge = marge € / prix de vente au client € * 100")
+    markup_rate_current = fields.Float('Taux de marque sur la part sous-traitée', compute=compute, store=True, help="Taux de marque = marge € / prix d'achat au fournisseur € * 100")
 
     order_direct_payment_done = fields.Monetary('Somme HT factures en paiement direct validées', compute=compute, store=True)
     order_direct_payment_done_detail = fields.Text('Détail des factures en paiement direct validées', compute=compute, store=True)

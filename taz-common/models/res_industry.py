@@ -32,6 +32,9 @@ class tazResIndustry(models.Model):
 
 
     def get_book_by_period(self, begin_date, end_date):
+        #TODO si 1/1/2024 00:00:00 => le projet n'est pas compté sur 2024
+        #   > problème de conversion à la date GMT ?
+        #   ATTENTION : ça ne sort pas non plus sur le TCD => bug coeur Odoo ?
         project_ids = self.env['project.project'].search([
             ('stage_is_part_of_booking', '=', True), 
             ('partner_id', 'in', self.partner_ids.ids),

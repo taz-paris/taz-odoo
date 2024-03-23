@@ -238,7 +238,8 @@ class projectAccountProject(models.Model):
     state_last_change_date = fields.Date('Date de dernier changement de statut', help="Utilisé pour le filtre Nouveautés de la semaine")
     date_win_loose = fields.Datetime("Date passage gagné ou perdu",
                 help="Date de la dernière fois que le projet a basculé dans le groupe de statuts {3, 4} ou en perdu",
-                readonly=True
+                readonly=True,
+                tracking=True,
                 )
     color_rel = fields.Selection(related="stage_id.color", store=True)
     rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id', store=True)
@@ -353,16 +354,25 @@ class projectAccountProject(models.Model):
             else:
                 rec.outsource_part_marging_rate_initial = 0.0 
  
+            if rec.outsource_part_cost_initial != 0 :
+                rec.outsource_part_markup_rate_initial = rec.outsource_part_marging_amount_initial / rec.outsource_part_cost_initial * 100
+            else:
+                rec.outsource_part_markup_rate_initial = 0.0
+
             rec.outsource_part_amount_current = outsource_part_amount_current
             rec.outsource_part_cost_current = outsource_part_cost_current
             rec.outsource_part_cost_futur = outsource_part_cost_futur
-
 
             rec.outsource_part_marging_amount_current =  rec.outsource_part_amount_current - rec.outsource_part_cost_current - rec.outsource_part_cost_futur
             if rec.outsource_part_amount_current != 0 :
                 rec.outsource_part_marging_rate_current = rec.outsource_part_marging_amount_current / rec.outsource_part_amount_current * 100
             else :
                 rec.outsource_part_marging_rate_current = 0.0 
+
+            if  (rec.outsource_part_cost_current + rec.outsource_part_cost_futur) != 0:
+                rec.outsource_part_markup_rate_current = rec.outsource_part_marging_amount_current / (rec.outsource_part_cost_current + rec.outsource_part_cost_futur) * 100
+            else :
+                rec.outsource_part_markup_rate_current = 0.0
 
             ######## COSOURCE PART
             rec.cosource_part_marging_amount_initial =  rec.cosource_part_amount_initial - rec.cosource_part_cost_initial
@@ -1106,7 +1116,8 @@ class projectAccountProject(models.Model):
             tracking=True,
             )
     outsource_part_marging_amount_initial = fields.Monetary('Marge sur la part S/T (€) initiale', store=True, compute=compute)
-    outsource_part_marging_rate_initial = fields.Float('Marge sur la part S/T (%) initiale', store=True, compute=compute)
+    outsource_part_marging_rate_initial = fields.Float('Marge sur la part S/T (%) initiale', store=True, compute=compute, help="Taux de marge = marge € / prix de vente au client € * 100")
+    outsource_part_markup_rate_initial = fields.Float('Taux de marque sur la part S/T initiale', store=True, compute=compute, help="Taux de marque = marge € / prix d'achat au fournisseur € * 100")
 
     outsource_part_amount_current = fields.Monetary('Montant HT de revente de la part S/T actuel', store=True, compute=compute)
     outsource_part_cost_current = fields.Monetary('Coût de revient HT de la part S/T actuel', 
@@ -1117,7 +1128,8 @@ class projectAccountProject(models.Model):
             store=True, compute=compute)
     outsourcing_link_purchase_order_with_draft = fields.Monetary('Somme de toutes les lignes d\'achats', store=True, compute=compute)
     outsource_part_marging_amount_current = fields.Monetary('Marge sur la part S/T (€) projetée', store=True, compute=compute)
-    outsource_part_marging_rate_current = fields.Float('Marge sur la part S/T (%) projetée', store=True, compute=compute)
+    outsource_part_marging_rate_current = fields.Float('Marge sur la part S/T (%) projetée', store=True, compute=compute, help="Taux de marge = marge € / prix de vente au client € * 100")
+    outsource_part_markup_rate_current = fields.Float('Taux de marque sur la part S/T projetée', store=True, compute=compute, help="Taux de marque = marge € / prix d'achat au fournisseur € * 100")
 
     project_outsourcing_link_ids = fields.One2many('project.outsourcing.link', 'project_id')
 

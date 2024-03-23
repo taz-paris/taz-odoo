@@ -220,6 +220,7 @@
                                                                 <field name="outsource_part_cost_futur"/>
                                                                 <field name="outsource_part_marging_amount_current"/>
                                                                 <field name="outsource_part_marging_rate_current" widget="progressbar"/>
+                                                                <field name="outsource_part_markup_rate_current" widget="progressbar"/>
                                                         </group>
                                                 	<group string="Autres prestations (exemple : séminaire dans nos locaux, frais de déplacement, etc.)" attrs="{'invisible' : [('other_part_amount_current', '=', 0), ('other_part_cost_current', '=', 0), ('other_part_cost_futur', '=', 0)]}">
                                                                 <field name="other_part_amount_current" force_save="1"/>
@@ -253,6 +254,7 @@
 								<field name="outsource_part_cost_initial"/>
 								<field name="outsource_part_marging_amount_initial"/>
 								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
+								<field name="outsource_part_markup_rate_initial" widget="progressbar"/>
 							</group>  
 							<group string="Autres prestations (exemple : séminaire dans nos locaux, frais de déplacement, etc.)">
 								<field name="other_part_amount_initial"/>

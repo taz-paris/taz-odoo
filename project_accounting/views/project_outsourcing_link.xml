@@ -37,6 +37,7 @@
 					<field name="outsource_part_amount_current"/>
 					<field name="marging_amount_current" />
 					<field name="marging_rate_current" widget="progressbar" />
+					<field name="markup_rate_current" widget="progressbar" />
 					<button type="object" name="action_open_purchase_order_lines" string="Voir les lignes de commande"/>
 					<button type="object" name="create_purchase_order" string="Créer commande fournisseur"/>
 				</group>
