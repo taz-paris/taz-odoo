@@ -345,7 +345,11 @@ class ClientRestNapta:
                 f.write(response.url)
                 json.dump(response_json, f, indent=4)
 
-            last_page_number = math.ceil(response_json['meta']['count'] / page_size)
+            if 'meta' in response_json.keys():
+                last_page_number = math.ceil(response_json['meta']['count'] / page_size)
+            else :
+                last_page_number = 1
+
             page_number = page_number + 1
         return {'data' : response_list, 'included' : response_list_included}
 
