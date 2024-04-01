@@ -577,6 +577,7 @@ class naptaPartner(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID", copy=False)
+    first_contract_date = fields.Date(compute=False) #Le modèle Napta permet de renseigner une date d'embauche décorélée de la date de début du premier contrat (ie du premier évènement)
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta customer')
@@ -648,6 +649,7 @@ class naptaEmployee(models.Model):
     _inherit = 'hr.employee'
     #Dans le modele employee, le napta_id est un related field car Napta ne différencie par l'objet employé de l'objet utilisateur
     napta_id = fields.Char("Napta ID", related='user_id.napta_id', store=True)
+
 
 class naptaAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -792,12 +794,26 @@ class naptaResUsers(models.Model):
             if odoo_user.active :
                 if len(employee_list) == 0:
                     odoo_user.action_create_employee()
-                    _logger.info("Création de l'employée depuis l'utilsiateur avec le login=%s" % odoo_user.login)
+                    _logger.info("Création de l'employée depuis l'utilisateur avec le login=%s" % odoo_user.login)
 
             for employee in employee_list:
+                if user['attributes']['hiring_date'] :
+                    hiring_date = user['attributes']['hiring_date']
+                else :
+                    hiring_date = False
+                if str(employee.first_contract_date) != str(hiring_date):
+                    employee.first_contract_date = hiring_date
+                    _logger.info("L'employé associé à l'utilisateur avec le login=%s a maintenant l'attribut date d'arrivée=%s" % (odoo_user.login, str(employee.first_contract_date)))
+                if user['attributes']['leaving_date'] :
+                    leaving_date = user['attributes']['leaving_date']
+                else :
+                    leaving_date = False
+                if str(employee.departure_date) != str(leaving_date):
+                    employee.departure_date = leaving_date
+                    _logger.info("L'employé associé à l'utilisateur avec le login=%s a maintenant l'attribut date de départ=%s" % (odoo_user.login, str(employee.departure_date)))
                 if odoo_user.active != employee.active :
                     employee.active = odoo_user.active
-                    _logger.info("L'employé associé à l'utilsiateur avec le login=%s a maintenant l'attribut active=%s" % (odoo_user.login, str(odoo_user.active)))
+                    _logger.info("L'employé associé à l'utilisateur avec le login=%s a maintenant l'attribut active=%s" % (odoo_user.login, str(odoo_user.active)))
 
 
 class naptaJob(models.Model):

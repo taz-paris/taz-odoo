@@ -208,45 +208,70 @@ class HrEmployeeStaffingReport(models.Model):
             dic = [('employee_id', '=', rec.employee_id.id)]
             pivot_date = datetime.today()
 
-            timesheet_grouped_raw = rec.env['account.analytic.line'].get_timesheet_grouped_raw(pivot_date, date_start=rec.start_date, date_end=rec.end_date, filters=dic)
-                #On appelle get_timesheet_grouped_raw et non pas get_timesheet_grouped_raw car pour les periodicité mensuelle car on veut borner strictement aux paramètres passés en paramètres
-                    #on ne veut pas intégrer les prévisionnels qui ont commencés le lundi 27 novembre pour le rapport du mois de déccembre
-                    #... oui mais dans ce cas est-ce qu'il manquera le prédisionnel pour le vendredi 1er décembre ==> normalement non car les périodes prévisionnels sont générées par Napta (SAUF FORÇAGE) par semaine et bout de semaine en cas de semaines à cheval sur deux mois ==> à vérifier #TODO
-            lines = timesheet_grouped_raw['aggreation_by_project_type']
+            if (rec.employee_id.first_contract_date and (rec.employee_id.first_contract_date > rec.end_date)) or (rec.employee_id.departure_date and (rec.employee_id.departure_date < rec.start_date)):
 
-            analytic_lines_list_ids = []
-            for aggregation in lines.values() :
-                for category in aggregation.values() :
-                    for timesheet in category['timesheet_ids']:
-                        analytic_lines_list_ids.append(timesheet.id)
-            rec.analytic_lines = [(6, 0, analytic_lines_list_ids)]
+                rec.workdays = 0.0
+                rec.hollidays = 0.0
+                rec.activity_days = 0.0
+                rec.project_days = 0.0
+                rec.learning_internal_days = 0.0
+                rec.sales_internal_days = 0.0
+                rec.other_internal_days = 0.0
+                rec.activity_days = 0.0
+                rec.activity_rate_with_holidays = 0.0
+                rec.available_days = 0.0
+                rec.activity_previsionnal_project_days = 0.0
+                rec.activity_previsionnal_rate = 0.0
+                rec.delta_previsionnal_project_days
 
-            #_logger.info(lines)
- 
-            rec.workdays = rec.employee_id.number_work_days_period(rec.start_date, rec.end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
-            rec.hollidays = lines['holidays']['other']['sum_period_unit_amount']
-            rec.activity_days = rec.workdays - rec.hollidays
-            rec.project_days = lines['mission']['project_employee_validated']['sum_period_unit_amount']
-            rec.learning_internal_days = lines['training']['project_employee_validated']['sum_period_unit_amount']
-            rec.sales_internal_days = lines['sales']['project_employee_validated']['sum_period_unit_amount']
-            rec.other_internal_days = lines['other_internal']['project_employee_validated']['sum_period_unit_amount']
-            if rec.activity_days :
-                rec.activity_rate = rec.project_days / rec.activity_days * 100
-            else : 
-                rec.activity_rate = None
-            if rec.workdays :
-                rec.activity_rate_with_holidays = rec.project_days / rec.workdays * 100
             else :
-                rec.activity_rate_with_holidays = None
 
-            rec.available_days = rec.activity_days - rec.project_days # ce qui est égal à rec.learning_internal_days + rec.sales_internal_days + rec.other_internal_days + LE NON POINTÉ (sur Napta il n'est pas obligé de pointer 100% des jours
+                real_start_date = rec.start_date
+                if rec.employee_id.first_contract_date and (rec.employee_id.first_contract_date > rec.start_date) :
+                    real_start_date = rec.employee_id.first_contract_date
+                real_end_date = rec.end_date
+                if rec.employee_id.departure_date and (rec.employee_id.departure_date < rec.end_date) :
+                    real_end_date = rec.employee_id.departure_date
+                
+                timesheet_grouped_raw = rec.env['account.analytic.line'].get_timesheet_grouped_raw(pivot_date, date_start=real_start_date, date_end=real_end_date, filters=dic)
+                    #On appelle get_timesheet_grouped_raw et non pas get_timesheet_grouped_raw car pour les periodicité mensuelle car on veut borner strictement aux paramètres passés en paramètres
+                        #on ne veut pas intégrer les prévisionnels qui ont commencés le lundi 27 novembre pour le rapport du mois de déccembre
+                        #... oui mais dans ce cas est-ce qu'il manquera le prédisionnel pour le vendredi 1er décembre ==> normalement non car les périodes prévisionnels sont générées par Napta (SAUF FORÇAGE) par semaine et bout de semaine en cas de semaines à cheval sur deux mois ==> à vérifier #TODO
+                lines = timesheet_grouped_raw['aggreation_by_project_type']
 
-            rec.activity_previsionnal_project_days = lines['mission']['project_forecast']['sum_period_unit_amount']
-            if rec.activity_days :
-                rec.activity_previsionnal_rate = rec.activity_previsionnal_project_days / rec.activity_days * 100
-            else :
-                rec.activity_previsionnal_rate = None
-            rec.delta_previsionnal_project_days = rec.activity_previsionnal_project_days - rec.project_days
+                analytic_lines_list_ids = []
+                for aggregation in lines.values() :
+                    for category in aggregation.values() :
+                        for timesheet in category['timesheet_ids']:
+                            analytic_lines_list_ids.append(timesheet.id)
+                rec.analytic_lines = [(6, 0, analytic_lines_list_ids)]
+
+                #_logger.info(lines)
+     
+                rec.workdays = rec.employee_id.number_work_days_period(real_start_date, real_end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
+                rec.hollidays = lines['holidays']['other']['sum_period_unit_amount']
+                rec.activity_days = rec.workdays - rec.hollidays
+                rec.project_days = lines['mission']['project_employee_validated']['sum_period_unit_amount']
+                rec.learning_internal_days = lines['training']['project_employee_validated']['sum_period_unit_amount']
+                rec.sales_internal_days = lines['sales']['project_employee_validated']['sum_period_unit_amount']
+                rec.other_internal_days = lines['other_internal']['project_employee_validated']['sum_period_unit_amount']
+                if rec.activity_days :
+                    rec.activity_rate = rec.project_days / rec.activity_days * 100
+                else : 
+                    rec.activity_rate = None
+                if rec.workdays :
+                    rec.activity_rate_with_holidays = rec.project_days / rec.workdays * 100
+                else :
+                    rec.activity_rate_with_holidays = None
+
+                rec.available_days = rec.activity_days - rec.project_days # ce qui est égal à rec.learning_internal_days + rec.sales_internal_days + rec.other_internal_days + LE NON POINTÉ (sur Napta il n'est pas obligé de pointer 100% des jours
+
+                rec.activity_previsionnal_project_days = lines['mission']['project_forecast']['sum_period_unit_amount']
+                if rec.activity_days :
+                    rec.activity_previsionnal_rate = rec.activity_previsionnal_project_days / rec.activity_days * 100
+                else :
+                    rec.activity_previsionnal_rate = None
+                rec.delta_previsionnal_project_days = rec.activity_previsionnal_project_days - rec.project_days
 
             if rec.has_to_be_recomputed :
                 rec.has_to_be_recomputed = False
