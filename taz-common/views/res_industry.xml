@@ -38,7 +38,9 @@
 							  <field name="period_delta" optional="show" sum="Total"/>
 							  <field name="period_ratio" optional="show"  widget="progressbar"/>
 							  <field name="book_last_month" optional="show" string="Prise commande J-31" sum="Total"/>
+		  					  <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
 							  <field name="number_of_opportunities" optional="show" sum="Total"/>
+							  <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
 							</tree> 
 						  </field>
 						  <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>

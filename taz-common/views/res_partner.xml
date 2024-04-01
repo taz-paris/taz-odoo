@@ -190,7 +190,7 @@
                 <field name="name" string="Nom ou libellé long de l'entreprise" filter_domain="['|', ('long_company_name', 'ilike', self), ('name', 'ilike', self)]"/>
 		<field name="industry_id" string="Compte (ex BD)"/>
             	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
-            	<filter name="no_industry_id" string="Sans business domain" domain="[('industry_id', '=', False)]"/>
+            	<filter name="no_industry_id" string="Sans compte (ex BD)" domain="[('industry_id', '=', False)]"/>
             	<filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
             	<filter name="no_child" string="Sans contact" domain="[('child_ids_contact', '=', False)]"/>
 
