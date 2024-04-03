@@ -157,6 +157,8 @@
 					  <field name="first_name"/>
 					  <field name="name"/>
 					  <field name="work_email"/>
+					  <field name="first_contract_date"/>
+					  <field name="departure_date"/>
 					  <field name="identification_id" />
 					  <field name="is_consultant"/>
 					  <field name="is_associate"/>

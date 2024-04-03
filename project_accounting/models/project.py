@@ -1068,12 +1068,12 @@ class projectAccountProject(models.Model):
 
     order_cost_initial = fields.Monetary('Coût total initial', compute=compute, store=True)
     order_marging_amount_initial = fields.Monetary('Marge totale (€) initiale', compute=compute, store=True)
-    order_marging_rate_initial = fields.Float('Marge totale (%) initiale', compute=compute, store=True)
+    order_marging_rate_initial = fields.Float('Marge totale (%) initiale sur prix de vente', compute=compute, store=True)
 
     order_cost_current = fields.Monetary('Coût de revient actuel piloté', compute=compute, store=True)
     order_cost_futur = fields.Monetary('Coût de revient à venir piloté', compute=compute, store=True)
     order_marging_amount_current = fields.Monetary('Marge totale (€) projetée', compute=compute, store=True)
-    order_marging_rate_current = fields.Float('Marge totale (%) projetée', compute=compute, store=True)
+    order_marging_rate_current = fields.Float('Marge totale (%) projetée sur prix de vente', compute=compute, store=True)
 
     order_to_invoice_company = fields.Monetary('Montant HT à facturer au client', compute=compute, store=True)
     order_to_invoice_company_with_tax = fields.Monetary('Montant TTC à facturer au client', compute=compute, store=True)
@@ -1095,7 +1095,7 @@ class projectAccountProject(models.Model):
             #states={'before_launch' : [('readonly', False)], 'launched':[('readonly', True)], 'closed':[('readonly', True)]},
             tracking=True)
     company_part_marging_amount_initial = fields.Monetary('Marge sur dispositif interne (€) initiale', store=True, compute=compute)
-    company_part_marging_rate_initial = fields.Float('Marge sur dispositif interne (%) initiale', store=True, compute=compute)
+    company_part_marging_rate_initial = fields.Float('Marge sur dispositif interne (%) initiale sur prix de vente', store=True, compute=compute)
 
     company_part_amount_current = fields.Monetary('Montant HT dispositif interne actuel', 
             compute=compute,
@@ -1103,7 +1103,7 @@ class projectAccountProject(models.Model):
     company_part_cost_current = fields.Monetary('Coût de revient du dispositif interne (€) < semaine actuelle', store=True, compute=compute)
     company_part_cost_futur = fields.Monetary('Coût de revient du dispositif interne (€) >= semaine actuelle', store=True, compute=compute)
     company_part_marging_amount_current = fields.Monetary('Marge sur dispositif interne (€) projetée', store=True, compute=compute)
-    company_part_marging_rate_current = fields.Float('Marge sur dispositif interne (%) projetée', store=True, compute=compute)
+    company_part_marging_rate_current = fields.Float('Marge sur dispositif interne (%) projetée sur prix de vente', store=True, compute=compute)
 
     ######## OUTSOURCE PART
     outsource_part_amount_initial = fields.Monetary('Montant HT de revente S/T initial', 
@@ -1116,8 +1116,8 @@ class projectAccountProject(models.Model):
             tracking=True,
             )
     outsource_part_marging_amount_initial = fields.Monetary('Marge sur la part S/T (€) initiale', store=True, compute=compute)
-    outsource_part_marging_rate_initial = fields.Float('Marge sur la part S/T (%) initiale', store=True, compute=compute, help="Taux de marge = marge € / prix de vente au client € * 100")
-    outsource_part_markup_rate_initial = fields.Float('Taux de marque sur la part S/T initiale', store=True, compute=compute, help="Taux de marque = marge € / prix d'achat au fournisseur € * 100")
+    outsource_part_marging_rate_initial = fields.Float('Marge sur la part S/T (%) initiale sur prix de vente', store=True, compute=compute, help="= marge € / prix de vente au client € * 100")
+    outsource_part_markup_rate_initial = fields.Float('Marge sur la part S/T (%) initiale sur prix d\'achat - markup', store=True, compute=compute, help="= marge € / prix d'achat au fournisseur € * 100")
 
     outsource_part_amount_current = fields.Monetary('Montant HT de revente de la part S/T actuel', store=True, compute=compute)
     outsource_part_cost_current = fields.Monetary('Coût de revient HT de la part S/T actuel', 
@@ -1128,8 +1128,8 @@ class projectAccountProject(models.Model):
             store=True, compute=compute)
     outsourcing_link_purchase_order_with_draft = fields.Monetary('Somme de toutes les lignes d\'achats', store=True, compute=compute)
     outsource_part_marging_amount_current = fields.Monetary('Marge sur la part S/T (€) projetée', store=True, compute=compute)
-    outsource_part_marging_rate_current = fields.Float('Marge sur la part S/T (%) projetée', store=True, compute=compute, help="Taux de marge = marge € / prix de vente au client € * 100")
-    outsource_part_markup_rate_current = fields.Float('Taux de marque sur la part S/T projetée', store=True, compute=compute, help="Taux de marque = marge € / prix d'achat au fournisseur € * 100")
+    outsource_part_marging_rate_current = fields.Float('Marge sur la part S/T (%) projetée sur prix de vente', store=True, compute=compute, help="= marge € / prix de vente au client € * 100")
+    outsource_part_markup_rate_current = fields.Float('Marge sur la part S/T (%) projetée sur prix d\'achat - markup', store=True, compute=compute, help="= marge € / prix d'achat au fournisseur € * 100")
 
     project_outsourcing_link_ids = fields.One2many('project.outsourcing.link', 'project_id')
 
@@ -1144,13 +1144,13 @@ class projectAccountProject(models.Model):
             tracking=True,
             )
     cosource_part_marging_amount_initial = fields.Monetary('Marge sur la part co-traitée (€) initiale', store=True, compute=compute)
-    cosource_part_marging_rate_initial = fields.Float('Marge sur la part co-traitée (%) initiale', store=True, compute=compute)
+    cosource_part_marging_rate_initial = fields.Float('Marge sur la part co-traitée (%) initiale sur prix de vente', store=True, compute=compute)
 
     cosource_part_amount_current = fields.Monetary('Montant HT de la part co-traitée actuel', help="Montant produit par les co-traitants : part produite par les co-traitants.", store=True, compute=compute)
     cosource_part_cost_current = fields.Monetary('Montant HT des factures du co-traitant validées sur Chorus', store=True, compute=compute)
     cosource_part_cost_futur = fields.Monetary('Montant HT restant à valider sur Chorus', store=True, compute=compute)
     cosource_part_marging_amount_current = fields.Monetary('Marge sur la part co-traitée (€) projetée', store=True, compute=compute)
-    cosource_part_marging_rate_current = fields.Float('Marge sur la part co-traitée (%) projetée', store=True, compute=compute)
+    cosource_part_marging_rate_current = fields.Float('Marge sur la part co-traitée (%) projetée sur prix de vente', store=True, compute=compute)
 
 
 
@@ -1166,7 +1166,7 @@ class projectAccountProject(models.Model):
             tracking=True,
             )
     other_part_marging_amount_initial = fields.Monetary('Marge sur les autres prestations (€) initiale', store=True, compute=compute)
-    other_part_marging_rate_initial = fields.Float('Marge sur les autres prestations (%) initiale', store=True, compute=compute)
+    other_part_marging_rate_initial = fields.Float('Marge sur les autres prestations (%) initiale sur prix de vente', store=True, compute=compute)
 
     other_part_amount_current = fields.Monetary('Montant HT de revente "autres presta" actuel', 
             compute=compute,
@@ -1175,7 +1175,7 @@ class projectAccountProject(models.Model):
     other_part_cost_current = fields.Monetary('Coût de revient HT de la part "autres presta" actuel', store=True, compute=compute)
     other_part_cost_futur = fields.Monetary('Coût de revient de la part "autres presta." à venir', store=True, compute=compute)
     other_part_marging_amount_current = fields.Monetary('Marge sur les autres prestations (€) projetée', store=True, compute=compute)
-    other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) projetée', store=True, compute=compute)
+    other_part_marging_rate_current = fields.Float('Marge sur les autres prestations (%) projetée sur prix de vente', store=True, compute=compute)
 
 
     ######## BOOK
