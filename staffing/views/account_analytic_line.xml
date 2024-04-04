@@ -39,6 +39,7 @@
 			<filter string="Mois en cours" name="current_month" domain="[('date','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('date','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
 			<filter string="Mois M-1" name="prev_month" domain="[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01')),('date','&lt;',time.strftime('%%Y-%%m-01'))]"/>
 			<filter string="Mois M-2" name="prev_month2" domain="[('date','&gt;=',(context_today()-relativedelta(months=2)).strftime('%%Y-%%m-01')),('date','&lt;',(context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01'))]"/>
+			<filter string="Mois M-3" name="prev_month3" domain="[('date','&gt;=',(context_today()-relativedelta(months=3)).strftime('%%Y-%%m-01')),('date','&lt;',(context_today()-relativedelta(months=2)).strftime('%%Y-%%m-01'))]"/>
 			<separator/>
 			<filter name="date_end" string="Date de fin" date="date"/>
 		</field>

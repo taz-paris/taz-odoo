@@ -38,7 +38,8 @@ class HrContract(models.Model):
 
     def create(self, vals):
         res = super().create(vals)
-        self.refresh_analytic_lines(self.employee_id.id, self.date_start, self.date_end)
+        for rec in res :
+            self.refresh_analytic_lines(rec.employee_id.id, rec.date_start, rec.date_end)
         return res
 
     def write(self, vals):
@@ -63,10 +64,9 @@ class HrContract(models.Model):
         return res
 
     def refresh_analytic_lines(self, employee_id, date_start, date_end):
-        pass #TODO : restaurer cette fonction
-        #TODO ne pas rafraichir les analytic.line dont la date est strictement antérieure à la date de la cloture comptable de la société
-
-        #_logger.info('-- hr.contract > refresh_analytic_lines employee_id=%s date_start=%s date_end=%s' % (str(employee_id), str(date_start), str(date_end)))
-        #lines = self.env['account.analytic.line'].search([('project_id', '!=', False), ('holiday_id', '=', False), ('employee_id', '=', employee_id), ('date', '>=', date_start), ('date', '<=', date_end)])
-        #for line in lines :
-        #    line.refresh_amount()
+        _logger.info('-- hr.contract > refresh_analytic_lines employee_id=%s date_start=%s date_end=%s' % (str(employee_id), str(date_start), str(date_end)))
+        if not(date_end):
+            date_end = datetime.date(2100,1,1)
+        lines = self.env['account.analytic.line'].search([('project_id', '!=', False), ('holiday_id', '=', False), ('employee_id', '=', employee_id), ('date', '>=', date_start), ('date', '<=', date_end)])
+        for line in lines :
+            line.refresh_amount()

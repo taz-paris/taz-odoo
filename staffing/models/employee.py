@@ -103,6 +103,12 @@ class staffingEmployee(models.Model):
 
     #most_recent_contract = fields.Many2one('hr.contract', 'employee_id', string="Contract le plus récent (ou à venir)", compute=most_recent_contract)
 
+    def _get_daily_cost_today(self):
+        t = datetime.today().date() 
+        for rec in self:
+            rec.daily_cost_today, cost_line = rec._get_daily_cost(t)
+    daily_cost_today = fields.Float("CJM actuel", compute=_get_daily_cost_today)
+
     def name_get(self):
          res = []
          for rec in self:                       
@@ -146,6 +152,7 @@ class staffingEmployee(models.Model):
         if contract :
             cost, cost_line = contract._get_daily_cost(date)
         return cost, cost_line
+
 
     def number_days_available_period(self, date_start, date_end):
         #_logger.info('number_days_available_period %s' % self.name)

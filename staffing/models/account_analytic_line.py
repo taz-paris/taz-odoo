@@ -5,6 +5,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta
+from odoo.tools import float_round
 
 class staffingAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -307,12 +308,13 @@ class staffingAnalyticLine(models.Model):
 
     def refresh_amount(self):
         _logger.info("---- refresh_amount")
+        _logger.info(self.read())
         amount, cost_line = self.compute_amount()
         #_logger.info(str(self.amount) + '_' +str(self.hr_cost_id))
         #_logger.info(str(amount) +'_'+ str(cost_line))
-        if self.amount != round(amount,3):
-            _logger.info("change amount of line :")
-            _logger.info(self.amount)
+        #if str(Decimal(str(self.amount)).quantize(Decimal('.001'), rounding=ROUND_UP)) != str(Decimal(str(amount)).quantize(Decimal('.001'), rounding=ROUND_UP)):
+        if "{:.3f}".format(self.amount) != "{:.3f}".format(float_round(self.amount, precision_digits=3, precision_rounding=None, rounding_method='HALF-UP')) :
+            _logger.info("          Change amount of line : before=%s  ===> after =%s" % (self.amount, amount))
             self.amount = amount
         if self.hr_cost_id != cost_line:
             _logger.info("change hr_cost_id > cost line")

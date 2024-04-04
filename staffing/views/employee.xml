@@ -40,6 +40,7 @@
                   <field name="first_name"/>
                   <field name="name"/>
                   <field name="job_id"/>
+                  <field name="daily_cost_today" optional="show"/>
                 </tree>
               </field>
             </record>

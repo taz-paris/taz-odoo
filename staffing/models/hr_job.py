@@ -74,6 +74,8 @@ class HrCost(models.Model):
 
     #TODO décliner la logique on_date_change sur l'objet hr.contract => à la création du contrat, au changement de contract.job_id ou au changement de date de début/fin du contrat => recalculer les lignes
     def on_date_change(self, new_date, former_date=False):
+        pass
+        """
         _logger.info("--- on_date_change")
         date_oldest = new_date
         if former_date : #s'il on est en train de créer un hr.cost, aucune former_date n'est fournie
@@ -91,6 +93,7 @@ class HrCost(models.Model):
                 continue
             if job.id == self.job_id.id:
                 line.refresh_amount()
+        """
 
     def compute_end_date(self):
         for rec in self:
