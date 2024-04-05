@@ -250,8 +250,8 @@
 		<field name="name">Équipage</field>
 		<field name="res_model">hr.employee</field>
 		<field name="view_mode">tree,form</field>
-		<field name="domain">[('contract_warning', '=', False)]</field>
-		<field name="context">{'search_default_group_job' : 1}</field>
+		<field name="domain"></field>
+		<field name="context"></field>
 		<field name="view_ids" eval="
 				    [
 				    (5, 0, 0),

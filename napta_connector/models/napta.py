@@ -529,6 +529,8 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
+        #self.env['hr.contract'].create_update_odoo_user_history()
+        #a=1/0
         client.refresh_cache()
 
         #### Retreive project that previous sync failled
@@ -881,12 +883,19 @@ class naptaHrContract(models.Model):
             name += " "+ str(user_history['attributes']['start_date'])
             
 
-            if user_history['attributes']['end_date'] != None : #TODO (pour éviter de mettre inactif un salarié avec une date de fin de contrat positionnée dans le futur) : and user_history['attributes']['end_date'] < today()
-                state = "close"
+            if user_history['attributes']['end_date'] != None :
+                #_logger.info(user_history['attributes'])
+                if datetime.datetime.strptime(user_history['attributes']['end_date'], '%Y-%m-%d').date() > datetime.datetime.today().date():
+                    #_logger.info("end_date > today") 
+                    state = "open"
+                else:
+                    #_logger.info("end_date < today")
+                    state = "close"
             else:
-                #if user_history['attributes']['start_date'] > today():
-                #    status = "new"
-                state = "open"
+                if datetime.datetime.strptime(user_history['attributes']['start_date'], '%Y-%m-%d').date() > datetime.datetime.today().date():
+                    state = "draft"
+                else:
+                    state = "open"
 
 
             dic = {
@@ -917,12 +926,15 @@ class naptaHrContract(models.Model):
                 cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)], order="begin_date asc")
                 if not cost_lines :
                     override = True
+                    #_logger.info('cas A')
                 else:
                     #si les cost_line du job_id ne couvrent pas l'intégralité de la durée du user_history > on surcharge le CJM dans le contrat
                     if cost_lines[0].begin_date > napta_start_date :
                         override = True
+                        #_logger.info('cas B')
                     if cost_lines[len(cost_lines)-1].end_date and napta_end_date and cost_lines[len(cost_lines)-1].end_date < napta_end_date:
                         override = True
+                        #_logger.info('cas C')
                 
                 for cost_line in cost_lines:
                     if napta_end_date and napta_end_date < cost_line.begin_date :
@@ -932,6 +944,9 @@ class naptaHrContract(models.Model):
                     # Si au moins une cost_line pour ce job_id au cours du contrat a un tarif différent à celui du user_hirtory_napta, alors on passe en mode overriden le contrat
                     if cost_line.cost != user_history['attributes']['daily_cost']:
                         override = True
+                        #_logger.info('cas D')
+                        #_logger.info(cost_line.read())
+                        #_logger.info(user_history['attributes']['daily_cost'])
                         break
              
             if override:
