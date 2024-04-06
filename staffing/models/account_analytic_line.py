@@ -312,8 +312,7 @@ class staffingAnalyticLine(models.Model):
         amount, cost_line = self.compute_amount()
         #_logger.info(str(self.amount) + '_' +str(self.hr_cost_id))
         #_logger.info(str(amount) +'_'+ str(cost_line))
-        #if str(Decimal(str(self.amount)).quantize(Decimal('.001'), rounding=ROUND_UP)) != str(Decimal(str(amount)).quantize(Decimal('.001'), rounding=ROUND_UP)):
-        if "{:.3f}".format(self.amount) != "{:.3f}".format(float_round(self.amount, precision_digits=3, precision_rounding=None, rounding_method='HALF-UP')) :
+        if "{:.3f}".format(self.amount) != "{:.3f}".format(float_round(amount, precision_digits=3, precision_rounding=None, rounding_method='HALF-UP')) :
             _logger.info("          Change amount of line : before=%s  ===> after =%s" % (self.amount, amount))
             self.amount = amount
         if self.hr_cost_id != cost_line:

@@ -140,6 +140,9 @@
 				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_validated_book', '=', True)]}">
 					Le DM n'a pas validé la répartition du book.
 				</div>
+				<div class="alert alert-info mb-1" role="alert" attrs="{'invisible': [('other_part_marging_rate_controle_OK', '=', True)]}">
+					Le taux de marge actuel (sur prix de vente) sur les autres prestations est inférieur à la cote d'alerte.
+				</div>
 				<field name="is_validated_order" invisible="1"/>
 				<field name="is_validated_book" invisible="1"/>
 				<field name="is_consistant_outsourcing" invisible="1"/>
@@ -149,6 +152,7 @@
 				<field name="is_consistant_prevent_napta_creation" invisible="1"/>
 				<field name="is_outsource_part_amount_current" invisible="1"/>
 				<field name="is_affected_book" invisible="1"/>
+				<field name="other_part_marging_rate_controle_OK" invisible="1"/>
 
 					
 				<div class="oe_title">
@@ -410,6 +414,7 @@
 								<field name="is_consistant_prevent_napta_creation"/>
 								<field name="is_outsource_part_amount_current"/>
 								<field name="is_affected_book"/>
+								<field name="other_part_marging_rate_controle_OK"/>
 								<field name="is_review_needed"/>
 							</group>
 

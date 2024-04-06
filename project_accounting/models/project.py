@@ -170,9 +170,9 @@ class projectAccountProject(models.Model):
             if not(self.book_validation_employee_id):
                 is_closable = False
                 error_message += "   - Le book n'est pas validé par le DM.\n"
-            if self.is_review_needed:
+            if not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
                 is_closable = False
-                error_message += "   - Au moins l'un des messages d'erreur de la fiche projet n'est pas résolu.\n"
+                error_message += "   - Au moins l'un des messages d'erreur bloquant de la fiche projet n'est pas résolu.\n"
             if self.company_to_invoice_left != 0.0 :
                 is_closable = False
                 error_message += "   - Le reste à facturer (onglet Facturation) n'est pas nul.\n"
@@ -402,11 +402,13 @@ class projectAccountProject(models.Model):
             rec.other_part_amount_current = other_part_amount_current
             rec.other_part_cost_futur = other_part_cost_futur
 
+            """
             rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current - rec.other_part_cost_futur
             if rec.other_part_amount_current != 0 :
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
             else:
                 rec.other_part_marging_rate_current = 0.0
+            """
 
             ######## COMPANY PART
 
@@ -509,10 +511,16 @@ class projectAccountProject(models.Model):
                 is_outsource_part_amount_current = False
             rec.is_outsource_part_amount_current = is_outsource_part_amount_current
             
+
+            if rec.other_part_marging_rate_current >= float(self.env['ir.config_parameter'].sudo().get_param("other_part_marging_rate_alert_level")):
+                rec.other_part_marging_rate_controle_OK = True
+            else:
+                rec.other_part_marging_rate_controle_OK = False
+
             if not(rec.number):
                 rec.is_review_needed = False
             else:
-                if not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
+                if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
                     rec.is_review_needed = True
                 else :
                     rec.is_review_needed = False
@@ -849,8 +857,8 @@ class projectAccountProject(models.Model):
     def check_partners_objects_consitency(self):
         _logger.info('-- check_partners_objects_consitency')
         for rec in self:
-            all_customer = rec.get_all_customer_ids()
-            all_supplier = rec.get_all_supplier_ids()
+            all_customer = rec.with_context({'active_test': False}).get_all_customer_ids()
+            all_supplier = rec.with_context({'active_test': False}).get_all_supplier_ids()
             all_partner = all_customer + all_supplier
 
             account_move_line_ids = self.get_account_move_line_ids([('partner_id', 'not in', all_partner)])
@@ -1057,7 +1065,7 @@ class projectAccountProject(models.Model):
     has_to_be_recomputed = fields.Boolean('À recalculer', default=False)
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')
-    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', help="Dans certains projet, le client final n'est pas le client facturé. Un client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
+    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', context={'active_test': False}, help="Dans certains projet, le client final n'est pas le client facturé. Un client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
 
     ######## TOTAL
     sale_order_amount_initial = fields.Monetary('Montant HT commandé par le client', store=True, compute=compute)
@@ -1208,6 +1216,7 @@ class projectAccountProject(models.Model):
     is_affected_book = fields.Boolean("Book affecté", store=True, compute=compute, help="VAI si le book est validé OU qu'il existe au moins une ligne de book")
 
     is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
+    other_part_marging_rate_controle_OK = fields.Boolean('Taux de marge actuel sur les autres prestations >= à la cote d\'alerte.', store=True, compute=compute)
     invoicing_comment = fields.Text("Commentaire ADV")
     project_book_factor = fields.Float("Facteur de bonus/malus", default=1.0)
 
