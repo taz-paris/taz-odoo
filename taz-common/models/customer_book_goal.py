@@ -61,6 +61,9 @@ class tazCustomerBookGoal(models.Model):
 
         COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities']
         for data in res:
+            if '__domain' not in data.keys():
+                continue
+
             customer_book_goals = self.search(data['__domain']).read(COMPUTED_FIELD_LIST)
 
             for computed_non_stored_field in COMPUTED_FIELD_LIST :

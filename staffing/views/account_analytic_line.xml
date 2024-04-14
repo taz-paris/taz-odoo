@@ -44,6 +44,7 @@
 			<filter name="date_end" string="Date de fin" date="date"/>
 		</field>
 		<xpath expr="//filter[@name='groupby_employee']">
+			<filter name="group_by_partner" string="Client" context="{'group_by': 'partner_id'}"/>
 			<filter name="group_by_date_week" string="Date" context="{'group_by': 'date:week'}"/>
 			<filter name="group_by_project" string="Projet" invisible="1" context="{'group_by': 'project_id'}"/>
 		</xpath>

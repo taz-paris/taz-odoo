@@ -63,8 +63,6 @@
       <field name="arch" type="xml">
         <calendar string="Actions commerciales" create="1" mode="month" date_start="date_deadline" hide_time="true" event_limit="5">
 		<!-- color="user_ids"-->
-	    <field name="partner_id" />
-				    <!-- <field name="user_ids" filters="1" invisible="1"/> => Il y a une errreur coté client pour les utilisateurs non admin si on ajouter le user_ids -->
             <field name="state"/>
 	</calendar>
       </field>
@@ -75,8 +73,7 @@
       <field name="model">taz.business_action</field>
       <field name="arch" type="xml">
 	<pivot string="Actions commerciales">
-	    <field name="owner_id" type="row"/>
-	    <field name="date_deadline" interval="month" type="row"/>
+	    <field name="date_deadline" interval="month" type="col"/>
             <field name="state" type="row"/>
 	</pivot>
       </field>
@@ -99,11 +96,13 @@
         <field name="arch" type="xml">
            <search string="Actions commerciales">
 		    <field name="partner_id" string="Contact"/>
-		    <field name="parent_partner_industry_id" string="Business Domain"/>
+		    <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
 		    <filter string="Mes actions commerciales" name="assigned_to_me"
 			domain="[('owner_id', '=', uid)]"
 			help="Actions commerciales qui m'ont été assignées"/>
 		    <separator/>
+		    <filter string="Actions avec échéance >= 01/M-6" name="m_6"
+			domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-5, day=1)).strftime('%Y-%m-%d')))]" />
 		    <filter string="Actions avec échéance >= 01/M-2" name="m_2"
 			domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')))]" />
 		    <filter string="Actions avec échéance sous 30 jours" name="j30"
@@ -122,7 +121,7 @@
 			<separator/>
 			<filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
 			<filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
-			<filter string="Business domain" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
+			<filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
 		    </group>
            </search>
         </field>
@@ -176,13 +175,13 @@
         <field name="name">Actions commerciales</field>
         <field name="res_model">taz.business_action</field>
         <field name="view_mode">tree,form,calendar,kanban,pivot,graph</field>
-                <!--<field name="domain">[('res.model', '=', 'res.partner')]</field> -->
         <field name="context">{
                     'search_default_assigned_to_me': 1,
                     'default_user_id': uid,
 		    'search_default_state_not_done_not_cancelled':1,
             }</field>
     </record>
+<!--
     <record id="taz-common.business_action_action_view_tree" model="ir.actions.act_window.view">
         <field name="sequence" eval="1"/>
         <field name="view_mode">tree</field>
@@ -198,8 +197,22 @@
         <field name="view_mode">kanban</field>
         <field name="act_window_id" ref="taz-common.business_action_action"/>
     </record>
+-->
 
-    <menuitem name="Actions commerciales" sequence="40" id="taz-common.business_action" parent="taz-common.commerce" action="taz-common.business_action_action"/>
+
+    <record id="taz-common.history_business_action_action" model="ir.actions.act_window">
+        <field name="name">Analyse 6 derniers mois</field>
+        <field name="res_model">taz.business_action</field>
+        <field name="view_mode">pivot,graph,tree</field>
+        <field name="context">{
+                    'default_user_id': uid,
+                    'search_default_m_6':1,
+            }</field>
+    </record>
+
+    <menuitem name="Actions commerciales" sequence="40" id="taz-common.business_action" parent="taz-common.commerce" />
+    <menuitem name="Mes actions commerciales en cours" sequence="10" id="taz-common.current_business_action" parent="taz-common.business_action" action="taz-common.business_action_action"/>
+    <menuitem name="Analyse 6 derniers mois" sequence="20" id="taz-common.history_business_action" parent="taz-common.business_action" action="taz-common.history_business_action_action"/>
      
 
 

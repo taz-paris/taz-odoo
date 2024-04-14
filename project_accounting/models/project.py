@@ -153,6 +153,17 @@ class projectAccountProject(models.Model):
                 purchase_order.user_id = project_id.user_id.id
                 self.env.cr.commit()
         _logger.info(' ==================== FIN revue purchase_order.user_id')
+
+    def get_project_won_2023_without_book_in_2023(self):
+        projects = self.env['project.project'].search([('number', '!=', False), ('stage_id', 'not in', [8,4]), ('date_win_loose', '!=', False), ('date_win_loose', '>=', '2023-01-01'), ('date_win_loose', '<=', '2023-12-31')])
+        for project in projects :
+            is_book_2023 = False
+            for book in project.book_employee_distribution_period_ids:
+                if book.project_book_period_id.reference_period == '2023':
+                    is_book_2023 = True
+                    break
+            if not(is_book_2023):
+                _logger.info('Pas de book en 2023 pour le projet %s - %s (client = %s) alors que date_win_loose=%s' % (project.number, project.name, project.partner_id.name, str(project.date_win_loose)))
     """
 
     def is_closable(self, new_stage_id):

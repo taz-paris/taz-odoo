@@ -17,6 +17,7 @@ class projectOutsourcingLink(models.Model):
     _check_company_auto = True
 
     def compute_purchase_order_total(self, with_direct_payment=True, with_draft_purchase_order=False): 
+        _logger.info('----- compute_purchase_order_total')
         status_list_to_keep = ['purchase']
         if with_draft_purchase_order :
             status_list_to_keep.append('draft')
@@ -25,9 +26,13 @@ class projectOutsourcingLink(models.Model):
             total = 0.0
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
+                _logger.info(line.read())
                 if line.direct_payment_sale_order_line_id and with_direct_payment==False:
+                    _logger.info('continue A')
                     continue
                 if line.state not in status_list_to_keep:
+                    _logger.info(status_list_to_keep)
+                    _logger.info('continue B')
                     continue
                 total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
             return total

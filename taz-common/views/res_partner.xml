@@ -65,7 +65,7 @@
 
 			  <page string="Contacts de cette entreprise">
 				<field name="child_ids_contact" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
-					<tree>
+					<tree delete="false">
 					  <field name="is_company" optional="hide" readonly="1"/>
 					  <field name="first_name"/>
 					  <field name="name"/>
@@ -397,7 +397,7 @@
         <field name="model">res.partner</field>
         <field name="arch" type="xml">
            <search string="Contacts">
-                <field name="name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('name', 'ilike', self)]"/>
+                <field name="name" string="Prénom Nom" filter_domain="[('display_name', 'ilike', self)]"/>
                 <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
                 <field name="email" string="Email" filter_domain="[('email', 'ilike', self)]"/>
 		<field name="category_id" string="Étiquette" />
@@ -422,6 +422,8 @@
 	    <filter name="no_action_12months" string="Pas vus depuis > 12 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
             <separator/>
 	    <filter name="no_update_12months" string="Pas MAJ depuis > 12 mois" domain="[('write_date','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
+            <separator/>
+	    <filter name="created_7days" string="Contacts créés au cours des 7 derniers jours" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(days=7)).strftime('%%Y-%%m-%%d')))]"/>
             <group expand="0" string="Group By">
             	<filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
             	<filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>

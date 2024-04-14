@@ -24,7 +24,7 @@
 				</group>
 			</group>
 			<field name="project_ids">
-				  <tree 
+				  <tree delete="false" 
 					  decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'"
 					  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
 					      >
@@ -47,20 +47,30 @@
 				  <field name="color_rel" invisible="1" />
 				  <field name="book_employee_distribution_ids" optional="hide" widget="many2many_tags" />
 				  <field name="is_validated_book" optional="hide" />
-				  <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés"/>
+				  <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés HT" sum="Total"/>
 				  <field name="order_to_invoice_company" optional="hide" sum="Total"/>
+				  <field name="order_amount_current" optional="hide" sum="Total"/>
+				  <field name="order_cost_current" optional="hide" sum="Total"/>
+				  <field name="order_cost_futur" optional="hide" sum="Total"/>
+				  <field name="order_marging_amount_current" optional="hide" sum="Total"/>
+				  <field name="order_marging_rate_current" optional="hide" />
 				  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
 				  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
 				  <field name="company_part_amount_current" optional="show" sum="Total"/>
-				  <field name="company_part_cost_current" optional="show" sum="Total"/>
-				  <field name="company_part_cost_futur" optional="show" sum="Total"/>
+				  <field name="company_part_cost_current" optional="hide" sum="Total"/>
+				  <field name="company_part_cost_futur" optional="hide" sum="Total"/>
 				  <field name="company_part_marging_amount_current" optional="hide" sum="Total"/>
 				  <field name="company_part_marging_rate_current" optional="show"/>
 				  <field name="outsource_part_amount_current" optional="show" sum="Total"/>
-				  <field name="outsource_part_cost_current" optional="show" sum="Total"/>
-				  <field name="outsource_part_cost_futur" optional="show" sum="Total"/>
+				  <field name="outsource_part_cost_current" optional="hide" sum="Total"/>
+				  <field name="outsource_part_cost_futur" optional="hide" sum="Total"/>
 				  <field name="outsource_part_marging_amount_current" optional="hide" sum="Total"/>
 				  <field name="outsource_part_marging_rate_current" optional="show"/>
+				  <field name="other_part_amount_current" optional="hide" sum="Total"/>
+				  <field name="other_part_cost_current" optional="hide" sum="Total"/>
+				  <field name="other_part_cost_futur" optional="hide" sum="Total"/>
+				  <field name="other_part_marging_amount_current" optional="hide" sum="Total"/>
+				  <field name="other_part_marging_rate_current" optional="hide"/>
 				</tree>
 			</field>
 		</form>                                

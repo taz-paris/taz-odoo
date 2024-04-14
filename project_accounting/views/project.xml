@@ -25,6 +25,7 @@
                     <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
                     <filter string="Date de fin" name="end_date" date="date"/>
+		    <filter string="Date de passage gagné/perdu" name="date_win_loose" date="date_win_loose"/>
                     <separator/>
                     <filter string="Projets de comptes prioritaires" name="priority_target" domain="[('rel_industry_business_priority', '=', 'priority_target')]"/>
                     <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>

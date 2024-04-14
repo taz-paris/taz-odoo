@@ -60,8 +60,8 @@
 						  </field>
 					  </page>
 					  <page string="Entreprises du compte">
-						<field colspan="3" name="partner_ids" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
-							<tree delete="false">
+						<field colspan="3" name="partner_ids" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
+							<tree delete="false" create="false">
 							  <field name="is_company" invisible="1"/>
 							  <field name="name"/>
 							  <field name="long_company_name"/>
