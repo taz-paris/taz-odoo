@@ -259,7 +259,7 @@ class projectAccountProject(models.Model):
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
-    project_group_id = fields.Many2one('project.group', string='Groupe de projets', check_company=True)
+    project_group_id = fields.Many2one('project.group', string='Groupe de projets', check_company=True, domain=[('active', 'in', [True, False])])
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False, check_company=True) #Si required=True ça bloque la création de nouvelle company 
     #TODO : synchroniser cette valeur avec user_id avec un oneChange
@@ -311,6 +311,7 @@ class projectAccountProject(models.Model):
         _logger.info('====================================================================== project.py COMPUTE')
         for rec in self:
             _logger.info(str(rec.number) + "==========================================>" +str(rec.name))
+
             rec.check_partners_objects_consitency() #forcer l'appel à cette fonction même si cette fonction compute n'écrit rien... car elle est appelée par les lignes de factures/sale.order/purchase.order et assure que tous ces objets liés à ce projet sont bien portés par un res.partner qui est soit le client final, soit un client intermédiaire soit un fournisseur d'un outsourcing_link
             old_default_book_end = rec.default_book_end
 
