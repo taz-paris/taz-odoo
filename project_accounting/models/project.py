@@ -32,10 +32,10 @@ class projectAccountProject(models.Model):
             vals['number'] = self.env['ir.sequence'].next_by_code('project.project') or ''
             vals['state_last_change_date'] = datetime.today()
             #_logger.info('Numéro de projet auto : %s' % str(vals['number']))
-            projects |= super().create(vals)
             if 'stage_id' in vals.keys():
                 if vals['stage_id'] in [6, 2, 9, 3, 8]: # statuts Accord client / Commandé / Prod terminée / Clos /Perdu
                     vals['date_win_loose'] = datetime.now()
+            projects |= super().create(vals)
         return projects
 
     def name_get(self):
@@ -81,14 +81,14 @@ class projectAccountProject(models.Model):
                         raise ValidationError(_(error_message))
 
                 ### Toper le passage le plus récent à Perdu ou à un statut du groupe Gagné {Accord client / Commandé / Prod terminée / Clos}
-                if new_stage_id.id in [1, 7, 4]: #statut Avt-froid / avt-chaud / annulée
+                if new_stage_id.id in [1, 7, 4]: #nouveau statut [Avt-froid / avt-chaud / annulée]
                     if record.date_win_loose != False:
                         vals['date_win_loose'] = False
-                if new_stage_id.id in [8]:
+                if new_stage_id.id in [8]: #nouveau statut = Perdu
                     if record.stage_id.id not in [8]:
                         vals['date_win_loose'] = datetime.now() 
-                elif new_stage_id.id in [6, 2, 9, 3]:
-                    if record.stage_id.id not in [6, 2, 9, 3]: #du statut Avt-froid / avt-chaud / perdu / annulée  vers un statuts Accord client / Commandé / Prod terminée / Clos
+                elif new_stage_id.id in [6, 2, 9, 3]: # nouveau statut n'est pas perdu, et apprtient à l'un des statuts [Accord client / Commandé / Prod terminée / Clos]
+                    if record.stage_id.id not in [6, 2, 9, 3]: # ET ancien statut était dans [Avt-froid / avt-chaud / perdu / annulée]
                         vals['date_win_loose'] = datetime.now() 
 
         res = super().write(vals)
