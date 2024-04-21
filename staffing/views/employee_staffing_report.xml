@@ -32,7 +32,7 @@
             <field name="name">Rapports d'activité</field>
             <field name="model">hr.employee_staffing_report</field>
             <field name="arch" type="xml">
-                <search string="Search Project accounting closing">
+                <search string="Search employee staffing report">
                     <field name="employee_id" string="Consultant"/>
                     <separator/>
                     <filter string="Date de début" name="start_date" date="start_date"/>
@@ -47,7 +47,10 @@
                     <separator/>
 		    <filter string="Périodes terminées (fin de période &lt; date du jour)" name="passed_periods" domain="[('end_date', '&lt;=', (context_today().strftime('%Y-%m-%d')))]"/>
                     <separator/>
+		    <filter string="Masquer les DM" name="hide_project_director" domain="[('rel_job_id.is_project_director', '=', False)]"/>
+                    <separator/>
                     <group expand="0" string="Group By">
+                        <filter string="Société" name="group_company_id" context="{'group_by': 'rel_company_id'}"/>
                         <filter string="Bureau" name="group_rel_work_location_id" context="{'group_by': 'rel_work_location_id'}"/>
                         <filter string="Grade" name="group_rel_job_id" context="{'group_by': 'rel_job_id'}"/>
                         <filter string="Consultant" name="group_employee_id" context="{'group_by': 'employee_id'}"/>
@@ -64,8 +67,8 @@
             <field name="name">Rapports d'activité (maille hebdomadaire)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree</field>
-	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True}</field>
-            <field name="domain">[('periodicity', '=', 'week')]</field>
+	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="domain">[('periodicity', '=', 'week'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille hebdomadaire)" id="employee_staffing_report_week_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_week_action"/>
 
@@ -73,8 +76,8 @@
             <field name="name">Rapports d'activité (maille mensuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree</field>
-	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False}</field>
-            <field name="domain">[('periodicity', '=', 'month')]</field>
+	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="domain">[('periodicity', '=', 'month'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille mensuelle)" id="employee_staffing_report_month_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_month_action"/>
 
@@ -82,16 +85,16 @@
             <field name="name">Rapports d'activité (maille trimestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree</field>
-	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False}</field>
-            <field name="domain">[('periodicity', '=', 'quarter')]</field>
+	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="domain">[('periodicity', '=', 'quarter'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille trimestrielle)" id="employee_staffing_report_quarter_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_quarter_action"/>
 
         <record id="employee_staffing_report_semester_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille semestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
-	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False}</field>
-            <field name="domain">[('periodicity', '=', 'semester')]</field>
+	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="domain">[('periodicity', '=', 'semester'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille semestrielle)" id="employee_staffing_report_semester_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_semester_action"/>
 	
@@ -99,8 +102,8 @@
             <field name="name">Rapports d'activité (maille annuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree</field>
-	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : False, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False}</field>
-            <field name="domain">[('periodicity', '=', 'year')]</field>
+	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : False, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="domain">[('periodicity', '=', 'year'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille annuelle)" id="employee_staffing_report_year_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_year_action"/>
 

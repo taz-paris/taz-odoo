@@ -370,6 +370,7 @@ class HrEmployeeStaffingReport(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Consultant", required=True)
     rel_job_id = fields.Many2one('hr.job', string='Grade', compute=compute_job, store=True, help="Grade du consultant au début de la période")
     rel_work_location_id = fields.Many2one('hr.work.location', compute=compute_work_location, store=True, help="Bureau du consultant au début de la période")
+    rel_company_id = fields.Many2one('res.company', string='Société', related="employee_id.company_id", store=True, help="Société du consultant")
 
     start_date = fields.Date('Date de début', required=True)
     end_date = fields.Date('Date de fin', compute=compute_end_date, store=True)
