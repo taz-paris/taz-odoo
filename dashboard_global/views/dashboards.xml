@@ -52,7 +52,25 @@
 	    </record>
 
 	<menuitem name="Cockpit DM/Manager" id="global_board" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="global_board_action" sequence="5"/>
-	<menuitem name="Créer un projet" id="new_project" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="open_view_project_new_form" sequence="6"/>
+
+	<menuitem name="Projets" id="projects" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="6"/>
+	<menuitem name="Créer un projet" id="new_project" parent="dashboard_global.projects" action="open_view_project_new_form" sequence="5"/>
+	<menuitem name="Mes projets" id="my_projects" parent="dashboard_global.projects" action="project.open_view_project_all_group_stage" sequence="10"/>
+	<menuitem name="Tous les projets" id="all_projects" parent="dashboard_global.projects" action="project_accounting.project_action" sequence="15"/>
+
+	<menuitem name="Stats de staffing" id="employee_staffing_report_menu" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="10"/>
+        <menuitem name="Rapports d'activité (maille hebdomadaire)" id="employee_staffing_report_week_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_week_action"/>
+        <menuitem name="Rapports d'activité (maille mensuelle)" id="employee_staffing_report_month_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_month_action"/>
+        <menuitem name="Rapports d'activité (maille trimestrielle)" id="employee_staffing_report_quarter_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_quarter_action"/>
+        <menuitem name="Rapports d'activité (maille semestrielle)" id="employee_staffing_report_semester_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_semester_action"/>
+        <menuitem name="Rapports d'activité (maille annuelle)" id="employee_staffing_report_year_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_year_action"/>
+
+
 	<menuitem id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="1"/>
+
+	    <!-- Masquer les modules de base, sauf poru le super admin -->
+	    <record  id="spreadsheet_dashboard.spreadsheet_dashboard_menu_dashboard" model="ir.ui.menu">
+		    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+	    </record>
    </data>
 </odoo>
