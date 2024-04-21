@@ -23,6 +23,7 @@
 			    </div>
 		    </field> 
 		    <field name="property_account_position_id" position="after">
+			    <field name="is_probono_partner"/>
 			    <field name="is_protected_partner"/>
 		    </field>
 		<xpath expr='//notebook' position="inside">

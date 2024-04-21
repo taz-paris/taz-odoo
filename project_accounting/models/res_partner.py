@@ -89,5 +89,4 @@ class projectAccountingResPartner(models.Model):
      project_ids = fields.One2many('project.project', 'partner_id', string="Projets")
      has_project_started_this_year = fields.Boolean('Un projet a débuté cette année', compute=compute_has_project_started_this_year, store=True)
      is_protected_partner = fields.Boolean('Fiche entreprise protégée', compute=_compute_protected_partner, help="Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut être modifiée que par un ADV.")
-
-
+     is_probono_partner = fields.Boolean('Client probono', help="Client pour lequel on réalise des mission pro bono (gratuite). Si cette case est cochée, les projets pour ce client final pourront passer au statut Commandé sans que le montant ne soit renseigné sur la Structure au lancement du projet.")

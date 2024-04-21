@@ -120,7 +120,7 @@ class staffingAnalyticLine(models.Model):
             ('project_employee_validated', 'Pointage (validé ou non)'),
         ])
 
-    staffing_need_id = fields.Many2one('staffing.need', ondelete="restrict")
+    staffing_need_id = fields.Many2one('staffing.need', ondelete="set null") # On delete is "set null" and not "restrict" because on Napta (and Odoo native), a timesheet is linked to a project, so the staffing need can be deleted without the timesheet (but a userperiod has to be linked to a stafffing need)
     rel_project_staffing_aggregation = fields.Selection(related='project_id.staffing_aggregation', store=True)
     hr_cost_id = fields.Many2one('hr.cost', ondelete="restrict")
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
