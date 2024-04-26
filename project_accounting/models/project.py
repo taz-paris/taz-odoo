@@ -100,13 +100,17 @@ class projectAccountProject(models.Model):
                     if record.stage_id.id not in [6, 2, 9, 3]: # ET ancien statut était dans [Avt-froid / avt-chaud / perdu / annulée]
                         vals['date_win_loose'] = datetime.now() 
 
+        res = super().write(vals)
+
+        for record in self :
+            if 'stage_id' in vals.keys():
                 if new_stage_id.id in [6, 2, 9, 3] : # nouveau statut appartient à l'un des statuts [Accord client / Commandé / Prod terminée / Clos]
                     if not(record.partner_id.is_probono_partner) and not(record.order_amount_initial) :
                         raise ValidationError(_("Le montant HT piloté initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s, hormis pour les clients pro bono." %(new_stage_id.name)))
                     if not(record.order_cost_initial) :
                         raise ValidationError(_("Le coût total initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s." %(new_stage_id.name)))
 
-        res = super().write(vals)
+
         return res
 
 

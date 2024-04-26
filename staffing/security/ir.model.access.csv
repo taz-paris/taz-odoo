@@ -7,4 +7,6 @@
 "timesheet_navigator_admin","timesheet_navigator_admin","staffing.model_timesheet_navigator","taz-common.taz-basic","True","True","True","True"
 "project_group_admin","project_group_admin","staffing.model_project_group","project.group_project_user","True","True","True","True"
 "employee_staffing_report_readonly","employee_staffing_report_readonly","staffing.model_hr_employee_staffing_report","taz-common.taz-basic","True","False","False","False"
+"hr_job_readonly","hr_job_readonly","hr.model_hr_job","taz-common.taz-basic","True","False","False","False"
+"hr_contract_type_readonly","hr_contract_type_readonly","hr.model_hr_contract_type","taz-common.taz-basic","True","False","False","False"
 "employee_staffing_report_admin","employee_staffing_report_admin","staffing.model_hr_employee_staffing_report","base.group_system","True","True","True","True"
