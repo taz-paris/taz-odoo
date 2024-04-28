@@ -15,7 +15,7 @@ import pandas as pd
 from bokeh.models import Label, Title, NumeralTickFormatter, Band
 import time
 import locale
-locale.setlocale(locale.LC_ALL, 'fr_FR')
+locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
 
 class projectAccountProject(models.Model):
     _inherit = "project.project"
