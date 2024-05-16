@@ -77,7 +77,7 @@
 		    <separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
-            	    <filter name="not_tracked" string="Comptes ni prioritaires, ni actifs" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
+            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
 		    <separator/>
 		    <group expand="0" string="Group By">
 			<filter string="Niveau de priorité" name="group_rel_business_priority" context="{'group_by': 'rel_business_priority'}"/>
@@ -153,7 +153,7 @@
 		    <separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
-            	    <filter name="not_tracked" string="Comptes ni prioritaires, ni actifs" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
+            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
 		    <separator/>
 		    <group expand="0" string="Group By">
 			<filter string="Niveau de priorité" name="group_rel_business_priority" context="{'group_by': 'rel_business_priority'}"/>

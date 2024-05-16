@@ -21,9 +21,9 @@ class tazResIndustry(models.Model):
     partner_ids = fields.One2many('res.partner', 'industry_id', string="Entreprises", domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
     account_plan_url = fields.Char("Lien vers le dossier du plan de compte")
     business_priority = fields.Selection([
-         ('priority_target', '1-Compte prioritaire'),
-         ('active', '2-Compte actif'),
-         ('not_tracked', '3-Ni prioritaire, ni actif'),
+         ('active', '1-Compte actif'),
+         ('priority_target', '2-Compte prioritaire'),
+         ('not_tracked', '3-Opportunités'),
     ], "Niveau de priorité", default='not_tracked')
 
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
