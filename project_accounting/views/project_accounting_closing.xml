@@ -63,6 +63,8 @@
 					<field name="company_id" invisible="1"/>
 					<field name="company_id" groups="base.group_multi_company"/>
 					<field name="project_id" attrs="{'readonly':[('project_id','!=',False)]}"/>
+					<field name="rel_project_user_id" string="Directeur de mission"/>
+					<field name="rel_project_manager_user_id" string="Manager en appui du DM"/>
 				    <label for="rel_project_date_start" string="Dates de début/fin"/>
 				    <div name="dates" class="o_row">
 					<field name="rel_project_date_start" widget="daterange" />
@@ -215,6 +217,7 @@
                 <search string="Search Project accounting closing">
 		    <field name="project_id" string="Projet"/>
                     <field name="rel_project_user_id" string="Directeur de mission (nom de famille)"/>
+					<field name="rel_project_manager_user_id" string="Manager en appui du DM (nom de famille)"/>
                     <field name="rel_project_partner_id" string="Client" filter_domain="[('rel_project_partner_id', 'child_of', self)]"/>
                     <separator/>
                     <filter string="Date de la clôture comptable" name="closing_date" date="closing_date"/>
@@ -223,15 +226,16 @@
                     <separator/>
                     <filter string="Clôture non validée" name="not_validated" domain="[('is_validated', '=', False)]"/>
                     <separator/>
-		    <filter string="Mes clôtures" name="my_project_accounting_closing" domain="[('rel_project_user_id', '=', uid)]"/>
+					<filter string="Mes clôtures" name="my_project_accounting_closing" domain="['|',('rel_project_user_id', '=', uid),('rel_project_manager_user_id', '=', uid)]"/>
                     <separator/>
                     <group expand="0" string="Group By">
-			<filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
-			<filter string="Date de la clôture comptable" name="closing_date" context="{'group_by': 'closing_date'}"/>
-                        <filter string="Directeur de mission" name="Manager" context="{'group_by': 'rel_project_user_id'}"/>
-                        <filter string="Client" name="Partner" context="{'group_by': 'rel_project_partner_id'}"/>
+						<filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
+						<filter string="Date de la clôture comptable" name="closing_date" context="{'group_by': 'closing_date'}"/>
+                        <filter string="Directeur de mission" name="project_director" context="{'group_by': 'rel_project_user_id'}"/>
+						<filter string="Manager en appui du DM" name="project_manager" context="{'group_by': 'rel_project_manager_user_id'}"/>
+                        <filter string="Client" name="partner" context="{'group_by': 'rel_project_partner_id'}"/>
                         <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}" />
-		        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+		        		<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
             </field>

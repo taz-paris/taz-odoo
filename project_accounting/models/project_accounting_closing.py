@@ -240,6 +240,7 @@ class projectAccountingClosing(models.Model):
     rel_project_date = fields.Date(related='project_id.date')
     rel_project_stage_id = fields.Many2one(related='project_id.stage_id', string="Statut actuel")
     rel_project_accounting_closing_ids = fields.One2many(related='project_id.accounting_closing_ids')
+    rel_project_manager_user_id = fields.Many2one(related='project_id.project_manager.user_id', store=True)
     original_stage_id = fields.Many2one('project.project.stage', readonly=True, string='Statut début clôture', help='Statut du projet à la création de la clôture ("photo")')
     closing_date = fields.Date("Date de clôture", required=False, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)
