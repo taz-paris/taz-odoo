@@ -29,7 +29,7 @@
                     <separator/>
                     <filter string="Projets de comptes prioritaires" name="priority_target" domain="[('rel_industry_business_priority', '=', 'priority_target')]"/>
                     <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>
-                    <filter string="Projets de comptes ni prioritaires, ni actifs" name="active" domain="[('rel_industry_business_priority', 'not in', ['priority_target','active'])]"/>
+                    <filter string="Projets de comptes à opportunités" name="active" domain="[('rel_industry_business_priority', 'not in', ['priority_target','active'])]"/>
                     <separator/>
 		    <filter string="Projets non annulés/non perdus avec date de passage 3-Accord client/4-Commandé+ cette année ou non valorisée" name="win_loose_this_year" 
 			    domain="[('stage_id.id', 'not in', [4,8]), '|', ('date_win_loose', '=', False), '&amp;', ('date_win_loose', '&gt;=', time.strftime('%%Y-01-01')), ('date_win_loose', '&lt;=', time.strftime('%%Y-12-31'))]"/>

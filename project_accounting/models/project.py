@@ -200,7 +200,7 @@ class projectAccountProject(models.Model):
             if not(self.book_validation_employee_id):
                 is_closable = False
                 error_message += "   - Le book n'est pas validé par le DM.\n"
-            if not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
+            if not(self.is_validated_order) or not (self.is_validated_book) or not(self.is_validated_purchase_order) or not(self.is_consistant_outsourcing) or not(self.is_consistant_prevent_napta_creation) or not(self.is_outsource_part_amount_current) or not(self.is_sale_order_with_draft) or not(self.is_affected_book):
                 is_closable = False
                 error_message += "   - Au moins l'un des messages d'erreur bloquant de la fiche projet n'est pas résolu.\n"
             if self.company_to_invoice_left != 0.0 :

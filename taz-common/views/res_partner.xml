@@ -203,7 +203,7 @@
 		<separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
-            	    <filter name="not_tracked" string="Comptes ni prioritaires, ni actifs" domain="[('business_priority', 'not in', ['priority_target', 'active'])]"/>
+            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', 'not in', ['priority_target', 'active'])]"/>
 		<separator/>
 		<separator/>
 		<group expand="0" string="Group By">
