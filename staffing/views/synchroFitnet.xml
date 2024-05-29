@@ -11,6 +11,7 @@
      </record>
 	  -->
 
+	<!--
         <record id="res_partner_fitnet_view_form_inherit" model="ir.ui.view">
             <field name="name">Partner</field>
             <field name="model">res.partner</field>
@@ -254,5 +255,6 @@
                 </field>
             </field>
         </record>
+	-->
    </data>
 </odoo>

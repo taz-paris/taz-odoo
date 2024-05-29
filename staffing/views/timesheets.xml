@@ -17,7 +17,9 @@
 				<field name="unit_amount" widget="timesheet_uom" sum="Total" readonly="1"/>
 				-->
 				<field name="encoding_uom_id" optional="show" readonly="1"/>
+				<!--
 				<field name="fitnet_id" optional="show" readonly="1"/>
+				-->
 				<field name="id" optional="show" readonly="1"/>
 			</tree>
                 </field>
