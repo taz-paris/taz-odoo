@@ -98,7 +98,7 @@ class projectAccountProject(models.Model):
                         vals['date_win_loose'] = datetime.now() 
                 elif new_stage_id.id in [6, 2, 9, 3]: # nouveau statut appartient à l'un des statuts [Accord client / Commandé / Prod terminée / Clos]
                     if record.stage_id.id not in [6, 2, 9, 3]: # ET ancien statut était dans [Avt-froid / avt-chaud / perdu / annulée]
-                        vals['date_win_loose'] = datetime.now() 
+                        vals['date_win_loose'] = datetime.now()
 
         res = super().write(vals)
 
@@ -109,7 +109,12 @@ class projectAccountProject(models.Model):
                         raise ValidationError(_("Le montant HT piloté initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s, hormis pour les clients pro bono." %(new_stage_id.name)))
                     if not(record.order_cost_initial) :
                         raise ValidationError(_("Le coût total initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s." %(new_stage_id.name)))
-
+                if new_stage_id.id in [9, 3]: # nouveau statut est prod terminée
+                    if not (record.deliverable_indexation) or not (record.sales_proposal_indexation) or not (
+                    record.commercial_reference_indexation) or not (record.commercial_reference_indexation):
+                        raise ValidationError(
+                            _("Tous les attributs de l'onglet Capitalisation doivent être valorisés pour passer au statut %s" % (
+                                new_stage_id.name)))
 
         return res
 
@@ -245,6 +250,21 @@ class projectAccountProject(models.Model):
                 is_closable = False
                 error_message += "   - Il reste des provisions ou du stock sur la dernière clôture.\n"
 
+            if not self.sales_proposal_indexation :
+                is_closable = False
+                error_message += "   - L'attribut Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé.\n"
+
+            if self.deliverable_indexation != False and self.deliverable_indexation != 'not_to_be_capitalized_without_anonymization':
+                is_closable = False
+                error_message += "   - L'attribut Livrables dans l'onglet Capitalisation est valorisée. \n"
+
+            if self.success_story_indexation != False and self.success_story_indexation != 'no_success_story':
+                is_closable = False
+                error_message += "   - L'attribut Success story dans l'onglet Capitalisation est valorisé. \n"
+
+            if self.commercial_reference_indexation != False and self.commercial_reference_indexation != 'no_commercial_reference' :
+                is_closable = False
+                error_message += "   - L'attribut référence commerciale dans l'onglet Capitlisation est valorisé. \n"
 
         return is_closable, error_message
 
@@ -283,6 +303,32 @@ class projectAccountProject(models.Model):
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False, check_company=True) #Si required=True ça bloque la création de nouvelle company 
     #TODO : synchroniser cette valeur avec user_id avec un oneChange
     project_manager = fields.Many2one('hr.employee', "Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", check_company=True)
+
+    # Champs relatifs à la capitalisation des projets
+    sales_proposal_indexation = fields.Selection([
+        ('to_be_capitalized', 'À capitaliser'),
+        ('not_to_be_capitalized', 'À ne pas capitaliser'),
+        ('capitalized', "Capitalisée"),
+    ], string="Proposition commerciale")
+    deliverable_indexation = fields.Selection([
+        ('to_be_capitalized_without_anonymization', 'À capitaliser (sans anonymisation)'),
+        ('to_be_capitalized_with_anonymization', 'À capitaliser (avec anonymisation)'),
+        ('not_to_be_capitalized', 'À ne pas capitaliser'),
+        ('capitalized', "Capitalisé"),
+    ], string="Livrable")
+    success_story_indexation = fields.Selection([
+        ('yes_success_story', 'Oui'),
+        ('no_success_story', 'Non'),
+        ('success_story_completed', 'Réalisée'),
+    ], string="Success story")
+    commercial_reference_indexation = fields.Selection([
+        ('yes_commercial_reference', 'Oui'),
+        ('no_commercial_reference', 'Non'),
+        ('commercial_reference_created', 'Référence créée'),
+        ('commercial_reference_validated', "Référence validée"),
+    ], string="Référence commerciale")
+
+
     user_id = fields.Many2one(compute=_compute_user_id, store=True)
     remark = fields.Text("Remarques")
 
