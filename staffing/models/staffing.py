@@ -16,7 +16,7 @@ class staffingNeed(models.Model):
         for record in self:
             record.name = "%s - %s" % (record.project_id.name or "", record.job_id.name or "")
             if record.staffed_employee_id:
-                record.name = "%s - %s %s" % (record.project_id.name or "", record.staffed_employee_id.first_name or "", record.staffed_employee_id.name or "")
+                record.name = "%s - %s %s" % (record.project_id.name or "", record.sudo().staffed_employee_id.first_name or "", record.sudo().staffed_employee_id.name or "")
 
     @api.onchange('project_id')
     def onchange_project_id(self):
