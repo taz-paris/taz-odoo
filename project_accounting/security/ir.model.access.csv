@@ -11,7 +11,6 @@
 "project_accounting_closing_readonly","project_bookaccounting_closing_readonly","project_accounting.model_project_accounting_closing","taz-common.taz-basic","True","False","False","False"
 "project_accounting_closing_admin","project_bookaccounting_closing_admin","project_accounting.model_project_accounting_closing","account.group_account_manager","True","True","True","True"
 "company_account_manager_write","company_account_manager_write","base.model_res_company","account.group_account_manager","True","True","False","False"
-"access_project_project","project.project","model_project_project","project.group_project_user","True","True","True","True"
 "access_wizard_accounting_closing_mass_creation","access_wizard_accounting_closing_mass_creation","project_accounting.model_wizard_accounting_closing_mass_creation","account.group_account_manager","True","True","True","True"
 "project_employee_book_goal_admin","project_employee_book_goal_admin","project_accounting.model_project_employee_book_goal","taz-common.taz-management","True","True","True","True"
 "project_employee_book_goal_readonly","project_employee_book_goal_readonly","project_accounting.model_project_employee_book_goal","taz-common.taz-basic","True","False","False","False"

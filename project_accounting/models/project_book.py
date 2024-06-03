@@ -119,7 +119,7 @@ class projectBookEmployeeDistribution(models.Model):
     @api.depends('employee_id.name', 'book_factor')
     def compute_display_name(self):
         for rec in self:
-            rec.display_name = str(rec.final_book_factor) + ' > ' + str(rec.employee_id.name)
+            rec.display_name = str(rec.final_book_factor) + ' > ' + str(rec.sudo().employee_id.name)
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     employee_id = fields.Many2one('hr.employee', domain=[('active', '=', True)], string="Salarié", ondelete='restrict', check_company=True)
