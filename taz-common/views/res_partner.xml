@@ -607,6 +607,11 @@
         <field name="comment">Basic rights.</field>
     </record>
 
+    <record id="taz-adv" model="res.groups">
+        <field name="name">TAZ-ADV</field>
+        <field name="comment">Rights for accounting and projets management.</field>
+    </record>
+
     <!-- Masquer les modules de base, sauf poru le super admin -->
     <record  id="mail.menu_root_discuss" model="ir.ui.menu">
 	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
