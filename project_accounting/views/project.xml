@@ -37,7 +37,6 @@
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
 					<separator/>
 					<filter string="Projet avec au moins un élément à capitaliser" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', ['to_be_capitalized']),('deliverable_indexation', 'in', ['to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization']),('success_story_indexation', 'in', ['yes_success_story']),('commercial_reference_indexation', 'in', ['yes_commercial_reference']),]"/>
-					<filter string="Projet avec propale capitalisée ou livrable capitalisé ou succes story réalisée ou référence validée" name="project_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', ['capitalized']),('deliverable_indexation', 'in', ['capitalized']),('success_story_indexation', 'in', ['success_story_completed']),('commercial_reference_indexation', 'in', ['commercial_reference_validated']),]"/>
                     <group expand="0" string="Group By">
                         <filter string="Directeur de mission" name="Manager" context="{'group_by': 'project_director_employee_id'}"/>
                         <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
@@ -86,6 +85,10 @@
 		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
 		  <field name="agreement_id" optional="hide"/>
 		  <field name="reporting_sum_company_outsource_code3_code_4" sum="Total" optional="show"/>
+		  <field name="sales_proposal_indexation" optional="hide"/>
+		  <field name="deliverable_indexation" optional="hide"/>
+		  <field name="success_story_indexation" optional="hide"/>
+		  <field name="commercial_reference_indexation" optional="hide"/>
 		</tree>
 	      </field>
 	    </record>
