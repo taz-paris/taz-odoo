@@ -113,7 +113,7 @@
           <field name="type">ir.actions.server</field>
           <field name="state">code</field>
           <field name="code">action = model.reset_all_reports()</field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_manager'))]" />
+          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]" />
        </record>
        <menuitem name="Supprimer puis recalculer tous les rapports d'activité (peut prendre plusieurs minutes)" id="reset_all_reports_menu" parent="staffing.employee_staffing_report_menu" action="reset_all_reports_action"/>
 
@@ -126,7 +126,7 @@
 for rec in records:
     rec.with_context().availability()
 	    </field>
-            <field name="groups_id" eval="[(4, ref('account.group_account_manager'))]" />
+            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]" />
   	</record>
 
 

@@ -45,7 +45,7 @@ class projectAccountingResPartner(models.Model):
          for rec in self :
              #_logger.info(rec.name)
              #_logger.info(vals)
-             if rec._precompute_protected() and not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
+             if rec._precompute_protected() and not self.env.user.has_group('account.group_account_user'):
                  if any(field in PROTECTED_FIELD_LIST for field in vals.keys()):
                     raise ValidationError(_("Cette fiche est protégée : seul un ADV peut modifier le nom, le libellé long, le groupe, l'adresse postale, et les données comptables (onglet Facturation) de cette fiche."))
          super().write(vals)

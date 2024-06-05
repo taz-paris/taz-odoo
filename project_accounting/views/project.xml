@@ -79,7 +79,7 @@
 		  <field name="is_validated_book" optional="hide" />
 		  <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés"/>
 		  <field name="remark" optional="hide" />
-		  <field name="invoicing_comment" optional="show" groups="account.group_account_manager"/>
+		  <field name="invoicing_comment" optional="show" groups="account.group_account_user"/>
             	  <field name="order_to_invoice_company" optional="hide" sum="Total"/>
             	  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
 		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
@@ -191,7 +191,7 @@
 					    </div>
 					    <field name="project_group_id"/>
 					    <field name="remark"/>
-					    <field name="invoicing_comment" groups="account.group_account_manager"/>
+					    <field name="invoicing_comment" groups="account.group_account_user"/>
 					</group>
 				   </group>
 				<notebook>
@@ -333,7 +333,7 @@
 						<group string="Book brut du projet">
 							<group>
 								<field name="default_book_end" />
-								<field name="is_book_manually_computed" groups="account.group_account_manager" />
+								<field name="is_book_manually_computed" groups="account.group_account_user" />
 								<field name="is_book_manually_computed" invisible="1"/>
 							</group>
 							<group>
@@ -599,7 +599,7 @@
           <field name="state">code</field>
           <field name="code">for rec in records:
                   rec.compute()</field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_manager'))]" />
+          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]" />
   </record>
 
 	    <!-- ACTION APPLICAQUE AUX UTILISATUER QUI ONT LE droit de gestion des étapes du projet (ie admin) -->

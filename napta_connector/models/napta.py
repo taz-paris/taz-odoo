@@ -1045,9 +1045,9 @@ class naptaHrLeave(models.Model):
                 }
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True, 'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
-        self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
+        #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
-
+    """
     def correct_leave_timesheet_stock(self):
         _logger.info('=========== Détection des incohérences entre hr.leave et analytic.line')
         leaves = self.env['hr.leave'].search([('napta_id', '!=', None), ('state', '=', "validate"), ('request_date_from', '>', '2022-12-31')])
@@ -1062,6 +1062,7 @@ class naptaHrLeave(models.Model):
                 #leave.number_of_days = leave.number_of_days 
                 #_logger.info('      Corrigé')
             self.env.cr.commit()
+    """
 
 
 class naptaHrLeaveType(models.Model):

@@ -81,7 +81,7 @@ class projectAccountProject(models.Model):
                 current_stage_id = record.stage_id
 
                 if new_stage_id not in current_stage_id.allowed_next_stage_ids:
-                    if not (self.env.user.has_group('account.group_account_user') or self.env.user.has_group('account.group_account_manager')):
+                    if not self.env.user.has_group('account.group_account_user'):
                         raise ValidationError(_("Seul un ADV peut paser un projet du statut %s au statut %s." %(current_stage_id.name, new_stage_id.name)))
 
                 if new_stage_id.state == 'closed' :
