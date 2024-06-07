@@ -5,7 +5,7 @@
 }
 
 .o_form_sheet_bg .o_form_statusbar {
-    position: fixed !important;
+    /* This doesn't work : it hides the alert info banner (for Credit in circulation for instance) position: fixed !important;*/
     width: 100%;
     z-index: 11;
 }

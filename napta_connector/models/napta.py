@@ -847,6 +847,7 @@ class naptaHrContract(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID", copy=False)
+    productive_share = fields.Float("Part productive", default=100.0) 
 
 
     def create_update_odoo_user_history(self):
@@ -913,6 +914,7 @@ class naptaHrContract(models.Model):
                     'work_location_id' : {'napta_id' : user_history['attributes']['location_id']},
                     'is_daily_cost_overridden' : False,
                     'daily_cost' : 0.0,
+                    'productive_share' : user_history['attributes']['productive_share'] * 100.0,
                 }
             ########## Gestion des surcharges de CJM individuel par rapport au grade
 

@@ -61,8 +61,8 @@ class projectAccountingAccountMove(models.Model):
     def _compute_partner_bank_id(self):
         super()._compute_partner_bank_id()
         for move in self:
-            if move.partner_id.default_invoice_payement_bank_account:
-                move.partner_bank_id = move.partner_id.default_invoice_payement_bank_account
+            if move.partner_id.property_payment_bank_account:
+                move.partner_bank_id = move.partner_id.property_payment_bank_account.id
     
     def _compute_payments_widget_to_reconcile_info(self):
         _logger.info('_compute_payments_widget_to_reconcile_info')
