@@ -24,6 +24,10 @@
  			<attribute name="placeholder">Référence client du Bon de commande</attribute>
 		</field>
 
+		<field name="payment_term_id" position="attributes">
+ 			<attribute name="required">1</attribute>
+		</field>
+
 		<field name="partner_id" position="attributes">
 			<attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
 		</field>
