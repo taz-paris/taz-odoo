@@ -19,30 +19,30 @@
 			<!-- Achats-->
 			<field name="purchase_period_amount" optional="show" sum="Total"/>
 			<!-- Total provision -->
-			<field name="provision_previous_balance_sum" optional="hide" sum="Total"/>
-			<field name="provision_balance_sum" optional="hide" sum="Total"/>
+			<field name="provision_previous_balance_sum" optional="hide" />
+			<field name="provision_balance_sum" optional="hide"/>
 			<!-- PCA -->
-			<field name="pca_previous_balance" optional="hide" sum="Total"/>
+			<field name="pca_previous_balance" optional="hide"/>
 			<field name="pca_period_amount" optional="show" sum="Total"/>
-			<field name="pca_balance" optional="hide" sum="Total"/>
+			<field name="pca_balance" optional="hide"/>
 			<!-- FAE -->
-			<field name="fae_previous_balance" optional="hide" sum="Total"/>
+			<field name="fae_previous_balance" optional="hide"/>
 			<field name="fae_period_amount" optional="show" sum="Total"/>
-			<field name="fae_balance" optional="hide" sum="Total"/>
+			<field name="fae_balance" optional="hide"/>
 			<!-- CCA -->
-			<field name="cca_previous_balance" optional="hide" sum="Total"/>
+			<field name="cca_previous_balance" optional="hide"/>
 			<field name="cca_period_amount" optional="show" sum="Total"/>
-			<field name="cca_balance" optional="hide" sum="Total"/>
+			<field name="cca_balance" optional="hide"/>
 			<!-- FNP -->
-			<field name="fnp_previous_balance" optional="hide" sum="Total"/>
+			<field name="fnp_previous_balance" optional="hide"/>
 			<field name="fnp_period_amount" optional="show" sum="Total"/>
-			<field name="fnp_balance" optional="hide" sum="Total"/>
+			<field name="fnp_balance" optional="hide"/>
 			<!-- Production -->
-			<field name="production_previous_balance" optional="hide" sum="Total"/>
+			<field name="production_previous_balance" optional="hide"/>
 			<field name="production_period_amount" optional="show" sum="Total"/>
-			<field name="production_stock" optional="show" sum="Total"/>
+			<field name="production_stock" optional="show"/>
 			<field name="production_destocking" optional="show" sum="Total"/>
-			<field name="production_balance" optional="hide" sum="Total"/>
+			<field name="production_balance" optional="hide"/>
 			<!-- Chiffre d'afffaire -->
 			<field name="gross_revenue" optional="hide" sum="Total"/>
 			<field name="internal_revenue" optional="hide" sum="Total"/>
