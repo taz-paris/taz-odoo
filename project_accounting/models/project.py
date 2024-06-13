@@ -255,22 +255,6 @@ class projectAccountProject(models.Model):
                 is_closable = False
                 error_message += "   - Il reste des provisions ou du stock sur la dernière clôture.\n"
 
-            if not self.sales_proposal_indexation :
-                is_closable = False
-                error_message += "   - L'attribut Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé.\n"
-
-            if self.deliverable_indexation != False and self.deliverable_indexation != 'not_to_be_capitalized':
-                is_closable = False
-                error_message += "   - L'attribut Livrables dans l'onglet Capitalisation est valorisée. \n"
-
-            if self.success_story_indexation != False and self.success_story_indexation != 'no_success_story':
-                is_closable = False
-                error_message += "   - L'attribut Success story dans l'onglet Capitalisation est valorisé. \n"
-
-            if self.commercial_reference_indexation != False and self.commercial_reference_indexation != 'no_commercial_reference' :
-                is_closable = False
-                error_message += "   - L'attribut référence commerciale dans l'onglet Capitlisation est valorisé. \n"
-
         return is_closable, error_message
 
 
@@ -312,25 +296,29 @@ class projectAccountProject(models.Model):
     # Champs relatifs à la capitalisation des projets
     sales_proposal_indexation = fields.Selection([
         ('to_be_capitalized', 'À capitaliser'),
-        ('not_to_be_capitalized', 'À ne pas capitaliser'),
+        ('not_to_be_capitalized', 'Ne pas capitaliser'),
         ('capitalized', "Capitalisée"),
+        ('not_specified','Non renseigné'),
     ], string="Proposition commerciale")
     deliverable_indexation = fields.Selection([
         ('to_be_capitalized_without_anonymization', 'À capitaliser (sans anonymisation)'),
         ('to_be_capitalized_with_anonymization', 'À capitaliser (avec anonymisation)'),
-        ('not_to_be_capitalized', 'À ne pas capitaliser'),
+        ('not_to_be_capitalized', 'Ne pas capitaliser'),
         ('capitalized', "Capitalisé"),
+        ('not_specified','Non renseigné')
     ], string="Livrable")
     success_story_indexation = fields.Selection([
-        ('yes_success_story', 'Oui'),
-        ('no_success_story', 'Non'),
+        ('yes_success_story', 'À réaliser'),
+        ('no_success_story', 'Ne pas réaliser'),
         ('success_story_completed', 'Réalisée'),
+        ('not_specified', 'Non renseigné'),
     ], string="Success story")
     commercial_reference_indexation = fields.Selection([
-        ('yes_commercial_reference', 'Oui'),
-        ('no_commercial_reference', 'Non'),
+        ('yes_commercial_reference', 'Référence à créer'),
+        ('no_commercial_reference', 'Ne pas créer'),
         ('commercial_reference_created', 'Référence créée'),
         ('commercial_reference_validated', "Référence validée"),
+        ('not_specified', 'Non renseigné')
     ], string="Référence commerciale")
 
 
@@ -376,6 +364,10 @@ class projectAccountProject(models.Model):
 	'other_part_cost_initial',
 	'project_outsourcing_link_ids',
 	'book_employee_distribution_ids', 'book_validation_datetime',
+        'sales_proposal_indexation',
+        'deliverable_indexation',
+        'commercial_reference_indexation',
+        'success_story_indexation'
     )
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
@@ -592,7 +584,27 @@ class projectAccountProject(models.Model):
             if 0.0 in reselling_subtotal_by_order_id.values():
                 is_outsource_part_amount_current = False
             rec.is_outsource_part_amount_current = is_outsource_part_amount_current
-            
+
+            is_filled_sales_proposal_indexation = True
+            if not(rec.sales_proposal_indexation) and rec.stage_id.id in [6, 2, 9, 3, 8]:
+                is_filled_sales_proposal_indexation = False
+            rec.is_filled_sales_proposal_indexation = is_filled_sales_proposal_indexation
+
+            is_filled_deliverable_indexation = True
+            if not (rec.deliverable_indexation) and rec.stage_id.id in [9, 3]:
+                is_filled_deliverable_indexation = False
+            rec.is_filled_deliverable_indexation = is_filled_deliverable_indexation
+
+            is_filled_commercial_reference_indexation = True
+            if not (rec.commercial_reference_indexation) and rec.stage_id.id in [9, 3]:
+                is_filled_commercial_reference_indexation = False
+            rec.is_filled_commercial_reference_indexation = is_filled_commercial_reference_indexation
+
+            is_filled_success_story_indexation = True
+            if not (rec.success_story_indexation) and rec.stage_id.id in [9, 3]:
+                is_filled_success_story_indexation = False
+            rec.is_filled_success_story_indexation = is_filled_success_story_indexation
+
 
             if rec.other_part_marging_rate_current >= float(self.env['ir.config_parameter'].sudo().get_param("other_part_marging_rate_alert_level")):
                 rec.other_part_marging_rate_controle_OK = True
@@ -602,7 +614,7 @@ class projectAccountProject(models.Model):
             if not(rec.number):
                 rec.is_review_needed = False
             else:
-                if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
+                if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book) or not(rec.is_filled_sales_proposal_indexation) or not(rec.is_filled_deliverable_indexation) or not(rec.is_filled_commercial_reference_indexation) or not(rec.is_filled_success_story_indexation):
                     rec.is_review_needed = True
                 else :
                     rec.is_review_needed = False
@@ -1313,3 +1325,9 @@ class projectAccountProject(models.Model):
     reporting_company_part_amount_current_at_least_code_4 = fields.Float('CA interne commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
     reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', help='Somme CA interne + markup commandé code 3/4/5/6', compute=compute_reporting_shortcuts, store=True)
     #purchase_line_ids = fields.One2many('purchase.order.line', 'rel_project_ids')
+
+    # CAPITALIZATION
+    is_filled_sales_proposal_indexation = fields.Boolean("Champ Proposition commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé")
+    is_filled_deliverable_indexation = fields.Boolean("Champ Livrable valorisé", store=True, commpute=compute, help="FAUX si le champ Livrable dans l'onglet Capitalisation n'est pas valorisé" )
+    is_filled_success_story_indexation = fields.Boolean("Champ Success story valorisé", store=True, compute=compute, help="FAUX si le champ Success story dans l'onglet Capitalisation n'est pa valorisé")
+    is_filled_commercial_reference_indexation = fields.Boolean("Champ Référence commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Référence commerciale dans l'onglet Capitalisation n'est pas valorisé")

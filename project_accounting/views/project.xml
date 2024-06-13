@@ -36,7 +36,7 @@
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
 					<separator/>
-					<filter string="Projet avec au moins un élément à capitaliser" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', ['to_be_capitalized']),('deliverable_indexation', 'in', ['to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization']),('success_story_indexation', 'in', ['yes_success_story']),('commercial_reference_indexation', 'in', ['yes_commercial_reference']),]"/>
+					<filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', ['to_be_capitalized','not_specified']),('deliverable_indexation', 'in', ['to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', ['yes_success_story','not_specified']),('commercial_reference_indexation', 'in', ['yes_commercial_reference','not_specified']),]"/>
                     <group expand="0" string="Group By">
                         <filter string="Directeur de mission" name="Manager" context="{'group_by': 'project_director_employee_id'}"/>
                         <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
@@ -149,6 +149,18 @@
 				<div class="alert alert-info mb-1" role="alert" attrs="{'invisible': [('other_part_marging_rate_controle_OK', '=', True)]}">
 					Le taux de marge actuel (sur prix de vente) sur les autres prestations est inférieur à la cote d'alerte.
 				</div>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_sales_proposal_indexation', '=', True)]}">
+					Le champ "Proposition commerciale" dans l'onglet Capitalisation n'est pas renseigné
+				</div>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_deliverable_indexation', '=', True)]}">
+					Le champ "Livrable" dans l'onglet Capitalisation n'est pas renseigné
+				</div>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_commercial_reference_indexation', '=', True)]}">
+					Le champ "Référence commerciale" dans l'onglet Capitalisation n'est pas renseigné
+				</div>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_success_story_indexation', '=', True)]}">
+					Le champ "Success story" dans l'onglet Capitalisation n'est pas renseigné
+				</div>
 				<field name="is_validated_order" invisible="1"/>
 				<field name="is_validated_book" invisible="1"/>
 				<field name="is_consistant_outsourcing" invisible="1"/>
@@ -159,6 +171,10 @@
 				<field name="is_outsource_part_amount_current" invisible="1"/>
 				<field name="is_affected_book" invisible="1"/>
 				<field name="other_part_marging_rate_controle_OK" invisible="1"/>
+				<field name="is_filled_sales_proposal_indexation" invisible="1"/>
+				<field name="is_filled_deliverable_indexation" invisible="1"/>
+				<field name="is_filled_commercial_reference_indexation" invisible="1"/>
+				<field name="is_filled_success_story_indexation" invisible="1"/>
 
 					
 				<div class="oe_title">
