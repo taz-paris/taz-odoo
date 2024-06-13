@@ -364,6 +364,10 @@ class projectAccountProject(models.Model):
 	'other_part_cost_initial',
 	'project_outsourcing_link_ids',
 	'book_employee_distribution_ids', 'book_validation_datetime',
+        'sales_proposal_indexation',
+        'deliverable_indexation',
+        'commercial_reference_indexation',
+        'success_story_indexation'
     )
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')
@@ -610,7 +614,7 @@ class projectAccountProject(models.Model):
             if not(rec.number):
                 rec.is_review_needed = False
             else:
-                if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book):
+                if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book) or not(rec.is_filled_sales_proposal_indexation) or not(rec.is_filled_deliverable_indexation) or not(rec.is_filled_commercial_reference_indexation) or not(rec.is_filled_success_story_indexation):
                     rec.is_review_needed = True
                 else :
                     rec.is_review_needed = False
