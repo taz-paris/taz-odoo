@@ -298,27 +298,27 @@ class projectAccountProject(models.Model):
         ('to_be_capitalized', 'À capitaliser'),
         ('not_to_be_capitalized', 'Ne pas capitaliser'),
         ('capitalized', "Capitalisée"),
-        ('not_specified','Non renseigné'),
+        ('not_specified','Pas de réponse du DM'),
     ], string="Proposition commerciale")
     deliverable_indexation = fields.Selection([
         ('to_be_capitalized_without_anonymization', 'À capitaliser (sans anonymisation)'),
         ('to_be_capitalized_with_anonymization', 'À capitaliser (avec anonymisation)'),
         ('not_to_be_capitalized', 'Ne pas capitaliser'),
         ('capitalized', "Capitalisé"),
-        ('not_specified','Non renseigné')
+        ('not_specified','Pas de réponse du DM')
     ], string="Livrable")
     success_story_indexation = fields.Selection([
         ('yes_success_story', 'À réaliser'),
         ('no_success_story', 'Ne pas réaliser'),
         ('success_story_completed', 'Réalisée'),
-        ('not_specified', 'Non renseigné'),
+        ('not_specified', 'Pas de réponse du DM'),
     ], string="Success story")
     commercial_reference_indexation = fields.Selection([
         ('yes_commercial_reference', 'Référence à créer'),
         ('no_commercial_reference', 'Ne pas créer'),
         ('commercial_reference_created', 'Référence créée'),
         ('commercial_reference_validated', "Référence validée"),
-        ('not_specified', 'Non renseigné')
+        ('not_specified', 'Pas de réponse du DM')
     ], string="Référence commerciale")
 
 

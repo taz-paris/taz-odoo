@@ -41,6 +41,7 @@
         'views/wizard_accounting_closing_mass_creation.xml',
         'views/employee_book_goal.xml',
         'views/agreement.xml',
+        'views/product_template.xml',
     ],
 
 

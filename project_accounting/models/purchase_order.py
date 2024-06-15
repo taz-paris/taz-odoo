@@ -124,6 +124,10 @@ class projectAccountingPurchaseOrder(models.Model):
     rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
 
 
+    def _add_supplier_to_product(self):
+        for line in self.order_line:
+            if line.product_id and line.product_id.create_supplier_info_auto :
+                return super()._add_supplier_to_product()
 
 
 class projectAccountingPurchaseOrderLine(models.Model):
