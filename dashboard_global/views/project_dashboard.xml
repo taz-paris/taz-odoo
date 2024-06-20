@@ -198,10 +198,6 @@
 				      ]" />
 	    </record>
 
-	    <menuitem name="Commerce" id="sales" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="7"/>
-	    <menuitem name="Graphique de prise de commande N/N-1 par trimestre" id="project_win_loose" parent="dashboard_global.sales" action="open_view_project_win_loose_action" sequence="10"/>
-	    <menuitem name="Objectifs commerciaux annuels par compte" id="customer_book_goal" parent="dashboard_global.sales" action="taz-common.customer_book_goal_action" sequence="20"/>
-	    <menuitem name="Actions commerciales des 6 derniers mois" id="history_business_action_action" parent="dashboard_global.sales" action="taz-common.history_business_action_action" sequence="30"/>
 
 
    </data>
