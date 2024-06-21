@@ -32,7 +32,7 @@
                 <field name="auto_confirm" position="replace">
                         <field name="auto_confirm" readonly="1" help="Auto-confirm should be false to perfom the two steps registration process : create draft registration, send invitation mail and let it be confirmed by guest." />
                 </field>
-		<xpath expr="//button[@name='%(event.act_event_registration_from_event)d']" position="after">
+		<xpath expr="//button[@name='%(event.act_event_registration_from_event)d']" position="replace">
 			<button name="%(event_registration_light.act_event_registration_from_event_all)d"
                                 type="action"
                                 context="{'search_default_expected': False}"
@@ -41,6 +41,7 @@
                                 help="Tous les invités">
 			<span class="o_stat_text">Invités (tous)</span>
                         </button>
+			<field name="seats_expected" invisible="1"/>
             	</xpath>
             </field>
         </record>
