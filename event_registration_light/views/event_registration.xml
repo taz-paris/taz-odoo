@@ -13,6 +13,12 @@
 				<field name="last_office365_mail_draft" invisible="1" />
 				<field name="comment" widget="text" optional="show" />
 			</field>
+			<field name="create_date" position="attributes">
+				<attribute name="optional">hide</attribute>
+			</field>
+			<field name="create_date" position="after">
+				<field name="write_date"/>
+			</field>
 			<field name="phone" position="attributes">
 				<attribute name="optional">hide</attribute>
 			</field>
@@ -29,6 +35,20 @@
 			<field name="event_ticket_id" position="attributes">
 				<attribute name="optional">hide</attribute>
 			</field>
+
+
+			<field name="state" position="attributes">
+				<attribute name="decoration-warning">state == 'draft'</attribute>
+				<attribute name="decoration-info">state == 'open'</attribute>
+				<attribute name="decoration-danger">state == 'cancel'</attribute>
+				<attribute name="decoration-muted"></attribute>
+			</field>
+			<field name="state" position="after">
+				<field name="rel_partner_parent_id" optional="hide"/>
+				<field name="rel_partner_parent_industry_id" optional="hide"/>
+				<field name="rel_partner_id_user_id" optional="hide"/>
+			</field>
+
 			<xpath expr="//button[@name='action_confirm']" position="before">
 				<button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
 					attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
@@ -73,17 +93,29 @@
 		<field name="arch" type="xml">
 			<xpath expr="//search/filter[@name='filter_is_ongoing']" position="before">
 				<filter string="Contacts dont je suis propriétaire" name="contact_proprietary" domain="[('rel_partner_id_user_id', '=', uid)]"/>
+				<separator/>
 				<filter string="Mes invités (dont je suis responsable de l'envoi de l'invitation)" name="assigned_to_me" domain="[('registration_user_id', '=', uid)]"/>
+				<separator/>
 				<field name="registration_user_id" string="Responsable de l'invitation"/>
+				<separator/>
 				<field name="rel_partner_id_user_id" string="Propriétaire du contact (nom de famille)"/>
-				<filter string="Responsable de l'invitation" name="group_registration_user_id" domain="[]" context="{'group_by':'registration_user_id'}"/>
+				<separator/>
+				<field name="rel_partner_parent_id" string="Entreprise"/>
+				<separator/>
+				<field name="rel_partner_parent_industry_id" string="Compte (ex BD)"/>
 				<separator/>
 				<filter string="Mail automatique" name="mail_auto" domain="[('mail_auto', '=', True)]"/>
 				<filter string="Mail personnalisé" name="mail_perso" domain="[('mail_auto', '=', False)]"/>
 				<separator/>
+				<filter string="Entreprise" name="group_rel_partner_parent_id" domain="[]" context="{'group_by':'rel_partner_parent_id'}"/>
+				<filter string="Compte (ex BD)" name="group_rel_partner_parent_industry_id" domain="[]" context="{'group_by':'rel_partner_parent_industry_id'}"/>
+				<filter string="Propriétaire" name="group_rel_partner_id_user_id" domain="[]" context="{'group_by':'rel_partner_id_user_id'}"/>
+				<filter string="Responsable de l'invitation" name="group_registration_user_id" domain="[]" context="{'group_by':'registration_user_id'}"/>
 			</xpath>
 			<xpath expr="//search/filter[@name='unconfirmed']" position="before">
 				<filter string="Identifié" name="identified" domain="[('state', '=', 'identified')]"/>
+			</xpath>
+			<xpath expr="//search/group/filter[@name='partner']" position="replace">
 			</xpath>
 		</field>
 	    </record>
