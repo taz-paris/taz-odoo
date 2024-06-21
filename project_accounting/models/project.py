@@ -605,6 +605,20 @@ class projectAccountProject(models.Model):
                 is_filled_success_story_indexation = False
             rec.is_filled_success_story_indexation = is_filled_success_story_indexation
 
+            is_filled_csr_project_initiative = True
+            if not (rec.csr_project_initiative) and rec.stage_id.id in [6, 2, 9, 3, 8]:
+                is_filled_csr_project_initiative = False
+            rec.is_filled_csr_project_initiative = is_filled_csr_project_initiative
+
+            is_filled_csr_project_environmental_level = True
+            if not (rec.csr_project_environmental_level) and rec.stage_id.id in [9, 3]:
+                is_filled_csr_project_environmental_level = False
+            rec.is_filled_csr_project_environmental_level = is_filled_csr_project_environmental_level
+
+            is_filled_csr_project_social_level = True
+            if not (rec.csr_project_social_level) and rec.stage_id.id in [9, 3]:
+                is_filled_csr_project_social_level = False
+            rec.is_filled_csr_project_social_level = is_filled_csr_project_social_level
 
             if rec.other_part_marging_rate_current >= float(self.env['ir.config_parameter'].sudo().get_param("other_part_marging_rate_alert_level")):
                 rec.other_part_marging_rate_controle_OK = True
@@ -614,7 +628,7 @@ class projectAccountProject(models.Model):
             if not(rec.number):
                 rec.is_review_needed = False
             else:
-                if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book) or not(rec.is_filled_sales_proposal_indexation) or not(rec.is_filled_deliverable_indexation) or not(rec.is_filled_commercial_reference_indexation) or not(rec.is_filled_success_story_indexation):
+                if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book) or not(rec.is_filled_sales_proposal_indexation) or not(rec.is_filled_deliverable_indexation) or not(rec.is_filled_commercial_reference_indexation) or not(rec.is_filled_success_story_indexation) or not(rec.is_filled_csr_project_initiative) or not(rec.is_filled_csr_project_social_level) or not(rec.is_filled_csr_project_environmental_level):
                     rec.is_review_needed = True
                 else :
                     rec.is_review_needed = False
@@ -1331,3 +1345,28 @@ class projectAccountProject(models.Model):
     is_filled_deliverable_indexation = fields.Boolean("Champ Livrable valorisé", store=True, commpute=compute, help="FAUX si le champ Livrable dans l'onglet Capitalisation n'est pas valorisé" )
     is_filled_success_story_indexation = fields.Boolean("Champ Success story valorisé", store=True, compute=compute, help="FAUX si le champ Success story dans l'onglet Capitalisation n'est pa valorisé")
     is_filled_commercial_reference_indexation = fields.Boolean("Champ Référence commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Référence commerciale dans l'onglet Capitalisation n'est pas valorisé")
+
+    #RSE
+    csr_project_initiative = fields.Selection([
+        ('csr_project','La demande client initiale comportait déjà un volet RSE'),
+        ('yes','Nous avons proposé un volet RSE'),
+        ('no','Nous n\'avons pas proposé de volet RSE'),
+        ('not_specified','Pas de réponse du DM'),
+        ], string="Réflexion apport RSE du projet")
+    is_filled_csr_project_initiative = fields.Boolean("Champ Réflexion apport RSE du projet valorisé", store=True, compute=compute, help="FAUX si le champ Réflexion apport RSE du projet dans l'onglet Structure au lancement n'est pas valorisé")
+    csr_project_environmental_level = fields.Selection([
+        ('level_0', 'Pas essayé'),
+        ('level_1', 'Essayé mais pas réussi'),
+        ('level_2', 'Réussi avec un impact modeste (Sensibilisation / Ajout d’un principe global / etc.)'),
+        ('level_3', 'Réussi avec un impact significatif (Ajout d’un axe avec des projets chiffrés / Décision RSE / etc.)'),
+        ('not_specified','Pas de réponse du DM'),
+        ], string="Bilan volet environnemental")
+    is_filled_csr_project_environmental_level = fields.Boolean("Champp Bilan volet environnemental valorisé", store=True, compute=compute, help="FAUX si le champ Bilan volet environnemental dans l'onglet Structure au lancement n'est pas valorisé")
+    csr_project_social_level = fields.Selection([
+        ('level_0', 'Pas essayé'),
+        ('level_1', 'Essayé mais pas réussi'),
+        ('level_2', 'Réussi avec un impact modeste (Sensibilisation / Ajout d’un principe global / etc.)'),
+        ('level_3', 'Réussi avec un impact significatif (Ajout d’un axe avec des projets chiffrés / Décision RSE / etc.)'),
+        ('not_specified','Pas de réponse du DM'),
+        ], string="Bilan volet social")
+    is_filled_csr_project_social_level = fields.Boolean("Champp Bilan volet social valorisé", store=True, compute=compute, help="FAUX si le champ Bilan volet social dans l'onglet Structure au lancement n'est pas valorisé")
