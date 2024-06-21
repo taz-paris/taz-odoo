@@ -89,6 +89,9 @@
 		  <field name="deliverable_indexation" optional="hide"/>
 		  <field name="success_story_indexation" optional="hide"/>
 		  <field name="commercial_reference_indexation" optional="hide"/>
+		  <field name="csr_project_initiative" optional="hide"/>
+		  <field name="csr_project_environmental_level" optional="hide"/>
+		  <field name="csr_project_social_level" optional="hide"/>
 		</tree>
 	      </field>
 	    </record>
@@ -161,6 +164,15 @@
 				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_success_story_indexation', '=', True)]}">
 					Le champ "Success story" dans l'onglet Capitalisation n'est pas renseigné
 				</div>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_csr_project_initiative', '=', True)]}">
+					Le champ "Réflexion apport RSE du projet" dans l'onglet Capitalisation n'est pas renseigné
+				</div>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_csr_project_environmental_level', '=', True)]}">
+					Le champ "Bilan volet environnemental" dans l'onglet Capitalisation n'est pas renseigné
+				</div>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_csr_project_social_level', '=', True)]}">
+					Le champ "Bilan volet social" dans l'onglet Capitalisation n'est pas renseigné
+				</div>
 				<field name="is_validated_order" invisible="1"/>
 				<field name="is_validated_book" invisible="1"/>
 				<field name="is_consistant_outsourcing" invisible="1"/>
@@ -175,6 +187,9 @@
 				<field name="is_filled_deliverable_indexation" invisible="1"/>
 				<field name="is_filled_commercial_reference_indexation" invisible="1"/>
 				<field name="is_filled_success_story_indexation" invisible="1"/>
+				<field name="is_filled_csr_project_initiative" invisible="1"/>
+				<field name="is_filled_csr_project_environmental_level" invisible="1"/>
+				<field name="is_filled_csr_project_social_level" invisible="1"/>
 
 					
 				<div class="oe_title">
@@ -268,6 +283,9 @@
 
 					</page>
 					<page name="project_structure" string="Structure au lancement">
+						<group>
+							<field name="csr_project_initiative"/>
+						</group>
 						<group col="3">
 							<group string="Dispositif interne">
 								<field name="company_part_amount_initial"/>
@@ -437,17 +455,30 @@
 								<field name="is_outsource_part_amount_current"/>
 								<field name="is_affected_book"/>
 								<field name="other_part_marging_rate_controle_OK"/>
+								<field name="is_filled_sales_proposal_indexation"/>
+								<field name="is_filled_deliverable_indexation"/>
+								<field name="is_filled_commercial_reference_indexation"/>
+								<field name="is_filled_success_story_indexation"/>
+								<field name="is_filled_csr_project_initiative"/>
+								<field name="is_filled_csr_project_environmental_level"/>
+								<field name="is_filled_csr_project_social_level"/>
 								<field name="is_review_needed"/>
 							</group>
 
 						</group>
 					</page>
-					<page string="Capitalisation">
+					<page string="Capitalisation/RSE">
 						<group>
-							<field name="sales_proposal_indexation"/>
-							<field name="deliverable_indexation"/>
-							<field name="success_story_indexation"/>
-							<field name="commercial_reference_indexation"/>
+							<group string="Capitalisation">
+								<field name="sales_proposal_indexation"/>
+								<field name="deliverable_indexation"/>
+								<field name="success_story_indexation"/>
+								<field name="commercial_reference_indexation"/>
+							</group>
+							<group string="Bilan RSE du projet">
+								<field name="csr_project_social_level"/>
+								<field name="csr_project_environmental_level"/>
+							</group>
 						</group>
 					</page>
 				</notebook>
