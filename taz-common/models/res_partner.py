@@ -357,18 +357,22 @@ class tazResPartner(models.Model):
         contacts = self.search([('is_company', '=', False), ('active','=',True), ('type', '=', 'contact'), ('user_ids', '=', False)])
         count = {}
         for c in contacts:
-            nom = ''
+            first_name = ''
+            name = ''
             if c.first_name : 
-                #nom += c.first_name.strip().title()
-                nom += normalizer(c.first_name)
+                first_name = normalizer(c.first_name)
             if c.name :
-                if nom != '':
-                    nom += ' '
-                #nom += c.name.strip().upper()
-                nom += normalizer(c.name)
-            if nom not in count.keys():
-                count[nom] = []
-            count[nom].append(c)
+                name = normalizer(c.name)
+            full_name = first_name+name
+
+            if full_name  not in count.keys():
+                count[full_name] = []
+            count[full_name].append(c)
+
+            reversed_full_name = name+first_name
+            if reversed_full_name in count.keys():
+                count[reversed_full_name].append(c)
+
         res = []
         for nom, partner_ids in count.items():
             if len(partner_ids) > 1:

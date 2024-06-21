@@ -52,7 +52,7 @@
 		</group>
 		  <notebook>
 			  <page string="Entreprises/sites du groupe">
-				<field name="child_ids_company" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
+				<field name="child_ids_company" context="{'default_parent_id':active_id, 'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
 					<tree delete="false">
 					  <field name="is_company" invisible="1"/>
 					  <field name="name"/>
