@@ -165,7 +165,7 @@
 					Le champ "Success story" dans l'onglet Capitalisation n'est pas renseigné
 				</div>
 				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_csr_project_initiative', '=', True)]}">
-					Le champ "Réflexion apport RSE du projet" dans l'onglet Capitalisation n'est pas renseigné
+					Le champ "Réflexion apport RSE du projet" dans l'onglet Structure au lancement n'est pas renseigné
 				</div>
 				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_filled_csr_project_environmental_level', '=', True)]}">
 					Le champ "Bilan volet environnemental" dans l'onglet Capitalisation n'est pas renseigné

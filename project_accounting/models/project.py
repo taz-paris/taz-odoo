@@ -367,7 +367,10 @@ class projectAccountProject(models.Model):
         'sales_proposal_indexation',
         'deliverable_indexation',
         'commercial_reference_indexation',
-        'success_story_indexation'
+        'success_story_indexation',
+        'csr_project_initiative',
+        'csr_project_environmental_level',
+        'csr_project_social_level'
     )
     def compute(self):
         _logger.info('====================================================================== project.py COMPUTE')

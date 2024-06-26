@@ -139,6 +139,8 @@ class staffingNeed(models.Model):
         for employee in employees:
             if not self.begin_date:
                 continue
+            if not employee.company_id.id == self.company_id.id:
+                continue
             employee_job = employee._get_job_id(self.begin_date)
             if not employee_job:
                 continue

@@ -531,7 +531,7 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        #self.env['hr.contract'].create_update_odoo_user_history()
+        #self.env['staffing.need'].create_update_odoo()
         #a=1/0
         client.refresh_cache()
 
@@ -630,6 +630,23 @@ class naptaNeed(models.Model):
     ]
     napta_id = fields.Char("Napta ID", copy=False)
 
+    """
+    def create(self, vals):
+        for val in vals :
+             if 'project_id' in val.keys():
+                _logger.info('TEST23------------------')
+                company_id = self.env['project.project'].browse([val['project_id']])[0].company_id.id
+                val['company_id'] = company_id 
+        return super().create(vals)
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'project_id' in vals:
+            for rec in self:
+                if rec.company_id.id != rec.project_id.company_id.id:
+                    rec.company_id = rec.project_id.company_id.id
+        return res
+    """
 
     def create_update_odoo(self):
         _logger.info('---- BATCH Create or update Odoo user_project')
