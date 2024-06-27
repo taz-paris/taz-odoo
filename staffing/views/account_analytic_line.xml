@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
 		<field name="date" position="after">
 			<field name="date_end"/>
+			<field name="company_id" groups="base.group_multi_company"/>
 			<field name="employee_id"/>
 			<field name="category"/>
 			<field name="rel_project_staffing_aggregation"/>

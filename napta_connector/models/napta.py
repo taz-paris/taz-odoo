@@ -531,9 +531,11 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
+        client.refresh_cache()
+        #self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
+        #self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
         #self.env['staffing.need'].create_update_odoo()
         #a=1/0
-        client.refresh_cache()
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -630,23 +632,24 @@ class naptaNeed(models.Model):
     ]
     napta_id = fields.Char("Napta ID", copy=False)
 
-    """
+    @api.model_create_multi
     def create(self, vals):
         for val in vals :
              if 'project_id' in val.keys():
-                _logger.info('TEST23------------------')
                 company_id = self.env['project.project'].browse([val['project_id']])[0].company_id.id
                 val['company_id'] = company_id 
         return super().create(vals)
 
     def write(self, vals):
-        res = super().write(vals)
         if 'project_id' in vals:
             for rec in self:
-                if rec.company_id.id != rec.project_id.company_id.id:
-                    rec.company_id = rec.project_id.company_id.id
-        return res
-    """
+                company_id = self.env['project.project'].browse([vals['project_id']])[0].company_id.id
+                vals['company_id'] = company_id
+                if not(super().write(vals)):
+                    return False
+        else :
+            return super().write(vals)
+
 
     def create_update_odoo(self):
         _logger.info('---- BATCH Create or update Odoo user_project')
@@ -683,12 +686,57 @@ class naptaAnalyticLine(models.Model):
     is_timesheet_closed_on_napta = fields.Boolean("Validée sur Napta")
 
 
+    @api.model_create_multi
+    def create(self, vals):
+        for val in vals :
+             if 'project_id' in val.keys():
+                company_id = self.env['project.project'].browse([val['project_id']])[0].company_id.id
+                val['company_id'] = company_id 
+        return super().create(vals)
+
+    def write(self, vals):
+        if 'project_id' in vals:
+            for rec in self:
+                company_id = self.env['project.project'].browse([vals['project_id']])[0].company_id.id
+                vals['company_id'] = company_id
+                if not(super().write(vals)):
+                    return False
+        else :
+            return super().write(vals)
+
+    """
+    @api.model_create_multi
+    def create(self, vals):
+        res = self.browse()
+        for val in vals :
+            if 'project_id' in val.keys():
+                company_id = self.env['project.project'].browse([val['project_id']])[0].company_id
+                val['company_id'] = company_id.id 
+                res |= super().with_company(company_id).create(vals)
+            else :
+                res |= super().create(vals)
+        return res
+
+    def write(self, vals):
+        if 'project_id' in vals:
+            for rec in self:
+                company_id = self.env['project.project'].browse([vals['project_id']])[0].company_id
+                vals['company_id'] = company_id.id
+                if not(super().with_company(company_id).write(vals)):
+                    return False
+        else :
+            return super().write(vals)
+    """
+
 
     def create_update_odoo_userprojectperiod(self):
         _logger.info('---- BATCH Create or update Odoo userprojectperiod')
         client = ClientRestNapta(self.env)
-        company = self.env['res.company'].browse(TASMANE_ODOO_COMPANY_ID)[0] #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
-        DATE_OLDEST_USERPROJECTPERIOD = str(company.fiscalyear_lock_date)
+        company_ids = self.env['res.company'].search([('fiscalyear_lock_date', '!=', False)], order="period_lock_date asc") #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
+        if len(company_ids) == 0:
+            return
+        DATE_OLDEST_USERPROJECTPERIOD = str(company_ids[0].fiscalyear_lock_date)
+        _logger.info('DATE_OLDEST_USERPROJECTPERIOD : %s (company : %s (ID=%s))' % (DATE_OLDEST_USERPROJECTPERIOD, company_ids[0].name, str(company_ids[0].id)))
 
         filt = [{"name" : "end_date", "op" : "gt", "val" : DATE_OLDEST_USERPROJECTPERIOD}]
         userprojectperiods = client.get_api('userprojectperiod', filter=filt)['data']
@@ -722,8 +770,12 @@ class naptaAnalyticLine(models.Model):
     def create_update_odoo_timesheetperiod(self):
         _logger.info('---- BATCH Create or update Odoo timesheet_period')
         client = ClientRestNapta(self.env)
-        company = self.env['res.company'].browse(TASMANE_ODOO_COMPANY_ID)[0] #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
-        DATE_OLDEST_TIMESHEETPERIOD = company.fiscalyear_lock_date
+        company_ids = self.env['res.company'].search([('fiscalyear_lock_date', '!=', False)], order="period_lock_date asc") #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
+        if len(company_ids) == 0:
+            return
+        DATE_OLDEST_TIMESHEETPERIOD = company_ids[0].fiscalyear_lock_date
+        _logger.info('DATE_OLDEST_TIMESHEETPERIOD : %s (company : %s (ID=%s))' % (str(DATE_OLDEST_TIMESHEETPERIOD), company_ids[0].name, str(company_ids[0].id)))
+
 
         filt = [{'or' : [
                             {"name" : "year", "op" : "gt", "val" : DATE_OLDEST_TIMESHEETPERIOD.year},
