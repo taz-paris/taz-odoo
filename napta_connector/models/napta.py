@@ -531,11 +531,11 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        client.refresh_cache()
-        #self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
-        #self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
+        self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
+        self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
         #self.env['staffing.need'].create_update_odoo()
         #a=1/0
+        client.refresh_cache()
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -689,44 +689,21 @@ class naptaAnalyticLine(models.Model):
     @api.model_create_multi
     def create(self, vals):
         for val in vals :
-             if 'project_id' in val.keys():
-                company_id = self.env['project.project'].browse([val['project_id']])[0].company_id.id
+            if 'staffing_need_id' in val.keys():
+                company_id = self.env['staffing.need'].browse([val['staffing_need_id']])[0].project_id.company_id.id
                 val['company_id'] = company_id 
         return super().create(vals)
 
     def write(self, vals):
-        if 'project_id' in vals:
+        if 'staffing_need_id' in vals:
             for rec in self:
-                company_id = self.env['project.project'].browse([vals['project_id']])[0].company_id.id
+                company_id = self.env['staffing.need'].browse([val['staffing_need_id']])[0].project_id.company_id.id
                 vals['company_id'] = company_id
                 if not(super().write(vals)):
                     return False
         else :
             return super().write(vals)
 
-    """
-    @api.model_create_multi
-    def create(self, vals):
-        res = self.browse()
-        for val in vals :
-            if 'project_id' in val.keys():
-                company_id = self.env['project.project'].browse([val['project_id']])[0].company_id
-                val['company_id'] = company_id.id 
-                res |= super().with_company(company_id).create(vals)
-            else :
-                res |= super().create(vals)
-        return res
-
-    def write(self, vals):
-        if 'project_id' in vals:
-            for rec in self:
-                company_id = self.env['project.project'].browse([vals['project_id']])[0].company_id
-                vals['company_id'] = company_id.id
-                if not(super().with_company(company_id).write(vals)):
-                    return False
-        else :
-            return super().write(vals)
-    """
 
 
     def create_update_odoo_userprojectperiod(self):
@@ -740,6 +717,7 @@ class naptaAnalyticLine(models.Model):
 
         filt = [{"name" : "end_date", "op" : "gt", "val" : DATE_OLDEST_USERPROJECTPERIOD}]
         userprojectperiods = client.get_api('userprojectperiod', filter=filt)['data']
+
 
         for userprojectperiod in userprojectperiods:
             napta_id = userprojectperiod['id']

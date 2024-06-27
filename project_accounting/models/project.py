@@ -1345,7 +1345,7 @@ class projectAccountProject(models.Model):
 
     # CAPITALIZATION
     is_filled_sales_proposal_indexation = fields.Boolean("Champ Proposition commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé")
-    is_filled_deliverable_indexation = fields.Boolean("Champ Livrable valorisé", store=True, commpute=compute, help="FAUX si le champ Livrable dans l'onglet Capitalisation n'est pas valorisé" )
+    is_filled_deliverable_indexation = fields.Boolean("Champ Livrable valorisé", store=True, compute=compute, help="FAUX si le champ Livrable dans l'onglet Capitalisation n'est pas valorisé" )
     is_filled_success_story_indexation = fields.Boolean("Champ Success story valorisé", store=True, compute=compute, help="FAUX si le champ Success story dans l'onglet Capitalisation n'est pa valorisé")
     is_filled_commercial_reference_indexation = fields.Boolean("Champ Référence commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Référence commerciale dans l'onglet Capitalisation n'est pas valorisé")
 

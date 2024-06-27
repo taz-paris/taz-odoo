@@ -12,6 +12,7 @@
 			<field name="employee_id"/>
 			<field name="category"/>
 			<field name="rel_project_staffing_aggregation"/>
+			<field name="account_id" optional="hide"/>
 		</field>
                 <field name="unit_amount" position="replace">
 			<!-- suppression du widget timesheet_uom qui empêche de saisir tous les montants-->
