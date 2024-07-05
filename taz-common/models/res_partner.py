@@ -109,8 +109,10 @@ class tazResPartner(models.Model):
      type = fields.Selection(string="Type de fiche partenaire")
 
      industry_id = fields.Many2one(string='Compte (ex BD)')
+     sector_id = fields.Many2one('res.partner.sector', string='Secteur')
      business_priority = fields.Selection(related='industry_id.business_priority', default='not_tracked', store=True, string='Niveau de priorité du compte')
      parent_industry_id = fields.Many2one('res.partner.industry', string='Compte du parent', related='parent_id.industry_id', store=True)
+     parent_sector_id = fields.Many2one('res.partner.sector', string='Secteur du parent', related='parent_id.sector_id', store=True)
      is_followed = fields.Boolean("Contact à suivre en Revue de compte")
 
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])

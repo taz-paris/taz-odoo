@@ -27,6 +27,7 @@
         'views/office365_import_people.xml',
         'views/customer_book_goal.xml',
         'views/res_industry.xml',
+        'views/res_sector.xml',
         'views/res_users.xml',
         'views/contact_user_link.xml',
         'views/wizard_partner_category.xml',
