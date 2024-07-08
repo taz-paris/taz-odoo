@@ -109,18 +109,6 @@ class projectAccountProject(models.Model):
                         raise ValidationError(_("Le montant HT piloté initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s, hormis pour les clients pro bono." %(new_stage_id.name)))
                     if not(record.order_cost_initial) :
                         raise ValidationError(_("Le coût total initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s." %(new_stage_id.name)))
-                if new_stage_id.id in [9, 3]: # nouveau statut appartient à l'un des statuts [Prod terminée / Clos]
-                    if not (record.deliverable_indexation) or not (record.sales_proposal_indexation) or not (
-                    record.commercial_reference_indexation) or not (record.commercial_reference_indexation):
-                        raise ValidationError(
-                            _("Tous les attributs de l'onglet Capitalisation doivent être valorisés pour passer au statut %s" % (
-                                new_stage_id.name)))
-                if new_stage_id.id in [6, 2] : # nouveau statut appartient à l'un des statuts [Accord client / Commandé]
-                    if not (record.sales_proposal_indexation) :
-                        raise ValidationError(
-                            _("L'attribut Proposition commerciale dans l'onglet Capitalisation doit être valorisé pour passer au statut %s" % (
-                                new_stage_id.name)))
-
         return res
 
 

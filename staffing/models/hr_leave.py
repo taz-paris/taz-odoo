@@ -97,6 +97,16 @@ class staffingLeave(models.Model):
         return self.env['account.analytic.line'].sudo().create(vals_list)
 
 
+    def _timesheet_prepare_line_values(self, index, work_hours_data, day_date, work_hours_count):
+        # surchargé pour mieux gérer le multi-company. Napta stockera tous les congés sur le même type, hors le standard Odoo se sert du type de congés pour déterminer le projet et la tache à associer aux analytic.lines créées à la validation du congés.
+        # cette surcharge force à utiliser le projet/tache de congés défini dans la configuration générale de l'entreprise. Il ne sera plus possible d'associer des congés à des tâches différentes suivante le type de congés utilisé. En revanche les analytic.line seront rattachés à la bonne entreprise
+        self.ensure_one()
+        res = super()._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count)
+        res['project_id'] = self.employee_company_id.internal_project_id.id
+        res['task_id'] = self.employee_company_id.leave_timesheet_task_id.id
+        res['account_id'] = self.employee_company_id.internal_project_id.analytic_account_id.id
+        res['company_id'] = self.employee_company_id.id
+        return res
 
     #TODO : mieux gérer les contrôles de conflit : pas possible d'avoir 2 demis jours 
     """

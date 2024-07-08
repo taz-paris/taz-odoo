@@ -531,11 +531,9 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
 
         client = ClientRestNapta(self.env)
-        self.env['account.analytic.line'].create_update_odoo_userprojectperiod()
-        self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
-        #self.env['staffing.need'].create_update_odoo()
-        #a=1/0
         client.refresh_cache()
+        #self.env['hr.leave'].create_update_odoo_user_holiday()
+        #a=1/0
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -697,7 +695,7 @@ class naptaAnalyticLine(models.Model):
     def write(self, vals):
         if 'staffing_need_id' in vals:
             for rec in self:
-                company_id = self.env['staffing.need'].browse([val['staffing_need_id']])[0].project_id.company_id.id
+                company_id = self.env['staffing.need'].browse([vals['staffing_need_id']])[0].project_id.company_id.id
                 vals['company_id'] = company_id
                 if not(super().write(vals)):
                     return False
@@ -741,8 +739,6 @@ class naptaAnalyticLine(models.Model):
             odoo_objet.with_context(do_not_update_staffing_report=True).unlink()
             self.env.cr.commit()
             _logger.info("      > Instance supprimée")
-        #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
-            #TODO ajouter des borne de début/fin renseignées avec les bord d'apel
 
         
     def create_update_odoo_timesheetperiod(self):
@@ -811,8 +807,6 @@ class naptaAnalyticLine(models.Model):
             odoo_objet.with_context(do_not_update_staffing_report=True).unlink()
             self.env.cr.commit()
             _logger.info("      > Instance supprimée")
-        #ATTENTION : si un jour on limite les pointage que l'on appelle (par période), il faudra changer ce code pour ne pas supprimer les pointages hors de la période appelées
-            #TODO ajouter des borne de début/fin renseignées avec les bord d'apel
 
 class naptaResUsers(models.Model):
     _inherit = 'res.users'
@@ -1066,6 +1060,7 @@ class naptaHrLeave(models.Model):
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
+            company_id = odoo_user.company_id.id
             numberOfDays = odoo_user.number_work_days_period(start_date, end_date)
             request_date_from_period = 'am'
             if user_holiday['attributes']['start_date_from_morning'] == False :
@@ -1092,7 +1087,7 @@ class naptaHrLeave(models.Model):
                         # TODO : doit-on obligatoirement envoyer cet attribut à Odoo... qui doit le reclaculer de son côté...
                     'state' : 'validate',
                 }
-            create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True, 'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
+            create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True, 'do_not_update_staffing_report' : True, 'do_not_update_project' : True}, company_id=company_id)
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
         #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
@@ -1198,7 +1193,7 @@ def get_napta_key_domain_search(odoo_model_name, dic):
     return key_domain_search
 
 
-def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=False):
+def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=False, company_id=False):
     key_domain_search = get_napta_key_domain_search(odoo_model_name, dic)
 
     context = env.context.copy()
@@ -1220,16 +1215,16 @@ def create_update_odoo(env, odoo_model_name, dic, context_add={}, only_update=Fa
         old_odoo_values, dict_dif = prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object)
 
         if len(dict_dif):
-            _logger.info("Mise à jour de l'objet %s ID= %s (napta key = %s) avec les valeurs %s" % (odoo_model_name, str(odoo_object.id), str(key_domain_search), str(dict_dif)))
+            _logger.info("[CompanyID=%s] Mise à jour de l'objet %s ID= %s (napta key = %s) avec les valeurs %s" % (str(company_id), odoo_model_name, str(odoo_object.id), str(key_domain_search), str(dict_dif)))
             _logger.info("      > Old odoo values : %s" % str(old_odoo_values))
-            odoo_object.write(dict_dif)
+            odoo_object.with_company(company_id).write(dict_dif)
             env.cr.commit()
 
     else : #creation
         if only_update == False:
             old_odoo_values, dic = prepare_update_from_napta_values(env, odoo_model_name, dic)
-            _logger.info("Create odoo_objet=%s with fields %s" % (odoo_model_name, str(dic)))
-            odoo_object = env[odoo_model_name].create(dic)
+            _logger.info("[CompanyID=%s] Create odoo_objet=%s with fields %s" % (str(company_id), odoo_model_name, str(dic)))
+            odoo_object = env[odoo_model_name].with_company(company_id).create(dic)
             _logger.info("Odoo object created, Odoo ID=%s" % (str(odoo_object.id)))
             env.cr.commit()
         else:
