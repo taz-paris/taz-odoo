@@ -277,9 +277,9 @@ class projectAccountProject(models.Model):
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
     project_group_id = fields.Many2one('project.group', string='Groupe de projets', check_company=True, domain=[('active', 'in', [True, False])])
         #TODO : pour être 100% sur ajouter une contrainte pour vérifier que tous les projets du groupe ont TOUJOURS le client du groupe
-    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False, check_company=True) #Si required=True ça bloque la création de nouvelle company 
+    project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False, check_company=False) #Si required=True ça bloque la création de nouvelle company 
     #TODO : synchroniser cette valeur avec user_id avec un oneChange
-    project_manager = fields.Many2one('hr.employee', "Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", check_company=True)
+    project_manager = fields.Many2one('hr.employee', "Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", check_company=False)
 
     # Champs relatifs à la capitalisation des projets
     sales_proposal_indexation = fields.Selection([
