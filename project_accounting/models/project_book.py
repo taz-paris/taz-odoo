@@ -63,6 +63,7 @@ class projectBookPeriod(models.Model):
         year_selection,
         string="Année de référence",
         default=year_default, # as a default value it would be 2019
+        required=True,
         )
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
@@ -122,7 +123,7 @@ class projectBookEmployeeDistribution(models.Model):
             rec.display_name = str(rec.final_book_factor) + ' > ' + str(rec.sudo().employee_id.name)
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
-    employee_id = fields.Many2one('hr.employee', domain=[('active', '=', True)], string="Salarié", ondelete='restrict', check_company=True)
+    employee_id = fields.Many2one('hr.employee', domain=[('active', '=', True)], required=True, string="Salarié", ondelete='restrict', check_company=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, default=_get_default_project_id, ondelete='cascade', check_company=True)
     project_id_number = fields.Char(related='project_id.number', store=True)
     book_factor = fields.Float("Coefficient", required=True)

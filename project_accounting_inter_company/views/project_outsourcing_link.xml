@@ -1,0 +1,25 @@
+<odoo>
+	<data>
+           <record model="ir.ui.view" id="project_outsourcing_link_tree_inherit">
+	      <field name="inherit_id" ref="project_accounting.project_outsourcing_link_tree"/>
+	      <field name="name">Achat : lien entre le projet et le fournisseur</field>
+              <field name="model">project.outsourcing.link</field>
+              <field name="arch" type="xml">
+			<field name="partner_id" position="after">
+				<field name="inter_company_mirror_project" optional="hide"/>
+			</field>
+	      </field>
+	  </record>
+
+           <record model="ir.ui.view" id="project_outsourcing_link_form_inherit">
+	      <field name="inherit_id" ref="project_accounting.project_outsourcing_link_form"/>
+	      <field name="name">Achat : lien entre le projet et le fournisseur</field>
+              <field name="model">project.outsourcing.link</field>
+              <field name="arch" type="xml">
+			<field name="partner_id" position="after">
+				<field name="inter_company_mirror_project" readonly="1"/>
+			</field>
+	      </field>
+	  </record>
+	</data>
+</odoo>
