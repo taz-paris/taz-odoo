@@ -45,7 +45,7 @@ class ClientRestNapta:
         self.CLIENT_ID = self.env['ir.config_parameter'].sudo().get_param("napta_client_id")
         self.CLIENT_SECRET = self.env['ir.config_parameter'].sudo().get_param("napta_client_secret")
         if not(self.CLIENT_SECRET) or not (self.CLIENT_ID) :
-            raise ValidationError(_("Client API Napta inactif car les paramètre système Odoo napta_client_id et napta_client_secret ne sont pas tous les deux valorisés."))
+            raise ValidationError(_("Client API Napta inactif car les paramètres système Odoo napta_client_id et napta_client_secret ne sont pas tous les deux valorisés."))
         self.API_URL_TOKEN_ENDPOINT = API_URL_TOKEN_ENDPOINT
         self.API_URL_BUSINESS_ENDPOINT = API_URL_BUSINESS_ENDPOINT
 

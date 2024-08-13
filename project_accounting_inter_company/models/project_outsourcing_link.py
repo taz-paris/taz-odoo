@@ -14,21 +14,25 @@ class projectOutsourcingLink(models.Model):
     inter_company_mirror_project = fields.Many2one('project.project', 'Projet miroir')
 
     def get_or_generate_inter_company_mirror_project(self) :
+        _logger.info('==== get_or_generate_inter_company_mirror_project')
         self.ensure_one()
         if self.inter_company_mirror_project:
             return self.inter_company_mirror_project
-        if not self.partner_id.company_id:
+        if len(self.partner_id.ref_company_ids) != 1:
             raise ValidationError(_("Le partenaire lié n'est pas lié à une société de la galaxie."))
         
-        self.inter_company_mirror_project = self.env['project.project'].create({
-            'company_id' : self.partner_id.company_id.id,
+        dic_mirror_project = {
+            'name' : self.project_id.name,
+            'company_id' : self.partner_id.ref_company_ids[0].id,
             'partner_id' : self.project_id.partner_id.id,
-            'stage_id' : self.project_id.stage_id,
+            'stage_id' : self.project_id.stage_id.id,
             'outsourcing' : False,
             'agreement_id' : False,
             'project_director_employee_id' : self.project_id.project_director_employee_id.id,
             'project_manager' : self.project_id.project_manager.id,
-            'partner_secondary_id' : [(4, self.partner_id.id)],
-            })
+            'partner_secondary_ids' : [(4, self.company_id.partner_id.id)],
+            }
+        _logger.info(dic_mirror_project)
+        self.inter_company_mirror_project = self.env['project.project'].create(dic_mirror_project)
 
         return self.inter_company_mirror_project
