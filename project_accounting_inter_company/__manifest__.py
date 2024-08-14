@@ -23,5 +23,7 @@
     # always loaded
     'data': [
         'views/project_outsourcing_link.xml',
+        'views/account_move.xml',
+        'views/purchase.xml',
     ],
 }

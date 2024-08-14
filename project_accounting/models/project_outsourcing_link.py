@@ -17,7 +17,7 @@ class projectOutsourcingLink(models.Model):
     _check_company_auto = True
 
     def compute_purchase_order_total(self, with_direct_payment=True, with_draft_purchase_order=False): 
-        _logger.info('----- compute_purchase_order_total')
+        #_logger.info('----- compute_purchase_order_total')
         status_list_to_keep = ['purchase']
         if with_draft_purchase_order :
             status_list_to_keep.append('draft')
@@ -26,13 +26,9 @@ class projectOutsourcingLink(models.Model):
             total = 0.0
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
-                _logger.info(line.read())
                 if line.direct_payment_sale_order_line_id and with_direct_payment==False:
-                    _logger.info('continue A')
                     continue
                 if line.state not in status_list_to_keep:
-                    _logger.info(status_list_to_keep)
-                    _logger.info('continue B')
                     continue
                 total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
             return total
@@ -62,7 +58,7 @@ class projectOutsourcingLink(models.Model):
         return action
 
     def get_purchase_order_line_ids(self, filter_list=None, analytic_account_ids=None):
-        _logger.info('--get_purchase_order_line_ids')
+        #_logger.info('--get_purchase_order_line_ids')
         if filter_list == None :
             filter_list = [('partner_id', '=', self.partner_id.id)]
         if analytic_account_ids == None:
@@ -85,7 +81,7 @@ class projectOutsourcingLink(models.Model):
         
 
     def compute_account_move_total_outsourcing_link(self, filter_list=[('parent_state', 'in', ['posted'])]): 
-        _logger.info('compute_account_move_total_outsourcing_link')
+        #_logger.info('compute_account_move_total_outsourcing_link')
         subtotal, total, paid, lines = self.project_id.compute_account_move_total_all_partners(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('partner_id', 'in', [self.partner_id.id])])
         return -1 * subtotal, -1 * total, -1 * paid
 
@@ -116,7 +112,7 @@ class projectOutsourcingLink(models.Model):
 
 
     def create_purchase_order(self):
-        _logger.info('--- create_purchase_order')
+        #_logger.info('--- create_purchase_order')
         self.ensure_one()
         
 
@@ -140,7 +136,7 @@ class projectOutsourcingLink(models.Model):
 
     @api.depends('project_id', 'partner_id')
     def compute(self):
-        _logger.info('--compute project_outsourcing_link')
+        #_logger.info('--compute project_outsourcing_link')
         for rec in self :
             rec.outsource_part_amount_current = 0.0
             rec.order_direct_payment_amount = 0.0

@@ -672,7 +672,7 @@ class projectAccountProject(models.Model):
 
 
     def compute_sale_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
-        _logger.info('----------compute_sale_order_total => with_direct_payment= %s =>with_draft_sale_order= %s' % (with_direct_payment, with_draft_sale_order))
+        #_logger.info('----------compute_sale_order_total => with_direct_payment= %s =>with_draft_sale_order= %s' % (with_direct_payment, with_draft_sale_order))
         self.ensure_one()
         rec = self
         line_ids = rec.get_sale_order_line_ids()
@@ -692,7 +692,7 @@ class projectAccountProject(models.Model):
             total += line.price_subtotal * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
             total_with_tax += line.price_total * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         #_logger.info(total)
-        _logger.info('----------END compute_sale_order_total')
+        #_logger.info('----------END compute_sale_order_total')
         return total, total_with_tax
         
     def action_open_sale_order_lines(self):
@@ -723,7 +723,7 @@ class projectAccountProject(models.Model):
 
     
     def get_sale_order_line_ids(self, filter_list=[]):
-        _logger.info('-- project sale.order.lines computation')
+        #_logger.info('-- project sale.order.lines computation')
         query = self.env['sale.order.line']._search(filter_list)
         #_logger.info(query)
         if query == []:
@@ -742,7 +742,7 @@ class projectAccountProject(models.Model):
 
 
     def get_account_move_line_ids(self, filter_list=[]):
-        _logger.info('--get_account_move_line_ids')
+        #_logger.info('--get_account_move_line_ids')
         query = self.env['account.move.line']._search(filter_list)
         #_logger.info(query)
         if query == []:
@@ -771,9 +771,9 @@ class projectAccountProject(models.Model):
         
 
     def compute_account_move_total(self, filter_list=[('parent_state', 'in', ['posted'])]):
-        _logger.info("--compute_account_move_total")
+        #_logger.info("--compute_account_move_total")
         all_customers = self.get_all_customer_ids()
-        _logger.info(all_customers)
+        #_logger.info(all_customers)
         return self.compute_account_move_total_all_partners(filter_list + [('move_type', 'in', ['out_refund', 'out_invoice', 'in_invoice', 'in_refund']), ('partner_id', 'in', all_customers)])
 
 
@@ -855,7 +855,7 @@ class projectAccountProject(models.Model):
 
 
     def create_sale_order(self):
-        _logger.info('--- create_sale_order')
+        #_logger.info('--- create_sale_order')
         self.ensure_one()
         
         return  {
@@ -954,7 +954,7 @@ class projectAccountProject(models.Model):
             rec.check_partners_objects_consitency()
 
     def check_partners_objects_consitency(self):
-        _logger.info('-- check_partners_objects_consitency')
+        #_logger.info('-- check_partners_objects_consitency')
         for rec in self:
             all_customer = rec.with_context({'active_test': False}).get_all_customer_ids()
             all_supplier = rec.with_context({'active_test': False}).get_all_supplier_ids()
@@ -962,6 +962,7 @@ class projectAccountProject(models.Model):
 
             account_move_line_ids = self.get_account_move_line_ids([('partner_id', 'not in', all_partner)])
             if len(account_move_line_ids) :
+                _logger.info(self.env.context)
                 _logger.info(all_partner)
                 for line in account_move_line_ids:
                     _logger.info(self.env['account.move.line'].browse([line]).read())
@@ -979,7 +980,7 @@ class projectAccountProject(models.Model):
     @api.depends('accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance')
     def compute_has_provision_running(self):
         for rec in self:
-            _logger.info('=======compute_has_provision_running')
+            #_logger.info('=======compute_has_provision_running')
             rec.has_provision_running = False
             last_closing_sorted = rec.accounting_closing_ids.filtered(lambda r: r.is_validated==True).sorted(key=lambda r: r.closing_date, reverse=True)
             if len(last_closing_sorted):
@@ -989,7 +990,7 @@ class projectAccountProject(models.Model):
 
 
     def compute_margin_graph(self):
-        _logger.info('---- compute_margin_graph')
+        #_logger.info('---- compute_margin_graph')
 
         for rec in self:
             lines = self.env['account.analytic.line'].search([('project_id', '=', rec.id), '|', ('category', '=', 'project_employee_validated'), ('category', '=', 'project_forecast')], order="date asc, category")
@@ -1155,9 +1156,9 @@ class projectAccountProject(models.Model):
 
 
     def recompute_if_has_to_be_recomputed(self):
-        _logger.info('--- recompute_if_has_to_be_recomputed')
+        #_logger.info('--- recompute_if_has_to_be_recomputed')
         projects = self.env['project.project'].search([('has_to_be_recomputed', '=', True)])
-        _logger.info('Nombre de projets à recalculer : %s' % str(len(projects)))
+        #_logger.info('Nombre de projets à recalculer : %s' % str(len(projects)))
         projects.compute()
 
 
