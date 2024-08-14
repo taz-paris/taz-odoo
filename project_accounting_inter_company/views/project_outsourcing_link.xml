@@ -17,7 +17,7 @@
               <field name="model">project.outsourcing.link</field>
               <field name="arch" type="xml">
 			<field name="partner_id" position="after">
-				<field name="inter_company_mirror_project" readonly="1"/>
+				<field name="inter_company_mirror_project" readonly="1" attrs="{'invisible':[('inter_company_mirror_project', '=', False)]}"/>
 			</field>
 	      </field>
 	  </record>
