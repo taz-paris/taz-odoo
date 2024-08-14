@@ -12,21 +12,21 @@ class projectAccountingAccountMove(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        _logger.info('---- create account.move')
+        #_logger.info('---- create account.move')
         res_list = super().create(vals_list)
         for rec in res_list :
             rec._compute_linked_projects()
         return res_list
 
     def write(self, vals):
-        _logger.info('---- write account.move')
+        #_logger.info('---- write account.move')
         res = super().write(vals)
         for rec in self :
             rec._compute_linked_projects()
         return res
 
     def unlink(self):
-        _logger.info('---- UNLINK account.move')
+        #_logger.info('---- UNLINK account.move')
         old_rel_project_ids = self.rel_project_ids
         res = super().unlink()
         for project in old_rel_project_ids:
@@ -65,7 +65,7 @@ class projectAccountingAccountMove(models.Model):
                 move.partner_bank_id = move.partner_id.property_payment_bank_account.id
     
     def _compute_payments_widget_to_reconcile_info(self):
-        _logger.info('_compute_payments_widget_to_reconcile_info')
+        #_logger.info('_compute_payments_widget_to_reconcile_info')
 
         super()._compute_payments_widget_to_reconcile_info()
 
@@ -75,8 +75,6 @@ class projectAccountingAccountMove(models.Model):
                 continue
             new_content = []
 
-            #lines = move._compute_payments_widget_to_reconcile_info()
-            _logger.info(payments_widget_vals['content'])
             for line in payments_widget_vals['content']:
                 payments = self.env['account.payment'].search([('id', '=', line['account_payment_id'])])
                 if len(payments):
@@ -87,7 +85,6 @@ class projectAccountingAccountMove(models.Model):
                     new_content.append(line)
 
             payments_widget_vals['content'] = new_content
-            _logger.info(payments_widget_vals)
             move.invoice_outstanding_credits_debits_widget = payments_widget_vals
             move.invoice_has_outstanding = len(new_content)
 
@@ -124,7 +121,7 @@ class projectAccountingAccountMoveLine(models.Model):
 
     @api.depends('parent_payment_state', 'parent_state', 'move_id.reversed_entry_id', 'move_id.amount_total', 'move_id.amount_residual', 'price_total', 'direction_sign')
     def _compute_amount_paid(self):
-        _logger.info('--- _compute_amount_paid')
+        #_logger.info('--- _compute_amount_paid')
         for rec in self:
             if rec.parent_payment_state == 'reversed' or rec.move_id.reversed_entry_id :
                 #TODO : vérifier la conséquence si on supprimait ce bloc IF : rec.parent_payment_state == 'reversed' or rec.move_id.reversed_entry_id

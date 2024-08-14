@@ -100,6 +100,8 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
     def unlink(self):
         _logger.info('---------- unlink account.analytic.line employee_staffing_report.py')
         for rec in self:
+            if not rec.employee_id :
+                continue
             line_end_date = rec.date_end
             if not line_end_date :
                 line_end_date = rec.date
