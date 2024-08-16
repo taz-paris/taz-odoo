@@ -60,3 +60,15 @@ class PurchaseOrder(models.Model):
         new_line['previsional_invoice_date'] = purchase_line['previsional_invoice_date']
         new_line['price_unit'] = purchase_line['price_unit']
         return new_line
+
+
+
+
+class PurchaseOrderLine(models.Model):
+    _inherit = "purchase.order.line"
+    
+    def _get_purchase_sale_line_sync_fields(self):
+        res = super()._get_purchase_sale_line_sync_fields()
+        res['qty_received'] = 'qty_delivered' 
+        res['previsional_invoice_date'] = 'previsional_invoice_date'
+        return res
