@@ -259,6 +259,7 @@ class projectAccountingPurchaseOrderLine(models.Model):
 
     direct_payment_sale_order_line_id = fields.One2many('sale.order.line', 'direct_payment_purchase_order_line_id',
             string="Paiement direct",
+            check_company=True,
             help = "Ligne de la commande du client final")
     order_direct_payment_validated_amount = fields.Monetary('Montant HT facture paiement direct validé', help='Somme factures en paiement direct validées')
         #TODO : ajouter contrôles : order_direct_payment_validated_amount ne peut pas être supérieur à subtotal et doit être nul si direct_payment_sale_order_line_id = False
