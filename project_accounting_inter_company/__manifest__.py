@@ -25,5 +25,6 @@
         'views/project_outsourcing_link.xml',
         'views/account_move.xml',
         'views/purchase.xml',
+        'views/sale.xml',
     ],
 }
