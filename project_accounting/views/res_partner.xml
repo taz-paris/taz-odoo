@@ -23,6 +23,8 @@
 			    </div>
 		    </field> 
 		    <field name="property_account_position_id" position="after">
+			    <field name="default_outsourcing_link_type"/>
+			    <field name="is_protected_partner"/>
 			    <field name="is_probono_partner"/>
 			    <field name="is_protected_partner"/>
 		    </field>

@@ -7,6 +7,12 @@ from datetime import datetime, timedelta
 import logging
 _logger = logging.getLogger(__name__)
 
+OUTSOURCING_LINK_TYPES = [
+    ('outsourcing', 'Sous-traitance'),
+    ('cosourcing', 'Co-traitance - Cas avec validation par interne des factures émises par le cotraitant vers le client'),
+    ('other', 'Autres achats')
+]
+
 
 class projectOutsourcingLink(models.Model):
     _name = "project.outsourcing.link"
@@ -175,14 +181,33 @@ class projectOutsourcingLink(models.Model):
     def _get_default_project_id(self):
         return self.env.context.get('default_project_id') or self.env.context.get('active_id')
 
+
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+       # self.populate_default_link_type()
+        if self.partner_id : 
+            self.link_type = self.partner_id.default_outsourcing_link_type
+
+    def populate_default_link_type(self):
+        #Fonction temporaire pour alimenter le champ default link type de res.partner à partir de l'historique.
+        dic = {}
+        for link in self.env['project.outsourcing.link'].search([('partner_id', '!=', False),('link_type', '!=', False)]):
+            if link.partner_id.id not in dic.keys():
+                dic[link.partner_id.id] = link.link_type
+            else :
+                if dic[link.partner_id.id] not in [False, link.link_type]:
+                    _logger.info("Tous les liens pour ce partenaire ne sont pas du même type : %s" % link.partner_id.name)
+                    dic[link.partner_id.id] = False
+        _logger.info("nombre de partenaires distincts avec un project.outsourcing.link : %s" % str(len(dic)))
+
+        for partner_id, link_type in dic.items():
+            p = self.env['res.partner'].browse(partner_id)
+            _logger.info('\npartner_id %s : %s' % (p.name, link_type))
+            p.default_outsourcing_link_type = link_type
+
     partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Sous-traitant", required=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')
-    link_type = fields.Selection([
-            ('outsourcing', 'Sous-traitance'),
-            ('cosourcing', 'Co-traitance - Cas avec validation par interne des factures émises par le cotraitant vers le client'),
-            ('other', 'Autres achats')
-        ], string="Type d'achat", default='outsourcing')
-
+    link_type = fields.Selection(OUTSOURCING_LINK_TYPES, string="Type d'achat", required=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
