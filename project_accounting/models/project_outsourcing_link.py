@@ -184,26 +184,9 @@ class projectOutsourcingLink(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
-       # self.populate_default_link_type()
         if self.partner_id : 
             self.link_type = self.partner_id.default_outsourcing_link_type
 
-    def populate_default_link_type(self):
-        #Fonction temporaire pour alimenter le champ default link type de res.partner à partir de l'historique.
-        dic = {}
-        for link in self.env['project.outsourcing.link'].search([('partner_id', '!=', False),('link_type', '!=', False)]):
-            if link.partner_id.id not in dic.keys():
-                dic[link.partner_id.id] = link.link_type
-            else :
-                if dic[link.partner_id.id] not in [False, link.link_type]:
-                    _logger.info("Tous les liens pour ce partenaire ne sont pas du même type : %s" % link.partner_id.name)
-                    dic[link.partner_id.id] = False
-        _logger.info("nombre de partenaires distincts avec un project.outsourcing.link : %s" % str(len(dic)))
-
-        for partner_id, link_type in dic.items():
-            p = self.env['res.partner'].browse(partner_id)
-            _logger.info('\npartner_id %s : %s' % (p.name, link_type))
-            p.default_outsourcing_link_type = link_type
 
     partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Sous-traitant", required=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')
