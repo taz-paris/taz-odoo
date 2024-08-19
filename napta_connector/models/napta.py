@@ -1057,6 +1057,7 @@ class naptaHrLeave(models.Model):
         for napta_id, user_holiday in user_holiday_list.items():
             #if str(napta_id) != "982":
             #    continue
+            # TODO : pour être propre, number_of_days ne devrait pas être fourni. Ces instructions de calcul devraient être dans une surcharge de _get_duration 
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])

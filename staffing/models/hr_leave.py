@@ -60,6 +60,13 @@ class staffingLeave(models.Model):
 
         return res
 
+    def _get_leaves_on_public_holiday(self):
+        # Lors de la clôture d'un contrat de travail, les congés postérieurs à la date de fin ne sont pas supprimés sur Napta (soit ils ne sont pas supprimés de Lucca,
+        # soit le connecteur Napta oublie d'interroger Lucca post cloture du contrat).
+        # Or la durée est calculée à 0 jours dans le module Napta
+        # On surchage cette fonction pour ne pas remonter ces congés à la fonction appelante (action_validate), ce qui bloque la création/mise à jour du congés.
+        super()._get_leaves_on_public_holiday()
+        return False
 
     #override to deal with uom in days and request_date_to_period
     #odoo/addons/project_timesheet_holidays/models/hr_holidays.py 
