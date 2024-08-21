@@ -20,4 +20,46 @@
     .o_spreadsheet_oca_name_warning {
         font-size: 0.8em;
     }
+
+    .o_spreadsheet_oca_datasource_panel {
+        padding: 16px;
+        .o_spreadsheet_oca_datasource_panel_field {
+            .o_spreadsheet_oca_datasource_panel_field_title {
+                font-weight: bold;
+            }
+        }
+    }
+    .o_spreadsheet_oca_pivot_panel_info {
+        font-style: italic;
+        color: $o-gray-600;
+    }
+    .o_spreadsheet_oca_filter {
+        padding: 16px;
+        .spreadsheet_oca_filter_label {
+            font-weight: bold;
+        }
+        .spreadsheet_oca_filter_value {
+            display: flex;
+            .o_field_widget {
+                width: 100%;
+                .o_field_tags {
+                    width: 100%;
+                }
+            }
+            .o_field_selector {
+                width: 100%;
+            }
+            .spreadsheet_oca_filter_value_edit {
+                width: 15px;
+                margin-left: 1rem;
+                padding: 0;
+                cursor: pointer;
+            }
+        }
+    }
+    .o-section-value {
+        .o_field_many2one_selection {
+            width: 100%;
+        }
+    }
 }

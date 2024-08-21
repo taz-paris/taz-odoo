@@ -2,15 +2,17 @@
 
 import {Component} from "@odoo/owl";
 import {DataSources} from "@spreadsheet/data_sources/data_sources";
+import Dialog from "web.OwlDialog";
 import {Field} from "@web/views/fields/field";
 import {loadSpreadsheetDependencies} from "@spreadsheet/helpers/helpers";
 import {migrate} from "@spreadsheet/o_spreadsheet/migration";
 import spreadsheet from "@spreadsheet/o_spreadsheet/o_spreadsheet_extended";
 import {useService} from "@web/core/utils/hooks";
 import {useSetupAction} from "@web/webclient/actions/action_hook";
+import {waitForDataLoaded} from "@spreadsheet/actions/spreadsheet_download_action";
 
 const {Spreadsheet, Model} = spreadsheet;
-const {useSubEnv, onWillStart} = owl;
+const {useSubEnv, useState, onWillStart} = owl;
 const uuidGenerator = new spreadsheet.helpers.UuidGenerator();
 
 class SpreadsheetTransportService {
@@ -57,7 +59,15 @@ export class SpreadsheetRenderer extends Component {
         this.orm = useService("orm");
         this.bus_service = useService("bus_service");
         this.user = useService("user");
+        this.ui = useService("ui");
+        this.action = useService("action");
         const dataSources = new DataSources(this.orm);
+        this.state = useState({
+            dialogDisplayed: false,
+            dialogTitle: "Spreadsheet",
+            dialogContent: undefined,
+        });
+        this.confirmDialog = this.closeDialog;
         this.spreadsheet_model = new Model(
             migrate(this.props.record.spreadsheet_raw),
             {
@@ -79,6 +89,9 @@ export class SpreadsheetRenderer extends Component {
         );
         useSubEnv({
             saveSpreadsheet: this.onSpreadsheetSaved.bind(this),
+            editText: this.editText.bind(this),
+            askConfirmation: this.askConfirmation.bind(this),
+            downloadAsXLXS: this.downloadAsXLXS.bind(this),
         });
         onWillStart(async () => {
             await loadSpreadsheetDependencies();
@@ -93,10 +106,47 @@ export class SpreadsheetRenderer extends Component {
             this.spreadsheet_model.dispatch("EVALUATE_CELLS", {sheetId});
         });
     }
+    closeDialog() {
+        this.state.dialogDisplayed = false;
+        this.state.dialogTitle = "Spreadsheet";
+        this.state.dialogContent = undefined;
+        this.state.dialogHideInputBox = false;
+    }
     onSpreadsheetSaved() {
         const data = this.spreadsheet_model.exportData();
         this.env.saveRecord({spreadsheet_raw: data});
         this.spreadsheet_model.leaveSession();
+    }
+    editText(title, callback, options) {
+        this.state.dialogContent = options.placeholder;
+        this.state.dialogTitle = title;
+        this.state.dialogDisplayed = true;
+        this.confirmDialog = () => {
+            callback(this.state.dialogContent);
+            this.closeDialog();
+        };
+    }
+    askConfirmation(content, confirm) {
+        this.state.dialogContent = content;
+        this.state.dialogDisplayed = true;
+        this.state.dialogHideInputBox = true;
+        this.confirmDialog = () => {
+            confirm();
+            this.closeDialog();
+        };
+    }
+    async downloadAsXLXS() {
+        this.ui.block();
+        await waitForDataLoaded(this.spreadsheet_model);
+        await this.action.doAction({
+            type: "ir.actions.client",
+            tag: "action_download_spreadsheet",
+            params: {
+                name: this.props.record.name,
+                xlsxData: this.spreadsheet_model.exportXLSX(),
+            },
+        });
+        this.ui.unblock();
     }
 }
 
@@ -104,6 +154,7 @@ SpreadsheetRenderer.template = "spreadsheet_oca.SpreadsheetRenderer";
 SpreadsheetRenderer.components = {
     Spreadsheet,
     Field,
+    Dialog,
 };
 SpreadsheetRenderer.props = {
     record: Object,
