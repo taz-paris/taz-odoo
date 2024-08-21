@@ -294,12 +294,11 @@ class HrEmployeeStaffingReport(models.Model):
             }
 
 
+    @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         #_logger.info('============================================= read_group employee_staffing_report.py')
         #_logger.info(fields)
-        """
-        This is a hack to allow us to correctly calculate the average activity rate.
-        """
+        #This is a hack to allow us to correctly calculate the average activity rate.
         if 'activity_rate' in fields:
             fields.extend(['aggregated_project_days:array_agg(project_days)'])
             fields.extend(['aggregated_activity_days:array_agg(activity_days)'])

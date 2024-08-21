@@ -28,7 +28,23 @@
               </field>
             </record>
               
-        <record id="view_employee_staffing_report_tree_search" model="ir.ui.view">
+        <record id="view_employee_staffing_report_pivot" model="ir.ui.view">
+		<field name="name">Rapports d'activité</field>
+		<field name="model">hr.employee_staffing_report</field>
+		<field name="arch" type="xml">
+		    <pivot string="Rapports d'activité" sample="1">
+			<field name="start_date" type="row" interval="month"/>
+			<!--
+			<field name="rel_job_id" type="col" />
+			-->
+			<field name="activity_days" type="measure"/>
+			<field name="project_days" type="measure"/>
+		    </pivot>
+		</field>
+	</record>
+
+
+        <record id="view_employee_staffing_report_search" model="ir.ui.view">
             <field name="name">Rapports d'activité</field>
             <field name="model">hr.employee_staffing_report</field>
             <field name="arch" type="xml">
@@ -66,7 +82,7 @@
         <record id="employee_staffing_report_week_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille hebdomadaire)</field>
             <field name="res_model">hr.employee_staffing_report</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,pivot</field>
 	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'week'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
@@ -75,7 +91,7 @@
         <record id="employee_staffing_report_month_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille mensuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,pivot</field>
 	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'month'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
@@ -84,7 +100,7 @@
         <record id="employee_staffing_report_quarter_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille trimestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,pivot</field>
 	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'quarter'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
@@ -93,6 +109,7 @@
         <record id="employee_staffing_report_semester_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille semestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
+            <field name="view_mode">tree,pivot</field>
 	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'semester'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
@@ -101,7 +118,7 @@
 	<record id="employee_staffing_report_year_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille annuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,pivot</field>
 	    <field name="context">{'search_default_location_paris' : True, 'search_default_this_year' : False, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'year'), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>

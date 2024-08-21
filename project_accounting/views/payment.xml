@@ -21,5 +21,21 @@
                   </field>
                </field>
         </record>
+
+	<record id="view_payment_pivot" model="ir.ui.view">
+		<field name="name">account.payment.pivot</field>
+		<field name="model">account.payment</field>
+		<field name="arch" type="xml">
+		    <pivot string="Paiements" sample="1">
+			<field name="date" type="row" interval="month"/>
+			<field name="amount_company_currency_signed" type="measure"/>
+		    </pivot>
+		</field>
+	</record>
+
+	    <record model="ir.actions.act_window" id="account.action_account_payments">
+	      <field name="view_mode">tree,form,kanban,graph,pivot</field>
+	    </record>
+
     </data>
 </odoo>
