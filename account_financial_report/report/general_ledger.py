@@ -1,6 +1,6 @@
-# © 2016 Julien Coux (Camptocamp)
+# ?? 2016 Julien Coux (Camptocamp)
 # Copyright 2020 ForgeFlow S.L. (https://www.forgeflow.com)
-# Copyright 2022 Tecnativa - Víctor Martínez
+# Copyright 2022 Tecnativa - V??ctor Mart??nez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import calendar
@@ -209,7 +209,6 @@ class GeneralLedgerReport(models.AbstractModel):
                 else:
                     prt_id = gl["partner_id"][0]
                     prt_name = gl["partner_id"][1]
-                    prt_name = prt_name._value
                 acc_id = gl["account_id"][0]
                 data[acc_id][prt_id] = self._prepare_gen_ld_data_item(gl)
                 data[acc_id][prt_id]["id"] = prt_id
@@ -236,7 +235,6 @@ class GeneralLedgerReport(models.AbstractModel):
                 if "tax_line_id" in gl and gl["tax_line_id"]:
                     tax_id = gl["tax_line_id"][0]
                     tax_name = gl["tax_line_id"][1]
-                    tax_name = tax_name._value
                 else:
                     tax_id = 0
                     tax_name = "Missing Tax"
@@ -347,7 +345,7 @@ class GeneralLedgerReport(models.AbstractModel):
         elif move_line_data["name"] == "":
             ref_label = move_line_data["ref"]
         else:
-            ref_label = move_line_data["ref"] + str(" - ") + move_line_data["name"]
+            ref_label = move_line_data["ref"] + " - " + move_line_data["name"]
         move_line_data.update({"ref_label": ref_label})
         return move_line_data
 

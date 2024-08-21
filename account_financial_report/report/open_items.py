@@ -1,4 +1,4 @@
-# © 2016 Julien Coux (Camptocamp)
+# ?? 2016 Julien Coux (Camptocamp)
 # Copyright 2020 ForgeFlow S.L. (https://www.forgeflow.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
@@ -147,7 +147,7 @@ class OpenItemsReport(models.AbstractModel):
             elif not move_line["name"]:
                 ref_label = move_line["ref"]
             else:
-                ref_label = move_line["ref"] + str(" - ") + move_line["name"]
+                ref_label = move_line["ref"] + " - " + move_line["name"]
 
             move_line.update(
                 {

@@ -1,8 +1,8 @@
 # Author: Damien Crier
 # Author: Julien Coux
 # Copyright 2016 Camptocamp SA
-# Copyright 2021 Tecnativa - João Marques
-# Copyright 2022 Tecnativa - Víctor Martínez
+# Copyright 2021 Tecnativa - Jo??o Marques
+# Copyright 2022 Tecnativa - V??ctor Mart??nez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import _, models
@@ -18,7 +18,7 @@ class GeneralLedgerXslx(models.AbstractModel):
         report_name = _("General Ledger")
         if company_id:
             company = self.env["res.company"].browse(company_id)
-            suffix = " - {} - {}".format(company.name, company.currency_id.name)
+            suffix = f" - {company.name} - {company.currency_id.name}"
             report_name = report_name + suffix
         return report_name
 
