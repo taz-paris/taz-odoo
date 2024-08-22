@@ -130,6 +130,8 @@ class projectAccountingPurchaseOrder(models.Model):
                 return super()._add_supplier_to_product()
 
     def _prepare_invoice(self):
+        # Revert the effetcs of this comit to keep the project director as default saleperson on purchase invoices
+        # https://github.com/odoo/odoo/commit/ef0289649d83aaa3046744a07385ecd303c7f3fe
         res = super()._prepare_invoice()
         res['invoice_user_id'] = self.user_id and self.user_id.id or self.env.user.id
         return res
