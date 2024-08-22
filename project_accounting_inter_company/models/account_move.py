@@ -31,9 +31,7 @@ class AccountMoveLine(models.Model):
         if dest_move.move_type in ['in_invoice', 'in_refund']:
             new_line['analytic_distribution'] = self.env['purchase.order'].get_dest_analytic_distribution_from_supplier_company(self.analytic_distribution, dest_company, self.company_id)
         elif dest_move.move_type in ['out_invoice', 'out_refund']:
-            new_line['analytic_distribution'] = self.env['purchase.order'].get_dest_analytic_distribution(self.analytic_distribution, dest_company)
+            new_line['analytic_distribution'] = self.env['purchase.order'].get_dest_analytic_distribution(self.analytic_distribution, dest_company, self.company_id)
         else :
             raise ValidationError(_("Type d'écriture non géré par le module project_accounting_inter_company : %s." % dest_move.move_type))
-        _logger.info(new_line['analytic_distribution'])
-        _logger.info(new_line)
         return new_line

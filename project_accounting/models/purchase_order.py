@@ -129,6 +129,10 @@ class projectAccountingPurchaseOrder(models.Model):
             if line.product_id and line.product_id.create_supplier_info_auto :
                 return super()._add_supplier_to_product()
 
+    def _prepare_invoice(self):
+        res = super()._prepare_invoice()
+        res['invoice_user_id'] = self.user_id and self.user_id.id or self.env.user.id
+        return res
 
 class projectAccountingPurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"

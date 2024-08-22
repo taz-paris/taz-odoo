@@ -252,26 +252,26 @@ class projectAccountingClosing(models.Model):
     invoice_period_amount = fields.Monetary('Facturation HT sur la période', compute=compute, store=True)
     purchase_period_amount = fields.Monetary('Achats HT sur la periode', compute=compute, store=True)
     
-    pca_previous_balance = fields.Monetary('Précédent solde PCA', related='previous_closing.pca_balance', group_operator=False)
+    pca_previous_balance = fields.Monetary('Précédent solde PCA', related='previous_closing.pca_balance', group_operator='sum', store=True)
     pca_period_amount = fields.Monetary('PCA(-)')
-    pca_balance = fields.Monetary('Solde PCA', compute=compute, store=True, group_operator=False)
+    pca_balance = fields.Monetary('Solde PCA', compute=compute, store=True, group_operator='sum')
     
-    fae_previous_balance = fields.Monetary('Précédent solde FAE', related='previous_closing.fae_balance', group_operator=False)
+    fae_previous_balance = fields.Monetary('Précédent solde FAE', related='previous_closing.fae_balance', group_operator=False, store=True)
     fae_period_amount = fields.Monetary('FAE(+)')
     fae_balance = fields.Monetary('Solde FAE', compute=compute, store=True, group_operator=False)
     
-    cca_previous_balance = fields.Monetary('Précédent solde CCA', related='previous_closing.cca_balance', group_operator=False)
+    cca_previous_balance = fields.Monetary('Précédent solde CCA', related='previous_closing.cca_balance', group_operator=False, store=True)
     cca_period_amount = fields.Monetary('CCA(+)')
     cca_balance = fields.Monetary('Solde CCA', compute=compute, store=True, group_operator=False)
     
-    fnp_previous_balance = fields.Monetary('Précédent solde FNP', related='previous_closing.fnp_balance', group_operator=False)
+    fnp_previous_balance = fields.Monetary('Précédent solde FNP', related='previous_closing.fnp_balance', group_operator=False, store=True)
     fnp_period_amount = fields.Monetary('FNP(-)')
     fnp_balance = fields.Monetary('Solde FNP', compute=compute, store=True, group_operator=False)
 
     provision_previous_balance_sum = fields.Monetary('Somme reprise prov.', compute=compute, store=True, group_operator=False)
     provision_balance_sum = fields.Monetary('Somme solde prov.', compute=compute, store=True, group_operator=False)
     
-    production_previous_balance = fields.Monetary('Précédent stock', related='previous_closing.production_balance', group_operator=False)
+    production_previous_balance = fields.Monetary('Précédent stock', related='previous_closing.production_balance', group_operator=False, store=True)
     production_period_amount = fields.Monetary('Production sur la période', compute=compute, store=True)
     production_stock = fields.Monetary('Stock total', compute=compute, store=True, group_operator=False)
     production_destocking = fields.Monetary('Destockage')
