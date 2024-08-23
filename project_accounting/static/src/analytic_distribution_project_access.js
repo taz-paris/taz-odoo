@@ -28,7 +28,6 @@ patch(components.AnalyticDistribution.prototype, 'analytic_distribution', {
 			    context: [],
 			}
 		this.analytic_account_object_list = await this.orm.call("account.analytic.account", "search_read", [], args);
-		//this.analytic_account_object_list_objects = JSON.parse(this.analytic_account_object_list);
 
 		if (typeof this.analytic_account_object_list[0] === 'undefined') {
 			alert("Pas de compte analytic sur la ligne.");
