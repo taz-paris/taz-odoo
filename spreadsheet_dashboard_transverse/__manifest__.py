@@ -17,7 +17,7 @@
     'category': 'Uncategorized',
     'version': '0.1',
 
-    'depends': ['spreadsheet_dashboard', 'taz-common', 'project_accounting'],
+    'depends': ['spreadsheet_dashboard', 'taz-common', 'project_accounting', 'spreadsheet_filters', 'staffing'],
 
     'data': [
         "data/dashboards.xml",

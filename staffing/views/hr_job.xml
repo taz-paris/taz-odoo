@@ -14,7 +14,8 @@
 						<field name="job_id" invisible="0" optional="hide"/>
 						<field name="begin_date"/>
 						<field name="cost"/>
-						<field name="account_analytic_line_ids" optional="False"/>
+						<field name="target_staffing_rate"/>
+						<field name="account_analytic_line_ids" optional="hide"/>
 					</tree>
 				</field>
 			</page>
