@@ -3844,7 +3844,7 @@
         },
         "L7": {
           "style": 21,
-          "content": "='Clotures YearToDate'!B1/L5"
+          "content": "='Clotures YearToDate'!Q24/L5"
         },
         "L8": {
           "style": 20
@@ -4186,7 +4186,7 @@
         },
         "M7": {
           "style": 21,
-          "content": "='Clotures YearToDate'!D2/M5"
+          "content": "='Clotures YearToDate'!Q2/M5"
         },
         "M8": {
           "style": 20
@@ -5496,7 +5496,7 @@
         {
           "id": "316f50ef-bcc6-41a1-a741-630dbae45ee4",
           "x": 0,
-          "y": 1309,
+          "y": 1250,
           "width": 536,
           "height": 335,
           "tag": "chart",

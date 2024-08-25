@@ -123,9 +123,9 @@
 
 	<menuitem id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="1"/>
 
-	    <!-- Masquer les modules de base, sauf poru le super admin -->
+	    <!-- Masquer les modules de base, sauf C-levels and ADV -->
 	    <record  id="spreadsheet_dashboard.spreadsheet_dashboard_menu_dashboard" model="ir.ui.menu">
-		    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+		    <field name="groups_id" eval="[(6, 0, [ref('taz-common.taz-cdg')])]"/>
 	    </record>
    </data>
 </odoo>

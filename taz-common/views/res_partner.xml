@@ -630,6 +630,11 @@
         <field name="comment">Rights for accounting and projets management.</field>
     </record>
 
+    <record id="taz-cdg" model="res.groups">
+        <field name="name">TAZ-CDG</field>
+        <field name="comment">Rights for C-levels.</field>
+    </record>
+
     <!-- Masquer les modules de base, sauf poru le super admin -->
     <record  id="mail.menu_root_discuss" model="ir.ui.menu">
 	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>

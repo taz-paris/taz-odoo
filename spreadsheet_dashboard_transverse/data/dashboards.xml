@@ -9,7 +9,7 @@
         <field name="name">Transverse</field>
         <field name="data" type="base64" file="spreadsheet_dashboard_transverse/data/files/transverse_dashboard.json"/>
         <field name="dashboard_group_id" ref="spreadsheet_dashboard_group_transverse"/>
-        <field name="group_ids" eval="[Command.link(ref('taz-common.taz-adv'))]"/>
+        <field name="group_ids" eval="[Command.link(ref('taz-common.taz-cdg'))]"/>
         <field name="sequence">1</field>
         <field name="active">False</field>
     </record>
