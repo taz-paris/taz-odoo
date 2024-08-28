@@ -33,6 +33,6 @@ class projectOutsourcingLink(models.Model):
             'partner_secondary_ids' : [(4, self.company_id.partner_id.id)],
             }
         _logger.info(dic_mirror_project)
-        self.inter_company_mirror_project = self.env['project.project'].create(dic_mirror_project)
+        self.inter_company_mirror_project = self.env['project.project'].with_context(allow_all_status=True).create(dic_mirror_project)
 
         return self.inter_company_mirror_project

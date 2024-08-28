@@ -34,7 +34,8 @@ class projectAccountProject(models.Model):
             #_logger.info('Numéro de projet auto : %s' % str(vals['number']))
             if 'stage_id' in vals.keys():
                 if vals['stage_id'] in [2, 9, 3, 8, 4]: # statuts Commandé / Prod terminée / Clos / Perdu / Annulée
-                    raise ValidationError(_("Un projet doit être créé au statut Avant-vente chaud ou Avant-vente froid ou Accord client."))
+                    if not self.env.context.get("allow_all_status") :
+                        raise ValidationError(_("Un projet doit être créé au statut Avant-vente chaud ou Avant-vente froid ou Accord client."))
                 elif vals['stage_id'] in [6]: # statuts Accord client
                     vals['date_win_loose'] = datetime.now()
                     new_stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
