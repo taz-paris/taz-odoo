@@ -17,12 +17,8 @@
                 <field name="unit_amount" position="replace">
 			<!-- suppression du widget timesheet_uom qui empêche de saisir tous les montants-->
 			<field name="unit_amount" optional="show" sum="Total" />
-                </field>
-		<!--
-                <field name="amount" position="replace">
 			<field name="amount" string="Valorisation €" optional="show" sum="Total" />
                 </field>
-		-->
             </field>
         </record>
 

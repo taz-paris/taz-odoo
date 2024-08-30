@@ -1348,18 +1348,18 @@ class projectAccountProject(models.Model):
         ], string="Réflexion apport RSE du projet")
     is_filled_csr_project_initiative = fields.Boolean("Champ Réflexion apport RSE du projet valorisé", store=True, compute=compute, help="FAUX si le champ Réflexion apport RSE du projet dans l'onglet Structure au lancement n'est pas valorisé")
     csr_project_environmental_level = fields.Selection([
-        ('level_0', 'Pas essayé'),
-        ('level_1', 'Essayé mais pas réussi'),
-        ('level_2', 'Réussi avec un impact modeste (Sensibilisation / Ajout d’un principe global / etc.)'),
-        ('level_3', 'Réussi avec un impact significatif (Ajout d’un axe avec des projets chiffrés / Décision RSE / etc.)'),
+        ('level_0', '0 - Pas essayé'),
+        ('level_1', '1 - Essayé mais pas réussi'),
+        ('level_2', '2 - Réussi avec un impact modeste (Sensibilisation / Ajout d’un principe global / etc.)'),
+        ('level_3', '3 - Réussi avec un impact significatif (Ajout d’un axe avec des projets chiffrés / Décision RSE / etc.)'),
         ('not_specified','Pas de réponse du DM'),
         ], string="Bilan volet environnemental")
     is_filled_csr_project_environmental_level = fields.Boolean("Champp Bilan volet environnemental valorisé", store=True, compute=compute, help="FAUX si le champ Bilan volet environnemental dans l'onglet Structure au lancement n'est pas valorisé")
     csr_project_social_level = fields.Selection([
-        ('level_0', 'Pas essayé'),
-        ('level_1', 'Essayé mais pas réussi'),
-        ('level_2', 'Réussi avec un impact modeste (Sensibilisation / Ajout d’un principe global / etc.)'),
-        ('level_3', 'Réussi avec un impact significatif (Ajout d’un axe avec des projets chiffrés / Décision RSE / etc.)'),
+        ('level_0', '0 - Pas essayé'),
+        ('level_1', '1 - Essayé mais pas réussi'),
+        ('level_2', '2 - Réussi avec un impact modeste (Sensibilisation / Ajout d’un principe global / etc.)'),
+        ('level_3', '3 - Réussi avec un impact significatif (Ajout d’un axe avec des projets chiffrés / Décision RSE / etc.)'),
         ('not_specified','Pas de réponse du DM'),
         ], string="Bilan volet social")
     is_filled_csr_project_social_level = fields.Boolean("Champp Bilan volet social valorisé", store=True, compute=compute, help="FAUX si le champ Bilan volet social dans l'onglet Structure au lancement n'est pas valorisé")

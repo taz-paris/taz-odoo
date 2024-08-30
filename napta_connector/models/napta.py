@@ -445,6 +445,11 @@ class naptaProject(models.Model):
 
         if not self.napta_id:
            raise ValidationError(_("Impossible de supprimer ce projet sur Napta car son id_napta est inconnu.")) 
+
+        analytic_lines = self.env['account.analytic.line'].search([('project_id', '=', self.id), ('napta_id', '!=', False)])
+        if len(analytic_lines) > 0:
+            raise ValidationError(_("Impossible de supprimer ce projet sur Napta car il est lié à des lignes de prévisionnel ou de pointage (sur TazForce) qui ont été transmises par Napta."))
+
         _logger.info('Projet à supprimer de napta %s %s (ID ODOO = %s / NaptaID = %s)' % (self.number, self.name, str(self.id), self.napta_id))
 
         client = ClientRestNapta(self.env)
