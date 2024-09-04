@@ -33,6 +33,7 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
 
     def action_validate(self):
         _logger.info('-- wizardAccountingClosingMassCreation > action_validate')
+        dic_list = []
         for project_id in self.project_ids:
             closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', project_id.id), ('closing_date', '=', self.date)])
             if len(closing_ids) == 0:
@@ -42,5 +43,7 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
                         'closing_date' : self.date,
                 }
                 _logger.info(dic)
-                self.env['project.accounting_closing'].create(dic)
+                dic_list.append(dic)
                 _logger.info(dic)
+        _logger.info(dic_list)
+        self.env['project.accounting_closing'].create(dic_list)

@@ -24,4 +24,10 @@
 		<field name="doall" eval="True" />
 	    </record>
 	</data>
+	<data>
+	    <record id="project.project_project_stage_0" model="project.project.stage">
+		<field name="sequence">10</field>
+		<field name="name">1-Avant-vente froid</field>
+	    </record>
+	</data>
 </odoo>

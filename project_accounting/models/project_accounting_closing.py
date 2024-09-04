@@ -40,8 +40,26 @@ class projectAccountingClosing(models.Model):
     def _check_closing_date(self):
         for rec in self:
             accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id)], order="closing_date desc")
-            if accounting_closing_ids[0].id != self.id:
+            if accounting_closing_ids[0].id != rec.id:
                 raise ValidationError(_("Il n'est pas possible de saisir une date de clôture antérieure à la dernière cloture enregistrée pour ce projet."))
+
+    @api.model_create_multi
+    def create(self, vals):
+        _logger.info('-- model_create_multi project_accounting_closing')
+        project_ids = [val['project_id'] for val in vals]
+        not_validated_closing_ids = self.env['project.accounting_closing'].search([('project_id', 'in', project_ids), ('is_validated', '=', False)])
+        not_validated_closing_projects = [closing.project_id.display_name for closing in not_validated_closing_ids]
+        if len(not_validated_closing_ids) >0:
+            raise ValidationError(_("Il n'est pas possible de générer de nouvelles clôtures, car les projets suivants ont au moins une cloture non validée : \n%s" % (',\n'.join(not_validated_closing_projects)) ))
+
+        closing = super().create(vals)
+
+        for rec in closing:
+            if rec.project_id:
+                rec.original_stage_id = rec.project_id.stage_id.id
+        return closing
+
+
 
     def write(self, vals):
         for rec in self :
@@ -106,9 +124,6 @@ class projectAccountingClosing(models.Model):
             rec.production_period_amount = -1 * production_period_amount
 
             rec.production_stock = rec.production_previous_balance + rec.production_period_amount
-            _logger.info('------ prod')
-            _logger.info(rec.production_previous_balance)
-            _logger.info(rec.production_period_amount)
 
             rec.production_balance = rec.production_stock - rec.production_destocking
 
@@ -208,15 +223,6 @@ class projectAccountingClosing(models.Model):
                 'target': 'current',
                 'domain': [('id', 'in', analytic_lines.ids)],
             }
-
-    @api.model_create_multi
-    def create(self, vals):
-        closing = super().create(vals)
-        for rec in closing:
-            if rec.project_id:
-                rec.original_stage_id = rec.project_id.stage_id.id
-        return closing
-
 
     def goto_napta(self):
         if self.project_id.napta_id:
