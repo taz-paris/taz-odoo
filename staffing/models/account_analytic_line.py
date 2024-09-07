@@ -32,7 +32,7 @@ class staffingAnalyticLine(models.Model):
         for rec in self :
             if rec.category in ['project_employee_validated', 'project_forecast']: #les changements sont possibles a postériori pour les timesheet liées aux congés
                 company = rec.env['res.company'].browse(rec.company_id.id)[0]
-                if company.fiscalyear_lock_date > rec.date:
+                if company.fiscalyear_lock_date and (company.fiscalyear_lock_date > rec.date):
                     if rec.category == 'project_employee_validated' :
                         raise ValidationError(_("Une écriture analytique de la catégorie Pointage ne peut être créée ou changer de nombre de jours/valorisation après la clôture comptable. : %s" % str(rec.read())))
                     elif rec.category == 'project_forecast' :

@@ -47,6 +47,7 @@
 				<field name="rel_partner_parent_id" optional="hide"/>
 				<field name="rel_partner_parent_industry_id" optional="hide"/>
 				<field name="rel_partner_id_user_id" optional="hide"/>
+				<field name="rel_partner_id_function" optional="show"/>
 			</field>
 
 			<xpath expr="//button[@name='action_confirm']" position="before">
@@ -73,6 +74,10 @@
 				<field name="registration_user_id" invisible="1" />
 				<field name="last_office365_mail_draft" invisible="1" />
 				<field name="comment" />
+				<field name="rel_partner_parent_id" />
+				<field name="rel_partner_parent_industry_id" />
+				<field name="rel_partner_id_user_id" />
+				<field name="rel_partner_id_function" />
 			</field>
 			<field name="event_ticket_id" position="attributes">
 				<attribute name="optional">hide</attribute>
