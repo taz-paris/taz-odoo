@@ -14,3 +14,5 @@
 "access_wizard_accounting_closing_mass_creation","access_wizard_accounting_closing_mass_creation","project_accounting.model_wizard_accounting_closing_mass_creation","taz-common.taz-adv","True","True","True","True"
 "project_employee_book_goal_admin","project_employee_book_goal_admin","project_accounting.model_project_employee_book_goal","taz-common.taz-management","True","True","True","True"
 "project_employee_book_goal_readonly","project_employee_book_goal_readonly","project_accounting.model_project_employee_book_goal","taz-common.taz-basic","True","False","False","False"
+"agreement_admin","agreement_admin","agreement.model_agreement","taz-common.taz-management","True","True","True","True"
+"agreement_type_admin","agreement_type_admin","agreement.model_agreement_type","taz-common.taz-management","True","True","True","True"
