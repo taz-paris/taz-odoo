@@ -15,6 +15,7 @@
 						<field name="active" widget="boolean_toggle"/>
 						<field name="business_priority"/>
 						<field name="pillar_id"/>
+						<field name="partner_ids" widget="many2many_tags" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" />
 					</group>
 					<group>
 						<field name="user_id" options="{'no_create': True, 'no_create_edit':True}"/>
@@ -59,6 +60,8 @@
 							</tree> 
 						  </field>
 					  </page>
+
+						  <!--
 					  <page string="Entreprises du compte">
 						<field colspan="3" name="partner_ids" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
 							<tree delete="false" create="false">
@@ -69,6 +72,7 @@
 							</tree>
 						</field>
 					  </page>
+						  -->
 				</notebook>
 			</sheet>
 		</xpath>
