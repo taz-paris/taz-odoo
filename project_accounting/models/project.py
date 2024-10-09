@@ -273,6 +273,7 @@ class projectAccountProject(models.Model):
     rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id', store=True)
     rel_industry_business_priority = fields.Selection(related='rel_partner_industry_id.business_priority', store=True)
     number = fields.Char('Numéro', readonly=True, required=False, copy=False, default='')
+    is_generate_project_accounting_closing = field.Boolean("Génèration en masse des clôtures comptables", default=True, help="Si VRAI, Odoo génèrera automatiquement des clôtures comptables pour ce projet tant qu'il n'est pas clôs comptablement. Sinon il sera ignoré par l'assistant de création des clôtures.")
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
@@ -617,7 +618,7 @@ class projectAccountProject(models.Model):
             else:
                 rec.other_part_marging_rate_controle_OK = False
 
-            if not(rec.number):
+            if not(rec.is_generate_project_accounting_closing):
                 rec.is_review_needed = False
             else:
                 if not(rec.other_part_marging_rate_controle_OK) or not(rec.is_validated_order) or not (rec.is_validated_book) or not(rec.is_validated_purchase_order) or not(rec.is_consistant_outsourcing) or not(rec.is_consistant_prevent_napta_creation) or not(rec.is_outsource_part_amount_current) or not(rec.is_sale_order_with_draft) or not(rec.is_affected_book) or not(rec.is_filled_sales_proposal_indexation) or not(rec.is_filled_deliverable_indexation) or not(rec.is_filled_commercial_reference_indexation) or not(rec.is_filled_success_story_indexation) or not(rec.is_filled_csr_project_initiative) or not(rec.is_filled_csr_project_social_level) or not(rec.is_filled_csr_project_environmental_level):

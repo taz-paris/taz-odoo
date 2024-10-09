@@ -17,7 +17,7 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
     @api.onchange('date')
     def _onchange_date(self):
         self.project_ids = False
-        p = self.env['project.project'].search([('number', '!=', False), ('company_id', '=', self.company_id.id), '|', ('has_provision_running', '=', True), ('stage_id.state', 'in', ['before_launch', 'launched'])])
+        p = self.env['project.project'].search([('is_generate_project_accounting_closing', '=', True), ('company_id', '=', self.company_id.id), '|', ('has_provision_running', '=', True), ('stage_id.state', 'in', ['before_launch', 'launched'])])
         self.project_ids = p.ids
 
     def _default_date(self):
