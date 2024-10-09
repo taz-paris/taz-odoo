@@ -31,6 +31,10 @@ class projectOutsourcingLink(models.Model):
         if not self.is_partner_id_res_company :
             raise ValidationError(_("Le partenaire lié n'est pas lié à une société de la galaxie."))
         
+        partner_secondary_ids  = []
+        if self.project_id.partner_id.id != self.company_id.partner_id.id :
+            partner_secondary_ids.append((4, self.company_id.partner_id.id))
+
         dic_mirror_project = {
             'name' : self.project_id.name,
             'company_id' : self.partner_id.ref_company_ids[0].id,
@@ -40,7 +44,7 @@ class projectOutsourcingLink(models.Model):
             'agreement_id' : False,
             'project_director_employee_id' : self.project_id.project_director_employee_id.id,
             'project_manager' : self.project_id.project_manager.id,
-            'partner_secondary_ids' : [(4, self.company_id.partner_id.id)],
+            'partner_secondary_ids' : partner_secondary_ids,
             }
         _logger.info(dic_mirror_project)
         self.inter_company_mirror_project = self.env['project.project'].with_context(allow_all_status=True).create(dic_mirror_project)

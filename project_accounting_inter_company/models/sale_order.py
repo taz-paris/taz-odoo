@@ -13,6 +13,7 @@ class SaleOrderLine(models.Model):
     def _get_sale_purchase_line_sync_fields(self):
         """Map sale line fields to the synced purchase line peer"""
         return {
+            "name" : "name",
             "product_uom_qty": "product_qty",
             "qty_delivered" : "qty_received",
             "previsional_invoice_date" : "previsional_invoice_date",

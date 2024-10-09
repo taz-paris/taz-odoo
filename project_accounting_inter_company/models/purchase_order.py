@@ -69,6 +69,7 @@ class PurchaseOrderLine(models.Model):
     
     def _get_purchase_sale_line_sync_fields(self):
         res = super()._get_purchase_sale_line_sync_fields()
+        res['name'] = 'name' 
         res['qty_received'] = 'qty_delivered' 
         res['previsional_invoice_date'] = 'previsional_invoice_date'
         return res
