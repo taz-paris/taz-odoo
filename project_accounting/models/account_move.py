@@ -123,8 +123,8 @@ class projectAccountingAccountMoveLine(models.Model):
     def _compute_amount_paid(self):
         #_logger.info('--- _compute_amount_paid')
         for rec in self:
-            if rec.parent_payment_state == 'reversed' or rec.move_id.reversed_entry_id :
-                #TODO : vérifier la conséquence si on supprimait ce bloc IF : rec.parent_payment_state == 'reversed' or rec.move_id.reversed_entry_id
+            if rec.parent_payment_state == 'reversed' or rec.move_id.reversed_entry_id.payment_state == 'reversed':
+                # si cette ligne d'écriture est sur une facture extrounée, ou bien est un avoir dont la facture initiale est totalement extournée (cet avoir a donc le bandeau payé sans paiement car il y a lettrage avec la facture initiale) alors le montant payé est 0. En revanche, si c'est une facture qui n'a pas le statut extourné ou un avoir partiel (c'est à dire un avoir qui ne pointe pas vers une facture extournée) alors il le paiement est non nul => on passe à la clause else.
                 rec.amount_paid = 0.0
             else:
                 invoice_amount_paid = rec.move_id.amount_total - rec.move_id.amount_residual
