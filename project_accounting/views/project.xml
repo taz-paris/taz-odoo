@@ -424,7 +424,7 @@
 					<page name="account_closing" string="Clôtures comptables">
 						<group>
 							<group>
-								<field name="is_generate_project_accounting_closing"/>
+								<field name="is_generate_project_accounting_closing" groups="account.group_account_user"/>
 							</group>
 							<group>
 								<field name="has_provision_running"/>

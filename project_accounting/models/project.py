@@ -273,7 +273,7 @@ class projectAccountProject(models.Model):
     rel_partner_industry_id = fields.Many2one(related='partner_id.industry_id', store=True)
     rel_industry_business_priority = fields.Selection(related='rel_partner_industry_id.business_priority', store=True)
     number = fields.Char('Numéro', readonly=True, required=False, copy=False, default='')
-    is_generate_project_accounting_closing = field.Boolean("Génèration en masse des clôtures comptables", default=True, help="Si VRAI, Odoo génèrera automatiquement des clôtures comptables pour ce projet tant qu'il n'est pas clôs comptablement. Sinon il sera ignoré par l'assistant de création des clôtures.")
+    is_generate_project_accounting_closing = fields.Boolean("Génèration en masse des clôtures comptables", default=True, help="Si VRAI, Odoo génèrera automatiquement des clôtures comptables pour ce projet tant qu'il n'est pas clôs comptablement. Sinon il sera ignoré par l'assistant de création des clôtures.")
     name = fields.Char(required = False) #Ne peut pas être obligatoire pour la synchro Fitnet
     stage_is_part_of_booking = fields.Boolean(related="stage_id.is_part_of_booking")
     partner_id = fields.Many2one(domain="[('is_company', '=', True)]")
