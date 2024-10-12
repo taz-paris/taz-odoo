@@ -45,6 +45,7 @@ class projectOutsourcingLink(models.Model):
             'project_director_employee_id' : self.project_id.project_director_employee_id.id,
             'project_manager' : self.project_id.project_manager.id,
             'partner_secondary_ids' : partner_secondary_ids,
+            'is_prevent_napta_creation' : is_prevent_napta_creation,
             }
         _logger.info(dic_mirror_project)
         self.inter_company_mirror_project = self.env['project.project'].with_context(allow_all_status=True).create(dic_mirror_project)

@@ -551,12 +551,17 @@ class projectAccountProject(models.Model):
             rec.is_affected_book = is_affected_book
 
             is_consistant_outsourcing = True
-            if not(rec.outsourcing):
+            if not(rec.outsourcing) :
                 is_consistant_outsourcing = False
-            else :
-                if rec.outsourcing in ['direct-paiement-outsourcing', 'direct-paiement-outsourcing-company', 'outsourcing']:
-                    if rec.outsource_part_amount_current == 0:
-                         is_consistant_outsourcing = False
+            elif rec.outsourcing in ['direct-paiement-outsourcing', 'direct-paiement-outsourcing-company', 'outsourcing']:
+                if (rec.partner_id.id != rec.company_id.partner_id.id) and (rec.outsource_part_current_amount <= 0):
+                    is_consistant_outsourcing = False
+                if rec.outsource_part_cost_current + rec.outsource_part_cost_futur <= 0 :
+                    is_consistant_outsourcing = False
+            elif rec.outsourcing in ['no-outsourcing']:
+                if (rec.outsource_part_current_amount != 0) or (rec.outsource_part_cost_current + rec.outsource_part_cost_futur != 0):
+                    is_consistant_outsourcing = False
+            
             rec.is_consistant_outsourcing = is_consistant_outsourcing
 
             is_validated_purchase_order = True
@@ -574,7 +579,7 @@ class projectAccountProject(models.Model):
             rec.is_validated_purchase_order = is_validated_purchase_order
 
             is_outsource_part_amount_current = True
-            if 0.0 in reselling_subtotal_by_order_id.values():
+            if (rec.partner_id.id != rec.company_id.partner_id.id) and (0.0 in reselling_subtotal_by_order_id.values()):
                 is_outsource_part_amount_current = False
             rec.is_outsource_part_amount_current = is_outsource_part_amount_current
 
