@@ -20,7 +20,7 @@ class ContactUserLink(models.Model):
     _rec_name = "name"
     _description = "Record attributes of the relation of an user and a customer/contact"
     _sql_constraints = [
-        ('contact_user_uniq', 'UNIQUE (partner_id, user_id)',  "Impossible d'enregistrer deux liens pour un même contact et un même utilisatuer.")
+        ('contact_user_uniq', 'UNIQUE (partner_id, user_id)',  "Impossible d'enregistrer deux liens pour un même contact et un même utilisateur.")
     ] 
     
     """

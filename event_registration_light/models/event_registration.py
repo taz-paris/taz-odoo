@@ -13,6 +13,9 @@ from odoo.addons import base
 class eventRegistration(models.Model):
     _inherit = "event.registration"
     _rec_name = 'display_name'
+    _sql_constraints = [
+        ('contact_event_uniq', 'UNIQUE (partner_id, event_id)',  "Impossible d'enregistrer plusieurs inscriptions le même couple {contact, évènement}.")
+    ] 
     
 
     @api.onchange('mail_auto')
