@@ -554,12 +554,12 @@ class projectAccountProject(models.Model):
             if not(rec.outsourcing) :
                 is_consistant_outsourcing = False
             elif rec.outsourcing in ['direct-paiement-outsourcing', 'direct-paiement-outsourcing-company', 'outsourcing']:
-                if (rec.partner_id.id != rec.company_id.partner_id.id) and (rec.outsource_part_current_amount <= 0):
+                if (rec.partner_id.id != rec.company_id.partner_id.id) and (rec.outsource_part_amount_current <= 0):
                     is_consistant_outsourcing = False
                 if rec.outsource_part_cost_current + rec.outsource_part_cost_futur <= 0 :
                     is_consistant_outsourcing = False
             elif rec.outsourcing in ['no-outsourcing']:
-                if (rec.outsource_part_current_amount != 0) or (rec.outsource_part_cost_current + rec.outsource_part_cost_futur != 0):
+                if (rec.outsource_part_amount_current != 0) or (rec.outsource_part_cost_current + rec.outsource_part_cost_futur != 0):
                     is_consistant_outsourcing = False
             
             rec.is_consistant_outsourcing = is_consistant_outsourcing

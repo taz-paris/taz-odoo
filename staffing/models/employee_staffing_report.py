@@ -361,6 +361,11 @@ class HrEmployeeStaffingReport(models.Model):
         for rec in self:
             rec.rel_work_location_id = rec.employee_id._get_work_location_id(rec.start_date)
 
+    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.department_id')
+    def compute_department(self):
+        for rec in self:
+            rec.rel_department_id = rec.employee_id._get_department_id(rec.start_date)
+
     periodicity = fields.Selection([
             ('week', 'Semaine'),
             ('month', 'Mois'), #Seules les maillers hebdomadaire et mensuelles sont différentes car elles recouvrent des lignes de pointage différentes. Les périodicités trimestrielles/semestrielles/annuelles pourraient être reconstituées en regroupant sur une liste de mois... mais on aurait pas le bouton pour voir toues les lignes mobilisées à la maille du trimestre/semestre/année (uniquement à la maille des mois)
@@ -371,6 +376,7 @@ class HrEmployeeStaffingReport(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Consultant", required=True)
     rel_job_id = fields.Many2one('hr.job', string='Grade', compute=compute_job, store=True, help="Grade du consultant au début de la période")
     rel_work_location_id = fields.Many2one('hr.work.location', compute=compute_work_location, store=True, help="Bureau du consultant au début de la période")
+    rel_department_id = fields.Many2one('hr.department', compute=compute_department, store=True, help="Département du consultant au début de la période")
     rel_company_id = fields.Many2one('res.company', string='Société', related="employee_id.company_id", store=True, help="Société du consultant")
 
     start_date = fields.Date('Date de début', required=True)
