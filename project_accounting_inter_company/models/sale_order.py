@@ -14,6 +14,9 @@ class SaleOrderLine(models.Model):
         """Map sale line fields to the synced purchase line peer"""
         return {
             "name" : "name",
+            "product_id" : "product_id",
+            "product_uom" : "product_uom", 
+            "price_unit" : "price_unit",
             "product_uom_qty": "product_qty",
             "qty_delivered" : "qty_received",
             "previsional_invoice_date" : "previsional_invoice_date",
@@ -67,7 +70,7 @@ class SaleOrderLine(models.Model):
 
     
     def _get_allowed_purchase_order_states(self):
-        allowed_states = ["purchase"]
+        allowed_states = ["draft", "purchase"]
         if self.env.context.get("allow_update_locked_purchases", False):
             allowed_states.append("done")
         return allowed_states

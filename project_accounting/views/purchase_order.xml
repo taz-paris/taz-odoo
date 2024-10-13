@@ -10,7 +10,7 @@
 			<field name="id" widget="open_tab" />
 		</field>
                 <xpath expr="//field[@name='price_subtotal']" position="after">
-			<field name="previsional_invoice_date" optional="show"/>
+			<field name="previsional_invoice_date" optional="show" required="1"/>
                         <field name="direct_payment_sale_order_line_id" readonly="1" widget="many2many_tags" optional="show" on_change="1"/>
 			<field name="order_direct_payment_validated_amount" optional="show" on_change="1"/>
 			<field name="order_direct_payment_validated_detail" optional="show" on_change="1"/>
