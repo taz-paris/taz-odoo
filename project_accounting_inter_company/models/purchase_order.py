@@ -54,13 +54,19 @@ class PurchaseOrder(models.Model):
 
         return dest_analytic_distribution
 
+    def _inter_company_create_sale_order(self, dest_company):
+        # To avoid creating multiple sale orders for the same purchase order on sale order confirmation
+        self.ensure_one()
+        if not(self.intercompany_sale_order_id):
+            return super()._inter_company_create_sale_order(dest_company)
+
     def _prepare_sale_order_line_data(self, purchase_line, dest_company, sale_order):
         new_line = super()._prepare_sale_order_line_data(purchase_line, dest_company, sale_order)
         new_line['analytic_distribution'] = self.get_dest_analytic_distribution(purchase_line.analytic_distribution, dest_company, purchase_line.company_id)
         new_line['previsional_invoice_date'] = purchase_line['previsional_invoice_date']
         new_line['price_unit'] = purchase_line['price_unit']
+        new_line['name'] = purchase_line['name']
         return new_line
-
 
 
 
@@ -70,6 +76,49 @@ class PurchaseOrderLine(models.Model):
     def _get_purchase_sale_line_sync_fields(self):
         res = super()._get_purchase_sale_line_sync_fields()
         res['name'] = 'name' 
+        res['product_id'] = 'product_id' 
+        res['product_uom'] = 'product_uom' 
         res['qty_received'] = 'qty_delivered' 
+        res['price_unit'] = 'price_unit' 
         res['previsional_invoice_date'] = 'previsional_invoice_date'
         return res
+
+    #### OVERIDE COMMUNITY FUNCTION FROM PURCHASE_SALE_INTER_COMPANY
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Sync lines between an confirmed unlocked purchase and a confirmed unlocked
+        sale order"""
+        lines = super().create(vals_list)
+        allowed_states = self._get_allowed_sale_order_states()
+        for order in lines.order_id.filtered(
+            #lambda x: x.state == "purchase" and x.intercompany_sale_order_id
+            #ADU : si l'état du purchase.order est en draft on doit créer la sale.order.line correspondante si l'intercompany_sale_order_id est défini sur le purchase.order
+            lambda x: x.intercompany_sale_order_id
+        ):
+            if order.intercompany_sale_order_id.sudo().state not in allowed_states:
+                raise UserError(
+                    _(
+                        "You can't change this purchase order as the corresponding "
+                        "sale is %(state)s",
+                        state=order.state,
+                    )
+                )
+            intercompany_user = (
+                order.intercompany_sale_order_id.sudo().company_id.intercompany_sale_user_id
+                or self.env.user
+            )
+            sale_lines = []
+            for purchase_line in lines.filtered(lambda x: x.order_id == order):
+                sale_lines.append(
+                    order._prepare_sale_order_line_data(
+                        purchase_line,
+                        order.intercompany_sale_order_id.sudo().company_id,
+                        order.intercompany_sale_order_id.sudo(),
+                    )
+                )
+            self.env["sale.order.line"].with_user(intercompany_user.id).sudo().create(
+                sale_lines
+            )
+        return lines
+
+
