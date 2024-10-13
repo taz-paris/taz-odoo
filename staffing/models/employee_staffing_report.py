@@ -86,7 +86,7 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
         for rec in self :
             rec.create_update_timesheet_report()
 
-        #_logger.info('---------- END write account.analytic.line employee_staffing_report.py')
+        _logger.info('---------- END write account.analytic.line employee_staffing_report.py')
         return res
 
 
@@ -117,7 +117,7 @@ class staffingAnalyticLine_employee_staffing_report(models.Model):
 
 
     def create_update_timesheet_report(self):
-        #_logger.info('---------- create_update_timesheet_report account.analytic.line employee_staffing_report.py')
+        _logger.info('---------- create_update_timesheet_report account.analytic.line employee_staffing_report.py')
         group_dic = {}
         for line in self :
             if not line.employee_id :
@@ -349,6 +349,7 @@ class HrEmployeeStaffingReport(models.Model):
         _logger.info('--- recompute_if_has_to_be_recomputed')
         reports = self.env['hr.employee_staffing_report'].search([('has_to_be_recomputed', '=', True)])
         _logger.info('Nombre de rapports de staffing à recalculer : %s' % str(len(reports)))
+        _logger.info(reports)
         reports.availability()
 
     @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.job_id')
@@ -377,7 +378,7 @@ class HrEmployeeStaffingReport(models.Model):
     rel_job_id = fields.Many2one('hr.job', string='Grade', compute=compute_job, store=True, help="Grade du consultant au début de la période")
     rel_work_location_id = fields.Many2one('hr.work.location', compute=compute_work_location, store=True, help="Bureau du consultant au début de la période")
     rel_department_id = fields.Many2one('hr.department', compute=compute_department, store=True, help="Département du consultant au début de la période")
-    rel_company_id = fields.Many2one('res.company', string='Société', related="employee_id.company_id", store=True, help="Société du consultant")
+    company_id = fields.Many2one('res.company', string='Société', related="employee_id.company_id", store=True, help="Société du consultant")
 
     start_date = fields.Date('Date de début', required=True)
     end_date = fields.Date('Date de fin', compute=compute_end_date, store=True)

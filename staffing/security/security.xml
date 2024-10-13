@@ -23,5 +23,12 @@
         <field name="model_id" ref="model_hr_cost"/>
         <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
     </record>
+	<record model="ir.rule" id="employee_staffing_report_comp_rule">
+	    <field name="name">employee_staffing_report Record: multi-company</field>
+	    <field name="model_id" ref="model_hr_employee_staffing_report"/>
+	    <field name="domain_force">
+		['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
+	    </field>
+	</record>
   </data>
 </odoo>
