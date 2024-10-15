@@ -412,6 +412,7 @@ class naptaProject(models.Model):
         for rec in self:
             ODOO_TO_NAPTA_PROJECT_FIELD_LIST = [
                 'napat_id',
+                'is_prevent_napta_creation',
                 'company_part_amount_current',
                 'company_part_amount_initial',
                 'partner_id',

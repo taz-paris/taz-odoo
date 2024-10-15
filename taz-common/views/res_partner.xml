@@ -441,6 +441,7 @@
 	    <filter name="no_update_12months" string="Pas MAJ depuis > 12 mois" domain="[('write_date','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
             <separator/>
 	    <filter name="created_7days" string="Contacts créés au cours des 7 derniers jours" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(days=7)).strftime('%%Y-%%m-%%d')))]"/>
+	    <filter name="created_24hourss" string="Contacts créés au cours des 24 dernières heures" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(hours=7)).strftime('%%Y-%%m-%%d')))]"/>
             <group expand="0" string="Group By">
             	<filter string="Compte du parent (ex BD)" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
             	<filter string="Secteur du parent" name="group_sector" context="{'group_by': 'parent_sector_id'}"/>

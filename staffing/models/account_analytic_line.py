@@ -100,8 +100,8 @@ class staffingAnalyticLine(models.Model):
             line_date_end = line.date_end
             if not line_date_end :
                 line_date_end = line.date
-            work_days_line = line.employee_id.number_work_days_period(line.date, line_date_end)
-            work_days_line_in_period = line.employee_id.number_work_days_period(max(line.date, date_start), min(line_date_end, date_end))
+            work_days_line = line.employee_id.sudo().number_work_days_period(line.date, line_date_end)
+            work_days_line_in_period = line.employee_id.sudo().number_work_days_period(max(line.date, date_start), min(line_date_end, date_end))
             #_logger.info('work_days_line %s' % work_days_line)
             #_logger.info('work_days_line_in_period %s' % work_days_line_in_period)
             #_logger.info('line.unit_amount %s' % line.unit_amount)
