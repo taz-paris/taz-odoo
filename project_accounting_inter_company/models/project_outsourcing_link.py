@@ -16,7 +16,7 @@ class projectOutsourcingLink(models.Model):
     @api.depends('partner_id', 'partner_id.ref_company_ids')
     def _compute_is_partner_id_res_company(self):
         for rec in self:
-            if len(rec.partner_id.ref_company_ids) != 1:
+            if len(rec.sudo().partner_id.ref_company_ids) != 1:
                 rec.is_partner_id_res_company = False
             else :
                 rec.is_partner_id_res_company = True
