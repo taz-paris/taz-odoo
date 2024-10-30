@@ -17,6 +17,7 @@
         "security/agreement_security.xml",
         "views/agreement.xml",
         "views/agreement_type.xml",
+        "views/agreement_subcontractor.xml"
     ],
     "demo": ["demo/demo.xml"],
     "development_status": "Beta",
