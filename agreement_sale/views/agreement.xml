@@ -12,4 +12,27 @@
         sequence="101"
         groups="agreement.group_use_agreement_type"
     />
+    <menuitem
+        id="agreement_subcontractor_menu"
+        parent="sale.menu_sale_config"
+        sequence="102"
+        name="Agreement Subcontractors"
+        action="agreement.agreement_subcontractor_action"
+    />
+    <record id="agreement_form_view_inherit" model="ir.ui.view">
+        <field name="name">agreement.form.view</field>
+        <field name="model">agreement</field>
+        <field name="inherit_id" ref="agreement.agreement_form" />
+        <field name="arch" type="xml">
+            <field name="max_amount" position="after">
+                <field name="total_sale_order"/>
+                <field name="available_amount"/>
+            </field>
+            <xpath expr="//page[@name='config']" position="after">
+            <page string="Bons de commande">
+                <field name="sale_order_ids"/>
+            </page>
+                </xpath>
+        </field>
+    </record>
 </odoo>

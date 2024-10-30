@@ -5,8 +5,7 @@
             <field name="model">agreement</field>
             <field name="inherit_id" ref="agreement.agreement_form"/>
             <field name="arch" type="xml">
-		    <xpath expr="//group[@name='main']" position="after">
-			<notebook>
+		    <xpath expr="//page[@name='config']" position="after">
 				<page string="Projets" name="projects">
 					<field name="project_ids">
 						  <tree delete="false" 
@@ -59,7 +58,6 @@
 						</tree>
 					</field>
 				</page>
-			</notebook>
 		    </xpath>
 	    </field>
 	</record>

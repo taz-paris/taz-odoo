@@ -11,20 +11,46 @@ class Agreement(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _check_company_auto = True
 
+
     code = fields.Char(required=True, tracking=True)
     name = fields.Char(required=True, tracking=True)
     partner_id = fields.Many2one(
         "res.partner",
-        string="Partner",
+        string="Pouvoir adjudicateur",
         ondelete="restrict",
         #domain=[("parent_id", "=", False)],
         tracking=True,
     )
+
+    partner_company_ids = fields.Many2many(
+        "res.partner",
+        relation="agreement_partner_company_ids",
+        string="Donneur d'ordres",
+        tracking=True,
+        domain="[('is_company', '=', True)]",
+    )
+
+    partner_principal_id = fields.Many2one(
+        "res.partner",
+        string="Mandataire",
+        tracking=True,
+        domain="[('is_company', '=', True)]",
+    )
+
+    partner_cocontractor_ids = fields.Many2many(
+        "res.partner",
+        relation="agreement_cocontractors_company_ids",
+        string="Co-traitant",
+        tracking=True,
+        domain="[('is_company', '=', True)]",
+    )
+
     company_id = fields.Many2one(
         "res.company",
         string="Company",
         default=lambda self: self.env.company,
     )
+
     is_template = fields.Boolean(
         string="Is a Template?",
         default=False,
@@ -37,16 +63,39 @@ class Agreement(models.Model):
         string="Agreement Type",
         help="Select the type of agreement",
     )
+
     domain = fields.Selection(
         "_domain_selection",
         string="Domain",
         default="sale",
         tracking=True,
     )
+
+    agreement_subcontractor_ids = fields.One2many(
+        comodel_name="agreement.subcontractor",
+        inverse_name="agreement_id",
+        string="Sous-traitants",
+    )
+
     active = fields.Boolean(default=True)
     signature_date = fields.Date(tracking=True)
     start_date = fields.Date(tracking=True)
-    end_date = fields.Date(tracking=True)
+    end_date = fields.Date(string="Date limite de commande", tracking=True)
+    end_date_contractors = fields.Date(string="Date de fin d'exécution des prestataires", tracking=True)
+
+    comments = fields.Html('Commentaires')
+    referent = fields.Many2one("res.users", string="Référent")
+    teams_link = fields.Char("Lien Teams")
+
+    currency_id = fields.Many2one(
+        'res.currency',
+        related="company_id.currency_id",
+        # default=lambda self: self.env.company.currency_id,
+        string="Currency",
+        readonly=True
+    )
+    max_amount = fields.Monetary("Montant max de l'accord", store=True)
+    other_contractors_total_sale_order = fields.Monetary("Montant commandé auprès des co-traitants")
 
     @api.model
     def _domain_selection(self):

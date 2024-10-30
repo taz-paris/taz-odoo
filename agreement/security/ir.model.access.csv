@@ -3,3 +3,5 @@ access_agreement_read,Read access on agreement to Employees,model_agreement,base
 access_agreement_full,Full access on agreement grp,model_agreement,base.group_system,1,1,1,1
 access_agreement_type_read,Read access on agreement type to Employees,model_agreement_type,base.group_user,1,0,0,0
 access_agreement_type_full,Full access on agreement type grp,model_agreement_type,base.group_system,1,1,1,1
+access_agreement_contractor_read,Full access on agreement contractor to Employees,model_agreement_subcontractor,base.group_user,1,0,0,0
+access_agreement_contractor_full,Full access on agreement contractor grp,model_agreement_subcontractor,base.group_system,1,1,1,1
