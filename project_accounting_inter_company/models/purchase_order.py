@@ -122,3 +122,7 @@ class PurchaseOrderLine(models.Model):
         return lines
 
 
+    def _get_allowed_sale_order_states(self):
+        allowed_states = super()._get_allowed_sale_order_states()
+        allowed_states.append("draft")
+        return allowed_states
