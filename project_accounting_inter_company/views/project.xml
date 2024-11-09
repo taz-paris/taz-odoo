@@ -1,0 +1,24 @@
+<odoo>
+    <record id="project_form_inherit" model="ir.ui.view">
+        <field name="name">project.project.form.view</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project_accounting.project_form" />
+	<field name="arch" type="xml">  
+		<field name="invoicing_comment" position="after">
+			<field name="mirored_project_outsourcing_link_ids" 
+				options="{'no_create': True}" 
+				attrs="{'invisible':[('mirored_project_outsourcing_link_ids', '=', [])]}" 
+				>
+				<tree>
+					<field name="project_id" widget="many2onebutton"/>
+					<field name="company_id"/>
+				</tree>
+			</field>
+		</field>
+		<xpath expr="//field[@name='project_outsourcing_link_ids']/tree/field[@name='link_type']" position="after">
+			<field name="inter_company_mirror_project" optional="show" widget="many2onebutton"/>
+		</xpath>
+        </field>
+    </record>
+</odoo>
+

@@ -4,6 +4,7 @@ from odoo.exceptions import ValidationError
 
 class AgreementSubcontractor(models.Model):
     _name = "agreement.subcontractor"
+    _inherit = ['mail.thread']
     _description = "Agreement Subcontractors"
     _sql_constraints = [
         ('agreement_partner_uniq', 'UNIQUE (agreement_id, partner_id)',

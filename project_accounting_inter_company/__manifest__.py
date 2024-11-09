@@ -26,5 +26,6 @@
         'views/account_move.xml',
         'views/purchase.xml',
         'views/sale.xml',
+        'views/project.xml',
     ],
 }
