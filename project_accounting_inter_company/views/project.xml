@@ -6,10 +6,9 @@
 	<field name="arch" type="xml">  
 		<field name="invoicing_comment" position="after">
 			<field name="mirored_project_outsourcing_link_ids" 
-				options="{'no_create': True}" 
 				attrs="{'invisible':[('mirored_project_outsourcing_link_ids', '=', [])]}" 
 				>
-				<tree>
+				<tree delete="false" edit="false" create="false">
 					<field name="project_id" widget="many2onebutton"/>
 					<field name="company_id"/>
 				</tree>
