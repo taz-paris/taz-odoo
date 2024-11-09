@@ -1,7 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import pytz
 
 
@@ -109,6 +109,38 @@ class staffingEmployee(models.Model):
     rel_is_project_director = fields.Boolean(related="job_id.is_project_director", store=True)
 
     #most_recent_contract = fields.Many2one('hr.contract', 'employee_id', string="Contract le plus récent (ou à venir)", compute=most_recent_contract)
+
+    def write(self, vals):
+        _logger.info('-- write hr.employee')
+        if 'first_contract_date' in vals.keys() or 'departure_date' in vals.keys():
+            old_values = {}
+            for rec in self:
+                old_values[rec.id] = {}
+                old_values[rec.id]['first_contract_date'] = rec.first_contract_date
+                old_values[rec.id]['departure_date'] = rec.departure_date
+        
+        res = super().write(vals)
+
+        if 'first_contract_date' in vals.keys() or 'departure_date' in vals.keys():
+            _logger.info('     > refresh employee_staffing_report  employee_name=%s first_contract_date=%s departure_date=%s' % (str(rec.name), str(rec.first_contract_date), str(rec.departure_date)))
+            for rec in self:
+                if 'first_contract_date' in vals.keys() :
+                    old_first_contract_date = old_values[rec.id]['first_contract_date'] or datetime.date(2000,1,1)
+                    new_first_contract_date = rec.first_contract_date or datetime.date(2000,1,1)
+                    reports_to_update = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.id),
+                                                                                        ('end_date', '>=', min(old_first_contract_date, new_first_contract_date)),
+                                                                                        ('start_date', '<=', max(old_first_contract_date, new_first_contract_date)),
+                                                                                        ])
+                    reports_to_update.availability()
+                if 'departure_date' in vals.keys() :
+                    old_departure_date = old_values[rec.id]['departure_date'] or datetime.date(2100,1,1)
+                    new_departure_date = rec.departure_date or datetime.date(2100,1,1)
+                    reports_to_update = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.id),
+                                                                                        ('end_date', '>=', min(old_departure_date, new_departure_date)),
+                                                                                        ('start_date', '<=', max(old_departure_date, new_departure_date)),
+                                                                                        ])
+                    reports_to_update.availability()
+        return res
 
     def _get_daily_cost_today(self):
         t = datetime.today().date() 

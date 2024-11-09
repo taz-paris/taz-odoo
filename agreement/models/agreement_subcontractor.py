@@ -1,4 +1,5 @@
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class AgreementSubcontractor(models.Model):
@@ -9,9 +10,21 @@ class AgreementSubcontractor(models.Model):
          "Impossible d'avoir deux DC4 pour le même sous-traitant et le même marché")
     ]
 
+    @api.depends('agreement_id','agreement_id.name', 'partner_id', 'partner_id.name') 
     def compute_name(self):
         for rec in self:
             rec.name = "%s %s" %(rec.agreement_id.name, rec.partner_id.name)
+
+    @api.constrains('start_date', 'end_date')
+    def _check_dates(self):
+        for record in self:
+            if (rec.start_date and not rec.end_date) :
+                raise ValidationError("Si la date de début est valorisée, la date de fin doit l'être également.")
+            if (rec.start_date and not rec.end_date) or (rec.end_date and not rec.start_date) :
+                raise ValidationError("Si la date de fin est valorisée, la date de début doit l'être également.")
+            if (rec.start_date >= rec.end_date):
+                raise ValidationError("La date de fin doit être strictement postérieure à la date de début.")
+
 
     name = fields.Char(compute=compute_name)
     agreement_id = fields.Many2one(
