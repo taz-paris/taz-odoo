@@ -72,10 +72,10 @@
                     <group expand="0" string="Group By">
                         <filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
                         <filter string="Bureau" name="group_rel_work_location_id" context="{'group_by': 'rel_work_location_id'}"/>
-                        <filter string="Grade" name="group_rel_job_id" context="{'group_by': 'rel_job_id'}"/>
-                        <filter string="Consultant" name="group_employee_id" context="{'group_by': 'employee_id'}"/>
                         <filter string="Date de début" name="group_start_date_year" context="{'group_by': 'start_date'}"/>
 			<filter string="Date de fin" name="group_end_date" context="{'group_by': 'end_date'}"/>
+                        <filter string="Grade" name="group_rel_job_id" context="{'group_by': 'rel_job_id'}"/>
+                        <filter string="Consultant" name="group_employee_id" context="{'group_by': 'employee_id'}"/>
                     </group>
                 </search>
             </field>
@@ -96,7 +96,7 @@
             <field name="name">Rapports d'activité (maille mensuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'month'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille mensuelle)" id="employee_staffing_report_month_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_month_action"/>
@@ -105,7 +105,7 @@
             <field name="name">Rapports d'activité (maille trimestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'quarter'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille trimestrielle)" id="employee_staffing_report_quarter_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_quarter_action"/>
@@ -114,7 +114,7 @@
             <field name="name">Rapports d'activité (maille semestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'semester'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille semestrielle)" id="employee_staffing_report_semester_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_semester_action"/>
@@ -123,7 +123,7 @@
             <field name="name">Rapports d'activité (maille annuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : False, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : False, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : False, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'year'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille annuelle)" id="employee_staffing_report_year_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_year_action"/>
