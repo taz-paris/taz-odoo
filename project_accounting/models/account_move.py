@@ -56,6 +56,7 @@ class projectAccountingAccountMove(models.Model):
                 rec.rel_project_ids = False
 
     rel_project_ids = fields.Many2many('project.project', string="Projets", compute=comptute_project_ids)
+    comment = fields.Text("Commentaire ADV")
 
     @api.depends('bank_partner_id')
     def _compute_partner_bank_id(self):
