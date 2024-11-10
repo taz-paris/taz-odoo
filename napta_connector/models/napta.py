@@ -477,6 +477,8 @@ class naptaProject(models.Model):
         _logger.info('---- Create or update Napta project')
         client = ClientRestNapta(self.env)
         for rec in self:
+            if rec.is_prevent_napta_creation == True:
+                continue
             rec.partner_id.create_update_napta()
             rec.stage_id.create_update_napta()
 
@@ -503,7 +505,7 @@ class naptaProject(models.Model):
                                     "data": [
                                       {
                                         "type": "business_unit",
-                                        "id": rec.company_id.default_hr_department_for_projects_id.napta_id,
+                                        "id": rec.sudo().company_id.default_hr_department_for_projects_id.napta_id,
                                       }
                                     ]
                                   }
@@ -515,12 +517,12 @@ class naptaProject(models.Model):
                 project_contributors = client.read_cache('project_contributor')
                 contributor_link_id = None
                 for project_contributor in project_contributors.values():
-                    if project_contributor['attributes']['contributor_id'] == str(rec.project_director_employee_id.user_id.napta_id) and project_contributor['attributes']['project_id'] == str(rec.napta_id):
+                    if project_contributor['attributes']['contributor_id'] == str(rec.project_director_employee_id.sudo().user_id.napta_id) and project_contributor['attributes']['project_id'] == str(rec.napta_id):
                         contributor_link_id = project_contributor['id']
                 if not contributor_link_id :
-                    if rec.project_director_employee_id.user_id.napta_id:
-                        if rec.project_director_employee_id.user_id.napta_id :
-                            contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
+                    if rec.project_director_employee_id.sudo().user_id.napta_id:
+                        if rec.project_director_employee_id.sudo().user_id.napta_id :
+                            contributor_link_id = client.post_api('project_contributor', {'contributor_id':rec.project_director_employee_id.sudo().user_id.napta_id, 'project_id' : rec.napta_id})['data']['id']
                 #On ne supprime pas de Napta les contributors qui ne sont pas/plus DM dans Odoo
 
 
