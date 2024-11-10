@@ -182,13 +182,13 @@ class ClientRestNapta:
 
 
 
-    def patch_api(self, napta_type, attributes, napta_id):
+    def patch_api(self, napta_type, attributes, napta_id, relationships=False, force_send=False):
         #if napta_type not in ['timesheet','timesheet_period']:#['timesheet_period', 'timesheet', 'userprojectperiod']:
         #    _logger.info('Pas de mise à jour sur ce type pour éviter de faire trop d\'appels.')
         #    return
         changes_dic, cache_value = self.get_change_dic(napta_type, attributes, napta_id)
 
-        if len(changes_dic) == 0:
+        if len(changes_dic) == 0 and force_send == False:
             #_logger.info('      > Pas de changement.')
             return cache_value
 
@@ -204,6 +204,9 @@ class ClientRestNapta:
             "id" : napta_id,
           }
         }
+        if relationships:
+            data["data"]["relationships"] = relationships
+
         headers = {
             'authorization': 'Bearer '+self.get_access_token(),
             'content-type': 'application/json'
@@ -232,6 +235,7 @@ class ClientRestNapta:
             "type": napta_type
           }
         }
+
         headers = {
             'authorization': 'Bearer '+self.get_access_token(),
             'content-type': 'application/json'
@@ -493,6 +497,18 @@ class naptaProject(models.Model):
             }
 
             client.create_update_api('project', attributes, rec)
+
+            #Department IDS
+            raw_relationships = {"business_units": {
+                                    "data": [
+                                      {
+                                        "type": "business_unit",
+                                        "id": rec.company_id.default_hr_department_for_projects_id.napta_id,
+                                      }
+                                    ]
+                                  }
+                                }
+            business_unit_req = client.patch_api('project', {}, napta_id=rec.napta_id, relationships=raw_relationships, force_send=True)
 
             # Directeur de mission
             if rec.project_director_employee_id:

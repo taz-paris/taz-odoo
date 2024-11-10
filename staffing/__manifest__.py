@@ -29,6 +29,7 @@
         'views/employee.xml',
         'views/account_analytic_line.xml',
         'views/hr_job.xml',
+        'views/res_company.xml',
         'views/timesheets.xml',
         'views/hr_contract.xml',
         'data/cron_fitnet_sync.xml',

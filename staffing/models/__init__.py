@@ -7,3 +7,4 @@ from . import hr_leave
 from . import hr_job
 from . import hr_contract
 from . import employee_staffing_report
+from . import res_company
