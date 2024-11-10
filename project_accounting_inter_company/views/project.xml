@@ -19,5 +19,17 @@
 		</xpath>
         </field>
     </record>
+
+    <record id="project_tree_inherit" model="ir.ui.view">
+        <field name="name">project.project.tree.view</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project_accounting.project_tree" />
+	<field name="arch" type="xml">  
+		<field name="id" position="after">
+			<field name="is_related_to_miror_project" invisible="1"/>
+			<button name="chain_is_related_to_miror_project" title="Lié à un projet miroir" icon="fa-chain" attrs="{'invisible': [('is_related_to_miror_project', '=', False)]}"/>
+		</field>
+        </field>
+    </record>
 </odoo>
 
