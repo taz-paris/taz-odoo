@@ -8,6 +8,8 @@
 			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                         <field name="company_id" invisible="1"/>
                   	<field name="project_id" optional="show"/>
+                  	<field name="original_stage_id" optional="show"/>
+                  	<field name="rel_project_stage_id" optional="show"/>
                   	<field name="closing_date" optional="show"/>
 			<field name="previous_closing" optional="hide"/>
 			<!-- Validation -->
@@ -224,13 +226,15 @@
 					<filter string="Mes clôtures" name="my_project_accounting_closing" domain="['|',('rel_project_user_id', '=', uid),('rel_project_manager_user_id', '=', uid)]"/>
                     <separator/>
                     <group expand="0" string="Group By">
-						<filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
-						<filter string="Date de la clôture comptable" name="closing_date" context="{'group_by': 'closing_date'}"/>
+			<filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
+			<filter string="Date de la clôture comptable" name="closing_date" context="{'group_by': 'closing_date'}"/>
                         <filter string="Directeur de mission" name="project_director" context="{'group_by': 'rel_project_user_id'}"/>
-						<filter string="Partner ou manager en appui de l'administration du projet" name="project_manager" context="{'group_by': 'rel_project_manager_user_id'}"/>
+			<filter string="Partner ou manager en appui de l'administration du projet" name="project_manager" context="{'group_by': 'rel_project_manager_user_id'}"/>
                         <filter string="Client" name="partner" context="{'group_by': 'rel_project_partner_id'}"/>
                         <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}" />
-		        		<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Statut du projet au début de la clôture" name="groupby_original_stage_id" context="{'group_by': 'original_stage_id'}" />
+                        <filter string="Statut du projet actuel" name="groupby_rel_project_stage_id" context="{'group_by': 'rel_project_stage_id'}" />
+		        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
             </field>
