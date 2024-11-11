@@ -21,6 +21,21 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
         self.project_ids = p.ids
 
         
+        analytic_lines, begin_period = self.get_warning_analytic_lines()
+        employee_name_list = []
+        for line in analytic_lines:
+            employee_name_list.append("%s %s" % (line.employee_id.first_name, line.employee_id.name))
+
+        if len(employee_name_list) > 0:
+            employees = ', '.join(employee_name_list)
+            self.warning_message = "Attention : les consultant(e)s suivant(e)s ont au moins une ligne de pointage dont la valorisation en euros est nulle entre le %s et le %s : %s.\n\nVérifiez que cela est normal (exemple : consultant externes payés au mois) ou corrigez l'erreur avant de valider la création des clôtures comptables." %(begin_period.strftime('%d/%m/%Y'), self.date.strftime('%d/%m/%Y'), employees)
+        else : 
+            self.warning_message = False
+
+    def _default_date(self):
+        return datetime.date.today().replace(day=1) - datetime.timedelta(1) 
+
+    def get_warning_analytic_lines(self):
         last_closing_of_older_not_closed_project = False
         for proj_id in self.project_ids:
             previous_accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', self.date)], order="closing_date desc")
@@ -34,19 +49,9 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
         else :
             begin_period = self.date.replace(day=1)
 
-        analytic_lines = self.env['account.analytic.line'].search([('company_id', '=', self.company_id.id), ('category', '=', 'project_employee_validated'), ('amount', '=', 0), ('unit_amount', '!=', 0), ('date', '>=', begin_period), ('date', '<=', self.date)])
-        employee_name_list = []
-        for line in analytic_lines:
-            employee_name_list.append("%s %s" % (line.employee_id.first_name, line.employee_id.name))
+        lines = self.env['account.analytic.line'].search([('company_id', '=', self.company_id.id), ('category', '=', 'project_employee_validated'), ('amount', '=', 0), ('unit_amount', '!=', 0), ('date', '>=', begin_period), ('date', '<=', self.date)])
+        return lines, begin_period
 
-        if len(employee_name_list) > 0:
-            employees = ', '.join(employee_name_list)
-            self.warning_message = "Attention : les consultants suivants ont au moins une ligne de pointage dont la valorisation en euros n'est pas nulle entre le %s et le %s : %s.\n\nVérifiez que cela est normal (exemple : consultant externes payés au mois) ou corrigez l'erreur avant de valider la création des clôtures comptables." %(begin_period, self.date, employees)
-        else : 
-            self.warning_message = False
-
-    def _default_date(self):
-        return datetime.date.today().replace(day=1) - datetime.timedelta(1) 
 
 
 
@@ -73,3 +78,21 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
                 _logger.info(dic)
         _logger.info(dic_list)
         self.env['project.accounting_closing'].create(dic_list)
+
+
+    def action_open_warning_analytic_line(self):
+        analytic_lines, begin_period = self.get_warning_analytic_lines()
+        view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Feuille de temps',
+                'res_model': 'account.analytic.line',
+                'domain' : [('id', 'in', analytic_lines.ids)],
+                'view_type': 'tree',
+                'view_mode': 'tree',
+                'view_id': view_id.id,
+                'context': {},
+                # if you want to open the form in edit mode direclty
+                'flags': {'initial_mode': 'edit'},
+                'target': 'current',
+            }
