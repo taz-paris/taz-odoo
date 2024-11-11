@@ -5,11 +5,17 @@
 	      <field name="model">wizard_accounting_closing_mass_creation</field>
 	      <field name="arch" type="xml">
 		<form>
+				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('warning_message', '=', False)]}">
+					<span>
+						<field name="warning_message" readonly="1"/>
+					</span>
+				</div>
 			<group>
 				<group>
 					<field name="company_id" invisible="1"/>
-					<field name="company_id" groups="base.group_multi_company"/>
+					<field name="company_id" groups="base.group_multi_company" readonly="1"/>
 					<field name="date" colspan="2" />
+					
 					<field name="project_ids" colspan="3">
 						<tree>
 							<field name="number"/>
