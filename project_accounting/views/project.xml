@@ -30,13 +30,15 @@
                     <filter string="Projets de comptes prioritaires" name="priority_target" domain="[('rel_industry_business_priority', '=', 'priority_target')]"/>
                     <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>
                     <filter string="Projets de comptes à opportunités" name="active" domain="[('rel_industry_business_priority', 'not in', ['priority_target','active'])]"/>
+		    <separator/>
+		    <filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', [False, 'to_be_capitalized','not_specified']),('deliverable_indexation', 'in', [False, 'to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', [False, 'yes_success_story','not_specified']),('commercial_reference_indexation', 'in', [False, 'yes_commercial_reference','not_specified'])]"/>
+		    <separator/>
+		    <filter string="Projet avec au moins un des 3 attributs RSE non renseigné" name="project_csr" domain="['|','|',('csr_project_initiative', 'in', [False,'not_specified']),('csr_project_environmental_level', 'in', [False, 'not_specified']), ('csr_project_social_level', 'in', [False,'not_specified'])]"/>
                     <separator/>
 		    <filter string="Projets non annulés/non perdus avec date de passage 3-Accord client/4-Commandé+ cette année ou non valorisée" name="win_loose_this_year" 
 			    domain="[('stage_id.id', 'not in', [4,8]), '|', ('date_win_loose', '=', False), '&amp;', ('date_win_loose', '&gt;=', time.strftime('%%Y-01-01')), ('date_win_loose', '&lt;=', time.strftime('%%Y-12-31'))]"/>
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
-					<separator/>
-					<filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', ['to_be_capitalized','not_specified']),('deliverable_indexation', 'in', ['to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', ['yes_success_story','not_specified']),('commercial_reference_indexation', 'in', ['yes_commercial_reference','not_specified']),]"/>
                     <group expand="0" string="Group By">
                         <filter string="Directeur de mission" name="Manager" context="{'group_by': 'project_director_employee_id'}"/>
                         <filter string="Client" name="Partner" context="{'group_by': 'partner_id'}"/>
