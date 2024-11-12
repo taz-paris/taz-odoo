@@ -66,9 +66,10 @@ class projectAccountingClosing(models.Model):
             if rec.next_closing :
                 raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
             if rec.is_validated :
-                if not (len(vals) == 1 and vals.get('is_validated') == False) :
-                    #il faut pouvoir écrire s'il on dévalide
-                    raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée."))
+                for val_key in vals.keys():
+                    if val_key not in ['is_validated', 'rel_project_stage_id', 'rel_project_user_id', 'rel_project_manager_user_id', 'name']:
+                    #il faut pouvoir écrire s'il on dévalide et lorsque le projet change de statut (rel_project_stage_id est stocké pour permettre de grouper sur cet attribut)
+                        raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s).\n\nTentative de modification des attributs suivants, dont au moins un n'est pas modifiable une fois la clôture validée : %s." % (rec.name, rec.id, ', '.join(vals.keys()))))
         super().write(vals)
 
 
@@ -82,7 +83,7 @@ class projectAccountingClosing(models.Model):
 
 
 
-    @api.depends('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
+    @api.depends('project_id', 'project_id.name', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     def compute(self):
         _logger.info('-- compute project_accounting_closing')
         for rec in self :
