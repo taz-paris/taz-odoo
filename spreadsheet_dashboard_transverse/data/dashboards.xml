@@ -20,7 +20,7 @@
         <field name="dashboard_group_id" ref="spreadsheet_dashboard_group_transverse"/>
         <field name="group_ids" eval="[Command.link(ref('taz-common.taz-basic'))]"/>
         <field name="sequence">1</field>
-        <field name="active">False</field>
+        <field name="active">True</field>
     </record>
 
 </odoo>

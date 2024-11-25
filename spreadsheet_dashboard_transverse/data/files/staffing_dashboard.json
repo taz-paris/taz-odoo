@@ -674,7 +674,7 @@
             "stacked": false,
             "fieldMatching": {
               "31a8e1ca-da6d-41d3-826a-0034c6b58f9d": {
-                "chain": "start_date"
+                "chain": "end_date"
               },
               "55c7c505-e170-473e-b029-00fda94a059d": {
                 "chain": "rel_job_id"
@@ -1343,7 +1343,7 @@
             "stacked": false,
             "fieldMatching": {
               "31a8e1ca-da6d-41d3-826a-0034c6b58f9d": {
-                "chain": "start_date"
+                "chain": "end_date"
               },
               "55c7c505-e170-473e-b029-00fda94a059d": {
                 "chain": "rel_job_id"
