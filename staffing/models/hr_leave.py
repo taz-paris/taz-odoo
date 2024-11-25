@@ -92,12 +92,32 @@ class staffingLeave(models.Model):
 
 
                 for index, (day_date) in enumerate(list_work_days):
+
                     work_days_count = 1.0
-                    if index == 0 and leave.request_date_from_period == "pm":
-                        work_days_count += -0.5
-                    if index == len(list_work_days)-1 and leave.request_date_to_period == "am":
-                        work_days_count += -0.5
-                    vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_date, work_days_count))
+                    if index == 0 :
+                        if leave.request_date_from_period == "pm":
+                            work_days_count += -0.5
+                    elif index == len(list_work_days)-1 :
+                        if leave.request_date_to_period == "am":
+                            work_days_count += -0.5
+                    """
+                    else:
+                        # En cas de juxtaposition de périodes de congés, retirer les jours déjà comptabilisés via une autre période de congés
+                        # TODO : ne tient pas compte des demies journées
+                        overlapped_leaves = self.env['hr.leave'].search([
+                            ('date_from', '<=', day_date),
+                            ('date_to', '>=', day_date),
+                            ('employee_id', 'in', leave.employee_id.id),
+                            ('id', 'not in', [leave.id]),
+                            ('state', 'not in', ['cancel', 'refuse']),
+                        ])
+                        if len(overlapped_leaves) > 0 :
+                        _logger.info('Leaves overlap for employee %s on %s' % (leave.employee_id.name, str(day_date)))
+                        work_days_count = 0.0
+                    """
+
+                    if work_days_count > 0.0 :
+                        vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_date, work_days_count))
             else : 
                 raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
 

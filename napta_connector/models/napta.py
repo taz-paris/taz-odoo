@@ -1087,6 +1087,7 @@ class naptaHrLeave(models.Model):
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
             company_id = odoo_user.company_id.id
             numberOfDays = odoo_user.number_work_days_period(start_date, end_date)
+            
             request_date_from_period = 'am'
             if user_holiday['attributes']['start_date_from_morning'] == False :
                 request_date_from_period = 'pm'

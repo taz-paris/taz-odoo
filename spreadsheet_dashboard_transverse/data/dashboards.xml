@@ -14,4 +14,13 @@
         <field name="active">False</field>
     </record>
 
+    <record id="spreadsheet_dashboard_staffing" model="spreadsheet.dashboard">
+        <field name="name">Histo TACE</field>
+        <field name="data" type="base64" file="spreadsheet_dashboard_transverse/data/files/staffing_dashboard.json"/>
+        <field name="dashboard_group_id" ref="spreadsheet_dashboard_group_transverse"/>
+        <field name="group_ids" eval="[Command.link(ref('taz-common.taz-basic'))]"/>
+        <field name="sequence">1</field>
+        <field name="active">False</field>
+    </record>
+
 </odoo>

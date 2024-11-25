@@ -1,0 +1,1396 @@
+{
+  "version": 12.5,
+  "sheets": [
+    {
+      "id": "sheet1",
+      "name": "Feuille1",
+      "colNumber": 26,
+      "rowNumber": 100,
+      "rows": {},
+      "cols": {},
+      "merges": [],
+      "cells": {},
+      "conditionalFormats": [],
+      "figures": [
+        {
+          "id": "436d75df-bef5-42bb-821a-67f2a8b9bf4a",
+          "x": 0,
+          "y": 0,
+          "width": 963,
+          "height": 528,
+          "tag": "chart",
+          "data": {
+            "title": "Évolution du TACE hebdo par grade (hors DM)",
+            "background": "#FFFFFF",
+            "legendPosition": "top",
+            "metaData": {
+              "disableLinking": false,
+              "fieldAttrs": {},
+              "fields": {
+                "periodicity": {
+                  "change_default": false,
+                  "name": "periodicity",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "selection": [
+                    [
+                      "week",
+                      "Semaine"
+                    ],
+                    [
+                      "month",
+                      "Mois"
+                    ],
+                    [
+                      "quarter",
+                      "Trimestre"
+                    ],
+                    [
+                      "semester",
+                      "Semestre"
+                    ],
+                    [
+                      "year",
+                      "Année"
+                    ]
+                  ],
+                  "sortable": true,
+                  "store": true,
+                  "string": "Périodicité",
+                  "type": "selection"
+                },
+                "employee_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "employee_id",
+                  "readonly": false,
+                  "relation": "hr.employee",
+                  "required": true,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Consultant",
+                  "type": "many2one"
+                },
+                "rel_job_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Grade du consultant au début de la période",
+                  "name": "rel_job_id",
+                  "readonly": true,
+                  "relation": "hr.job",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Grade",
+                  "type": "many2one"
+                },
+                "rel_work_location_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Bureau du consultant au début de la période",
+                  "name": "rel_work_location_id",
+                  "readonly": true,
+                  "relation": "hr.work.location",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Rel Work Location",
+                  "type": "many2one"
+                },
+                "rel_department_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Département du consultant au début de la période",
+                  "name": "rel_department_id",
+                  "readonly": true,
+                  "relation": "hr.department",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Rel Department",
+                  "type": "many2one"
+                },
+                "company_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Société du consultant",
+                  "name": "company_id",
+                  "readonly": true,
+                  "related": "employee_id.company_id",
+                  "relation": "res.company",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Société",
+                  "type": "many2one"
+                },
+                "start_date": {
+                  "change_default": false,
+                  "name": "start_date",
+                  "readonly": false,
+                  "required": true,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Date de début",
+                  "type": "date"
+                },
+                "end_date": {
+                  "change_default": false,
+                  "name": "end_date",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Date de fin",
+                  "type": "date"
+                },
+                "has_to_be_recomputed": {
+                  "change_default": false,
+                  "name": "has_to_be_recomputed",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "A recalculer",
+                  "type": "boolean"
+                },
+                "analytic_lines": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "analytic_lines",
+                  "readonly": false,
+                  "relation": "account.analytic.line",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": false,
+                  "store": true,
+                  "string": "Lignes",
+                  "type": "many2many"
+                },
+                "workdays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.",
+                  "name": "workdays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. ouvrés",
+                  "type": "float"
+                },
+                "hollidays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Jours de congés sur la période",
+                  "name": "hollidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Congés",
+                  "type": "float"
+                },
+                "activity_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés",
+                  "name": "activity_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. facturables",
+                  "type": "float"
+                },
+                "learning_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours de formation du consultant (et non les actions écoles) sur la période",
+                  "name": "learning_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. formations",
+                  "type": "float"
+                },
+                "sales_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours avant-vente (experts) sur la période",
+                  "name": "sales_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. avant-vente",
+                  "type": "float"
+                },
+                "other_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours autres activités internes sur la période",
+                  "name": "other_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. autres activités internes",
+                  "type": "float"
+                },
+                "project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours produits en mission sur la période (y compris les missions de la fondation)",
+                  "name": "project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. produits mission",
+                  "type": "float"
+                },
+                "activity_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACE",
+                  "type": "float"
+                },
+                "activity_rate_with_holidays": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
+                  "name": "activity_rate_with_holidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACI",
+                  "type": "float"
+                },
+                "available_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables - nombre de jours pointés en mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.) sur la période",
+                  "name": "available_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. dispo",
+                  "type": "float"
+                },
+                "activity_previsionnal_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_previsionnal_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "% prévisionnel",
+                  "type": "float"
+                },
+                "activity_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "activity_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Prév. (j)",
+                  "type": "float"
+                },
+                "delta_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "delta_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Delta prev-pointé (j)",
+                  "type": "float"
+                },
+                "id": {
+                  "change_default": false,
+                  "name": "id",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "ID",
+                  "type": "integer"
+                },
+                "__last_update": {
+                  "change_default": false,
+                  "name": "__last_update",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": false,
+                  "sortable": false,
+                  "store": false,
+                  "string": "Last Modified on",
+                  "type": "datetime"
+                },
+                "display_name": {
+                  "change_default": false,
+                  "name": "display_name",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": false,
+                  "sortable": false,
+                  "store": false,
+                  "string": "Display Name",
+                  "translate": false,
+                  "trim": true,
+                  "type": "char"
+                },
+                "create_uid": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "create_uid",
+                  "readonly": true,
+                  "relation": "res.users",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Created by",
+                  "type": "many2one"
+                },
+                "create_date": {
+                  "change_default": false,
+                  "name": "create_date",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Created on",
+                  "type": "datetime"
+                },
+                "write_uid": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "write_uid",
+                  "readonly": true,
+                  "relation": "res.users",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Last Updated by",
+                  "type": "many2one"
+                },
+                "write_date": {
+                  "change_default": false,
+                  "name": "write_date",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Last Updated on",
+                  "type": "datetime"
+                }
+              },
+              "groupBy": [
+                "start_date:week",
+                "rel_job_id"
+              ],
+              "measure": "activity_rate",
+              "viewMeasures": [
+                "activity_rate"
+              ],
+              "mode": "line",
+              "order": null,
+              "resModel": "hr.employee_staffing_report",
+              "stacked": false,
+              "cumulated": false,
+              "title": "Rapports d'activité",
+              "context": {
+                "lang": "fr_FR",
+                "tz": "Europe/Paris",
+                "uid": 2,
+                "allowed_company_ids": [
+                  1
+                ]
+              },
+              "domains": [
+                {
+                  "arrayRepr": [
+                    [
+                      "periodicity",
+                      "=",
+                      "week"
+                    ]
+                  ],
+                  "description": null
+                }
+              ],
+              "measures": {
+                "activity_previsionnal_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_previsionnal_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "% prévisionnel",
+                  "type": "float"
+                },
+                "hollidays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Jours de congés sur la période",
+                  "name": "hollidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Congés",
+                  "type": "float"
+                },
+                "delta_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "delta_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Delta prev-pointé (j)",
+                  "type": "float"
+                },
+                "other_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours autres activités internes sur la période",
+                  "name": "other_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. autres activités internes",
+                  "type": "float"
+                },
+                "sales_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours avant-vente (experts) sur la période",
+                  "name": "sales_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. avant-vente",
+                  "type": "float"
+                },
+                "available_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables - nombre de jours pointés en mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.) sur la période",
+                  "name": "available_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. dispo",
+                  "type": "float"
+                },
+                "activity_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés",
+                  "name": "activity_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. facturables",
+                  "type": "float"
+                },
+                "learning_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours de formation du consultant (et non les actions écoles) sur la période",
+                  "name": "learning_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. formations",
+                  "type": "float"
+                },
+                "workdays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.",
+                  "name": "workdays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. ouvrés",
+                  "type": "float"
+                },
+                "project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours produits en mission sur la période (y compris les missions de la fondation)",
+                  "name": "project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. produits mission",
+                  "type": "float"
+                },
+                "activity_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "activity_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Prév. (j)",
+                  "type": "float"
+                },
+                "activity_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACE",
+                  "type": "float"
+                },
+                "activity_rate_with_holidays": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
+                  "name": "activity_rate_with_holidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACI",
+                  "type": "float"
+                },
+                "__count": {
+                  "name": "__count",
+                  "string": "Comptage",
+                  "type": "integer"
+                }
+              },
+              "allIntegers": false,
+              "comparisonField": "start_date"
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {
+                "lang": "fr_FR",
+                "tz": "Europe/Paris",
+                "uid": 2,
+                "allowed_company_ids": [
+                  1
+                ]
+              },
+              "domain": [
+                [
+                  "periodicity",
+                  "=",
+                  "week"
+                ]
+              ],
+              "groupBy": [
+                "start_date:week",
+                "rel_job_id"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_line",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "31a8e1ca-da6d-41d3-826a-0034c6b58f9d": {
+                "chain": "start_date"
+              },
+              "55c7c505-e170-473e-b029-00fda94a059d": {
+                "chain": "rel_job_id"
+              }
+            }
+          }
+        },
+        {
+          "id": "2ba089a6-2884-469a-b183-1ef1214dcd3c",
+          "x": 0,
+          "y": 567,
+          "width": 962,
+          "height": 523,
+          "tag": "chart",
+          "data": {
+            "title": "Évolution du TACE hebdo (hors DM)",
+            "background": "#FFFFFF",
+            "legendPosition": "top",
+            "metaData": {
+              "disableLinking": false,
+              "fieldAttrs": {},
+              "fields": {
+                "periodicity": {
+                  "change_default": false,
+                  "name": "periodicity",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "selection": [
+                    [
+                      "week",
+                      "Semaine"
+                    ],
+                    [
+                      "month",
+                      "Mois"
+                    ],
+                    [
+                      "quarter",
+                      "Trimestre"
+                    ],
+                    [
+                      "semester",
+                      "Semestre"
+                    ],
+                    [
+                      "year",
+                      "Année"
+                    ]
+                  ],
+                  "sortable": true,
+                  "store": true,
+                  "string": "Périodicité",
+                  "type": "selection"
+                },
+                "employee_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "employee_id",
+                  "readonly": false,
+                  "relation": "hr.employee",
+                  "required": true,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Consultant",
+                  "type": "many2one"
+                },
+                "rel_job_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Grade du consultant au début de la période",
+                  "name": "rel_job_id",
+                  "readonly": true,
+                  "relation": "hr.job",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Grade",
+                  "type": "many2one"
+                },
+                "rel_work_location_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Bureau du consultant au début de la période",
+                  "name": "rel_work_location_id",
+                  "readonly": true,
+                  "relation": "hr.work.location",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Rel Work Location",
+                  "type": "many2one"
+                },
+                "rel_department_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Département du consultant au début de la période",
+                  "name": "rel_department_id",
+                  "readonly": true,
+                  "relation": "hr.department",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Rel Department",
+                  "type": "many2one"
+                },
+                "company_id": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "help": "Société du consultant",
+                  "name": "company_id",
+                  "readonly": true,
+                  "related": "employee_id.company_id",
+                  "relation": "res.company",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Société",
+                  "type": "many2one"
+                },
+                "start_date": {
+                  "change_default": false,
+                  "name": "start_date",
+                  "readonly": false,
+                  "required": true,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Date de début",
+                  "type": "date"
+                },
+                "end_date": {
+                  "change_default": false,
+                  "name": "end_date",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Date de fin",
+                  "type": "date"
+                },
+                "has_to_be_recomputed": {
+                  "change_default": false,
+                  "name": "has_to_be_recomputed",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "A recalculer",
+                  "type": "boolean"
+                },
+                "analytic_lines": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "analytic_lines",
+                  "readonly": false,
+                  "relation": "account.analytic.line",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": false,
+                  "store": true,
+                  "string": "Lignes",
+                  "type": "many2many"
+                },
+                "workdays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.",
+                  "name": "workdays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. ouvrés",
+                  "type": "float"
+                },
+                "hollidays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Jours de congés sur la période",
+                  "name": "hollidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Congés",
+                  "type": "float"
+                },
+                "activity_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés",
+                  "name": "activity_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. facturables",
+                  "type": "float"
+                },
+                "learning_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours de formation du consultant (et non les actions écoles) sur la période",
+                  "name": "learning_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. formations",
+                  "type": "float"
+                },
+                "sales_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours avant-vente (experts) sur la période",
+                  "name": "sales_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. avant-vente",
+                  "type": "float"
+                },
+                "other_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours autres activités internes sur la période",
+                  "name": "other_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. autres activités internes",
+                  "type": "float"
+                },
+                "project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours produits en mission sur la période (y compris les missions de la fondation)",
+                  "name": "project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. produits mission",
+                  "type": "float"
+                },
+                "activity_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACE",
+                  "type": "float"
+                },
+                "activity_rate_with_holidays": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
+                  "name": "activity_rate_with_holidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACI",
+                  "type": "float"
+                },
+                "available_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables - nombre de jours pointés en mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.) sur la période",
+                  "name": "available_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. dispo",
+                  "type": "float"
+                },
+                "activity_previsionnal_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_previsionnal_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "% prévisionnel",
+                  "type": "float"
+                },
+                "activity_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "activity_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Prév. (j)",
+                  "type": "float"
+                },
+                "delta_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "delta_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Delta prev-pointé (j)",
+                  "type": "float"
+                },
+                "id": {
+                  "change_default": false,
+                  "name": "id",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "ID",
+                  "type": "integer"
+                },
+                "__last_update": {
+                  "change_default": false,
+                  "name": "__last_update",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": false,
+                  "sortable": false,
+                  "store": false,
+                  "string": "Last Modified on",
+                  "type": "datetime"
+                },
+                "display_name": {
+                  "change_default": false,
+                  "name": "display_name",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": false,
+                  "sortable": false,
+                  "store": false,
+                  "string": "Display Name",
+                  "translate": false,
+                  "trim": true,
+                  "type": "char"
+                },
+                "create_uid": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "create_uid",
+                  "readonly": true,
+                  "relation": "res.users",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Created by",
+                  "type": "many2one"
+                },
+                "create_date": {
+                  "change_default": false,
+                  "name": "create_date",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Created on",
+                  "type": "datetime"
+                },
+                "write_uid": {
+                  "change_default": false,
+                  "context": {},
+                  "domain": [],
+                  "name": "write_uid",
+                  "readonly": true,
+                  "relation": "res.users",
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Last Updated by",
+                  "type": "many2one"
+                },
+                "write_date": {
+                  "change_default": false,
+                  "name": "write_date",
+                  "readonly": true,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Last Updated on",
+                  "type": "datetime"
+                }
+              },
+              "groupBy": [
+                "start_date:week"
+              ],
+              "measure": "activity_rate",
+              "viewMeasures": [
+                "activity_rate"
+              ],
+              "mode": "line",
+              "order": null,
+              "resModel": "hr.employee_staffing_report",
+              "stacked": false,
+              "cumulated": false,
+              "title": "Rapports d'activité",
+              "context": {
+                "params": {
+                  "action": 844,
+                  "model": "hr.employee_staffing_report",
+                  "view_type": "graph",
+                  "cids": 1,
+                  "menu_id": 614
+                }
+              },
+              "domains": [
+                {
+                  "arrayRepr": [
+                    [
+                      "periodicity",
+                      "=",
+                      "week"
+                    ]
+                  ],
+                  "description": null
+                }
+              ],
+              "measures": {
+                "activity_previsionnal_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_previsionnal_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "% prévisionnel",
+                  "type": "float"
+                },
+                "hollidays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Jours de congés sur la période",
+                  "name": "hollidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Congés",
+                  "type": "float"
+                },
+                "delta_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "delta_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Delta prev-pointé (j)",
+                  "type": "float"
+                },
+                "other_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours autres activités internes sur la période",
+                  "name": "other_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. autres activités internes",
+                  "type": "float"
+                },
+                "sales_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours avant-vente (experts) sur la période",
+                  "name": "sales_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. avant-vente",
+                  "type": "float"
+                },
+                "available_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables - nombre de jours pointés en mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.) sur la période",
+                  "name": "available_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. dispo",
+                  "type": "float"
+                },
+                "activity_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés",
+                  "name": "activity_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. facturables",
+                  "type": "float"
+                },
+                "learning_internal_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours de formation du consultant (et non les actions écoles) sur la période",
+                  "name": "learning_internal_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. formations",
+                  "type": "float"
+                },
+                "workdays": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.",
+                  "name": "workdays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. ouvrés",
+                  "type": "float"
+                },
+                "project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "help": "Nombre de jours produits en mission sur la période (y compris les missions de la fondation)",
+                  "name": "project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "J. produits mission",
+                  "type": "float"
+                },
+                "activity_previsionnal_project_days": {
+                  "change_default": false,
+                  "group_operator": "sum",
+                  "name": "activity_previsionnal_project_days",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "Prév. (j)",
+                  "type": "float"
+                },
+                "activity_rate": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)",
+                  "name": "activity_rate",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACE",
+                  "type": "float"
+                },
+                "activity_rate_with_holidays": {
+                  "change_default": false,
+                  "group_operator": "avg",
+                  "help": "% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
+                  "name": "activity_rate_with_holidays",
+                  "readonly": false,
+                  "required": false,
+                  "searchable": true,
+                  "sortable": true,
+                  "store": true,
+                  "string": "TACI",
+                  "type": "float"
+                },
+                "__count": {
+                  "name": "__count",
+                  "string": "Comptage",
+                  "type": "integer"
+                }
+              },
+              "allIntegers": false
+            },
+            "searchParams": {
+              "comparison": null,
+              "context": {
+                "params": {
+                  "action": 844,
+                  "model": "hr.employee_staffing_report",
+                  "view_type": "graph",
+                  "cids": 1,
+                  "menu_id": 614
+                }
+              },
+              "domain": [
+                [
+                  "periodicity",
+                  "=",
+                  "week"
+                ]
+              ],
+              "groupBy": [
+                "start_date:week"
+              ],
+              "orderBy": []
+            },
+            "type": "odoo_line",
+            "verticalAxisPosition": "left",
+            "stacked": false,
+            "fieldMatching": {
+              "31a8e1ca-da6d-41d3-826a-0034c6b58f9d": {
+                "chain": "start_date"
+              },
+              "55c7c505-e170-473e-b029-00fda94a059d": {
+                "chain": "rel_job_id"
+              }
+            }
+          }
+        }
+      ],
+      "filterTables": [],
+      "areGridLinesVisible": true,
+      "isVisible": true
+    }
+  ],
+  "entities": {},
+  "styles": {},
+  "formats": {},
+  "borders": {},
+  "revisionId": "START_REVISION",
+  "uniqueFigureIds": true,
+  "odooVersion": 5,
+  "globalFilters": [
+    {
+      "id": "31a8e1ca-da6d-41d3-826a-0034c6b58f9d",
+      "type": "date",
+      "label": "Filtre temporel",
+      "defaultValue": "year_to_date",
+      "rangeType": "relative"
+    },
+    {
+      "id": "55c7c505-e170-473e-b029-00fda94a059d",
+      "type": "relation",
+      "label": "Grades",
+      "rangeType": "year",
+      "modelName": "hr.job",
+      "defaultValue": [
+        1,
+        2,
+        3,
+        11
+      ]
+    }
+  ],
+  "pivots": {},
+  "pivotNextId": 1,
+  "lists": {},
+  "listNextId": 1,
+  "chartOdooMenusReferences": {
+    "436d75df-bef5-42bb-821a-67f2a8b9bf4a": "staffing.employee_staffing_report_week_menu"
+  }
+}
