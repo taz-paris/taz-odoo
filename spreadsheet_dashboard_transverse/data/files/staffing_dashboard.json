@@ -20,7 +20,7 @@
           "height": 528,
           "tag": "chart",
           "data": {
-            "title": "Évolution du TACE hebdo par grade (hors DM)",
+            "title": "Évolution du TACE hebdomadaire par grade",
             "background": "#FFFFFF",
             "legendPosition": "top",
             "metaData": {
@@ -690,7 +690,7 @@
           "height": 523,
           "tag": "chart",
           "data": {
-            "title": "Évolution du TACE hebdo (hors DM)",
+            "title": "Évolution du TACE hebdomadaire",
             "background": "#FFFFFF",
             "legendPosition": "top",
             "metaData": {
