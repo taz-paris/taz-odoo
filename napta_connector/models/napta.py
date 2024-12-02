@@ -553,8 +553,8 @@ class naptaProject(models.Model):
     
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
-        #self.env['hr.leave'].detect_leave_timesheet_inconsistancy()
-        #return
+        self.env['hr.leave'].detect_leave_timesheet_inconsistancy(auto_correct=True)
+        return
         client = ClientRestNapta(self.env)
         client.refresh_cache()
         #self.env['hr.leave'].create_update_odoo_user_holiday()
@@ -1088,7 +1088,6 @@ class naptaHrLeave(models.Model):
             odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
             company_id = odoo_user.company_id.id
             numberOfDays = odoo_user.number_work_days_period(start_date, end_date)
-            
             request_date_from_period = 'am'
             if user_holiday['attributes']['start_date_from_morning'] == False :
                 request_date_from_period = 'pm'
@@ -1126,7 +1125,7 @@ class naptaHrLeave(models.Model):
 
         leaves = self.env['hr.leave'].search([  ('napta_id', '!=', None),
                                                 ('state', '=', "validate"),
-                                                ('request_date_from', '>', '2023-12-01'),
+                                                ('request_date_from', '>', '2022-12-31'),
                                                 #('id', 'in', [4962])
                                                 ], order="request_date_from asc")
         incorrect_leave_ids = []
@@ -1141,6 +1140,7 @@ class naptaHrLeave(models.Model):
                     for t in day_dic['selected_timesheet_list']:
                         _logger.info("      > %s jours retenus pour la timesheet %s" % (str(t[1]), t[0].read(['date', 'unit_amount', 'holiday_id'])))
 
+        _logger.info('%s hr.leave à corriger : %s' % (str(len(incorrect_leave_ids)), str(incorrect_leave_ids)))
         if auto_correct==True :
             for incorrect_leave in incorrect_leave_ids :
                 incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).number_of_days = incorrect_leave.number_of_days
