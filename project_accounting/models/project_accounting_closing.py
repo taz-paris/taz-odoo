@@ -66,9 +66,10 @@ class projectAccountingClosing(models.Model):
             if rec.next_closing :
                 raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
             if rec.is_validated :
-                if not (len(vals) == 1 and vals.get('is_validated') == False) :
-                    #il faut pouvoir écrire s'il on dévalide
-                    raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée."))
+                for val_key in vals.keys():
+                    if val_key not in ['is_validated', 'rel_project_stage_id', 'rel_project_user_id', 'rel_project_manager_user_id', 'name']:
+                    #il faut pouvoir écrire s'il on dévalide et lorsque le projet change de statut (rel_project_stage_id est stocké pour permettre de grouper sur cet attribut)
+                        raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s).\n\nTentative de modification des attributs suivants, dont au moins un n'est pas modifiable une fois la clôture validée : %s." % (rec.name, rec.id, ', '.join(vals.keys()))))
         super().write(vals)
 
 
@@ -82,7 +83,7 @@ class projectAccountingClosing(models.Model):
 
 
 
-    @api.depends('project_id', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
+    @api.depends('project_id', 'project_id.name', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking')
     def compute(self):
         _logger.info('-- compute project_accounting_closing')
         for rec in self :
@@ -252,7 +253,7 @@ class projectAccountingClosing(models.Model):
     rel_project_user_id = fields.Many2one(related='project_id.user_id', store=True)
     rel_project_date_start = fields.Date(related='project_id.date_start')
     rel_project_date = fields.Date(related='project_id.date')
-    rel_project_stage_id = fields.Many2one(related='project_id.stage_id', string="Statut actuel")
+    rel_project_stage_id = fields.Many2one(related='project_id.stage_id', string="Statut actuel", store=True)
     rel_project_accounting_closing_ids = fields.One2many(related='project_id.accounting_closing_ids')
     rel_project_manager_user_id = fields.Many2one(related='project_id.project_manager.user_id', string="Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", store=True)
     original_stage_id = fields.Many2one('project.project.stage', readonly=True, string='Statut début clôture', help='Statut du projet à la création de la clôture ("photo")')

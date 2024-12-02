@@ -299,15 +299,22 @@ class HrEmployeeStaffingReport(models.Model):
         #_logger.info('============================================= read_group employee_staffing_report.py')
         #_logger.info(fields)
         #This is a hack to allow us to correctly calculate the average activity rate.
-        if 'activity_rate' in fields:
+
+        # fields_name contains only the field names, not the aggregation operator sent after the ':' symbol
+        #       The following percentage fields are always aggregated the same way : the aggregation operator sent doesn't matter
+        fields_name = []
+        for f in fields:
+            fields_name.append(f.split(':')[0])
+
+        if 'activity_rate' in fields_name:
             fields.extend(['aggregated_project_days:array_agg(project_days)'])
             fields.extend(['aggregated_activity_days:array_agg(activity_days)'])
 
-        if 'activity_rate_with_holidays' in fields:
+        if 'activity_rate_with_holidays' in fields_name:
             fields.extend(['aggregated_project_days2:array_agg(project_days)'])
             fields.extend(['aggregated_workdays:array_agg(workdays)'])
         
-        if 'activity_previsionnal_rate' in fields :
+        if 'activity_previsionnal_rate' in fields_name :
             fields.extend(['aggregated_activity_previsionnal_project_days:array_agg(activity_previsionnal_project_days)'])
             fields.extend(['aggregated_activity_days2:array_agg(activity_days)'])
 
@@ -316,7 +323,7 @@ class HrEmployeeStaffingReport(models.Model):
         if fields:
             res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
-        if 'activity_rate' in fields:
+        if 'activity_rate' in fields_name:
             for data in res:
                 if data['aggregated_project_days'] and data['aggregated_activity_days']:
                     total_project_days = sum(float(project_days) for project_days in data['aggregated_project_days'] if project_days)
@@ -325,7 +332,7 @@ class HrEmployeeStaffingReport(models.Model):
                 del data['aggregated_project_days']
                 del data['aggregated_activity_days']
 
-        if 'activity_rate_with_holidays' in fields:
+        if 'activity_rate_with_holidays' in fields_name:
             for data in res:
                 if data['aggregated_project_days2'] and data['aggregated_workdays']:
                     total_project_days = sum(float(project_days) for project_days in data['aggregated_project_days2'] if project_days)
@@ -334,7 +341,7 @@ class HrEmployeeStaffingReport(models.Model):
                 del data['aggregated_project_days2']
                 del data['aggregated_workdays']
 
-        if 'activity_previsionnal_rate' in fields :
+        if 'activity_previsionnal_rate' in fields_name :
             for data in res:
                 if data['aggregated_activity_previsionnal_project_days'] and data['aggregated_activity_days2']:
                     total_activity_previsionnal_project_days = sum(float(activity_previsionnal_project_days) for activity_previsionnal_project_days in data['aggregated_activity_previsionnal_project_days'] if activity_previsionnal_project_days)
