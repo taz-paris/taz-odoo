@@ -28,6 +28,10 @@ class staffingLeave(models.Model):
 
 
     def write(self_list, vals):
+        old_values = {}
+        for self in self_list :
+            old_values[self.id] = {'date_from' : self.date_from, 'date_to' : self.date_to}
+
         res = super().write(vals)
 
         for self in self_list :
@@ -58,7 +62,43 @@ class staffingLeave(models.Model):
                     # create the timesheet on the vacation project
                     holidays._timesheet_create_lines()
 
+                    # update timesheets of all overlapped leaves
+                    overlapped_leaves =  self.env['hr.leave'].search([
+                                                ('id', '!=', self.id),
+                                                ('employee_id', '=', self.employee_id.id),
+                                                ('state', '=', "validate"),
+                                                ('date_from', '<=', max(old_values[self.id]['date_to'], self.date_to)),
+                                                ('date_to', '>=', min(old_values[self.id]['date_from'], self.date_from)),
+                                                ], order="request_date_from asc")
+                    for ol in overlapped_leaves :
+                        _logger.info(self.env.context.get('overlapped_already_updated', ''))
+                        current_context = self.env.context.get('overlapped_already_updated', '')
+                        if str(ol.id) not in current_context.split(',') :
+                            ol.with_context(overlapped_already_updated=current_context+str(self.id)+',').number_of_days = ol.number_of_days 
+
         return res
+
+
+    def unlink(self):
+        self_id = self.id
+        overlapped_leaves =  self.env['hr.leave'].search([
+                                    ('id', '!=', self.id),
+                                    ('employee_id', '=', self.employee_id.id),
+                                    ('state', '=', "validate"),
+                                    ('date_from', '<=', self.date_to),
+                                    ('date_to', '>=', self.date_from),
+                                    ], order="request_date_from asc")
+
+        res = super().unlink()
+
+        for ol in overlapped_leaves :
+            _logger.info(self.env.context.get('overlapped_already_updated', []))
+            current_context = self.env.context.get('overlapped_already_updated', []) or []
+            if ol.id not in current_context :
+                ol.with_context(overlapped_already_updated=current_context.append(self.id)).number_of_days = ol.number_of_days 
+
+        return rex
+
 
     def _get_leaves_on_public_holiday(self):
         # Lors de la clôture d'un contrat de travail, les congés postérieurs à la date de fin ne sont pas supprimés sur Napta (soit ils ne sont pas supprimés de Lucca,
@@ -83,21 +123,14 @@ class staffingLeave(models.Model):
                 #    vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count))
             if encoding_uom_id == self.env.ref("uom.product_uom_day"):
 
-                user_tz = self.env.user.tz or str(pytz.utc)
-                local = pytz.timezone(user_tz)
-                date_start = leave.date_from.astimezone(local).date() #Ne garder que date sinon, pour le congés de Gaëlle avant le changement d'heure d'octobre on téiat en GMT+2... et en janvier en GMT+1 et donc on avait toujours le 25/01/2023 car ajouter un jour à GMT+2 restait e GMT+2 même si on passait le 31/10
-                date_end = leave.date_to.astimezone(local).date()
+                leave_timesheets_by_day, list_work_days = leave.get_leave_timesheets_by_day()
+                index = 0
+                for str_date, day_dic in leave_timesheets_by_day.items() :
+                    if day_dic['selected_timesheets_unit_amount_sum'] < day_dic['target_unit_amount']:
+                        unit_amount_to_create = day_dic['target_unit_amount'] - day_dic['selected_timesheets_unit_amount_sum']
+                        vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_dic['date'], unit_amount_to_create))
+                        index += 1
 
-                list_work_days = leave.employee_id.list_work_days_period(date_start, date_end) 
-
-
-                for index, (day_date) in enumerate(list_work_days):
-                    work_days_count = 1.0
-                    if index == 0 and leave.request_date_from_period == "pm":
-                        work_days_count += -0.5
-                    if index == len(list_work_days)-1 and leave.request_date_to_period == "am":
-                        work_days_count += -0.5
-                    vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_date, work_days_count))
             else : 
                 raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
 
@@ -115,82 +148,72 @@ class staffingLeave(models.Model):
         res['company_id'] = self.employee_company_id.id
         return res
 
-    #TODO : mieux gérer les contrôles de conflit : pas possible d'avoir 2 demis jours 
-    """
-    @api.constrains('date_from', 'date_to', 'employee_id')
-    def _check_date(self):
-        if self.env.context.get('leave_skip_date_check', False):
-            return
 
-        all_employees = self.employee_id | self.employee_ids
-        all_leaves = self.search([
-            ('date_from', '<', max(self.mapped('date_to'))),
-            ('date_to', '>', min(self.mapped('date_from'))),
-            ('employee_id', 'in', all_employees.ids),
-            ('id', 'not in', self.ids),
-            ('state', 'not in', ['cancel', 'refuse']),
-        ])
-        for holiday in self:
-            domain = [
-                ('date_from', '<', holiday.date_to),
-                ('date_to', '>', holiday.date_from),
-                ('id', '!=', holiday.id),
-                ('state', 'not in', ['cancel', 'refuse']),
-            ]
+    def get_leave_timesheets_by_day(self):
+        #_logger.info('------ get_leave_timesheets_by_day')
+        self.ensure_one()
+        leave = self
 
-            employee_ids = (holiday.employee_id | holiday.employee_ids).ids
-            search_domain = domain + [('employee_id', 'in', employee_ids)]
+        res = {}
 
-            # Begin change for dealing with 2 half-days holidays on the same day : on for morning, other for afertnoon
-            conflicting_holidays_tmp = all_leaves.filtered_domain(search_domain)
-            conflicting_holidays = []
-            for conflicting_holiday in conflicting_holidays_tmp:
-                if holiday.date_to == conflicting_holiday.date_to and holiday.request_date_to_period == 'am':
-                    continue
-                conflicting_holidays.append(conflicting_holiday)
-            # end change
+        user_tz = self.env.user.tz or str(pytz.utc)
+        local = pytz.timezone(user_tz)
+        date_start = leave.date_from.astimezone(local).date() #Ne garder que date sinon, pour le congés de Gaëlle avant le changement d'heure d'octobre on téiat en GMT+2... et en janvier en GMT+1 et donc on avait toujours le 25/01/2023 car ajouter un jour à GMT+2 restait e GMT+2 même si on passait le 31/10
+        date_end = leave.date_to.astimezone(local).date()
+        #_logger.info(leave.date_from)
+        #_logger.info(leave.request_date_from)
+        #_logger.info(date_start)
+        #_logger.info(leave.date_to)
+        #_logger.info(leave.request_date_to)
+        #_logger.info(date_end)
 
+        list_work_days = leave.employee_id.list_work_days_period(date_start, date_end)
 
-            if conflicting_holidays:
-                conflicting_holidays_list = []
-                # Do not display the name of the employee if the conflicting holidays have an employee_id.user_id equivalent to the user id
-                holidays_only_have_uid = bool(holiday.employee_id)
-                holiday_states = dict(conflicting_holidays.fields_get(allfields=['state'])['state']['selection'])
-                for conflicting_holiday in conflicting_holidays:
-                    conflicting_holiday_data = {}
-                    conflicting_holiday_data['employee_name'] = conflicting_holiday.employee_id.name
-                    conflicting_holiday_data['date_from'] = format_date(self.env, min(conflicting_holiday.mapped('date_from')))
-                    conflicting_holiday_data['date_to'] = format_date(self.env, min(conflicting_holiday.mapped('date_to')))
-                    conflicting_holiday_data['state'] = holiday_states[conflicting_holiday.state]
-                    if conflicting_holiday.employee_id.user_id.id != self.env.uid:
-                        holidays_only_have_uid = False
-                    if conflicting_holiday_data not in conflicting_holidays_list:
-                        conflicting_holidays_list.append(conflicting_holiday_data)
-                if not conflicting_holidays_list:
-                    return
-                conflicting_holidays_strings = []
-                if holidays_only_have_uid:
-                    for conflicting_holiday_data in conflicting_holidays_list:
-                        conflicting_holidays_string = _('From %(date_from)s To %(date_to)s - %(state)s',
-                                                        date_from=conflicting_holiday_data['date_from'],
-                                                        date_to=conflicting_holiday_data['date_to'],
-                                                        state=conflicting_holiday_data['state'])
-                        conflicting_holidays_strings.append(conflicting_holidays_string)
-                    raise ValidationError(_('You can not set two time off that overlap on the same day.\nExisting time off:\n%s') %
-                                          ('\n'.join(conflicting_holidays_strings)))
-                for conflicting_holiday_data in conflicting_holidays_list:
-                    conflicting_holidays_string = _('%(employee_name)s - From %(date_from)s To %(date_to)s - %(state)s',
-                                                    employee_name=conflicting_holiday_data['employee_name'],
-                                                    date_from=conflicting_holiday_data['date_from'],
-                                                    date_to=conflicting_holiday_data['date_to'],
-                                                    state=conflicting_holiday_data['state'])
-                    conflicting_holidays_strings.append(conflicting_holidays_string)
-                conflicting_employees = set(employee_ids) - set(conflicting_holidays.employee_id.ids)
-                # Only one employee has a conflicting holiday
-                if len(conflicting_employees) == len(employee_ids) - 1:
-                    raise ValidationError(_('You can not set two time off that overlap on the same day for the same employee.\nExisting time off:\n%s') %
-                                          ('\n'.join(conflicting_holidays_strings)))
-                raise ValidationError(_('You can not set two time off that overlap on the same day for the same employees.\nExisting time off:\n%s') %
-                                      ('\n'.join(conflicting_holidays_strings)))
+        #_logger.info(list_work_days)
+        #_logger.info('===============================')
 
-    """
+        target_date = date_start
+        while (target_date <= date_end):
+            dic = {
+                    'date' : target_date,
+                    'target_unit_amount' : 0.0,
+                    'selected_timesheets_unit_amount_sum' : 0.0,
+                    'selected_timesheet_list' : [],
+                  }
+            timesheets = self.env['account.analytic.line'].search([('holiday_id', '!=', False), ('employee_id', '=', leave.employee_id.id), ('date', '=', target_date)])
+
+            if (target_date == leave.request_date_from and leave.request_date_from_period == "pm"):
+                dic['target_unit_amount'] = 0.5
+                for t in timesheets:
+                    if target_date == t.holiday_id.request_date_to and t.holiday_id.request_date_to_period == "am":
+                        pass
+                    else :
+                        dic['selected_timesheets_unit_amount_sum'] += min(t.unit_amount, 0.5)
+                        dic['selected_timesheet_list'].append((t, min(t.unit_amount, 0.5)))
+            elif (target_date == leave.request_date_to and leave.request_date_to_period == "am"):
+                dic['target_unit_amount'] = 0.5
+                for t in timesheets:
+                    if target_date == t.holiday_id.request_date_from and t.holiday_id.request_date_from_period == "pm":
+                        pass
+                    else :
+                        dic['selected_timesheets_unit_amount_sum'] += min(t.unit_amount, 0.5)
+                        dic['selected_timesheet_list'].append((t, min(t.unit_amount, 0.5)))
+            else :
+                dic['target_unit_amount'] = 1
+                for t in timesheets:
+                    dic['selected_timesheets_unit_amount_sum'] += t.unit_amount
+                    dic['selected_timesheet_list'].append((t, t.unit_amount))
+
+            if target_date not in list_work_days :
+                dic['target_unit_amount'] = 0.0
+
+            res[str(target_date)] = dic
+            #_logger.info(target_date)
+            #_logger.info(dic)
+            #for t in dic['selected_timesheet_list']:
+            #    _logger.info("      > %s jours retenus pour la timesheet %s" % (str(t[1]), t[0].read(['date', 'unit_amount', 'holiday_id'])))
+
+            target_date = target_date + timedelta(days=1)
+
+        return res, list_work_days
+
