@@ -432,7 +432,21 @@
 								<field name="has_provision_running"/>
 							</group>
 						</group>
-						<field name="accounting_closing_ids" context="{'default_project_id':active_id}"/>
+						<field name="accounting_closing_ids" context="{'default_project_id':active_id}">
+							<tree>
+								<!-- ATTENTION : ne pas mettre la closing_date dans cette vue, sinon (pour une raison inconnue) lorsque l'on change le statut du projet, la closing date de la dernière cloture du projet est mise à jour avec la même valeur. Or le statut du projet est un related stocké sur la cloture, donc il déclenche la mise à jour de la cloture et embarque donc (en plus de la mise à jour du statut du projet) la mise à jour de la closing_date. Or la closing_date ne peut pas changer lorsqu'une clôture est validée. Donc la mise à jour de la cloture tombe en erreur, et entraine également un rollback sur la mise à jour du statut sur l'objet project.project.
+								-->
+								<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+								<field name="company_id" invisible="1"/>
+								<field name="original_stage_id" optional="show"/>
+								<field name="closing_date" optional="show"/>
+								<field name="previous_closing" optional="hide"/>
+								<!-- Validation -->
+								<field name="is_validated" optional="show"/>
+								<field name="comment" optional="hide" widget="text"/>
+								<field name="comment_previous" optional="hide" widget="text"/>
+							</tree>
+						</field>
 					</page>
 					<page string="Autres info et contrôles (debug admin)"  groups="base.group_system">
 						<group>

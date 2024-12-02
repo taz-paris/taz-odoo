@@ -33,17 +33,17 @@ class projectAccountProject(models.Model):
             vals['state_last_change_date'] = datetime.today()
             #_logger.info('Numéro de projet auto : %s' % str(vals['number']))
             if 'stage_id' in vals.keys():
-                if vals['stage_id'] in [2, 9, 3, 8, 4]: # statuts Commandé / Prod terminée / Clos / Perdu / Annulée
-                    if not self.env.context.get("allow_all_status") :
-                        raise ValidationError(_("Un projet doit être créé au statut Avant-vente chaud ou Avant-vente froid ou Accord client."))
-                elif vals['stage_id'] in [6]: # statuts Accord client
-                    vals['date_win_loose'] = datetime.now()
-                    new_stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
-                    partner_id = self.env['res.partner'].browse(vals['partner_id'])
-                    if not(partner_id.is_probono_partner) and not('order_amount_initial' in vals.keys()) :
-                        raise ValidationError(_("Le montant HT piloté initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s, hormis pour les clients pro bono." %(new_stage_id.name)))
-                    if not('order_cost_initial' in vals.keys()) :
-                        raise ValidationError(_("Le coût total initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s." %(new_stage_id.name)))
+                if not self.env.context.get("allow_all_status") :
+                    if vals['stage_id'] in [2, 9, 3, 8, 4]: # statuts Commandé / Prod terminée / Clos / Perdu / Annulée
+                            raise ValidationError(_("Un projet doit être créé au statut Avant-vente chaud ou Avant-vente froid ou Accord client."))
+                    elif vals['stage_id'] in [6]: # statuts Accord client
+                        vals['date_win_loose'] = datetime.now()
+                        new_stage_id = self.env['project.project.stage'].browse(vals['stage_id'])
+                        partner_id = self.env['res.partner'].browse(vals['partner_id'])
+                        if not(partner_id.is_probono_partner) and not('order_amount_initial' in vals.keys()) :
+                            raise ValidationError(_("Le montant HT piloté initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s, hormis pour les clients pro bono." %(new_stage_id.name)))
+                        if not('order_cost_initial' in vals.keys()) :
+                            raise ValidationError(_("Le coût total initial (sur l'onglet Structure au lancement) ne peut pas être nul pour passer au statut %s." %(new_stage_id.name)))
 
             projects |= super().create(vals)
         return projects
