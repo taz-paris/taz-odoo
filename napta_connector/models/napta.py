@@ -553,6 +553,8 @@ class naptaProject(models.Model):
     
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
+        self.env['hr.leave'].detect_leave_timesheet_inconsistancy()
+        return
 
         client = ClientRestNapta(self.env)
         client.refresh_cache()
@@ -1115,24 +1117,46 @@ class naptaHrLeave(models.Model):
                 }
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True, 'do_not_update_staffing_report' : True, 'do_not_update_project' : True}, company_id=company_id)
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
-        #self.correct_leave_timesheet_stock() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
+        #self.detect_leave_timesheet_inconsistancy() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
-    """
-    def correct_leave_timesheet_stock(self):
+
+    def detect_leave_timesheet_inconsistancy(self, auto_correct=True):
         _logger.info('=========== Détection des incohérences entre hr.leave et analytic.line')
-        leaves = self.env['hr.leave'].search([('napta_id', '!=', None), ('state', '=', "validate"), ('request_date_from', '>', '2022-12-31')])
-        for leave in leaves:
-            count = 0.0
-            timesheets = self.env['account.analytic.line'].search([('holiday_id', '=', leave.id)])
-            for timesheet in timesheets:
-                count += timesheet.unit_amount
-            if count != leave.number_of_days:
-                _logger.info('Incohérence : leave_id=%s pour %s (statut : %s) => duréee =%s alors que total des timesheet=%s. Debut le %s' % (str(leave.id), leave.employee_id.name, leave.state, str(leave.number_of_days), str(count), str(leave.request_date_from)))
-                _logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
-                #leave.number_of_days = leave.number_of_days 
-                #_logger.info('      Corrigé')
-            self.env.cr.commit()
-    """
+        # ATTENTION : au Lucca Transmet à Napta, puis Napta à Odoo des périodes de congés qui peuvent se recouvrir !
+            # Pour vérifier la cohérence entre les hr.leave et les analytic.timesheet il est nécessaire de prendre en compte TOUTES les timesheets
+
+        leaves = self.env['hr.leave'].search([  ('napta_id', '!=', None),
+                                                ('state', '=', "validate"),
+                                                ('request_date_from', '>', '2023-12-01'),
+                                                #('id', 'in', [4962])
+                                                ], order="request_date_from asc")
+        incorrect_leave_ids = []
+        for leave in leaves :
+            leave_timesheets_by_day, list_work_days = leave.get_leave_timesheets_by_day()
+            for str_date, day_dic in leave_timesheets_by_day.items() :
+                if day_dic['selected_timesheets_unit_amount_sum'] != day_dic['target_unit_amount']:
+                    if leave not in incorrect_leave_ids:
+                        incorrect_leave_ids.append(leave)
+                    _logger.info('ERROR hr_leave.id = %s employe=%s date=%s normal sum of timesheets = %s differe from counted %s' %  (str(leave.id), str(leave.employee_id), str_date, str(day_dic['target_unit_amount']), str(day_dic['selected_timesheets_unit_amount_sum'])))
+                    #_logger.info('      Créé le %s Dernière modif du congés : %s' % (str(leave.create_date), str(leave.write_date)))
+                    for t in day_dic['selected_timesheet_list']:
+                        _logger.info("      > %s jours retenus pour la timesheet %s" % (str(t[1]), t[0].read(['date', 'unit_amount', 'holiday_id'])))
+
+        if auto_correct==True :
+            for incorrect_leave in incorrect_leave_ids :
+                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).number_of_days = incorrect_leave.number_of_days
+
+            self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
+            self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()
+
+            if len(incorrect_leave_ids) > 0 :
+                # il est parfois nécessaire de boucler plusieurs fois jusqu'à ce qu'il n'y ait plus d'erreurs (notamment dans des cas impliquant des demi-journées en // d'une journée pleine)
+                self.detect_leave_timesheet_inconsistancy(auto_correct=True)
+            else :
+                # pour vérification visuelle dans les log qu'aucune anomalie ne persiste
+                self.detect_leave_timesheet_inconsistancy(auto_correct=False)
+
+        self.env.cr.commit()
 
 
 class naptaHrLeaveType(models.Model):

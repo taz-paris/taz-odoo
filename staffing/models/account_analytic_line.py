@@ -152,7 +152,7 @@ class staffingAnalyticLine(models.Model):
 
 
     def get_timesheet_grouped_raw(self, pivot_date, date_start=None, date_end=None, filters=None):
-        _logger.info('------ get_timesheet_grouped_raw date_start=%s, date_end=%s' % (date_start, date_end))
+        #_logger.info('------ get_timesheet_grouped_raw date_start=%s, date_end=%s' % (date_start, date_end))
         # Usage de cette fonction :
         #   - Calculer le temps pointé / prévisionnel d'un consultant
         #   - Calculer la disponibilité d'un consultant sur une période (passé, présente ou future)
