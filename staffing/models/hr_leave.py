@@ -97,7 +97,7 @@ class staffingLeave(models.Model):
             if ol.id not in current_context :
                 ol.with_context(overlapped_already_updated=current_context.append(self.id)).number_of_days = ol.number_of_days 
 
-        return rex
+        return res
 
 
     def _get_leaves_on_public_holiday(self):

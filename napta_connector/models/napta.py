@@ -553,12 +553,10 @@ class naptaProject(models.Model):
     
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
-        self.env['hr.leave'].detect_leave_timesheet_inconsistancy(auto_correct=True)
-        return
+        #self.env['hr.leave'].detect_leave_timesheet_inconsistancy(auto_correct=False)
+        #return
         client = ClientRestNapta(self.env)
         client.refresh_cache()
-        #self.env['hr.leave'].create_update_odoo_user_holiday()
-        #a=1/0
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -1118,7 +1116,7 @@ class naptaHrLeave(models.Model):
         self.detect_leave_timesheet_inconsistancy() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
 
-    def detect_leave_timesheet_inconsistancy(self, auto_correct=True):
+    def detect_leave_timesheet_inconsistancy(self, auto_correct=False):
         _logger.info('=========== Détection des incohérences entre hr.leave et analytic.line')
         # ATTENTION : au Lucca Transmet à Napta, puis Napta à Odoo des périodes de congés qui peuvent se recouvrir !
             # Pour vérifier la cohérence entre les hr.leave et les analytic.timesheet il est nécessaire de prendre en compte TOUTES les timesheets
@@ -1151,9 +1149,6 @@ class naptaHrLeave(models.Model):
             if len(incorrect_leave_ids) > 0 :
                 # il est parfois nécessaire de boucler plusieurs fois jusqu'à ce qu'il n'y ait plus d'erreurs (notamment dans des cas impliquant des demi-journées en // d'une journée pleine)
                 self.detect_leave_timesheet_inconsistancy(auto_correct=True)
-            else :
-                # pour vérification visuelle dans les log qu'aucune anomalie ne persiste
-                self.detect_leave_timesheet_inconsistancy(auto_correct=False)
 
         self.env.cr.commit()
 

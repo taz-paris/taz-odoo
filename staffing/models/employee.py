@@ -122,19 +122,19 @@ class staffingEmployee(models.Model):
         res = super().write(vals)
 
         if 'first_contract_date' in vals.keys() or 'departure_date' in vals.keys():
-            _logger.info('     > refresh employee_staffing_report  employee_name=%s first_contract_date=%s departure_date=%s' % (str(rec.name), str(rec.first_contract_date), str(rec.departure_date)))
             for rec in self:
+                _logger.info('     > refresh employee_staffing_report  employee_name=%s first_contract_date=%s departure_date=%s' % (str(rec.name), str(rec.first_contract_date), str(rec.departure_date)))
                 if 'first_contract_date' in vals.keys() :
-                    old_first_contract_date = old_values[rec.id]['first_contract_date'] or datetime.date(2000,1,1)
-                    new_first_contract_date = rec.first_contract_date or datetime.date(2000,1,1)
+                    old_first_contract_date = old_values[rec.id]['first_contract_date'] or date(2000,1,1)
+                    new_first_contract_date = rec.first_contract_date or date(2000,1,1)
                     reports_to_update = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.id),
                                                                                         ('end_date', '>=', min(old_first_contract_date, new_first_contract_date)),
                                                                                         ('start_date', '<=', max(old_first_contract_date, new_first_contract_date)),
                                                                                         ])
                     reports_to_update.availability()
                 if 'departure_date' in vals.keys() :
-                    old_departure_date = old_values[rec.id]['departure_date'] or datetime.date(2100,1,1)
-                    new_departure_date = rec.departure_date or datetime.date(2100,1,1)
+                    old_departure_date = old_values[rec.id]['departure_date'] or date(2100,1,1)
+                    new_departure_date = rec.departure_date or date(2100,1,1)
                     reports_to_update = self.env['hr.employee_staffing_report'].search([('employee_id', '=', rec.id),
                                                                                         ('end_date', '>=', min(old_departure_date, new_departure_date)),
                                                                                         ('start_date', '<=', max(old_departure_date, new_departure_date)),
