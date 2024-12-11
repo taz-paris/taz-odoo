@@ -74,6 +74,7 @@ class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
     
     def _get_purchase_sale_line_sync_fields(self):
+        #_logger.info('---- override _get_purchase_sale_line_sync_fields')
         res = super()._get_purchase_sale_line_sync_fields()
         res['name'] = 'name' 
         res['product_id'] = 'product_id' 
@@ -83,46 +84,9 @@ class PurchaseOrderLine(models.Model):
         res['previsional_invoice_date'] = 'previsional_invoice_date'
         return res
 
-    #### OVERIDE COMMUNITY FUNCTION FROM PURCHASE_SALE_INTER_COMPANY
-    @api.model_create_multi
-    def create(self, vals_list):
-        """Sync lines between an confirmed unlocked purchase and a confirmed unlocked
-        sale order"""
-        lines = super().create(vals_list)
-        allowed_states = self._get_allowed_sale_order_states()
-        for order in lines.order_id.filtered(
-            #lambda x: x.state == "purchase" and x.intercompany_sale_order_id
-            #ADU : si l'état du purchase.order est en draft on doit créer la sale.order.line correspondante si l'intercompany_sale_order_id est défini sur le purchase.order
-            lambda x: x.intercompany_sale_order_id
-        ):
-            if order.intercompany_sale_order_id.sudo().state not in allowed_states:
-                raise UserError(
-                    _(
-                        "You can't change this purchase order as the corresponding "
-                        "sale is %(state)s",
-                        state=order.state,
-                    )
-                )
-            intercompany_user = (
-                order.intercompany_sale_order_id.sudo().company_id.intercompany_sale_user_id
-                or self.env.user
-            )
-            sale_lines = []
-            for purchase_line in lines.filtered(lambda x: x.order_id == order):
-                sale_lines.append(
-                    order._prepare_sale_order_line_data(
-                        purchase_line,
-                        order.intercompany_sale_order_id.sudo().company_id,
-                        order.intercompany_sale_order_id.sudo(),
-                    )
-                )
-            self.env["sale.order.line"].with_user(intercompany_user.id).sudo().create(
-                sale_lines
-            )
-        return lines
-
-
     def _get_allowed_sale_order_states(self):
         allowed_states = super()._get_allowed_sale_order_states()
         allowed_states.append("draft")
         return allowed_states
+
+
