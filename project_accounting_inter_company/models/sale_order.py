@@ -58,13 +58,6 @@ class SaleOrderLine(models.Model):
             "previsional_invoice_date" : "previsional_invoice_date",
         }
 
-
-    def _get_allowed_purchase_order_states(self):
-        allowed_states = ["draft", "purchase"]
-        if self.env.context.get("allow_update_locked_sales", False):
-            allowed_states.append("done")
-        return allowed_states
-
     @api.model_create_multi
     def create(self, vals_list):
         """Sync lines between an confirmed unlocked sale order and a confirmed unlocked
