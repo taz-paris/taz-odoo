@@ -18,6 +18,13 @@ class tazResPartner(models.Model):
          res.append("street3")
          return res
 
+
+     def update_address(self, vals):
+        #Empêcher la synchronisation des adresses entre les res.partner parent et ses enfants si ce sont des companys
+        for rec in self:
+            if not(rec.is_company):
+                super().update_address(vals)
+
      def _get_default_address_format(self):
         return "%(street)s\n%(street2)s\n%(street3)s\n%(zip)s %(city)s %(state_code)s\n%(country_name)s"
 
