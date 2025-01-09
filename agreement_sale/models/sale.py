@@ -14,9 +14,9 @@ class SaleOrder(models.Model):
         ondelete="restrict",
         domain=[('domain', '=', 'sale')],
         tracking=True,
-        readonly=True,
+        #readonly=True,
         copy=False,
-        states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
+        #states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
         check_company=True,
     )
 

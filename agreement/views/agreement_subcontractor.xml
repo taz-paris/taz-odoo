@@ -19,7 +19,6 @@
                         <group name="left">
                             <field name="partner_id"/>
                             <field name="agreement_id"/>
-                            <field name="parent_subcontractor_agreement_id"/>
                             <field name="max_amount"/>
                             <field name="company_id"/>
                         </group>

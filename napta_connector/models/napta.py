@@ -74,14 +74,14 @@ class ClientRestNapta:
         return access_values['access_token']
 
 
-    def read_cache(self, napta_type, napta_id=None):
+    def read_cache(self, napta_type, napta_id=None, include=None):
         if not(os.path.exists(cache_folder)):
             os.mkdir(cache_folder)
         path = os.path.join(cache_folder, napta_type.replace('/','_'))
 
         if not(os.path.exists(path)) or (datetime.datetime.fromtimestamp(os.path.getmtime(path)) < (datetime.datetime.now() - datetime.timedelta(minutes=cache_duration_in_minutes))) :
             _logger.info('Refresh du cache : objet=%s' % (str(napta_type)))
-            api_get_result = self.get_api(napta_type)
+            api_get_result = self.get_api(napta_type, include=include)
             api_get_result_dic = {}
             for obj in api_get_result['data']:
                 api_get_result_dic[obj['id']] = obj
@@ -148,7 +148,7 @@ class ClientRestNapta:
                 _logger.info("Remove %s" % str(file_path))
 
         self.read_cache('user_history')
-        self.read_cache('project')
+        self.read_cache('project', include=['business_units'])
         self.read_cache('project_contributor')
         self.read_cache('client')
         _logger.info("------- refresh_cache TERMINÉ")
@@ -428,8 +428,10 @@ class naptaProject(models.Model):
                 'company_part_marging_rate_initial',
                 'project_director_employee_id',
                 'project_manager', #TODO : dans la perspective de l'envoyer comme copropriétaire projet à Napta automatiquement
+                'company_id',
             ]
             if any(field in ODOO_TO_NAPTA_PROJECT_FIELD_LIST for field in vals.keys()):
+                _logger.info("==== Champs de l'objet project.project modifiés : %s" % str(vals.keys()))
                 if not rec.is_prevent_napta_creation and not self.env.context.get('ignore_napta_write') and rec.partner_id :
                     rec.with_context(ignore_napta_write=True).napta_to_sync = True
                     try:
@@ -529,7 +531,7 @@ class naptaProject(models.Model):
     def create_update_odoo(self):
         _logger.info('---- Get project begin/begin dates from Napta')
         client = ClientRestNapta(self.env)
-        user_projects = client.read_cache('project')
+        user_projects = client.read_cache('project', include=['business_units'])
         for napta_id, user_project in user_projects.items():
             dic = {
                     'napta_id' : napta_id,
@@ -553,10 +555,9 @@ class naptaProject(models.Model):
     
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
-        #self.env['hr.leave'].detect_leave_timesheet_inconsistancy(auto_correct=False)
-        #return
         client = ClientRestNapta(self.env)
         client.refresh_cache()
+        #a=1/0
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
