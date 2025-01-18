@@ -152,7 +152,7 @@ class projectBookEmployeeDistributionPeriod(models.Model):
         new = super().create(vals)
         return new
 
-    @api.constrains('book_employee_distribution_id', 'book_period_id')
+    @api.constrains('book_employee_distribution_id', 'project_book_period_id')
     def _check(self):
          for rec in self :
              if not(rec.book_employee_distribution_id.project_id.id) or not(rec.project_book_period_id.project_id.id) :
