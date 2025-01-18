@@ -72,9 +72,11 @@ class staffingLeave(models.Model):
                                                 ], order="request_date_from asc")
                     for ol in overlapped_leaves :
                         _logger.info(self.env.context.get('overlapped_already_updated', ''))
-                        current_context = self.env.context.get('overlapped_already_updated', '')
-                        if str(ol.id) not in current_context.split(',') :
-                            ol.with_context(overlapped_already_updated=current_context+str(self.id)+',').number_of_days = ol.number_of_days 
+                        overlapped_already_updated_str = self.env.context.get('overlapped_already_updated', '')
+                        if not(overlapped_already_updated_str):
+                            overlapped_already_updated_str = ""
+                        if str(ol.id) not in overlapped_already_updated_str.split(',') :
+                            ol.with_context(overlapped_already_updated=overlapped_already_updated_str+str(self.id)+',').number_of_days = ol.number_of_days 
 
         return res
 
