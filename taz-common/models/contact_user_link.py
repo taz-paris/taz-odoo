@@ -309,6 +309,16 @@ class ContactUserLink(models.Model):
                             }
                         }
                     ],
+                    "from" : {
+                        "emailAddress":{
+                            "address": self.env.user.login,
+                        }
+                    },
+                    "sender" : {
+                        "emailAddress":{
+                            "address": self.env.user.login,
+                        }
+                    },
                 }
             office365_mail_draft = self.env.user._msgraph_post_draft_mail(mail_dict)
             rec.last_office365_mail_draft = json.dumps(office365_mail_draft)

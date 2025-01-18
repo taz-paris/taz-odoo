@@ -500,19 +500,28 @@ class naptaProject(models.Model):
               "target_margin_rate" : round(rec.company_part_marging_rate_initial/100.0,2),
             }
 
+            alreeady_existing_project = False
+            if rec.napta_id :
+                alreeady_existing_project = True
+
             client.create_update_api('project', attributes, rec)
 
-            #Department IDS
-            raw_relationships = {"business_units": {
-                                    "data": [
-                                      {
-                                        "type": "business_unit",
-                                        "id": rec.sudo().company_id.default_hr_department_for_projects_id.napta_id,
+            #Set department IDS
+                # this request is sent only when the project is created on Napta because : 
+                #   1/ We assume that on Odoo, the projet's company never changes.
+                #   2/ We can't esalily get the business_unit id of a projet in chase, so we can't easily know when it's need to be sent to Napta
+                #   3/ We do not want to send the business_unit id to Napta a every call of this function
+            if not alreeady_existing_project:
+                raw_relationships = {"business_units": {
+                                        "data": [
+                                          {
+                                            "type": "business_unit",
+                                            "id": rec.sudo().company_id.default_hr_department_for_projects_id.napta_id,
+                                          }
+                                        ]
                                       }
-                                    ]
-                                  }
-                                }
-            business_unit_req = client.patch_api('project', {}, napta_id=rec.napta_id, relationships=raw_relationships, force_send=True)
+                                    }
+                business_unit_req = client.patch_api('project', {}, napta_id=rec.napta_id, relationships=raw_relationships, force_send=True)
 
             # Directeur de mission
             if rec.project_director_employee_id:
