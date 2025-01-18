@@ -39,7 +39,7 @@
             <field name="arch" type="xml">
                 <field name="tag_ids" position="after">
                         <field name="napta_to_sync" readonly="1"/>
-                        <field name="napta_id" readonly="1"/>
+                        <field name="napta_id" readonly="0"/>
 			<button type="object" name="delete_on_napta" string="Supprimer sur Napta" colspan="2" attrs="{'invisible': [('napta_id', '=', False)]}" groups="base.group_system"/>
                 </field>
                 <field name="active" position="after">
