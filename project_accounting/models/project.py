@@ -666,7 +666,7 @@ class projectAccountProject(models.Model):
                                 'project_id' : rec._origin.id,
                                 'reference_period' : str(current_year),
                             }
-                        book_period_current_year = rec.env['project.book_period'].create(dic)
+                        book_period_current_year = rec.env['project.book_period'].with_company(rec.company_id).create(dic)
 
                     if book_period_current_year.period_project_book != default_current_year_book_amount:
                         book_period_current_year.period_project_book = default_current_year_book_amount
