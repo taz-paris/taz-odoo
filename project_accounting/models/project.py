@@ -1173,7 +1173,7 @@ class projectAccountProject(models.Model):
     has_to_be_recomputed = fields.Boolean('À recalculer', default=False)
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')
-    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', context={'active_test': False}, help="Dans certains projets, le client final n'est pas le client facturé. Un client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
+    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', context={'active_test': False}, domain="[('is_company', '=', True), ('type', '=', 'contact')]", help="Dans certains projets, le client final n'est pas le client facturé. Un client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
 
     ######## TOTAL
     sale_order_amount_initial = fields.Monetary('Montant HT commandé par le client', store=True, compute=compute)

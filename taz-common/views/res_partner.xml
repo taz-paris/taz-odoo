@@ -40,7 +40,7 @@
 		  <group>
 		      <field name="name"/>
 		      <field name="long_company_name"/>
-		      <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
+		      <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]" />
                       <field name="comment"/>
 		  </group>
 		  <group>
