@@ -17,6 +17,7 @@
 
 	
 	<!-- IF THIS RULE IS UNCOMMENTED, USER CAN'T SEE MIROR PROJECT OUTSOURCING IN PROJECT FORM IF MIROR COMPANY IS NOT SELECTED IN THE COMPANY SELECTOR 
+		check_company=True WAS ADDED IN THE project_id attribute in the project_outsourcing_link MODEL to prevent creation of inconsistent project_outsourcing_link
 	   <record model="ir.rule" id="project_outsourcing_link_comp_rule">
 		<field name="name">Project outsourcing link: multi-company</field>
 		<field name="model_id" ref="model_project_outsourcing_link"/>

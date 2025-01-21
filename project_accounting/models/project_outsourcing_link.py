@@ -150,6 +150,8 @@ class projectOutsourcingLink(models.Model):
             rec.order_direct_payment_done_detail = ""
             purchase_lines = self.env['purchase.order.line'].browse(rec.get_purchase_order_line_ids())
             for purchase_line in purchase_lines :
+                if purchase_line.state not in ['purchase']:
+                    continue
                 rec.outsource_part_amount_current += purchase_line.reselling_subtotal 
                 if purchase_line.direct_payment_sale_order_line_id :
                     rec.order_direct_payment_amount += purchase_line.price_subtotal
