@@ -16,10 +16,13 @@ class projectOutsourcingLink(models.Model):
     @api.depends('partner_id', 'partner_id.ref_company_ids')
     def _compute_is_partner_id_res_company(self):
         for rec in self:
-            if len(rec.sudo().partner_id.ref_company_ids) != 1:
-                rec.is_partner_id_res_company = False
-            else :
+            dest_company = (
+                    rec.sudo().partner_id.commercial_partner_id.ref_company_ids
+            )
+            if dest_company and dest_company.so_from_po:
                 rec.is_partner_id_res_company = True
+            else :
+                rec.is_partner_id_res_company = False
 
     is_partner_id_res_company = fields.Boolean(compute="_compute_is_partner_id_res_company")
 
@@ -42,6 +45,7 @@ class projectOutsourcingLink(models.Model):
         self.ensure_one()
         if self.inter_company_mirror_project:
             return self.inter_company_mirror_project
+
         if not self.is_partner_id_res_company :
             raise ValidationError(_("Le partenaire lié n'est pas lié à une société de la galaxie."))
         
