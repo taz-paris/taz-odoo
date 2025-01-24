@@ -1,4 +1,6 @@
 from odoo import models, fields, api
+from odoo.exceptions import AccessDenied, UserError, ValidationError, AccessError
+from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -10,14 +12,32 @@ class tazCustomerBookGoal(models.Model):
     _description = "Customer book goal"
     _order = "reference_period desc, industry_id"
     _sql_constraints = [
-        ('partner_year_uniq', 'UNIQUE (industry_id, reference_period)',  "Impossible d'avoir deux objectifs différents pour le même compte et la même année.")
+        ('partner_year_company_unicity', 'UNIQUE (industry_id, reference_period, company_id)',  "Impossible d'avoir deux objectifs différents pour le même compte, la même année et la même société.")
     ]
+
+    @api.constrains('reference_period', 'company_id', 'industry_id')
+    def _check_company_consistency(self):
+        for rec in self:
+            # TODO When we will use Postgres 15, we will change the SQL constrain of the class and add keyword NULLS NOT DISTINCT... but untill then we have to check it manually
+            #   more info : https://www.linkedin.com/pulse/postgresql-unique-constraint-null-values-mykhaylo-symulyk-fpkwf/
+            unique_check = self.search([('reference_period', '=', rec.reference_period), ('industry_id', '=', rec.industry_id.id), ('id', '!=', rec.id), ('company_id', '=', False)])
+            if unique_check :
+                raise ValidationError(_("Impossible d'avoir deux objectifs différents pour le même compte, la même année et aucune société de définie."))
+
+            # Les vérifications suivantes sont pérennes, y compris lorsque l'on sera sur Postgres 15
+            cbg = self.search([('reference_period', '=', rec.reference_period), ('industry_id', '=', rec.industry_id.id), ('id', '!=', rec.id)])
+            if cbg :
+                if cbg[0].company_id and not(rec.company_id):
+                    raise ValidationError(_("Il existe déjà au moins un objectif de book pour ce compte et cette année.\n\nCes objectifs ont une société de spécifiée, donc vous devez spécifier une société pour les nouveaux objectifs que vous souhaitez créer pour cette période et cette année."))
+                if not(cbg[0].company_id) and rec.company_id:
+                    raise ValidationError(_("Il existe déjà un objectif de prise de commande pour ce compte et cette année.\n\nCet objectif est pour le moment global à toutes les sociétés de la galaxie. En effet, aucune société n'y est spécifiée.\n\nSi vous souhaitez gérer les objectifs pour ce Compte et cette année à à la maille des sociétés, vous devez commencer par renseigner une société sur l'objectif préexistant (avant de créer un nouvel objectif)."))
 
     @api.model
     def create(self, vals):
         if not vals.get("industry_id"):
             vals["industry_id"] = self._context.get("default_industry_id")
-        return super().create(vals)
+        res = super().create(vals)
+        return res
 
     @api.model
     def year_selection(self):
@@ -38,22 +58,25 @@ class tazCustomerBookGoal(models.Model):
     @api.depends('industry_id', 'reference_period')
     def _compute_name(self):
         for rec in self :
-            rec.name =  "%s - %s" % (rec.reference_period or "", rec.industry_id.name or "") 
+            if rec.company_id :
+                rec.name =  "%s - %s (%s)" % (rec.reference_period or "", rec.industry_id.name or "", rec.company_id.name) 
+            else :
+                rec.name =  "%s - %s" % (rec.reference_period or "", rec.industry_id.name or "") 
 
     @api.model
     def compute(self):
         for record in self:
             begin_year = datetime.datetime(int(record.reference_period), 1, 1) 
             end_year = datetime.datetime(int(record.reference_period), 12, 31)
-            record.period_book, period_project_ids = record.industry_id.get_book_by_period(begin_year, end_year)
+            record.period_book, period_project_ids = record.industry_id.get_book_by_period(begin_year, end_year, record.company_id)
 
             record.period_delta = record.period_goal - record.period_book
             if (record.period_goal and record.period_goal != 0.0):
                 record.period_ratio = (record.period_book / record.period_goal)*100.0
             else :
                 record.period_ratio = 0.0
-            record.book_last_month, last_month_project_ids = record.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today())
-            record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_number_of_opportunities()
+            record.book_last_month, last_month_project_ids = record.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today(), record.company_id)
+            record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_number_of_opportunities(record.company_id)
 
 
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -136,7 +159,8 @@ class tazCustomerBookGoal(models.Model):
         default=year_default,
         )
     name = fields.Char("Compte - Période", compute=_compute_name)
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, readonly=True)
+    company_id = fields.Many2one('res.company', string='Company', help="Si la société est définie, seule les projets liés à cette société sont comptés dans les agrégats. Sinon, tous les projets de toutes les sociétés sont comptés dans les agrégats.")
+    currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
     book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des objectifs")
 
@@ -154,8 +178,9 @@ class tazCustomerBookFollowup(models.Model):
     _description = "Customer book evolution"
     _order = "date_update desc"
     _sql_constraints = [
-        ('book_date_uniq', 'UNIQUE (customer_book_goal_id, date_update)',  "Impossible d'avoir suivis d'objectifs différents pour le même jour.")
+        ('book_date_company_uniq', 'UNIQUE (customer_book_goal_id, date_update, company_id)',  "Impossible d'avoir des suivis d'objectifs différents pour le même jour et la même société.")
     ]
+    _check_company_auto = True
 
     @api.depends('customer_book_goal_id', 'date_update', 'period_book', 'period_futur_book', 'period_goal')
     @api.model
@@ -178,9 +203,10 @@ class tazCustomerBookFollowup(models.Model):
 
         #Utilisé pour le formulaire du res.parent.industry
         industry_default_id = self._context.get("default_industry_id")
+
         if industry_default_id:
             industry_default = self.env['res.partner.industry'].search([('id', '=', industry_default_id)])[0]
-            bgl = self.env['taz.customer_book_goal'].search([('industry_id', '=', industry_default.id)], order="reference_period desc")
+            bgl = self.env['taz.customer_book_goal'].search([('company_id', 'in', [False, self.env.company.id]), ('industry_id', '=', industry_default.id)], order="reference_period desc")
             if len(bgl)>0:
                 bg_last = bgl[0]
                 res['customer_book_goal_id'] = bg_last.id
@@ -190,12 +216,12 @@ class tazCustomerBookFollowup(models.Model):
         default_customer_book_goal_id = self._context.get("default_customer_book_goal_id")
         if default_customer_book_goal_id:
             res['customer_book_goal_id']  = default_customer_book_goal_id
-            customer_book_goal = self.env['taz.customer_book_goal'].search([('id', '=', default_customer_book_goal_id)])[0]
+            customer_book_goal = self.env['taz.customer_book_goal'].search([('company_id', 'in', [False, self.env.company.id]), ('id', '=', default_customer_book_goal_id)])[0]
 
         if customer_book_goal:
-            begin_year = datetime.datetime(int(customer_book_goal.reference_period), 1, 1) 
+            begin_year = datetime.datetime(int(customer_book_goal.reference_period), 1, 1)
             end_year = datetime.datetime(int(customer_book_goal.reference_period), 12, 31)
-            res['period_book'], period_project_ids = customer_book_goal.industry_id.get_book_by_period(begin_year, end_year)
+            res['period_book'], period_project_ids = customer_book_goal.industry_id.get_book_by_period(begin_year, end_year, customer_book_goal.company_id)
 
         _logger.info(res)
         return res
@@ -204,12 +230,16 @@ class tazCustomerBookFollowup(models.Model):
     @api.depends('industry_id', 'date_update')
     def _compute_name(self):
         for record in self:
-            record.name = "%s - %s" % (record.industry_id.name or "", record.date_update or "") 
+            if self.company_id:
+                record.name = "%s - %s (%s)" % (record.industry_id.name or "", record.date_update or "", record/company_id.name) 
+            else:
+                record.name = "%s - %s" % (record.industry_id.name or "", record.date_update or "") 
 
     name = fields.Char("Nom", compute=_compute_name)
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id, readonly=True)
+    company_id = fields.Many2one('res.company', related="customer_book_goal_id.company_id", store=True)
+    currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=False, ondelete='restrict')
+    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=False, ondelete='restrict', check_company=True)
     period_goal = fields.Monetary("Montant obj", related="customer_book_goal_id.period_goal", store=True)
     industry_id = fields.Many2one(related="customer_book_goal_id.industry_id", store=True)
     rel_business_priority = fields.Selection(related='industry_id.business_priority', store=True)

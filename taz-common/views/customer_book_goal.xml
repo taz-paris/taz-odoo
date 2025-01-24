@@ -7,6 +7,7 @@
       <field name="arch" type="xml">
 	 <tree editable="top"  expand="1">
 		  <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly': [('id','!=', False)]}"/>
+		  <field name="company_id" optional="show"/>
 		  <field name="reference_period" optional="hide"/>
 		  <field name="period_goal" optional="show" sum="Total"/>
 		  <field name="period_book" optional="show" sum="Total"/>
@@ -30,6 +31,7 @@
 	    <sheet>
 		  <group>
 			<group>
+		  		<field name="company_id"/>
 		  		<field name="industry_id" required="1" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly': [('id','!=', False)]}"/>
 				<field name="period_goal" sum="Total"/>
 			</group>
@@ -80,6 +82,7 @@
             	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
 		    <separator/>
 		    <group expand="0" string="Group By">
+			<filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
 			<filter string="Niveau de priorité" name="group_rel_business_priority" context="{'group_by': 'rel_business_priority'}"/>
 			<filter string="Compte (ex BD)" name="group_industry_id" context="{'group_by': 'industry_id'}"/>
 			<filter string="Période de référence" name="group_reference_period" context="{'group_by': 'reference_period'}"/>
@@ -93,6 +96,7 @@
       <field name="model">taz.customer_book_followup</field>
       <field name="arch" type="xml">
 	 <tree editable="top" create="true">
+	      <field name="company_id" optional="show"/>
 	      <field name="industry_id" optional="hide"/>
 	      <field name="customer_book_goal_id" force_save="1" optional="show" attrs="{'readonly': [('id','!=', False)]}"/>
 	      <field name="date_update" optional="show"/>
@@ -156,6 +160,7 @@
             	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
 		    <separator/>
 		    <group expand="0" string="Group By">
+			<filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
 			<filter string="Niveau de priorité" name="group_rel_business_priority" context="{'group_by': 'rel_business_priority'}"/>
 			<filter string="Compte (ex BD)" name="group_industry_id" context="{'group_by': 'industry_id'}"/>
 			<filter string="Date" name="group_date_update" context="{'group_by': 'date_update'}"/>

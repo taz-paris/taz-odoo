@@ -31,28 +31,38 @@ class tazResIndustry(models.Model):
     business_partner_company_ids = fields.Many2many('res.partner', domain=[('ref_company_ids', '!=', False)], string="Galaxie")
 
 
-    def get_book_by_period(self, begin_date, end_date):
+    def get_book_by_period(self, begin_date, end_date, company_id):
         #TODO si 1/1/2024 00:00:00 => le projet n'est pas compté sur 2024
         #   > problème de conversion à la date GMT ?
         #   ATTENTION : ça ne sort pas non plus sur le TCD => bug coeur Odoo ?
-        project_ids = self.env['project.project'].search([
+        search_param_list = [
             ('stage_is_part_of_booking', '=', True), 
             ('partner_id', 'in', self.partner_ids.ids),
             ('date_win_loose', '>=', begin_date),
             ('date_win_loose', '<=', end_date),
             ('reporting_sum_company_outsource_code3_code_4', '!=', False),
-        ])
+        ]
+
+        if company_id != False :
+            search_param_list.append(('company_id', '=', company_id.id))
+
+        project_ids = self.env['project.project'].search(search_param_list)
         book_period = 0.0
         for project in project_ids:
             book_period += project.reporting_sum_company_outsource_code3_code_4
         return book_period, project_ids
 
-    def get_number_of_opportunities(self):
-        project_ids = self.env['project.project'].search([
+    def get_number_of_opportunities(self, company_id):
+        search_param_list = [
             ('partner_id', 'in', self.partner_ids.ids),
             ('stage_is_part_of_booking', '=', False),
             ('state', '=', 'before_launch'),
-        ])
+        ]
+
+        if company_id != False :
+            search_param_list.append(('company_id', '=', company_id.id))
+
+        project_ids = self.env['project.project'].search(search_param_list)
         return len(project_ids), project_ids
 
     def action_open_account_plan_url(self):
