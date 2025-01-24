@@ -864,6 +864,15 @@ class naptaResUsers(models.Model):
                     'first_name' : user['attributes']['first_name'],
                     'active' : user['attributes']['active'],
                 }
+
+            # si l'utilisateur a été créé manuellement sur TF avant d'exister sur Napta, lors de sa création sur Napta il faut l'associer au Napta ID
+            # Donc pour chaque utilisateur retourné par Napta dont le napta_id n'est rattaché à aucun utilisateur Odoo, on cherche si un utilisateur sans napta_id et avec le même login existe dèjà sur Odoo
+            existing_odoo_user = self.env['res.users'].search([('napta_id', '=', napta_id)])
+            if len(existing_odoo_user) == 0:
+                same_login_odoo_user = self.env['res.users'].search([('napta_id', '=', False), ('login', '=', user['attributes']['email'])])
+                if len(same_login_odoo_user) == 1:
+                    same_login_odoo_user[0].napta_id = napta_id
+
             odoo_user = create_update_odoo(self.env, 'res.users', dic)
 
             #Create hr.employee
