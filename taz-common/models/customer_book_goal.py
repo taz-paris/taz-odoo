@@ -173,7 +173,6 @@ class tazCustomerBookFollowup(models.Model):
             else :
                 record.period_ratio = 0.0
 
-    """
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -206,7 +205,6 @@ class tazCustomerBookFollowup(models.Model):
 
         _logger.info(res)
         return res
-     """
 
            
     @api.depends('industry_id', 'date_update', 'company_id')

@@ -31,9 +31,9 @@ class projectAccountProject(models.Model):
                 continue
             if not(rec.partner_id.industry_id):
                 raise ValidationError(_("Enregistrement impossible : vous devez renseigner un Compte sur la fiche de l'entreprise cliente %s" % rec.partner_id.name))
-            cbg = rec.env['taz.customer_book_goal'].search([('industry_id', '=', rec.partner_id.industry_id.id), ('reference_period', '=', rec.date_win_loose.year), ('company_id', '=',rec.company_id.id)])
+            cbg = rec.env['taz.customer_book_goal'].search([('industry_id', '=', rec.partner_id.industry_id.id), ('reference_period', '=', str(rec.date_win_loose.year)), ('company_id', '=',rec.company_id.id)])
             if not(cbg):
-                rec.env['taz.customer_book_goal'].create({'industry_id' : rec.partner_id.industry_id.id, 'reference_period' : rec.date_win_loose.year, 'company_id' : rec.company_id.id})
+                rec.env['taz.customer_book_goal'].create({'industry_id' : rec.partner_id.industry_id.id, 'reference_period' : str(rec.date_win_loose.year), 'company_id' : rec.company_id.id})
 
     @api.model_create_multi
     def create(self, vals_list):
