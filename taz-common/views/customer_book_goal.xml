@@ -96,9 +96,9 @@
       <field name="model">taz.customer_book_followup</field>
       <field name="arch" type="xml">
 	 <tree editable="top" create="true">
-	      <field name="company_id" optional="show"/>
+	      <field name="company_id" optional="hide"/>
 	      <field name="industry_id" optional="hide"/>
-	      <field name="customer_book_goal_id" force_save="1" optional="show" attrs="{'readonly': [('id','!=', False)]}"/>
+	      <field name="customer_book_goal_id" force_save="1" optional="show" />
 	      <field name="date_update" optional="show"/>
 	      <field name="period_book" force_save="1" optional="show"/>
 	      <field name="period_futur_book" optional="show"/>

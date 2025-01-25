@@ -41,11 +41,8 @@ class tazResIndustry(models.Model):
             ('date_win_loose', '>=', begin_date),
             ('date_win_loose', '<=', end_date),
             ('reporting_sum_company_outsource_code3_code_4', '!=', False),
+            ('company_id', '=', company_id.id),
         ]
-
-        if company_id != False :
-            search_param_list.append(('company_id', '=', company_id.id))
-
         project_ids = self.env['project.project'].search(search_param_list)
         book_period = 0.0
         for project in project_ids:
@@ -57,11 +54,8 @@ class tazResIndustry(models.Model):
             ('partner_id', 'in', self.partner_ids.ids),
             ('stage_is_part_of_booking', '=', False),
             ('state', '=', 'before_launch'),
+            ('company_id', '=', company_id.id),
         ]
-
-        if company_id != False :
-            search_param_list.append(('company_id', '=', company_id.id))
-
         project_ids = self.env['project.project'].search(search_param_list)
         return len(project_ids), project_ids
 
