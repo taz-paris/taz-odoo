@@ -85,7 +85,7 @@ class tazCustomerBookGoal(models.Model):
         return res
 
     def action_open_project_opportunities(self):
-        number_of_opportunities, opportunities_project_ids = self.industry_id.get_number_of_opportunities()
+        number_of_opportunities, opportunities_project_ids = self.industry_id.get_number_of_opportunities(self.company_id)
         view_id = self.env.ref("project_accounting.project_tree")
         return {
                 'type': 'ir.actions.act_window',
@@ -100,7 +100,7 @@ class tazCustomerBookGoal(models.Model):
             }
 
     def action_open_project_booked_last_month(self):
-        book_last_month, last_month_project_ids = self.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today())
+        book_last_month, last_month_project_ids = self.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today(), self.company_id)
         view_id = self.env.ref("project_accounting.project_tree")
         return {
                 'type': 'ir.actions.act_window',
@@ -117,7 +117,7 @@ class tazCustomerBookGoal(models.Model):
     def action_open_project_booked_this_year(self):
         begin_year = datetime.datetime(int(self.reference_period), 1, 1)
         end_year = datetime.datetime(int(self.reference_period), 12, 31)
-        period_book, period_project_ids = self.industry_id.get_book_by_period(begin_year, end_year)
+        period_book, period_project_ids = self.industry_id.get_book_by_period(begin_year, end_year, self.company_id)
         view_id = self.env.ref("project_accounting.project_tree")
         return {
                 'type': 'ir.actions.act_window',
@@ -139,7 +139,7 @@ class tazCustomerBookGoal(models.Model):
         default=year_default,
         )
     name = fields.Char("Compte - Période", compute=_compute_name)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
     book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des objectifs")
