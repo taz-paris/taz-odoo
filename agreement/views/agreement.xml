@@ -70,7 +70,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page name="agreement_subcontractor" string="Sous-traitants" attrs="{'invisible': [('domain','!=','sale')]}">
+                        <page name="agreement_subcontractor" string="Sous-traitants de rang 1" attrs="{'invisible': [('domain','!=','sale')]}">
 				<field name="agreement_subcontractor_ids">
 					<tree>
 						<field name="partner_id"/>

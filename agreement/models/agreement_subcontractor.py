@@ -90,14 +90,14 @@ class AgreementSubcontractor(models.Model):
     @api.depends('partner_id')#, 'partner_id.ref_company_ids')
     def _compute_is_partner_id_res_company(self):
         for rec in self:
-            if rec.sudo().partner_id.ref_company_ids :
+            if rec.sudo().partner_id.ref_company_ids and rec.sudo().partner_id.ref_company_ids.so_from_po:
                 rec.is_partner_id_res_company = True
             else :
                 rec.is_partner_id_res_company = False
 
     def get_orders(self):
         self.ensure_one()
-        if self.is_partner_id_res_company :
+        if self.is_partner_id_res_company :#and not self.agreement_id.is_galaxy_agreement :
             order_ids = self.env['sale.order'].search([('state', '=', 'sale'), ('agreement_id', '=', self.agreement_id.id), ('company_id', 'in', [self.sudo().partner_id.ref_company_ids.id])])
             order_type = 'sale.order'
         else :

@@ -121,6 +121,9 @@ class projectOutsourcingLink(models.Model):
         #_logger.info('--- create_purchase_order')
         self.ensure_one()
         
+        agreement_id = False
+        if self.link_type == 'outsourcing':
+            agreement_id = self.project_id.agreement_id.id
 
         return  {
             'res_model': 'purchase.order',
@@ -135,7 +138,7 @@ class projectOutsourcingLink(models.Model):
                 'default_date_planned' : self.project_id.date,
                 'default_previsional_invoice_date' : self.project_id.date,
                 'default_user_id' : self.project_id.user_id.id,
-                'default_agreement_id' : self.project_id.agreement_id.id,
+                'default_agreement_id' : agreement_id,
             }
         }
 
