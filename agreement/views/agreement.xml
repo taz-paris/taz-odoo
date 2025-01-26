@@ -28,52 +28,58 @@
                             <field name="name" />
                         </h1>
                     </div>
-                    <group name="main">
-                        <group name="left">
-                            <field name="code" />
+                    <group name="main" col="4">
+                        <group name="left" string="Acteurs">
                             <field
                                 name="partner_id"
+				string="Pouvoir adjudicateur"
                                 attrs="{'required': [('is_template', '=', False)]}"
-                                string="Pouvoir adjudicateur"
+				context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"
                             />
-                            <field name="partner_company_ids" widget="many2many_tags"/>
-                            <field name="partner_principal_id"/>
-                            <field name="partner_cocontractor_ids" widget="many2many_tags"/>
-                            <field
+                            <field name="partner_company_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                            <field name="mandator_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                            <field name="cocontractor_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                            <field name="referent"/>
+             			    <!--
+                                groups="agreement.group_use_agreement_template"
+				    -->
+                        </group>
+                        <group name="right" string="Périodes">
+                            <field name="signature_date" />
+                            <field name="start_date" />
+                            <field name="end_date" string="Date limite de commande" />
+                            <field name="passed_time_rate" widget="progressbar" />
+                            <field name="end_date_contractors"/>
+                        </group>
+                        <group name="left_bottom" string="Montant plafond">
+                            <field name="max_amount"/>
+                        </group>
+                        <group name="right_bottom" string="Autres informations">
+                            <field name="code" />
+                            <field name="teams_link" widget="url"/>
+                            <field name="comments"/>
+			    <field
                                 name="agreement_type_id"
                                 groups="agreement.group_use_agreement_type"
                             />
                             <field name="currency_id" invisible="1"/>
-                            <field name="max_amount"/>
-                            <field name="domain" widget="radio" />
-                            <field
-                                name="is_template"
-                            />
-			    <!--
-                                groups="agreement.group_use_agreement_template"
-				    -->
-                        </group>
-                        <group name="right" string="dates">
-                            <field name="signature_date" />
-                            <field name="start_date" />
-                            <field name="end_date" string="Date limite de commande" />
-                            <field name="end_date_contractors"/>
-                        </group>
-                        <group name="left_bottom" string="">
-                        </group>
-                        <group name="right_bottom" string="">
-                            <field
-                                name="company_id"
-                                groups="base.group_multi_company"
-                            />
-                            <field name="referent"/>
-                            <field name="teams_link" widget="url"/>
-                            <field name="comments"/>
+                            <field name="domain" />
+                            <field name="is_template" invisible="1"/>
+                            <field name="is_galaxy_agreement"/>
+
                         </group>
                     </group>
                     <notebook>
-                        <page name="agreement_subcontractor" string="Sous-traitants">
-                            <field name="agreement_subcontractor_ids"/>
+                        <page name="agreement_subcontractor" string="Sous-traitants" attrs="{'invisible': [('domain','!=','sale')]}">
+				<field name="agreement_subcontractor_ids">
+					<tree>
+						<field name="partner_id"/>
+						<field name="max_amount" optional="show"/>
+						<field name="start_date" optional="show"/>
+						<field name="end_date" optional="show"/>
+						<field name="partner_validation_date" optional="show"/>
+					</tree>
+				</field>
                         </page>
 
 
@@ -106,7 +112,6 @@
                 <field name="end_date"/>
                 <field name="end_date_contractors"/>
                 <field name="domain" />
-                <field name="company_id" groups="base.group_multi_company" />
             </tree>
         </field>
     </record>

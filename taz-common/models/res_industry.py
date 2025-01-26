@@ -43,7 +43,7 @@ class tazResIndustry(models.Model):
             ('reporting_sum_company_outsource_code3_code_4', '!=', False),
             ('company_id', '=', company_id.id),
         ]
-        project_ids = self.env['project.project'].search(search_param_list)
+        project_ids = self.env['project.project'].sudo().search(search_param_list)
         book_period = 0.0
         for project in project_ids:
             book_period += project.reporting_sum_company_outsource_code3_code_4
@@ -56,7 +56,7 @@ class tazResIndustry(models.Model):
             ('state', '=', 'before_launch'),
             ('company_id', '=', company_id.id),
         ]
-        project_ids = self.env['project.project'].search(search_param_list)
+        project_ids = self.env['project.project'].sudo().search(search_param_list)
         return len(project_ids), project_ids
 
     def action_open_account_plan_url(self):

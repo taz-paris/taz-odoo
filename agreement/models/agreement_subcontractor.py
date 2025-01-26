@@ -1,5 +1,7 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class AgreementSubcontractor(models.Model):
@@ -18,12 +20,12 @@ class AgreementSubcontractor(models.Model):
 
     @api.constrains('start_date', 'end_date')
     def _check_dates(self):
-        for record in self:
+        for rec in self:
             if (rec.start_date and not rec.end_date) :
                 raise ValidationError("Si la date de début est valorisée, la date de fin doit l'être également.")
             if (rec.start_date and not rec.end_date) or (rec.end_date and not rec.start_date) :
                 raise ValidationError("Si la date de fin est valorisée, la date de début doit l'être également.")
-            if (rec.start_date >= rec.end_date):
+            if rec.start_date and rec.end_date and (rec.start_date >= rec.end_date):
                 raise ValidationError("La date de fin doit être strictement postérieure à la date de début.")
 
 
@@ -32,7 +34,6 @@ class AgreementSubcontractor(models.Model):
         "agreement",
         string="Accord",
         ondelete="restrict",
-        # domain=[("parent_id", "=", False)],
         tracking=True,
         required=True,
     )
@@ -41,14 +42,8 @@ class AgreementSubcontractor(models.Model):
         "res.partner",
         string="Sous-traitant",
         tracking=True,
-        domain="[('is_company', '=', True)]",
+        domain="[('is_company', '=', True), ('type', '=', 'contact')]",
         required=True,
-    )
-
-    company_id = fields.Many2one(
-        "res.company",
-        string="Company",
-        default=lambda self: self.env.company,
     )
 
     start_date = fields.Date(string="Date de début", tracking=True)
@@ -57,42 +52,50 @@ class AgreementSubcontractor(models.Model):
 
     currency_id = fields.Many2one(
         'res.currency',
-        related="company_id.currency_id",
-        # default=lambda self: self.env.company.currency_id,
+        default=lambda self: self.env.company.currency_id,
         string="Currency",
         readonly=True
     )
+
+    code = fields.Char(string="Référence")
+    comments = fields.Html('Commentaires')
+    teams_link = fields.Char("Lien Teams")
 
 
     @api.depends('partner_id')#, 'partner_id.ref_company_ids')
     def _compute_is_partner_id_res_company(self):
         for rec in self:
-            if len(rec.sudo().partner_id.ref_company_ids) != 1:
-                rec.is_partner_id_res_company = False
-            else :
+            if rec.sudo().partner_id.ref_company_ids :
                 rec.is_partner_id_res_company = True
+            else :
+                rec.is_partner_id_res_company = False
 
     def get_orders(self):
         self.ensure_one()
         if self.is_partner_id_res_company :
-            order_ids = self.env['sale.order'].search([('state', '=', 'sale'), ('agreement_id', '=', self.agreement_id.id), ('company_id', '=', self.sudo().partner_id.ref_company_ids.id)])
+            order_ids = self.env['sale.order'].search([('state', '=', 'sale'), ('agreement_id', '=', self.agreement_id.id), ('company_id', 'in', [self.sudo().partner_id.ref_company_ids.id])])
             order_type = 'sale.order'
         else :
             order_ids = self.env['purchase.order'].search([('state', '=', 'purchase'), ('agreement_id', '=', self.agreement_id.id), ('partner_id', 'in', [self.partner_id.id])])
             order_type = 'purchase.order'
             #TODO : il faudrait également regarder tous les partner_id de la descendances du partner_id du DC4
-        return order_tye, order_ids
+
+        _logger.info(order_type)
+        _logger.info(order_ids)
+        return order_type, order_ids
 
 
+    """
     def get_account_moves(self):
         self.ensure_one()
         if self.is_partner_id_res_company :
-            move_ids = self.env['account.move'].search([('state', '=', 'posted'), ('agreement_id', '=', self.agreement_id.id), ('company_id', '=', self.sudo().partner_id.ref_company_ids.id)])
+            move_ids = self.env['account.move'].search([('state', '=', 'posted'), ('agreement_id', '=', self.agreement_id.id), ('company_id', 'in', [self.sudo().partner_id.ref_company_ids.id])])
             #   TODO : est-il nécessaire d'ajouter un filtre sur le partner_id ? => non si on controle cohérence {marché/partenaire} à la saisie de la facture et que l'on nettoie le stock
         else :
-            move_ids = self.env['account_move'].search([('state', '=', 'posted'), ('agreement_id', '=', self.agreement_id.id), ('partner_id', 'in', [self.partner_id.id])])
+            move_ids = self.env['account.move'].search([('state', '=', 'posted'), ('agreement_id', '=', self.agreement_id.id), ('partner_id', 'in', [self.partner_id.id])])
             #TODO : il faudrait également regarder tous les partner_id de la descendances du partner_id du DC4 (ex : si un sous-traitant a plusieurs filiales ou adresses de livraison)
         return move_ids
+    """
 
 
     #TODO : ajouter contrôle pour limiter la saisie car si non on ne saura pas valoriser les montants => si aucune des entité du groupe n'est titulaire ou cotraitant du marché, le sous-traiant de niveau 1 doit forcément être une entité du groupe
@@ -100,17 +103,37 @@ class AgreementSubcontractor(models.Model):
         for rec in self :
             ordered_total = 0.0
             ordered_direct_payment = 0.0
-            ordered_not_direct_payment = 0.0
 
+            move_line_ids = []
+            invoiced_direct_payment_validated_amount = 0.0
             order_type, orders = rec.get_orders()
             for order in orders :
-                for line in order.lines :
+                for line in order.order_line :
                     ordered_total += line.price_subtotal
+                    for invoice_line in line.invoice_lines :
+                        move_line_ids.append(invoice_line)
                     if order_type == 'purchase.order' : #on ne sait pas distinguer les paiements directs lorsque Tasmane est sous-traitant
-                        if line.direct_payment_purchase_order_line_id :
+                        invoiced_direct_payment_validated_amount += line.order_direct_payment_validated_amount
+                        if line.direct_payment_sale_order_line_id :
                             ordered_direct_payment += line.price_subtotal
-                        else : 
-                            ordered_not_direct_payment += line.price_subtotal
+            rec.ordered_total = ordered_total
+            rec.ordered_total_available = rec.max_amount - rec.ordered_total
+            rec.ordered_direct_payment = ordered_direct_payment
+            rec.ordered_direct_payment_available = rec.max_amount - rec.ordered_direct_payment
+
+            rec.invoiced_direct_payment_validated_amount = invoiced_direct_payment_validated_amount
+
+            invoiced_indirect_total = 0.0
+            for move_line in move_line_ids :
+                if rec.is_partner_id_res_company :
+                    invoiced_indirect_total += move_line.price_subtotal_signed
+                else:
+                    invoiced_indirect_total += -1 * move_line.price_subtotal_signed
+
+            rec.invoiced_total = invoiced_indirect_total + rec.invoiced_direct_payment_validated_amount
+            rec.invoiced_total_available = rec.max_amount - rec.invoiced_total
+
+
 
 
     #TODO ajouter un bouton pour afficher la liste des BCC/BCF pris en compte
@@ -119,12 +142,16 @@ class AgreementSubcontractor(models.Model):
 
     is_partner_id_res_company = fields.Boolean(compute=_compute_is_partner_id_res_company)
     max_amount = fields.Monetary("Montant HT max de sous-traitance")
-    ordered_total = fields.Monetary("Total HT commandé", store=False, compute=compute)
-    ordered_direct_payment = fields.Monetary("Commandé HT en paiement direct", store=False, compute=compute)
-    ordered_not_direct_payment = fields.Monetary("Commandé hors paiement direct", store=False, compute=compute)
-    invoiced_total = fields.Monetary("Total facturé", store=False, compute=compute)
-    invoiced_direct_payment = fields.Monetary("Facturé en paiement direct", store=False, compute=compute)
-    invoiced_not_direct_payment = fields.Monetary("Facturé hors paiement direct", store=False, compute=compute)
+
+    ordered_total = fields.Monetary("Total HT commandé", store=False, compute=compute, compute_sudo=True)
+    ordered_total_available = fields.Monetary("Reste engageable sur le total HT commandé", store=False, compute=compute, compute_sudo=True)
+    ordered_direct_payment = fields.Monetary("Commandé HT en paiement direct", store=False, compute=compute, compute_sudo=True)
+    ordered_direct_payment_available = fields.Monetary("Reste dispo. sur le commandé HT en paiement direct", store=False, compute=compute, compute_sudo=True)
+
+    invoiced_total = fields.Monetary("Total facturé HT", store=False, compute=compute, compute_sudo=True)
+    invoiced_total_available = fields.Monetary("Reste dispo. sur total facturé HT", store=False, compute=compute, compute_sudo=True)
+    invoiced_direct_payment_validated_amount = fields.Monetary("Facturé en paiement direct", store=False, compute=compute, compute_sudo=True)
+    #invoiced_not_direct_payment = fields.Monetary("Facturé hors paiement direct", store=False, compute=compute, compute_sudo=True)
 
 
 

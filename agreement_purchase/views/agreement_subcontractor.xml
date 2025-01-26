@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+	<!--
     <record id="agreement_subcontractor_form_view_inherit" model="ir.ui.view">
         <field name="name">agreement.subcontractor.form.view</field>
         <field name="model">agreement.subcontractor</field>
@@ -10,5 +11,5 @@
             </field>
         </field>
     </record>
-    <!-- Top menu item -->
+	-->
 </odoo>

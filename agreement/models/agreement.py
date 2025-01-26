@@ -3,14 +3,48 @@
 
 
 from odoo import _, api, fields, models
-
+import datetime
+import logging
+_logger = logging.getLogger(__name__)
 
 class Agreement(models.Model):
     _name = "agreement"
     _description = "Agreement"
     _inherit = ["mail.thread", "mail.activity.mixin"]
-    _check_company_auto = True
 
+    @api.constrains('start_date', 'end_date')
+    def _check_dates(self):
+        for rec in self:
+            #if (rec.start_date and not rec.end_date) :
+            #    raise ValidationError("Si la date de début est valorisée, la date de fin doit l'être également.")
+            #if (rec.start_date and not rec.end_date) or (rec.end_date and not rec.start_date) :
+            #    raise ValidationError("Si la date de fin est valorisée, la date de début doit l'être également.")
+            if rec.start_date and rec.end_date and (rec.start_date >= rec.end_date):
+                raise ValidationError("La date de fin doit être strictement postérieure à la date de début.")
+
+    def compute(self):
+        for rec in self :
+            is_galaxy_agreement = False
+            if rec.mandator_id.ref_company_ids:
+                is_galaxy_agreement = True
+            for cocontractor in rec.cocontractor_ids:
+                if cocontractor.ref_company_ids:
+                    is_galaxy_agreement = True
+                    break
+            rec.is_galaxy_agreement = is_galaxy_agreement
+
+            today = datetime.date.today()
+            if rec.end_date and (today > rec.end_date) :
+                    rec.passed_time_rate = 100
+            elif rec.start_date and (today < rec.start_date):
+                    rec.passed_time_rate = 0
+            else :
+                if rec.start_date and rec.end_date :
+                    total_days_period = rec.end_date - rec.start_date
+                    passed_time = today - rec.start_date
+                    rec.passed_time_rate = passed_time / total_days_period * 100.0
+                else : 
+                    rec.passed_time_rate = 0
 
     code = fields.Char(required=True, tracking=True)
     name = fields.Char(required=True, tracking=True)
@@ -18,37 +52,31 @@ class Agreement(models.Model):
         "res.partner",
         string="Pouvoir adjudicateur",
         ondelete="restrict",
-        #domain=[("parent_id", "=", False)],
         tracking=True,
+        domain="[('is_company', '=', True), ('type', '=', 'contact')]",
     )
 
     partner_company_ids = fields.Many2many(
         "res.partner",
         relation="agreement_partner_company_ids",
-        string="Donneur d'ordres",
+        string="Donneurs d'ordre",
         tracking=True,
-        domain="[('is_company', '=', True)]",
+        domain="[('is_company', '=', True), ('type', '=', 'contact')]",
     )
 
-    partner_principal_id = fields.Many2one(
+    mandator_id = fields.Many2one(
         "res.partner",
         string="Mandataire",
         tracking=True,
-        domain="[('is_company', '=', True)]",
+        domain="[('is_company', '=', True), ('type', '=', 'contact')]",
     )
 
-    partner_cocontractor_ids = fields.Many2many(
+    cocontractor_ids = fields.Many2many(
         "res.partner",
         relation="agreement_cocontractors_company_ids",
-        string="Co-traitant",
+        string="Co-traitants",
         tracking=True,
-        domain="[('is_company', '=', True)]",
-    )
-
-    company_id = fields.Many2one(
-        "res.company",
-        string="Company",
-        default=lambda self: self.env.company,
+        domain="[('is_company', '=', True), ('type', '=', 'contact')]",
     )
 
     is_template = fields.Boolean(
@@ -74,7 +102,7 @@ class Agreement(models.Model):
     agreement_subcontractor_ids = fields.One2many(
         comodel_name="agreement.subcontractor",
         inverse_name="agreement_id",
-        string="Sous-traitants",
+        string="Sous-traitants de rang 1",
     )
 
     active = fields.Boolean(default=True)
@@ -82,20 +110,21 @@ class Agreement(models.Model):
     start_date = fields.Date(tracking=True)
     end_date = fields.Date(string="Date limite de commande", tracking=True)
     end_date_contractors = fields.Date(string="Date de fin d'exécution des prestataires", tracking=True)
+    passed_time_rate = fields.Float("%age écoulé", compute=compute)
 
     comments = fields.Html('Commentaires')
-    referent = fields.Many2one("res.users", string="Référent")
+    referent = fields.Many2one("res.users", string="Référent Galaxie")
     teams_link = fields.Char("Lien Teams")
 
     currency_id = fields.Many2one(
         'res.currency',
-        related="company_id.currency_id",
-        # default=lambda self: self.env.company.currency_id,
+        default=lambda self: self.env.company.currency_id,
         string="Currency",
         readonly=True
     )
     max_amount = fields.Monetary("Montant max de l'accord", store=True)
-    other_contractors_total_sale_order = fields.Monetary("Montant commandé auprès des co-traitants")
+
+    is_galaxy_agreement = fields.Boolean("Marché de la galaxie", compute=compute, help="Une entreprise de la galaxie est titulaire ou bien co-traitante de ce marché.")
 
     @api.model
     def _domain_selection(self):
@@ -121,7 +150,7 @@ class Agreement(models.Model):
     _sql_constraints = [
         (
             "code_partner_company_unique",
-            "unique(code, partner_id, company_id)",
+            "unique(code, partner_id)",
             "This agreement code already exists for this partner!",
         )
     ]

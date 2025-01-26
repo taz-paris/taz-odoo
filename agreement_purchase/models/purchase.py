@@ -8,12 +8,11 @@ class PurchaseOrder(models.Model):
         comodel_name="agreement",
         string="Accord cadre fournisseur",
         ondelete="restrict",
-        domain=[('domain', '=', 'purchase')],
+        #domain=[('domain', '=', 'purchase')],
         tracking=True,
-        readonly=True,
+        #readonly=True,
         copy=False,
-        states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
-        check_company=True,
+        #states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
     )
 
     agreement_type_id = fields.Many2one(

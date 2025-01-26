@@ -15,19 +15,37 @@
         <field name="arch" type="xml">
             <form string="Agreement Subcontractors">
                 <sheet>
-                    <group name="main">
-                        <group name="left">
-                            <field name="partner_id"/>
+                    <group name="main" col="3">
+                        <group name="left" string="Synthèse">
+                            <field name="partner_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
                             <field name="agreement_id"/>
                             <field name="max_amount"/>
-                            <field name="company_id"/>
+                            <field name="is_partner_id_res_company" invisible="1"/>
                         </group>
-                        <group name="right">
+			<group name="center" string="Période">
+                            <field name="partner_validation_date"/>
                             <field name="start_date"/>
                             <field name="end_date"/>
-                            <field name="partner_validation_date"/>
+			</group>
+                        <group name="right" string="Autres informations">
+                            <field name="code" />
+                            <field name="teams_link" widget="url"/>
+                            <field name="comments"/>
                         </group>
                     </group>
+		    <group name="amount_rows">
+			  <group string="Total commandes">
+				  <field name="ordered_total"/>
+				  <field name="ordered_direct_payment" string="... dont prévus en paimeent direct" attrs="{'invisible' : [('is_partner_id_res_company', '=', True)]}"/>
+				  <field name="ordered_total_available"/>
+				  <!--<field name="ordered_direct_payment_available"/>-->
+			  </group>
+			  <group string="Total factures">
+				  <field name="invoiced_total"/>
+				  <field name="invoiced_direct_payment_validated_amount" string="... dont paimeent direct" attrs="{'invisible' : [('is_partner_id_res_company', '=', True)]}"/>
+				  <field name="invoiced_total_available"/>
+			  </group>
+		    </group>
                 </sheet>
             </form>
         </field>

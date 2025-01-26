@@ -94,6 +94,7 @@
 		  <field name="csr_project_initiative" optional="hide"/>
 		  <field name="csr_project_environmental_level" optional="hide"/>
 		  <field name="csr_project_social_level" optional="hide"/>
+		  <field name="rel_partner_industry_id" optional="hide"/>
 		</tree>
 	      </field>
 	    </record>

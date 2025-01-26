@@ -1,29 +1,34 @@
 from odoo import _, api, fields, models
+import logging
+_logger = logging.getLogger(__name__)
 
 class Agreement(models.Model):
     _inherit = "agreement"
 
-    @api.depends(
-        # 'sale_order_ids',
-        # 'sale_order_ids.amount_untaxed',
-        'max_amount'
-    )
+    @api.depends('max_amount')
     def compute(self):
         for rec in self:
-            total_sale_order = 0
-            for sale_order in rec.sale_order_ids:
-               total_sale_order+= sale_order.amount_untaxed
-            rec.total_sale_order = total_sale_order
+            # This is computed with sudo to include all orders of all companies, wathever companies are currently selected
+            if rec.domain == 'sale':
+                order_ids = self.env['sale.order'].sudo().search([('agreement_id', '=', rec.id)])
+            elif rec.domain == 'purchase':
+                order_ids = self.env['purchase.order'].sudo().search([('agreement_id', '=', rec.id)])
+            else :
+                raise ValidationError("Domaine de marché non géré : %s" % rec.domain)
 
-            rec.available_amount = rec.max_amount - rec.total_sale_order - rec.other_contractors_total_sale_order
-            # pourcentage engagé
+            total_orders = 0
+            for order in order_ids:
+               total_orders += order.amount_untaxed
+            rec.total_order_amount = total_orders
 
-    sale_order_ids = fields.One2many(
-        comodel_name="sale.order",
-        inverse_name="agreement_id",
-        string="Bons de commande",
-    )
+            sold = rec.total_order_amount + rec.other_contractors_total_sale_order 
+            rec.available_amount = rec.max_amount - sold
+            if rec.max_amount == 0.0:
+                rec.sold_rate = 0.0
+            else:
+                rec.sold_rate = sold / rec.max_amount * 100
 
-
-    available_amount = fields.Monetary("Montant restant engageable", compute=compute)
-    total_sale_order = fields.Monetary("Montant commandé", compute=compute)
+    total_order_amount = fields.Monetary("Montant commandé Galaxie", compute=compute, compute_sudo=True)
+    other_contractors_total_sale_order = fields.Monetary("Montant commandé hors Galaxie", help="Montants commandés auprès des autres co-traitants.")
+    available_amount = fields.Monetary("Montant restant engageable", compute=compute, compute_sudo=True)
+    sold_rate = fields.Float("%age déjà engagé", compute=compute, compute_sudo=True)

@@ -135,6 +135,7 @@ class projectOutsourcingLink(models.Model):
                 'default_date_planned' : self.project_id.date,
                 'default_previsional_invoice_date' : self.project_id.date,
                 'default_user_id' : self.project_id.user_id.id,
+                'default_agreement_id' : self.project_id.agreement_id.id,
             }
         }
 

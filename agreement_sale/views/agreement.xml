@@ -25,13 +25,17 @@
         <field name="inherit_id" ref="agreement.agreement_form" />
         <field name="arch" type="xml">
             <field name="max_amount" position="after">
-                <field name="total_sale_order"/>
-                <field name="available_amount"/>
+                <field name="total_order_amount"/>
+                <field name="other_contractors_total_sale_order" attrs="{'invisible': [('is_galaxy_agreement','!=',True)]}"/>
+                <field name="sold_rate" widget="progressbar" attrs="{'invisible': [('is_galaxy_agreement','!=',True)]}"/>
+                <field name="available_amount" attrs="{'invisible': [('is_galaxy_agreement','!=',True)]}"/>
             </field>
             <xpath expr="//page[@name='config']" position="after">
+	    <!--
             <page string="Bons de commande">
                 <field name="sale_order_ids"/>
             </page>
+	    -->
                 </xpath>
         </field>
     </record>

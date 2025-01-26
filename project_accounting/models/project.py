@@ -347,7 +347,6 @@ class projectAccountProject(models.Model):
         tracking=True,
         readonly=False,
         copy=False,
-        check_company=True,
     ) #Attribut temporaire Fitnet à supprimer (l'agreement_id est sur le bon de commande client et non sur le projet en cible)
 
 
