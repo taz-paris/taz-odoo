@@ -13,6 +13,31 @@ class AgreementSubcontractor(models.Model):
          "Impossible d'avoir deux DC4 pour le même sous-traitant et le même marché")
     ]
 
+
+    """
+    def repprise_donnees_agreement_subcontractor(self):
+        _logger.info('======== repprise_donnees_agreement_subcontractor')
+        orders = self.env['purchase.order'].search([('agreement_id', '=', False)])
+        for po in orders:
+            if len(po.rel_project_ids) > 1 :
+                _logger.info("plusieurs projets liés : ID=%s" % po.id)
+            elif len(po.rel_project_ids) == 1 :
+                proj = po.rel_project_ids[0]
+                if proj.agreement_id  and proj.agreement_id.id not in [7] and po.partner_id.id not in [101491, 102083]:
+                    _logger.info("------")
+                    outsourcing_links = self.env['project.outsourcing.link'].search([('link_type', '=', 'outsourcing'), ('project_id', '=', proj.id), ('partner_id', '=', po.partner_id.id)])
+                    if len(outsourcing_links) == 1 :
+                        subcontractors = self.env['agreement.subcontractor'].search([('agreement_id', '=', proj.agreement_id.id), ('partner_id', '=', po.partner_id.id)])
+                        if len(subcontractors) == 0 :
+                            self.env['agreement.subcontractor'].create({'agreement_id' : proj.agreement_id.id, 'partner_id' : po.partner_id.id})
+                            _logger.info("Création du DC4 pour l'agreement %s (ID=%s) et le sous-traitant %s (ID=%s)" % (proj.agreement_id.name, proj.agreement_id.id, po.partner_id.name, po.partner_id.id))
+                        po.agreement_id = proj.agreement_id.id
+                        _logger.info("Agreement %s (ID=%s) ajouté au BCF %s (ID=%s) pour le fournisseur %s (ID=%s) pour le projet %s (ID=%s)" % (proj.agreement_id.name, proj.agreement_id.id, po.name, po.id, po.partner_id.name, po.partner_id.id, proj.name, proj.id))
+                    else :
+                        _logger.info("Pas de project_outsourcing_link pour fournisseur %s (ID=%s) pour le projet %s (ID=%s)" % (po.partner_id.name, po.partner_id.id, proj.name, proj.id))
+    """
+
+
     @api.depends('agreement_id','agreement_id.name', 'partner_id', 'partner_id.name') 
     def compute_name(self):
         for rec in self:
