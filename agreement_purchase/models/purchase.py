@@ -29,7 +29,7 @@ class PurchaseOrder(models.Model):
                     raise validationerror(_("Vous ne pouvez pas définir un marché sur ce BCF car le fournisseur est lié au projet avec un lien de type Autres achats."))
 
             if rec.agreement_id:
-                subcontractors = rec.env['agreement.subcontractor'].search([('agreement_id', '=', rec.agreement_id.id), ('partner_id', '=', po.partner_id.id)])
+                subcontractors = rec.env['agreement.subcontractor'].search([('agreement_id', '=', rec.agreement_id.id), ('partner_id', '=', rec.partner_id.id)])
                 #TODO : gérer les filliales / adresses de facturation du partner
                 if not subcontractors:
                     raise validationerror(_("Aucun DC4 trouvé pour ce partenaire (%s) et l'accord de ce BCF (%s).\n Vous devez en créer un." % (rec.partner_id.name, rec.agreement_id.name)))
