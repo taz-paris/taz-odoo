@@ -9,7 +9,7 @@ class PurchaseOrder(models.Model):
         for rec in self:
             link_types = []
             project_agreement_id = False
-            for project in rel_project_ids:
+            for project in rec.rel_project_ids:
                 if project.agreement_id :
                     if project_agreement_id == False :
                         project_agreement_id = project.agreement_id

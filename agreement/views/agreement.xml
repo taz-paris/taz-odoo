@@ -105,13 +105,14 @@
         <field name="arch" type="xml">
             <tree string="Agreements">
                 <field name="partner_id" />
-                <field name="code" />
+                <field name="code" optional="hide"/>
                 <field name="name" />
                 <field name="signature_date" />
                 <field name="start_date" />
                 <field name="end_date"/>
+                <field name="passed_time_rate" optional="show" widget="progressbar"/>
                 <field name="end_date_contractors"/>
-                <field name="domain" />
+                <field name="domain" optional="hide"/>
             </tree>
         </field>
     </record>

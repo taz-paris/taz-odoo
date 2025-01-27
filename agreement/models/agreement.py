@@ -46,7 +46,7 @@ class Agreement(models.Model):
                 else : 
                     rec.passed_time_rate = 0
 
-    code = fields.Char(required=True, tracking=True)
+    code = fields.Char(required=False, tracking=True)
     name = fields.Char(required=True, tracking=True)
     partner_id = fields.Many2one(
         "res.partner",
@@ -138,6 +138,7 @@ class Agreement(models.Model):
         if self.agreement_type_id and self.agreement_type_id.domain:
             self.domain = self.agreement_type_id.domain
 
+    """
     def name_get(self):
         res = []
         for agr in self:
@@ -146,6 +147,7 @@ class Agreement(models.Model):
                 name = "[{}] {}".format(agr.code, agr.name)
             res.append((agr.id, name))
         return res
+    """
 
     _sql_constraints = [
         (

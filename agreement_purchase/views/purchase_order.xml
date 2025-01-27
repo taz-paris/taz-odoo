@@ -7,11 +7,11 @@
 		<xpath expr="//div[@name='button_box']" position="after">
 			<field name="is_consistent_subcontractor_max_amount_direct_payment" invisible="1"/>
 			<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('is_consistent_subcontractor_max_amount_direct_payment', '=', True)]}">
-				Le plafond du DC4 de ce partenaire sur ce marché est dépassé : la somme des lignes de BCF en paiement direct (ce sont les seules visible du donneur d'ordre) est supérieur au plafond.<br/>Un acte modificatif du DC4 devra être pris pour que toutes les factures puissent être payées.
+				Le plafond du DC4 de ce partenaire sur ce marché est dépassé : la somme des lignes de BCF en paiement direct (ce sont les seules visibles du donneur d'ordre) est supérieurs au plafond.<br/>Un acte modificatif du DC4 devra être signé pour augmenter ce plafond pour que toutes les factures puissent être payées.
 			</div>
 			<field name="is_consistent_subcontractor_max_amount_total" invisible="1"/>
 			<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': ['|', ('is_consistent_subcontractor_max_amount_total', '=', True), ('is_consistent_subcontractor_max_amount_direct_payment', '=', False)]}">
-				La somme des lignes facturés par ce fournisseur sur ce DC4 (que le paimeent soit en direct ou non) est supérieur au maximum du DC4. Cependant, le dépassement n'est pas visible du client car tout n'a pas été facturé en paiement direct.
+				La somme des lignes facturées par ce fournisseur sur ce DC4 (que le paimeent soit en direct ou non) est supérieure au maximum du DC4. Cependant, le dépassement n'est pas visible du client car tout n'a pas été facturé en paiement direct.
 			</div>
                 </xpath>
             <field name="partner_id" position="after">
