@@ -189,7 +189,7 @@ class projectAccountingPurchaseOrderLine(models.Model):
                 line.analytic_distribution = line._context.get('default_analytic_distribution')
 
 
-    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
+    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state', 'direct_payment_sale_order_line_id')
     def _compute_qty_invoiced(self):
         res = super()._compute_qty_invoiced()
 
