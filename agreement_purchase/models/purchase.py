@@ -26,7 +26,7 @@ class PurchaseOrder(models.Model):
                     raise ValidationError(_("Vous devez définir un marché car ce fournisseur est lié au projet par un lien de type Sous-traitance et que le projet est lié à un marché par défaut."))
             if project_agreement_id and len(link_types) == 1 and link_types[0] == 'other' :
                 if rec.agreement_id:
-                    raise validationerror(_("Vous ne pouvez pas définir un marché sur ce BCF car le fournisseur est lié au projet avec un lien de type Autres achats."))
+                    raise ValidationError(_("Vous ne pouvez pas définir un marché sur ce BCF car le fournisseur est lié au projet avec un lien de type Autres achats."))
 
             if rec.agreement_id:
                 subcontractors = rec.env['agreement.subcontractor'].search([('agreement_id', '=', rec.agreement_id.id), ('partner_id', '=', rec.partner_id.id)])
