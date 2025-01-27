@@ -15,7 +15,7 @@ class PurchaseOrder(models.Model):
                         project_agreement_id = project.agreement_id
                     else :
                         if project_agreement_id.id != project.agreement_id.id:
-                            raise validationerror(_("Tous les projets liés à ce BCF ne sont pas liés au même marché par défaut."))
+                            raise ValidationError(_("Tous les projets liés à ce BCF ne sont pas liés au même marché par défaut."))
                 for link in project.outsourcing_project_link_ids :
                     if link.project_id.id == rec.partner_id.id:
                         #TODO : gérer les filliales / adresses de facturation du partner
@@ -23,7 +23,7 @@ class PurchaseOrder(models.Model):
                 
             if project_agreement_id and len(link_types) == 1 and link_types[0] == 'outsourcing' :
                 if not rec.agreement_id:
-                    raise validationerror(_("Vous devez définir un marché car ce fournisseur est lié au projet par un lien de type Sous-traitance et que le projet est lié à un marché par défaut."))
+                    raise ValidationError(_("Vous devez définir un marché car ce fournisseur est lié au projet par un lien de type Sous-traitance et que le projet est lié à un marché par défaut."))
             if project_agreement_id and len(link_types) == 1 and link_types[0] == 'other' :
                 if rec.agreement_id:
                     raise validationerror(_("Vous ne pouvez pas définir un marché sur ce BCF car le fournisseur est lié au projet avec un lien de type Autres achats."))
@@ -32,7 +32,7 @@ class PurchaseOrder(models.Model):
                 subcontractors = rec.env['agreement.subcontractor'].search([('agreement_id', '=', rec.agreement_id.id), ('partner_id', '=', rec.partner_id.id)])
                 #TODO : gérer les filliales / adresses de facturation du partner
                 if not subcontractors:
-                    raise validationerror(_("Aucun DC4 trouvé pour ce partenaire (%s) et l'accord de ce BCF (%s).\n Vous devez en créer un." % (rec.partner_id.name, rec.agreement_id.name)))
+                    raise ValidationError(_("Aucun DC4 trouvé pour ce partenaire (%s) et l'accord de ce BCF (%s).\n Vous devez en créer un." % (rec.partner_id.name, rec.agreement_id.name)))
 
     @api.depends('agreement_id', 'partner_id') 
     def compute(self):
