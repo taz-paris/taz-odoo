@@ -159,14 +159,6 @@ class projectAccountingPurchaseOrderLine(models.Model):
                     raise ValidationError(_("L'une des lignes portant un paiement direct est incohérente (ex : la distribution analytique a plsuieurs compte ou bien elle n'est pas à 100%).\n\nUne fois que le paiement direct est engistré sur ligne du bon de commande du CLIENT FINAL, il n'est plus possible de modifier la distribution analytic, ni le sous-total de la ligne correspondante du BC de sous-traitance. \nVous devez supprimer le lien dans le bon de commande du client final si vous souhaitez la modifier."))
 
 
-    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state', 'direct_payment_sale_order_line_id')
-    def _compute_qty_invoiced(self):
-        super()._compute_qty_invoiced()
-        for line in self:
-            if line.direct_payment_sale_order_line_id :
-                line.qty_to_invoice = 0
-
-
     @api.depends('price_subtotal', 'reselling_subtotal')
     def compute(self):
         for rec in self:
@@ -199,11 +191,16 @@ class projectAccountingPurchaseOrderLine(models.Model):
 
     @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state')
     def _compute_qty_invoiced(self):
-        #Complément nécessaire pour que les factures de régularisation (on émet une facture CLIENT vers un Fournisseur : out_invoice/out_refund) soient comptées sur les BC Fournisseurs
-        #       car en natif Odoo, seuls les factures et avoirs FOURNISSEUR (in_invoice et in_refund) sont décomptés de la quantitée facturée/restant à facturée sur le BC FOURNISSEUR
         res = super()._compute_qty_invoiced()
 
         for line in self:
+            # Complément nécessaire pour que la quantité à facturer soit TOUJOURS nulle si la ligne est en paiement direct, même si un quantité reçue a été saisie.
+            if line.direct_payment_sale_order_line_id :
+                line.qty_to_invoice = 0
+                continue
+
+            #Complément nécessaire pour que les factures de régularisation (on émet une facture CLIENT vers un Fournisseur : out_invoice/out_refund) soient comptées sur les BC Fournisseurs
+            #       car en natif Odoo, seuls les factures et avoirs FOURNISSEUR (in_invoice et in_refund) sont décomptés de la quantitée facturée/restant à facturée sur le BC FOURNISSEUR
             # compute qty_invoiced
             qty_invoiced_changed = False
             for inv_line in line._get_invoice_lines():
@@ -221,8 +218,6 @@ class projectAccountingPurchaseOrderLine(models.Model):
                     line.qty_to_invoice = line.product_qty - line.qty_invoiced
                 else:
                     line.qty_to_invoice = line.qty_received - line.qty_invoiced
-                line.qty_to_invoice = 0
-
         return res
 
 
