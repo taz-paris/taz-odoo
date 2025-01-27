@@ -32,7 +32,7 @@ class PurchaseOrder(models.Model):
                 subcontractors = rec.env['agreement.subcontractor'].search([('agreement_id', '=', rec.agreement_id.id), ('partner_id', '=', rec.partner_id.id)])
                 #TODO : gérer les filliales / adresses de facturation du partner
                 if not subcontractors:
-                    raise ValidationError(_("Aucun DC4 trouvé pour ce partenaire (%s) et l'accord de ce BCF (%s).\n Vous devez en créer un." % (rec.partner_id.name, rec.agreement_id.name)))
+                    raise ValidationError(_("Aucun DC4 trouvé pour ce partenaire (%s) et l'accord de ce BCF.\nVous devez en créer un." % (rec.partner_id.name)))
 
     @api.depends('agreement_id', 'partner_id') 
     def compute(self):
@@ -57,6 +57,7 @@ class PurchaseOrder(models.Model):
         #domain=[('domain', '=', 'purchase')],
         tracking=True,
         #readonly=True,
+        check_company=False,
         copy=False,
         #states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
     )
@@ -67,5 +68,6 @@ class PurchaseOrder(models.Model):
         string="Type d'accord cadre fournisseur",
         ondelete="restrict",
         tracking=True,
+        check_company=False,
         copy=True,
     )
