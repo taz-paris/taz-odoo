@@ -84,10 +84,6 @@ class projectAccountingSaleOrderLine(models.Model):
     #  Sur les sale.order et purchase.order seule la QUANTITE restant à facturer sur chaque ligne détermine si la ligne a un reliquat de facturation et en aucun cas le MONTANT
     #       Donc quand on veut facturer partiellement une ligne il faut modifier la QUANTITE sur la facture et non pas le MONTANT => Sinon la qté restant à facturer sur la SOL=0 et donc le SO passe au statut facturé, même si tout le montant n'a pas été facturé.
     @api.onchange('product_id')
-
-
-
-
     def _onchange_product_id_taz(self):
         if not self.product_id:
             return

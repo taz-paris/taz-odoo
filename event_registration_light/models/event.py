@@ -34,6 +34,7 @@ class event(models.Model):
     invitation_mail_template = fields.Many2one("ir.ui.view", "Template du mail d'invitation", domain=[('type', '=', 'qweb')])
     invitation_cc_address = fields.Char('Adresse en CC')
     event_registrations_open = fields.Boolean(store=True)
+    company_id = fields.Many2one(default=False)
 
 
 class EventType(models.Model):
