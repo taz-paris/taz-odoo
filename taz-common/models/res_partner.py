@@ -126,7 +126,7 @@ class tazResPartner(models.Model):
      child_ids_company = fields.One2many('res.partner', 'parent_id', string='Entreprises du groupe', domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
      child_ids_contact = fields.One2many('res.partner', 'parent_id', string='Contacts rattachés à cette entreprise', domain=[('active', '=', True), ('is_company', '=', False), ('type', '=', 'contact')]) 
      child_ids_address = fields.One2many('res.partner', 'parent_id', string='Addresses rattachés à cette entreprise', domain=[('active', '=', True), ('type', '!=', 'contact')]) 
-     external_auxiliary_code = fields.Char('Code auxiliaire CEGB - Quadratus', help="Code permettant d'identifier le tiers sur Quadratus. Exporté chaque mois avec les facture clients par CEGB") 
+     external_auxiliary_code = fields.Char('Code auxiliaire (logiciel externe)', help="Code permettant d'identifier le tiers sur un logiciel externe. Exporté chaque mois avec les factures clients par le cabinet d'expertise comptable.") 
      former_email_address = fields.Char("Anciennes adresses email", readonly=True)
 
      assistant = fields.Html('Assistant(e)')

@@ -40,7 +40,7 @@ class projectAccountingAccountMove(models.Model):
 
     def action_post(self):
         if self.move_type in ['out_invoice', 'out_refund', 'out_receipt'] and not self.partner_id.external_auxiliary_code:
-            raise ValidationError(_("Impossible de valider la facture/avoir client : le Code auxiliaire CEGB - Quadratus n'est pas défini sur la fiche client.")) 
+            raise ValidationError(_("Impossible de valider la facture/avoir client : l'attribut Code auxiliaire (logiciel externe) n'est pas défini sur l'onglet Facturation de la fiche client.")) 
         return super().action_post()
 
     def comptute_project_ids(self):

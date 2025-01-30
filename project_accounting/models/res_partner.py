@@ -86,7 +86,7 @@ class projectAccountingResPartner(models.Model):
      def check_external_auxiliary_code_consistency(self):
          for rec in self:
              if rec.external_auxiliary_code and len(rec.external_auxiliary_code) > 8:
-                 raise ValidationError(_("Le code auxiliaire CEGB - Quadratus ne peut pas faire plus de 8 caractères."))
+                 raise ValidationError(_("L'attribut Code auxiliaire (logiciel externe) ne peut pas faire plus de 8 caractères."))
             
      project_ids = fields.One2many('project.project', 'partner_id', string="Projets")
      has_project_started_this_year = fields.Boolean('Un projet a débuté cette année', compute=compute_has_project_started_this_year, store=True)
