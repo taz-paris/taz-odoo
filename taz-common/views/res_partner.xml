@@ -10,7 +10,14 @@
           <field name="name"/>
 	  <field name="long_company_name"/>
           <field name="industry_id"/>
-          <field name="parent_id" options="{'no_quick_create': True}" string="Groupe"/>
+          <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" optional="show"/>
+	  <field name="business_priority"
+		optional="show"
+		widget="badge" 
+		decoration-info="business_priority == 'not_tracked'" 
+		decoration-success="business_priority == 'active'" 
+		decoration-danger="business_priority == 'priority_target'"
+		/>
           <field name="child_mail_address_domain_list" optional="show"/>
         </tree>
       </field>
@@ -257,6 +264,13 @@
 	  <field name="date_last_business_action" optional="show"/>
           <field name="email" optional="show"/>
 	  <field name="parent_industry_id" optional="show"/> <!-- multi_edit="1" -->
+	  <field name="parent_industry_priority" 
+		optional="show"
+		widget="badge" 
+		decoration-info="parent_industry_priority == 'not_tracked'" 
+		decoration-success="parent_industry_priority == 'active'" 
+		decoration-danger="parent_industry_priority == 'priority_target'"
+		/>
 	  <field name="parent_sector_id" optional="hide"/>
           <field name="category_id" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
 	<field name="street" optional="hide"/>
@@ -297,6 +311,7 @@
                             <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_edit_color': True, 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
                             <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
 			    <field name="parent_industry_id" options="{'no_create': True, 'no_create_edit':True}" />
+			    <field name="parent_industry_priority" />
 			    <field name="parent_sector_id" options="{'no_create': True, 'no_create_edit':True}" />
 			    <field name="date_last_business_action"/>
 			    <field name="linkedin_url" widget="url"/>
@@ -418,6 +433,11 @@
 		<field name="parent_industry_id" string="Compte du parent (ex BD)"/>
 		<field name="parent_sector_id" string="Secteur du parent"/>
 	    <filter string="Contact à suivre en Revue de compte" name="is_followed" domain="[('is_followed', '=', True)]"/>
+		<separator/>
+		    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('parent_industry_priority', '=', 'priority_target')]"/>
+		    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('parent_industry_priority', '=', 'active')]"/>
+		    <filter name="not_tracked" string="Contacts de comptes à opportunités" domain="[('parent_industry_priority', 'not in', ['priority_target', 'active'])]"/>
+		<separator/>
             <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"
                 help="Contacts qui m'ont été assignés en vendeur principal"/>
@@ -444,6 +464,7 @@
 	    <filter name="created_24hourss" string="Contacts créés au cours des 24 dernières heures" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(hours=7)).strftime('%%Y-%%m-%%d')))]"/>
             <group expand="0" string="Group By">
             	<filter string="Compte du parent (ex BD)" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
+            	<filter string="Nivau de priorité du compte du parent (ex BD)" name="group_industry_priority" context="{'group_by': 'parent_industry_priority'}"/>
             	<filter string="Secteur du parent" name="group_sector" context="{'group_by': 'parent_sector_id'}"/>
             	<filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
 		<filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>

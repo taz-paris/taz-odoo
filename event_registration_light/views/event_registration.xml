@@ -46,6 +46,13 @@
 			<field name="state" position="after">
 				<field name="rel_partner_parent_id" optional="hide"/>
 				<field name="rel_partner_parent_industry_id" optional="hide"/>
+				<field name="rel_partner_parent_industry_id_business_priority" 
+					optional="hide" 
+					widget="badge" 
+					decoration-info="rel_partner_parent_industry_id_business_priority == 'not_tracked'" 
+					decoration-success="rel_partner_parent_industry_id_business_priority == 'active'" 
+					decoration-danger="rel_partner_parent_industry_id_business_priority == 'priority_target'"
+					/>
 				<field name="rel_partner_id_user_id" optional="hide"/>
 				<field name="rel_partner_id_function" optional="show"/>
 			</field>
@@ -67,6 +74,9 @@
                         <field name="state" position="attributes">
                                 <attribute name="statusbar_visible">identified,draft,open,done</attribute>
                         </field>
+                        <field name="partner_id" position="attributes">
+                                <attribute name="context">{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}</attribute>
+                        </field>
 			<field name="email" position="after">
 				<field name="mail_auto" />
 				<field name="state" readonly="0"/>
@@ -76,6 +86,7 @@
 				<field name="comment" />
 				<field name="rel_partner_parent_id" />
 				<field name="rel_partner_parent_industry_id" />
+				<field name="rel_partner_parent_industry_id_business_priority" />
 				<field name="rel_partner_id_user_id" />
 				<field name="rel_partner_id_function" />
 			</field>
@@ -109,11 +120,16 @@
 				<separator/>
 				<field name="rel_partner_parent_industry_id" string="Compte (ex BD)"/>
 				<separator/>
+				    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'priority_target')]"/>
+				    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'active')]"/>
+				    <filter name="not_tracked" string="Contacts de comptes à opportunités" domain="[('rel_partner_parent_industry_id_business_priority', 'not in', ['priority_target', 'active'])]"/>
+				<separator/>
 				<filter string="Mail automatique" name="mail_auto" domain="[('mail_auto', '=', True)]"/>
 				<filter string="Mail personnalisé" name="mail_perso" domain="[('mail_auto', '=', False)]"/>
 				<separator/>
 				<filter string="Entreprise" name="group_rel_partner_parent_id" domain="[]" context="{'group_by':'rel_partner_parent_id'}"/>
 				<filter string="Compte (ex BD)" name="group_rel_partner_parent_industry_id" domain="[]" context="{'group_by':'rel_partner_parent_industry_id'}"/>
+				<filter string="Niveau de priorité du compte" name="group_rel_partner_parent_industry_id_business_priority" domain="[]" context="{'group_by':'rel_partner_parent_industry_id_business_priority'}"/>
 				<filter string="Propriétaire" name="group_rel_partner_id_user_id" domain="[]" context="{'group_by':'rel_partner_id_user_id'}"/>
 				<filter string="Responsable de l'invitation" name="group_registration_user_id" domain="[]" context="{'group_by':'registration_user_id'}"/>
 			</xpath>
