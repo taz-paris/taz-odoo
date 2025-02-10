@@ -51,7 +51,7 @@ class tazResUsers(models.Model):
             # si dépassée, tenter de le raffraichir avec le refresh token
         d = datetime.datetime.now().isoformat()
         if not(self.oauth_token_expires_at) or (d > self.oauth_token_expires_at):
-            raise ValidationError(_('Token de session Microsoft invalide : veuillez vous déconnecter puis vous reconnecter en SSO'))
+            raise ValidationError(_("La fonctionnalité que vous essayez d'utiliser nécessite la connexion aux serveurs Office365 de Microsoft.\n Veuillez vous déconnecter, en cliquant sur votre nom en haut à droite de la page puis sur Se déconnecter. Puis vous reconnecter en cliquant (comme d'habitude) sur le bouton Connexion Office365."))
             """
             data = {
                 'grant_type': 'refresh_token',

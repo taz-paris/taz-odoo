@@ -109,8 +109,8 @@ class Agreement(models.Model):
     signature_date = fields.Date(tracking=True)
     start_date = fields.Date(tracking=True)
     end_date = fields.Date(string="Date limite de commande", tracking=True)
-    end_date_contractors = fields.Date(string="Date de fin d'exécution des prestataires", tracking=True)
-    passed_time_rate = fields.Float("%age écoulé", compute=compute)
+    end_date_contractors = fields.Date(string="Date de fin d'exécution des prestations", tracking=True)
+    passed_time_rate = fields.Float("%age écoulé (durée)", compute=compute)
 
     comments = fields.Html('Commentaires')
     referent = fields.Many2one("res.users", string="Référent Galaxie")

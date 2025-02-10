@@ -31,4 +31,4 @@ class Agreement(models.Model):
     total_order_amount = fields.Monetary("Montant commandé Galaxie", compute=compute, compute_sudo=True)
     other_contractors_total_sale_order = fields.Monetary("Montant commandé hors Galaxie", help="Montants commandés auprès des autres co-traitants.")
     available_amount = fields.Monetary("Montant restant engageable", compute=compute, compute_sudo=True)
-    sold_rate = fields.Float("%age déjà engagé", compute=compute, compute_sudo=True)
+    sold_rate = fields.Float("%age déjà engagé (€)", compute=compute, compute_sudo=True)

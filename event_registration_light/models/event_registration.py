@@ -36,7 +36,7 @@ class eventRegistration(models.Model):
     registration_user_id = fields.Many2one("res.users", "User", related="contact_user_link_id.user_id", store=True)
     state = fields.Selection(selection_add=[
             ('identified', 'Identifié'),
-            ('draft', 'Invité'), ('cancel', 'Annulé'),
+            ('draft', 'Invité (auto)'), ('draft_step2', 'Invité (manuel)'), ('cancel', 'Annulé'),
             ('open', 'Confirmé'), ('done', 'Présent')
             ], default='identified')
     last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
@@ -48,7 +48,8 @@ class eventRegistration(models.Model):
     rel_partner_parent_industry_id_business_priority = fields.Selection(related='partner_id.parent_id.industry_id.business_priority', store=True)
     rel_partner_id_function = fields.Char(related='partner_id.function', store=True)
 
-
+    def action_set_draft_step2(self):
+        self.write({'state': 'draft_step2'})
 
     def get_html_invitation(self):
         self.ensure_one()

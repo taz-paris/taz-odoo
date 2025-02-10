@@ -58,10 +58,15 @@
 			</field>
 
 			<xpath expr="//button[@name='action_confirm']" position="before">
-				<button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
-					attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
+				<button name="action_set_draft" string="Inviter (auto)" type="object" icon="fa-check"
+					attrs="{'invisible': ['|', ('active', '=', False), ('state', 'not in', ['identified'])]}"/>
+				<button name="action_set_draft_step2" string="Inviter (manuel)" type="object" icon="fa-check"
+					attrs="{'invisible': ['|', ('active', '=', False), ('state', 'not in', ['draft'])]}"/>
 				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
 					attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', '!=', False), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+			</xpath>
+			<xpath expr="//button[@name='action_confirm']" position="attributes">
+				<attribute name="attrs">{'invisible': ['|', ('active', '=', False), ('state', 'in', ['done'])]}</attribute>
 			</xpath>
 		    </field>
 		</record>
