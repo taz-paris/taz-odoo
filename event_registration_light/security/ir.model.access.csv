@@ -1,2 +1,3 @@
 "id","name","model_id/id","group_id/id","perm_read","perm_write","perm_create","perm_unlink"
 "event_registration_light.access_res_partner_mass_event_registration","access_res_partner_mass_event_registration","event_registration_light.model_res_partner_mass_event_registration","taz-common.taz-basic","True","True","True","True"
+"event_registration_light.access_res_partner_mass_event_registration_line","access_res_partner_mass_event_registration_line","event_registration_light.model_res_partner_mass_event_registration_line","taz-common.taz-basic","True","True","True","True"

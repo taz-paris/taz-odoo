@@ -8,13 +8,11 @@
 			<group>
 				<group>
 					<field name="add_event_id" domain="[('stage_id.pipe_end', '!=', 'False')]"/>
-					<field name="partner_ids" colspan="3" readonly="1">
-						<tree>
-						  <field name="first_name"/>
-						  <field name="name"/>
-						  <field name="long_company_name"/>
-						  <field name="industry_id"/>
-						  <field name="parent_id"/>
+					<field name="line_ids" colspan="3">
+						<tree editable="top">
+						  <field name="partner_id"/>
+						  <field name="add_contact_user_link"/>
+						  <field name="add_event_registration_owner"/>
 						</tree>
 					</field>
 				</group>
