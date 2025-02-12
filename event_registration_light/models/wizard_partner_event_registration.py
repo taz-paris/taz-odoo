@@ -48,9 +48,9 @@ class resPartnerMassEventRegistration(models.TransientModel):
      def action_validate(self):
          _logger.info('------------ resPartnerMassEventRegistration VALIDATE')
          _logger.info(self.add_event_id)
-         _logger.info(self.partner_ids)
+         _logger.info(self.line_ids)
 
-         for line in self.lines_ids:
+         for line in self.line_ids:
             partner = line.partner_id
             if partner.is_company:
                 raise ValidationError(_('Une entreprise est sélectionnée. Opération impossible.'))
@@ -64,12 +64,12 @@ class resPartnerMassEventRegistration(models.TransientModel):
                     registration_id = self.env['event.registration'].create(registration_dict)
                 #add contact user link
                 if line.add_contact_user_link:
-                    target_contact_user_link_ids = self.env['taz_common.contact_user_link'].search([
+                    target_contact_user_link_ids = self.env['taz.contact_user_link'].search([
                         ('partner_id', '=', partner.id),
                         ('user_id', '=', self.env.user.id)
                     ])
                     if len(target_contact_user_link_ids) == 0:
-                        target_contact_user_link_id = self.env['taz_common.contact_user_link'].create({
+                        target_contact_user_link_id = self.env['taz.contact_user_link'].create({
                             'partner_id': partner.id,
                              'user_id': self.env.user.id
                              })
@@ -81,7 +81,7 @@ class resPartnerMassEventRegistration(models.TransientModel):
                         ('contact_user_link_id', '=', False)
                     ])
                     if len(target_registration_ids) == 1:
-                        target_contact_user_link_ids = self.env['taz_common.contact_user_link'].search([
+                        target_contact_user_link_ids = self.env['taz.contact_user_link'].search([
                             ('partner_id', '=', partner.id),
                             ('user_id', '=', self.env.user.id)
                         ])
