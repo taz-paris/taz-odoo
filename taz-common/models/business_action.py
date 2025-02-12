@@ -187,7 +187,10 @@ class tazBusinessAction(models.Model):
         ('noting', 'Aucune suite à donner')
         ], "Conclusion")
     action_type = fields.Selection([
-        ('first_meeting', 'Prise de connaissance'),
+        ('regular_news', 'Intimité réseau'),
+        ('commercial_interview', 'RDV commercial avec DM / en délégation'),
+        ('propale', 'Contribution à une proposition commerciale'),
+        ('first_meeting', 'Prise de connaissance/Découverte'),
         ('deepening', 'Approfondissement')
         ], "Type")
     report_url = fields.Char("URL vers le CR OneNote")

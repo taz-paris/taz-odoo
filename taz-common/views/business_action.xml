@@ -6,6 +6,8 @@
       <field name="arch" type="xml">
 	  <tree editable="top"
 		decoration-info="state == 'wait'"
+		decoration-success="state == 'done'"
+		decoration-muted="state == 'cancelled'"
 		decoration-danger="state == 'todo' and today > date_deadline">
 		  <field name="partner_id" options="{'no_quick_create':True}" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
 		  <field name="name" widget="text"/>
