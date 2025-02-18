@@ -14,3 +14,4 @@ from . import contact_user_link
 from . import res_country
 from . import monkey_patch_res_partner
 from . import res_sector
+from . import wizard_partner_contact_user_link

@@ -31,6 +31,7 @@
         'views/res_users.xml',
         'views/contact_user_link.xml',
         'views/wizard_partner_category.xml',
+        'views/wizard_partner_contact_user_link.xml',
         'security/ir.model.access.csv',
     ],
 }
