@@ -169,26 +169,25 @@
 	    <record id="open_view_project_win_loose_action" model="ir.actions.act_window">
 		<field name="name">Prise de commande des projets passés</field>
 		<field name="res_model">project.project</field>
-		<field name="view_mode">pivot</field>
-		<field name="domain">[("date_win_loose", ">=", "2022-12-31 23:00:00")]</field>
-		<field name="context">{'search_default_win_loose_this_year':1}</field>
+		<field name="view_mode">graph,pivot</field>
+		<field name="domain">[("date_win_loose", ">=", "2022-12-31 23:00:00"), ('stage_id.id', 'not in', [4,8])]</field>
 		<!--
-		<field name="context">{
-			'group_by': [], 
-			'graph_measure': 'reporting_sum_company_outsource_code3_code_4', 
-			'graph_mode': 'bar', 
-			'graph_groupbys': ['date_win_loose:quarter'], 
-			'graph_order': None, 
-			'graph_stacked': True, 
-			'comparison': {'comparisonId': 'previous_year', 
-					'fieldName': 'date_win_loose', 
-					'fieldDescription': 'Date de passage gagné/perdu', 
-					'range': ('&amp;', ('date_win_loose', '&gt;=', '2023-12-31 23:00:00'), ('date_win_loose', '&lt;=', '2024-12-31 22:59:59')), 
-					'rangeDescription': '2024',
-					'comparisonRange': ('&amp;', ('date_win_loose', '&gt;=', '2022-12-31 23:00:00'), ('date_win_loose', '&lt;=', '2023-12-31 22:59:59')), 
-					'comparisonRangeDescription': '2023',
-					}
-			}</field>
+	        <field name="context">{
+                        'group_by': [],
+                        'graph_measure': 'reporting_sum_company_outsource_code3_code_4',
+                        'graph_mode': 'bar',
+                        'graph_groupbys': ['date_win_loose:quarter'],
+                        'graph_order': None,
+                        'graph_stacked': True,
+                        'comparison': {'comparisonId': 'previous_year',
+                                        'fieldName': 'date_win_loose',
+                                        'fieldDescription': 'Date de passage gagné/perdu',
+                                        'range': ('&amp;', ('date_win_loose', '&gt;=', datetime.datetime(context_today().year, 1, 1, 0, 0, 0)), ('date_win_loose', '&lt;=', datetime.datetime(context_today().year, 12, 31, 23, 59, 59))),
+                                        'rangeDescription': 'Année N',
+                                        'comparisonRange': ('&amp;', ('date_win_loose', '&gt;=', datetime.datetime(context_today().year - 1, 1, 1, 0, 0, 0)), ('date_win_loose', '&lt;=', datetime.datetime(context_today().year - 1, 12, 31, 23, 59, 59))),
+                                        'comparisonRangeDescription': 'Année N-1',
+                                        }
+                        }</field>
 		-->
 		<field name="view_ids" eval="
 				    [
