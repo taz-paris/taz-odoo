@@ -10,10 +10,12 @@
 
 		    <field name="date_win_loose" interval="month" type="col"/>
 
+		    <!--
 		    <field name="reporting_company_part_amount_initial_only_code_3" type="measure" string="CA interne estimé (code 3)"/>
 		    <field name="reporting_outsource_part_marging_amount_initial_only_code_3" type="measure" string="Markup estimé (code 3)"/>
 		    <field name="reporting_company_part_amount_current_at_least_code_4" type="measure" string="CA interne commandé (code 4+)"/>
 		    <field name="reporting_outsource_part_marging_amount_current_at_least_code_4" type="measure" string="Markup commandé (code 4+)"/>
+		    -->
 		    <field name="reporting_sum_company_outsource_code3_code_4" type="measure" string="Total 'prise de commande'"/>
 
 

@@ -95,6 +95,8 @@
 		  <field name="csr_project_environmental_level" optional="hide"/>
 		  <field name="csr_project_social_level" optional="hide"/>
 		  <field name="rel_partner_industry_id" optional="hide"/>
+		  <field name="begin_year_futur_revenue" optional="hide" sum="Total"/>
+		  <field name="begin_year_stage_id" optional="hide"/>
 		</tree>
 	      </field>
 	    </record>
@@ -423,6 +425,19 @@
 								<field name="period_project_book_employee" sum="Total" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 							</tree>    
 						</field>
+					</page>
+					<page name="steering" string="Pilotage">
+						<group>
+							<group string="Au 1er janvier N">
+								<field name="begin_year_stage_id"/>
+								<field name="begin_year_reporting_sum_company_outsource_code3_code_4"/>
+								<field name="begin_year_past_internal_revenue"/>
+								<field name="begin_year_futur_revenue"/>
+							</group>
+							<group string="À date">
+								<field name="reporting_sum_company_outsource_code3_code_4"/>
+							</group>
+						</group>
 					</page>
 					<page name="account_closing" string="Clôtures comptables">
 						<group>
