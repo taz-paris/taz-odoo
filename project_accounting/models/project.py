@@ -1229,29 +1229,11 @@ class projectAccountProject(models.Model):
                 stage_id = target_stage_id
 
             ### COMPUTE REPOTING SHORTCUTS
+            reporting_sum_company_outsource_code3_code_4 = 0.0
             if stage_id == 6 : #code_3 = Accord client
-                reporting_outsource_part_marging_amount_initial_only_code_3 = rec.outsource_part_marging_amount_initial
-                reporting_cosource_part_marging_amount_initial_only_code_3 = rec.cosource_part_marging_amount_initial
-                reporting_other_part_marging_amount_initial_only_code_3 = rec.other_part_marging_amount_initial
-                reporting_company_part_amount_initial_only_code_3 = rec.company_part_amount_initial
-            else :
-                reporting_outsource_part_marging_amount_initial_only_code_3 = 0.0
-                reporting_cosource_part_marging_amount_initial_only_code_3 = 0.0
-                reporting_other_part_marging_amount_initial_only_code_3 = 0.0
-                reporting_company_part_amount_initial_only_code_3 = 0.0
-
+                reporting_sum_company_outsource_code3_code_4 = rec.outsource_part_marging_amount_initial + rec.cosource_part_marging_amount_initial + rec.other_part_marging_amount_initial + rec.company_part_amount_initial
             if stage_id in [2, 9, 3]: #code_4 = Commandé + code 5=Production terminée + code 6 = Clos comptablement
-                reporting_outsource_part_marging_amount_current_at_least_code_4 = rec.outsource_part_marging_amount_current
-                reporting_cosource_part_marging_amount_current_at_least_code_4 = rec.cosource_part_marging_amount_current
-                reporting_other_part_marging_amount_current_at_least_code_4 = rec.other_part_marging_amount_current
-                reporting_company_part_amount_current_at_least_code_4 = rec.company_part_amount_current
-            else:
-                reporting_outsource_part_marging_amount_current_at_least_code_4 = 0.0
-                reporting_cosource_part_marging_amount_current_at_least_code_4 = 0.0
-                reporting_other_part_marging_amount_current_at_least_code_4 = 0.0
-                reporting_company_part_amount_current_at_least_code_4 = 0.0
-
-            reporting_sum_company_outsource_code3_code_4 = reporting_outsource_part_marging_amount_initial_only_code_3 + reporting_cosource_part_marging_amount_initial_only_code_3 + reporting_other_part_marging_amount_initial_only_code_3 + reporting_company_part_amount_initial_only_code_3 + reporting_outsource_part_marging_amount_current_at_least_code_4 + reporting_cosource_part_marging_amount_current_at_least_code_4 + reporting_other_part_marging_amount_current_at_least_code_4 + reporting_company_part_amount_current_at_least_code_4
+                reporting_sum_company_outsource_code3_code_4 = rec.outsource_part_marging_amount_current + rec.cosource_part_marging_amount_current + rec.other_part_marging_amount_current + rec.company_part_amount_current
 
             if target_stage_id == False :
                 rec.reporting_sum_company_outsource_code3_code_4 = reporting_sum_company_outsource_code3_code_4
@@ -1282,7 +1264,7 @@ class projectAccountProject(models.Model):
                     past_internal_revenue += accounting_closing_id.internal_revenue
             rec.begin_year_past_internal_revenue = past_internal_revenue
 
-            if stage_id not in [6, 2, 9]:
+            if stage_id not in [6, 2, 9]: #code_3 = Accord client + code_4 = Commandé + code 5=Production terminée
                 rec.begin_year_futur_revenue = 0.0
             else :
                 rec.begin_year_futur_revenue = rec.begin_year_reporting_sum_company_outsource_code3_code_4 - rec.begin_year_past_internal_revenue
@@ -1452,16 +1434,12 @@ class projectAccountProject(models.Model):
     margin_graph = fields.Char("Margin graph", compute=compute_margin_graph)
     activity_graph = fields.Char("Activity graph", compute=compute_margin_graph)
 
-    #reporting_outsource_part_marging_amount_initial_only_code_3 = fields.Float('Markup estimé si code 3 sinon 0', compute=compute_reporting_shortcuts, store=True)
-    #reporting_outsource_part_marging_amount_current_at_least_code_4 = fields.Float('Markup commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
-    #reporting_company_part_amount_initial_only_code_3 = fields.Float('CA interne estimé si code 3 sinon 0', compute=compute_reporting_shortcuts, store=True)
-    #reporting_company_part_amount_current_at_least_code_4 = fields.Float('CA interne commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
     reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', help="Somme Montant dispositif interne + markup S/T + markup cotraitant + marge ventes Autres (ex : séminaires) pour les projets en code 3-Accord client (données saisies par le DM sur l'onglet Structure au lancement) ou en code 4/5/6 (données calculées et affichées sur l'onglet Synthèse à date).", compute=compute_reporting_shortcuts, store=True)
 
     begin_year_stage_id = fields.Many2one('project.project.stage', string='Statut au 1er janvier N', ondelete='restrict', groups="project.group_project_stages", compute=compute_begin_year_futur_revenue)
-    begin_year_reporting_sum_company_outsource_code3_code_4 = fields.Monetary("Prise de commande au 1/1/N", compute=compute_begin_year_futur_revenue)
+    begin_year_reporting_sum_company_outsource_code3_code_4 = fields.Monetary("Approximation de la prise de commande au 1/1/N", compute=compute_begin_year_futur_revenue, help="La valorisation de cet attribut dépend de l'étape à laquelle était le projet au 1/1/N (s'il existait) :\n\n- Si le projet était en étape 3-Accord client au 1/1/N => Somme Montant dispositif interne + markup S/T + markup cotraitant + marge ventes Autres (ex : séminaires) issus de l'onglet Structure au lancement\n\n- Si le projet était en étape 4-Commandé ou 5-Production terminée au 1/1/N => Somme Montant dispositif interne + markup S/T + markup cotraitant + marge ventes Autres (ex : séminaires) issus de l'onglet Synthèse à date \n\n- Sinon => 0")
     begin_year_past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue)
-    begin_year_futur_revenue = fields.Monetary("CA à venir - daté du 1er janvier N", compute=compute_begin_year_futur_revenue, help="Si le projet était en code 3/4/5 au 1/1/N, cet attribut est valoré avec la prise de commande (nette de sous-traitance) A DATE réduit du CA déjà reconnu dans la clôture du 31/12N-1)")
+    begin_year_futur_revenue = fields.Monetary("CA à venir - daté du 1er janvier N", compute=compute_begin_year_futur_revenue, help="Si le projet était en code 3/4/5 au 1/1/N = [Approximation de la prise de commande au 1/1/N] - [CA déjà reconnu dans les clôture <= 31/12N-1]")
 
 
     # CAPITALIZATION
