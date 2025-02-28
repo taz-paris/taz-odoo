@@ -53,9 +53,11 @@ class projectOutsourcingLink(models.Model):
         if self.project_id.partner_id.id != self.company_id.partner_id.id :
             partner_secondary_ids.append((4, self.company_id.partner_id.id))
 
+        dest_company = self.partner_id.ref_company_ids[0].id
+
         dic_mirror_project = {
             'name' : self.project_id.name,
-            'company_id' : self.partner_id.ref_company_ids[0].id,
+            'company_id' : dest_company,
             'partner_id' : self.project_id.partner_id.id,
             'stage_id' : self.project_id.stage_id.id,
             'outsourcing' : False,
@@ -67,6 +69,6 @@ class projectOutsourcingLink(models.Model):
             'date_win_loose' : self.project_id.date_win_loose,
             }
         _logger.info(dic_mirror_project)
-        self.inter_company_mirror_project = self.env['project.project'].with_context(allow_all_status=True).create(dic_mirror_project)
+        self.inter_company_mirror_project = self.env['project.project'].with_company(dest_company).with_context(allow_all_status=True).create(dic_mirror_project)
 
         return self.inter_company_mirror_project
