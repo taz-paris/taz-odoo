@@ -1242,7 +1242,7 @@ class projectAccountProject(models.Model):
 
     def compute_begin_year_futur_revenue(self):
         for rec in self:
-            date_begin_year = date(2025,1,1)
+            date_begin_year = date(date.today().year,1,1)
             stage_id = rec.sudo().get_field_tracked_value('stage_id', date_begin_year)[rec.id]
             rec.begin_year_stage_id = stage_id
 
