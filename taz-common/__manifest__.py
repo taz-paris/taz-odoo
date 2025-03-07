@@ -22,6 +22,7 @@
 
     # always loaded
     'data': [
+        'security/security.xml',
         'views/res_partner.xml',
         'views/business_action.xml',
         'views/office365_import_people.xml',

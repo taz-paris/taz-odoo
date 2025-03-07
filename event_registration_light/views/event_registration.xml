@@ -127,7 +127,8 @@
 				<separator/>
 				    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'priority_target')]"/>
 				    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'active')]"/>
-				    <filter name="not_tracked" string="Contacts de comptes à opportunités" domain="[('rel_partner_parent_industry_id_business_priority', 'not in', ['priority_target', 'active'])]"/>
+				    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'not_tracked')]"/>
+				    <filter name="inditto" string="Comptes Inditto" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'inditto')]"/>
 				<separator/>
 				<filter string="Mail automatique" name="mail_auto" domain="[('mail_auto', '=', True)]"/>
 				<filter string="Mail personnalisé" name="mail_perso" domain="[('mail_auto', '=', False)]"/>

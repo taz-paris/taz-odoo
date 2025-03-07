@@ -115,7 +115,8 @@
 		    <separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
-            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', 'not in', ['priority_target', 'active'])]"/>
+		    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
+		    <filter name="inditto" string="Comptes Inditto" domain="[('business_priority', '=', 'inditto')]"/>
 		    <separator/>
 		    <filter name="state_not_done_not_cancelled" string="Non terminées ni annulées" domain="[('state', '!=', 'done'), ('state', '!=', 'cancelled')]"/>
 		    <group expand="0" string="Group By">

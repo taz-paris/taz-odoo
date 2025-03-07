@@ -29,7 +29,8 @@
                     <separator/>
                     <filter string="Projets de comptes prioritaires" name="priority_target" domain="[('rel_industry_business_priority', '=', 'priority_target')]"/>
                     <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>
-                    <filter string="Projets de comptes à opportunités" name="active" domain="[('rel_industry_business_priority', 'not in', ['priority_target','active'])]"/>
+                    <filter string="Projets de comptes à opportunités" name="not_tracked" domain="[('rel_industry_business_priority', '=', ['inditto'])]"/>
+                    <filter string="Projets de comptes Inditto" name="inditto" domain="[('rel_industry_business_priority', '=', 'inditto')]"/>
 		    <separator/>
 		    <filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', [False, 'to_be_capitalized','not_specified']),('deliverable_indexation', 'in', [False, 'to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', [False, 'yes_success_story','not_specified']),('commercial_reference_indexation', 'in', [False, 'yes_commercial_reference','not_specified'])]"/>
 		    <separator/>
