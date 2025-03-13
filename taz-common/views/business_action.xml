@@ -99,8 +99,8 @@
            <search string="Actions commerciales">
 		    <field name="partner_id" string="Contact"/>
 		    <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
-		    <filter string="Mes actions commerciales" name="assigned_to_me"
-			domain="[('owner_id', '=', uid)]"
+		    <filter string="Mes actions commerciales (porteur ou participant)" name="assigned_to_me"
+			domain="['|', ('owner_id', '=', uid), ('user_ids', 'in', uid)]"
 			help="Actions commerciales qui m'ont été assignées"/>
 		    <separator/>
 		    <filter string="Actions avec échéance >= 01/M-6" name="m_6"

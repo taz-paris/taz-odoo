@@ -1420,7 +1420,7 @@ class projectAccountProject(models.Model):
     is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme des prix de revente n'est pas nulle.")
     is_affected_book = fields.Boolean("Book affecté", store=True, compute=compute, help="VAI si le book est validé OU qu'il existe au moins une ligne de book")
 
-    is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
+    is_review_needed = fields.Boolean('Projet avec anomalie(s)', store=True, compute=compute, help="Projet à revoir : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
     other_part_marging_rate_controle_OK = fields.Boolean('Taux de marge actuel sur les autres prestations >= à la cote d\'alerte.', store=True, compute=compute)
     invoicing_comment = fields.Text("Commentaire ADV")
     project_book_factor = fields.Float("Facteur de bonus/malus", default=1.0)
