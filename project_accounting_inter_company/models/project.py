@@ -27,3 +27,13 @@ class projectProject(models.Model):
                                                             'inter_company_mirror_project', 
                                                             check_company=False,
                                                             string="Liens projet-fourniseur des projets 'clients'") 
+
+
+    outsourcing_link_with_inter_company_project_ids = fields.One2many(  # /!\ outsourcing_link_with_inter_company_project_ids is just a subset of project_outsourcing_link_ids.
+        'project.outsourcing.link',
+        'project_id',
+        string="Liens projet-fourniseur des projets 'fournisseurs'",
+        copy=False,
+        readonly=True,
+        domain=[('inter_company_mirror_project', '!=', False)],
+    )

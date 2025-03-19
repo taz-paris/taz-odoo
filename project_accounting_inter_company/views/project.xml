@@ -6,12 +6,21 @@
 	<field name="arch" type="xml">  
 		<field name="invoicing_comment" position="after">
 			<field name="mirored_project_outsourcing_link_ids" 
+				readonly="1" 
 				attrs="{'invisible':[('mirored_project_outsourcing_link_ids', '=', [])]}" 
 				>
 				<tree delete="false" edit="false" create="false">
 					<field name="project_id" widget="many2onebutton"/>
 					<field name="company_id"/>
 				</tree>
+			</field>
+			<field name="outsourcing_link_with_inter_company_project_ids" 
+				readonly="1" 
+				attrs="{'invisible': [('outsourcing_link_with_inter_company_project_ids', '=', [])]}">
+				<tree delete="false" edit="false" create="false">
+					<field name="inter_company_mirror_project" optional="show" widget="many2onebutton"/>
+					<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" />
+				</tree>                                
 			</field>
 		</field>
 		<xpath expr="//field[@name='project_outsourcing_link_ids']/tree/field[@name='link_type']" position="after">

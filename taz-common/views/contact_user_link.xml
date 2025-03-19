@@ -88,10 +88,6 @@
                     <field name="partner_id" string="Contact"/>
                     <field name="parent_partner_id" string="Entreprise"/>
                     <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
-		<!-- Inutile car la page du plan d'intimité ne permet de voir que ses propres liens
-                    <filter string="Mes liens collaborateur-contact" name="my_link"
-                        domain="[('user_id', '=', uid)]"/>
-		-->
                     <separator/>
 		    <filter name="mail_sent" string="Vœux envoyé" domain="[('mail_sent', '=', True)]" />
 		    <filter name="mail_not_sent" string="Vœux non envoyé" domain="[('mail_sent', '=', False)]" />
@@ -116,11 +112,6 @@
 		    <filter name="communication_preference_email_perso" string="Préférence de com. = email perso" domain="[('communication_preference', '=', 'email_perso')]" />
 		    <filter name="communication_preference_paper_auto" string="Préférence de com. = papier auto" domain="[('communication_preference', '=', 'paper_auto')]" />
 		    <filter name="communication_preference_paper_perso" string="Préférence de com. = papier perso" domain="[('communication_preference', '=', 'paper_perso')]" />
-		    <!--
-                    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
-                    <filter name="not_tracked" string="Comptes ni actifs non suivis ni prioritaires" domain="[('business_priority', '=', 'not_tracked')]"/>
-                    <separator/>
-			-->
                     <group expand="0" string="Group By">
                         <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
                         <filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>

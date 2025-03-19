@@ -220,7 +220,8 @@
 		<separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
-            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', 'not in', ['priority_target', 'active'])]"/>
+		    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
+		    <filter name="inditto" string="Comptes Inditto" domain="[('business_priority', '=', 'inditto')]"/>
 		<separator/>
 		<separator/>
 		<group expand="0" string="Group By">
@@ -436,7 +437,8 @@
 		<separator/>
 		    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('parent_industry_priority', '=', 'priority_target')]"/>
 		    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('parent_industry_priority', '=', 'active')]"/>
-		    <filter name="not_tracked" string="Contacts de comptes à opportunités" domain="[('parent_industry_priority', 'not in', ['priority_target', 'active'])]"/>
+		    <filter name="not_tracked" string="Comptes à opportunités" domain="[('parent_industry_priority', '=', 'not_tracked')]"/>
+		    <filter name="inditto" string="Comptes Inditto" domain="[('parent_industry_priority', '=', 'inditto')]"/>
 		<separator/>
             <filter string="Contacts dont je suis propriétaire" name="assigned_to_me"
                 domain="[('user_id', '=', uid)]"

@@ -79,7 +79,8 @@
 		    <separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
-            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
+            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', '=', 'not_tracked')]"/>
+            	    <filter name="inditto" string="Comptes Inditto" domain="[('rel_business_priority', '=', 'inditto')]"/>
 		    <separator/>
 		    <group expand="0" string="Group By">
 			<filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
@@ -157,7 +158,8 @@
 		    <separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
-            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', 'not in', ['priority_target', 'active'])]"/>
+            	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', '=', 'not_tracked')]"/>
+            	    <filter name="inditto" string="Comptes Inditto" domain="[('rel_business_priority', '=', 'inditto')]"/>
 		    <separator/>
 		    <group expand="0" string="Group By">
 			<filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
@@ -181,7 +183,7 @@
 	<field name="context">{'search_default_filter_this_year' : True}</field>
     </record>
 
-    <menuitem name="Objectifs commerciaux" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
+    <menuitem name="Comptes / Objectifs" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
     <menuitem name="Photo des objectifs commerciaux" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
     <menuitem name="Objectifs commerciaux annuels" sequence="20"  id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
 

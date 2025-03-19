@@ -124,6 +124,75 @@ class projectAccountProject(models.Model):
         return res
 
 
+    def get_field_tracked_value(self, field_name, target_date):
+        model_name = 'project.project'
+        project_model_id = self.env['ir.model'].search([('model', '=', model_name)])[0]
+        field_ids = self.env['ir.model.fields'].search([('name', '=', field_name), ('model_id', '=', project_model_id.id)])
+        if len(field_ids) == 0:
+            raise ValidationError(_("Le champ demandé n'existe pas dans cet objet."))
+            # ATTENTION : on part du principe que ce champ est tracké depuis que la base a été créée.
+        field_id = field_ids[0]
+        if field_id.tracking == 0 :
+            raise ValidationError(_("Le champ demandé n'est pas tracké (tracking = 0 or False)."))
+        if target_date > date.today():
+            raise ValidationError(_("La date demandée est postérieure à la date du jour."))
+
+        res_dic = {}
+        for rec in self :
+            if rec.create_date.date() > target_date :
+                res_dic[rec.id] = None
+            else :
+                #Si la valeur du champ n'a pas changé depuis la création de l'objet, on retourne la valeur à date
+                res_dic[rec.id] = rec.read([field_name])[0][field_name]
+
+                #Si la valeur a changé entre la target_date et aujourd'hui, on prend l'ANCIENNE valeur de l'attribut, à la date de modification la plus proche de la target date
+                message_list_post_target_date = self.env['mail.message'].search([('model', '=', model_name), ('res_id', '=', rec.id), ('date', '>', target_date)], order="date ASC")
+                for message in message_list_post_target_date :
+                    found = False
+                    for track in message.tracking_value_ids:
+                        if track.field.id == field_id.id:
+                            if track.old_value_integer :
+                                res_dic[rec.id] = track.old_value_integer
+                            elif track.new_value_float :
+                                res_dic[rec.id] = track.old_value_float
+                            elif track.new_value_char :
+                                res_dic[rec.id] = track.old_value_char
+                            elif track.new_value_text :
+                                res_dic[rec.id] = track.old_value_text
+                            elif track.new_value_datetime :
+                                res_dic[rec.id] = track.old_value_datetime
+                            elif track.new_value_monetary :
+                                res_dic[rec.id] = track.old_value_float_monetary
+                            found = True
+                            break
+                    if found :
+                        break
+
+                #Si la valeur a changé entre la création de l'objet et la target_date, on prend la NOUVELLE valeur de l'attribut à la date de modification la plus proche de la target date
+                message_list = self.env['mail.message'].search([('model', '=', model_name), ('res_id', '=', rec.id), ('date', '<=', target_date)], order="date DESC")
+                for message in message_list :
+                    found = False
+                    for track in message.tracking_value_ids:
+                        if track.field.id == field_id.id:
+                            if track.new_value_integer :
+                                res_dic[rec.id] = track.new_value_integer
+                            elif track.new_value_float :
+                                res_dic[rec.id] = track.new_value_float
+                            elif track.new_value_char :
+                                res_dic[rec.id] = track.new_value_char
+                            elif track.new_value_text :
+                                res_dic[rec.id] = track.new_value_text
+                            elif track.new_value_datetime :
+                                res_dic[rec.id] = track.new_value_datetime
+                            elif track.new_value_monetary :
+                                res_dic[rec.id] = track.new_value_float_monetary
+                            found = True
+                            break
+                    if found :
+                        break
+        return res_dic
+
+
     """
     def init_date_win_loose(self):
         for rec in self:
@@ -480,13 +549,11 @@ class projectAccountProject(models.Model):
             rec.other_part_amount_current = other_part_amount_current
             rec.other_part_cost_futur = other_part_cost_futur
 
-            """
             rec.other_part_marging_amount_current =  rec.other_part_amount_current - rec.other_part_cost_current - rec.other_part_cost_futur
             if rec.other_part_amount_current != 0 :
                 rec.other_part_marging_rate_current = rec.other_part_marging_amount_current / rec.other_part_amount_current * 100
             else:
                 rec.other_part_marging_rate_current = 0.0
-            """
 
             ######## COMPANY PART
 
@@ -687,6 +754,7 @@ class projectAccountProject(models.Model):
 
             if rec.has_to_be_recomputed :
                 rec.has_to_be_recomputed = False
+            #rec.compute_reporting_shortcuts()
 
 
     def compute_sale_order_total(self, with_direct_payment=True, with_draft_sale_order=False): 
@@ -1154,22 +1222,15 @@ class projectAccountProject(models.Model):
     @api.depends('stage_id', 'outsource_part_marging_amount_initial', 'company_part_amount_initial', 'outsource_part_marging_amount_current', 'company_part_amount_current')
     def compute_reporting_shortcuts(self):
         for rec in self :
-            ### COMPUTE REPOTING SHORTCUTS
-            if rec.stage_id.id == 6 : #code_3 = Accord client
-                rec.reporting_outsource_part_marging_amount_initial_only_code_3 = rec.outsource_part_marging_amount_initial
-                rec.reporting_company_part_amount_initial_only_code_3 = rec.company_part_amount_initial
-            else :
-                rec.reporting_outsource_part_marging_amount_initial_only_code_3 = 0.0
-                rec.reporting_company_part_amount_initial_only_code_3 = 0.0
+            stage_id = rec.stage_id.id
 
-            if rec.stage_id.id in [2, 9, 3]: #code_4 = Commandé + code 5=Production terminée + code 6 = Clos comptablement
-                rec.reporting_outsource_part_marging_amount_current_at_least_code_4 = rec.outsource_part_marging_amount_current
-                rec.reporting_company_part_amount_current_at_least_code_4 = rec.company_part_amount_current
-            else:
-                rec.reporting_outsource_part_marging_amount_current_at_least_code_4 = 0.0
-                rec.reporting_company_part_amount_current_at_least_code_4 = 0.0
+            reporting_sum_company_outsource_code3_code_4 = 0.0
+            if stage_id == 6 : #code_3 = Accord client
+                reporting_sum_company_outsource_code3_code_4 = rec.outsource_part_marging_amount_initial + rec.cosource_part_marging_amount_initial + rec.other_part_marging_amount_initial + rec.company_part_amount_initial
+            if stage_id in [2, 9, 3]: #code_4 = Commandé + code 5=Production terminée + code 6 = Clos comptablement
+                reporting_sum_company_outsource_code3_code_4 = rec.outsource_part_marging_amount_current + rec.cosource_part_marging_amount_current + rec.other_part_marging_amount_current + rec.company_part_amount_current
 
-            rec.reporting_sum_company_outsource_code3_code_4 = rec.reporting_outsource_part_marging_amount_initial_only_code_3 + rec.reporting_company_part_amount_initial_only_code_3 + rec.reporting_outsource_part_marging_amount_current_at_least_code_4 + rec.reporting_company_part_amount_current_at_least_code_4
+            rec.reporting_sum_company_outsource_code3_code_4 = reporting_sum_company_outsource_code3_code_4
 
 
 
@@ -1179,11 +1240,37 @@ class projectAccountProject(models.Model):
         #_logger.info('Nombre de projets à recalculer : %s' % str(len(projects)))
         projects.compute()
 
+    def compute_begin_year_futur_revenue(self):
+        for rec in self:
+            date_begin_year = date(date.today().year,1,1)
+            stage_id = rec.sudo().get_field_tracked_value('stage_id', date_begin_year)[rec.id]
+            rec.begin_year_stage_id = stage_id
+
+            ### COMPUTE PAST NET REVENU IN CLOSINGS
+            begin_year_past_internal_revenue = 0.0
+            past_internal_revenue = 0.0
+            for accounting_closing_id in rec.accounting_closing_ids:
+                past_internal_revenue += accounting_closing_id.internal_revenue
+                if accounting_closing_id.closing_date < date_begin_year :
+                    begin_year_past_internal_revenue += accounting_closing_id.internal_revenue
+            rec.begin_year_past_internal_revenue = past_internal_revenue
+            rec.past_internal_revenue = past_internal_revenue
+
+            if stage_id not in [6, 2, 9]: #code_3 = Accord client + code_4 = Commandé + code 5=Production terminée
+                rec.begin_year_futur_internal_revenue = 0.0
+            else :
+                rec.begin_year_futur_internal_revenue = rec.reporting_sum_company_outsource_code3_code_4 - rec.begin_year_past_internal_revenue
+
+            if rec.stage_id.id not in [6, 2, 9]: #code_3 = Accord client + code_4 = Commandé + code 5=Production terminée
+                rec.futur_internal_revenue = 0.0
+            else :
+                rec.futur_internal_revenue = rec.reporting_sum_company_outsource_code3_code_4 - rec.past_internal_revenue
+
 
     has_to_be_recomputed = fields.Boolean('À recalculer', default=False)
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')
-    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', context={'active_test': False}, domain="[('is_company', '=', True), ('type', '=', 'contact')]", help="Dans certains projets, le client final n'est pas le client facturé. Un client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
+    partner_secondary_ids = fields.Many2many('res.partner', string='Clients intermediaires', context={'active_test': False}, help="Dans certains projets, le client final n'est pas le client facturé. Un client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici afin de permettre sa(leur) facturation pour ce projet.")
 
     ######## TOTAL
     sale_order_amount_initial = fields.Monetary('Montant HT commandé par le client', store=True, compute=compute)
@@ -1333,7 +1420,7 @@ class projectAccountProject(models.Model):
     is_outsource_part_amount_current = fields.Boolean("Prix de revente S/T renseigné", store=True, compute=compute, help="VRAI si, pour chaque BC Fournisseur, la somme des prix de revente n'est pas nulle.")
     is_affected_book = fields.Boolean("Book affecté", store=True, compute=compute, help="VAI si le book est validé OU qu'il existe au moins une ligne de book")
 
-    is_review_needed = fields.Boolean('A revoir avec le DM', store=True, compute=compute, help="Projet à revoir avec le DM : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
+    is_review_needed = fields.Boolean('Projet avec anomalie(s)', store=True, compute=compute, help="Projet à revoir : au moins un contrôle est KO ou bien le champ 'Commentaire ADV' contient du texte.")
     other_part_marging_rate_controle_OK = fields.Boolean('Taux de marge actuel sur les autres prestations >= à la cote d\'alerte.', store=True, compute=compute)
     invoicing_comment = fields.Text("Commentaire ADV")
     project_book_factor = fields.Float("Facteur de bonus/malus", default=1.0)
@@ -1343,18 +1430,21 @@ class projectAccountProject(models.Model):
     margin_graph = fields.Char("Margin graph", compute=compute_margin_graph)
     activity_graph = fields.Char("Activity graph", compute=compute_margin_graph)
 
-    reporting_outsource_part_marging_amount_initial_only_code_3 = fields.Float('Markup estimé si code 3 sinon 0', compute=compute_reporting_shortcuts, store=True)
-    reporting_outsource_part_marging_amount_current_at_least_code_4 = fields.Float('Markup commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
-    reporting_company_part_amount_initial_only_code_3 = fields.Float('CA interne estimé si code 3 sinon 0', compute=compute_reporting_shortcuts, store=True)
-    reporting_company_part_amount_current_at_least_code_4 = fields.Float('CA interne commandé si code 4/5/6 sinon 0', compute=compute_reporting_shortcuts, store=True)
-    reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', help='Somme CA interne + markup commandé code 3/4/5/6', compute=compute_reporting_shortcuts, store=True)
-    #purchase_line_ids = fields.One2many('purchase.order.line', 'rel_project_ids')
+    reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', help="Somme Montant dispositif interne + markup S/T + markup cotraitant + marge ventes Autres (ex : séminaires) pour les projets en code 3-Accord client (données saisies par le DM sur l'onglet Structure au lancement) ou en code 4/5/6 (données calculées et affichées sur l'onglet Synthèse à date).", compute=compute_reporting_shortcuts, store=True)
+
+    begin_year_stage_id = fields.Many2one('project.project.stage', string='Statut au 1er janvier N', ondelete='restrict', groups="project.group_project_stages", compute=compute_begin_year_futur_revenue)
+    begin_year_past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue, help="Somme des CA net S/T de toutes les clôtures comptables du projet antérieures ou égales au 31/12/N-1")
+    begin_year_futur_internal_revenue = fields.Monetary("CA à venir - daté du 1er janvier N", compute=compute_begin_year_futur_revenue, help="Suivant l'étape du projet au 1/1/N : \n    - Si le projet était en code 3/4/5 au 1/1/N = [Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet <= 31/12N-1]\n    - Sinon, 0")
+
+    past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu à date", compute=compute_begin_year_futur_revenue, help="Somme des CA net S/T de toutes les clôtures comptables du projet")
+    futur_internal_revenue = fields.Monetary("CA à venir - à date", compute=compute_begin_year_futur_revenue, help="[Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet]")
 
     # CAPITALIZATION
     is_filled_sales_proposal_indexation = fields.Boolean("Champ Proposition commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé")
     is_filled_deliverable_indexation = fields.Boolean("Champ Livrable valorisé", store=True, compute=compute, help="FAUX si le champ Livrable dans l'onglet Capitalisation n'est pas valorisé" )
     is_filled_success_story_indexation = fields.Boolean("Champ Success story valorisé", store=True, compute=compute, help="FAUX si le champ Success story dans l'onglet Capitalisation n'est pa valorisé")
     is_filled_commercial_reference_indexation = fields.Boolean("Champ Référence commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Référence commerciale dans l'onglet Capitalisation n'est pas valorisé")
+
 
     #RSE
     csr_project_initiative = fields.Selection([

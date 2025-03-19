@@ -11,20 +11,22 @@ _logger = logging.getLogger(__name__)
 
 
 class tazResIndustry(models.Model):
-    _inherit = "res.partner.industry"
+    #_inherit = ['res.partner.industry', 'mail.thread']
+    _inherit = 'res.partner.industry'
 
     ms_planner_plan_id = fields.Char("M$ planner plan ID", help="Id of the Microsoft Planner plan where tasks should be created for business action of that industry")
     pillar_id = fields.Many2one('res.partner.industry.pillar', string = "Pillier")
-    user_id = fields.Many2one('res.users', string='Responsable du compte')
-    challenger_id = fields.Many2one('res.users', string='Compte challenger')
-    contributor_ids = fields.Many2many('res.users', string='Contributeurs')
+    user_id = fields.Many2one('res.users', string='Responsable du compte')#, tracking=True)
+    challenger_id = fields.Many2one('res.users', string='Compte challenger')#, tracking=True)
+    contributor_ids = fields.Many2many('res.users', string='Contributeurs')#, tracking=True)
     partner_ids = fields.One2many('res.partner', 'industry_id', string="Entreprises", domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
     account_plan_url = fields.Char("Lien vers le dossier du plan de compte")
     business_priority = fields.Selection([
          ('active', '1-Compte actif'),
          ('priority_target', '2-Compte prioritaire'),
          ('not_tracked', '3-Opportunités'),
-    ], "Niveau de priorité", default='not_tracked')
+         ('inditto', '4-Comptes Inditto'),
+    ], "Niveau de priorité", default='not_tracked')#, tracking=True)
 
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
