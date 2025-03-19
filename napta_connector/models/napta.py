@@ -739,7 +739,7 @@ class naptaAnalyticLine(models.Model):
     def create_update_odoo_userprojectperiod(self):
         _logger.info('---- BATCH Create or update Odoo userprojectperiod')
         client = ClientRestNapta(self.env)
-        company_ids = self.env['res.company'].search([('fiscalyear_lock_date', '!=', False)], order="period_lock_date asc") #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
+        company_ids = self.env['res.company'].search([('active', '=', True), ('fiscalyear_lock_date', '!=', False)], order="fiscalyear_lock_date asc") #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
         if len(company_ids) == 0:
             return
         DATE_OLDEST_USERPROJECTPERIOD = str(company_ids[0].fiscalyear_lock_date)
@@ -776,7 +776,7 @@ class naptaAnalyticLine(models.Model):
     def create_update_odoo_timesheetperiod(self):
         _logger.info('---- BATCH Create or update Odoo timesheet_period')
         client = ClientRestNapta(self.env)
-        company_ids = self.env['res.company'].search([('fiscalyear_lock_date', '!=', False)], order="period_lock_date asc") #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
+        company_ids = self.env['res.company'].search([('active', '=', True), ('fiscalyear_lock_date', '!=', False)], order="fiscalyear_lock_date asc") #TODO : s'il on mappe une company Odoo avec le departement Napta, il faudrait boucler sur les département pour appeler un date de fin correspondant à la dernière cloture de l'entreprise
         if len(company_ids) == 0:
             return
         DATE_OLDEST_TIMESHEETPERIOD = company_ids[0].fiscalyear_lock_date
