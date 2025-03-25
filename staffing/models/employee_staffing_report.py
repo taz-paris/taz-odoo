@@ -210,7 +210,6 @@ class HrEmployeeStaffingReport(models.Model):
             dic = [('employee_id', '=', rec.employee_id.id)]
             pivot_date = datetime.today()
 
-            rec.compute_company()
             if (rec.employee_id.first_contract_date and (rec.employee_id.first_contract_date > rec.end_date)) or (rec.employee_id.departure_date and (rec.employee_id.departure_date < rec.start_date)):
 
                 rec.workdays = 0.0
