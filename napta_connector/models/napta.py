@@ -500,9 +500,9 @@ class naptaProject(models.Model):
               "target_margin_rate" : round(rec.company_part_marging_rate_initial/100.0,2),
             }
 
-            alreeady_existing_project = False
+            already_existing_project = False
             if rec.napta_id :
-                alreeady_existing_project = True
+                already_existing_project = True
 
             client.create_update_api('project', attributes, rec)
 
@@ -511,7 +511,7 @@ class naptaProject(models.Model):
                 #   1/ We assume that on Odoo, the projet's company never changes.
                 #   2/ We can't esalily get the business_unit id of a projet in chase, so we can't easily know when it's need to be sent to Napta
                 #   3/ We do not want to send the business_unit id to Napta a every call of this function
-            if not alreeady_existing_project:
+            if not already_existing_project:
                 raw_relationships = {"business_units": {
                                         "data": [
                                           {
@@ -942,7 +942,7 @@ class naptaHrContract(models.Model):
         BEGIN_OF_TIME = "2023-01-01"
 
         for napta_id, user_history in user_history_list.items():
-            #if int(napta_id) != 1237:
+            #if int(napta_id) != 1499:
             #    continue
 
             user_napta_id = user_history['attributes']['user_id']
@@ -982,11 +982,26 @@ class naptaHrContract(models.Model):
                 else:
                     state = "open"
 
+            # Mapping Odoo/contrat/company with Napta/Department
+            comp_id = 1 #Tasmane
+            if user_history['attributes']['business_unit_id']:
+                dep = self.env['hr.department'].search([('napta_id', '=', user_history['attributes']['business_unit_id'])])
+                if len(dep) == 1:
+                    if dep.company_id:
+                        comp_id = dep.company_id.id
+                    else : 
+                        _logger.info("L'attribut company_id du hr.department avec l'Id Odoo %s n'est pas alimenté dans Odoo." % dep.id)
+                else :
+                    _logger.info("Le département avec l'ID %s sur Napta n'est lié à aucun hr.department dans Odoo." % user_history['attributes']['business_unit_id'])
+            #else:
+            #    _logger.info("Cet évènement Napta n'a pas de département sur Napta: %s" % (str(user_history['attributes']['business_unit_id'])))
+
 
             dic = {
                     'napta_id' : napta_id,
                     'name' : name,
                     'wage' : 0.0,
+                    'company_id' : {'id' : comp_id},
                     'employee_id' : {'napta_id' : user_napta_id},
                     'date_start' : user_history['attributes']['start_date'],
                     'date_end' : user_history['attributes']['end_date'],
@@ -998,6 +1013,8 @@ class naptaHrContract(models.Model):
                     'daily_cost' : 0.0,
                     'productive_share' : user_history['attributes']['productive_share'] * 100.0,
                 }
+
+
             ########## Gestion des surcharges de CJM individuel par rapport au grade
 
             job_ids = self.env['hr.job'].search([('napta_id', '=', user_history['attributes']['user_position_id'])])
@@ -1226,6 +1243,7 @@ class naptaHrWorkLocation(models.Model):
 
 KEYS_CATALOG = { #Par défaut la clé fonctionnelle d'un objet est napta_id => si pour un objet donné, la clé est composée de plusieurs attributs, préciser la liste de ces attributs dans ce dictionnaire
     'account.analytic.line' : ['napta_id', 'category'],
+    'res.company' : ['id'],
 }
 
 def get_napta_key_domain_search(odoo_model_name, dic):
@@ -1237,8 +1255,8 @@ def get_napta_key_domain_search(odoo_model_name, dic):
     else :
         key_attribute_list = ['napta_id']
 
-    if 'napta_id' not in key_attribute_list:
-        raise ValidationError(_("key_attribute_list has to contains napta_id"))
+    if ('napta_id' not in key_attribute_list) and ('id' not in key_attribute_list):
+        raise ValidationError(_("key_attribute_list has to contains napta_id or id"))
 
     key_domain_search = []
     for key_attribute in key_attribute_list:

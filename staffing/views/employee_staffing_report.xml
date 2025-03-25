@@ -8,6 +8,7 @@
 			      <field name="employee_id" optional="show"/>
 			      <field name="rel_job_id" optional="show"/>
 			      <field name="company_id" optional="hide"/>
+			      <field name="periodicity" optional="hide"/>
 			      <field name="rel_work_location_id" optional="hide"/>
 			      <field name="rel_department_id" optional="hide"/>
 			      <field name="start_date" optional="show"/>
@@ -140,6 +141,14 @@
             <field name="domain">[('periodicity', '=', 'year'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille annuelle)" id="employee_staffing_report_year_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_year_action"/>
+
+	<record id="employee_staffing_report_all_action" model="ir.actions.act_window">
+            <field name="name">Rapports d'activité TOUTES MAILLES</field>
+            <field name="res_model">hr.employee_staffing_report</field>
+            <field name="view_mode">tree,pivot,graph</field>
+	    <field name="domain"></field>
+        </record>
+        <menuitem name="Rapports d'activité TOUTES MAILLES (pour tâches d'admin uniquement)" id="employee_staffing_report_year_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_all_action" groups="taz-common.taz-admin"/>
 
        <record id="reset_all_reports_action" model="ir.actions.server">
           <field name="name">Supprimer puis recalculer tous les rapports d'activité (peut prendre plusieurs minutes)</field>
