@@ -70,3 +70,44 @@ class tazResIndustry(models.Model):
             }
         else :
             raise ValidationError(_("Ce projet n'est lié à aucun plan de compte : impossible de l'ouvrir."))
+
+
+    def action_open_contacts(self):
+        contact_ids = []
+        for partner_id in self.partner_ids:
+            contact_ids += partner_id.child_ids_contact.ids
+
+        action = {
+            'name': _('Liste des contacts des entreprises du compte '+self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'res.partner',
+            'view_mode': 'tree,form',
+            'view_id': [self.env.ref("taz-common.contact_tree").id, self.env.ref("taz-common.contact_form").id],
+            'domain': [('id', 'in', contact_ids)],
+            'target': 'current',
+            'limit': 150,
+            'groups_limit': 150,
+            'context': {
+            }
+        }
+
+        return action
+
+    def action_open_business_actions(self):
+        business_action_ids = self.env['taz.business_action'].search([('parent_partner_industry_id', '=', self.id)])
+
+        action = {
+            'name': _('Liste des actions commerciales des entreprises du compte '+self.name),
+            'type': 'ir.actions.act_window',
+            'res_model': 'taz.business_action',
+            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'domain': [('id', 'in', business_action_ids.ids)],
+            'target': 'current',
+            'limit': 150,
+            'groups_limit': 150,
+            'context': {
+                'search_default_state_not_done_not_cancelled': 1
+            }
+        }
+
+        return action

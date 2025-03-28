@@ -16,6 +16,8 @@
 						<field name="business_priority"/>
 						<field name="pillar_id"/>
 						<field name="partner_ids" widget="many2many_tags" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" />
+						<button type="object" name="action_open_contacts" string="Voir les contacts"/>
+						<button type="object" name="action_open_business_actions" string="Voir les actions commerciales"/>
 					</group>
 					<group>
 						<field name="user_id" options="{'no_create': True, 'no_create_edit':True}"/>
