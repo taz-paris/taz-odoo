@@ -18,9 +18,9 @@
 		  <field name="note" optional="hide"/>
 	          <field name="action_type" optional="show"/>
 	          <field name="conclusion" optional="hide"/>
-		  <field name="is_rdv_to_be_taken_by_assistant" optional="show" string="À planifier /EA"/>
-		  <field name="is_rdv_taken_by_assistant" optional="show" string="Planifié /EA"/>
-		  <field name="report_url" widget="url" optional="hide"/>
+		  <field name="is_rdv_to_be_taken_by_assistant" optional="hide"/>
+		  <field name="is_rdv_taken_by_assistant" optional="hide"/>
+		  <field name="report_url" widget="url" optional="show"/>
 		  <field name="parent_partner_id" optional="hide"/>
 		  <field name="parent_partner_industry_id" optional="hide"/>
 		      <button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
