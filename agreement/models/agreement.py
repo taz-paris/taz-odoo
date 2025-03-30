@@ -46,8 +46,9 @@ class Agreement(models.Model):
                 else : 
                     rec.passed_time_rate = 0
 
+    name = fields.Char(required=True, tracking=True, string="Libellé interne")
     code = fields.Char(required=False, tracking=True)
-    name = fields.Char(required=True, tracking=True)
+    official_name = fields.Char(required=True, tracking=True, string="Libellé officiel")
 
     state = fields.Selection([('new', "DCE publié"),
                               ('nogo', "NoGo galaxie"),
@@ -59,6 +60,7 @@ class Agreement(models.Model):
                               ('revoked', "Procédure annulée par l'acheteur")],
                              'Statut', readonly=True, index=True, default='new')
 
+    agreement_procedure_id = fields.Many2one('agreement.procedure', "Marché / Procédure de passation", required=True)
 
     partner_id = fields.Many2one(
         "res.partner",
@@ -66,7 +68,16 @@ class Agreement(models.Model):
         ondelete="restrict",
         tracking=True,
         domain="[('is_company', '=', True), ('type', '=', 'contact')]",
+        default=lambda self: self.agreement_procedure_id.partner_id,
+        readonly=True,
+        required=True
     )
+    """
+    partner_id = fields.Many2one(
+        "res.partner",
+        related="agreement_procedure_id.partner_id"
+    )
+    """
 
     partner_company_ids = fields.Many2many(
         "res.partner",
@@ -129,7 +140,6 @@ class Agreement(models.Model):
     referent = fields.Many2one("res.users", string="Référent Galaxie")
     teams_link = fields.Char("Lien Teams")
 
-    win_announcement = fields.Char("URL vers l'annonce d'attribution", help="Lien vers l'annonce au BODACC de l'attribution du marché")
 
     currency_id = fields.Many2one(
         'res.currency',

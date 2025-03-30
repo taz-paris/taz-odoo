@@ -7,27 +7,30 @@
 	name="Marchés"
     />
     <menuitem
+        id="agreement_procedure_menu"
+        parent="project_agreement_menu"
+        sequence="10"   
+        action="agreement.agreement_procedure_action"
+     />
+    <menuitem
         id="agreement.agreement_menu"
         action="agreement.agreement_action"
         parent="project_agreement_menu"
-	    sequence="10"
-	    name="Marchés"
-    />
-    <menuitem
-        id="agreement.agreement_type_menu"
-        action="agreement.agreement_type_action"
-        parent="project_agreement_menu"
-        sequence="30"
-        groups="agreement.group_use_agreement_type"
-	name="Types de marchés"
+	sequence="20"
     />
     <menuitem
         id="agreement_subcontractor_menu"
         parent="project_agreement_menu"
-        sequence="20"
-        name="Accords de sous-traitance (DC4)"
+        sequence="30"
         action="agreement.agreement_subcontractor_action"
      /> 
+    <menuitem
+        id="agreement.agreement_type_menu"
+        action="agreement.agreement_type_action"
+        parent="project_agreement_menu"
+        sequence="40"
+        groups="agreement.group_use_agreement_type"
+    />
 
         <record id="agreement_form_inherit" model="ir.ui.view">
             <field name="name">Agreement</field>

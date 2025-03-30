@@ -25,56 +25,66 @@
                         <label
                             for="name"
                             class="oe_edit_only"
-                            string="Agreement Name"
+                            string="Libellé interne"
                         />
                         <h1>
                             <field name="name" />
                         </h1>
                     </div>
-                    <group name="main" col="4">
-                        <group name="left" string="Acteurs">
-                            <field
-                                name="partner_id"
-				string="Pouvoir adjudicateur"
-                                attrs="{'required': [('is_template', '=', False)]}"
-				context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"
-                            />
-                            <field name="partner_company_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-                            <field name="mandator_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-                            <field name="cocontractor_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-                            <field name="referent"/>
-             			    <!--
-                                groups="agreement.group_use_agreement_template"
-				    -->
-                        </group>
-                        <group name="right" string="Périodes">
-                            <field name="signature_date" />
-                            <field name="start_date" />
-                            <field name="end_date" string="Date limite de commande" />
-                            <field name="passed_time_rate" widget="progressbar" />
-                            <field name="end_date_contractors"/>
-                        </group>
-                        <group name="left_bottom" string="Montant plafond">
-                            <field name="max_amount"/>
-                        </group>
-                        <group name="right_bottom" string="Autres informations">
-                            <field name="code" />
-                            <field name="teams_link" widget="url"/>
-                            <field name="comments"/>
-			    <field
-                                name="agreement_type_id"
-                                groups="agreement.group_use_agreement_type"
-                            />
-                            <field name="end_of_year_discount"/>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="domain" />
-                            <field name="is_template" invisible="1"/>
-                            <field name="is_galaxy_agreement"/>
-                            <field name="win_announcement"/>
+		    <group>
+			    <group>
+				<field name="agreement_procedure_id"/>
+                            	<field name="code" />
+                            	<field name="official_name" />
+			    </group>
+			    <group>
+                            	<field name="comments"/>
+			    </group>
+		    </group>
 
-                        </group>
-                    </group>
                     <notebook>
+                        <page name="agreement_data" string="Données principales">
+				    <group name="main" col="4">
+					<group name="left" string="Acteurs">
+					    <field
+						name="partner_id"
+						string="Pouvoir adjudicateur"
+						attrs="{'required': [('is_template', '=', False)]}"
+						context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"
+					    />
+					    <field name="partner_company_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+					    <field name="mandator_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+					    <field name="cocontractor_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+					    <field name="referent"/>
+						    <!--
+						groups="agreement.group_use_agreement_template"
+						    -->
+					</group>
+					<group name="right" string="Périodes">
+					    <field name="signature_date" />
+					    <field name="start_date" />
+					    <field name="end_date" string="Date limite de commande" />
+					    <field name="passed_time_rate" widget="progressbar" />
+					    <field name="end_date_contractors"/>
+					</group>
+					<group name="left_bottom" string="Montant plafond">
+					    <field name="max_amount"/>
+					</group>
+					<group name="right_bottom" string="Autres informations">
+					    <field name="teams_link" widget="url"/>
+					    <field
+						name="agreement_type_id"
+						groups="agreement.group_use_agreement_type"
+					    />
+					    <field name="end_of_year_discount"/>
+					    <field name="currency_id" invisible="1"/>
+					    <field name="domain" />
+					    <field name="is_template" invisible="1"/>
+					    <field name="is_galaxy_agreement"/>
+
+					</group>
+				    </group>
+			</page>
                         <page name="agreement_subcontractor" string="Sous-traitants de rang 1" attrs="{'invisible': [('domain','!=','sale')]}">
 				<field name="agreement_subcontractor_ids">
 					<tree>

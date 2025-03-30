@@ -7,8 +7,10 @@
             <tree string="Agreement Subcontractors">
                 <field name="partner_id" />
                 <field name="agreement_id" />
-                <field name="start_date" />
-                <field name="end_date" />
+                <field name="start_date"  optional="show"/>
+                <field name="partner_validation_date"  optional="show"/>
+                <field name="end_date" optional="show" />
+		<field name="max_amount" optional="show"/>
             </tree>
         </field>
     </record>
@@ -55,7 +57,7 @@
         </field>
     </record>
     <record id="agreement_subcontractor_action" model="ir.actions.act_window">
-        <field name="name">Agreement Subcontractors</field>
+        <field name="name">Accords de sous-traitance (DC4)</field>
         <field name="res_model">agreement.subcontractor</field>
         <field name="view_mode">tree,form</field>
     </record>
