@@ -9,6 +9,9 @@
         <field name="model">agreement</field>
         <field name="arch" type="xml">
             <form string="Agreement">
+		<header>
+			<field name="state" widget="statusbar" on_change="1"/>
+		</header>
                 <sheet>
                     <div class="oe_button_box" name="button_box" />
                     <widget
@@ -62,10 +65,12 @@
                                 name="agreement_type_id"
                                 groups="agreement.group_use_agreement_type"
                             />
+                            <field name="end_of_year_discount"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="domain" />
                             <field name="is_template" invisible="1"/>
                             <field name="is_galaxy_agreement"/>
+                            <field name="win_announcement"/>
 
                         </group>
                     </group>
@@ -107,11 +112,19 @@
                 <field name="partner_id" />
                 <field name="code" optional="hide"/>
                 <field name="name" />
-                <field name="signature_date" />
-                <field name="start_date" />
-                <field name="end_date"/>
+		<field name="state" widget="badge" 
+			decoration-info="state == 'new'" 
+			decoration-success="state == 'won'" 
+			decoration-danger="state == 'cancelled' or state == 'revoked'" 
+			decoration-warning="state == 'lost'" 
+			decoration-muted="state == 'passed' or state == 'nogo'" 
+			decoration-primary="state == 'work_on_anwser'"
+			/>
+                <field name="signature_date" optional="show"/>
+                <field name="start_date" optional="show"/>
+                <field name="end_date" optional="show"/>
                 <field name="passed_time_rate" optional="show" widget="progressbar"/>
-                <field name="end_date_contractors"/>
+                <field name="end_date_contractors" optional="show"/>
                 <field name="domain" optional="hide"/>
             </tree>
         </field>

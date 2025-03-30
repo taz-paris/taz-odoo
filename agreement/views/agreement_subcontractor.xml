@@ -6,6 +6,9 @@
         <field name="arch" type="xml">
             <tree string="Agreement Subcontractors">
                 <field name="partner_id" />
+                <field name="agreement_id" />
+                <field name="start_date" />
+                <field name="end_date" />
             </tree>
         </field>
     </record>
@@ -31,6 +34,7 @@
                             <field name="code" />
                             <field name="teams_link" widget="url"/>
                             <field name="comments"/>
+			    <field name="markup_deal"/>
                         </group>
                     </group>
 		    <group name="amount_rows">

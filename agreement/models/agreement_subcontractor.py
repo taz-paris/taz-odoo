@@ -168,6 +168,8 @@ class AgreementSubcontractor(models.Model):
     is_partner_id_res_company = fields.Boolean(compute=_compute_is_partner_id_res_company)
     max_amount = fields.Monetary("Montant HT max de sous-traitance")
 
+    markup_deal = fields.Html("Markup convenu", help="Décrire ici le taux de markup dealé avec le mandataire/co-traitant, le cas échéant")
+
     ordered_total = fields.Monetary("Total HT commandé", store=False, compute=compute, compute_sudo=True)
     ordered_total_available = fields.Monetary("Reste engageable sur le total HT commandé", store=False, compute=compute, compute_sudo=True)
     ordered_direct_payment = fields.Monetary("Commandé HT en paiement direct", store=False, compute=compute, compute_sudo=True)

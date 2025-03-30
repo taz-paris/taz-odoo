@@ -57,19 +57,19 @@ msgstr ""
 #: model:ir.model,name:agreement.model_agreement
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_form
 msgid "Agreement"
-msgstr "Accord"
+msgstr "Marché"
 
 #. module: agreement
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_form
 msgid "Agreement Name"
-msgstr "Nom de l'accord"
+msgstr "Nom du marché"
 
 #. module: agreement
 #: model:ir.model.fields,field_description:agreement.field_agreement__agreement_type_id
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_type_form_view
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_type_search
 msgid "Agreement Type"
-msgstr "Type d'accord"
+msgstr "Type de marché"
 
 #. module: agreement
 #: model:ir.actions.act_window,name:agreement.agreement_type_action
@@ -77,7 +77,7 @@ msgstr "Type d'accord"
 #: model:ir.ui.menu,name:agreement.agreement_type_menu
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_type_list_view
 msgid "Agreement Types"
-msgstr "Types d'accord"
+msgstr "Types de marché"
 
 #. module: agreement
 #: model:ir.actions.act_window,name:agreement.agreement_action
@@ -85,7 +85,7 @@ msgstr "Types d'accord"
 #: model:ir.ui.menu,name:agreement.agreement_menu_root
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_tree
 msgid "Agreements"
-msgstr "Accords"
+msgstr "Marchés"
 
 #. module: agreement
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_form
@@ -338,12 +338,12 @@ msgstr "Vente"
 #. module: agreement
 #: model_terms:ir.ui.view,arch_db:agreement.agreement_search
 msgid "Search Agreements"
-msgstr "Recherche Accords"
+msgstr "Recherche Marchés"
 
 #. module: agreement
 #: model:ir.model.fields,help:agreement.field_agreement__agreement_type_id
 msgid "Select the type of agreement"
-msgstr "Sélectionner le type d'accord"
+msgstr "Sélectionner le type de marché"
 
 #. module: agreement
 #: model:ir.model.fields,help:agreement.field_agreement__is_template
@@ -351,7 +351,7 @@ msgid ""
 "Set if the agreement is a template. Template agreements don't require a "
 "partner."
 msgstr ""
-"Définir cet accord comme modèle. Les modèles d'accord ne nécessitent pas de "
+"Définir ce marché comme modèle. Les modèles de marché ne nécessitent pas de "
 "partenaires."
 
 #. module: agreement
@@ -386,7 +386,7 @@ msgstr "Client ou fournisseur avec lequel le contrat est lié."
 #. module: agreement
 #: model:ir.model.constraint,message:agreement.constraint_agreement_code_partner_company_unique
 msgid "This agreement code already exists for this partner!"
-msgstr "Code accord existant pour ce partenaire !"
+msgstr "Code marché existant pour ce partenaire !"
 
 #. module: agreement
 #: model:ir.model.fields,field_description:agreement.field_agreement__name
@@ -416,12 +416,12 @@ msgstr "Nombre de messages non lus"
 #. module: agreement
 #: model:res.groups,name:agreement.group_use_agreement_template
 msgid "Use agreement template"
-msgstr "Utiliser le modèle d'accord"
+msgstr "Utiliser le modèle de marché"
 
 #. module: agreement
 #: model:res.groups,name:agreement.group_use_agreement_type
 msgid "Use agreement type"
-msgstr "Utiliser le type d'accord"
+msgstr "Utiliser le type de marché"
 
 #. module: agreement
 #: model:ir.model.fields,field_description:agreement.field_agreement__website_message_ids

@@ -1,12 +1,41 @@
 <odoo>
   <data>
+    <menuitem
+        id="project_agreement_menu"
+        action="agreement.agreement_action"
+        parent="project.menu_main_pm"
+	name="Marchés"
+    />
+    <menuitem
+        id="agreement.agreement_menu"
+        action="agreement.agreement_action"
+        parent="project_agreement_menu"
+	    sequence="10"
+	    name="Marchés"
+    />
+    <menuitem
+        id="agreement.agreement_type_menu"
+        action="agreement.agreement_type_action"
+        parent="project_agreement_menu"
+        sequence="30"
+        groups="agreement.group_use_agreement_type"
+	name="Types de marchés"
+    />
+    <menuitem
+        id="agreement_subcontractor_menu"
+        parent="project_agreement_menu"
+        sequence="20"
+        name="Accords de sous-traitance (DC4)"
+        action="agreement.agreement_subcontractor_action"
+     /> 
+
         <record id="agreement_form_inherit" model="ir.ui.view">
             <field name="name">Agreement</field>
             <field name="model">agreement</field>
             <field name="inherit_id" ref="agreement.agreement_form"/>
             <field name="arch" type="xml">
 		    <xpath expr="//page[@name='config']" position="after">
-				<page string="Projets" name="projects">
+				<page string="Projets liés" name="projects">
 					<field name="project_ids">
 						  <tree delete="false" 
 							  decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'"

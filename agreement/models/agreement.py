@@ -48,6 +48,18 @@ class Agreement(models.Model):
 
     code = fields.Char(required=False, tracking=True)
     name = fields.Char(required=True, tracking=True)
+
+    state = fields.Selection([('new', "DCE publié"),
+                              ('nogo', "NoGo galaxie"),
+                              ('work_on_anwser', "Go - Réponse en cours"),
+                              ('lost', "Marché perdu"),
+                              ('won', "Marché en cours"),
+                              ('passed', "Marché terminé"),
+                              ('cancelled', "Annulé - erreur Tasmane"),
+                              ('revoked', "Procédure annulée par l'acheteur")],
+                             'Statut', readonly=True, index=True, default='new')
+
+
     partner_id = fields.Many2one(
         "res.partner",
         string="Pouvoir adjudicateur",
@@ -111,10 +123,13 @@ class Agreement(models.Model):
     end_date = fields.Date(string="Date limite de commande", tracking=True)
     end_date_contractors = fields.Date(string="Date de fin d'exécution des prestations", tracking=True)
     passed_time_rate = fields.Float("%age écoulé (durée)", compute=compute)
+    end_of_year_discount = fields.Html("Remise de fin d'année", help="Décrire ici les modalités de remise de fin d'année, le cas échéant")
 
     comments = fields.Html('Commentaires')
     referent = fields.Many2one("res.users", string="Référent Galaxie")
     teams_link = fields.Char("Lien Teams")
+
+    win_announcement = fields.Char("URL vers l'annonce d'attribution", help="Lien vers l'annonce au BODACC de l'attribution du marché")
 
     currency_id = fields.Many2one(
         'res.currency',

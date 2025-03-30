@@ -32,3 +32,5 @@ class Agreement(models.Model):
     other_contractors_total_sale_order = fields.Monetary("Montant commandé hors Galaxie", help="Montants commandés auprès des autres co-traitants.")
     available_amount = fields.Monetary("Montant restant engageable", compute=compute, compute_sudo=True)
     sold_rate = fields.Float("%age déjà engagé (€)", compute=compute, compute_sudo=True)
+
+    sale_order_ids = fields.One2many('sale.order', 'agreement_id')
