@@ -12,7 +12,6 @@ class AgreementProcedure(models.Model):
         "res.partner",
         string="Pouvoir adjudicateur",
         ondelete="restrict",
-        tracking=True,
         domain="[('is_company', '=', True), ('type', '=', 'contact')]",
         required=True,
     )

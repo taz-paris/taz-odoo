@@ -62,22 +62,19 @@ class Agreement(models.Model):
 
     agreement_procedure_id = fields.Many2one('agreement.procedure', "Marché / Procédure de passation", required=True)
 
+    """
     partner_id = fields.Many2one(
         "res.partner",
         string="Pouvoir adjudicateur",
         ondelete="restrict",
         tracking=True,
         domain="[('is_company', '=', True), ('type', '=', 'contact')]",
-        default=lambda self: self.agreement_procedure_id.partner_id,
-        readonly=True,
-        required=True
     )
     """
     partner_id = fields.Many2one(
         "res.partner",
         related="agreement_procedure_id.partner_id"
     )
-    """
 
     partner_company_ids = fields.Many2many(
         "res.partner",
@@ -135,6 +132,7 @@ class Agreement(models.Model):
     end_date_contractors = fields.Date(string="Date de fin d'exécution des prestations", tracking=True)
     passed_time_rate = fields.Float("%age écoulé (durée)", compute=compute)
     end_of_year_discount = fields.Html("Remise de fin d'année", help="Décrire ici les modalités de remise de fin d'année, le cas échéant")
+    markup_deal = fields.Html("Frais de gestion", help="Décrire ici le taux de frais de gestion dealé avec le mandataire, le cas échéant")
 
     comments = fields.Html('Commentaires')
     referent = fields.Many2one("res.users", string="Référent Galaxie")
