@@ -58,7 +58,7 @@ class Agreement(models.Model):
                               ('passed', "Marché terminé"),
                               ('cancelled', "Annulé - erreur Tasmane"),
                               ('revoked', "Procédure annulée par l'acheteur")],
-                             'Statut', readonly=True, index=True, default='new')
+                             'Statut', index=True, default='new')
 
     agreement_procedure_id = fields.Many2one('agreement.procedure', "Marché / Procédure de passation", required=True)
 
@@ -136,7 +136,7 @@ class Agreement(models.Model):
 
     comments = fields.Html('Commentaires')
     referent = fields.Many2one("res.users", string="Référent Galaxie")
-    teams_link = fields.Char("Lien Teams")
+    teams_link = fields.Char("Lien dossier réponse")
 
 
     currency_id = fields.Many2one(
@@ -145,7 +145,7 @@ class Agreement(models.Model):
         string="Currency",
         readonly=True
     )
-    max_amount = fields.Monetary("Montant max de l'accord", store=True)
+    max_amount = fields.Monetary("Montant maximum", store=True)
 
     is_galaxy_agreement = fields.Boolean("Marché de la galaxie", compute=compute, help="Une entreprise de la galaxie est titulaire ou bien co-traitante de ce marché.")
 

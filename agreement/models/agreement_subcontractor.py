@@ -84,7 +84,7 @@ class AgreementSubcontractor(models.Model):
 
     code = fields.Char(string="Référence")
     comments = fields.Html('Commentaires')
-    teams_link = fields.Char("Lien Teams")
+    teams_link = fields.Char("Lien vers le DC4")
 
 
     @api.depends('partner_id')#, 'partner_id.ref_company_ids')

@@ -36,6 +36,7 @@
 				<field name="agreement_procedure_id"/>
                             	<field name="code" />
                             	<field name="official_name" />
+                            	<field name="state" />
 			    </group>
 			    <group>
                             	<field name="comments"/>
@@ -122,6 +123,7 @@
             <tree string="Agreements">
                 <field name="partner_id" />
                 <field name="code" optional="hide"/>
+                <field name="agreement_procedure_id" optional="hide"/>
                 <field name="name" />
 		<field name="state" widget="badge" 
 			decoration-info="state == 'new'" 

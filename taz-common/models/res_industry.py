@@ -25,7 +25,7 @@ class tazResIndustry(models.Model):
          ('active', '1-Compte actif'),
          ('priority_target', '2-Compte prioritaire'),
          ('not_tracked', '3-Opportunités'),
-         ('inditto', '4-Comptes Inditto'),
+         ('inditto', '4-Contribution Inditto'),
     ], "Niveau de priorité", default='not_tracked')#, tracking=True)
 
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
