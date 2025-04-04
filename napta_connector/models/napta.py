@@ -1025,7 +1025,16 @@ class naptaHrContract(models.Model):
 
 
             override = False
-            if job_ids and user_history['attributes']['daily_cost'] != None:
+            #_logger.info('cas 0000000000000000000000000')
+            #_logger.info(job_ids)
+            #_logger.info(str(user_history['attributes']))
+            if user_history['attributes']['daily_cost'] != None:
+                daily_cost = user_history['attributes']['daily_cost']
+            else :
+                daily_cost = 0.0
+
+            if job_ids :
+                #_logger.info('cas 1')
                 cost_lines = self.env['hr.cost'].search([('job_id', '=', job_ids[0].id)], order="begin_date asc")
                 if not cost_lines :
                     override = True
@@ -1045,18 +1054,19 @@ class naptaHrContract(models.Model):
                     if cost_line.end_date and cost_line.end_date < napta_start_date:
                         continue
                     # Si au moins une cost_line pour ce job_id au cours du contrat a un tarif différent à celui du user_hirtory_napta, alors on passe en mode overriden le contrat
-                    if cost_line.cost != user_history['attributes']['daily_cost']:
+                    if cost_line.cost != daily_cost:
                         override = True
                         #_logger.info('cas D')
                         #_logger.info(cost_line.read())
-                        #_logger.info(user_history['attributes']['daily_cost'])
+                        #_logger.info(daily_cost)
                         break
              
             if override:
                 _logger.info('      > Surchage du daily_cost au niveau de contrat napta_id=%s pour le user avec le napta_id= %s : %s' % (str(napta_id), (str(user_history['attributes']['user_id'])), str(user_history['attributes'])))
                 dic['is_daily_cost_overridden'] = True
-                dic['daily_cost'] = user_history['attributes']['daily_cost']
+                dic['daily_cost'] = daily_cost
                 
+            #_logger.info('is_daily_cost_overridden : %s' % str(dic['is_daily_cost_overridden']))
             create_update_odoo(self.env, 'hr.contract', dic, context_add={'do_not_update_staffing_report' : True, 'do_not_update_project' : True})
             #TODO : les attributs is_daily_cost_overridden et daily_cost ne doivent pas pouvoir changer si la clôture comptable est passée
                     # il faut créer un controle lors de l'écriture/création des objects hr.contract côté Odoo
