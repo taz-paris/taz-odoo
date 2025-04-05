@@ -133,6 +133,7 @@ class Agreement(models.Model):
     passed_time_rate = fields.Float("%age écoulé (durée)", compute=compute)
     end_of_year_discount = fields.Html("Remise de fin d'année", help="Décrire ici les modalités de remise de fin d'année, le cas échéant")
     markup_deal = fields.Html("Frais de gestion", help="Décrire ici le taux de frais de gestion dealé avec le mandataire, le cas échéant")
+    social_clause = fields.Html("Clause d'insertion / pénalités", help="Décrire ici les clauses d'insertion à respecter et les pénalités en cas de non-respect, le cas échéant")
 
     comments = fields.Html('Commentaires')
     referent = fields.Many2one("res.users", string="Référent Galaxie")

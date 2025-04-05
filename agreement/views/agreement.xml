@@ -79,6 +79,7 @@
 					    />
 					    <field name="end_of_year_discount"/>
 					    <field name="markup_deal"/>
+					    <field name="social_clause"/>
 					    <field name="currency_id" invisible="1"/>
 					    <field name="domain" />
 					    <field name="is_template" invisible="1"/>
