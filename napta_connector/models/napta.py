@@ -920,6 +920,11 @@ class naptaJob(models.Model):
                 }
             create_update_odoo(self.env, 'hr.job', dic)
 
+
+    def delete_not_found_anymore_object_on_napta(self):
+        # Fait planter le traitement si on le fait avant d'avoir mis à jour les user_history et qu'il y a encore des user_histiry qui poinet vers ce hr.job => intégrité relationnelle
+        #       Donc on appelle cette fonction dans une méthode dédiée que l'on appelle après la mise à jour des contrats
+        client = ClientRestNapta(self.env)
         client.delete_not_found_anymore_object_on_napta('hr.job', 'user_position')
 
 
@@ -1072,6 +1077,10 @@ class naptaHrContract(models.Model):
                     # il faut créer un controle lors de l'écriture/création des objects hr.contract côté Odoo
                     # ... mais ça ne doit pas faire planter toute la synchro Napta => donc il faudrait catcher l'exception 
                     # ... à voir si on fait ces évolutions si jamais on décide que c'est TF qui pousse les CJM sur Napta
+
+
+        # on supprime les hr.job qui n'existent plus sur Napta
+        self.env['hr.job'].delete_not_found_anymore_object_on_napta()
 
     #TODO : surcharger les méthodes CRUD de l'objet hr.cost pour que ça mette à jour les CJM de tous les utilisateteurs Napta qui ont sur ce grade sur la période
     #TODO : intégrer la date de sortie du napta user à la fin du dernier contrat Odoo

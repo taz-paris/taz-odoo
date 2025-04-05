@@ -278,6 +278,7 @@ class HrEmployeeStaffingReport(models.Model):
             if rec.has_to_be_recomputed :
                 rec.has_to_be_recomputed = False
 
+
     def action_open_analytic_lines(self):
         analytic_lines = self.analytic_lines
         view_id = self.env.ref("staffing.hr_timesheet_line_tree_period_depending")
@@ -359,22 +360,22 @@ class HrEmployeeStaffingReport(models.Model):
         _logger.info(reports)
         reports.availability()
 
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.job_id')
+    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.job_id', 'start_date')
     def compute_job(self):
         for rec in self:
             rec.rel_job_id = rec.employee_id._get_job_id(rec.start_date)
 
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.work_location_id')
+    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.work_location_id', 'start_date')
     def compute_work_location(self):
         for rec in self:
             rec.rel_work_location_id = rec.employee_id._get_work_location_id(rec.start_date)
 
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.department_id')
+    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.department_id', 'start_date')
     def compute_department(self):
         for rec in self:
             rec.rel_department_id = rec.employee_id._get_department_id(rec.start_date)
 
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.company_id')
+    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.company_id', 'start_date')
     def compute_company(self):
         for rec in self:
             rec.company_id = rec.employee_id._get_company_id(rec.start_date)
