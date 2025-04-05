@@ -189,6 +189,12 @@ class staffingEmployee(models.Model):
             return contract.company_id
         return False
 
+    def _get_productive_share(self, date):
+        contract = self._get_contract(date)
+        if contract :
+            return contract.productive_share
+        return 100.0
+
     def _get_job_id(self, date):
         contract = self._get_contract(date)
         if contract :

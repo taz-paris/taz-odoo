@@ -47,7 +47,7 @@ class HrContract(models.Model):
         old_date_end = self.date_end
         old_employee_id = self.employee_id.id
         res = super().write(vals)
-        if 'date_start' in vals or 'date_end' in vals or 'employee_id' in vals or 'is_daily_cost_overridden' in vals or 'daily_cost' in vals:
+        if 'date_start' in vals or 'date_end' in vals or 'employee_id' in vals or 'is_daily_cost_overridden' in vals or 'daily_cost' in vals or 'job_id' in vals :
             if not(old_date_end):
                 old_date_end = datetime.date(2100,1,1)
             if not(self.date_end):
