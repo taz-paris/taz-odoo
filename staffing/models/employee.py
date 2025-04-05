@@ -238,6 +238,16 @@ class staffingEmployee(models.Model):
         count = len(self.list_work_days_period(date_start, date_end))
         return count
 
+    def number_work_days_period_including_productive_share(self, date_start, date_end):
+        #_logger.info('numbers_work_days_period_including_productive_share %s du %s au %s' % (self.name, str(date_start), str(date_end)))
+        self.ensure_one()
+        count = 0.0
+        list_work_days_period = self.list_work_days_period(date_start, date_end)
+        for day in list_work_days_period:
+            #_logger.info(self._get_contract(day).productive_share)
+            count += self._get_contract(day).productive_share/100.0
+        return count
+
     def list_work_days_period(self, date_start, date_end):
         self.ensure_one()
         list_work_days_period_common = self.list_work_days_period_common(date_start, date_end)

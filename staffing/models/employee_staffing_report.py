@@ -250,8 +250,9 @@ class HrEmployeeStaffingReport(models.Model):
 
                 #_logger.info(lines)
      
-                rec.workdays = rec.employee_id.number_work_days_period(real_start_date, real_end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
-                rec.hollidays = lines['holidays']['other']['sum_period_unit_amount']
+                #_logger.info(rec.employee_id.number_work_days_period_including_productive_share(real_start_date, real_end_date))
+                rec.workdays = rec.employee_id.number_work_days_period_including_productive_share(real_start_date, real_end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
+                rec.hollidays = min(rec.workdays, lines['holidays']['other']['sum_period_unit_amount'])
                 rec.activity_days = rec.workdays - rec.hollidays
                 rec.project_days = lines['mission']['project_employee_validated']['sum_period_unit_amount']
                 rec.learning_internal_days = lines['training']['project_employee_validated']['sum_period_unit_amount']

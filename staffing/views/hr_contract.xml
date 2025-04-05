@@ -8,6 +8,7 @@
                 <field name="job_id" position="after">
                         <field name="is_daily_cost_overridden" />
 			<field name="daily_cost" attrs="{'invisible': [('is_daily_cost_overridden', '=', False)]}"/>
+			<field name="productive_share" />
                 </field>
             </field>
         </record>
