@@ -230,6 +230,7 @@ class staffingAnalyticLine(models.Model):
         return res
 
 
+    @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         #_logger.info('======================= read_group account_analytic_line.py')
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)

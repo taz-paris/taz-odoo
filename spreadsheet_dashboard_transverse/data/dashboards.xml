@@ -6,7 +6,7 @@
     </record>
 
     <record id="spreadsheet_dashboard_transverse" model="spreadsheet.dashboard">
-        <field name="name">Transverse</field>
+        <field name="name">Activité (version GIT)</field>
         <field name="data" type="base64" file="spreadsheet_dashboard_transverse/data/files/transverse_dashboard.json"/>
         <field name="dashboard_group_id" ref="spreadsheet_dashboard_group_transverse"/>
         <field name="group_ids" eval="[Command.link(ref('taz-common.taz-cdg'))]"/>
@@ -14,12 +14,22 @@
         <field name="active">False</field>
     </record>
 
+    <record id="spreadsheet_dashboard_customer_book_goal" model="spreadsheet.dashboard">
+        <field name="name">Prise de commande (version GIT)</field>
+        <field name="data" type="base64" file="spreadsheet_dashboard_transverse/data/files/customer_book_goal_dashboard.json"/>
+        <field name="dashboard_group_id" ref="spreadsheet_dashboard_group_transverse"/>
+        <field name="group_ids" eval="[Command.link(ref('taz-common.taz-management'))]"/>
+        <field name="sequence">2</field>
+        <field name="active">False</field>
+    </record>
+
+
     <record id="spreadsheet_dashboard_staffing" model="spreadsheet.dashboard">
-        <field name="name">Histo TACE</field>
+        <field name="name">Historique TACE (version GIT)</field>
         <field name="data" type="base64" file="spreadsheet_dashboard_transverse/data/files/staffing_dashboard.json"/>
         <field name="dashboard_group_id" ref="spreadsheet_dashboard_group_transverse"/>
         <field name="group_ids" eval="[Command.link(ref('taz-common.taz-basic'))]"/>
-        <field name="sequence">1</field>
+        <field name="sequence">3</field>
         <field name="active">True</field>
     </record>
 

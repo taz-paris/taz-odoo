@@ -58,7 +58,7 @@ class tazCustomerBookGoal(models.Model):
             record.book_last_month, last_month_project_ids = record.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today(), record.company_id)
             record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_number_of_opportunities(record.company_id)
 
-
+    @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
@@ -78,10 +78,6 @@ class tazCustomerBookGoal(models.Model):
             if data['period_goal'] != 0.0:
                 data['period_ratio'] = data['period_book']/data['period_goal'] * 100
             
-            for computed_non_stored_field in COMPUTED_FIELD_LIST:
-                if computed_non_stored_field not in fields:
-                    del data[computed_non_stored_field]
-
         return res
 
     def action_open_project_opportunities(self):

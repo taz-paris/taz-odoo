@@ -92,6 +92,19 @@
         </field>
     </record>
 
+    <record model="ir.ui.view" id="taz-common.customer_book_goal_pivot">
+      <field name="name">Objectif de book</field>
+      <field name="model">taz.customer_book_goal</field>
+      <field name="arch" type="xml">
+	<pivot string="Suivi du book">
+	    <field name="rel_business_priority" type="row"/>
+	    <field name="industry_id" type="row"/>
+	    <field name="reference_period" type="col"/>
+	    <field name="period_goal" type="measure"/>
+	</pivot>
+      </field>
+    </record>
+
     <record model="ir.ui.view" id="taz-common.customer_book_followup_tree">
       <field name="name">Suivi du book</field>
       <field name="model">taz.customer_book_followup</field>
@@ -119,8 +132,8 @@
       <field name="model">taz.customer_book_followup</field>
       <field name="arch" type="xml">
 	<pivot string="Suivi du book">
-	    <field name="date_update" interval="month" type="col"/>
 	    <field name="industry_id" type="row"/>
+	    <field name="date_update" interval="month" type="col"/>
 	    <field name="period_book"  type="measure"/>
 	    <field name="period_futur_book"  type="measure"/>
 	    <field name="period_landing"  type="measure"/>
