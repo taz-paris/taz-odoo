@@ -168,6 +168,7 @@
         <field name="name">account.out.invoice.search</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+	<field name="mode">primary</field>
         <field name="arch" type="xml">
 		<xpath expr="//filter[@name='due_date']" position="after">
 			<separator/>
@@ -193,7 +194,7 @@
             <field name="res_model">account.move</field>
             <field name="view_mode">tree,kanban,form,activity</field>
             <field name="view_id" ref="account.view_out_invoice_tree"/>
-            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="search_view_id" ref="project_accounting.view_account_invoice_filter_inherit"/>
             <field name="domain">[('move_type', 'in', ['out_invoice', 'in_invoice', 'out_refund', 'in_refund'])]</field>
             <field name="context">{'create': False}</field>
         </record>
