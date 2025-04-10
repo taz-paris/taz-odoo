@@ -1470,3 +1470,6 @@ class projectAccountProject(models.Model):
         ('not_specified','Pas de réponse du DM'),
         ], string="Bilan volet social")
     is_filled_csr_project_social_level = fields.Boolean("Champp Bilan volet social valorisé", store=True, compute=compute, help="FAUX si le champ Bilan volet social dans l'onglet Structure au lancement n'est pas valorisé")
+    csr_form_date = fields.Date("Date de dépot de la fiche RSE")
+    csr_form_author = fields.Many2one('hr.employee', "Auteur de la fiche RSE", required=False, check_company=False)
+    csr_form_url = fields.Char("Lien vers la fiche RSE")

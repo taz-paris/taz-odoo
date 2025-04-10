@@ -78,6 +78,8 @@
 			  decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"
 			  />
 		  <field name="color_rel" invisible="1" />
+		  <field name="date_start" optional="hide"/>
+		  <field name="date" optional="hide"/>
 		  <field name="book_employee_distribution_ids" optional="show" widget="many2many_tags" />
 		  <field name="is_validated_book" optional="hide" />
 		  <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés"/>
@@ -95,6 +97,9 @@
 		  <field name="csr_project_initiative" optional="hide"/>
 		  <field name="csr_project_environmental_level" optional="hide"/>
 		  <field name="csr_project_social_level" optional="hide"/>
+		  <field name="csr_form_date" optional="hide"/>
+		  <field name="csr_form_author" optional="hide"/>
+		  <field name="csr_form_url" optional="hide"/>
 		  <field name="rel_partner_industry_id" optional="hide"/>
 		  <field name="company_part_amount_initial" optional="hide"/>
 		  <field name="outsource_part_marging_amount_initial" optional="hide"/>
@@ -517,6 +522,9 @@
 							<group string="Bilan RSE du projet">
 								<field name="csr_project_social_level"/>
 								<field name="csr_project_environmental_level"/>
+								  <field name="csr_form_date" />
+								  <field name="csr_form_author" />
+								  <field name="csr_form_url" />
 							</group>
 						</group>
 					</page>
