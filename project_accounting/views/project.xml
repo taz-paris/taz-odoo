@@ -436,7 +436,7 @@
 					</page>
 					<page name="steering" string="Pilotage">
 						<group>
-							<group string="Au 1er janvier N">
+							<group string="Au 1er janvier N (si la cloture au 31/12/N-1 est faite !)">
 								<field name="begin_year_stage_id"/>
 								<field name="begin_year_past_internal_revenue"/>
 								<field name="begin_year_futur_internal_revenue"/>
