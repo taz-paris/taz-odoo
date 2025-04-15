@@ -64,7 +64,7 @@
 				<group string="Projet">
 					<field name="company_id" invisible="1"/>
 					<field name="company_id" groups="base.group_multi_company"/>
-					<field name="project_id" attrs="{'readonly':[('project_id','!=',False)]}"/>
+					<field name="project_id" attrs="{'readonly':[('project_id','!=',False)]}" force_save="1"/>
 					<field name="rel_project_user_id" string="Directeur de mission"/>
 					<field name="rel_project_manager_user_id"/>
 				    <label for="rel_project_date_start" string="Dates de début/fin"/>

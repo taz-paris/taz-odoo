@@ -124,7 +124,9 @@ class projectAccountProject(models.Model):
         return res
 
 
+    @api.model
     def get_field_tracked_value(self, field_name, target_date):
+        _logger.info('---- get_field_tracked_value field_name=%s target_date=%s'% (field_name, target_date))
         model_name = 'project.project'
         project_model_id = self.env['ir.model'].search([('model', '=', model_name)])[0]
         field_ids = self.env['ir.model.fields'].search([('name', '=', field_name), ('model_id', '=', project_model_id.id)])
@@ -752,7 +754,7 @@ class projectAccountProject(models.Model):
                     #if book_period_current_year.period_project_book == 0.0 :
                     #    book_period_current_year.unlink()
 
-            rec.compute_begin_year_futur_revenue()
+            #rec.compute_begin_year_futur_revenue()
             #rec.compute_reporting_shortcuts()
             if rec.has_to_be_recomputed :
                 rec.has_to_be_recomputed = False
@@ -776,8 +778,9 @@ class projectAccountProject(models.Model):
                 continue
             if line.state not in status_list_to_keep:
                 continue
-            total += line.price_subtotal * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
-            total_with_tax += line.price_total * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            if str(self.analytic_account_id.id) in line.analytic_distribution.keys():
+                total += line.price_subtotal * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+                total_with_tax += line.price_total * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
         #_logger.info(total)
         #_logger.info('----------END compute_sale_order_total')
         return total, total_with_tax
@@ -1241,12 +1244,23 @@ class projectAccountProject(models.Model):
         #_logger.info('Nombre de projets à recalculer : %s' % str(len(projects)))
         projects.compute()
 
-    @api.depends('reporting_sum_company_outsource_code3_code_4', 'accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance') #Recalculé lorsqu'une nouvelle cloture comptable est ajoutée, ou lorsque la prise de commande à date change
+
+    def cron_update_begin_year_stage_id(self):
+        # On utilise un cron pour mettre à jour l'attribut begin_year_stage_id
+        # En revanche on met à jour begin_year_past_internal_revenu et begin_year_futur_internal_revenue via compute_begin_year_futur_revenue car la clôture au 31/12 est enregistrée au cours du premier trimestre, bien après le 1er janvier
+        #       ... et par ailleurs, celà permet de tenir compte de la valeur à date de la prise de commande (reporting_sum_company_outsource_code3_code_4) pour calculer le CA à venir daté du 1er janvier 
+        _logger.info("DEBUT cron_update_begin_year_stage_id")
+        project_ids = self.env['project.project'].search([])
+        for project_id in project_ids:
+            project_id.begin_year_stage_id = project_id.stage_id.id
+        _logger.info("FIN cron_update_begin_year_stage_id")
+
+
+    @api.depends('reporting_sum_company_outsource_code3_code_4', 'accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance')  # Recalculé lorsqu'une nouvelle cloture comptable est ajoutée ou modifiée. On recalcule aussi les valeur au 1er janvier (begin_year_past_internal_revenu et begin_year_futur_internal_revenue) car la clôture au 31/12 est enregistrée au cours du premier trimestre, bien après le 1er janvier
     def compute_begin_year_futur_revenue(self):
+        #_logger.info('--- compute_begin_year_futur_revenue')
         for rec in self:
             date_begin_year = date(date.today().year,1,1)
-            begin_year_stage_id = rec.sudo().get_field_tracked_value('stage_id', date_begin_year)[rec.id]
-            rec.begin_year_stage_id = begin_year_stage_id
 
             ### COMPUTE PAST NET REVENU IN CLOSINGS
             begin_year_past_internal_revenue = 0.0
@@ -1258,7 +1272,7 @@ class projectAccountProject(models.Model):
             rec.begin_year_past_internal_revenue = begin_year_past_internal_revenue
             rec.past_internal_revenue = past_internal_revenue
 
-            if begin_year_stage_id not in [6, 2, 9]: #code_3 = Accord client + code_4 = Commandé + code 5=Production terminée
+            if rec.begin_year_stage_id.id not in [6, 2, 9]: #code_3 = Accord client + code_4 = Commandé + code 5=Production terminée
                 rec.begin_year_futur_internal_revenue = 0.0
             else :
                 rec.begin_year_futur_internal_revenue = rec.reporting_sum_company_outsource_code3_code_4 - rec.begin_year_past_internal_revenue
@@ -1434,7 +1448,7 @@ class projectAccountProject(models.Model):
 
     reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', help="Somme Montant dispositif interne + markup S/T + markup cotraitant + marge ventes Autres (ex : séminaires) pour les projets en code 3-Accord client (données saisies par le DM sur l'onglet Structure au lancement) ou en code 4/5/6 (données calculées et affichées sur l'onglet Synthèse à date).", compute=compute_reporting_shortcuts, store=True)
 
-    begin_year_stage_id = fields.Many2one('project.project.stage', string='Statut au 1er janvier N', ondelete='restrict', groups="project.group_project_stages", compute=compute_begin_year_futur_revenue, store=True)
+    begin_year_stage_id = fields.Many2one('project.project.stage', string='Statut au 1er janvier N', ondelete='restrict', groups="project.group_project_stages", readonly=True)
     begin_year_past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net S/T de toutes les clôtures comptables du projet antérieures ou égales au 31/12/N-1")
     begin_year_futur_internal_revenue = fields.Monetary("CA à venir (daté du 1er janvier N)", compute=compute_begin_year_futur_revenue, store=True, help="Suivant l'étape du projet au 1/1/N : \n    - Si le projet était en code 3/4/5 au 1/1/N = [Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet <= 31/12N-1]\n    - Sinon, 0")
 

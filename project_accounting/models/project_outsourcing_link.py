@@ -36,7 +36,8 @@ class projectOutsourcingLink(models.Model):
                     continue
                 if line.state not in status_list_to_keep:
                     continue
-                total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
+                if str(rec.project_id.analytic_account_id.id) in line.analytic_distribution.keys():
+                    total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
             return total
 
     def action_open_purchase_order_lines(self):
