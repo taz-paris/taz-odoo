@@ -10,7 +10,7 @@
                   	<field name="project_id" optional="show"/>
                   	<field name="original_stage_id" optional="show"/>
                   	<field name="rel_project_stage_id" optional="show"/>
-                  	<field name="closing_date" optional="show"/>
+                  	<field name="closing_date" required="1" optional="show"/>
 			<field name="previous_closing" optional="hide"/>
 			<!-- Validation -->
 			<field name="is_validated" optional="show"/>
@@ -81,7 +81,7 @@
 					<field name="comment_previous" widget="text"/>
 				</group>
 				<group string="Clôture en cours">
-					<field name="closing_date"/>
+					<field name="closing_date" required="1"/>
 					<field name="original_stage_id"/>
 					<field name="is_validated"/>
 					<field name="comment" widget="text"/>
