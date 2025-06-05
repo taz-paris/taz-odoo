@@ -12,5 +12,30 @@
                 </field>
             </field>
         </record>
+
+	<record id="view_hr_contract_pivot" model="ir.ui.view">
+		<field name="name">Contrats</field>
+		<field name="model">hr.contract</field>
+		<field name="arch" type="xml">
+			<pivot string="Contrats">
+				<field name="job_id" type="row"/>
+				<field name="employee_id" type="row"/>
+				<field name="productive_share" type="measure"/>
+			</pivot>
+		</field>
+	</record>
+
+        <record id="hr_contract_action" model="ir.actions.act_window">
+		<field name="name">Contrats</field>
+		<field name="res_model">hr.contract</field>
+		<field name="view_mode">tree,pivot</field>
+	</record>
+	
+	<menuitem name="Contrats" id="hr_contract_menu" parent="hr.menu_hr_employee_payroll" action="hr_contract_action"/>
+
+	<record id="hr_contract.hr_menu_contract_history" model="ir.ui.menu">
+		<field name="name">Historique des contrats</field>
+	</record>
+
    </data>
 </odoo>
