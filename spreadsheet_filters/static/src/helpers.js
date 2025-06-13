@@ -26,10 +26,24 @@ export function getRelativeDateDomainNewFilters(now, offset, rangeType, fieldNam
             endDate = now.minus({months: 1}).endOf("day").plus(offsetParam);
             break;
         }
+        case "year_to_last_closed_week": {
+            const offsetParam = { years: offset };
+            startDate = now.startOf("year").plus(offsetParam);
+            endDate = now.plus(offsetParam).minus({week: 1}).endOf("week");
+            break;
+        }
         case "current_year": {
             const offsetParam = { years: offset };
             startDate = now.startOf("year").plus(offsetParam);
             endDate = now.endOf("year").plus(offsetParam);
+            break;
+        }
+        case "current_week_to_end_year": {
+            const offsetParam = { years: offset };
+            startDate = now.plus(offsetParam).startOf("week");
+            endDate = now.endOf("year").plus(offsetParam);
+	console.log(startDate);
+	console.log(endDate);
             break;
         }
         default:{
@@ -73,7 +87,7 @@ patch(GlobalFiltersUIPlugin.prototype, 'spreadsheet_filters.GlobalFiltersUIPlugi
 		const offset = fieldMatching.offset || 0;
 		const now = DateTime.local();
 		if (filter.rangeType === "relative") {
-	    		if (["year_to_date", "year_to_last_closed_month", "current_year"].includes(value)){
+	    		if (["year_to_date", "year_to_last_closed_month", "year_to_last_closed_week", "current_week_to_end_year", "current_year"].includes(value)){
 				return getRelativeDateDomainNewFilters(now, offset, value, field, type);
 			}
      		}
