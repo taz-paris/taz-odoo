@@ -10,10 +10,17 @@
                         <field name="project_id"/>
                         <field name="partner_id"/>
                         <field name="link_type"/>
-                        <field name="order_sum_purchase_order_lines"/>
-                        <field name="order_direct_payment_amount"/>
-                        <field name="order_company_payment_amount"/>
-                        <field name="sum_account_move_lines"/>
+                        <field name="order_sum_purchase_order_lines" optional="show"/>
+                        <field name="outsource_part_amount_current" optional="hide"/>
+			<field name="marging_amount_current" optional="hide"/>
+                        <field name="marging_rate_current" widget="progressbar" optional="hide"/>
+                        <field name="markup_rate_current" widget="progressbar" optional="hide"/>
+                        <field name="order_direct_payment_amount" optional="show"/>
+                        <field name="order_company_payment_amount" optional="show"/>
+                        <field name="sum_account_move_lines" optional="show"/>
+                        <field name="order_company_payment_to_invoice" optional="hide"/>
+                        <field name="order_direct_payment_done" optional="hide"/>
+                        <field name="order_direct_payment_to_do" optional="hide"/>
 		</tree>                                
             </field>                                    
         </record>
@@ -69,6 +76,32 @@
 		</form>                                
             </field>                                    
         </record>
+
+        <record id="view_project_outsourcing_link_search" model="ir.ui.view">
+            <field name="name">project.outsourcing.link.search</field>
+            <field name="model">project.outsourcing.link</field>
+            <field name="arch" type="xml">
+                <search string="Search Project outsourcing link">
+		    <field name="project_id" string="Projet"/>
+		    <field name="partner_id" string="Fournisseur"/>
+                    <separator/>
+                    <filter name="link_type_outsourcing" string="Liens de type sous-traitance" domain="[('link_type', '=', 'outsourcing')]"/>
+                    <separator/>
+                    <filter name="link_type_cosourcing" string="Liens de type co-traitance" domain="[('link_type', '=', 'cosourcing')]"/>
+                    <separator/>
+                    <filter name="link_type_other" string="Liens de type autre (frais, séminaires...)" domain="[('link_type', '=', 'other')]"/>
+                    <separator/>
+		    <filter name="to_invoice" string="Montant HT restant à facturer non nul" domain="[('order_company_payment_to_invoice', '>', 0.0)]"/>
+		    <filter name="to_validate" string="Montant HT restant à valider (paiement direct) non nul" domain="[('order_direct_payment_to_do', '>', 0.0)]"/>
+                    <group expand="0" string="Group By">
+			<filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
+                        <filter string="Fournisseur" name="partner" context="{'group_by': 'partner_id'}"/>
+		        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
 
     <record id="project_outsourcing_link_tree_action" model="ir.actions.act_window">
         <field name="name">Liens projet-fournisseur</field>

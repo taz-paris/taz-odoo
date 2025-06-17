@@ -194,8 +194,15 @@ class projectOutsourcingLink(models.Model):
         if self.partner_id : 
             self.link_type = self.partner_id.default_outsourcing_link_type
 
+    @api.depends('project_id', 'partner_id')
+    def _compute_display_name(self):
+        for rec in self:
+            if rec.project_id and rec.partner_id:
+                rec.display_name = f"{rec.project_id.name} - {rec.partner_id.name}"
+            else:
+                rec.display_name = f"{rec._name},{rec.id}"
 
-    partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Sous-traitant", required=True)
+    partner_id = fields.Many2one('res.partner', domain="[('is_company', '=', True)]", string="Fournisseur", required=True)
     project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')
     link_type = fields.Selection(OUTSOURCING_LINK_TYPES, string="Type d'achat", required=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
@@ -216,7 +223,7 @@ class projectOutsourcingLink(models.Model):
 
     order_direct_payment_done = fields.Monetary('Somme HT factures en paiement direct validées', compute=compute, store=True)
     order_direct_payment_done_detail = fields.Text('Détail des factures en paiement direct validées', compute=compute, store=True)
-    order_direct_payment_to_do = fields.Monetary('Montant HT restant à valider', compute=compute, store=True)
+    order_direct_payment_to_do = fields.Monetary('Montant HT des factures en paiement direct restant à valider', compute=compute, store=True)
 
     company_paid = fields.Monetary('Montant TTC déjà payé au S/T', compute=compute, store=True)
     company_residual = fields.Monetary('Montant TTC restant à payer au S/T', compute=compute, store=True)
