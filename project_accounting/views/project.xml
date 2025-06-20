@@ -445,6 +445,7 @@
 								<field name="reporting_sum_company_outsource_code3_code_4"/>
 								<field name="past_internal_revenue"/>
 								<field name="futur_internal_revenue"/>
+								<field name="last_closing_production_balance"/>
 							</group>
 						</group>
 					</page>
@@ -550,6 +551,9 @@
 		    <field name="stage_id"/>
 		    <field name="partner_id"/>
 		    <field name="order_sum_sale_order_lines_with_draft" type="measure"/>
+
+		    <field name="futur_internal_revenue" type="measure"/>
+		    <field name="last_closing_production_balance" type="measure"/>
 
 		    <field name="order_amount_current" type="measure"/>
 		    <field name="order_cost_current" type="measure"/>
