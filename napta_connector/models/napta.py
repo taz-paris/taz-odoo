@@ -963,7 +963,12 @@ class naptaHrContract(models.Model):
             if user_history['attributes']['end_date'] != None and user_history['attributes']['end_date'] < BEGIN_OF_TIME:
                 continue
 
-            if user_history['attributes']['start_date'] == None  or user_history['attributes']['start_date'] < BEGIN_OF_TIME:
+            if user_history['attributes']['start_date'] == None :
+                #_logger.info("----- Evnement non importé sur Odoo car il n'a pas de date de fin")
+                #_logger.info(user_history['attributes'])
+                continue
+
+            if user_history['attributes']['start_date'] < BEGIN_OF_TIME:
                 user_history['attributes']['start_date'] = BEGIN_OF_TIME
 
             user = self.env['res.users'].search([('napta_id', '=', user_napta_id)])
