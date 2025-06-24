@@ -1,6 +1,6 @@
 # Author: Julien Coux
 # Copyright 2016 Camptocamp SA
-# Copyright 2021 Tecnativa - João Marques
+# Copyright 2021 Tecnativa - Jo??o Marques
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from odoo import models
 
@@ -496,7 +496,7 @@ class AbstractReportXslx(models.AbstractModel):
                         report_data["formats"]["format_header_amount"],
                     )
                 elif cell_type == "amount_currency":
-                    if my_object["currency_id"] and value:
+                    if my_object["currency_id"]:
                         format_amt = self._get_currency_amt_format_dict(
                             my_object, report_data
                         )
@@ -536,7 +536,7 @@ class AbstractReportXslx(models.AbstractModel):
                 currency = self.env["res.currency"].browse(line_object["currency_id"])
             else:
                 currency = line_object["currency_id"]
-            field_name = "{}_{}".format(field_prefix, currency.name)
+            field_name = f"{field_prefix}_{currency.name}"
             if hasattr(self, field_name):
                 format_amt = getattr(self, field_name)
             else:
@@ -558,7 +558,7 @@ class AbstractReportXslx(models.AbstractModel):
                 currency = self.env["res.currency"].browse(line_dict["currency_id"])
             else:
                 currency = line_dict["currency_id"]
-            field_name = "{}_{}".format(field_prefix, currency.name)
+            field_name = f"{field_prefix}_{currency.name}"
             if hasattr(self, field_name):
                 format_amt = getattr(self, field_name)
             else:
@@ -597,9 +597,8 @@ class AbstractReportXslx(models.AbstractModel):
                     {"bold": True, "border": True, "bg_color": "#FFFFCC"}
                 )
                 report_data["field_name"] = format_amt
-                format_amount = "#,##0." + (
-                    "0" * line_object["currency_id"].decimal_places
-                )
+                currency = self.env["res.currency"].browse(line_object["currency_id"])
+                format_amount = "#,##0." + ("0" * currency.decimal_places)
                 format_amt.set_num_format(format_amount)
         return format_amt
 

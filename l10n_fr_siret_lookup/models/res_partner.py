@@ -13,7 +13,8 @@ from odoo.exceptions import UserError
 logger = logging.getLogger(__name__)
 try:
     from stdnum.eu.vat import check_vies
-    from stdnum.fr.siren import is_valid as siren_is_valid, to_tva as siren_to_vat
+    from stdnum.fr.siren import is_valid as siren_is_valid
+    from stdnum.fr.siren import to_tva as siren_to_vat
     from stdnum.fr.siret import is_valid as siret_is_valid
 except ImportError:
     logger.debug("Cannot import stdnum")
@@ -287,13 +288,13 @@ class ResPartner(models.Model):
         if (
             self.name
             and self.is_company
-            #and not self.parent_id
+            and not self.parent_id
             and not self.siren
             and not self.nic
             and not self.siret
-            #and not self.street
-            #and not self.city
-            #and not self.zip
+            and not self.street
+            and not self.city
+            and not self.zip
         ):
             name = self.name.replace(" ", "")
             if name:

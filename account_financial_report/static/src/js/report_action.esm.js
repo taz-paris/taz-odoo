@@ -1,13 +1,13 @@
-/** @odoo-module **/
+// /** @odoo-module **/
 import {ReportAction} from "@web/webclient/actions/reports/report_action";
-import {patch} from "web.utils";
+import {patch} from "@web/core/utils/patch";
 import {useEnrichWithActionLinks} from "./report.esm";
 
 const MODULE_NAME = "account_financial_report";
 
-patch(ReportAction.prototype, "account_financial_report.ReportAction", {
+patch(ReportAction.prototype, {
     setup() {
-        this._super.apply(this, arguments);
+        super.setup(...arguments);
         this.isAccountFinancialReport = this.props.report_name.startsWith(
             `${MODULE_NAME}.`
         );
@@ -31,7 +31,7 @@ patch(ReportAction.prototype, "account_financial_report.ReportAction", {
      * @returns {String}
      */
     _get_xlsx_name(str) {
-        if (!_.isString(str)) {
+        if (typeof str !== "string") {
             return str;
         }
         const parts = str.split(".");

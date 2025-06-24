@@ -1,10 +1,9 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
-
     _inherit = "res.config.settings"
 
     invoice_auto_validation = fields.Boolean(
@@ -21,16 +20,6 @@ class ResConfigSettings(models.TransientModel):
         "intercompany rules. If not set the user initiating the"
         "transaction will be used",
     )
-    company_share_product = fields.Boolean(
-        "Share product to all companies",
-        help="Share your product to all companies defined in your instance.\n"
-        " * Checked : Product are visible for every company, "
-        "even if a company is defined on the partner.\n"
-        " * Unchecked : Each company can see only its product "
-        "(product where company is defined). Product not related to a "
-        "company are visible for all companies.",
-    )
-
     intercompany_invoicing = fields.Boolean(
         string="Generate Inter company Invoices",
         related="company_id.intercompany_invoicing",
@@ -40,18 +29,3 @@ class ResConfigSettings(models.TransientModel):
         " is created.",
         readonly=False,
     )
-
-    @api.model
-    def get_values(self):
-        res = super().get_values()
-        product_rule = self.env.ref("product.product_comp_rule")
-        res.update(
-            company_share_product=not bool(product_rule.active),
-        )
-        return res
-
-    def set_values(self):
-        res = super().set_values()
-        product_rule = self.env.ref("product.product_comp_rule")
-        product_rule.write({"active": not bool(self.company_share_product)})
-        return res
