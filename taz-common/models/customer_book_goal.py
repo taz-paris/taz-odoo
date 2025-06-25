@@ -55,7 +55,7 @@ class tazCustomerBookGoal(models.Model):
                 record.period_ratio = (record.period_book / record.period_goal)*100.0
             else :
                 record.period_ratio = 0.0
-            record.book_last_month, last_month_project_ids = record.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today(), record.company_id)
+            record.book_last_month, last_month_project_ids = record.industry_id.get_book_delta(begin_year, end_year, record.company_id)
             record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_number_of_opportunities(record.company_id)
 
     @api.model
@@ -96,7 +96,9 @@ class tazCustomerBookGoal(models.Model):
             }
 
     def action_open_project_booked_last_month(self):
-        book_last_month, last_month_project_ids = self.industry_id.get_book_by_period(datetime.datetime.today() + relativedelta(days=-31), datetime.datetime.today(), self.company_id)
+        begin_year = datetime.datetime(int(self.reference_period), 1, 1)
+        end_year = datetime.datetime(int(self.reference_period), 12, 31)
+        book_last_month, last_month_project_ids = self.industry_id.get_book_delta(begin_year, end_year, self.company_id)
         view_id = self.env.ref("project_accounting.project_tree")
         return {
                 'type': 'ir.actions.act_window',
@@ -106,7 +108,7 @@ class tazCustomerBookGoal(models.Model):
                 'view_mode': 'tree',
                 'view_id': view_id.id,
                 'target': 'current',
-                'domain': [('id', 'in', last_month_project_ids.ids)],
+                'domain': [('id', 'in', last_month_project_ids)],
                 'context' : {'no_create' : True},
             }
 
