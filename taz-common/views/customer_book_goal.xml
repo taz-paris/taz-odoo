@@ -189,6 +189,12 @@
         <field name="view_mode">tree,form,pivot,graph</field>
 	<field name="context">{'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}</field>
     </record>
+    <record id="taz-common.my_customer_book_goal_action" model="ir.actions.act_window">
+        <field name="name">Mes objectifs commerciaux annuels</field>
+        <field name="res_model">taz.customer_book_goal</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+	<field name="context">{'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True, 'search_default_filter_my_customer_book_goal' : True}</field>
+    </record>
     <record id="taz-common.customer_book_followup_action" model="ir.actions.act_window">
         <field name="name">Photos des objectifs commerciaux</field>
         <field name="res_model">taz.customer_book_followup</field>
