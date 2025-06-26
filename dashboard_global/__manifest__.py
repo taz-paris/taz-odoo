@@ -20,9 +20,9 @@
     'depends': ['board', 'taz-common', 'project_accounting'],
 
     'data': [
+        "views/project_dashboard.xml",
         "views/dashboards.xml",
         "views/outsourcing_dashboard.xml",
-        "views/project_dashboard.xml",
     ],
     'assets': {
         'web.assets_backend': [

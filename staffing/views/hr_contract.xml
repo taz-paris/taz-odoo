@@ -33,9 +33,5 @@
 	
 	<menuitem name="Contrats" id="hr_contract_menu" parent="hr.menu_hr_employee_payroll" action="hr_contract_action"/>
 
-	<record id="hr_contract.hr_menu_contract_history" model="ir.ui.menu">
-		<field name="name">Historique des contrats</field>
-	</record>
-
    </data>
 </odoo>

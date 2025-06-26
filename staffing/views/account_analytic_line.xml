@@ -66,6 +66,8 @@
             }</field>
         </record>
 
+	<menuitem name="Pointage du mois M-1" id="project_accounting_closing_menu_timesheet_action_last_month" parent="project_accounting.project_accounting_closing_menu_root" action="staffing.timesheet_action_last_month"/>
+
         <record id="timesheet_action_last_month_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="4"/>
             <field name="view_mode">tree</field>

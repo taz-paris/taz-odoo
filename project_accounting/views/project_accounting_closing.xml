@@ -249,7 +249,6 @@
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm"/>
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_list" parent="project_accounting_closing_menu_root" action="project_accounting_closing_action"/>
 	<menuitem name="Sociétés" id="project_accounting_closing_menu_res_company" parent="project_accounting_closing_menu_root" action="base.action_res_company_form"/>
-	<menuitem name="Pointage du mois M-1" id="project_accounting_closing_menu_timesheet_action_last_month" parent="project_accounting_closing_menu_root" action="staffing.timesheet_action_last_month"/>
 
    <record id="action_recompute_closing" model="ir.actions.server">
           <field name="name">Recalculer les données de cette fiche cloture</field>

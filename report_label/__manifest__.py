@@ -18,9 +18,5 @@
         "views/report_paperformat_label.xml",
         "reports/report_label.xml",
         "wizards/report_label_wizard.xml",
-        "demo/demo.xml",
-    ],
-    "demo": [
-#        "demo/demo.xml",
     ],
 }

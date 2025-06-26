@@ -18,8 +18,8 @@
     'data': [
         'security/ir.model.access.csv',
         'data/cron_sync.xml',
-        'views/project.xml',
         'views/napta.xml',
+        'views/project.xml',
         'views/wizard_timesheet_mass_validation.xml',
     ],
 

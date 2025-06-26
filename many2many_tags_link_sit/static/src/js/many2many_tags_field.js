@@ -1,11 +1,11 @@
 /** @odoo-module **/
-import { _t } from 'web.core';
+import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { Many2ManyTagsFieldColorEditable } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { patch } from "@web/core/utils/patch";
 
-patch(Many2ManyTagsFieldColorEditable.prototype, '/advanced_many2many_tags/static/src/js/many2many_tags_field.js', {
+patch(Many2ManyTagsFieldColorEditable.prototype, {
     /*Here Many2ManyTagsFieldColorEditable is patched to over ride onBadgeClick()*/
     setup() {
         this._super.apply(this, arguments);
@@ -25,7 +25,7 @@ patch(Many2ManyTagsFieldColorEditable.prototype, '/advanced_many2many_tags/stati
     }
 })
 
-patch(Many2ManyTagsField.prototype, '/advanced_many2many_tags/static/src/js/many2many_tags_field.js', {
+patch(Many2ManyTagsField.prototype, {
     /*Here Many2ManyTagsField is patched to over ride onBadgeClick()*/
     setup() {
         this._super.apply(this, arguments);

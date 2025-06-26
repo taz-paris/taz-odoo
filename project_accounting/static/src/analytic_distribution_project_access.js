@@ -3,11 +3,11 @@
 import { AnalyticDistribution } from '@analytic/components/analytic_distribution/analytic_distribution';
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
-import { patch } from 'web.utils';
+import { patch } from "@web/core/utils/patch";
 
 const components = { AnalyticDistribution };
 
-patch(components.AnalyticDistribution.prototype, 'analytic_distribution', {
+patch(components.AnalyticDistribution.prototype, {
 	searchAnalyticDomain(searchTerm) {
 		return [
 		    '|',

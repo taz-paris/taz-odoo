@@ -104,7 +104,7 @@
 				-->
 				<field name="contract_warning" invisible="1"/>
 				<field name="employee_type" invisible="1"/>
-				<button name="action_open_contract_history" class="oe_stat_button" icon="fa-book" type="object" groups="hr_contract.group_hr_contract_manager" invisible="employee_type not in ['employee', 'student', 'trainee']">
+				<button name="action_open_contract" class="oe_stat_button" icon="fa-book" type="object" groups="hr_contract.group_hr_contract_manager" invisible="employee_type not in ['employee', 'student', 'trainee']">
 				    <div invisible="not first_contract_date" class="o_stat_info">
 					<span class="o_stat_text text-success" invisible="contract_warning" title="In Contract Since">Arrivé(e) le</span>
 					<span class="o_stat_value text-success" invisible="contract_warning">
