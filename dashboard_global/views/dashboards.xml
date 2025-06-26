@@ -105,8 +105,8 @@
 		<menuitem name="Tous les contacts" id="all_contacts" parent="dashboard_global.sales" action="taz-common.action_partner_contact" sequence="10"/>
 		<menuitem name="Créer une action commerciale" id="new_business_action" parent="dashboard_global.sales" action="open_view_business_action_new_form" sequence="20"/>
 		<menuitem name="Mes actions commerciales" id="all_business_actions" parent="dashboard_global.sales" action="taz-common.business_action_action" sequence="25"/>
-		<menuitem name="Comptes (ex BD)" id="res_industry" parent="dashboard_global.sales" action="base.res_partner_industry_action" sequence="30"/>
-		<menuitem name="Objectifs commerciaux annuels" id="all_customer_book_goal" parent="dashboard_global.sales" action="taz-common.customer_book_goal_action" sequence="35"/>
+		<menuitem name="Comptes (ex BD) auxquels je suis affecté" id="res_industry" parent="dashboard_global.sales" action="taz-common.my_industries_action" sequence="30"/>
+		<menuitem name="Objectifs commerciaux annuels de mes comptes" id="all_customer_book_goal" parent="dashboard_global.sales" action="taz-common.my_customer_book_goal_action" sequence="35"/>
 		<menuitem name=">>> Redirection vers le module Commerce" id="business_module" parent="dashboard_global.sales" action="open_business_module" sequence="50"/>
 
 	<menuitem name="Pilotage" id="statistics_report_menu" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="10"/>

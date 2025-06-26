@@ -51,6 +51,24 @@ class tazResIndustry(models.Model):
             book_period += project.reporting_sum_company_outsource_code3_code_4
         return book_period, project_ids
 
+    def get_book_delta(self, begin_date, end_date, company_id):
+        # This function returns the projects with date_win_loose in the period (usually current year) and customer_book changed within the last 31 days
+        search_param_list = [
+            ('stage_is_part_of_booking', '=', True),
+            ('date_win_loose', '>=', begin_date),
+            ('date_win_loose', '<=', end_date),
+            ('partner_id', 'in', self.partner_ids.ids),
+            ('company_id', '=', company_id.id),
+        ]
+        project_ids = self.env['project.project'].sudo().search(search_param_list)
+        book_period = 0.0
+        target_project_ids = []
+        for project in project_ids:
+            if project.reporting_sum_company_outsource_code3_code_4_delta != 0:
+                book_period += project.reporting_sum_company_outsource_code3_code_4_delta
+                target_project_ids.append(project.id)
+        return book_period, target_project_ids
+
     def get_number_of_opportunities(self, company_id):
         search_param_list = [
             ('partner_id', 'in', self.partner_ids.ids),
