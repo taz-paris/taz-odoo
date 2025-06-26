@@ -32,13 +32,13 @@
                     <group>
 			<group>
 			    <field name="parent_id" widget="res_partner_many2one" placeholder="Company Name..." domain="[('is_company', '=', True)]" context="{'default_is_company': True}"/>
-                            <field name="function" placeholder="e.g. Sales Director" attrs="{'invisible': [('is_company','=', True)]}"/>
+                            <field name="function" placeholder="e.g. Sales Director" invisible="is_company"/>
                             <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
-			    <field name="parent_industry_id" />
+			    <field name="parent_industry_id"/>
                         </group>
 			<group>
                                     <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-                                    <field name="industry_id" attrs="{'invisible': [('is_company', '=', False)]}" options="{'no_create': True}"/>
+                                    <field name="industry_id" invisible="not is_company" options="{'no_create': True}"/>
                             <field name="comment" placeholder="Internal notes..."/>
 			</group>
                     </group>
@@ -50,7 +50,7 @@
 				<group>
                             <field name="phone" widget="phone"/>
                             <field name="mobile" widget="phone"/>
-                            <field name="email" widget="email" context="{'gravatar_image': True}" attrs="{'required': [('user_ids','!=', [])]}"/>
+                            <field name="email" widget="email" context="{'gravatar_image': True}" required="user_ids"/>
 			    	    <field name="user_ids" invisible="1"/>
 		    <!--
 		    !-->
@@ -72,12 +72,7 @@
       <field name="res_model">res.partner</field>
       <field name="context">{}</field>
       <field name="view_mode">tree,form,kanban</field>
-		      <field name="view_ids" eval="
-                            [
-                            (5, 0, 0),
-                            (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),
-                            (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),
-			      ]" />
+		      <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),          ]"/>
       <field name="help" type="html">
 		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
       </field>

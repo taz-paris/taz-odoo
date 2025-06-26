@@ -7,7 +7,7 @@
 		    <field name="inherit_id" ref="taz-common.contact_search"/>
 		    <field name="arch" type="xml">
 			<xpath expr="//field[@name='parent_industry_id']" position="after">
-			    <field name="event_registration_ids" string="Inscrit à l'évènement..." filter_domain="[('event_registration_ids.event_id', 'ilike', self)]" />
+			    <field name="event_registration_ids" string="Inscrit à l'évènement..." filter_domain="[('event_registration_ids.event_id', 'ilike', self)]"/>
 			    <!--
 			    <field name="event_registration_ids" string="NON inscrit à l'évènement..." filter_domain="[('event_registration_ids.event_id', 'not ilike', self)]" />
 			    -->
@@ -31,19 +31,17 @@
 						<field name="state" decoration-info="state in ('draft', 'open')" decoration-success="state == 'done'" decoration-muted="state == 'cancel'" widget="badge"/>
 						<field name="mail_auto" optional="show"/>
 						<field name="contact_user_link_id" optional="show" options="{'no_quick_create' : True}" context="{'default_partner_id' : partner_id, 'default_user_id' : uid}"/>
-						<field name="partner_id" invisible="1" />
+						<field name="partner_id" invisible="1"/>
 						<field name="company_id" groups="base.group_multi_company" optional="hide"/>
 						<field name="email" optional="hide"/>
 						<field name="message_needaction" invisible="1"/>
-						<field name="last_office365_mail_draft" invisible="1" />
-						<field name="comment" widget="text" optional="show" />
-						<button name="action_confirm" string="Confirm" type="object" icon="fa-check" attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'draft')]}"/>
-						<button name="action_set_done" string="Mark as Attending" type="object" icon="fa-level-down" attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'open')]}"/>
-						<button name="action_cancel" string="Cancel" type="object" class="o_btn_cancel_registration" icon="fa-times" attrs="{'invisible': ['|', ('active', '=', False), '&amp;', ('state', '!=', 'open'), ('state', '!=', 'draft')]}"/>
-						<button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
-							attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
-						<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-							attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', '!=', False), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+						<field name="last_office365_mail_draft" invisible="1"/>
+						<field name="comment" widget="text" optional="show"/>
+						<button name="action_confirm" string="Confirm" type="object" icon="fa-check" invisible="not active or state != 'draft'"/>
+						<button name="action_set_done" string="Mark as Attending" type="object" icon="fa-level-down" invisible="not active or state != 'open'"/>
+						<button name="action_cancel" string="Cancel" type="object" class="o_btn_cancel_registration" icon="fa-times" invisible="not active or (state != 'open' and state != 'draft')"/>
+						<button name="action_set_draft" string="Inviter" type="object" icon="fa-check" invisible="not active or state != 'identified'"/>
+						<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft or not active or mail_auto or state in ['cancel', 'open']"/>
 						<field name="activity_exception_decoration" widget="activity_exception"/>
 					    </tree>
 					</field>

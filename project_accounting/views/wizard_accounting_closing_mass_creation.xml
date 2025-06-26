@@ -5,17 +5,17 @@
 	      <field name="model">wizard_accounting_closing_mass_creation</field>
 	      <field name="arch" type="xml">
 		<form>
-				<div class="alert alert-warning mb-1" role="alert" attrs="{'invisible': [('warning_message', '=', False)]}">
+				<div class="alert alert-warning mb-1" role="alert" invisible="not warning_message">
 					<span>
 						<field name="warning_message" readonly="1"/>
 					</span>
-					<button name="action_open_warning_analytic_line" string="Voir ces lignes de pointage" type="object" colspan="2" />
+					<button name="action_open_warning_analytic_line" string="Voir ces lignes de pointage" type="object" colspan="2"/>
 				</div>
 			<group>
 				<group>
 					<field name="company_id" invisible="1"/>
 					<field name="company_id" groups="base.group_multi_company" readonly="1"/>
-					<field name="date" colspan="2" />
+					<field name="date" colspan="2"/>
 				</group>
 			</group>
 			<group>
@@ -41,7 +41,7 @@
 	    <field name="res_model">wizard_accounting_closing_mass_creation</field>
 	    <field name="view_mode">form</field>
 	    <field name="target">new</field>
-	    <field name="context"></field>
+	    <field name="context"/>
 	</record>
 	
 	<menuitem name="Création en masse des clôtures comptables" id="project_accounting_closing_mass_creation" parent="project_accounting.project_accounting_closing_menu_root" action="launch_wizard_accounting_closing_mass_creation"/>

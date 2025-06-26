@@ -6,9 +6,9 @@
             <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
             <field name="arch" type="xml">
                 <field name="job_id" position="after">
-                        <field name="is_daily_cost_overridden" />
-			<field name="daily_cost" attrs="{'invisible': [('is_daily_cost_overridden', '=', False)]}"/>
-			<field name="productive_share" />
+                        <field name="is_daily_cost_overridden"/>
+			<field name="daily_cost" invisible="not is_daily_cost_overridden"/>
+			<field name="productive_share"/>
                 </field>
             </field>
         </record>
