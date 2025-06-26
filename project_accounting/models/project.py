@@ -142,7 +142,7 @@ class projectAccountProject(models.Model):
 
         res_dic = {}
         for rec in self :
-            if rec.create_date.date() > target_date :
+            if not(rec.create_date) or (rec.create_date.date() > target_date) :
                 res_dic[rec.id] = None
             else :
                 #Si la valeur du champ n'a pas changé depuis la création de l'objet, on retourne la valeur à date
