@@ -90,6 +90,7 @@
 		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
 		  <field name="agreement_id" optional="hide"/>
 		  <field name="reporting_sum_company_outsource_code3_code_4" sum="Total" optional="show"/>
+		  <field name="reporting_sum_company_outsource_code3_code_4_delta" sum="Total" optional="show"/>
 		  <field name="sales_proposal_indexation" optional="hide"/>
 		  <field name="deliverable_indexation" optional="hide"/>
 		  <field name="success_story_indexation" optional="hide"/>
@@ -443,6 +444,7 @@
 							</group>
 							<group string="À date">
 								<field name="reporting_sum_company_outsource_code3_code_4"/>
+								<field name="reporting_sum_company_outsource_code3_code_4_delta"/>
 								<field name="past_internal_revenue"/>
 								<field name="futur_internal_revenue"/>
 								<field name="last_closing_production_balance"/>

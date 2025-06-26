@@ -3,6 +3,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo import _
 
 from datetime import datetime, timedelta, date
+from dateutil.relativedelta import relativedelta
 import json
 
 import logging
@@ -126,7 +127,7 @@ class projectAccountProject(models.Model):
 
     @api.model
     def get_field_tracked_value(self, field_name, target_date):
-        _logger.info('---- get_field_tracked_value field_name=%s target_date=%s'% (field_name, target_date))
+        #_logger.info('---- get_field_tracked_value field_name=%s target_date=%s'% (field_name, target_date))
         model_name = 'project.project'
         project_model_id = self.env['ir.model'].search([('model', '=', model_name)])[0]
         field_ids = self.env['ir.model.fields'].search([('name', '=', field_name), ('model_id', '=', project_model_id.id)])
@@ -141,7 +142,7 @@ class projectAccountProject(models.Model):
 
         res_dic = {}
         for rec in self :
-            if rec.create_date.date() > target_date :
+            if not(rec.create_date) or (rec.create_date.date() > target_date) :
                 res_dic[rec.id] = None
             else :
                 #Si la valeur du champ n'a pas changé depuis la création de l'objet, on retourne la valeur à date
@@ -194,6 +195,19 @@ class projectAccountProject(models.Model):
                         break
         return res_dic
 
+    @api.depends('reporting_sum_company_outsource_code3_code_4')
+    def compute_reporting_sum_company_outsource_code3_code_4_delta(self):
+        #_logger.info('======= compute_reporting_sum_company_outsource_code3_code_4_delta')
+        for rec in self:
+            target_date = date.today() + relativedelta(days=-31)
+            #_logger.info(target_date)
+            old_value = rec.sudo().get_field_tracked_value('reporting_sum_company_outsource_code3_code_4', target_date)
+            #_logger.info(old_value)
+            if old_value[rec.id] == None :
+                old = 0.0
+            else :
+                old = old_value[rec.id]
+            rec.reporting_sum_company_outsource_code3_code_4_delta = rec.reporting_sum_company_outsource_code3_code_4 - old
 
     """
     def init_date_win_loose(self):
@@ -1449,6 +1463,7 @@ class projectAccountProject(models.Model):
     activity_graph = fields.Char("Activity graph", compute=compute_margin_graph)
 
     reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', tracking=True, help="Somme Montant dispositif interne + markup S/T + markup cotraitant + marge ventes Autres (ex : séminaires) pour les projets en code 3-Accord client (données saisies par le DM sur l'onglet Structure au lancement) ou en code 4/5/6 (données calculées et affichées sur l'onglet Synthèse à date).", compute=compute_reporting_shortcuts, store=True)
+    reporting_sum_company_outsource_code3_code_4_delta = fields.Float('Evol PDC J-31', help="Evolution du montant de la prise de commande du projet sur les 31 derniers jours calendaires", compute=compute_reporting_sum_company_outsource_code3_code_4_delta, store=False)
 
     begin_year_stage_id = fields.Many2one('project.project.stage', string='Statut au 1er janvier N', ondelete='restrict', groups="project.group_project_stages", readonly=True)
     begin_year_past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net S/T de toutes les clôtures comptables du projet antérieures ou égales au 31/12/N-1")

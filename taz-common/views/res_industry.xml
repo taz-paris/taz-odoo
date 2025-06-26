@@ -115,6 +115,9 @@
             	    <field name="contributor_ids" string="Contributeurs (nom de famille)"/>
 		    <field name="business_partner_company_ids"/>
             	    <field name="partner_ids" />
+		    <separator/>
+		    <filter name="filter_my_industries" string="Comptes (ex BD) auxquels je suis affecté" domain="['|', '|', ('contributor_ids', 'in', uid), ('user_id', '=', uid), ('challenger_id', '=', uid)]"/>
+		    <separator/>
             	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
             	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
             	    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
@@ -133,10 +136,15 @@
         </record>
 
     	<record id="base.res_partner_industry_action" model="ir.actions.act_window">
-	    <!--
-	    <field name="name">Comptes (ex BD)</field>
-	    -->
 	    <field name="context">{'search_default_group_business_priority' : True}</field>
     	</record>
+
+        <record id="my_industries_action" model="ir.actions.act_window">
+            <field name="name">Comptes (ex BD)</field>
+            <field name="res_model">res.partner.industry</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="base.res_partner_industry_view_search"/>
+	    <field name="context">{'search_default_group_business_priority' : True, 'search_default_filter_my_industries' : True}</field>
+        </record>
    </data>
 </odoo>
