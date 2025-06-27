@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
-//import * as helpers from "@spreadsheet/global_filters/helpers";
+
 import { patch } from "@web/core/utils/patch";
-import GlobalFiltersUIPlugin from "@spreadsheet/global_filters/plugins/global_filters_ui_plugin"
+import { GlobalFiltersUIPlugin } from "@spreadsheet/global_filters/plugins/global_filters_ui_plugin"
 const { DateTime } = luxon;
 import { Domain } from "@web/core/domain";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
@@ -88,7 +88,7 @@ export function getRelativeDateDomainNewFilters(now, offset, rangeType, fieldNam
 }
 
 
-patch(GlobalFiltersUIPlugin.prototype, 'spreadsheet_filters.GlobalFiltersUIPlugin', {
+patch(GlobalFiltersUIPlugin.prototype, {
 	_getDateDomain(filter, fieldMatching) {
 		//console.log(">>>>> overided _getDateDomain");
 		let granularity;
@@ -100,12 +100,14 @@ patch(GlobalFiltersUIPlugin.prototype, 'spreadsheet_filters.GlobalFiltersUIPlugi
 		const type = fieldMatching.type;
 		const offset = fieldMatching.offset || 0;
 		const now = DateTime.local();
+		
 		if (filter.rangeType === "relative") {
-	    		if (["year_to_date", "year_to_last_closed_month", "year_to_last_closed_week", "current_week_to_end_year", "current_year", "past_until_today", "today_future"].includes(value)){
+	    	if (["year_to_date", "year_to_last_closed_month", "year_to_last_closed_week", "current_week_to_end_year", "current_year", "past_until_today", "today_future"].includes(value)){
 				return getRelativeDateDomainNewFilters(now, offset, value, field, type);
 			}
-     		}
-            	return this._super(filter, fieldMatching);
+     	}    	
+        return super._getDateDomain(filter, fieldMatching);
 	}
-});
+})
 
+;

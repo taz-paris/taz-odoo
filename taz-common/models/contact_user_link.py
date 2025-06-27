@@ -151,13 +151,12 @@ class ContactUserLink(models.Model):
                ], order="date_deadline desc")
             #_logger.info(passed_business_action)
             rec.is_late = False
-            rec.next_meeting_before = False
             if len(passed_business_action):
                 rec.last_business_action_id = passed_business_action[0]
                 rec.date_last_business_action = passed_business_action[0].date_deadline
                 if rec.target_contact_frequency_id :
-                    rec.next_meeting_before = passed_business_action[0].date_deadline + relativedelta(days=rec.target_contact_frequency_id.day_number)
-                    if rec.next_meeting_before < datetime.date.today():
+                    next_meeting_before = passed_business_action[0].date_deadline + relativedelta(days=rec.target_contact_frequency_id.day_number)
+                    if next_meeting_before < datetime.date.today():
                         rec.is_late = True
             else :
                 rec.last_business_action_id = False
@@ -173,6 +172,14 @@ class ContactUserLink(models.Model):
                 rec.next_business_action_id = future_business_action[0]
             else :
                 rec.next_business_action_id = False
+
+    @api.depends('date_last_business_action', 'next_meeting_before')
+    def _compute_next_meeting_before(self):
+        for rec in self:
+            if rec.date_last_business_action and rec.target_contact_frequency_id :
+                rec.next_meeting_before = rec.date_business_action + relativedelta(days=rec.target_contact_frequency_id.day_number)
+            else :
+                rec.next_meeting_before = False
 
 
     @api.depends('partner_id.inhouse_influence_level')
@@ -223,8 +230,8 @@ class ContactUserLink(models.Model):
 
     last_business_action_id = fields.Many2one('taz.business_action', string='Dernière action au statut FAIT', help="Dernière action commerciale au statut FAIT de ce collaborateur avec ce contact.", compute=_compute_date_business_action, store=False)
     next_business_action_id = fields.Many2one('taz.business_action', string='Prochaine action', help="Prochaine action commerciale (quel que soit le statut) de ce collaborateur avec ce contact.", compute=_compute_date_business_action, store=False)
-    next_meeting_before = fields.Date('À revoir avant le', compute=_compute_date_business_action, store=True)
-    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce collaborateur auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=True, default=False) #impossible de stocker la valeur de is_late car sa valeur reposer sur la date du jour (sauf à créer un traitement batch)
+    next_meeting_before = fields.Date('À revoir avant le', compute=_compute_next_meeting_before, store=True)
+    is_late = fields.Boolean('En retard', help="La dernière action commerciale faite par ce collaborateur auprès de ce contact est plus ancienne que la fréquence souhaitée.", compute=_compute_date_business_action, store=False, default=False) #impossible de stocker la valeur de is_late car sa valeur reposer sur la date du jour (sauf à créer un traitement batch)
     date_last_business_action = fields.Date('Date dernière action au statut FAIT', compute=_compute_date_business_action, store=False)
     
     #RDV to plan before
