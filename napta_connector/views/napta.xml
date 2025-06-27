@@ -39,7 +39,7 @@
             <field name="arch" type="xml">
                 <field name="tag_ids" position="after">
                         <field name="napta_to_sync" readonly="1"/>
-                        <field name="napta_id" readonly="0"/>
+                        <field name="napta_id" readonly="1"/>
 			<button type="object" name="delete_on_napta" string="Supprimer sur Napta" colspan="2" invisible="not napta_id" groups="base.group_system"/>
                 </field>
                 <field name="active" position="after">
@@ -133,7 +133,7 @@
             <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
             <field name="arch" type="xml">
                 <field name="icon_id" position="after">
-                        <field name="napta_id" readonly="0"/>
+                        <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
@@ -145,7 +145,7 @@
             <field name="inherit_id" ref="hr.hr_work_location_form_view"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                        <field name="napta_id" readonly="0"/>
+                        <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
