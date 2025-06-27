@@ -8,7 +8,7 @@ import { patch } from "@web/core/utils/patch";
 patch(Many2ManyTagsFieldColorEditable.prototype, {
     /*Here Many2ManyTagsFieldColorEditable is patched to over ride onBadgeClick()*/
     setup() {
-        this._super.apply(this, arguments);
+        super.setup(...arguments);
         this.notification = useService("notification");
         this.action = useService("action");
     },
@@ -28,7 +28,7 @@ patch(Many2ManyTagsFieldColorEditable.prototype, {
 patch(Many2ManyTagsField.prototype, {
     /*Here Many2ManyTagsField is patched to over ride onBadgeClick()*/
     setup() {
-        this._super.apply(this, arguments);
+        super.setup(...arguments);
         this.notification = useService("notification");
         this.action = useService("action");
     },
