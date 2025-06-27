@@ -93,7 +93,7 @@
                     <separator/>
                     <filter string="À revoir d'ici 2 mois" name="m_2" domain="[('next_meeting_before','&lt;=', ((context_today() + relativedelta(months=2)).strftime('%Y-%m-%d')))]"/>
                     <filter name="filter_next_meeting_before" date="next_meeting_before"/>
-                    <filter string="En retard" name="is_late" domain="[('is_late','=', True)]"/>
+                    <filter string="En retard" name="is_late" domain="[('next_meeting_before', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
                     <separator/>
 		    <filter name="proximity_level_0" string="Proximité = Niveau 0" domain="[('proximity_level', '=', '0')]"/>
 		    <filter name="proximity_level_1" string="Proximité = Niveau 1" domain="[('proximity_level', '=', '1')]"/>

@@ -107,7 +107,7 @@
 	   <record model="ir.ui.view" id="project_accounting.project_form">
 	      <field name="name">Project</field>
 	      <field name="model">project.project</field>
-	      <field name="priority">5</field>
+	      <field name="priority">1</field>
 	      <field name="arch" type="xml">
 		<form string="Project" class="o_form_project_project" js_class="project_form">
 			<header>
@@ -539,6 +539,7 @@
            <record model="ir.ui.view" id="project_pivot">
               <field name="name">Project</field>
 	      <field name="model">project.project</field>
+              <field name="priority">1</field>
 	      <field name="arch" type="xml">
 		<pivot string="Projet">
 		    <field name="name" type="row"/>
@@ -608,7 +609,7 @@
 	   <record model="ir.ui.view" id="project_kanban">
 	      <field name="name">Project</field>
 	      <field name="model">project.project</field>
-	      <field name="priority">5</field>
+	      <field name="priority">1</field>
 	      <field name="arch" type="xml">
 		<kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" sample="1" default_order="sequence, number">
                     <field name="display_name"/>
@@ -698,66 +699,50 @@
 	    <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
 		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
       		<field name="search_view_id" ref="view_project_search"/>
-		<field name="view_ids" eval="[
-			(5, 0, 0),
-			(0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
-			(0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
-			(0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),
-			]"/>
+		<field name="view_mode">tree,form,pivot,kanban,calendar,activity</field>
 	    </record>
 
 
-<!--
             <record id="project.open_view_project_all_group_stage_kanban_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="1"/>
+                <field name="sequence" eval="20"/>
                 <field name="view_mode">kanban</field>
                 <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
                 <field name="view_id" ref="project_accounting.project_kanban"/>
             </record>
 
             <record id="project.open_view_project_all_group_stage_tree_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="2"/>
+                <field name="sequence" eval="1"/>
                 <field name="view_mode">tree</field>
                 <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
                 <field name="view_id" ref="project_accounting.project_tree"/>
             </record>
 
             <record id="open_view_project_all_group_stage_form_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="3"/>
+                <field name="sequence" eval="2"/>
                 <field name="view_mode">form</field>
                 <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
                 <field name="view_id" ref="project_accounting.project_form"/>
             </record>
 
             <record id="open_view_project_all_group_stage_pivot_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="4"/>
+                <field name="sequence" eval="3"/>
                 <field name="view_mode">pivot</field>
                 <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
                 <field name="view_id" ref="project_accounting.project_pivot"/>
             </record>
--->
 
 	    <!-- ACTION APPLICAQUE AUX UTILISATUER SANS LE droit de gestion des étapes du projet -->
 	    <record id="project.open_view_project_all" model="ir.actions.act_window">
 		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
       		<field name="search_view_id" ref="view_project_search"/>
-		<field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),         (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),         (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),         (0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),           ]"/>
+		<field name="view_ids" eval="[
+			(5, 0, 0),
+			(0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
+			(0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
+			(0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
+			(0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),
+		]"/>
 	    </record>
-
-	<!--
-        <record id="view_project_kanban_inherit" model="ir.ui.view">
-            <field name="name">Project</field>
-            <field name="model">project.project</field>
-            <field name="inherit_id" ref="project.view_project_kanban"/>
-	    <field name="arch" type="xml">
-		<xpath expr="//kanban" position="attributes">
-			<attribute name="on_create"></attribute>
-			<attribute name="action"></attribute>
-			<attribute name="type"></attribute>
-                </xpath>
-	    </field>
-	</record>
-	-->
 
     <record id="project.menu_main_pm" model="ir.ui.menu">
 	    <field name="sequence">4</field>
