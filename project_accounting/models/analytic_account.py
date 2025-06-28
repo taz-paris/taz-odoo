@@ -22,7 +22,7 @@ class analyticAccount(models.Model):
         return result
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
         _logger.info('account.analytic.account => _name_search')
         query = "SELECT aaa.id, aaa.name FROM account_analytic_account AS aaa LEFT JOIN project_project AS p ON aaa.id = p.analytic_account_id WHERE aaa.name ilike %s OR p.number ilike %s;"
         name2 = '%'+str(name)+'%'
