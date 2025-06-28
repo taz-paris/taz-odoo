@@ -8,16 +8,6 @@ import { patch } from "@web/core/utils/patch";
 const components = { AnalyticDistribution };
 
 patch(components.AnalyticDistribution.prototype, {
-	searchAnalyticDomain(searchTerm) {
-		return [
-		    '|',
-		    ["display_name", "ilike", searchTerm],
-		    '|',
-		    ['code', 'ilike', searchTerm],
-		    ['partner_id', 'ilike', searchTerm],
-		];
-	},
-
 	async getProjectUrl(ev) {
 		ev.stopPropagation();
 

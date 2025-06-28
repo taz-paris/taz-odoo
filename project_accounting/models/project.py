@@ -60,21 +60,20 @@ class projectAccountProject(models.Model):
             projects |= super().create(vals)
         return projects
 
-    def name_get(self):
-        res = []
+    @api.depends('name', 'number', 'partner_id')
+    def _compute_display_name(self):
         for rec in self:
             display_name = "%s %s" % (rec.number or "", rec.name or "")
             if rec.partner_id : 
                 display_name += "("+str(rec.partner_id.name)+")"
-            res.append((rec.id, display_name))
-        return res
+            rec.display_name = display_name
 
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
-        args = list(args or [])
+        domain = list(domain or [])
         if name :
-            args += ['|', ('name', operator, name), ('number', operator, name)]
-        return self._search(args, limit=limit, access_rights_uid=name_get_uid)
+            domain += ['|', ('name', operator, name), ('number', operator, name)]
+        return self._search(domain, limit=limit, order=order, access_rights_uid=name_get_uid)
 
 
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
@@ -164,8 +163,6 @@ class projectAccountProject(models.Model):
                                 res_dic[rec.id] = track.old_value_text
                             elif track.new_value_datetime :
                                 res_dic[rec.id] = track.old_value_datetime
-                            elif track.new_value_monetary :
-                                res_dic[rec.id] = track.old_value_float_monetary
                             found = True
                             break
                     if found :
@@ -187,8 +184,6 @@ class projectAccountProject(models.Model):
                                 res_dic[rec.id] = track.new_value_text
                             elif track.new_value_datetime :
                                 res_dic[rec.id] = track.new_value_datetime
-                            elif track.new_value_monetary :
-                                res_dic[rec.id] = track.new_value_float_monetary
                             found = True
                             break
                     if found :
