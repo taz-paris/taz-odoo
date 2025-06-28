@@ -153,7 +153,7 @@ class projectAccountProject(models.Model):
                 for message in message_list_post_target_date :
                     found = False
                     for track in message.tracking_value_ids:
-                        if track.field.id == field_id.id:
+                        if track.field_id.id == field_id.id:
                             if track.old_value_integer :
                                 res_dic[rec.id] = track.old_value_integer
                             elif track.new_value_float :
@@ -176,7 +176,7 @@ class projectAccountProject(models.Model):
                 for message in message_list :
                     found = False
                     for track in message.tracking_value_ids:
-                        if track.field.id == field_id.id:
+                        if track.field_id.id == field_id.id:
                             if track.new_value_integer :
                                 res_dic[rec.id] = track.new_value_integer
                             elif track.new_value_float :
