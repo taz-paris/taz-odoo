@@ -190,7 +190,7 @@ class projectAccountProject(models.Model):
                         break
         return res_dic
 
-    @api.depends('reporting_sum_company_outsource_code3_code_4')
+    @api.model
     def compute_reporting_sum_company_outsource_code3_code_4_delta(self):
         #_logger.info('======= compute_reporting_sum_company_outsource_code3_code_4_delta')
         for rec in self:
