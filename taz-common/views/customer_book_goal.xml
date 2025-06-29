@@ -5,15 +5,15 @@
       <field name="name">Objectif de book</field>
       <field name="model">taz.customer_book_goal</field>
       <field name="arch" type="xml">
-	 <tree editable="top"  expand="1">
-		  <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly': [('id','!=', False)]}"/>
+	 <tree editable="top" expand="1">
+		  <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}" readonly="id"/>
 		  <field name="company_id" optional="show"/>
 		  <field name="reference_period" optional="hide"/>
 		  <field name="period_goal" optional="show" sum="Total"/>
 		  <field name="period_book" optional="show" sum="Total"/>
 		  <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="open_project_booked_this_year"/>
 		  <field name="period_delta" optional="show" sum="Total"/>
-		  <field name="period_ratio" optional="show"  widget="progressbar"/>
+		  <field name="period_ratio" optional="show" widget="progressbar"/>
 		  <field name="book_last_month" optional="show" string="Commande J-31" sum="Total"/>
 		  <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
 		  <field name="number_of_opportunities" optional="show" string="Nb AVT" sum="Total"/>
@@ -32,11 +32,11 @@
 		  <group>
 			<group>
 		  		<field name="company_id"/>
-		  		<field name="industry_id" required="1" options="{'no_create': True, 'no_create_edit':True}" attrs="{'readonly': [('id','!=', False)]}"/>
+		  		<field name="industry_id" required="1" options="{'no_create': True, 'no_create_edit':True}" readonly="id"/>
 				<field name="period_goal" sum="Total"/>
 			</group>
 			<group col="2">
-		 		<field name="reference_period" />
+		 		<field name="reference_period"/>
 		  		<field name="comment" widget="text"/>
 			</group>
 		  </group>
@@ -112,7 +112,7 @@
 	 <tree editable="top" create="true">
 	      <field name="company_id" optional="hide"/>
 	      <field name="industry_id" optional="hide"/>
-	      <field name="customer_book_goal_id" force_save="1" optional="show" />
+	      <field name="customer_book_goal_id" force_save="1" optional="show"/>
 	      <field name="date_update" optional="show"/>
 	      <field name="period_book" force_save="1" optional="show"/>
 	      <field name="period_futur_book" optional="show"/>
@@ -134,11 +134,11 @@
 	<pivot string="Suivi du book">
 	    <field name="industry_id" type="row"/>
 	    <field name="date_update" interval="month" type="col"/>
-	    <field name="period_book"  type="measure"/>
-	    <field name="period_futur_book"  type="measure"/>
-	    <field name="period_landing"  type="measure"/>
-	    <field name="period_delta"  type="measure"/>
-	    <field name="period_ratio"  type="measure"/>
+	    <field name="period_book" type="measure"/>
+	    <field name="period_futur_book" type="measure"/>
+	    <field name="period_landing" type="measure"/>
+	    <field name="period_delta" type="measure"/>
+	    <field name="period_ratio" type="measure"/>
 	</pivot>
       </field>
     </record>
@@ -150,12 +150,12 @@
       <field name="arch" type="xml">
 	<graph type="line" string="Suivi du book">
 	    <field name="date_update" interval="month"/>
-	    <field name="industry_id" />
-	    <field name="period_book"  type="measure"/>
-	    <field name="period_futur_book"  type="measure"/>
-	    <field name="period_landing"  type="measure"/>
-	    <field name="period_delta"  type="measure"/>
-	    <field name="period_ratio"  type="measure"/>
+	    <field name="industry_id"/>
+	    <field name="period_book" type="measure"/>
+	    <field name="period_futur_book" type="measure"/>
+	    <field name="period_landing" type="measure"/>
+	    <field name="period_delta" type="measure"/>
+	    <field name="period_ratio" type="measure"/>
 	</graph>
       </field>
     </record>
@@ -204,11 +204,9 @@
 
     <menuitem name="Comptes / Objectifs" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
     <menuitem name="Photo des objectifs commerciaux" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
-    <menuitem name="Objectifs commerciaux annuels" sequence="20"  id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
+    <menuitem name="Objectifs commerciaux annuels" sequence="20" id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
 
-    <menuitem id="taz-common.res_partner_industry_menu" name="Comptes (ex BD)"
-        action="base.res_partner_industry_action" parent="taz-common.customer_book"
-        sequence="10"/>
+    <menuitem id="taz-common.res_partner_industry_menu" name="Comptes (ex BD)" action="base.res_partner_industry_action" parent="taz-common.customer_book" sequence="10"/>
 
   </data>
 </odoo>

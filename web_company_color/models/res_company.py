@@ -20,13 +20,6 @@ class ResCompany(models.Model):
           background-color: %(color_navbar_bg)s !important;
           color: %(color_navbar_text)s !important;
 
-          > .o_menu_brand {
-            color: %(color_navbar_text)s !important;
-            &:hover, &:focus, &:active, &:focus:active {
-              background-color: %(color_navbar_bg_hover)s !important;
-            }
-          }
-
           .show {
             .dropdown-toggle {
               background-color: %(color_navbar_bg_hover)s !important;
@@ -45,6 +38,12 @@ class ResCompany(models.Model):
             }
           }
         }
+        .o_menu_brand {
+            color: %(color_navbar_text)s !important;
+            &:hover, &:focus, &:active, &:focus:active {
+              background-color: %(color_navbar_bg_hover)s !important;
+            }
+          }
 
           a[href],
           a[tabindex],
@@ -100,6 +99,31 @@ class ResCompany(models.Model):
             --o-caret-color: %(color_button_bg)s !important;
           }
         }
+        .o_menu_sections .o_nav_entry {
+          background: %(color_navbar_bg)s !important;
+          background-color: %(color_navbar_bg)s !important;
+          color: %(color_navbar_text)s !important;
+          &:hover, &:focus, &:active, &:focus:active {
+            background-color: %(color_navbar_bg_hover)s !important;
+          }
+        }
+        .o_menu_sections .o-dropdown .dropdown-toggle {
+          background: %(color_navbar_bg)s !important;
+          background-color: %(color_navbar_bg)s !important;
+          color: %(color_navbar_text)s !important;
+          &:hover, &:focus, &:active, &:focus:active {
+            background-color: %(color_navbar_bg_hover)s !important;
+          }
+        }
+        .o_menu_systray .o-dropdown .dropdown-toggle {
+            color: %(color_navbar_text)s !important;
+            &:hover, &:focus, &:active, &:focus:active {
+                background-color: %(color_navbar_bg_hover)s !important;
+            }
+        }
+        .dropdown-item{
+            color: %(color_submenu_text)s !important;
+        }
     """
 
     company_colors = fields.Serialized()
@@ -117,6 +141,7 @@ class ResCompany(models.Model):
     color_link_text_hover = fields.Char(
         "Link Text Color Hover", sparse="company_colors"
     )
+    color_submenu_text = fields.Char("Submenu Text Color", sparse="company_colors")
     scss_modif_timestamp = fields.Char("SCSS Modif. Timestamp")
 
     @api.model_create_multi
@@ -193,6 +218,7 @@ class ResCompany(models.Model):
                 "color_link_text": values.get("color_link_text") or "#71639e",
                 "color_link_text_hover": values.get("color_link_text_hover")
                 or "darken(#71639e, 10%)",
+                "color_submenu_text": values.get("color_link_text") or "#374151",
             }
         )
         return values
@@ -218,14 +244,14 @@ class ResCompany(models.Model):
             )
             values = {
                 "datas": datas,
-                "db_datas": datas,
                 "url": custom_url,
                 "name": custom_url,
                 "company_id": record.id,
+                "type": "binary",
+                "mimetype": "text/css",
             }
             if custom_attachment:
                 custom_attachment.sudo().write(values)
             else:
-                values.update({"type": "binary", "mimetype": "text/scss"})
                 IrAttachmentObj.sudo().create(values)
-        self.env["ir.qweb"].sudo().clear_caches()
+        self.env.registry.clear_cache()

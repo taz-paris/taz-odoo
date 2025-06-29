@@ -12,12 +12,10 @@ class IrActionsServer(models.Model):
     label_template = fields.Char(
         "Label QWeb Template",
         help="The QWeb template key to render the labels",
-        states={"report_label": [("required", True)]},
     )
     label_paperformat_id = fields.Many2one(
         "report.paperformat.label",
         "Label Paper Format",
-        states={"report_label": [("required", True)]},
     )
 
     def report_label_associated_view(self):

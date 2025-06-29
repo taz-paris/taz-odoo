@@ -8,7 +8,7 @@
 		    <pivot string="Analytic Items" sample="1">
 			<field name="date" type="col" interval="month"/>
 			<field name="date" type="col" interval="week"/>
-			<field name="category" type="col" />
+			<field name="category" type="col"/>
 			<field name="project_id" type="row"/>
 			<field name="unit_amount" type="measure" string="Jours"/>
 			<field name="amount" type="measure"/>
@@ -22,8 +22,8 @@
             <field name="inherit_id" ref="hr.view_employee_filter"/>
 	    <field name="priority">5</field>
 	    <field name="arch" type="xml">
-		<xpath expr='//searchpanel' position="replace">
-			<searchpanel view_types="list,graph"  >
+		<xpath expr="//searchpanel" position="replace">
+			<searchpanel view_types="list,graph">
 			<field name="company_id" groups="base.group_multi_company" icon="fa-building" enable_counters="1"/>
                         <field name="job_id" icon="fa-users" select="multi" enable_counters="1"/>
 			</searchpanel>
@@ -58,15 +58,9 @@
 				<field name="show_leaves" invisible="1"/>
 				<field name="is_absent" invisible="1"/>
 				<field name="hr_icon_display" invisible="1"/>
-				<button name="action_time_off_dashboard"
-					type="object"
-					class="oe_stat_button"
-					context="{'search_default_employee_ids': active_id}"
-					attrs="{'invisible': [('is_absent', '=', False)]}">
-					<div attrs="{'invisible': [('hr_icon_display', '!=', 'presence_holiday_present')]}"
-					      role="img" class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Off Till" title="Off Till"/>
-					<div attrs="{'invisible': [('hr_icon_display', '!=', 'presence_holiday_absent')]}" role="img"
-					     class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Off Till" title="Off Till"/>
+				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" context="{'search_default_employee_ids': active_id}" invisible="not is_absent">
+					<div invisible="hr_icon_display != 'presence_holiday_present'" role="img" class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Off Till" title="Off Till"/>
+					<div invisible="hr_icon_display != 'presence_holiday_absent'" role="img" class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Off Till" title="Off Till"/>
 				    <div class="o_field_widget o_stat_info">
 					<span class="o_stat_text">
 					    En congés jusqu'au
@@ -76,15 +70,8 @@
 					</span>
 				    </div>
 				</button>
-				<button name="action_time_off_dashboard"
-					type="object"
-					class="oe_stat_button"
-					icon="fa-calendar"
-					attrs="{'invisible': [('show_leaves','=', False)]}"
-					context="{'search_default_employee_ids': active_id}"
-					groups="base.group_user"
-					help="Remaining leaves">
-				    <div class="o_field_widget o_stat_info" attrs="{'invisible': [('allocation_display', '=', '0')]}">
+				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not show_leaves" context="{'search_default_employee_ids': active_id}" groups="base.group_user" help="Remaining leaves">
+				    <div class="o_field_widget o_stat_info" invisible="allocation_display == '0'">
 					<span class="o_stat_value">
 					    <field name="allocation_remaining_display"/>/<field name="allocation_display"/> Jours
 					</span>
@@ -92,7 +79,7 @@
 					    Congés
 					</span>
 				    </div>
-				    <div class="o_field_widget o_stat_info" attrs="{'invisible': [('allocation_display', '!=', '0')]}">
+				    <div class="o_field_widget o_stat_info" invisible="allocation_display != '0'">
 					<span class="o_stat_text">
 					   Congés
 					</span>
@@ -117,38 +104,33 @@
 				-->
 				<field name="contract_warning" invisible="1"/>
 				<field name="employee_type" invisible="1"/>
-				<button name="action_open_contract_history"
-				    class="oe_stat_button"
-				    icon="fa-book"
-				    type="object"
-				    groups="hr_contract.group_hr_contract_manager"
-				    attrs="{'invisible' : [('employee_type', 'not in', ['employee', 'student', 'trainee'])]}">
-				    <div attrs="{'invisible' : [('first_contract_date', '=', False)]}" class="o_stat_info">
-					<span class="o_stat_text text-success" attrs="{'invisible' : [('contract_warning', '=', True)]}" title="In Contract Since">Arrivé(e) le</span>
-					<span class="o_stat_value text-success" attrs="{'invisible' : [('contract_warning', '=', True)]}">
+				<button name="action_open_contract" class="oe_stat_button" icon="fa-book" type="object" groups="hr_contract.group_hr_contract_manager" invisible="employee_type not in ['employee', 'student', 'trainee']">
+				    <div invisible="not first_contract_date" class="o_stat_info">
+					<span class="o_stat_text text-success" invisible="contract_warning" title="In Contract Since">Arrivé(e) le</span>
+					<span class="o_stat_value text-success" invisible="contract_warning">
 					    <field name="first_contract_date" readonly="1"/>
 					</span>
-					<span class="o_stat_text text-danger" attrs="{'invisible' : [('contract_warning', '=', False)]}" title="In Contract Since">
+					<span class="o_stat_text text-danger" invisible="not contract_warning" title="In Contract Since">
 					    En contrat depuis le
 					</span>
-					<span class="o_stat_value text-danger" attrs="{'invisible' : [('contract_warning', '=', False)]}">
+					<span class="o_stat_value text-danger" invisible="not contract_warning">
 					    <field name="first_contract_date" readonly="1"/>
 					</span>
 				    </div>
-				    <div attrs="{'invisible' : [('first_contract_date', '!=', False)]}" class="o_stat_info">
+				    <div invisible="first_contract_date" class="o_stat_info">
 					<span class="o_stat_value text-danger">
 					   <field name="contracts_count"/>
 					</span>
-					<span attrs="{'invisible' : [('contracts_count', '!=', 1)]}" class="o_stat_text text-danger" >
+					<span invisible="contracts_count != 1" class="o_stat_text text-danger">
 					    Contrat
 					</span>
-					<span attrs="{'invisible' : [('contracts_count', '=', 1)]}" class="o_stat_text text-danger">
+					<span invisible="contracts_count == 1" class="o_stat_text text-danger">
 					    Contrats
 					</span>
 				    </div>
 				</button>
 			  </div>
-			    <div class="alert alert-warning mb-0" role="alert" attrs="{'invisible': [('is_late_validated_timesheet', '=', False)]}">
+			    <div class="alert alert-warning mb-0" role="alert" invisible="not is_late_validated_timesheet">
 				Pointage en retard
 				<button name="send_email_timesheet_late" type="object" string="Envoyer un email de rappel" class="btn btn-link p-0"/>
 			    </div>
@@ -160,7 +142,7 @@
 					  <field name="work_email"/>
 					  <field name="first_contract_date"/>
 					  <field name="departure_date"/>
-					  <field name="identification_id" />
+					  <field name="identification_id"/>
 					  <field name="is_consultant"/>
 					  <field name="is_associate"/>
 					  <field name="sector_ids" widget="many2many_tags"/>
@@ -184,7 +166,7 @@
 			<notebook>
 				<page string="Affectations validées">
 					<field name="staffing_need_ids" readonly="1" domain="[('state', '=', 'done')]">
-						<tree default_order='begin_date desc'>
+						<tree default_order="begin_date desc">
 							<field name="project_id"/>
 							<field name="begin_date"/>
 							<field name="end_date"/>
@@ -234,7 +216,7 @@
 				</page>
 				    <page name="hr_settings" string="HR Settings" groups="hr.group_hr_user">
 					<group>
-					    <group string='Status' name="active_group">
+					    <group string="Status" name="active_group">
 						<field name="employee_type"/>
 						<field name="user_id" string="Related User" domain="[('share', '=', False)]" context="{'allow_create_employee': False, 'default_create_employee': False}"/>
 					    </group>
@@ -250,8 +232,8 @@
 		<field name="name">Équipage</field>
 		<field name="res_model">hr.employee</field>
 		<field name="view_mode">tree,form</field>
-		<field name="domain"></field>
-		<field name="context"></field>
+		<field name="domain"/>
+		<field name="context"/>
 	    </record>
 		    
 	    <record id="staffing.employee_action_view_tree" model="ir.actions.act_window.view">

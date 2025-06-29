@@ -50,9 +50,10 @@ class TrialBalanceReportWizard(models.TransientModel):
     show_partner_details = fields.Boolean()
     partner_ids = fields.Many2many(comodel_name="res.partner", string="Filter partners")
     journal_ids = fields.Many2many(comodel_name="account.journal")
-
-    not_only_one_unaffected_earnings_account = fields.Boolean(readonly=True)
-
+    only_one_unaffected_earnings_account = fields.Boolean(
+        readonly=True,
+        default=lambda self: self._only_one_unaffected_earnings_account(),
+    )
     foreign_currency = fields.Boolean(
         string="Show foreign currency",
         help="Display foreign currency for move lines, unless "
@@ -67,6 +68,15 @@ class TrialBalanceReportWizard(models.TransientModel):
         comodel_name="account.account",
         help="Ending account in a range",
     )
+    grouped_by = fields.Selection(
+        selection=[("analytic_account", "Analytic Account")], default=False
+    )
+
+    @api.onchange("grouped_by")
+    def onchange_grouped_by(self):
+        if self.grouped_by == "analytic_account":
+            self.show_partner_details = False
+            self.show_hierarchy = False
 
     @api.onchange("account_code_from", "account_code_to")
     def on_change_account_range(self):
@@ -107,16 +117,21 @@ class TrialBalanceReportWizard(models.TransientModel):
             else:
                 wiz.fy_start_date = False
 
-    @api.onchange("company_id")
-    def onchange_company_id(self):
-        """Handle company change."""
+    def _only_one_unaffected_earnings_account(self):
         count = self.env["account.account"].search_count(
             [
                 ("account_type", "=", "equity_unaffected"),
-                ("company_id", "=", self.company_id.id),
+                ("company_id", "=", self.company_id.id or self.env.company.id),
             ]
         )
-        self.not_only_one_unaffected_earnings_account = count != 1
+        return count == 1
+
+    @api.onchange("company_id")
+    def onchange_company_id(self):
+        """Handle company change."""
+        self.only_one_unaffected_earnings_account = (
+            self._only_one_unaffected_earnings_account()
+        )
         if (
             self.company_id
             and self.date_range_id.company_id
@@ -202,6 +217,7 @@ class TrialBalanceReportWizard(models.TransientModel):
         """Handle partners change."""
         if self.show_partner_details:
             self.receivable_accounts_only = self.payable_accounts_only = True
+            self.grouped_by = False
         else:
             self.receivable_accounts_only = self.payable_accounts_only = False
 
@@ -258,6 +274,7 @@ class TrialBalanceReportWizard(models.TransientModel):
             "show_partner_details": self.show_partner_details,
             "unaffected_earnings_account": self.unaffected_earnings_account.id,
             "account_financial_report_lang": self.env.lang,
+            "grouped_by": self.grouped_by,
         }
 
     def _export(self, report_type):

@@ -3,25 +3,16 @@
 import { AnalyticDistribution } from '@analytic/components/analytic_distribution/analytic_distribution';
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
-import { patch } from 'web.utils';
+import { patch } from "@web/core/utils/patch";
 
 const components = { AnalyticDistribution };
 
-patch(components.AnalyticDistribution.prototype, 'analytic_distribution', {
-	searchAnalyticDomain(searchTerm) {
-		return [
-		    '|',
-		    ["display_name", "ilike", searchTerm],
-		    '|',
-		    ['code', 'ilike', searchTerm],
-		    ['partner_id', 'ilike', searchTerm],
-		];
-	},
-
+patch(components.AnalyticDistribution.prototype, {
 	async getProjectUrl(ev) {
 		ev.stopPropagation();
 
-		var analytic_account_ids = Object.keys(this.listForJson).map(Number);
+		const jsonFieldValue = this.props.record.data[this.props.name];
+		const analytic_account_ids = jsonFieldValue ? Object.keys(jsonFieldValue).map((key) => key.split(',')).flat().map((id) => parseInt(id)) : [];
 		const args = {
 			    domain: [["id", "in", analytic_account_ids]],
 			    fields: ["id", "project_ids"],

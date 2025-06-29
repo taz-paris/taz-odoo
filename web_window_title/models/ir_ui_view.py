@@ -10,7 +10,7 @@ class View(models.Model):
     _inherit = 'ir.ui.view'
 
     @api.model
-    def _render_template(self, template, values=None, engine='ir.qweb'):
+    def _render_template(self, template, values=None):
         if template in ['web.login', 'web.webclient_bootstrap']:
             if not values:
                 values = {}

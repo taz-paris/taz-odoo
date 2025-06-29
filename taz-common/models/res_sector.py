@@ -7,6 +7,6 @@ _logger = logging.getLogger(__name__)
 
 class tazResSector(models.Model):
     _name = "res.partner.sector"
-
+    _description = "Sector"
     name = fields.Char(string="Nom")
     partner_ids = fields.One2many('res.partner', 'sector_id')

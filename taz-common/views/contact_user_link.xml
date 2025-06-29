@@ -4,19 +4,19 @@
       <field name="model">taz.contact_user_link</field>
       <field name="arch" type="xml">
           <tree editable="top" decoration-danger="is_late == True">
-                  <field name="partner_id" optional="hide" options="{'no_quick_create':True}" attrs="{'required' : False}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
-                  <field name="user_id" />
-		  <field name="proximity_level" />
-		  <field name="last_business_action_id" optional="hide" />
-                  <field name="date_last_business_action" />
-                  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}" />
-		  <field name="is_late" optional="hide" />
-		  <field name="next_meeting_before" optional="show" />
-		  <field name="next_business_action_id" optional="show" />
-		  <field name="comment" optional="show" />
-		  <field name="formality" optional="show" />
-		  <field name="communication_preference" optional="show" />
-		  <field name="mail_template" optional="show" />
+                  <field name="partner_id" optional="hide" options="{'no_quick_create':True}" required="False" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+                  <field name="user_id"/>
+		  <field name="proximity_level"/>
+		  <field name="last_business_action_id" optional="hide"/>
+                  <field name="date_last_business_action"/>
+                  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}"/>
+		  <field name="is_late" optional="hide"/>
+		  <field name="next_meeting_before" optional="show"/>
+		  <field name="next_business_action_id" optional="show"/>
+		  <field name="comment" optional="show"/>
+		  <field name="formality" optional="show"/>
+		  <field name="communication_preference" optional="show"/>
+		  <field name="mail_template" optional="show"/>
         </tree>
       </field>
     </record>
@@ -29,20 +29,20 @@
 	      <form>
 		  <group>
 			  <group string="Lien Contact / Tasmanien">
-				  <field name="partner_id" options="{'no_quick_create':True}" attrs="{'required' : False}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
-				  <field name="parent_partner_id" />
-				  <field name="rel_inhouse_influence_level" />
+				  <field name="partner_id" options="{'no_quick_create':True}" required="False" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+				  <field name="parent_partner_id"/>
+				  <field name="rel_inhouse_influence_level"/>
 				  <field name="user_id"/>
-				  <field name="proximity_level" />
-				  <field name="formality" />
+				  <field name="proximity_level"/>
+				  <field name="formality"/>
 				  <field name="communication_preference"/>
 			</group>
 			<group string="Synthèse des actions commerciales">
-				  <field name="date_last_business_action" />
-				  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}" />
+				  <field name="date_last_business_action"/>
+				  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}"/>
 				  <field name="next_meeting_before"/>
-				  <field name="next_business_action_id" />
-				  <field name="comment" />
+				  <field name="next_business_action_id"/>
+				  <field name="comment"/>
 		  	</group>
 		</group>
         </form>
@@ -54,27 +54,26 @@
       <field name="model">taz.contact_user_link</field>
       <field name="arch" type="xml">
           <tree editable="top" default_order="next_meeting_before" decoration-danger="is_late == True">
-                  <field name="partner_id" options="{'no_quick_create':True}" attrs="{'required' : False}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
-                  <field name="parent_partner_id" optional="hide" />
-                  <field name="parent_partner_industry_id" optional="hide" />
-		  <field name="rel_inhouse_influence_level" optional="show" />
-                  <field name="user_id" optional="hide" />
-		  <field name="proximity_level" />
-		  <field name="last_business_action_id" optional="hide" />
-                  <field name="date_last_business_action" />
-                  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}" />
-		  <field name="is_late" optional="hide" />
-		  <field name="next_meeting_before" optional="show" />
-		  <field name="next_business_action_id" optional="show" />
-		  <field name="comment" optional="show" />
-		  <field name="formality" optional="show" />
-		  <field name="communication_preference" optional="show" />
-		  <field name="mail_template" optional="show" />
+                  <field name="partner_id" options="{'no_quick_create':True}" required="False" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+                  <field name="parent_partner_id" optional="hide"/>
+                  <field name="parent_partner_industry_id" optional="hide"/>
+		  <field name="rel_inhouse_influence_level" optional="show"/>
+                  <field name="user_id" optional="hide"/>
+		  <field name="proximity_level"/>
+		  <field name="last_business_action_id" optional="hide"/>
+                  <field name="date_last_business_action"/>
+                  <field name="target_contact_frequency_id" string="Fréquence" options="{'no_quick_create':True}"/>
+		  <field name="is_late" optional="hide"/>
+		  <field name="next_meeting_before" optional="show"/>
+		  <field name="next_business_action_id" optional="show"/>
+		  <field name="comment" optional="show"/>
+		  <field name="formality" optional="show"/>
+		  <field name="communication_preference" optional="show"/>
+		  <field name="mail_template" optional="show"/>
 		  <field name="last_office365_mail_draft" optional="hide" readonly="1"/>
-		  <field name="can_generate_office365_mail_draft" invisible="1" />
-		  <field name="mail_sent" />
-		  <button name="create_office365_mail_draft" string="Générer brouillon mail Voeux" type="object" icon="fa-envelope"
-			  attrs="{'invisible': [('can_generate_office365_mail_draft', '=', False)]}"/>
+		  <field name="can_generate_office365_mail_draft" invisible="1"/>
+		  <field name="mail_sent"/>
+		  <button name="create_office365_mail_draft" string="Générer brouillon mail Voeux" type="object" icon="fa-envelope" invisible="not can_generate_office365_mail_draft"/>
         </tree>
       </field>
     </record>
@@ -89,29 +88,27 @@
                     <field name="parent_partner_id" string="Entreprise"/>
                     <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
                     <separator/>
-		    <filter name="mail_sent" string="Vœux envoyé" domain="[('mail_sent', '=', True)]" />
-		    <filter name="mail_not_sent" string="Vœux non envoyé" domain="[('mail_sent', '=', False)]" />
+		    <filter name="mail_sent" string="Vœux envoyé" domain="[('mail_sent', '=', True)]"/>
+		    <filter name="mail_not_sent" string="Vœux non envoyé" domain="[('mail_sent', '=', False)]"/>
                     <separator/>
-                    <filter string="À revoir d'ici 2 mois" name="m_2"
-                        domain="[('next_meeting_before','&lt;=', ((context_today() + relativedelta(months=2)).strftime('%Y-%m-%d')))]" />
+                    <filter string="À revoir d'ici 2 mois" name="m_2" domain="[('next_meeting_before','&lt;=', ((context_today() + relativedelta(months=2)).strftime('%Y-%m-%d')))]"/>
                     <filter name="filter_next_meeting_before" date="next_meeting_before"/>
-                    <filter string="En retard" name="is_late"
-			    domain="[('is_late','=', True)]" />
+                    <filter string="En retard" name="is_late" domain="[('next_meeting_before', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
                     <separator/>
-		    <filter name="proximity_level_0" string="Proximité = Niveau 0" domain="[('proximity_level', '=', '0')]" />
-		    <filter name="proximity_level_1" string="Proximité = Niveau 1" domain="[('proximity_level', '=', '1')]" />
-		    <filter name="proximity_level_2" string="Proximité = Niveau 2" domain="[('proximity_level', '=', '2')]" />
-		    <filter name="proximity_level_3" string="Proximité = Niveau 3" domain="[('proximity_level', '=', '3')]" />
+		    <filter name="proximity_level_0" string="Proximité = Niveau 0" domain="[('proximity_level', '=', '0')]"/>
+		    <filter name="proximity_level_1" string="Proximité = Niveau 1" domain="[('proximity_level', '=', '1')]"/>
+		    <filter name="proximity_level_2" string="Proximité = Niveau 2" domain="[('proximity_level', '=', '2')]"/>
+		    <filter name="proximity_level_3" string="Proximité = Niveau 3" domain="[('proximity_level', '=', '3')]"/>
                     <separator/>
 		    <filter name="rel_inhouse_influence_level_1" string="Influence = Niveau 1" domain="[('rel_inhouse_influence_level', '=', '1')]"/>
 		    <filter name="rel_inhouse_influence_level_2" string="Influence = Niveau 2" domain="[('rel_inhouse_influence_level', '=', '2')]"/>
 		    <filter name="rel_inhouse_influence_level_3" string="Influence = Niveau 3" domain="[('rel_inhouse_influence_level', '=', '3')]"/>
 		    <filter name="rel_inhouse_influence_level_4" string="Influence = Niveau 4" domain="[('rel_inhouse_influence_level', '=', '4')]"/>
                     <separator/>
-		    <filter name="communication_preference_email_auto" string="Préférence de com. = email auto" domain="[('communication_preference', '=', 'email_auto')]" />
-		    <filter name="communication_preference_email_perso" string="Préférence de com. = email perso" domain="[('communication_preference', '=', 'email_perso')]" />
-		    <filter name="communication_preference_paper_auto" string="Préférence de com. = papier auto" domain="[('communication_preference', '=', 'paper_auto')]" />
-		    <filter name="communication_preference_paper_perso" string="Préférence de com. = papier perso" domain="[('communication_preference', '=', 'paper_perso')]" />
+		    <filter name="communication_preference_email_auto" string="Préférence de com. = email auto" domain="[('communication_preference', '=', 'email_auto')]"/>
+		    <filter name="communication_preference_email_perso" string="Préférence de com. = email perso" domain="[('communication_preference', '=', 'email_perso')]"/>
+		    <filter name="communication_preference_paper_auto" string="Préférence de com. = papier auto" domain="[('communication_preference', '=', 'paper_auto')]"/>
+		    <filter name="communication_preference_paper_perso" string="Préférence de com. = papier perso" domain="[('communication_preference', '=', 'paper_perso')]"/>
                     <group expand="0" string="Group By">
                         <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
                         <filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
@@ -130,11 +127,7 @@
       <field name="name">Mon plan d'intimité client</field>
       <field name="res_model">taz.contact_user_link</field>
       <field name="view_mode">tree</field>
-      <field name="view_ids" eval="
-	    [
-	    (5, 0, 0),
-	    (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_user_link_tree_intimity_plan')}),
-	      ]" />
+      <field name="view_ids" eval="      [      (5, 0, 0),      (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_user_link_tree_intimity_plan')}),        ]"/>
       <field name="domain">[('user_id', '=', uid)]</field>
     </record>
 
@@ -144,11 +137,7 @@
       <field name="name">Tous les liens Tasmaniens/contacts</field>
       <field name="res_model">taz.contact_user_link</field>
       <field name="view_mode">tree</field>
-      <field name="view_ids" eval="
-	    [
-	    (5, 0, 0),
-	    (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_user_link_tree_intimity_plan')}),
-	      ]" />
+      <field name="view_ids" eval="      [      (5, 0, 0),      (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_user_link_tree_intimity_plan')}),        ]"/>
     </record>
 
     <menuitem name="Tous les liens Tasmaniens/contacts" id="taz-common.contact_user_link_menu" sequence="91" parent="taz-common.commerce" action="taz-common.action_contact_user_link"/>
@@ -158,8 +147,8 @@
       <field name="model">taz.contact_user_link_frequency</field>
       <field name="arch" type="xml">
           <tree editable="top">
-                  <field name="name" />
-                  <field name="day_number" />
+                  <field name="name"/>
+                  <field name="day_number"/>
         </tree>    
       </field> 
     </record>
@@ -170,8 +159,7 @@
       <field name="view_mode">tree</field>
     </record>
 
-    <menuitem id="taz-common.menu_contact_user_link_frequency" name="Fréquence recontre client"
-        parent="taz-common.res_partner_menu_config" sequence="6" action="taz-common.action_contact_user_link_frequency"/>
+    <menuitem id="taz-common.menu_contact_user_link_frequency" name="Fréquence recontre client" parent="taz-common.res_partner_menu_config" sequence="6" action="taz-common.action_contact_user_link_frequency"/>
 
 
     <record id="action_init_contact_user_link_from_taggs" model="ir.actions.server">
@@ -180,6 +168,6 @@
           <field name="binding_model_id" ref="model_taz_contact_user_link"/>
           <field name="state">code</field>
           <field name="code">action =  env.get('taz.contact_user_link').init_from_taggs()</field>
-          <field name="groups_id" eval="[(4, ref('base.group_system'))]" />
+          <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
    </record>
 </data>

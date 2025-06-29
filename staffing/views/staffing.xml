@@ -1,5 +1,10 @@
 <odoo>
   <data>
+
+    <record id="hr_holidays.menu_hr_holidays_root" model="ir.ui.menu">
+	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+
    <record model="ir.ui.view" id="staffing.need_tree">
       <field name="name">Besoins de staffing</field>
       <field name="model">staffing.need</field>

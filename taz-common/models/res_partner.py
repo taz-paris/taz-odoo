@@ -117,7 +117,7 @@ class tazResPartner(models.Model):
 
      industry_id = fields.Many2one(string='Compte (ex BD)')
      sector_id = fields.Many2one('res.partner.sector', string='Secteur')
-     business_priority = fields.Selection(related='industry_id.business_priority', default='not_tracked', store=True, string='Niveau de priorité du compte')
+     business_priority = fields.Selection(related='industry_id.business_priority', store=True, string='Niveau de priorité du compte')
      parent_industry_id = fields.Many2one('res.partner.industry', string='Compte du parent', related='parent_id.industry_id', store=True)
      parent_industry_priority = fields.Selection(related='parent_id.industry_id.business_priority', store=True) 
      parent_sector_id = fields.Many2one('res.partner.sector', string='Secteur du parent', related='parent_id.sector_id', store=True)
@@ -170,7 +170,7 @@ class tazResPartner(models.Model):
      def name_get(self):
          res = []
          for rec in self:
-             display_name = rec._get_name()
+             display_name = rec.display_name
              if not (self._context.get('show_address_only') or self._context.get('show_address') or self._context.get('partner_show_db_id') or self._context.get('address_inline') or self._context.get('show_email') or self._context.get('html_format') or self._context.get('show_vat')): #Sans cette condition, l'adresse postale n'apparaît pas sur les factures
                  if (rec.is_company == False):
                      display_name = "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")

@@ -1,4 +1,4 @@
-# © 2016 Julien Coux (Camptocamp)
+# ?? 2016 Julien Coux (Camptocamp)
 # Copyright 2020 ForgeFlow S.L. (https://www.forgeflow.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
@@ -147,7 +147,7 @@ class OpenItemsReport(models.AbstractModel):
             elif not move_line["name"]:
                 ref_label = move_line["ref"]
             else:
-                ref_label = move_line["ref"] + str(" - ") + move_line["name"]
+                ref_label = move_line["ref"] + " - " + move_line["name"]
 
             move_line.update(
                 {
@@ -206,11 +206,18 @@ class OpenItemsReport(models.AbstractModel):
 
     @api.model
     def _order_open_items_by_date(
-        self, open_items_move_lines_data, show_partner_details, partners_data
+        self,
+        open_items_move_lines_data,
+        show_partner_details,
+        partners_data,
+        accounts_data,
     ):
+        # We need to order by account code, partner_name and date
+        accounts_data_sorted = sorted(accounts_data.items(), key=lambda x: x[1]["code"])
+        account_ids_sorted = [account[0] for account in accounts_data_sorted]
         new_open_items = {}
         if not show_partner_details:
-            for acc_id in open_items_move_lines_data.keys():
+            for acc_id in account_ids_sorted:
                 new_open_items[acc_id] = {}
                 move_lines = []
                 for prt_id in open_items_move_lines_data[acc_id]:
@@ -219,7 +226,7 @@ class OpenItemsReport(models.AbstractModel):
                 move_lines = sorted(move_lines, key=lambda k: (k["date"]))
                 new_open_items[acc_id] = move_lines
         else:
-            for acc_id in open_items_move_lines_data.keys():
+            for acc_id in account_ids_sorted:
                 new_open_items[acc_id] = {}
                 for prt_id in sorted(
                     open_items_move_lines_data[acc_id],
@@ -262,7 +269,10 @@ class OpenItemsReport(models.AbstractModel):
 
         total_amount = self._calculate_amounts(open_items_move_lines_data)
         open_items_move_lines_data = self._order_open_items_by_date(
-            open_items_move_lines_data, show_partner_details, partners_data
+            open_items_move_lines_data,
+            show_partner_details,
+            partners_data,
+            accounts_data,
         )
         return {
             "doc_ids": [wizard_id],

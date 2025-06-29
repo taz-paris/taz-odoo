@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 
-import { patch } from 'web.utils';
+import { patch } from "@web/core/utils/patch";
 import { BoardController } from '@board/board_controller';
 
 
@@ -19,7 +19,7 @@ import { BoardAction } from "@board/board_action";
 const xmlSerializer = new XMLSerializer();
 const { blockDom, Component, useState, useRef } = owl;
 
-patch(BoardController.prototype, 'board_controller', {
+patch(BoardController.prototype, {
     saveBoard() {
         const templateFn = renderToString.app.getTemplate("board.arch");
         const bdom = templateFn(this.board, {});

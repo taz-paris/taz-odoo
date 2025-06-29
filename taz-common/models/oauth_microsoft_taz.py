@@ -25,22 +25,6 @@ class OAuthResUsers(models.Model):
     oauth_token_expires_at = fields.Char("Date d'expiration du token") #ADU
     oauth_refresh_token = fields.Char("Refresh token") #ADU
 
-    def _read(self, fields): #Localisation de la fonction remplacée /usr/lib/python3/dist-packages/odoo/addons/base/models/res_users.py
-        super(models.Model, self)._read(fields)
-        if set(base.models.res_users.USER_PRIVATE_FIELDS).intersection(fields):
-            if self.check_access_rights('write', raise_exception=False):
-                return
-            for record in self:
-                if self.env.user.id == record.id: #ADU #un utilsateur a le droit de lire son propre access_tocken
-                    continue #ADU
-                for f in base.models.res_users.USER_PRIVATE_FIELDS:
-                    try:
-                        record._cache[f]
-                        record._cache[f] = '********'
-                    except Exception:
-                        # skip SpecialValue (e.g. for missing record or access right)
-                        pass
-
     def _auth_oauth_rpc(self, endpoint, access_token):
         if self.env['ir.config_parameter'].sudo().get_param('auth_oauth.authorization_header'):
             response = requests.get(endpoint, headers={'Authorization': 'Bearer %s' % access_token}, timeout=10)

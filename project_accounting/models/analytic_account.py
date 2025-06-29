@@ -22,19 +22,19 @@ class analyticAccount(models.Model):
         return result
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
-        _logger.info('account.analytic.account => _name_search')
-        query = "SELECT aaa.id, aaa.name FROM account_analytic_account AS aaa LEFT JOIN project_project AS p ON aaa.id = p.analytic_account_id WHERE aaa.name ilike %s OR p.number ilike %s;"
-        name2 = '%'+str(name)+'%'
-        params = (name2, name2)
-        self.env.cr.execute(query, params)
-        return [row[0] for row in self.env.cr.fetchall()]
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
+        domain = list(domain or [])
+        if name :
+            domain += ['|', ('name', operator, name), ('display_name', operator, name)]
+        return self._search(domain, limit=limit, order=order, access_rights_uid=name_get_uid)
 
 
     @api.depends('project_ids', 'project_ids.number', 'project_ids.name', 'name')
-    def display_name(self):
+    def _compute_display_name(self):
         for rec in self:
-            rec.display_name = rec.name_get()[0][1]
+            if len(rec.project_ids)==1:
+                rec.display_name = rec.project_ids[0].display_name
+            else :
+                rec.display_name = rec.name
 
-
-    display_name = fields.Char('Nom affiché', compute=display_name, store=True)
+    display_name = fields.Char(store=True)

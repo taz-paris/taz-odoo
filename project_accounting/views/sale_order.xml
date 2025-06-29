@@ -249,21 +249,21 @@
 	    <field name="priority" eval="50"/>
 	    <field name="arch" type="xml">
 		<tree editable="top" create="false">
-			<field name="salesman_id" modifiers="{'readonly': true}"/>
-			<field name="order_partner_id" modifiers="{'readonly': true}"/>
-			<field name="order_partner_invoice_id" optional="hide" modifiers="{'readonly': true}"/>
+			<field name="salesman_id" readonly="1"/>
+			<field name="order_partner_id" readonly="1"/>
+			<field name="order_partner_invoice_id" optional="hide" readonly="1"/>
 			<field name="analytic_distribution" widget="analytic_distribution" readonly="1"/>
-			<field name="order_id" widget="many2one" on_change="1" modifiers="{'required': true}"/>
+			<field name="order_id" widget="many2one" on_change="1" required="1"/>
 			<field name="previsional_invoice_date" string="Echéance" optional="show" readonly="1"/>
-			<field name="name" modifiers="{'required': true}" optional="hide"/>
-			<field name="price_subtotal" sum="Montant HT" widget="monetary" modifiers="{'readonly': true}"/>
+			<field name="name" optional="hide" required="1"/>
+			<field name="price_subtotal" sum="Montant HT" widget="monetary" readonly="1"/>
 
-			<field name="product_uom_qty" string="Qté" optional="show" on_change="1" readonly="1" modifiers="{'required': true}"/>
+			<field name="product_uom_qty" string="Qté" optional="show" on_change="1" readonly="1" required="1"/>
 			<field name="qty_delivered" optional="show" on_change="1"/>
 
-			<field name="qty_invoiced" optional="hide" on_change="1" modifiers="{'readonly': true}"/>
-			<field name="qty_to_invoice" optional="hide" modifiers="{'readonly': true}"/>
-			<field name="untaxed_amount_to_invoice" optional="hide" string="Reste à facturer (HT)" modifiers="{'readonly': true}"/>
+			<field name="qty_invoiced" optional="hide" on_change="1" readonly="1"/>
+			<field name="qty_to_invoice" optional="hide" readonly="1"/>
+			<field name="untaxed_amount_to_invoice" optional="hide" string="Reste à facturer (HT)" readonly="1"/>
 			<field name="direct_payment_purchase_order_line_id" optional="hide" on_change="1"/>
 			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1"/>
 			<field name="invoice_lines" optional="hide" readonly="1" widget="many2many_tags" />

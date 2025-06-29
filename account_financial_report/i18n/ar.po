@@ -19,12 +19,12 @@ msgstr ""
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "&gt; 120 d."
-msgstr "‫&gt; 120 يوم."
+msgstr "???&gt; 120 ??????."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "1 - 30 d."
-msgstr "1 - 30 يوم."
+msgstr "1 - 30 ??????."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
@@ -34,23 +34,36 @@ msgstr "10"
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "31 - 60 d."
-msgstr "31 - 60 يوم."
+msgstr "31 - 60 ??????."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "61 - 90 d."
-msgstr "61 - 90 يوم."
+msgstr "61 - 90 ??????."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "91 - 120 d."
-msgstr "91 - 120 يوم."
+msgstr "91 - 120 ??????."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 msgid "<b>Taxes summary</b>"
-msgstr "‫<b>موجز الضرائب</b>"
+msgstr "???<b>???????? ??????????????</b>"
+
+#. module: account_financial_report
+#: model_terms:ir.ui.view,arch_db:account_financial_report.trial_balance_wizard
+msgid ""
+"<i class=\"fa fa-exclamation-triangle mr-3\"/>\n"
+"                    Duplicate amounts may be shown because more than one "
+"analytical account may be defined in the journal items."
+msgstr ""
+
+#. module: account_financial_report
+#: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
+msgid "<span class=\"o_form_label\">Intervals configuration</span>"
+msgstr ""
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
@@ -90,7 +103,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #, python-format
 msgid "Account"
-msgstr "الحساب"
+msgstr "????????????"
+
+#. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__account_age_report_config_id
+msgid "Account Age Report Config"
+msgstr ""
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__account_code_from
@@ -99,7 +117,7 @@ msgstr "الحساب"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__account_code_from
 #, fuzzy
 msgid "Account Code From"
-msgstr "رمز الحساب"
+msgstr "?????? ????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__account_code_to
@@ -108,19 +126,19 @@ msgstr "رمز الحساب"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__account_code_to
 #, fuzzy
 msgid "Account Code To"
-msgstr "رمز الحساب"
+msgstr "?????? ????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_account_group
 msgid "Account Group"
-msgstr "مجموعة الحساب"
+msgstr "???????????? ????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #, python-format
 msgid "Account Name"
-msgstr "اسم الحساب"
+msgstr "?????? ????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -128,7 +146,7 @@ msgstr "اسم الحساب"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 #, fuzzy, python-format
 msgid "Account at 0 filter"
-msgstr "الحسابات برصيد صفر"
+msgstr "???????????????? ?????????? ??????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -138,17 +156,17 @@ msgstr "الحسابات برصيد صفر"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
 #, python-format
 msgid "Account balance at 0 filter"
-msgstr "الحسابات برصيد صفر"
+msgstr "???????????????? ?????????? ??????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_group__account_ids
 msgid "Accounts"
-msgstr "الحسابات"
+msgstr "????????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__centralize
 msgid "Activate centralization"
-msgstr "تجميع القيود"
+msgstr "?????????? ????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
@@ -156,60 +174,65 @@ msgid "Additional Filtering"
 msgstr ""
 
 #. module: account_financial_report
+#: model:ir.actions.act_window,name:account_financial_report.action_aged_partner_report_configuration
+msgid "Age Partner Report Configuration"
+msgstr ""
+
+#. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 msgid ""
 "Age ≤ 120\n"
-"                        d."
-msgstr "≤ 120 يوم."
+"                            d."
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, fuzzy, python-format
+#, python-format
 msgid "Age ≤ 120 d."
-msgstr "‫â¤ 120 يوم."
+msgstr ""
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 msgid ""
 "Age ≤ 30\n"
-"                        d."
-msgstr "المدة ≤ 30 يوم."
+"                            d."
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, fuzzy, python-format
+#, python-format
 msgid "Age ≤ 30 d."
-msgstr "‫â¤ 30 يوم."
+msgstr ""
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 msgid ""
 "Age ≤ 60\n"
-"                        d."
-msgstr "المدة ≤ 60 يوم."
+"                            d."
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, fuzzy, python-format
+#, python-format
 msgid "Age ≤ 60 d."
-msgstr "‫‫‫â¤ 60 يوم."
+msgstr ""
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 msgid ""
 "Age ≤ 90\n"
-"                        d."
-msgstr "المدة ≤ 90 يوم."
+"                            d."
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, fuzzy, python-format
+#, python-format
 msgid "Age ≤ 90 d."
-msgstr "‫‫‫â¤ 90 يوم."
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
@@ -220,42 +243,42 @@ msgstr "‫‫‫â¤ 90 يوم."
 #: model:ir.ui.menu,name:account_financial_report.menu_aged_partner_balance_wizard
 #, python-format
 msgid "Aged Partner Balance"
-msgstr "تحليل رصيد الشركاء"
+msgstr "?????????? ???????? ??????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_base
 #, fuzzy
 msgid "Aged Partner Balance -"
-msgstr "تحليل رصيد الشركاء"
+msgstr "?????????? ???????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_account_financial_report_aged_partner_balance
 #, fuzzy
 msgid "Aged Partner Balance Report"
-msgstr "تحليل رصيد الشركاء"
+msgstr "?????????? ???????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_aged_partner_balance_report_wizard
 msgid "Aged Partner Balance Wizard"
-msgstr "معالج ‫تحليل رصيد الشركاء"
+msgstr "?????????? ????????????? ???????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_a_f_r_report_aged_partner_balance_xlsx
 #, fuzzy
 msgid "Aged Partner Balance XLSL Report"
-msgstr "‫تحليل رصيد الشركاء إكسل"
+msgstr "????????????? ???????? ?????????????? ????????"
 
 #. module: account_financial_report
 #: model:ir.actions.report,name:account_financial_report.action_report_aged_partner_balance_xlsx
 msgid "Aged Partner Balance XLSX"
-msgstr "‫تحليل رصيد الشركاء إكسل"
+msgstr "????????????? ???????? ?????????????? ????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
 #, python-format
 msgid "All"
-msgstr "الكل"
+msgstr "????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields.selection,name:account_financial_report.selection__aged_partner_balance_report_wizard__target_move__all
@@ -264,7 +287,7 @@ msgstr "الكل"
 #: model:ir.model.fields.selection,name:account_financial_report.selection__trial_balance_report_wizard__target_move__all
 #: model:ir.model.fields.selection,name:account_financial_report.selection__vat_report_wizard__target_move__all
 msgid "All Entries"
-msgstr "كل القيود"
+msgstr "???? ????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields.selection,name:account_financial_report.selection__aged_partner_balance_report_wizard__target_move__posted
@@ -273,7 +296,7 @@ msgstr "كل القيود"
 #: model:ir.model.fields.selection,name:account_financial_report.selection__trial_balance_report_wizard__target_move__posted
 #: model:ir.model.fields.selection,name:account_financial_report.selection__vat_report_wizard__target_move__posted
 msgid "All Posted Entries"
-msgstr "المرحّلة فقط"
+msgstr "???????????????? ??????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -287,7 +310,7 @@ msgstr "المرحّلة فقط"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 #, python-format
 msgid "All entries"
-msgstr "كل القيود"
+msgstr "???? ????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -301,19 +324,19 @@ msgstr "كل القيود"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 #, python-format
 msgid "All posted entries"
-msgstr "المرحّلة فقط"
+msgstr "???????????????? ??????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "Amount Cur."
-msgstr "القيمة بالعملة."
+msgstr "???????????? ??????????????."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #, python-format
 msgid "Amount Currency"
-msgstr "القيمة بالعملة"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -321,13 +344,14 @@ msgstr "القيمة بالعملة"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
 #, python-format
 msgid "Amount cur."
-msgstr "القيمة بالعملة."
+msgstr "???????????? ??????????????."
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_move_line__analytic_account_ids
+#: model:ir.model.fields.selection,name:account_financial_report.selection__trial_balance_report_wizard__grouped_by__analytic_account
 #, fuzzy
 msgid "Analytic Account"
-msgstr "ترشيح الحسابات"
+msgstr "?????????? ????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -341,47 +365,47 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 msgid "Balance"
-msgstr "الرصيد"
+msgstr "????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 msgid "Base Amount"
-msgstr "القيمة الأساسية"
+msgstr "???????????? ????????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #, python-format
 msgid "Base Balance"
-msgstr "الرصيد الأساسي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #, python-format
 msgid "Base Credit"
-msgstr "الدائن الأساسي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #, python-format
 msgid "Base Debit"
-msgstr "المدين الأساسي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__based_on
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_filters
 msgid "Based On"
-msgstr "مبني على"
+msgstr "???????? ??????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #, python-format
 msgid "Based on"
-msgstr "مبني على"
+msgstr "???????? ??????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
@@ -391,7 +415,7 @@ msgstr "مبني على"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.trial_balance_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.vat_report_wizard
 msgid "Cancel"
-msgstr "إلغاء"
+msgstr "??????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -399,17 +423,17 @@ msgstr "إلغاء"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #, python-format
 msgid "Centralize filter"
-msgstr "تجميع القيود"
+msgstr "?????????? ????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_account__centralized
 msgid "Centralized"
-msgstr "مجمّع"
+msgstr "??????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_group__group_child_ids
 msgid "Child Groups"
-msgstr "مجموعات فرعية"
+msgstr "?????????????? ??????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -419,11 +443,12 @@ msgstr "مجموعات فرعية"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_base
 #, python-format
 msgid "Code"
-msgstr "الرمز"
+msgstr "??????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__company_id
 #: model:ir.model.fields,field_description:account_financial_report.field_account_financial_report_abstract_wizard__company_id
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__company_id
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__company_id
@@ -433,15 +458,27 @@ msgstr "الرمز"
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__company_id
 #, python-format
 msgid "Company"
-msgstr "المؤسسة"
+msgstr "??????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_group__compute_account_ids
 #, fuzzy
 msgid "Compute accounts"
-msgstr "حسابات محسوبة"
+msgstr "???????????? ????????????"
 
 #. module: account_financial_report
+#: model:ir.model,name:account_financial_report.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: account_financial_report
+#: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
+msgid "Configurations"
+msgstr ""
+
+#. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__create_uid
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__create_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__create_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__create_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__create_uid
@@ -449,9 +486,11 @@ msgstr "حسابات محسوبة"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__create_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__create_uid
 msgid "Created by"
-msgstr "أنشئ بواسطة"
+msgstr "???????? ????????????"
 
 #. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__create_date
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__create_date
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__create_date
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__create_date
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__create_date
@@ -459,7 +498,7 @@ msgstr "أنشئ بواسطة"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__create_date
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__create_date
 msgid "Created on"
-msgstr "أنشئ في"
+msgstr "???????? ????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -473,7 +512,7 @@ msgstr "أنشئ في"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #, python-format
 msgid "Credit"
-msgstr "الدائن"
+msgstr "????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -489,7 +528,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
 #, python-format
 msgid "Cumul. Bal."
-msgstr "الرصيد التراكمي."
+msgstr "???????????? ????????????????."
 
 #. module: account_financial_report
 #. odoo-python
@@ -498,7 +537,7 @@ msgstr "الرصيد التراكمي."
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #, python-format
 msgid "Cur."
-msgstr "العملة"
+msgstr "????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -506,7 +545,7 @@ msgstr "العملة"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #, python-format
 msgid "Cur. Original"
-msgstr "الإجمالي بالعملة"
+msgstr "???????????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -514,14 +553,14 @@ msgstr "الإجمالي بالعملة"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #, python-format
 msgid "Cur. Residual"
-msgstr "المستحق بالعملة"
+msgstr "?????????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #, python-format
 msgid "Currency"
-msgstr "العملة"
+msgstr "????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -529,7 +568,7 @@ msgstr "العملة"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 #, python-format
 msgid "Current"
-msgstr "الحالي"
+msgstr "????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -544,13 +583,13 @@ msgstr "الحالي"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #, python-format
 msgid "Date"
-msgstr "التاريخ"
+msgstr "??????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__date_at
 #: model:ir.model.fields,field_description:account_financial_report.field_open_items_report_wizard__date_at
 msgid "Date At"
-msgstr "التاريخ عند"
+msgstr "?????????????? ??????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__date_from
@@ -559,14 +598,14 @@ msgstr "التاريخ عند"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__date_from
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_filters
 msgid "Date From"
-msgstr "تاريخ البدء"
+msgstr "?????????? ??????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__date_to
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__date_to
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_filters
 msgid "Date To"
-msgstr "تاريخ الانتهاء"
+msgstr "?????????? ????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -576,14 +615,14 @@ msgstr "تاريخ الانتهاء"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
 #, python-format
 msgid "Date at filter"
-msgstr "التاريخ"
+msgstr "??????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #, python-format
 msgid "Date from"
-msgstr "تاريخ البدء"
+msgstr "?????????? ??????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__date_range_id
@@ -591,7 +630,7 @@ msgstr "تاريخ البدء"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__date_range_id
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__date_range_id
 msgid "Date range"
-msgstr "الفترة"
+msgstr "????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -602,14 +641,14 @@ msgstr "الفترة"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 #, python-format
 msgid "Date range filter"
-msgstr "ترشيح التاريخ"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #, python-format
 msgid "Date to"
-msgstr "‫تاريخ الانتهاء"
+msgstr "????????????? ????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -623,7 +662,7 @@ msgstr "‫تاريخ الانتهاء"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #, python-format
 msgid "Debit"
-msgstr "المدين"
+msgstr "????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -632,14 +671,16 @@ msgstr "المدين"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 #, python-format
 msgid "Description"
-msgstr "البيان"
+msgstr "????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__tax_detail
 msgid "Detail Taxes"
-msgstr "تفصيل الضرائب"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__display_name
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__display_name
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__display_name
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__display_name
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__display_name
@@ -647,7 +688,7 @@ msgstr "تفصيل الضرائب"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__display_name
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__display_name
 msgid "Display Name"
-msgstr "اسم العرض"
+msgstr "?????? ??????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,help:account_financial_report.field_general_ledger_report_wizard__foreign_currency
@@ -669,7 +710,7 @@ msgstr ""
 msgid ""
 "Due\n"
 "                        date"
-msgstr "تاريخ الاستحقاق"
+msgstr "?????????? ??????????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
@@ -677,7 +718,7 @@ msgstr "تاريخ الاستحقاق"
 msgid ""
 "Due\n"
 "                    date"
-msgstr "تاريخ الاستحقاق"
+msgstr "?????????? ??????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -685,24 +726,24 @@ msgstr "تاريخ الاستحقاق"
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #, python-format
 msgid "Due date"
-msgstr "تاريخ الاستحقاق"
+msgstr "?????????? ??????????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__date_to
 msgid "End Date"
-msgstr "تاريخ الإنتهاء"
+msgstr "?????????? ????????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__date_to
 msgid "End date"
-msgstr "تاريخ الانتهاء"
+msgstr "?????????? ????????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_ending_cumul
 msgid ""
 "Ending\n"
 "                        balance"
-msgstr "الرصيد الختامي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,help:account_financial_report.field_aged_partner_balance_report_wizard__account_code_to
@@ -721,7 +762,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #, python-format
 msgid "Ending balance"
-msgstr "الرصيد الختامي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
@@ -729,14 +770,14 @@ msgstr "الرصيد الختامي"
 msgid ""
 "Ending balance\n"
 "                        cur."
-msgstr "الرصيد الختامي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #, python-format
 msgid "Entries sorted by"
-msgstr "ترتيب القيود حسب"
+msgstr "?????????? ???????????? ??????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -750,14 +791,14 @@ msgstr "ترتيب القيود حسب"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #, python-format
 msgid "Entry"
-msgstr "القيد"
+msgstr "??????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
 #, python-format
 msgid "Entry number"
-msgstr "رقم القيد"
+msgstr "?????? ??????????"
 
 #. module: account_financial_report
 #. odoo-javascript
@@ -774,7 +815,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.trial_balance_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.vat_report_wizard
 msgid "Export PDF"
-msgstr "طباعة PDF"
+msgstr "?????????? PDF"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
@@ -784,7 +825,7 @@ msgstr "طباعة PDF"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.trial_balance_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.vat_report_wizard
 msgid "Export XLSX"
-msgstr "طباعة إكسل"
+msgstr "?????????? ????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__account_ids
@@ -793,24 +834,24 @@ msgstr "طباعة إكسل"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__account_ids
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
 msgid "Filter accounts"
-msgstr "‫ترشيح الحسابات"
+msgstr "????????????? ????????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
 #, fuzzy
 msgid "Filter analytic accounts"
-msgstr "‫ترشيح الحسابات"
+msgstr "????????????? ????????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__cost_center_ids
 msgid "Filter cost centers"
-msgstr "‫ترشيح مراكز التكلفة"
+msgstr "????????????? ?????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__account_journal_ids
 #, fuzzy
 msgid "Filter journals"
-msgstr "‫ترشيح الحسابات"
+msgstr "????????????? ????????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__partner_ids
@@ -819,12 +860,12 @@ msgstr "‫ترشيح الحسابات"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__partner_ids
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
 msgid "Filter partners"
-msgstr "ترشيح الشركاء"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__foreign_currency
 msgid "Foreign Currency"
-msgstr "العملة الأجنبية"
+msgstr "???????????? ????????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
@@ -833,13 +874,13 @@ msgstr "العملة الأجنبية"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.trial_balance_wizard
 #, fuzzy
 msgid "From Code"
-msgstr "الرمز"
+msgstr "??????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 msgid "From:"
-msgstr "من:"
+msgstr "????:"
 
 #. module: account_financial_report
 #. odoo-python
@@ -854,19 +895,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_financial_report.field_account_group__complete_code
 #, fuzzy
 msgid "Full Code"
-msgstr "الرمز"
+msgstr "??????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_group__complete_name
 #, fuzzy
 msgid "Full Name"
-msgstr "الاسم"
+msgstr "??????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__fy_start_date
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__fy_start_date
 msgid "Fy Start Date"
-msgstr "تاريخ بدء السنة المالية"
+msgstr "?????????? ?????? ?????????? ??????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -878,19 +919,19 @@ msgstr "تاريخ بدء السنة المالية"
 #: model:ir.ui.menu,name:account_financial_report.menu_general_ledger_wizard
 #, python-format
 msgid "General Ledger"
-msgstr "الأستاذ العام"
+msgstr "?????????????? ??????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_base
 #, fuzzy
 msgid "General Ledger -"
-msgstr "الأستاذ العام"
+msgstr "?????????????? ??????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_account_financial_report_general_ledger
 #, fuzzy
 msgid "General Ledger Report"
-msgstr "الأستاذ العام"
+msgstr "?????????????? ??????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_general_ledger_report_wizard
@@ -901,12 +942,12 @@ msgstr ""
 #: model:ir.model,name:account_financial_report.model_report_a_f_r_report_general_ledger_xlsx
 #, fuzzy
 msgid "General Ledger XLSL Report"
-msgstr "الأستاذ العام إكسل"
+msgstr "?????????????? ?????????? ????????"
 
 #. module: account_financial_report
 #: model:ir.actions.report,name:account_financial_report.action_report_general_ledger_xlsx
 msgid "General Ledger XLSX"
-msgstr "الأستاذ العام إكسل"
+msgstr "?????????????? ?????????? ????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
@@ -918,11 +959,18 @@ msgstr ""
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__group_option
 msgid "Group entries by"
-msgstr "تجميع القيود حسب"
+msgstr "?????????? ???????????? ??????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__grouped_by
+#: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__grouped_by
 msgid "Grouped By"
+msgstr ""
+
+#. module: account_financial_report
+#: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
+msgid ""
+"Here you can set the intervals that will appear on the Aged Partner Balance."
 msgstr ""
 
 #. module: account_financial_report
@@ -935,19 +983,19 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 #, python-format
 msgid "Hide"
-msgstr "إخفاء"
+msgstr "??????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__hide_account_at_0
 #: model:ir.model.fields,field_description:account_financial_report.field_open_items_report_wizard__hide_account_at_0
 msgid "Hide account ending balance at 0"
-msgstr "تجاهل الحسابات برصيد صفر"
+msgstr "?????????? ???????????????? ?????????? ??????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__hide_account_at_0
 #, fuzzy
 msgid "Hide accounts at 0"
-msgstr "تجاهل الحسابات برصيد صفر"
+msgstr "?????????? ???????????????? ?????????? ??????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__show_hierarchy_level
@@ -955,6 +1003,8 @@ msgid "Hierarchy Levels to display"
 msgstr ""
 
 #. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__id
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__id
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__id
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__id
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__id
@@ -962,7 +1012,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__id
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__id
 msgid "ID"
-msgstr "المعرف"
+msgstr "????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,help:account_financial_report.field_account_account__centralized
@@ -972,19 +1022,31 @@ msgid ""
 msgstr ""
 
 #. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__inferior_limit
+msgid "Inferior Limit"
+msgstr ""
+
+#. module: account_financial_report
+#. odoo-python
+#: code:addons/account_financial_report/models/account_age_report_configuration.py:0
+#, python-format
+msgid "Inferior Limit must be greather than zero"
+msgstr ""
+
+#. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #, fuzzy
 msgid ""
 "Initial\n"
 "                        balance cur."
-msgstr "الرصيد الافتتاحي"
+msgstr "???????????? ??????????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 msgid ""
 "Initial\n"
 "                    balance"
-msgstr "الرصيد الافتتاحي"
+msgstr "???????????? ??????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -993,7 +1055,13 @@ msgstr "الرصيد الافتتاحي"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
 #, python-format
 msgid "Initial balance"
-msgstr "الرصيد الافتتاحي"
+msgstr "???????????? ??????????????????"
+
+#. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__age_partner_config_id
+#: model:ir.model.fields,field_description:account_financial_report.field_res_config_settings__age_partner_config_id
+msgid "Intervals configuration"
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
@@ -1007,13 +1075,13 @@ msgstr "الرصيد الافتتاحي"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #, python-format
 msgid "Journal"
-msgstr "اليومية"
+msgstr "??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_account_move_line
 #, fuzzy
 msgid "Journal Item"
-msgstr "اليومية"
+msgstr "??????????????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__domain
@@ -1028,19 +1096,19 @@ msgstr ""
 #: model:ir.ui.menu,name:account_financial_report.menu_journal_ledger_wizard
 #, python-format
 msgid "Journal Ledger"
-msgstr "أستاذ اليومية"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_base
 #, fuzzy
 msgid "Journal Ledger -"
-msgstr "أستاذ اليومية"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_account_financial_report_journal_ledger
 #, fuzzy
 msgid "Journal Ledger Report"
-msgstr "أستاذ اليومية"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_journal_ledger_report_wizard
@@ -1050,13 +1118,13 @@ msgstr ""
 #. module: account_financial_report
 #: model:ir.actions.report,name:account_financial_report.action_report_journal_ledger_xlsx
 msgid "Journal Ledger XLSX"
-msgstr "أستاذ اليومية إكسل"
+msgstr "?????????? ?????????????? ????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_a_f_r_report_journal_ledger_xlsx
 #, fuzzy
 msgid "Journal Ledger XLSX Report"
-msgstr "أستاذ اليومية إكسل"
+msgstr "?????????? ?????????????? ????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1065,19 +1133,11 @@ msgstr "أستاذ اليومية إكسل"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.journal_ledger_wizard
 #, python-format
 msgid "Journals"
-msgstr "اليوميات"
+msgstr "????????????????"
 
 #. module: account_financial_report
-#: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard____last_update
-#: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard____last_update
-#: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard____last_update
-#: model:ir.model.fields,field_description:account_financial_report.field_open_items_report_wizard____last_update
-#: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard____last_update
-#: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard____last_update
-msgid "Last Modified on"
-msgstr "آخر تعديل في"
-
-#. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__write_uid
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__write_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__write_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__write_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__write_uid
@@ -1085,9 +1145,11 @@ msgstr "آخر تعديل في"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__write_uid
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__write_uid
 msgid "Last Updated by"
-msgstr "آخر تحديث بواسطة"
+msgstr "?????? ?????????? ????????????"
 
 #. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__write_date
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__write_date
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__write_date
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__write_date
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__write_date
@@ -1095,20 +1157,20 @@ msgstr "آخر تحديث بواسطة"
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__write_date
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__write_date
 msgid "Last Updated on"
-msgstr "آخر تحديث في"
+msgstr "?????? ?????????? ????"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_group__level
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 msgid "Level"
-msgstr "المستوى"
+msgstr "??????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #, fuzzy, python-format
 msgid "Level %s"
-msgstr "المستوى %s"
+msgstr "?????????????? %s"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1120,6 +1182,11 @@ msgid "Limit hierarchy levels"
 msgstr ""
 
 #. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__line_ids
+msgid "Line"
+msgstr "??????"
+
+#. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger.py:0
 #: code:addons/account_financial_report/report/open_items.py:0
@@ -1129,25 +1196,52 @@ msgid "Missing Partner"
 msgstr ""
 
 #. module: account_financial_report
+#: model:ir.model,name:account_financial_report.model_account_age_report_configuration_line
+msgid "Model to set interval lines for Age partner balance report"
+msgstr ""
+
+#. module: account_financial_report
+#: model:ir.model,name:account_financial_report.model_account_age_report_configuration
+msgid "Model to set intervals for Age partner balance report"
+msgstr ""
+
+#. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__move_target
 msgid "Move Target"
-msgstr "التحركات المستهدفة"
+msgstr "???????????????? ??????????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal
 msgid "Moves"
-msgstr "القيود"
+msgstr "????????????"
+
+#. module: account_financial_report
+#. odoo-python
+#: code:addons/account_financial_report/models/account_age_report_configuration.py:0
+#, python-format
+msgid "Must complete Configuration Lines"
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__name
+#: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__name
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_base
 #, python-format
 msgid "Name"
-msgstr "الاسم"
+msgstr "??????????"
+
+#. module: account_financial_report
+#. odoo-python
+#: code:addons/account_financial_report/models/account_age_report_configuration.py:0
+#: model:ir.model.constraint,message:account_financial_report.constraint_account_age_report_configuration_line_unique_name_config_combination
+#, python-format
+msgid "Name must be unique per report configuration"
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
@@ -1155,7 +1249,7 @@ msgstr "الاسم"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_base
 #, python-format
 msgid "Net"
-msgstr "الصافي"
+msgstr "????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1165,14 +1259,14 @@ msgstr "الصافي"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #, python-format
 msgid "No"
-msgstr "لا"
+msgstr "????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
 #, python-format
 msgid "No group"
-msgstr "بدون تجميع"
+msgstr "???????? ??????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1188,27 +1282,26 @@ msgid "None"
 msgstr ""
 
 #. module: account_financial_report
-#: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__not_only_one_unaffected_earnings_account
-#: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__not_only_one_unaffected_earnings_account
-msgid "Not Only One Unaffected Earnings Account"
-msgstr ""
-
-#. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
 #, python-format
 msgid "Not Posted"
-msgstr "غير مرحّل"
+msgstr "?????? ??????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "Not due"
-msgstr "غير مستحق"
+msgstr "?????? ??????????"
+
+#. module: account_financial_report
+#: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
+msgid "OCA Aged Report Configuration"
+msgstr ""
 
 #. module: account_financial_report
 #: model:ir.ui.menu,name:account_financial_report.menu_oca_reports
 msgid "OCA accounting reports"
-msgstr "تقارير محاسبية OCA"
+msgstr "???????????? ?????????????? OCA"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1216,7 +1309,13 @@ msgstr "تقارير محاسبية OCA"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 #, python-format
 msgid "Older"
-msgstr "أقدم"
+msgstr "????????"
+
+#. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__only_one_unaffected_earnings_account
+#: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__only_one_unaffected_earnings_account
+msgid "Only One Unaffected Earnings Account"
+msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
@@ -1227,25 +1326,25 @@ msgstr "أقدم"
 #: model:ir.ui.menu,name:account_financial_report.menu_open_items_wizard
 #, python-format
 msgid "Open Items"
-msgstr "دفعات مستحقّة"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_base
 #, fuzzy
 msgid "Open Items -"
-msgstr "دفعات مستحقّة"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.actions.act_window,name:account_financial_report.act_action_open_items_wizard_partner_relation
 #, fuzzy
 msgid "Open Items Partner"
-msgstr "دفعات مستحقّة"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_account_financial_report_open_items
 #, fuzzy
 msgid "Open Items Report"
-msgstr "دفعات مستحقّة"
+msgstr "?????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_open_items_report_wizard
@@ -1255,18 +1354,18 @@ msgstr ""
 #. module: account_financial_report
 #: model:ir.actions.report,name:account_financial_report.action_report_open_items_xlsx
 msgid "Open Items XLSX"
-msgstr "دفعات مستحقّة إكسل"
+msgstr "?????????? ?????????????? ????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_a_f_r_report_open_items_xlsx
 #, fuzzy
 msgid "Open Items XLSX Report"
-msgstr "دفعات مستحقّة إكسل"
+msgstr "?????????? ?????????????? ????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.journal_ledger_wizard
 msgid "Options"
-msgstr "الخيارات"
+msgstr "????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1274,7 +1373,7 @@ msgstr "الخيارات"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #, python-format
 msgid "Original"
-msgstr "الإجمالي"
+msgstr "????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1291,28 +1390,28 @@ msgstr "الإجمالي"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #, python-format
 msgid "Partner"
-msgstr "الشريك"
+msgstr "????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_partner_ending_cumul
 msgid ""
 "Partner\n"
 "                    cumul aged balance"
-msgstr "إجمالي الرصيد التراكمي"
+msgstr "???????????? ???????????? ????????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #, python-format
 msgid "Partner Initial balance"
-msgstr "رصيد الشريك الافتتاحي"
+msgstr "???????? ???????????? ??????????????????"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
 #, python-format
 msgid "Partner cumul aged balance"
-msgstr "إجمالي الرصيد التراكمي"
+msgstr "???????????? ???????????? ????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1353,7 +1452,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #, fuzzy, python-format
 msgid "Period balance"
-msgstr "رصيد الشريك الافتتاحي"
+msgstr "???????? ???????????? ??????????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.journal_ledger_wizard
@@ -1397,7 +1496,7 @@ msgstr ""
 msgid ""
 "Ref -\n"
 "                    Label"
-msgstr "تاريخ الاستحقاق"
+msgstr "?????????? ??????????????????"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1504,6 +1603,14 @@ msgstr ""
 #: model:ir.model.fields,help:account_financial_report.field_general_ledger_report_wizard__account_code_from
 #: model:ir.model.fields,help:account_financial_report.field_trial_balance_report_wizard__account_code_from
 msgid "Starting account in a range"
+msgstr ""
+
+#. module: account_financial_report
+#. odoo-python
+#: code:addons/account_financial_report/report/trial_balance.py:0
+#: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
+#, python-format
+msgid "TOTAL"
 msgstr ""
 
 #. module: account_financial_report
@@ -1651,6 +1758,15 @@ msgid "The hierarchy level to filter on must be greater than 0."
 msgstr ""
 
 #. module: account_financial_report
+#. odoo-python
+#: code:addons/account_financial_report/report/trial_balance.py:0
+#, python-format
+msgid ""
+"There is a problem in the structure of the account groups. You may need to "
+"create some child group of %s."
+msgstr ""
+
+#. module: account_financial_report
 #: model:ir.model.fields,help:account_financial_report.field_general_ledger_report_wizard__domain
 msgid "This domain will be used to select specific domain for Journal Items"
 msgstr ""
@@ -1666,7 +1782,10 @@ msgid "To:"
 msgstr ""
 
 #. module: account_financial_report
+#. odoo-python
+#: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_account_ending_cumul
+#, python-format
 msgid "Total"
 msgstr ""
 
@@ -1685,13 +1804,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_base
 #, fuzzy
 msgid "Trial Balance -"
-msgstr "الرصيد الختامي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_account_financial_report_trial_balance
 #, fuzzy
 msgid "Trial Balance Report"
-msgstr "الرصيد الختامي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_trial_balance_report_wizard
@@ -1707,7 +1826,7 @@ msgstr ""
 #: model:ir.model,name:account_financial_report.model_report_a_f_r_report_trial_balance_xlsx
 #, fuzzy
 msgid "Trial Balance XLSX Report"
-msgstr "الرصيد الختامي"
+msgstr "???????????? ??????????????"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.trial_balance_wizard
@@ -1805,6 +1924,13 @@ msgstr ""
 
 #. module: account_financial_report
 #. odoo-python
+#: code:addons/account_financial_report/report/trial_balance.py:0
+#, python-format
+msgid "Without analytic account"
+msgstr ""
+
+#. module: account_financial_report
+#. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
@@ -1821,7 +1947,6 @@ msgid "future"
 msgstr ""
 
 #. module: account_financial_report
-#: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.journal_ledger_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.open_items_wizard
@@ -1870,241 +1995,277 @@ msgstr ""
 msgid "width: 8.11%;"
 msgstr ""
 
+#~ msgid ""
+#~ "Age ??? 120\n"
+#~ "                        d."
+#~ msgstr "??? 120 ??????."
+
+#, fuzzy, python-format
+#~ msgid "Age ??? 120 d."
+#~ msgstr "????????? 120 ??????."
+
+#~ msgid ""
+#~ "Age ??? 30\n"
+#~ "                        d."
+#~ msgstr "?????????? ??? 30 ??????."
+
+#, fuzzy, python-format
+#~ msgid "Age ??? 30 d."
+#~ msgstr "????????? 30 ??????."
+
+#~ msgid ""
+#~ "Age ??? 60\n"
+#~ "                        d."
+#~ msgstr "?????????? ??? 60 ??????."
+
+#, fuzzy, python-format
+#~ msgid "Age ??? 60 d."
+#~ msgstr "??????????????? 60 ??????."
+
+#~ msgid ""
+#~ "Age ??? 90\n"
+#~ "                        d."
+#~ msgstr "?????????? ??? 90 ??????."
+
+#, fuzzy, python-format
+#~ msgid "Age ??? 90 d."
+#~ msgstr "??????????????? 90 ??????."
+
+#~ msgid "Last Modified on"
+#~ msgstr "?????? ?????????? ????"
+
 #, fuzzy
 #~ msgid "Filter analytic tags"
-#~ msgstr "‫ترشيح الحسابات"
+#~ msgstr "????????????? ????????????????"
 
 #~ msgid "Child Accounts"
-#~ msgstr "حسابات فرعية"
+#~ msgstr "???????????? ??????????"
 
 #~ msgid "Computed Accounts"
-#~ msgstr "حسابات محسوبة"
+#~ msgstr "???????????? ????????????"
 
 #~ msgid "Hierarchy On"
-#~ msgstr "الشجرة مبنية على"
+#~ msgstr "???????????? ?????????? ??????"
 
 #, fuzzy
 #~ msgid "No hierarchy"
-#~ msgstr "الشجرة مبنية على"
+#~ msgstr "???????????? ?????????? ??????"
 
 #~ msgid "From: %s To: %s"
-#~ msgstr "من: %s إلى: %s"
+#~ msgstr "????: %s ??????: %s"
 
 #~ msgid "<span class=\"fa fa-download\"/> Export"
-#~ msgstr "<span class=\"fa fa-download\"/> ‫تصدير"
+#~ msgstr "<span class=\"fa fa-download\"/> ?????????????"
 
 #~ msgid "<span class=\"fa fa-print\"/> Print"
-#~ msgstr "<span class=\"fa fa-print\"/> ‫طباعة"
+#~ msgstr "<span class=\"fa fa-print\"/> ?????????????"
 
 #~ msgid ""
 #~ "Cost\n"
 #~ "                            center"
-#~ msgstr "مركز التكلفة"
+#~ msgstr "???????? ??????????????"
 
 #~ msgid "Cost center"
-#~ msgstr "مركز التكلفة"
+#~ msgstr "???????? ??????????????"
 
 #, fuzzy
 #~| msgid "Account"
 #~ msgid "Account ID"
-#~ msgstr "الحساب"
+#~ msgstr "????????????"
 
 #~ msgid "Account Type"
-#~ msgstr "نوع الحساب"
+#~ msgstr "?????? ????????????"
 
 #~ msgid "Age 120 Days"
-#~ msgstr "120 يوم"
+#~ msgstr "120 ??????"
 
 #~ msgid "Age 30 Days"
-#~ msgstr "30 يوم"
+#~ msgstr "30 ??????"
 
 #~ msgid "Age 60 Days"
-#~ msgstr "60 يوم"
+#~ msgstr "60 ??????"
 
 #~ msgid "Age 90 Days"
-#~ msgstr "90 يوم"
+#~ msgstr "90 ??????"
 
 #~ msgid "Amount Residual"
-#~ msgstr "المستحق"
+#~ msgstr "??????????????"
 
 #~ msgid "Amount Residual Currency"
-#~ msgstr "المستحق بالعملة"
+#~ msgstr "?????????????? ??????????????"
 
 #~ msgid "Amount Total Due"
-#~ msgstr "إجمالي المستحق"
+#~ msgstr "???????????? ??????????????"
 
 #~ msgid "Amount Total Due Currency"
-#~ msgstr "إجمالي المستحق بالعملة"
+#~ msgstr "???????????? ?????????????? ??????????????"
 
 #~ msgid "Centralize"
-#~ msgstr "تجميع القيود"
+#~ msgstr "?????????? ????????????"
 
 #~ msgid "Centralized Entries"
-#~ msgstr "القيود المجمّعة"
+#~ msgstr "???????????? ????????????????"
 
 #, fuzzy
 #~| msgid "Child Accounts"
 #~ msgid "Child accounts"
-#~ msgstr "حسابات فرعية"
+#~ msgstr "???????????? ??????????"
 
 #~ msgid "Company Currency"
-#~ msgstr "عملة المؤسسة"
+#~ msgstr "???????? ??????????????"
 
 #~ msgid "Cost Center"
-#~ msgstr "مركز التكلفة"
+#~ msgstr "???????? ??????????????"
 
 #~ msgid "Cumul Age 120 Days"
-#~ msgstr "‫تراكم 120 يوم"
+#~ msgstr "????????????? 120 ??????"
 
 #~ msgid "Cumul Age 30 Days"
-#~ msgstr "‫‫تراكم 30 يوم"
+#~ msgstr "???????????????? 30 ??????"
 
 #~ msgid "Cumul Age 60 Days"
-#~ msgstr "‫‫تراكم 60 يوم"
+#~ msgstr "???????????????? 60 ??????"
 
 #~ msgid "Cumul Age 90 Days"
-#~ msgstr "‫‫تراكم 90 يوم"
+#~ msgstr "???????????????? 90 ??????"
 
 #~ msgid "Cumul Amount Residual"
-#~ msgstr "المستحق المتراكم"
+#~ msgstr "?????????????? ????????????????"
 
 #~ msgid "Cumul Balance"
-#~ msgstr "الرصيد المتراكم"
+#~ msgstr "???????????? ????????????????"
 
 #~ msgid "Cumul Current"
-#~ msgstr "المتراكم الحالي"
+#~ msgstr "???????????????? ????????????"
 
 #~ msgid "Cumul Older"
-#~ msgstr "المتراكم القديم"
+#~ msgstr "???????????????? ????????????"
 
 #~ msgid "Currency Name"
-#~ msgstr "اسم العملة"
+#~ msgstr "?????? ????????????"
 
 #~ msgid "Date Due"
-#~ msgstr "تاريخ الاستحقاق"
+#~ msgstr "?????????? ??????????????????"
 
 #~ msgid "Ending blance cur."
-#~ msgstr "الرصيد الختامي بالعملة."
+#~ msgstr "???????????? ?????????????? ??????????????."
 
 #, fuzzy
 #~ msgid "Filter Analytic Tag"
-#~ msgstr "ترشيح الحسابات"
+#~ msgstr "?????????? ????????????????"
 
 #~ msgid "Filter Cost Center"
-#~ msgstr "ترشيح مراكز التكلفة"
+#~ msgstr "?????????? ?????????? ??????????????"
 
 #, fuzzy
 #~ msgid "Filter Journal"
-#~ msgstr "ترشيح الحسابات"
+#~ msgstr "?????????? ????????????????"
 
 #~ msgid "Filter Partner"
-#~ msgstr "ترشيح الشركاء"
+#~ msgstr "?????????? ??????????????"
 
 #~ msgid "Final Amount Residual"
-#~ msgstr "المستحق الختامي"
+#~ msgstr "?????????????? ??????????????"
 
 #~ msgid "Final Amount Residual Currency"
-#~ msgstr "المستحق الختامي بالعملة"
+#~ msgstr "?????????????? ?????????????? ??????????????"
 
 #~ msgid "Final Amount Total Due"
-#~ msgstr "إجمالي المستحق الختامي"
+#~ msgstr "???????????? ?????????????? ??????????????"
 
 #~ msgid "Final Amount Total Due Currency"
-#~ msgstr "‫إجمالي المستحق الختامي بالعملة"
+#~ msgstr "??????????????? ?????????????? ?????????????? ??????????????"
 
 #~ msgid "Final Balance"
-#~ msgstr "الرصيد الختامي"
+#~ msgstr "???????????? ??????????????"
 
 #~ msgid "Final Balance Foreign Currency"
-#~ msgstr "الرصيد الختامي بالعملة"
+#~ msgstr "???????????? ?????????????? ??????????????"
 
 #~ msgid "Final Credit"
-#~ msgstr "الدائن الختامي"
+#~ msgstr "???????????? ??????????????"
 
 #~ msgid "Final Debit"
-#~ msgstr "المدين الختامي"
+#~ msgstr "???????????? ??????????????"
 
 #~ msgid "Group Option"
-#~ msgstr "خيار التجميع"
+#~ msgstr "???????? ??????????????"
 
 #, fuzzy
 #~ msgid "Hide Account At 0"
-#~ msgstr "تجاهل الحسابات برصيد صفر"
+#~ msgstr "?????????? ???????????????? ?????????? ??????"
 
 #, fuzzy
 #~ msgid "Hide Line"
-#~ msgstr "البند"
+#~ msgstr "??????????"
 
 #~ msgid "Initial Balance"
-#~ msgstr "الرصيد الافتتاحي"
+#~ msgstr "???????????? ??????????????????"
 
 #~ msgid "Initial Balance Foreign Currency"
-#~ msgstr "الرصيد الافتتاحي بالعملة"
+#~ msgstr "???????????? ?????????????????? ??????????????"
 
 #~ msgid "Initial Credit"
-#~ msgstr "الدائن الافتتاحي"
+#~ msgstr "???????????? ??????????????????"
 
 #~ msgid "Initial Debit"
-#~ msgstr "المدين الافتتاحي"
+#~ msgstr "???????????? ??????????????????"
 
 #~ msgid "Initial blance cur."
-#~ msgstr "‫الرصيد الافتتاحي بالعملة."
+#~ msgstr "??????????????? ?????????????????? ??????????????."
 
 #~ msgid "Is Partner Account"
-#~ msgstr "حساب شريك"
+#~ msgstr "???????? ????????"
 
 #~ msgid "Label"
-#~ msgstr "البيان"
-
-#~ msgid "Line"
-#~ msgstr "بند"
+#~ msgstr "????????????"
 
 #~ msgid "Matching Number"
-#~ msgstr "الرقم المطابق"
+#~ msgstr "?????????? ??????????????"
 
 #~ msgid "Move"
-#~ msgstr "القيد"
+#~ msgstr "??????????"
 
 #~ msgid "Move Line"
-#~ msgstr "البند"
+#~ msgstr "??????????"
 
 #~ msgid "No partner allocated"
-#~ msgstr "لم يتم تخصيص شريك"
+#~ msgstr "???? ?????? ?????????? ????????"
 
 #~ msgid "Only Posted Moves"
-#~ msgstr "المرحّلة فقط"
+#~ msgstr "???????????????? ??????"
 
 #~ msgid "Parent"
-#~ msgstr "الرئيسي"
+#~ msgstr "??????????????"
 
 #, fuzzy
 #~| msgid "Partner"
 #~ msgid "Partner ID"
-#~ msgstr "الشريك"
+#~ msgstr "????????????"
 
 #, fuzzy
 #~ msgid "Period Balance"
-#~ msgstr "الرصيد الأساسي"
+#~ msgstr "???????????? ??????????????"
 
 #, fuzzy
 #~ msgid "Aged Partner Balance - %s - %s"
-#~ msgstr "تحليل رصيد الشركاء"
+#~ msgstr "?????????? ???????? ??????????????"
 
 #, fuzzy
 #~ msgid "General Ledger - %s - %s"
-#~ msgstr "الأستاذ العام"
+#~ msgstr "?????????????? ??????????"
 
 #, fuzzy
 #~ msgid "Journal Ledger - %s - %s"
-#~ msgstr "أستاذ اليومية"
+#~ msgstr "?????????? ??????????????"
 
 #, fuzzy
 #~ msgid "Open Items - %s - %s"
-#~ msgstr "دفعات مستحقّة"
+#~ msgstr "?????????? ??????????????"
 
 #, fuzzy
 #~ msgid "Trial Balance - %s - %s"
-#~ msgstr "الرصيد الختامي"
+#~ msgstr "???????????? ??????????????"
 
 #~ msgid "Hide Account Balance At 0"
-#~ msgstr "تجاهل الحسابات برصيد صفر"
+#~ msgstr "?????????? ???????????????? ?????????? ??????"

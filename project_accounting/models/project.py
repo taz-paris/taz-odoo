@@ -60,21 +60,20 @@ class projectAccountProject(models.Model):
             projects |= super().create(vals)
         return projects
 
-    def name_get(self):
-        res = []
+    @api.depends('name', 'number', 'partner_id')
+    def _compute_display_name(self):
         for rec in self:
             display_name = "%s %s" % (rec.number or "", rec.name or "")
             if rec.partner_id : 
                 display_name += "("+str(rec.partner_id.name)+")"
-            res.append((rec.id, display_name))
-        return res
+            rec.display_name = display_name
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = list(args or [])
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
+        domain = list(domain or [])
         if name :
-            args += ['|', ('name', operator, name), ('number', operator, name)]
-        return self._search(args, limit=limit, access_rights_uid=name_get_uid)
+            domain += ['|', ('name', operator, name), ('number', operator, name)]
+        return self._search(domain, limit=limit, order=order, access_rights_uid=name_get_uid)
 
 
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
@@ -153,7 +152,7 @@ class projectAccountProject(models.Model):
                 for message in message_list_post_target_date :
                     found = False
                     for track in message.tracking_value_ids:
-                        if track.field.id == field_id.id:
+                        if track.field_id.id == field_id.id:
                             if track.old_value_integer :
                                 res_dic[rec.id] = track.old_value_integer
                             elif track.new_value_float :
@@ -164,8 +163,6 @@ class projectAccountProject(models.Model):
                                 res_dic[rec.id] = track.old_value_text
                             elif track.new_value_datetime :
                                 res_dic[rec.id] = track.old_value_datetime
-                            elif track.new_value_monetary :
-                                res_dic[rec.id] = track.old_value_float_monetary
                             found = True
                             break
                     if found :
@@ -176,7 +173,7 @@ class projectAccountProject(models.Model):
                 for message in message_list :
                     found = False
                     for track in message.tracking_value_ids:
-                        if track.field.id == field_id.id:
+                        if track.field_id.id == field_id.id:
                             if track.new_value_integer :
                                 res_dic[rec.id] = track.new_value_integer
                             elif track.new_value_float :
@@ -187,8 +184,6 @@ class projectAccountProject(models.Model):
                                 res_dic[rec.id] = track.new_value_text
                             elif track.new_value_datetime :
                                 res_dic[rec.id] = track.new_value_datetime
-                            elif track.new_value_monetary :
-                                res_dic[rec.id] = track.new_value_float_monetary
                             found = True
                             break
                     if found :
@@ -1299,6 +1294,20 @@ class projectAccountProject(models.Model):
                 rec.futur_internal_revenue = rec.reporting_sum_company_outsource_code3_code_4 - rec.past_internal_revenue
 
 
+    @api.model
+    def _create_analytic_account_from_values(self, values):
+        analytic_account = super()._create_analytic_account_from_values(values)
+        # We have to do that because hr_timesheet/models/project_project.py call this function in the override create() method on projetc.project.
+        #   See here : https://github.com/odoo/odoo/blob/b6b6bf74428e8cbd0b23362ce4ae05a742a6264f/addons/hr_timesheet/models/project_project.py#L160
+        # create() calls this function before the project is created with the vals dict  sent by the front-end
+        # company_id is (and ts has to be) redonly on the project view, so this vals dict does not contain the company_id
+        # so we have to manually add the company_id on the juste created analytic_account
+        # We could have set force_save to the company_id field on the project view but doing this in the back-end is more robust
+        if not analytic_account.company_id :
+            analytic_account.company_id = self.env.company
+        return analytic_account
+
+    company_id = fields.Many2one(readonly=True, required=True, default=lambda self: self.env.company)
     has_to_be_recomputed = fields.Boolean('À recalculer', default=False)
     state = fields.Selection(related='stage_id.state')
     partner_id = fields.Many2one(string='Client final')

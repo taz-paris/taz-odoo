@@ -21,7 +21,7 @@
 			<!-- Achats-->
 			<field name="purchase_period_amount" optional="show" sum="Total"/>
 			<!-- Total provision -->
-			<field name="provision_previous_balance_sum" optional="hide" />
+			<field name="provision_previous_balance_sum" optional="hide"/>
 			<field name="provision_balance_sum" optional="hide"/>
 			<!-- PCA -->
 			<field name="pca_previous_balance" optional="hide"/>
@@ -64,14 +64,14 @@
 				<group string="Projet">
 					<field name="company_id" invisible="1"/>
 					<field name="company_id" groups="base.group_multi_company"/>
-					<field name="project_id" attrs="{'readonly':[('project_id','!=',False)]}" force_save="1"/>
+					<field name="project_id" readonly="project_id" force_save="1"/>
 					<field name="rel_project_user_id" string="Directeur de mission"/>
 					<field name="rel_project_manager_user_id"/>
 				    <label for="rel_project_date_start" string="Dates de début/fin"/>
 				    <div name="dates" class="o_row">
-					<field name="rel_project_date_start" widget="daterange" />
+					<field name="rel_project_date_start" widget="daterange"/>
 					<i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
-					<field name="rel_project_date" widget="daterange" />
+					<field name="rel_project_date" widget="daterange"/>
 				    </div>
 					<field name="rel_project_stage_id"/>
 					<button type="object" name="goto_napta" string="Voir sur Napta" colspan="2"/>
@@ -106,22 +106,22 @@
 					<group col="4">
 						<group name="pca" string="PCA">
 							<field name="pca_previous_balance"/>
-							<field name="pca_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
+							<field name="pca_period_amount" readonly="is_validated"/>
 							<field name="pca_balance"/>
 						</group>
 						<group name="fae" string="FAE">
 							<field name="fae_previous_balance"/>
-							<field name="fae_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
+							<field name="fae_period_amount" readonly="is_validated"/>
 							<field name="fae_balance"/>
 						</group>
 						<group name="cca" string="CCA">
 							<field name="cca_previous_balance"/>
-							<field name="cca_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
+							<field name="cca_period_amount" readonly="is_validated"/>
 							<field name="cca_balance"/>
 						</group>
 						<group name="fnp" string="FNP">
 							<field name="fnp_previous_balance"/>
-							<field name="fnp_period_amount" attrs="{'readonly':[('is_validated','=',True)]}"/>
+							<field name="fnp_period_amount" readonly="is_validated"/>
 							<field name="fnp_balance"/>
 						</group>
 					</group>
@@ -133,7 +133,7 @@
 								<field name="production_stock"/>
 							</group>
 							<group>
-								<field name="production_destocking" attrs="{'readonly':[('is_validated','=',True)]}"/>
+								<field name="production_destocking" readonly="is_validated"/>
 								<field name="production_balance"/>
 								<button type="object" name="action_open_analytic_lines" colspan="2" string="Voir les lignes de pointage"/>
 							</group>
@@ -231,9 +231,9 @@
                         <filter string="Directeur de mission" name="project_director" context="{'group_by': 'rel_project_user_id'}"/>
 			<filter string="Partner ou manager en appui de l'administration du projet" name="project_manager" context="{'group_by': 'rel_project_manager_user_id'}"/>
                         <filter string="Client" name="partner" context="{'group_by': 'rel_project_partner_id'}"/>
-                        <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}" />
-                        <filter string="Statut du projet au début de la clôture" name="groupby_original_stage_id" context="{'group_by': 'original_stage_id'}" />
-                        <filter string="Statut du projet actuel" name="groupby_rel_project_stage_id" context="{'group_by': 'rel_project_stage_id'}" />
+                        <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}"/>
+                        <filter string="Statut du projet au début de la clôture" name="groupby_original_stage_id" context="{'group_by': 'original_stage_id'}"/>
+                        <filter string="Statut du projet actuel" name="groupby_rel_project_stage_id" context="{'group_by': 'rel_project_stage_id'}"/>
 		        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
@@ -246,10 +246,9 @@
                 <field name="view_mode">tree,form,pivot,graph</field>
 	</record>
 
-	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm" />
+	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm"/>
 	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_list" parent="project_accounting_closing_menu_root" action="project_accounting_closing_action"/>
 	<menuitem name="Sociétés" id="project_accounting_closing_menu_res_company" parent="project_accounting_closing_menu_root" action="base.action_res_company_form"/>
-	<menuitem name="Pointage du mois M-1" id="project_accounting_closing_menu_timesheet_action_last_month" parent="project_accounting_closing_menu_root" action="staffing.timesheet_action_last_month"/>
 
    <record id="action_recompute_closing" model="ir.actions.server">
           <field name="name">Recalculer les données de cette fiche cloture</field>
@@ -258,7 +257,7 @@
           <field name="state">code</field>
           <field name="code">for rec in records:
                   rec.compute()</field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]" />
+          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
   </record>
 	</data>
 </odoo>

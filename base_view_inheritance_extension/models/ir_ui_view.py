@@ -3,11 +3,16 @@
 # Copyright 2021 Camptocamp SA (https://www.camptocamp.com).
 # Copyright 2023 Tecnativa - Carlos Dauden
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl.html).
-
 import ast
+import logging
 import re
 
-import astor
+try:
+    import astor
+except ImportError as err:  # pragma: no cover
+    _logger = logging.getLogger(__name__)
+    _logger.debug(err)
+
 from lxml import etree
 
 from odoo import api, models
@@ -182,47 +187,7 @@ class IrUiView(models.Model):
                 # in update mode the domain cause an invalid syntax error
                 new_value = attribute_node.text.strip()
             if condition:
-                new_value = "{condition} and {new_value} or {old_value}".format(
-                    condition=condition,
-                    new_value=new_value,
-                    old_value=old_value or [],
-                )
-            node.attrib[attribute_name] = new_value
-        return source
-
-    @api.model
-    def inheritance_handler_attributes_attrs_domain_add(self, source, specs):
-        """Implement attrs_domain_add
-
-        <attribute name="$attribute" operation="attrs_domain_add"
-                   key="$attrs_key" join_operator="OR">
-            $domain_to_add_to_attrs_key
-        </attribute>
-        """
-        node = self.locate_node(source, specs)
-        for attribute_node in specs:
-            attribute_name = attribute_node.get("name")
-            key = attribute_node.get("key")
-            join_operator = attribute_node.get("join_operator") or "AND"
-            old_value = node.get(attribute_name) or ""
-            if old_value:
-                old_value = ast.literal_eval(
-                    self.var2str_domain_text(old_value.strip())
-                )
-                old_domain_attrs = old_value.get(key)
-                new_domain = ast.literal_eval(
-                    self.var2str_domain_text(attribute_node.text.strip())
-                )
-                if join_operator == "OR":
-                    new_value = expression.OR([old_domain_attrs, new_domain])
-                else:
-                    new_value = expression.AND([old_domain_attrs, new_domain])
-                old_value[key] = new_value
-                new_value = self.str2var_domain_text(str(old_value))
-            else:
-                # We must ensure that the domain definition has not line breaks because
-                # in update mode the domain cause an invalid syntax error
-                new_value = "{'%s': %s}" % (key, attribute_node.text.strip())
+                new_value = f"{condition} and {new_value} or {old_value or []}"
             node.attrib[attribute_name] = new_value
         return source
 

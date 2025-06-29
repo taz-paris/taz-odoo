@@ -59,7 +59,6 @@ class PurchaseOrder(models.Model):
         #readonly=True,
         check_company=False,
         copy=False,
-        #states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
     )
 
     agreement_type_id = fields.Many2one(
