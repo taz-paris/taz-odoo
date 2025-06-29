@@ -29,8 +29,8 @@ def create(self, vals_list):
     user_ids = []
     employee_ids = []
     # 1/ Collect the user_ids and employee_ids from each timesheet vals
+    vals_list = self._timesheet_preprocess(vals_list)
     for vals in vals_list:
-        vals.update(self._timesheet_preprocess(vals))
         if not vals.get('project_id'):
             continue
         if not vals.get('name'):
