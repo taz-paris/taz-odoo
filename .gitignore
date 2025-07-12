@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+#lib/ #Do not ignore lib directory : some odoo modules use it
 lib64/
 parts/
 sdist/
