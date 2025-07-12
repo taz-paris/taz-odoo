@@ -6,67 +6,44 @@ import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_t
 import { patch } from "@web/core/utils/patch";
 
 patch(Many2ManyTagsFieldColorEditable.prototype, {
-    /*Here Many2ManyTagsFieldColorEditable is patched to over ride onBadgeClick()*/
     setup() {
         super.setup(...arguments);
-        this.notification = useService("notification");
         this.action = useService("action");
     },
     onBadgeClick(ev, record) {
-                        this.action.doAction({
-                            type: 'ir.actions.act_window',
-                            res_model: this.props.relation,
-                            res_id: record.data.id,
-                            views: [[false, 'form']],
-                            target: 'current',
-                        });
-
-        return this._super.apply(this, arguments);
+        if (!this.props.canEditColor) {
+	    this.action.doAction({
+	        type: 'ir.actions.act_window',
+	        res_model: this.props.record.fields[this.props.name].relation,
+	        res_id: record.resId,
+	        views: [[false, 'form']],
+	        target: 'current',
+	    });
+        } else {
+	    super.onBadgeClick(ev, record);
+	}
     }
 })
 
 patch(Many2ManyTagsField.prototype, {
-    /*Here Many2ManyTagsField is patched to over ride onBadgeClick()*/
     setup() {
         super.setup(...arguments);
-        this.notification = useService("notification");
         this.action = useService("action");
     },
 
-	/*
     getTagProps(record) {
-        const props = this.super().getTagProps(record);
+        const props = super.getTagProps(record);
         props.onClick = (ev) => this.onBadgeClick(ev, record);
         return props;
     },
-    */
-
-    getTagProps(record) {
-        return {
-            id: record.id, // datapoint_X
-            resId: record.resId,
-            text: record.data.display_name,
-            colorIndex: record.data[this.props.colorField],
-            onDelete: !this.props.readonly ? () => this.deleteTag(record.id) : undefined,
-            onKeydown: (ev) => {
-                if (this.props.readonly) {
-                    return;
-                }
-                this.onTagKeydown(ev);
-            },
-	    onClick : (ev) => {this.onBadgeClick(ev, record);},
-        };
-    },
 
     onBadgeClick(ev, record) {
-                        this.action.doAction({
-                            type: 'ir.actions.act_window',
-                            res_model: this.props.relation,
-                            res_id: record.data.id,
-                            views: [[false, 'form']],
-                            target: 'current',
-                        });
-
-        //return this.apply(this, arguments);
+	this.action.doAction({
+	    type: 'ir.actions.act_window',
+	    res_model: this.props.record.fields[this.props.name].relation,
+	    res_id: record.resId,
+	    views: [[false, 'form']],
+	    target: 'current',
+	});
     }
 })

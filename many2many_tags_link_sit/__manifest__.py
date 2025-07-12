@@ -17,8 +17,6 @@
     'assets': {
         'web.assets_backend': [
             'many2many_tags_link_sit/static/src/js/many2many_tags_field.js',
-            #'many2many_tags_link_sit/static/src/js/systray.js',
-            #'many2many_tags_link_sit/static/src/xml/systray.xml',
         ],
 
     },
