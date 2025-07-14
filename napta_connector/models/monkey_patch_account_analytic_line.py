@@ -29,22 +29,24 @@ def create(self, vals_list):
     user_ids = []
     employee_ids = []
     # 1/ Collect the user_ids and employee_ids from each timesheet vals
+    vals_list = self._timesheet_preprocess(vals_list)
     for vals in vals_list:
-        vals.update(self._timesheet_preprocess(vals))
         if not vals.get('project_id'):
             continue
         if not vals.get('name'):
             vals['name'] = '/'
-        employee_id = vals.get('employee_id')
-        user_id = vals.get('user_id', default_user_id)
+        employee_id = vals.get('employee_id', self._context.get('default_employee_id', False))
         if employee_id and employee_id not in employee_ids:
             employee_ids.append(employee_id)
-        elif user_id not in user_ids:
-            user_ids.append(user_id)
+        else:
+            user_id = vals.get('user_id', default_user_id)
+            if user_id not in user_ids:
+                user_ids.append(user_id)
 
     """
     # 2/ Search all employees related to user_ids and employee_ids, in the selected companies
-    employees = self.env['hr.employee'].sudo().search([
+    HrEmployee_sudo = self.env['hr.employee'].sudo()
+    employees = HrEmployee_sudo.search([
         '&', '|', ('user_id', 'in', user_ids), ('id', 'in', employee_ids), ('company_id', 'in', self.env.companies.ids)
     ])
 
@@ -67,8 +69,14 @@ def create(self, vals_list):
     for vals in vals_list:
         if not vals.get('project_id'):
             continue
-        employee_in_id = vals.get('employee_id')
+        employee_in_id = vals.get('employee_id', self._context.get('default_employee_id', False))
         if employee_in_id:
+            company = False
+            if not vals.get('company_id'):
+                company = HrEmployee_sudo.browse(employee_in_id).company_id
+                vals['company_id'] = company.id
+            if not vals.get('product_uom_id'):
+                vals['product_uom_id'] = company.project_time_mode_id.id if company else self.env['res.company'].browse(vals.get('company_id', self.env.company.id)).project_time_mode_id.id
             if employee_in_id in valid_employee_per_id:
                 vals['user_id'] = valid_employee_per_id[employee_in_id].sudo().user_id.id   # (A) OK
                 continue
@@ -88,12 +96,19 @@ def create(self, vals_list):
         if employee_out_id:
             vals['employee_id'] = employee_out_id
             vals['user_id'] = user_id
+            company = False
+            if not vals.get('company_id'):
+                company = HrEmployee_sudo.browse(employee_out_id).company_id
+                vals['company_id'] = company.id
+            if not vals.get('product_uom_id'):
+                vals['product_uom_id'] = company.project_time_mode_id.id if company else self.env['res.company'].browse(vals.get('company_id', self.env.company.id)).project_time_mode_id.id
         else:  # ...and raise an error if they fail
             raise ValidationError(error_msg)
     """
 
     # 5/ Finally, create the timesheets
     lines = super(AccountAnalyticLineInherit, self).create(vals_list)
+    lines._check_can_create()
     for line, values in zip(lines, vals_list):
         if line.project_id:  # applied only for timesheet
             line._timesheet_postprocess(values)

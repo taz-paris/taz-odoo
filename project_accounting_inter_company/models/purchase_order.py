@@ -83,10 +83,3 @@ class PurchaseOrderLine(models.Model):
         res['price_unit'] = 'price_unit' 
         res['previsional_invoice_date'] = 'previsional_invoice_date'
         return res
-
-    def _get_allowed_sale_order_states(self):
-        allowed_states = super()._get_allowed_sale_order_states()
-        allowed_states.append("draft")
-        return allowed_states
-
-

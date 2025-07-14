@@ -12,11 +12,10 @@ def create(self, vals_list):
     lines = super(PurchaseOrderLine_inherit, self).create(vals_list)
     if self.env.context.get("stop_loop_create_purchase_order_lines") == True:
         return lines
-    allowed_states = self._get_allowed_sale_order_states()
     for order in lines.order_id.filtered(
         lambda x: x.intercompany_sale_order_id
     ):
-        if order.intercompany_sale_order_id.sudo().state not in allowed_states:
+        if order.intercompany_sale_order_id.sudo().state in {"cancel", "done"}:
             raise UserError(
                 _(
                     "You can't change this purchase order as the corresponding "
@@ -29,7 +28,7 @@ def create(self, vals_list):
             or self.env.user
         )
         sale_lines = []
-        for purchase_line in lines.filtered(lambda x: x.order_id == order):
+        for purchase_line in lines.filtered(lambda x, o=order: x.order_id == o):
             sale_lines.append(
                 order._prepare_sale_order_line_data(
                     purchase_line,
@@ -43,4 +42,49 @@ def create(self, vals_list):
     return lines
 
 
+
+def write(self, vals):
+    """Sync values of confirmed unlocked sales"""
+    res = super(PurchaseOrderLine_inherit, self).write(vals)
+    sync_map = self._get_purchase_sale_line_sync_fields()
+    update_vals = {
+        sync_map.get(field): value
+        for field, value in vals.items()
+        if sync_map.get(field)
+    }
+    if not update_vals:
+        return res
+    intercompany_user = (
+        self.intercompany_sale_line_id.sudo().company_id.intercompany_sale_user_id
+        or self.env.user
+    )
+    sale_lines = self.intercompany_sale_line_id.with_user(
+        intercompany_user.id
+    ).sudo()
+    if not sale_lines:
+        return res
+    closed_sale_lines = sale_lines.filtered(lambda x: x.state not in ["sale", "draft"])
+    if closed_sale_lines:
+        raise UserError(
+            _(
+                "The generated sale orders with reference %(orders)s can't be "
+                "modified. They're either unconfirmed or locked for modifications.",
+                orders=",".join(closed_sale_lines.order_id.mapped("name")),
+            )
+        )
+    # Update directly the sale order so we can trigger the decreased qty exceptions
+    for sale in sale_lines.order_id:
+        sale.write(
+            {
+                "order_line": [
+                    (1, line.id, update_vals)
+                    for line in sale_lines.filtered(
+                        lambda x, s=sale: x.order_id == s
+                    )
+                ]
+            }
+        )
+    return res
+
 PurchaseOrderLine_inherit.create = create
+PurchaseOrderLine_inherit.write = write
