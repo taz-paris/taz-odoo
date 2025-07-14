@@ -1,6 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
+from odoo.tools import SQL
 
 from datetime import datetime, timedelta
 
@@ -175,13 +176,19 @@ class projectAccountingSaleOrderLine(models.Model):
 
                 else :    
                     #TODO : ajouter une condition dans le filtre : le PO n'est pas annulé ni terminée et la POL n'est pas déjà facturée
-                    query_string = 'SELECT * FROM "purchase_order_line" \
-                                    WHERE ("purchase_order_line"."company_id" IS NULL  OR ("purchase_order_line"."company_id" in %s)) \
-                                    AND  ("purchase_order_line"."id" not in (SELECT "direct_payment_purchase_order_line_id" FROM "sale_order_line" WHERE "direct_payment_purchase_order_line_id" IS NOT NULL)) \
-                                    AND "purchase_order_line"."price_subtotal" = %s \
-                                    AND analytic_distribution ? %s \
-                                    '
-                    query_param = [(1,), self.price_subtotal, str(analytic_account_ids[0])]
+                    query = self.env['purchase.order.line']._search([])
+                    query.add_where('("purchase_order_line"."company_id" IS NULL  OR ("purchase_order_line"."company_id" = %s))', [self.company_id.id])
+                    query.add_where('("purchase_order_line"."id" not in (SELECT "direct_payment_purchase_order_line_id" FROM "sale_order_line" WHERE "direct_payment_purchase_order_line_id" IS NOT NULL))')
+                    query.add_where('"purchase_order_line"."price_subtotal" = %s', [self.price_subtotal])
+                    query.add_where(
+                        SQL(
+                            "%s && %s",
+                            [str(analytic_account_ids[0])],
+                            self.env['purchase.order.line']._query_analytic_accounts(),
+                        )
+                    )
+                    query.order = None
+                    query_string, query_param = query.select('purchase_order_line.*') #important car Odoo fait un LEFT join obligatoire, donc si on fait SELECT * on a plusieurs colonne ID dans le résultat
                     self._cr.execute(query_string, query_param)
                     line_ids = [line.get('id') for line in self._cr.dictfetchall()]
                     #_logger.info(line_ids)

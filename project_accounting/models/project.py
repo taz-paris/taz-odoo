@@ -1,6 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
+from odoo.tools import SQL
 
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
@@ -827,7 +828,13 @@ class projectAccountProject(models.Model):
         #_logger.info(query)
         if query == []:
             return []
-        query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
+        query.add_where(
+            SQL(
+                "%s && %s",
+                [str(self.analytic_account_id.id)],
+                self.env['sale.order.line']._query_analytic_accounts(),
+            )
+        )
         query.order = None
         query_string, query_param = query.select('sale_order_line.*') #important car Odoo fait un LEFT join obligatoire, donc si on fait SELECT * on a plusieurs colonne ID dans le résultat
         #_logger.info(query_string)
@@ -846,7 +853,13 @@ class projectAccountProject(models.Model):
         #_logger.info(query)
         if query == []:
             return []
-        query.add_where('analytic_distribution ? %s', [str(self.analytic_account_id.id)])
+        query.add_where(
+            SQL(
+                "%s && %s",
+                [str(self.analytic_account_id.id)],
+                self.env['account.move.line']._query_analytic_accounts(),
+            )
+        )
         query.order = None
         query_string, query_param = query.select('account_move_line.*')
         #_logger.info(query_string)
