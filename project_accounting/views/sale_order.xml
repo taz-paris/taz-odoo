@@ -265,9 +265,9 @@
 			<field name="qty_to_invoice" optional="hide" readonly="1"/>
 			<field name="untaxed_amount_to_invoice" optional="hide" string="Reste à facturer (HT)" readonly="1"/>
 			<field name="direct_payment_purchase_order_line_id" optional="hide" on_change="1"/>
-			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1"/>
+			<field name="allowed_direct_payment_purchase_order_line_ids" column_invisible="1"/>
 			<field name="invoice_lines" optional="hide" readonly="1" widget="many2many_tags" />
-			<field name="currency_id" invisible="1"/>
+			<field name="currency_id" column_invisible="1"/>
 			<field name="invoice_status" optional="hide" />
 			<field name="state" optional="show" widget="badge" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'"/>
 			<field name="comment" optional="show"/>
