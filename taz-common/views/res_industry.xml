@@ -33,6 +33,7 @@
 						  <label for="customer_book_goal_ids" string="Objectifs annuels"/>
 						  <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_industry_id': active_id}">
 							<tree editable="top">
+                        	 	  		  <field name="currency_id" column_invisible="1"/>
 		  					  <field name="company_id" optional="show"/>
 							  <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
 							  <field name="period_goal" optional="show" sum="Total"/>
@@ -50,6 +51,7 @@
 						  <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>
 						  <field name="customer_book_followup_ids" context="{'default_industry_id': active_id, 'active_id': active_id}">
 							 <tree editable="top" create="true">
+                        	 	  		      <field name="currency_id" column_invisible="1"/>
 		  					      <field name="company_id" optional="hide"/>
 							      <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
 							      <field name="customer_book_goal_id" force_save="1" optional="show" domain="[('industry_id', '=', active_id)]"/>

@@ -70,8 +70,9 @@
                         <page name="agreement_subcontractor" string="Sous-traitants de rang 1" invisible="domain != 'sale'">
 				<field name="agreement_subcontractor_ids">
 					<tree>
+                        			<field name="currency_id" column_invisible="1"/>
 						<field name="partner_id"/>
-						<field name="max_amount" optional="show"/>
+						<field name="max_amount" optional="show" sum="Total"/>
 						<field name="start_date" optional="show"/>
 						<field name="end_date" optional="show"/>
 						<field name="partner_validation_date" optional="show"/>
@@ -97,6 +98,7 @@
         <field name="model">agreement</field>
         <field name="arch" type="xml">
             <tree string="Agreements">
+                <field name="currency_id" column_invisible="1"/>
                 <field name="partner_id"/>
                 <field name="code" optional="hide"/>
                 <field name="agreement_procedure_id" optional="hide"/>

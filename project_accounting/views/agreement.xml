@@ -15,19 +15,20 @@
 				<page string="Projets liés" name="projects">
 					<field name="project_ids">
 						  <tree delete="false" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
+                        			  <field name="currency_id" column_invisible="1"/>
 						  <field name="id" widget="open_tab"/>
 						  <field name="number"/>
-						  <field name="is_review_needed" invisible="1"/>
+						  <field name="is_review_needed" column_invisible="1"/>
 						  <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" invisible="not is_review_needed"/>
 							  <!-- Ce panneau attetion n'est pas compatible avec le module web_remember_tree_column_width => celà conduit à des colonnes trop larges -->
 						  <field name="name"/>
 						  <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-						  <field name="company_id" invisible="1"/>
+						  <field name="company_id" column_invisible="1"/>
 						  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" optional="hide"/>
 						  <field name="project_director_employee_id" optional="show"/>
 						  <field name="outsourcing" optional="hide"/>
 						  <field name="stage_id" widget="badge" optional="show" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"/>
-						  <field name="color_rel" invisible="1"/>
+						  <field name="color_rel" column_invisible="1"/>
 						  <field name="book_employee_distribution_ids" optional="hide" widget="many2many_tags"/>
 						  <field name="is_validated_book" optional="hide"/>
 						  <field name="order_sum_sale_order_lines" optional="show" string="€ commandés HT" sum="Total"/>

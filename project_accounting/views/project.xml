@@ -359,6 +359,7 @@
 					<page name="purchase" string="Achats">
 							<field name="project_outsourcing_link_ids" context="{'default_project_id' : active_id}">
 								<tree>    
+                        						<field name="currency_id" column_invisible="1"/>
 									<field name="project_id" optional="hide"/>
 									<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
 									<field name="link_type"/>
@@ -380,9 +381,10 @@
 							<group>
 								<field name="book_period_ids" colspan="2" nolabel="1" context="{'default_project_id':active_id}" readonly="not is_book_manually_computed">
 									<tree editable="top">
+                        							<field name="currency_id" column_invisible="1"/>
 										<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-										<field name="company_id" invisible="1"/>
-										<field name="project_id" invisible="1"/>
+										<field name="company_id" column_invisible="1"/>
+										<field name="project_id" column_invisible="1"/>
 										<field name="reference_period"/>
 										<field name="period_project_book" sum="Total"/>
 									</tree>
@@ -411,6 +413,7 @@
 						</group>
 						<field name="book_employee_distribution_period_ids" context="{'default_project_id':active_id}" readonly="not is_book_manually_computed">
 							<tree editable="top">
+                        					<field name="currency_id" column_invisible="1"/>
 								<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
 								<field name="company_id" column_invisible="1"/>
 								<field name="employee_id" readonly="not rel_is_book_manually_computed"/>

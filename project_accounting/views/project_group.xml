@@ -30,6 +30,7 @@
 			</group>
 			<field name="project_ids">
 				  <tree delete="false" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
+                        	  <field name="currency_id" column_invisible="1"/>
 				  <field name="id" widget="open_tab"/>
 				  <field name="number"/>
 				  <field name="is_review_needed" invisible="1"/>

@@ -6,6 +6,7 @@
       <field name="model">taz.customer_book_goal</field>
       <field name="arch" type="xml">
 	 <tree editable="top" expand="1">
+                  <field name="currency_id" column_invisible="1"/>
 		  <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}" readonly="id"/>
 		  <field name="company_id" optional="show"/>
 		  <field name="reference_period" optional="hide"/>
@@ -110,6 +111,7 @@
       <field name="model">taz.customer_book_followup</field>
       <field name="arch" type="xml">
 	 <tree editable="top" create="true">
+              <field name="currency_id" column_invisible="1"/>
 	      <field name="company_id" optional="hide"/>
 	      <field name="industry_id" optional="hide"/>
 	      <field name="customer_book_goal_id" force_save="1" optional="show"/>
