@@ -333,7 +333,7 @@
 					</group>
 					<group string="Autres adresses filles">
 					    <field name="lang" invisible="1"/>
-					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_user_id': user_id,            'default_type': 'private'}">
+					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_user_id': user_id,            'default_type': 'other'}">
 							<tree delete="false">
 								  <field name="type"/>
 								  <field name="name"/>
@@ -487,9 +487,6 @@
 			    </p>
 			    <p class="mb-0" invisible="type != 'delivery'">
 				<span>Adresse préférée pour toutes les livraisons. Sélectionnée par défaut lorsque vous livrez une commande appartenant à cette société.</span>
-			    </p>
-			    <p class="mb-0" invisible="type != 'private'">
-				<span>Les adresses privées ne sont visibles que par les utilisateurs autorisés et contiennent des données sensibles (adresses personnelles des employés, ...).</span>
 			    </p>
 			    <p class="mb-0" invisible="type != 'other'">
 				<span>Utilisez ceci pour organiser les coordonnées des employés d'une entreprise donnée (par exemple, CEO, CFO, ...).</span>
