@@ -60,7 +60,7 @@
 			  </group>
 		  </group>
 		  <label for="book_followup_ids" string="Photos des objectifs annuels"/>
-		  <field name="book_followup_ids" context="{'default_customer_book_goal_id': active_id}"/>
+		  <field name="book_followup_ids" context="{'default_customer_book_goal_id': id}"/>
 	    </sheet>
         </form>
       </field>

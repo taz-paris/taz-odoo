@@ -6,7 +6,7 @@
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <tree>
-          <field name="is_company" invisible="1"/>
+          <field name="is_company" column_invisible="1"/>
           <field name="name"/>
 	  <field name="long_company_name"/>
           <field name="industry_id"/>
@@ -54,9 +54,9 @@
 		</group>
 		  <notebook>
 			  <page string="Entreprises/sites du groupe">
-				<field name="child_ids_company" context="{'default_parent_id':active_id, 'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
+				<field name="child_ids_company" context="{'default_parent_id':id, 'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
 					<tree delete="false">
-					  <field name="is_company" invisible="1"/>
+					  <field name="is_company" column_invisible="1"/>
 					  <field name="name"/>
 					  <field name="long_company_name"/>
 					  <field name="industry_id"/>
@@ -66,12 +66,12 @@
 			  </page>
 
 			  <page string="Contacts de cette entreprise">
-				<field name="child_ids_contact" context="{'default_parent_id':active_id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
+				<field name="child_ids_contact" context="{'default_parent_id':id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
 					<tree delete="false">
 					  <field name="is_company" optional="hide" readonly="1"/>
 					  <field name="first_name"/>
 					  <field name="name"/>
-          				<field name="email" optional="show"/>
+          				  <field name="email" optional="show"/>
 					</tree>
 				</field>
 			  </page>
@@ -97,7 +97,7 @@
 					</group>
 					<group string="Autres adresses filles">
 					    <field name="lang" invisible="1"/>
-					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': active_id,            'default_lang': lang,            'default_external_auxiliary_code' : external_auxiliary_code,           'default_user_id': user_id,            'default_is_company' : True,           'default_currency_id' : currency_id,           'default_property_account_receivable_id' : property_account_receivable_id,           'default_property_account_payable_id' : property_account_payable_id,           'default_property_payment_term_id' : property_payment_term_id,           'default_property_account_position_id' : property_account_position_id,           'default_default_invoice_payement_bank_account' : property_payment_bank_account,           'default_type': 'invoice'}">
+					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_external_auxiliary_code' : external_auxiliary_code,           'default_user_id': user_id,            'default_is_company' : True,           'default_currency_id' : currency_id,           'default_property_account_receivable_id' : property_account_receivable_id,           'default_property_account_payable_id' : property_account_payable_id,           'default_property_payment_term_id' : property_payment_term_id,           'default_property_account_position_id' : property_account_position_id,           'default_default_invoice_payement_bank_account' : property_payment_bank_account,           'default_type': 'invoice'}">
 							<tree delete="false">
 								  <field name="type"/>
 								  <field name="name"/>
@@ -231,7 +231,7 @@
       <field name="model">res.partner</field>
       <field name="arch" type="xml">
         <tree>
-                        <field name="is_company" invisible="1"/>
+          <field name="is_company" column_invisible="1"/>
           <field name="first_name"/>
           <field name="name"/>
           <field name="parent_id" options="{'no_quick_create': True}" optional="show"/>
@@ -241,13 +241,13 @@
 	  <field name="parent_industry_priority" optional="show" widget="badge" decoration-info="parent_industry_priority == 'not_tracked'" decoration-success="parent_industry_priority == 'active'" decoration-danger="parent_industry_priority == 'priority_target'"/>
 	  <field name="parent_sector_id" optional="hide"/>
           <field name="category_id" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
-	<field name="street" optional="hide"/>
-	<field name="street2" optional="hide"/>
-	<field name="street3" optional="hide"/>
-	<field name="zip" optional="hide"/>
-	<field name="city" optional="hide"/>
-	<field name="country_id" optional="hide"/>
-	<field name="function" optional="hide"/>
+	  <field name="street" optional="hide"/>
+	  <field name="street2" optional="hide"/>
+	  <field name="street3" optional="hide"/>
+	  <field name="zip" optional="hide"/>
+	  <field name="city" optional="hide"/>
+	  <field name="country_id" optional="hide"/>
+	  <field name="function" optional="hide"/>
         </tree>
       </field>
     </record>
@@ -289,7 +289,7 @@
                     </group>
 		    <notebook>
 			<page string="Actions commerciales">
-				<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': active_id}">
+				<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': id}">
 					<tree editable="top">
 					  <field name="name" widget="text"/>
 					  <field name="state"/>
@@ -309,7 +309,7 @@
 				</field>
 			</page>
 			<page string="Collaborateurs en contact">
-				<field name="contact_user_link_ids" context="{'default_partner_id': active_id}"/>
+				<field name="contact_user_link_ids" context="{'default_partner_id': id}"/>
 			</page>
 			<page name="contact_channels" string="Coordonnées">
 				<group>
@@ -333,7 +333,7 @@
 					</group>
 					<group string="Autres adresses filles">
 					    <field name="lang" invisible="1"/>
-					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': active_id,            'default_lang': lang,            'default_user_id': user_id,            'default_type': 'private'}">
+					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_user_id': user_id,            'default_type': 'private'}">
 							<tree delete="false">
 								  <field name="type"/>
 								  <field name="name"/>

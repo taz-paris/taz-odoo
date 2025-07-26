@@ -58,7 +58,7 @@
 				<field name="show_leaves" invisible="1"/>
 				<field name="is_absent" invisible="1"/>
 				<field name="hr_icon_display" invisible="1"/>
-				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" context="{'search_default_employee_ids': active_id}" invisible="not is_absent">
+				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" context="{'search_default_employee_ids': id}" invisible="not is_absent">
 					<div invisible="hr_icon_display != 'presence_holiday_present'" role="img" class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Off Till" title="Off Till"/>
 					<div invisible="hr_icon_display != 'presence_holiday_absent'" role="img" class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Off Till" title="Off Till"/>
 				    <div class="o_field_widget o_stat_info">
@@ -70,7 +70,7 @@
 					</span>
 				    </div>
 				</button>
-				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not show_leaves" context="{'search_default_employee_ids': active_id}" groups="base.group_user" help="Remaining leaves">
+				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not show_leaves" context="{'search_default_employee_ids': id}" groups="base.group_user" help="Remaining leaves">
 				    <div class="o_field_widget o_stat_info" invisible="allocation_display == '0'">
 					<span class="o_stat_value">
 					    <field name="allocation_remaining_display"/>/<field name="allocation_display"/> Jours

@@ -357,7 +357,7 @@
 						</group>
 					</page>
 					<page name="purchase" string="Achats">
-							<field name="project_outsourcing_link_ids" context="{'default_project_id' : active_id}">
+							<field name="project_outsourcing_link_ids" context="{'default_project_id' : id}">
 								<tree>    
                         						<field name="currency_id" column_invisible="1"/>
 									<field name="project_id" optional="hide"/>
@@ -379,7 +379,7 @@
 								<field name="is_book_manually_computed" invisible="1"/>
 							</group>
 							<group>
-								<field name="book_period_ids" colspan="2" nolabel="1" context="{'default_project_id':active_id}" readonly="not is_book_manually_computed">
+								<field name="book_period_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
 									<tree editable="top">
                         							<field name="currency_id" column_invisible="1"/>
 										<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
@@ -399,7 +399,7 @@
 								<field name="book_comment" column_invisible="not is_book_manually_computed"/>
 							</group>
 							<group>
-								<field name="book_employee_distribution_ids" colspan="2" nolabel="1" context="{'default_project_id':active_id}" invisible="is_book_manually_computed">
+								<field name="book_employee_distribution_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" invisible="is_book_manually_computed">
 									<tree editable="top">
 										<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
 										<field name="company_id" column_invisible="1"/>
@@ -411,7 +411,7 @@
 								</field>
 							</group>
 						</group>
-						<field name="book_employee_distribution_period_ids" context="{'default_project_id':active_id}" readonly="not is_book_manually_computed">
+						<field name="book_employee_distribution_period_ids" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
 							<tree editable="top">
                         					<field name="currency_id" column_invisible="1"/>
 								<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
@@ -456,7 +456,7 @@
 								<field name="has_provision_running"/>
 							</group>
 						</group>
-						<field name="accounting_closing_ids" context="{'default_project_id':active_id}">
+						<field name="accounting_closing_ids" context="{'default_project_id':id}">
 							<tree>
 								<!-- ATTENTION : ne pas mettre la closing_date dans cette vue, sinon (pour une raison inconnue) lorsque l'on change le statut du projet, la closing date de la dernière cloture du projet est mise à jour avec la même valeur. Or le statut du projet est un related stocké sur la cloture, donc il déclenche la mise à jour de la cloture et embarque donc (en plus de la mise à jour du statut du projet) la mise à jour de la closing_date. Or la closing_date ne peut pas changer lorsqu'une clôture est validée. Donc la mise à jour de la cloture tombe en erreur, et entraine également un rollback sur la mise à jour du statut sur l'objet project.project.
 								-->

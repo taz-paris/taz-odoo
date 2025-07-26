@@ -58,7 +58,7 @@
 
 		<xpath expr="//notebook" position='inside'>
 			<page string="Avances (sans facture)">
-				<field name="advance_payment_ids" context="{'default_partner_id' : partner_id, 'default_advance_sale_order_id':active_id, 'default_ref' : 'Avance sans facture sur BC ' + (client_order_ref or '')}" />
+				<field name="advance_payment_ids" context="{'default_partner_id' : partner_id, 'default_advance_sale_order_id':id, 'default_ref' : 'Avance sans facture sur BC ' + (client_order_ref or '')}" />
 			</page>
 		</xpath>
 
