@@ -1,0 +1,3863 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* project_accounting
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-26 19:18+0000\n"
+"PO-Revision-Date: 2025-07-26 19:18+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_environmental_level__level_0
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_social_level__level_0
+msgid "0 - Pas essayé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_environmental_level__level_1
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_social_level__level_1
+msgid "1 - Essayé mais pas réussi"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_environmental_level__level_2
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_social_level__level_2
+msgid ""
+"2 - Réussi avec un impact modeste (Sensibilisation / Ajout d’un principe "
+"global / etc.)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_environmental_level__level_3
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_social_level__level_3
+msgid ""
+"3 - Réussi avec un impact significatif (Ajout d’un axe avec des projets "
+"chiffrés / Décision RSE / etc.)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid ""
+"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow "
+"icon\" title=\"Arrow\"/>"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"<i class=\"fa fa-long-arrow-right mx-2 oe_edit_only\" aria-label=\"Arrow icon\" title=\"Arrow\"/>\n"
+"\t\t\t\t\t\t<i class=\"fa fa-long-arrow-right mx-2 oe_read_only\" aria-label=\"Arrow icon\" title=\"Arrow\" invisible=\"not date_start and not date\"/>"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "<span class=\"fa fa-clock-o me-2\" title=\"Dates\"/>"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid ""
+"<span class=\"fa fa-envelope-o me-2\" aria-label=\"Domain Alias\" "
+"title=\"Domain Alias\"/>"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "<span class=\"fa fa-user me-2\" aria-label=\"Partner\" title=\"Partner\"/>"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "<span class=\"o_stat_text\">Toutes les écritures</span>"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid ""
+"<span title=\"warning_is_review_needed\" class=\"fa fa-exclamation-triangle me-2\" aria-label=\"Partner\"/>\n"
+"\t\t\t\t\t\t\tContrôle(s) en échec"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.report_invoice_document_inherit
+msgid "<strong>Client :</strong>"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.report_invoice_document_inherit
+msgid "<strong>N° de bon de commande</strong>"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__outsource_part_markup_rate_current
+#: model:ir.model.fields,help:project_accounting.field_project_project__outsource_part_markup_rate_initial
+msgid "= marge € / prix d'achat au fournisseur € * 100"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__outsource_part_marging_rate_current
+#: model:ir.model.fields,help:project_accounting.field_project_project__outsource_part_marging_rate_initial
+msgid "= marge € / prix de vente au client € * 100"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_group
+msgid "A project group is use for data consolidation purpose"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_consistant_prevent_napta_creation
+msgid "Absent Napta et pas de prod. interne"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.agreement_subcontractor_menu
+msgid "Accords de sous-traitance (DC4)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Achats"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__purchase_period_amount
+msgid "Achats HT sur la periode"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__active
+msgid "Actif"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__activity_graph
+msgid "Activity graph"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__order_partner_invoice_id
+msgid "Adresse de facturation"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_agreement
+msgid "Agreement"
+msgstr ""
+
+#. module: project_accounting
+#: model:res.groups,comment:project_accounting.external_project_outsourcing_link
+msgid ""
+"Allow external users to access in readonly to project outsourcing links"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__allowed_direct_payment_purchase_order_line_ids
+msgid "Allowed Direct Payment Purchase Order Line"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_bank_statement_line__allowed_partner_ids
+#: model:ir.model.fields,field_description:project_accounting.field_account_move__allowed_partner_ids
+#: model:ir.model.fields,field_description:project_accounting.field_account_payment__allowed_partner_ids
+msgid "Allowed Partner"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_account_analytic_account
+msgid "Analytic Account"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_account_analytic_line
+msgid "Analytic Line"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_analytic_mixin
+msgid "Analytic Mixin"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.wizard_accounting_closing_mass_creation_form
+msgid "Annuler"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__project_book_period_id
+msgid "Année"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__reference_period
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__reference_period
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__reference_period
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Année de référence"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Archived"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_group_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_group_search
+msgid "Archivé"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Arrow"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Arrow icon"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.launch_wizard_accounting_closing_mass_creation
+msgid "Assistant de création en masse des clôture"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Au 1er janvier N (si la cloture au 31/12/N-1 est faite !)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Au moins un bon de commande client n'est pas à l'état 'Bon de commande'."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Au moins un bon de commande fournisseur n'est pas à l'état 'Bon de "
+"commande'."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/purchase_order.py:0
+#, python-format
+msgid ""
+"Aucune ligne de ce bon de commande fournisseur n'est elligible à la création"
+" d'une facture de régularisation (ligne avec une quantité reçue > quantité "
+"facturée ET dont le prix unitaire est strictement négatif)."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__csr_form_author
+msgid "Auteur de la fiche RSE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_outsourcing_link__link_type__other
+#: model:ir.model.fields.selection,name:project_accounting.selection__res_partner__default_outsourcing_link_type__other
+msgid "Autres achats"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Autres info et contrôles (debug admin)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Autres prestations (exemple : séminaire dans nos locaux, frais de "
+"déplacement, etc.)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_form_inherit
+msgid "Avances (sans facture)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__outsourcing__co-sourcing
+msgid "Avec Co-traitance"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Average Rating: Dissatisfied"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Average Rating: Okay"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Average Rating: Satisfied"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_account_invoice_filter_inherit
+msgid "Avoirs clients"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_account_invoice_filter_inherit
+msgid "Avoirs fournisseurs"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_sale_order_with_draft
+msgid "BC Client existants"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_validated_order
+msgid "BC clients tous validés"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_validated_purchase_order
+msgid "BC fournisseurs tous validés"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_consistant_outsourcing
+msgid "BCF présents"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Bilan RSE du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__csr_project_environmental_level
+msgid "Bilan volet environnemental"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__csr_project_social_level
+msgid "Bilan volet social"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__color__decoration-info
+msgid "Bleu"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.report_invoice_document_inherit
+msgid "Bon de commande"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_form_inherit
+msgid "Bon de commande du client final"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_purchase_order_received
+msgid "Bon de commande reçu Fitnet"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Book"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__book_employee_distribution_id
+msgid "Book Employee Distribution"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__period_project_book
+msgid "Book HT du projet pour l'année"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__period_project_book_employee
+msgid "Book HT pour l'année/projet/employé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_affected_book
+msgid "Book affecté"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Book brut du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Book calculé automatiquement"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Book calculé manuellement"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__rel_is_book_manually_computed
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__rel_is_book_manually_computed
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__rel_is_book_manually_computed
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_book_manually_computed
+msgid "Book géré manuellement"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Book non validé"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Book non validé par le DM"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__book_period_ids
+msgid "Book par année"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_book_period_menu
+msgid "Book par année/projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.project_book_period_action
+msgid "Book par projet/année"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__book_employee_distribution_ids
+msgid "Book par salarié"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__book_employee_distribution_period_ids
+msgid "Book par salarié et par an"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Book validé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__rel_book_validation_datetime
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__rel_book_validation_datetime
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__rel_book_validation_datetime
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__book_validation_datetime
+msgid "Book validé le"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__rel_book_validation_employee_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__rel_book_validation_employee_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__rel_book_validation_employee_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__book_validation_employee_id
+msgid "Book validé par"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Book validé par le DM"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__period_book
+msgid "Book à date"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__gross_revenue
+msgid "CA brut"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__begin_year_past_internal_revenue
+msgid "CA net S/T déjà reconnu au 31/12/N-1"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__past_internal_revenue
+msgid "CA net S/T déjà reconnu à date"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__futur_internal_revenue
+msgid "CA net S/T à venir à date"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__internal_revenue
+msgid "CA net de ST"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__begin_year_futur_internal_revenue
+msgid "CA à venir (daté du 1er janvier N)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "CCA"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__cca_period_amount
+msgid "CCA(+)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Capitalisation"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Capitalisation/RSE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__deliverable_indexation__capitalized
+msgid "Capitalisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__sales_proposal_indexation__capitalized
+msgid "Capitalisée"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid ""
+"Ce projet n'est lié à aucun identifiant Napta : impossible d'ouvrir sa page "
+"Napta."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Cette année"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/res_partner.py:0
+#: model_terms:ir.ui.view,arch_db:project_accounting.res_partner_project_accounting_view_form_inherit
+#, python-format
+msgid ""
+"Cette fiche est protégée : seul un ADV peut modifier le nom, le libellé "
+"long, le groupe, l'adresse postale, et les données comptables (onglet "
+"Facturation) de cette fiche."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_filled_deliverable_indexation
+msgid "Champ Livrable valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_filled_sales_proposal_indexation
+msgid "Champ Proposition commerciale valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_filled_csr_project_initiative
+msgid "Champ Réflexion apport RSE du projet valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_filled_commercial_reference_indexation
+msgid "Champ Référence commerciale valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_filled_success_story_indexation
+msgid "Champ Success story valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_filled_csr_project_environmental_level
+msgid "Champp Bilan volet environnemental valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_filled_csr_project_social_level
+msgid "Champp Bilan volet social valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Chiffre d'affaire"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rel_project_partner_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__partner_id
+msgid "Client final"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_res_partner__is_probono_partner
+#: model:ir.model.fields,help:project_accounting.field_res_users__is_probono_partner
+msgid ""
+"Client pour lequel on réalise des mission pro bono (gratuite). Si cette case"
+" est cochée, les projets pour ce client final pourront passer au statut "
+"Commandé sans que le montant ne soit renseigné sur la Structure au lancement"
+" du projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_res_partner__is_probono_partner
+#: model:ir.model.fields,field_description:project_accounting.field_res_users__is_probono_partner
+msgid "Client probono"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__partner_secondary_ids
+msgid "Clients intermediaires"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Clôture en cours"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Clôture non validée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__previous_closing
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Clôture précédente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__next_closing
+msgid "Clôture suivante"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Clôture validée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rel_project_accounting_closing_ids
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__accounting_closing_ids
+#: model:ir.ui.menu,name:project_accounting.project_accounting_closing_menu_list
+#: model:ir.ui.menu,name:project_accounting.project_accounting_closing_menu_root
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_graph
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_pivot
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Clôtures comptables"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.project_accounting_closing_action
+msgid "Clôtures comptables par projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_outsourcing_link__link_type__cosourcing
+#: model:ir.model.fields.selection,name:project_accounting.selection__res_partner__default_outsourcing_link_type__cosourcing
+msgid ""
+"Co-traitance - Cas avec validation par interne des factures émises par le "
+"cotraitant vers le client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__final_book_factor
+msgid "Coef. pour le projet/année/employée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__book_factor
+msgid "Coefficient"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__final_book_factor
+msgid "Coefficient avec bonus/malus"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__employee_id
+msgid "Collaborateur"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Commande au S/T"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Commandes du client"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Commandé HT"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__comment
+msgid "Commentaire"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_bank_statement_line__comment
+#: model:ir.model.fields,field_description:project_accounting.field_account_move__comment
+#: model:ir.model.fields,field_description:project_accounting.field_account_payment__comment
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__invoicing_comment
+msgid "Commentaire ADV"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__comment_previous
+msgid "Commentaire clôture précédente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__comment
+msgid "Commentaire lien ADV/facturation"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__order_direct_payment_validated_detail
+msgid "Commentaire paiement direct"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__rel_book_comment
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__rel_book_comment
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__rel_book_comment
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__book_comment
+msgid "Commentaire sur le book"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_id
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__company_id
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Company"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Compte (commerce)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__rel_partner_industry_id
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Compte (ex BD)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__stage_is_part_of_booking
+#: model:ir.model.fields,field_description:project_accounting.field_project_project_stage__is_part_of_booking
+msgid "Compte dans le book"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Contrôles automatisés"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__color_rel
+#: model:ir.model.fields,field_description:project_accounting.field_project_project_stage__color
+msgid "Couleur"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_cost_current
+msgid "Coût de revient HT de la part \"autres presta\" actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_cost_current
+msgid "Coût de revient HT de la part S/T actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_cost_initial
+msgid "Coût de revient HT de la part S/T initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_cost_current
+msgid "Coût de revient actuel piloté"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_cost_initial
+msgid "Coût de revient de la part \"autres presta.\" initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_cost_futur
+msgid "Coût de revient de la part \"autres presta.\" à venir"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_cost_initial
+msgid "Coût de revient dispositif interne (€) initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_cost_current
+msgid "Coût de revient du dispositif interne (€) < semaine actuelle"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_cost_futur
+msgid "Coût de revient du dispositif interne (€) >= semaine actuelle"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_cost_futur
+msgid "Coût de revient sur la part S/T (€) à venir"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_cost_futur
+msgid "Coût de revient à venir piloté"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_cost_initial
+msgid "Coût total initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__create_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__create_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__create_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__create_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__create_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__create_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__create_uid
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__create_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__create_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__create_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__create_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__create_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__create_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__create_date
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_accounting_closing_mass_creation
+msgid "Création en masse des clôtures comptables"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Créer commande client"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Créer commande fournisseur"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.purchase_order_form_inherit
+msgid "Créer facture de régularisation (régul négative)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_product_product__create_supplier_info_auto
+#: model:ir.model.fields,field_description:project_accounting.field_product_template__create_supplier_info_auto
+msgid "Créer prix fournisseur auto"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__currency_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__currency_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__currency_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__currency_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__currency_id
+msgid "Currency"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order__client_order_ref
+msgid "Customer Reference"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_payment__partner_id
+msgid "Customer/Vendor"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__partner_secondary_ids
+msgid ""
+"Dans certains projets, le client final n'est pas le client facturé. Un "
+"client nous intermédie. Enregistrer ce(s) client(s) intermédiaire(s) ici "
+"afin de permettre sa(leur) facturation pour ce projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_sale_order__other_company_amount
+msgid ""
+"Dans le cas où nous sommes sous-traitant/co-traitant-non-mandataire d'un "
+"tiers (on ne valide pas les facture du tiers, donc ce tiers n'est pas géré "
+"comme un co-traitant), saisir ici le montant qui sera facturé par ce tiers "
+"au client final."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__closing_date
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__date
+msgid "Date de clôture"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__state_last_change_date
+msgid "Date de dernier changement de statut"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Date de début"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__csr_form_date
+msgid "Date de dépot de la fiche RSE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_analytic_line__date_end
+#: model_terms:ir.ui.view,arch_db:project_accounting.res_partner_project_accounting_view_form_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Date de fin"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Date de la clôture comptable"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__date_win_loose
+msgid ""
+"Date de la dernière fois que le projet a basculé dans le groupe de statuts "
+"{3, 4} ou en perdu"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_agreement__signature_date
+msgid "Date de notification/signature"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Date de passage gagné/perdu"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Date de validation"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__rel_project_date
+msgid ""
+"Date on which this project ends. The timeframe defined on the project is "
+"taken into account when viewing its planning."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__date_win_loose
+msgid "Date passage gagné ou perdu"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_form_inherit
+msgid "Date prev fact"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__previsional_invoice_date
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__previsional_invoice_date
+msgid "Date prev. de facturation"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_company_form
+msgid "Dates cloture"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Dates de début/fin"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__description
+msgid "Description"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Description du projet..."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__production_destocking
+msgid "Destockage"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_outsourcing_link__order_company_payment_amount
+msgid ""
+"Différence entre le total des commandes à ce sous-traitant pour ce projet, "
+"et le montant que le sous-traitant a prévu de facturer directement au client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__rel_project_director_employee_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__rel_project_director_employee_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__rel_project_director_employee_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__project_director_employee_id
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Directeur de mission"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Directeur de mission (nom de famille)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__direction_sign
+msgid "Direction Sign"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_analytic_account__display_name
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__display_name
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__display_name
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__display_name
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__display_name
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__display_name
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__display_name
+msgid "Display name"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Dispositif interne"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.project_book_employee_distribution_period_action
+msgid "Distribution du book projet/salarié/année"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Données de clôture"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__order_direct_payment_done_detail
+#: model:ir.model.fields,help:project_accounting.field_purchase_order_line__order_direct_payment_validated_detail
+msgid "Détail des factures en paiement direct validées"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sale_order_line_delivery_validation
+msgid "Echéance"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_employee_book_goal
+msgid "Employee book goal"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__employee_id
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+msgid "Employé"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Enregistrement impossible : vous devez renseigner un Compte sur la fiche de "
+"l'entreprise cliente %s"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Enregistrement impossible pour le projet %s - %s : les bons de commande "
+"clients liées à un projet doivent obligatoirement concerner soit le client "
+"final, soit le client intermédiaire (onglet Facturation)."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Enregistrement impossible pour le projet %s - %s : les bons de commande "
+"fournisseurs liés à un projet doivent obligatoirement concerner l'un des "
+"fournisseurs liés au projet (onglet Achat)."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Enregistrement impossible pour le projet %s - %s : les écritures comptables "
+"liées à un projet doivent obligatoirement concerner soit le client final, "
+"soit le client intermédiaire (onglet Facturation), soit l'un des fourisseurs"
+" (onglet Achats) enregistrés sur la fiche du projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__state
+#: model:ir.model.fields,field_description:project_accounting.field_project_project_stage__state
+msgid "Etat"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Etat de validation"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__reporting_sum_company_outsource_code3_code_4_delta
+msgid "Evol PDC J-31"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__reporting_sum_company_outsource_code3_code_4_delta
+msgid ""
+"Evolution du montant de la prise de commande du projet sur les 31 derniers "
+"jours calendaires"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rel_project_date
+msgid "Expiration Date"
+msgstr ""
+
+#. module: project_accounting
+#: model:res.groups,name:project_accounting.external_project_outsourcing_link
+msgid "External project outsourcing link"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "FAE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__fae_period_amount
+msgid "FAE(+)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_consistant_prevent_napta_creation
+msgid ""
+"FAUX si la case Ne pas créer sur Napta est cochée et que le montant HT du "
+"dispositif interne à date n'est pas nul."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_filled_csr_project_environmental_level
+msgid ""
+"FAUX si le champ Bilan volet environnemental dans l'onglet Structure au "
+"lancement n'est pas valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_filled_csr_project_social_level
+msgid ""
+"FAUX si le champ Bilan volet social dans l'onglet Structure au lancement "
+"n'est pas valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_filled_deliverable_indexation
+msgid ""
+"FAUX si le champ Livrable dans l'onglet Capitalisation n'est pas valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_filled_sales_proposal_indexation
+msgid ""
+"FAUX si le champ Proposition commerciale dans l'onglet Capitalisation n'est "
+"pas valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_filled_csr_project_initiative
+msgid ""
+"FAUX si le champ Réflexion apport RSE du projet dans l'onglet Structure au "
+"lancement n'est pas valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_filled_commercial_reference_indexation
+msgid ""
+"FAUX si le champ Référence commerciale dans l'onglet Capitalisation n'est "
+"pas valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_filled_success_story_indexation
+msgid ""
+"FAUX si le champ Success story dans l'onglet Capitalisation n'est pa "
+"valorisé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_sale_order_with_draft
+msgid ""
+"FAUX si le projet est en statut Accord client/Commandé/Terminé (on devrait "
+"avoir du book) mais que le total des BC client (quelque soit leur statut) "
+"est nul"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "FNP"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__fnp_period_amount
+msgid "FNP(-)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__project_book_factor
+msgid "Facteur de bonus/malus"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_book_employee_distribution
+msgid "Facteur de book par consultant/projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.project_book_employee_distribution_action
+msgid "Facteur de book par projet/consultant"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Facturation 'classique' du sous-traitant"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Facturation HT au client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__invoice_period_amount
+msgid "Facturation HT sur la période"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Facturation TTC au client"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Facturation client"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Facturation fournisseurs"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_account_invoice_filter_inherit
+msgid "Factures clients"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.action_move_out_in_invoice_refund_type
+#: model:ir.ui.menu,name:project_accounting.menu_action_move_out_in_invoice_refund_typ
+msgid "Factures et avoirs / clients et fournisseurs"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_account_invoice_filter_inherit
+msgid "Factures fournisseurs"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_line_tree_inherit
+msgid "Facturé (HT)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_res_partner__is_protected_partner
+#: model:ir.model.fields,field_description:project_accounting.field_res_users__is_protected_partner
+msgid "Fiche entreprise protégée"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Follow this project to automatically track the events associated to tasks "
+"and issues of this project."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Forcer recalcul"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__partner_id
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+msgid "Fournisseur"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__purchase_order_line__invoice_status__invoiced
+msgid "Fully Invoiced"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_book_menu
+msgid "Gestion du book"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__rel_job_id
+msgid "Grade"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Graphique de production interne"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__color__decoration-muted
+msgid "Gris"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Group By"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.project_group_action
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__project_group_id
+#: model:ir.ui.menu,name:project_accounting.project_group_menu
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Groupe de projets"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_generate_project_accounting_closing
+msgid "Génèration en masse des clôtures comptables"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Happy face"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Historique des clôtures du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__id
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__id
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__id
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__id
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__id
+msgid "ID"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__message_has_error
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid ""
+"Il n'est pas possible de générer de nouvelles clôtures, car les projets suivants ont au moins une cloture non validée : \n"
+"%s"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid ""
+"Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s).\n"
+"\n"
+"Tentative de modification des attributs suivants, dont au moins un n'est pas modifiable une fois la clôture validée : %s."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid ""
+"Il n'est pas possible de modifier cette clôture car une clôture postérieure "
+"existe pour ce projet."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid ""
+"Il n'est pas possible de saisir une date de clôture antérieure à la dernière"
+" cloture enregistrée pour ce projet."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid "Il n'est pas possible de supprimer cette clôture car elle est validée."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid ""
+"Il n'est pas possible de supprimer cette clôture car une clôture postérieure"
+" existe pour ce projet."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Il n'existe aucune ligne de répartition du book par employé (et le book "
+"n'est pas validé). Si le book de cette mission n'est pas attribuable à des "
+"salariés, merci de valider le book. Sinon, merci de renseigner la "
+"répartition du book entre les Tasmaniens."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__has_provision_running
+msgid ""
+"Il y a des provisions courrantes ou du stock de production au sein de la "
+"dernière cloture VALIDÉE du projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_project_book_period_project_year_uniq
+msgid "Impossible d'avoir deux book annuels différents pour un même projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_project_book_employee_distribution_project_employee_uniq
+msgid "Impossible d'avoir deux book différents pour un même salarié."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_project_book_employee_distribution_period_proj_employ_period
+msgid "Impossible d'avoir deux book différents pour un même salarié/période."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_project_accounting_closing_project_date_uniq
+msgid "Impossible d'avoir deux clôtures à une même date pour un même projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_project_employee_book_goal_employee_year_uniq
+msgid ""
+"Impossible d'avoir deux objectifs différents pour le même salarié et la même"
+" année."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_sale_order_line_direct_payment_purchase_order_line_id_uniq
+msgid ""
+"Impossible d'enregistrer deux fois la même lignes de commande de SOUS-"
+"TRAITANT (purchase.order.line) dans l'attribut "
+"direct_payment_purchase_order_line_id."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_project_outsourcing_link_project_partner_uniq
+msgid ""
+"Impossible d'enregistrer deux fois le même sous-traitant pour un même "
+"projet. Ajoutez des commandes à la ligne existantes."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.constraint,message:project_accounting.constraint_project_project_number_uniq
+msgid "Impossible d'enregistrer deux projets avec le même numéro."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/analytic_mixin.py:0
+#, python-format
+msgid ""
+"Impossible de lier cette ligne à ce compte analytique, car ces deux objets "
+"appartiennent à des sociétés (res.company) différentes."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/account_move.py:0
+#, python-format
+msgid ""
+"Impossible de valider la facture/avoir client : l'attribut Code auxiliaire "
+"(logiciel externe) n'est pas défini sur l'onglet Facturation de la fiche "
+"client."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Intitulé du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__invoice_status
+msgid "Invoice Status"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "Invoice and refound lines"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_account_move
+msgid "Journal Entry"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_account_move_line
+msgid "Journal Item"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "L'an dernier"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/res_partner.py:0
+#, python-format
+msgid ""
+"L'attribut Code auxiliaire (logiciel externe) ne peut pas faire plus de 8 "
+"caractères."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/purchase_order.py:0
+#, python-format
+msgid ""
+"L'une des lignes portant un paiement direct est incohérente (ex : la distribution analytique a plsuieurs compte ou bien elle n'est pas à 100%).\n"
+"\n"
+"Une fois que le paiement direct est engistré sur ligne du bon de commande du CLIENT FINAL, il n'est plus possible de modifier la distribution analytic, ni le sous-total de la ligne correspondante du BC de sous-traitance. \n"
+"Vous devez supprimer le lien dans le bon de commande du client final si vous souhaitez la modifier."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/sale_order.py:0
+#, python-format
+msgid ""
+"L'une des lignes portant un paiement direct est incohérente : distribution "
+"anlytique sur SOL != POL"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"La case \"Ne pas créer sur Napta\" est cochée alors que le montant HT du "
+"dispositif interne (ou le coût de revient du dispositif interne) à date "
+"n'est pas nul et que la date de fin de la mission est postérieure au 1er "
+"janvier 2023."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "La date demandée est postérieure à la date du jour."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_initiative__csr_project
+msgid "La demande client initiale comportait déjà un volet RSE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__write_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__write_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__write_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__write_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__write_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__write_uid
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__write_uid
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__write_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__write_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__write_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__write_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__write_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__write_date
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__write_date
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Le DM n'a pas validé la répartition du book."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le Montant HT du dispositif sous-traité à date n'est pas correct. En effet, "
+"la somme des 'Montants HT de revente' des lignes d'au moins un Bon de "
+"commande Fournisseur est nulle."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_book.py:0
+#, python-format
+msgid ""
+"Le book_employee_distribution_id et project_book_period_id doivent être "
+"renseignés."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_book.py:0
+#, python-format
+msgid ""
+"Le book_employee_distribution_id et project_book_period_id ne sont pas "
+"rattachés au même projet."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le champ \"Bilan volet environnemental\" dans l'onglet Capitalisation n'est "
+"pas renseigné."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le champ \"Bilan volet social\" dans l'onglet Capitalisation n'est pas "
+"renseigné."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Le champ \"Livrable\" dans l'onglet Capitalisation n'est pas renseigné."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le champ \"Proposition commerciale\" dans l'onglet Capitalisation n'est pas "
+"renseigné."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le champ \"Réflexion apport RSE du projet\" dans l'onglet Structure au "
+"lancement n'est pas renseigné."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le champ \"Référence commerciale\" dans l'onglet Capitalisation n'est pas "
+"renseigné."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le champ \"Success story\" dans l'onglet Capitalisation n'est pas renseigné."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le champ \"Type de sous-traitance\" n'est pas renseigné, ou bien il est "
+"incohérent avec les achats et le 'Montants HT de revente' enregistrés."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "Le champ demandé n'est pas tracké (tracking = 0 or False)."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "Le champ demandé n'existe pas dans cet objet."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Le client final (et ses établissements/filiales) ne peut pas être un "
+"fournisseur (onglet Achats) pour ce même projet."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Le client final ne peut pas être un client intermédiaire (onglet "
+"Facturation)."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Le client intermédiaire (onglet Facturation) ni ses établissements/filiales "
+"ne peuvent être fournisseur (onglet Achats) pour ce même projet."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Le coût total initial (sur l'onglet Structure au lancement) ne peut pas être"
+" nul pour passer au statut %s."
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Le montant HT piloté initial (sur l'onglet Structure au lancement) ne peut "
+"pas être nul pour passer au statut %s, hormis pour les clients pro bono."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le projet est en statut Accord client/Commandé/Terminé (on devrait avoir du "
+"book) mais il n'existe aucun BC client (quelque soit leur statut)."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Le taux de marge actuel (sur prix de vente) sur les autres prestations est "
+"inférieur à la cote d'alerte."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__other_part_amount_current
+#: model:ir.model.fields,help:project_accounting.field_project_project__other_part_amount_initial
+msgid ""
+"Les autres prestations peuvent être la facturation d'un séminaire dans nos "
+"locaux ou des frais de déplacement par exemple."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Les books que j'ai validés"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__stage_is_part_of_booking
+#: model:ir.model.fields,help:project_accounting.field_project_project_stage__is_part_of_booking
+msgid "Les projects qui sont à cette étape comptent dans le book."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Les projets dont je suis DM"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__name
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__name
+msgid "Libellé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__csr_form_url
+msgid "Lien vers la fiche RSE"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+msgid "Liens de type autre (frais, séminaires...)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+msgid "Liens de type co-traitance"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+msgid "Liens de type sous-traitance"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.project_outsourcing_link_tree_action
+#: model:ir.ui.menu,name:project_accounting.project_outsourcing_link_list_menu
+msgid "Liens projet-fournisseur"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_sale_order_line__direct_payment_purchase_order_line_id
+msgid ""
+"Ligne de la commande au sous-traitant qui sera en tout ou partie payée "
+"directement par le client final"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_purchase_order_line__direct_payment_sale_order_line_id
+msgid "Ligne de la commande du client final"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_outsourcing_link.py:0
+#, python-format
+msgid "Lignes de BC fournisseur"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.purchase_order_line_pivot
+msgid "Lignes de BCF"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sale_order_line_pivot
+msgid "Lignes de commande"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "Lignes de commande client"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_form_inherit
+msgid ""
+"Lignes de commande de la part que nous pilotons (y/c co-traitance pour "
+"laquelle nous sommes mandataires)"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "Lignes de factures / avoirs"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#, python-format
+msgid "Lignes de factures / avoirs clients"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project_accounting_closing.py:0
+#: code:addons/project_accounting/models/project_outsourcing_link.py:0
+#, python-format
+msgid "Lignes de factures / avoirs fournisseurs"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_outsourcing_link
+msgid "Link beetwin a project and the subcontracting partner"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__deliverable_indexation
+msgid "Livrable"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_line_tree_inherit
+msgid "Livré à facturer (HT)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.agreement_procedure_menu
+msgid "Marché / Procédure de passation"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__agreement_id
+msgid "Marché par défaut sur les BC clients"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_agreement_menu
+msgid "Marchés"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.purchase_order_line_form2_inherit
+msgid "Marge"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__margin_rate
+msgid "Marge %"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__internal_margin_rate
+msgid "Marge nette ST (%)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__internal_margin_amount
+msgid "Marge nette ST (€)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_marging_rate_initial
+msgid "Marge sur dispositif interne (%) initiale sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_marging_rate_current
+msgid "Marge sur dispositif interne (%) projetée sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_marging_amount_initial
+msgid "Marge sur dispositif interne (€) initiale"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_marging_amount_current
+msgid "Marge sur dispositif interne (€) projetée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_markup_rate_initial
+msgid "Marge sur la part S/T (%) initiale sur prix d'achat - markup"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_marging_rate_initial
+msgid "Marge sur la part S/T (%) initiale sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_markup_rate_current
+msgid "Marge sur la part S/T (%) projetée sur prix d'achat - markup"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_marging_rate_current
+msgid "Marge sur la part S/T (%) projetée sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_marging_amount_initial
+msgid "Marge sur la part S/T (€) initiale"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_marging_amount_current
+msgid "Marge sur la part S/T (€) projetée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_marging_rate_initial
+msgid "Marge sur la part co-traitée (%) initiale sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_marging_rate_current
+msgid "Marge sur la part co-traitée (%) projetée sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_marging_amount_initial
+msgid "Marge sur la part co-traitée (€) initiale"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_marging_amount_current
+msgid "Marge sur la part co-traitée (€) projetée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__marging_rate_current
+msgid "Marge sur la part sous-traitée (%)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__marging_amount_current
+msgid "Marge sur la part sous-traitée (€)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_marging_rate_initial
+msgid "Marge sur les autres prestations (%) initiale sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_marging_rate_current
+msgid "Marge sur les autres prestations (%) projetée sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_marging_amount_initial
+msgid "Marge sur les autres prestations (€) initiale"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_marging_amount_current
+msgid "Marge sur les autres prestations (€) projetée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_marging_rate_initial
+msgid "Marge totale (%) initiale sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_marging_rate_current
+msgid "Marge totale (%) projetée sur prix de vente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_marging_amount_initial
+msgid "Marge totale (€) initiale"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_marging_amount_current
+msgid "Marge totale (€) projetée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__margin_amount
+msgid "Marge €"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__margin_graph
+msgid "Margin graph"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__color__decoration-warning
+msgid "Marron"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Mes clôtures"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+msgid "Mes objectifs"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Mes projets"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.action_sale_order_line_delivery_validation_month
+#: model:ir.ui.menu,name:project_accounting.menu_sale_order_line_delivery_validation_month
+msgid "Mes échéances de facturation du mois"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_account_move_line_filter_inherit
+msgid "Mois en cours"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_account_move_line_filter_inherit
+msgid "Mois précédent"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+msgid "Mon book"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sale_order_line_delivery_validation
+msgid "Montant HT"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__price_subtotal_signed
+msgid "Montant HT (signé)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__sale_order_amount_initial
+msgid "Montant HT commandé par le client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order__other_company_amount
+msgid ""
+"Montant HT de la commande pour le sur-traitant/co-traitant non mandataire"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_amount_current
+msgid "Montant HT de la part co-traitée actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_amount_initial
+msgid "Montant HT de la part co-traitée initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_amount_current
+msgid "Montant HT de revente \"autres presta\" actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_amount_initial
+msgid "Montant HT de revente \"autres presta\" initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_amount_initial
+msgid "Montant HT de revente S/T initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsource_part_amount_current
+msgid "Montant HT de revente de la part S/T actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_cost_current
+msgid "Montant HT des factures du co-traitant validées sur Chorus"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__order_direct_payment_to_do
+msgid "Montant HT des factures en paiement direct restant à valider"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_amount_current
+msgid "Montant HT dispositif interne actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_part_amount_initial
+msgid "Montant HT dispositif interne initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order__final_customer_order_amount
+msgid "Montant HT du bon de commande client final"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__sum_account_move_lines
+msgid "Montant HT déjà facturé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_invoice_sum_move_lines
+msgid "Montant HT déjà facturé au client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__order_direct_payment_validated_amount
+msgid "Montant HT facture paiement direct validé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__untaxed_amount_invoiced
+msgid "Montant HT facturé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_cost_initial
+msgid "Montant HT facturé par le co-traitant au client final"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__order_direct_payment_amount
+msgid "Montant HT paiement direct"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_amount_current
+msgid "Montant HT piloté actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_amount_initial
+msgid "Montant HT piloté initial"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__order_company_payment_to_invoice
+msgid "Montant HT restant à facturer"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_to_invoice_left
+msgid "Montant HT restant à facturer au client"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+msgid "Montant HT restant à facturer non nul"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+msgid "Montant HT restant à valider (paiement direct) non nul"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__cosource_part_cost_futur
+msgid "Montant HT restant à valider sur Chorus"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__untaxed_amount_to_invoice
+msgid "Montant HT à facturer"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_to_invoice_company
+msgid "Montant HT à facturer au client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__order_company_payment_amount
+msgid "Montant HT à payer à ce sous-traitant"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__price_total_signed
+msgid "Montant TTC (signé)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__sum_account_move_lines_with_tax
+msgid "Montant TTC déjà facturé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__company_paid
+msgid "Montant TTC déjà payé au S/T"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_paid
+msgid "Montant TTC déjà payé par le client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_to_invoice_left_with_tax
+msgid "Montant TTC restant à facturer au client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__company_residual
+msgid "Montant TTC restant à payer au S/T"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_residual
+msgid "Montant TTC restant à payer par le client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_to_invoice_company_with_tax
+msgid "Montant TTC à facturer au client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__period_project_book
+msgid "Montant book HT"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order__target_amount
+msgid "Montant cible HT - à répartir"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__company_invoice_sum_move_lines_with_tax
+msgid "Montant déjà TTC facturé au client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__billed_amount
+msgid "Montant facturé Fitnet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__amount
+msgid "Montant net S/T Fitnet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__amount_paid
+msgid "Montant payé"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__payed_amount
+msgid "Montant payé Fitnet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_outsourcing_link__order_direct_payment_amount
+msgid "Montant payé directement par le client final au sous-traitant"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__cosource_part_amount_current
+msgid ""
+"Montant produit par les co-traitants : part produite par les co-traitants."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_sale_order__final_customer_order_amount
+msgid ""
+"Montant total commandé par le client final (supérieur au montant piloté si "
+"nous sommes sous-traitants. Egal au montant que nous pilotons sinon.)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_purchase_order_line__reselling_subtotal
+msgid ""
+"Montant valorisé que l'on facture au client final. Somme du prix d'achat et "
+"du markup."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_account_move_line__direction_sign
+msgid ""
+"Multiplicator depending on the document type, to convert a price into a "
+"balance"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__display_name
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__name
+msgid "Name"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__deliverable_indexation__not_to_be_capitalized
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__sales_proposal_indexation__not_to_be_capitalized
+msgid "Ne pas capitaliser"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__commercial_reference_indexation__no_commercial_reference
+msgid "Ne pas créer"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_prevent_napta_creation
+msgid "Ne pas créer sur Napta (dont portage pur)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__success_story_indexation__no_success_story
+msgid "Ne pas réaliser"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Neutral face"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__rel_industry_business_priority
+msgid "Niveau de priorité"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Niveau de priorité du compte"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__name
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_group_search
+msgid "Nom"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__purchase_order_line__invoice_status__no
+msgid "Nothing to Invoice"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_initiative__yes
+msgid "Nous avons proposé un volet RSE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_initiative__no
+msgid "Nous n'avons pas proposé de volet RSE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__project_id_number
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__project_id_number
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__project_id_number
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__project_id_number
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__number
+msgid "Numéro"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__purchase_order_number
+msgid "Numéro du bon de commande Fitnet"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "N° ou nom du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__period_goal
+msgid "Objectif annuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.employee_book_goal_action
+msgid "Objectifs de book par consultant"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.employee_book_goal
+msgid "Objectifs de book par consultant / année"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "PCA"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__pca_period_amount
+msgid "PCA(-)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__reselling_price_unit
+msgid "PU HT de revente"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Paiement 'classique' au sous-traitant"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Paiement TTC du client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_payment__advance_sale_order_id
+msgid "Paiement d'avance pour la commande client"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__direct_payment_sale_order_line_id
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__direct_payment_purchase_order_line_id
+#: model_terms:ir.ui.view,arch_db:project_accounting.purchase_order_line_form2_inherit
+msgid "Paiement direct"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Paiement direct du client au sous-traitant"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_sale_order__advance_payment_ids
+msgid ""
+"Paiement en avance mais sans facture, notamment dans le cas de commandes "
+"publiques"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_payment_pivot
+msgid "Paiements"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order__advance_payment_ids
+msgid "Paiements d'avance (sans facture)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Part en paiement classique HT"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Part en paiement direct HT"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_account_move_line_filter_inherit
+msgid "Partenaire sans code auxiliaire externe"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rel_project_manager_user_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__project_manager
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Partner ou manager en appui de l'administration du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid ""
+"Partner ou manager en appui de l'administration du projet (nom de famille)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__commercial_reference_indexation__not_specified
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_environmental_level__not_specified
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_initiative__not_specified
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__csr_project_social_level__not_specified
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__deliverable_indexation__not_specified
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__sales_proposal_indexation__not_specified
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__success_story_indexation__not_specified
+msgid "Pas de réponse du DM"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_account_payment
+msgid "Payments"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__rel_project_manager_user_id
+#: model:ir.model.fields,help:project_accounting.field_project_project__project_manager
+msgid ""
+"Personne à contacter par l'ADV, capable de répondre aux aspects économiques "
+"et contractuels du projet."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Pilotage"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__reporting_sum_company_outsource_code3_code_4
+msgid "Prise de commande"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_outsource_part_amount_current
+msgid "Prix de revente S/T renseigné"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Prix revente HT"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project_stage__allowed_next_stage_ids
+msgid "Prochaines étapes possibles"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_product_template
+msgid "Product"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Production"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Production par le dispositif interne"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Production pilotée (yc S/T)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Production pilotée par un co-traitant (Cas où notre ADV valide des factures "
+"émises par le cotraitant vers le client)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid ""
+"Production pilotée par un co-traitant (Cas où notre ADV valide les factures "
+"émises par le cotraitant vers le client)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Production sous-traitée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__production_period_amount
+msgid "Production sur la période"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_project
+#: model:ir.model.fields,field_description:project_accounting.field_agreement__project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__project_ids
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Project"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rel_project_user_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__user_id
+msgid "Project Manager"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__project_outsourcing_link_ids
+msgid "Project Outsourcing Link"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_project_stage
+msgid "Project Stage"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_accounting_closing
+msgid "Project accounting closing"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_book_employee_distribution
+msgid "Project book employee distribution"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_book_employee_distribution_period
+msgid "Project book employee distribution PERIOD"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_project_book_period
+msgid "Project book period"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_search
+msgid "Project employee book goal"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__project_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__project_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__project_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__project_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__project_id
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_pivot
+#: model_terms:ir.ui.view,arch_db:project_accounting.report_invoice_document_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_purchase_order_line_search_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sales_order_line_filter_inherit
+msgid "Projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_review_needed
+msgid "Projet avec anomalie(s)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projet avec au moins un des 3 attributs RSE non renseigné"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projet avec au moins un élément à capitaliser ou non renseigné"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__state__closed
+msgid "Projet clos ou annulé ou perdu"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.company_search_inherit
+msgid "Projet débuté sur cette année civile"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__state__launched
+msgid "Projet lancé (mission commamdée ou production terminée)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__state__before_launch
+msgid "Projet pas encore lancé (avant le lancement)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projet à revoir (contrôle KO ou commentaire ADV valorisé)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_review_needed
+msgid ""
+"Projet à revoir : au moins un contrôle est KO ou bien le champ 'Commentaire "
+"ADV' contient du texte."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.project_action
+#: model:ir.model.fields,field_description:project_accounting.field_account_analytic_distribution_model__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_account_bank_statement_line__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_account_move__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_account_payment__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_account_reconcile_model_line__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_analytic_mixin__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_project_group__project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_res_partner__project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_res_users__project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order__rel_project_ids
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__rel_project_ids
+#: model_terms:ir.ui.view,arch_db:project_accounting.res_partner_project_accounting_view_form_inherit
+msgid "Projets"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_menu
+msgid "Projets ADV"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projets ayant changé de statut depuis 7 jours"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projets de comptes Inditto"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projets de comptes actifs"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projets de comptes prioritaires"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projets de comptes à opportunités"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.agreement_form_inherit
+msgid "Projets liés"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Projets ni terminés, ni annulés, ni perdus"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid ""
+"Projets non annulés/non perdus avec date de passage 3-Accord "
+"client/4-Commandé+ cette année ou non valorisée"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.wizard_accounting_closing_mass_creation_form
+msgid "Projets pour lesquels générer une clôture comptables"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__sales_proposal_indexation
+msgid "Proposition commerciale"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__has_provision_running
+msgid "Provisions/stock prod. en cours"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__cca_previous_balance
+msgid "Précédent solde CCA"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__fae_previous_balance
+msgid "Précédent solde FAE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__fnp_previous_balance
+msgid "Précédent solde FNP"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__pca_previous_balance
+msgid "Précédent solde PCA"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__production_previous_balance
+msgid "Précédent stock"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_purchase_order
+msgid "Purchase Order"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_purchase_order_line
+msgid "Purchase Order Line"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sale_order_line_delivery_validation
+msgid "Qté"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__qty_delivered
+msgid "Qté livrée"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_line_tree_inherit
+msgid "Quantité livrée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rating_ids
+msgid "Ratings"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_employee_book_goal__period_rate
+msgid "Ratio atteint/objectif"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.server,name:project_accounting.action_recompute_project
+msgid "Recalculer les agrégats du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.server,name:project_accounting.action_recompute_closing
+msgid "Recalculer les données de cette fiche cloture"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__remark
+msgid "Remarques"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sale_order_line_delivery_validation
+msgid "Reste à facturer (HT)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_purchase_order_line_search_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sales_order_line_filter_inherit
+msgid "Reste à livrer ou facturer"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__color__decoration-primary
+msgid "Rose"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__color__decoration-danger
+msgid "Rouge"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__success_story_indexation__success_story_completed
+msgid "Réalisée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__csr_project_initiative
+msgid "Réflexion apport RSE du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_form_inherit
+msgid "Référence client du Bon de commande"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__commercial_reference_indexation
+msgid "Référence commerciale"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__commercial_reference_indexation__commercial_reference_created
+msgid "Référence créée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__commercial_reference_indexation__commercial_reference_validated
+msgid "Référence validée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__commercial_reference_indexation__yes_commercial_reference
+msgid "Référence à créer"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__is_validated_book
+msgid "Répartition book validée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_book_distribution_menu
+msgid "Répartition du book par projet/année/consultant"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_kanban
+msgid "Sad face"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__employee_id
+msgid "Salarié"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_sale_order
+msgid "Sales Order"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_sale_order_line
+msgid "Sales Order Line"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__outsourcing__no-outsourcing
+msgid "Sans sous-traitance"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Search"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Search Project"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_group_search
+msgid "Search Project Group"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Search Project accounting closing"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_outsourcing_link_search
+msgid "Search Project outsourcing link"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "Seul un ADV peut paser un projet du statut %s au statut %s."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_generate_project_accounting_closing
+msgid ""
+"Si VRAI, Odoo génèrera automatiquement des clôtures comptables pour ce "
+"projet tant qu'il n'est pas clôs comptablement. Sinon il sera ignoré par "
+"l'assistant de création des clôtures."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_product_product__create_supplier_info_auto
+#: model:ir.model.fields,help:project_accounting.field_product_template__create_supplier_info_auto
+msgid ""
+"Si VRAI, lorsqu'un bon de commande fournisseur est confirmé, un objet "
+"supplierinfo est automatiquement créé pour les lignes du bon de commande "
+"fournisseur dont le produit / fournisseur n'existe pas pour la société. Ce "
+"supplier info n'est créé que s'il n'exite pas déjà 10 supplierinfo pour ce "
+"produit. Le prix associé est celui du bon de commande."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project_stage__allowed_next_stage_ids
+msgid ""
+"Si l'utilisateur n'est pas un ADV, il ne pourra passer le projet qu'à ces "
+"statuts."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__default_book_end
+msgid ""
+"Si l'étape projet est paramétrée pour compter dans le book, ce champ "
+"correspond à la valeur du book par défaut projetée à terminaison : somme des"
+" commandes clients (validées ou non) diminuée des commandes d'achats "
+"(validées ou non). Sinon ce champ a une valeur nulle."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.project_accounting_closing_menu_res_company
+msgid "Sociétés"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__cca_balance
+msgid "Solde CCA"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__fae_balance
+msgid "Solde FAE"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__fnp_balance
+msgid "Solde FNP"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__pca_balance
+msgid "Solde PCA"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__production_balance
+msgid "Solde prod après destockage"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__order_direct_payment_done
+msgid "Somme HT factures en paiement direct validées"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__reporting_sum_company_outsource_code3_code_4
+msgid ""
+"Somme Montant dispositif interne + markup S/T + markup cotraitant + marge "
+"ventes Autres (ex : séminaires) pour les projets en code 3-Accord client "
+"(données saisies par le DM sur l'onglet Structure au lancement) ou en code "
+"4/5/6 (données calculées et affichées sur l'onglet Synthèse à date)."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsourcing_link_purchase_order_with_draft
+msgid "Somme de toutes les lignes d'achats"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__past_internal_revenue
+msgid "Somme des CA net S/T de toutes les clôtures comptables du projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__begin_year_past_internal_revenue
+msgid ""
+"Somme des CA net S/T de toutes les clôtures comptables du projet antérieures"
+" ou égales au 31/12/N-1"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_outsourcing_link__sum_account_move_lines
+msgid ""
+"Somme des factures envoyées par le sous-traitant moins la somme des avoirs "
+"dûs à ce sous traitant pour ce projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_purchase_order_line__order_direct_payment_validated_amount
+msgid "Somme factures en paiement direct validées"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__provision_previous_balance_sum
+msgid "Somme reprise prov."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__provision_balance_sum
+msgid "Somme solde prov."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__price_subtotal
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__price_subtotal
+#: model:ir.model.fields,field_description:project_accounting.field_sale_order_line__price_subtotal
+msgid "Sous-total HT"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_purchase_order_line__reselling_subtotal
+msgid "Sous-total HT de revente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_outsourcing_link__link_type__outsourcing
+#: model:ir.model.fields.selection,name:project_accounting.selection__res_partner__default_outsourcing_link_type__outsourcing
+msgid "Sous-traitance"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__outsourcing__outsourcing
+msgid "Sous-traitance paiement classique (pas de paiement direct)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__outsourcing__direct-paiement-outsourcing
+msgid "Sous-traitance paiement direct"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__outsourcing__direct-paiement-outsourcing-company
+msgid "Sous-traitance paiement direct + paiement classique"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rel_project_date_start
+msgid "Start Date"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_search
+msgid "Statut"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__rel_project_stage_id
+msgid "Statut actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__begin_year_stage_id
+msgid "Statut au 1er janvier N"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Statut de la mission"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Statut du projet actuel"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_accounting_closing_search
+msgid "Statut du projet au début de la clôture"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__original_stage_id
+msgid "Statut du projet à la création de la clôture (\"photo\")"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__original_stage_id
+msgid "Statut début clôture"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__last_closing_production_balance
+msgid "Stock de production"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__production_stock
+msgid "Stock total"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Structure au lancement"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__success_story_indexation
+msgid "Success story"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__begin_year_futur_internal_revenue
+msgid ""
+"Suivant l'étape du projet au 1/1/N : \n"
+"    - Si le projet était en code 3/4/5 au 1/1/N = [Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet <= 31/12N-1]\n"
+"    - Sinon, 0"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Synthèse à date"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_outsourcing_link__marging_rate_current
+msgid "Taux de marge = marge € / prix de vente au client € * 100"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__other_part_marging_rate_controle_OK
+msgid "Taux de marge actuel sur les autres prestations >= à la cote d'alerte."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_outsourcing_link__markup_rate_current
+msgid "Taux de marque = marge € / prix d'achat au fournisseur € * 100"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__markup_rate_current
+msgid "Taux de marque sur la part sous-traitée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__purchase_order_line__invoice_status__to_invoice
+msgid "To Invoice"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.agreement_form_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.book_employee_distribution_period_tree
+#: model_terms:ir.ui.view,arch_db:project_accounting.book_employee_distribution_tree
+#: model_terms:ir.ui.view,arch_db:project_accounting.employee_book_goal_tree
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_tree
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_book_period_tree
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_group_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_tree
+#: model_terms:ir.ui.view,arch_db:project_accounting.purchase_order_form_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_order_form_inherit
+msgid "Total"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_sum_sale_order_lines
+msgid "Total HT commandé par le client (uniquement à l'état BDC)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__order_sum_sale_order_lines_with_draft
+msgid "Total HT commandé par le client (y/c BCC à l'état Devis)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__order_sum_purchase_order_lines
+msgid "Total HT des commandes enregistrées"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Total provisions"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__link_type
+msgid "Type d'achat"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid "Type d'achat non géré : %s"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_res_partner__default_outsourcing_link_type
+#: model:ir.model.fields,field_description:project_accounting.field_res_users__default_outsourcing_link_type
+msgid "Type de lien fournisseur par défaut"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__outsourcing
+msgid "Type de sous-traitance"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_res_partner__has_project_started_this_year
+#: model:ir.model.fields,field_description:project_accounting.field_res_users__has_project_started_this_year
+msgid "Un projet a débuté cette année"
+msgstr ""
+
+#. module: project_accounting
+#. odoo-python
+#: code:addons/project_accounting/models/project.py:0
+#, python-format
+msgid ""
+"Un projet doit être créé au statut Avant-vente chaud ou Avant-vente froid ou"
+" Accord client."
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.account_view_partner_property_form_inherit
+msgid ""
+"Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de "
+"commande client/fournisseur) le référence. Cette fiche ne peut être modifiée"
+" que par un ADV."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_res_partner__is_protected_partner
+#: model:ir.model.fields,help:project_accounting.field_res_users__is_protected_partner
+msgid ""
+"Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de "
+"commande client/fournisseur) le référence. Dans ce cas, la fiche ne peut "
+"être modifiée que par un ADV."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.server,name:project_accounting.update_project_begin_year_stage_id_ir_actions_server
+msgid "Update project each first of January with begin_year_stage_id"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.server,name:project_accounting.update_project_margin_projection_ir_actions_server
+msgid "Update project each monday morning to update margin projection"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__user_enrolled_ids
+msgid "Utilisateurs concernés par ce projet"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__state_last_change_date
+msgid "Utilisé pour le filtre Nouveautés de la semaine"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_affected_book
+msgid "VAI si le book est validé OU qu'il existe au moins une ligne de book"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_validated_book
+msgid "VRAI si la répartition du book est validée."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_consistant_outsourcing
+msgid ""
+"VRAI si le type de sous-traitance est renseigné et qu'il est cohérent avec "
+"les Bons de commande fournisseur du projet."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_validated_order
+msgid "VRAI si tous les BC clients sont à l'état 'Bon de commande'."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_validated_purchase_order
+msgid "VRAI si tous les BC fournissuers sont à l'état 'Bon de commande'."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__is_outsource_part_amount_current
+msgid ""
+"VRAI si, pour chaque BC Fournisseur, la somme des prix de revente n'est pas "
+"nulle."
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__last_closing_production_balance
+msgid ""
+"Valeur de Stock prod après destokage de la clôture validée la plus récente"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__default_book_end
+msgid "Valeur du book par défaut à terminaison"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.wizard_accounting_closing_mass_creation_form
+msgid "Valider"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_period_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_employee_distribution_search
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_project_book_period_search
+msgid "Valideur du book"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__is_validated
+msgid "Validée"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_outsourcing_link__outsource_part_amount_current
+msgid "Valorisation HT de la part sous-traitée"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "Valorisation du book par DM/manager"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project_stage__color__decoration-success
+msgid "Vert"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.wizard_accounting_closing_mass_creation_form
+msgid "Voir ces lignes de pointage"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Voir les lignes de commande"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Voir les lignes de facturation client"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Voir les lignes de facturation fournisseur"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_outsourcing_link_form
+msgid "Voir les lignes de facture/avoir"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Voir les lignes de pointage"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_accounting_closing_form
+msgid "Voir sur Napta"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.wizard_accounting_closing_mass_creation_form
+msgid ""
+"Vous allez générer des clotures pour ces projets. Voulez-vous continuer ?"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_wizard_accounting_closing_mass_creation__warning_message
+msgid "Warning Message"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_accounting_closing__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_accounting_closing__website_message_ids
+msgid "Website communication history"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,help:project_accounting.field_project_project__futur_internal_revenue
+msgid ""
+"[Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables "
+"du projet]"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.agreement_form_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_group_form
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_tree
+msgid "warning_is_review_needed"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model,name:project_accounting.model_wizard_accounting_closing_mass_creation
+msgid "wizard_accounting_closing_mass_creation"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__sales_proposal_indexation__to_be_capitalized
+msgid "À capitaliser"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__deliverable_indexation__to_be_capitalized_with_anonymization
+msgid "À capitaliser (avec anonymisation)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__deliverable_indexation__to_be_capitalized_without_anonymization
+msgid "À capitaliser (sans anonymisation)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_form
+msgid "À date"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__has_to_be_recomputed
+msgid "À recalculer"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields.selection,name:project_accounting.selection__project_project__success_story_indexation__yes_success_story
+msgid "À réaliser"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_purchase_order_line_search_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sales_order_line_filter_inherit
+msgid "Échéances antérieures à la date du jour"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_purchase_order_line_search_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.view_sales_order_line_filter_inherit
+msgid "Échéances antérieures à la fin de ce mois"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.action_purchase_order_line
+#: model:ir.actions.act_window,name:project_accounting.action_sale_order_line_delivery_validation
+#: model:ir.ui.menu,name:project_accounting.menu_action_purchase_order_line
+#: model:ir.ui.menu,name:project_accounting.menu_sale_order_line_delivery_validation
+msgid "Échéances de facturation"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.actions.act_window,name:project_accounting.action_account_moves_previous_month
+msgid "Écritures comptables"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.ui.menu,name:project_accounting.account_moves_previous_month
+#: model:ir.ui.menu,name:project_accounting.project_accounting_closing_account_moves_previous_month
+msgid "Écritures de vente validées du mois M-1"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution__rel_stage_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_employee_distribution_period__rel_stage_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_book_period__rel_stage_id
+#: model:ir.model.fields,field_description:project_accounting.field_project_project__stage_id
+msgid "Étape"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__parent_state
+msgid "État (fature)"
+msgstr ""
+
+#. module: project_accounting
+#: model:ir.model.fields,field_description:project_accounting.field_account_move_line__parent_payment_state
+msgid "État du paiement (fature)"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_tree
+msgid "€ commandés"
+msgstr ""
+
+#. module: project_accounting
+#: model_terms:ir.ui.view,arch_db:project_accounting.agreement_form_inherit
+#: model_terms:ir.ui.view,arch_db:project_accounting.project_group_form
+msgid "€ commandés HT"
+msgstr ""

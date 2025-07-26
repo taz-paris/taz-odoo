@@ -1,0 +1,330 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* dashboard_global
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-26 20:38+0000\n"
+"PO-Revision-Date: 2025-07-26 20:38+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.business_module
+msgid ">>> Redirection vers le module Commerce"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.project_module
+msgid ">>> Redirection vers le module Projet"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_window,name:dashboard_global.open_view_business_action_new_form
+msgid "Actions commerciales"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.history_business_action_action
+msgid "Actions commerciales des 6 derniers mois"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_window,name:dashboard_global.global_board_action
+#: model:ir.ui.menu,name:dashboard_global.global_board
+msgid "Cockpit DM/Manager"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Comment"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Commentaire ADV"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.sales
+msgid "Commerce"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.res_industry
+msgid "Comptes (ex BD) auxquels je suis affecté"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_window,name:dashboard_global.open_view_contact_new_form
+msgid "Contacts"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.new_contact
+msgid "Créer un contact"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.actions.act_window,help:dashboard_global.open_view_project_win_loose_action
+msgid "Créer un nouveau document"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.new_project
+msgid "Créer un projet"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.new_business_action
+msgid "Créer une action commerciale"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.global_board_form
+msgid "Dashboard"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Date"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Date factu. prév"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.project_recent_change_action_menu
+msgid "Escale > Projet créés/ayant changé de statut sur les 7 derniers jours"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Etat"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.global_board_form
+msgid "Factures impayées et en retard de mes missions"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.project_win_loose
+msgid "Graphique de prise de commande N/N-1 par trimestre"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.global_board_form
+msgid "Les objectifs de prise de commande des comptes auxquels je contribue"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Lignes de commande client"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Lignes de commande fournisseur"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Lignes de facture client"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Lignes de facture fournisseur"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.res_partner_industry_menu
+msgid "Liste des comptes"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.all_business_actions
+msgid "Mes actions commerciales"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.global_board_form
+msgid "Mes actions commerciales ouvertes avec une échéance sous 30 jours"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.global_board_form
+msgid "Mes objectifs de book annuels personnels"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.my_projects
+msgid "Mes projets"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.global_board_form
+msgid "Mes projets en cours"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.global_board_form
+msgid "Mes échéances de facturation du mois"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Montant HT"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Nom"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.all_customer_book_goal
+msgid "Objectifs commerciaux annuels de mes comptes"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.customer_book_goal
+msgid "Objectifs commerciaux annuels par compte"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "PU HT"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Paiement"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.statistics_report_menu
+msgid "Pilotage"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_window,name:dashboard_global.open_view_project_win_loose_action
+msgid "Prise de commande des projets passés"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.projects
+#: model_terms:ir.ui.view,arch_db:dashboard_global.project_win_loose_graph
+#: model_terms:ir.ui.view,arch_db:dashboard_global.project_win_loose_pivot
+msgid "Projet"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_window,name:dashboard_global.open_view_project_new_form
+msgid "Projets"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Projets avec des achats à"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_window,name:dashboard_global.project_recent_change_action
+msgid "Projets ayant récemment changé de statut"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Qté"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.employee_staffing_report_year_menu
+msgid "Rapports d'activité (maille annuelle)"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.employee_staffing_report_week_menu
+msgid "Rapports d'activité (maille hebdomadaire)"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.employee_staffing_report_month_menu
+msgid "Rapports d'activité (maille mensuelle)"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.employee_staffing_report_semester_menu
+msgid "Rapports d'activité (maille semestrielle)"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.employee_staffing_report_quarter_menu
+msgid "Rapports d'activité (maille trimestrielle)"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_url,name:dashboard_global.open_business_module
+msgid "Redirection vers le module Commerce"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.actions.act_url,name:dashboard_global.open_project_module
+msgid "Redirection vers le module Projet"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Ref"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "Remarques"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.business_report_menu
+msgid "Stats commerciales"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.employee_staffing_report_menu
+msgid "Stats de staffing"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.project_win_loose_graph
+#: model_terms:ir.ui.view,arch_db:dashboard_global.project_win_loose_pivot
+msgid "Total 'prise de commande'"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.all_contacts
+msgid "Tous les contacts"
+msgstr ""
+
+#. module: dashboard_global
+#: model:ir.ui.menu,name:dashboard_global.all_projects
+msgid "Tous les projets"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "au"
+msgstr ""
+
+#. module: dashboard_global
+#: model_terms:ir.ui.view,arch_db:dashboard_global.outsourcing_dashboard
+msgid "du"
+msgstr ""
