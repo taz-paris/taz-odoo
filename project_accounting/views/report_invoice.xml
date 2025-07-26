@@ -41,12 +41,6 @@
                         <strong>N° de bon de commande</strong>
 		</xpath>
 
-		<!-- Chez nous les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande 
-			=> C'est à dire si au moins une des lignes de la facture a un article qui appartient à un marché public
-			=> TODO : remplace display_quantity_price_unit par cette condition lorsque l'on aura développé l'objet marché public et le lien avec les articles
-
-			=> Dans le même esprit, on pourrait n'afficher la colonne taxe dans le tableau que s'il y a plusieurs taux de taxe sur la facture
-			-->
 		<xpath expr="//th[@name='th_quantity']" position="attributes">
 			<attribute name="t-if">display_quantity_price_unit</attribute>
 		</xpath>
