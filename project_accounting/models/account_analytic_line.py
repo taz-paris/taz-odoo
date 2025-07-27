@@ -21,11 +21,11 @@ class staffingAnalyticLine(models.Model):
         self.update_project()
         return res
 
-    @api.model
-    def create(self, vals):
-        res = super().create(vals)
-        self.update_project()
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records.update_project()
+        return records
 
     def unlink(self):
         for rec in self:

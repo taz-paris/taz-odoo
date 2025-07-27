@@ -21,12 +21,12 @@ class staffingAnalyticLine(models.Model):
             self.check_accounting_closed()
         return res
 
-    @api.model
-    def create(self, vals):
-        res = self._sync_project(vals)
-        res = super().create(res)
-        res.check_accounting_closed()
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        synced_vals_list = [self._sync_project(vals) for vals in vals_list]
+        records = super().create(synced_vals_list)
+        records.check_accounting_closed()
+        return records
 
     def check_accounting_closed(self):
         for rec in self :

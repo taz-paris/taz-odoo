@@ -125,13 +125,6 @@ class ContactUserLink(models.Model):
         _logger.info("FIN init_from_taggs")
         """
 
-
-    @api.model
-    def create(self, vals):
-        if not vals.get("partner_id"):
-            vals["partner_id"] = self._context.get("default_partner_id")
-        return super().create(vals)
-
     @api.depends('user_id', 'partner_id', 'partner_id.business_action_ids', 'partner_id.business_action_ids.date_deadline', 'partner_id.business_action_ids.state', 'target_contact_frequency_id', 'target_contact_frequency_id.day_number')
     def _compute_date_business_action(self):
         #_logger.info("-- _compute_date_business_action")

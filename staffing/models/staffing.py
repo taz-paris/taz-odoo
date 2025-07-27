@@ -101,17 +101,18 @@ class staffingNeed(models.Model):
     staffing_proposal_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_ids)
     staffing_proposal_other_job_ids = fields.One2many('staffing.proposal', 'staffing_need_id', compute=staffing_proposal_other_job_ids)
 
-    @api.model
-    def create(self, vals):
-        if "staffed_employee_id" in vals: #TODO ne vaudrait-il pas mieux avoir une action manuelle ou un statut en plus pour publier l'affecation (la rendre visible au consultant)
-            if vals["staffed_employee_id"] :
-                self.state = 'done'
-            else :
-                self.state = 'open'
-        needs = super().create(vals)
-        for need in needs:
-            need.generate_staffing_proposal()
-        return needs
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if "staffed_employee_id" in vals:  #TODO ne vaudrait-il pas mieux avoir une action manuelle ou un statut en plus pour publier l'affecation (la rendre visible au consultant)
+                if vals["staffed_employee_id"]:
+                    vals["state"] = 'done'
+                else:
+                    vals["state"] = 'open'
+        records = super().create(vals_list)
+        for record in records:
+            record.generate_staffing_proposal()
+        return records
 
     def write(self, vals):
         res = super().write(vals)

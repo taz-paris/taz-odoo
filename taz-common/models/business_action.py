@@ -18,15 +18,13 @@ class tazBusinessAction(models.Model):
         ('date_partner_uniq', 'UNIQUE (partner_id, date_deadline)',  "Impossible d'enregistrer deux actions commerciales le même jour pour le même client.")
     ]
 
-    @api.model
-    def create(self, vals):
-        if not vals.get("partner_id"):
-            vals["partner_id"] = self._context.get("default_partner_id")
-        res = super().create(vals)
-        if res :
-            if INTEGRATION_MS_PLANNER_ACTIVE :
-                res.create_update_ms_planner_task([])
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        business_actions = super().create(vals_list)
+        if INTEGRATION_MS_PLANNER_ACTIVE:
+            for business_action in business_actions:
+                business_action.create_update_ms_planner_task([])
+        return business_actions
 
     def write(self, vals):
         old_user_ids = self.user_ids

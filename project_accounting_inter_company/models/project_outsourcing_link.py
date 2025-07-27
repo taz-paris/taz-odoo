@@ -26,12 +26,13 @@ class projectOutsourcingLink(models.Model):
 
     is_partner_id_res_company = fields.Boolean(compute="_compute_is_partner_id_res_company")
 
-    @api.model
-    def create(self, vals):
-        res = super().create(vals)
-        if self.is_partner_id_res_company :
-            self.get_or_generate_inter_company_mirror_project()
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for record in records:
+            if record.is_partner_id_res_company:
+                record.get_or_generate_inter_company_mirror_project()
+        return records
 
     def write(self, vals):
         res = super().write(vals)
