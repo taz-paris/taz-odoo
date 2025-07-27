@@ -170,7 +170,7 @@ class HrEmployeeStaffingReport(models.Model):
 
         self.search([]).sudo().unlink()
 
-        if self.search([], count=True) == 0 :
+        if self.search_count([]) == 0 :
             lines = self.env['account.analytic.line'].search([
                     #('employee_id', '=', 11), 
                     ('employee_id', '!=', False), 
