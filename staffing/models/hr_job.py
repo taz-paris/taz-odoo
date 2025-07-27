@@ -109,7 +109,7 @@ class HrCost(models.Model):
     begin_date = fields.Date("Date d'effet", required=True)
     end_date = fields.Date("Date de fin", compute=compute_end_date)
     cost = fields.Float("CJM", help="Coût journalier moyen imputé sur les lignes de pointage.", required=True)
-    target_staffing_rate = fields.Float("% staffing cible", required=True, help="Taux de staffing utilisé pour construire le budget")
+    target_staffing_rate = fields.Float("% staffing cible", help="Taux de staffing utilisé pour construire le budget")
     #daily_max_timesheet_unit_amount = field.Float("Pointage par jour", help="Exprimé suivant l'unité de pointage défini pour l'entreprise : jour ou heure")
     #weekly_max_timesheet_unit_amount = field.Float("Pointage par semaine", help="Exprimé suivant l'unité de pointage défini pour l'entreprise : jour ou heure")
 

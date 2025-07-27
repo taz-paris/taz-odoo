@@ -1,6 +1,6 @@
-# © 2016 Julien Coux (Camptocamp)
+# ?? 2016 Julien Coux (Camptocamp)
 # Copyright 2020 ForgeFlow S.L. (https://www.forgeflow.com)
-# Copyright 2022 Tecnativa - Víctor Martínez
+# Copyright 2022 Tecnativa - V??ctor Mart??nez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import calendar
@@ -20,7 +20,8 @@ class GeneralLedgerReport(models.AbstractModel):
         analytic_accounts = self.env["account.analytic.account"].browse(account_ids)
         analytic_data = {}
         for account in analytic_accounts:
-            analytic_data.update({account.id: {"name": account.name}})
+            name = f"[{account.code}] {account.name}" if account.code else account.name
+            analytic_data.update({account.id: {"name": name}})
         return analytic_data
 
     def _get_taxes_data(self, taxes_ids):
@@ -209,7 +210,6 @@ class GeneralLedgerReport(models.AbstractModel):
                 else:
                     prt_id = gl["partner_id"][0]
                     prt_name = gl["partner_id"][1]
-                    prt_name = prt_name._value
                 acc_id = gl["account_id"][0]
                 data[acc_id][prt_id] = self._prepare_gen_ld_data_item(gl)
                 data[acc_id][prt_id]["id"] = prt_id
@@ -236,7 +236,6 @@ class GeneralLedgerReport(models.AbstractModel):
                 if "tax_line_id" in gl and gl["tax_line_id"]:
                     tax_id = gl["tax_line_id"][0]
                     tax_name = gl["tax_line_id"][1]
-                    tax_name = tax_name._value
                 else:
                     tax_id = 0
                     tax_name = "Missing Tax"
@@ -347,7 +346,7 @@ class GeneralLedgerReport(models.AbstractModel):
         elif move_line_data["name"] == "":
             ref_label = move_line_data["ref"]
         else:
-            ref_label = move_line_data["ref"] + str(" - ") + move_line_data["name"]
+            ref_label = move_line_data["ref"] + " - " + move_line_data["name"]
         move_line_data.update({"ref_label": ref_label})
         return move_line_data
 
@@ -472,8 +471,8 @@ class GeneralLedgerReport(models.AbstractModel):
             journal_ids.add(move_line["journal_id"][0])
             for tax_id in move_line["tax_ids"]:
                 taxes_ids.add(tax_id)
-            for analytic_account in move_line["analytic_distribution"] or {}:
-                analytic_ids.add(int(analytic_account))
+            for ids in (move_line["analytic_distribution"] or {}).keys():
+                analytic_ids.update(map(int, ids.split(",")))
             if move_line["full_reconcile_id"]:
                 rec_id = move_line["full_reconcile_id"][0]
                 if rec_id not in full_reconcile_ids:
@@ -764,6 +763,7 @@ class GeneralLedgerReport(models.AbstractModel):
             list_centralized_ml += list(centralized_ml[jnl_id].values())
         return list_centralized_ml
 
+    # flake8: noqa: C901
     def _get_report_values(self, docids, data):
         wizard_id = data["wizard_id"]
         company = self.env["res.company"].browse(data["company_id"])
@@ -838,6 +838,62 @@ class GeneralLedgerReport(models.AbstractModel):
                         account[grouped_by] = False
                         del account["list_grouped"]
         general_ledger = sorted(general_ledger, key=lambda k: k["code"])
+        # Set the bal_curr of the initial balance to 0 if it does not correspond
+        # (reducing the corresponding of the bal_curr of the initial balance).
+        for gl_item in general_ledger:
+            if not foreign_currency:
+                continue
+            if (
+                not gl_item["currency_id"]
+                or gl_item["currency_id"] != company.currency_id
+            ):
+                gl_item["fin_bal"]["bal_curr"] -= gl_item["init_bal"]["bal_curr"]
+                gl_item["init_bal"]["bal_curr"] = 0
+                if "list_grouped" in gl_item:
+                    for lg_item in gl_item["list_grouped"]:
+                        lg_item["fin_bal"]["bal_curr"] -= lg_item["init_bal"][
+                            "bal_curr"
+                        ]
+                        lg_item["init_bal"]["bal_curr"] = 0
+        # Set the fin_bal_currency_id value if the account does not have it set
+        # and there are move lines in a currency different from that of
+        # the company (USD for example).
+        for gl_item in general_ledger:
+            fin_bal_currency_ids = []
+            fin_bal_currency_id = gl_item["currency_id"]
+            if gl_item["currency_id"] or not foreign_currency:
+                gl_item["fin_bal_currency_id"] = fin_bal_currency_id
+                continue
+            gl_item["fin_bal"]["bal_curr"] = gl_item["init_bal"]["bal_curr"]
+            if "move_lines" in gl_item:
+                for ml in gl_item["move_lines"]:
+                    ml_currency_id = (
+                        ml["currency_id"][0] if ml["currency_id"] else False
+                    )
+                    if ml_currency_id and ml_currency_id != company.currency_id.id:
+                        gl_item["fin_bal"]["bal_curr"] += ml["bal_curr"]
+                        if ml_currency_id not in fin_bal_currency_ids:
+                            fin_bal_currency_ids.append(ml_currency_id)
+            elif "list_grouped" in gl_item:
+                fin_bal_currency_ids = []
+                for lg_item in gl_item["list_grouped"]:
+                    lg_item["fin_bal"]["bal_curr"] = lg_item["init_bal"]["bal_curr"]
+                    for ml in lg_item["move_lines"]:
+                        ml_currency_id = (
+                            ml["currency_id"][0] if ml["currency_id"] else False
+                        )
+                        if ml_currency_id and ml_currency_id != company.currency_id.id:
+                            lg_item["fin_bal"]["bal_curr"] += ml["bal_curr"]
+                            gl_item["fin_bal"]["bal_curr"] += ml["bal_curr"]
+                            if ml_currency_id not in fin_bal_currency_ids:
+                                fin_bal_currency_ids.append(ml_currency_id)
+            # If there is only 1 currency, we set that one as fin_bal_currency_id
+            # The use of different move lines with different currencies (EUR + GBP)
+            # will be excluded. We use a different field to avoid showing the initial
+            # balance and/or distorting data.
+            if not gl_item["currency_id"] and len(fin_bal_currency_ids) == 1:
+                fin_bal_currency_id = fin_bal_currency_ids[0]
+            gl_item["fin_bal_currency_id"] = fin_bal_currency_id
         return {
             "doc_ids": [wizard_id],
             "doc_model": "general.ledger.report.wizard",

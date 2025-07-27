@@ -133,23 +133,44 @@ class TestMassEditing(common.TransactionCase):
         """Test whether fields_view_get method returns arch.
         with dynamic fields.
         """
+        view_id = self.env.ref("server_action_mass_edit.view_mass_editing_wizard_form")
+        view_id.mass_server_action_id = False
         result = self.MassEditingWizard.with_context(
             active_ids=[],
-        ).get_view()
+        ).get_view(view_id=view_id.id)
         arch = result.get("arch", "")
         self.assertTrue(
             "selection__email" not in arch,
             "Fields view get must return architecture w/o fields" "created dynamicaly",
         )
-
+        view_id.mass_server_action_id = self.mass_editing_user
         result = self.MassEditingWizard.with_context(
             server_action_id=self.mass_editing_user.id,
             active_ids=[],
-        ).get_view()
+        ).get_view(view_id=view_id.id)
         arch = result.get("arch", "")
         self.assertTrue(
             "selection__email" in arch,
             "Fields view get must return architecture with fields" "created dynamicaly",
+        )
+
+        # test the code path where we extract an embedded tree for o2m fields
+        self.env["ir.ui.view"].search(
+            [
+                ("model", "in", ("res.partner.bank", "res.partner", "res.users")),
+                ("id", "!=", self.env.ref("base.res_partner_view_form_private").id),
+            ]
+        ).unlink()
+        self.env.ref("base.res_partner_view_form_private").model = "res.users"
+        result = self.MassEditingWizard.with_context(
+            server_action_id=self.mass_editing_user.id,
+            active_ids=[],
+        ).get_view(view_id=view_id.id)
+        arch = result.get("arch", "")
+        self.assertIn(
+            "<tree editable=",
+            arch,
+            "Fields view get must return architecture with embedded tree",
         )
 
     def test_wzd_clean_check_company_field_domain(self):
@@ -262,6 +283,36 @@ class TestMassEditing(common.TransactionCase):
         self._create_wizard_and_apply_values(self.mass_editing_user, self.user, vals)
         self.assertNotEqual(self.user.email, False, "User's Email should be set.")
 
+    def test_mass_edit_o2m_banks(self):
+        """Test Case for MASS EDITING which will remove and add
+        Partner's bank o2m."""
+        # Set another bank (must replace existing one)
+        bank_vals = {"acc_number": "account number"}
+        self.user.write(
+            {
+                "bank_ids": [(6, 0, []), (0, 0, bank_vals)],
+            }
+        )
+        vals = {
+            "selection__bank_ids": "set_o2m",
+            "bank_ids": [(0, 0, dict(bank_vals, acc_number="new number"))],
+        }
+        self._create_wizard_and_apply_values(self.mass_editing_user, self.user, vals)
+        self.assertEqual(self.user.bank_ids.acc_number, "new number")
+        # Add bank (must keep existing one)
+        vals = {
+            "selection__bank_ids": "add_o2m",
+            "bank_ids": [(0, 0, dict(bank_vals, acc_number="new number2"))],
+        }
+        self._create_wizard_and_apply_values(self.mass_editing_user, self.user, vals)
+        self.assertEqual(
+            self.user.bank_ids.mapped("acc_number"), ["new number", "new number2"]
+        )
+        # Set empty list (must remove all banks)
+        vals = {"selection__bank_ids": "set_o2m"}
+        self._create_wizard_and_apply_values(self.mass_editing_user, self.user, vals)
+        self.assertFalse(self.user.bank_ids)
+
     def test_mass_edit_m2m_categ(self):
         """Test Case for MASS EDITING which will remove and add
         Partner's category m2m."""
@@ -276,7 +327,7 @@ class TestMassEditing(common.TransactionCase):
         vend_categ_id = self.env.ref("base.res_partner_category_0").id
         vals = {
             "selection__category_id": "add",
-            "category_id": [[6, 0, [dist_categ_id, vend_categ_id]]],
+            "category_id": [(4, dist_categ_id), (4, vend_categ_id)],
         }
         self._create_wizard_and_apply_values(self.mass_editing_user, self.user, vals)
         self.assertTrue(
@@ -289,7 +340,7 @@ class TestMassEditing(common.TransactionCase):
         # Remove one m2m category
         vals = {
             "selection__category_id": "remove_m2m",
-            "category_id": [[6, 0, [vend_categ_id]]],
+            "category_id": [[4, vend_categ_id]],
         }
         self._create_wizard_and_apply_values(self.mass_editing_user, self.user, vals)
         self.assertTrue(
@@ -333,9 +384,6 @@ class TestMassEditing(common.TransactionCase):
         self.assertEqual(mass_edit_line_form.widget_option, "image")
         mass_edit_line_form.field_id = self.env.ref("base.field_res_company__logo")
         self.assertEqual(mass_edit_line_form.widget_option, "image")
-        # binary
-        mass_edit_line_form.field_id = self.env.ref("base.field_res_company__favicon")
-        self.assertEqual(mass_edit_line_form.widget_option, False)
 
         mass_edit_line_form.field_id = self.env.ref("base.field_res_users__country_id")
         self.assertFalse(mass_edit_line_form.widget_option)

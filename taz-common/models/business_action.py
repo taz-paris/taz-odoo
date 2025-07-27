@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 
 import json
 
-INTEGRATION_MS_PLANNER_ACTIVE = False
+INTEGRATION_MS_PLANNER_ACTIVE = False # TODO : transformer en paramètre système
 
 class tazBusinessAction(models.Model):
     _name = "taz.business_action"
@@ -18,37 +18,13 @@ class tazBusinessAction(models.Model):
         ('date_partner_uniq', 'UNIQUE (partner_id, date_deadline)',  "Impossible d'enregistrer deux actions commerciales le même jour pour le même client.")
     ]
 
-    #@api.model
-    #def default_get(self, fields):
-    #    c = self.env.context.get('default_partner_id', None)
-    #    c = 2664
-    #    _logger.info(c)
-    #    res = super().default_get(fields)
-    #    res['user_id'] = 12
-    #    res['partner_id']=c
-        #if 'default_partner_id' in self._context:
-        #    res['partner_id'] = self._context.get('default_partner_id')
-    #    return res
-
-
-# INITIALISATION du champ owner_id à partir du user_ids sur le stock d'actions
-#        actions = self.env["taz.business_action"].search([])
-#        for a in actions:
-#            if len(a.user_ids) == 1:
-#                a.owner_id = a.user_ids[0]
-
-# RE-CALCUL de la date de dernière action faite des res.partner
-#        partner_ids = self.env['res.partner'].search([('active', '=', True), ('is_company', '=', False), ('type', '=', 'contact')])._compute_date_last_business_action()
-
-    @api.model
-    def create(self, vals):
-        if not vals.get("partner_id"):
-            vals["partner_id"] = self._context.get("default_partner_id")
-        res = super().create(vals)
-        if res :
-            if INTEGRATION_MS_PLANNER_ACTIVE :
-                res.create_update_ms_planner_task([])
-        return res
+    @api.model_create_multi
+    def create(self, vals_list):
+        business_actions = super().create(vals_list)
+        if INTEGRATION_MS_PLANNER_ACTIVE:
+            for business_action in business_actions:
+                business_action.create_update_ms_planner_task([])
+        return business_actions
 
     def write(self, vals):
         old_user_ids = self.user_ids

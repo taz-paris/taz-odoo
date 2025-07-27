@@ -5,8 +5,9 @@
             <field name="model">project.book_period</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
+                        <field name="currency_id" column_invisible="1"/>
 			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-			<field name="company_id" invisible="1"/>
+			<field name="company_id" column_invisible="1"/>
                         <field name="project_id"/>
                         <field name="reference_period"/>
                         <field name="period_project_book" sum="Total"/>
@@ -67,7 +68,7 @@
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
 			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-			<field name="company_id" invisible="1"/>
+			<field name="company_id" column_invisible="1"/>
                         <field name="project_id"/>
                         <field name="employee_id"/>
                         <field name="book_factor" sum="Total"/>
@@ -127,8 +128,9 @@
             <field name="model">project.book_employee_distribution_period</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
+                        <field name="currency_id" column_invisible="1"/>
 			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-			<field name="company_id" invisible="1"/>
+			<field name="company_id" column_invisible="1"/>
                         <field name="project_id"/>
                         <field name="rel_project_director_employee_id" optional="show"/>
                         <field name="rel_stage_id" optional="show"/>

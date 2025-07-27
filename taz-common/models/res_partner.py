@@ -117,7 +117,7 @@ class tazResPartner(models.Model):
 
      industry_id = fields.Many2one(string='Compte (ex BD)')
      sector_id = fields.Many2one('res.partner.sector', string='Secteur')
-     business_priority = fields.Selection(related='industry_id.business_priority', default='not_tracked', store=True, string='Niveau de priorité du compte')
+     business_priority = fields.Selection(related='industry_id.business_priority', store=True, string='Niveau de priorité du compte')
      parent_industry_id = fields.Many2one('res.partner.industry', string='Compte du parent', related='parent_id.industry_id', store=True)
      parent_industry_priority = fields.Selection(related='parent_id.industry_id.business_priority', store=True) 
      parent_sector_id = fields.Many2one('res.partner.sector', string='Secteur du parent', related='parent_id.sector_id', store=True)
@@ -167,10 +167,11 @@ class tazResPartner(models.Model):
              domain=_get_default_property_payment_bank_account_domain)
 
 
+     """
      def name_get(self):
          res = []
          for rec in self:
-             display_name = rec._get_name()
+             display_name = rec.display_name
              if not (self._context.get('show_address_only') or self._context.get('show_address') or self._context.get('partner_show_db_id') or self._context.get('address_inline') or self._context.get('show_email') or self._context.get('html_format') or self._context.get('show_vat')): #Sans cette condition, l'adresse postale n'apparaît pas sur les factures
                  if (rec.is_company == False):
                      display_name = "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")
@@ -182,19 +183,32 @@ class tazResPartner(models.Model):
                          display_name += " (%s)" % rec.parent_id.name or ""
              res.append((rec.id, display_name))
          return res
+     """
+
+     @api.depends('first_name', 'name', 'parent_id', 'parent_id.name', 'long_company_name')
+     def _compute_display_name(self):
+         super()._compute_display_name()
+         for rec in self:
+             if not (self._context.get('show_address_only') or self._context.get('show_address') or self._context.get('partner_show_db_id') or self._context.get('address_inline') or self._context.get('show_email') or self._context.get('html_format') or self._context.get('show_vat')): #Sans cette condition, l'adresse postale n'apparaît pas sur les factures
+                 if (rec.is_company == False):
+                     display_name = "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")
+                 else:
+                     display_name = rec.name or ""
+                     if (rec.long_company_name):
+                         display_name += " - %s" % rec.long_company_name or ""
+                     if (rec.parent_id):
+                         display_name += " (%s)" % rec.parent_id.name or ""
+                 rec.display_name = display_name
 
      @api.model
-     def name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-         args = args or []
-         recs = self.browse()
-         if not recs:
-             recs = self.search(['|', '|', ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)] + args, limit=limit)
-         return recs.name_get()
+     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
+        if name :
+            domain += ['|', '|', '|', '&', ('is_company', '=', False), ('display_name', operator, name), ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)]
+        return self._search(domain, limit=limit, order=order)
 
-     #     args = args or []
-     #     args = ['|', '|', ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)] + args
-     #     return self._search(args, limit=limit, access_rights_uid=name_get_uid)
-     
+     display_name = fields.Char(store=True) #Il est indispensable de stocker display_name s'il on veut pouvoir rechercher dessus dans _name_search, ce qui est utile pour les clients dont le nom est un prénom usuel type Hugues Bernard
+
      @api.model
      def fields_get(self, allfields=None, attributes=None):
         hide = ['message_is_follower', 'message_follower_ids', 'message_partner_ids', 'message_ids', 'has_message', 'message_needaction', 'message_needaction_counter', 'message_has_error', 'message_has_error_counter', 'message_attachment_count', 'message_main_attachment_id', 'website_message_ids', 'email_normalized', 'is_blacklisted', 'message_bounce', 'activity_ids', 'activity_state', 'activity_user_id', 'activity_type_id', 'activity_type_icon', 'activity_date_deadline', 'my_activity_date_deadline', 'activity_summary', 'activity_exception_decoration', 'activity_exception_icon', 'activity_calendar_event_id', 'image_1920', 'image_1024', 'image_512', 'image_256', 'image_128', 'avatar_1920', 'avatar_1024', 'avatar_512', 'avatar_256', 'avatar_128', 'display_name', 'date', 'lang', 'active_lang_count', 'tz', 'tz_offset', 'user_id', 'vat', 'same_vat_partner_id', 'same_company_registry_partner_id', 'company_registry', 'bank_ids', 'employee', 'partner_latitude', 'partner_longitude','email_formatted', 'is_public', 'company_type', 'company_id', 'color', 'user_ids', 'partner_share', 'contact_address', 'commercial_partner_id', 'commercial_company_name', 'company_name', 'barcode','im_status', 'channel_ids', 'signup_token', 'signup_type', 'signup_expiration', 'signup_valid', 'signup_url', 'meeting_count', 'meeting_ids', 'calendar_last_notif_ack', 'employee_ids', 'employees_count', 'property_product_pricelist', 'team_id', 'certifications_count', 'certifications_company_count', 'event_count', 'payment_token_ids', 'payment_token_count', 'child_ids_company', 'child_ids_contact', 'credit', 'credit_limit', 'use_partner_credit_limit', 'show_credit_limit', 'debit', 'debit_limit', 'total_invoiced', 'currency_id', 'journal_item_count', 'property_account_payable_id', 'property_account_receivable_id', 'property_account_position_id', 'property_payment_term_id', 'property_supplier_payment_term_id', 'ref_company_ids', 'has_unreconciled_entries', 'last_time_entries_checked', 'invoice_ids', 'contract_ids', 'bank_account_count', 'trust', 'invoice_warn', 'invoice_warn_msg', 'supplier_rank', 'customer_rank', 'duplicated_bank_account_partners_count', 'opportunity_ids', 'opportunity_count', 'task_ids', 'task_count', 'property_purchase_currency_id', 'purchase_order_count', 'supplier_invoice_count', 'purchase_warn', 'purchase_warn_msg', 'receipt_reminder_email', 'reminder_date_before_receipt', 'siret']

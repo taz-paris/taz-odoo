@@ -7,11 +7,11 @@
 		    <field name="inherit_id" ref="event.view_event_registration_tree"/>
 		    <field name="arch" type="xml">
 			<field name="state" position="before">
-				<field name="mail_auto" />
-				<field name="contact_user_link_id" />
-				<field name="registration_user_id" invisible="1" />
-				<field name="last_office365_mail_draft" invisible="1" />
-				<field name="comment" widget="text" optional="show" />
+				<field name="mail_auto"/>
+				<field name="contact_user_link_id"/>
+				<field name="registration_user_id" invisible="1"/>
+				<field name="last_office365_mail_draft" invisible="1"/>
+				<field name="comment" widget="text" optional="show"/>
 			</field>
 			<field name="create_date" position="attributes">
 				<attribute name="optional">hide</attribute>
@@ -41,32 +41,26 @@
 				<attribute name="decoration-warning">state == 'draft'</attribute>
 				<attribute name="decoration-info">state == 'open'</attribute>
 				<attribute name="decoration-danger">state == 'cancel'</attribute>
-				<attribute name="decoration-muted"></attribute>
+				<attribute name="decoration-muted"/>
 			</field>
 			<field name="state" position="after">
 				<field name="rel_partner_parent_id" optional="hide"/>
 				<field name="rel_partner_parent_industry_id" optional="hide"/>
-				<field name="rel_partner_parent_industry_id_business_priority" 
-					optional="hide" 
-					widget="badge" 
-					decoration-info="rel_partner_parent_industry_id_business_priority == 'not_tracked'" 
-					decoration-success="rel_partner_parent_industry_id_business_priority == 'active'" 
-					decoration-danger="rel_partner_parent_industry_id_business_priority == 'priority_target'"
-					/>
+				<field name="rel_partner_parent_industry_id_business_priority" optional="hide" widget="badge" decoration-info="rel_partner_parent_industry_id_business_priority == 'not_tracked'" decoration-success="rel_partner_parent_industry_id_business_priority == 'active'" decoration-danger="rel_partner_parent_industry_id_business_priority == 'priority_target'"/>
 				<field name="rel_partner_id_user_id" optional="hide"/>
 				<field name="rel_partner_id_function" optional="show"/>
 			</field>
 
 			<xpath expr="//button[@name='action_confirm']" position="before">
-				<button name="action_set_draft" string="Inviter (auto)" type="object" icon="fa-check"
-					attrs="{'invisible': ['|', ('active', '=', False), ('state', 'not in', ['identified'])]}"/>
-				<button name="action_set_draft_step2" string="Inviter (manuel)" type="object" icon="fa-check"
-					attrs="{'invisible': ['|', ('active', '=', False), ('state', 'not in', ['draft'])]}"/>
-				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-					attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', '!=', False), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+				<button name="action_set_draft" string="Inviter (auto)" type="object" icon="fa-check" invisible="not active or state not in ['identified']"/>
+				<button name="action_set_draft_step2" string="Inviter (manuel)" type="object" icon="fa-check" invisible="not active or state not in ['draft']"/>
+				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft or not active or mail_auto or state in ['cancel', 'open']"/>
 			</xpath>
 			<xpath expr="//button[@name='action_confirm']" position="attributes">
-				<attribute name="attrs">{'invisible': ['|', ('active', '=', False), ('state', 'in', ['done'])]}</attribute>
+				<!--TODO: Result from 'attrs' -> 'invisible' conversion without also overriding 'states' attribute
+				     Check if this button tag contained a states attribute in any of the parent views, in which case it should be combined into this 'invisible' attribute
+				     (If any states attributes existed in parent views, they'll also be marked with a TODO)-->
+				<attribute name="invisible">not active or state in ['done']</attribute>
 			</xpath>
 		    </field>
 		</record>
@@ -83,26 +77,24 @@
                                 <attribute name="context">{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}</attribute>
                         </field>
 			<field name="email" position="after">
-				<field name="mail_auto" />
+				<field name="mail_auto"/>
 				<field name="state" readonly="0"/>
 				<field name="contact_user_link_id" options="{'no_quick_create' : True}" context="{'default_partner_id' : partner_id}"/>
-				<field name="registration_user_id" invisible="1" />
-				<field name="last_office365_mail_draft" invisible="1" />
-				<field name="comment" />
-				<field name="rel_partner_parent_id" />
-				<field name="rel_partner_parent_industry_id" />
-				<field name="rel_partner_parent_industry_id_business_priority" />
-				<field name="rel_partner_id_user_id" />
-				<field name="rel_partner_id_function" />
+				<field name="registration_user_id" invisible="1"/>
+				<field name="last_office365_mail_draft" invisible="1"/>
+				<field name="comment"/>
+				<field name="rel_partner_parent_id"/>
+				<field name="rel_partner_parent_industry_id"/>
+				<field name="rel_partner_parent_industry_id_business_priority"/>
+				<field name="rel_partner_id_user_id"/>
+				<field name="rel_partner_id_function"/>
 			</field>
 			<field name="event_ticket_id" position="attributes">
 				<attribute name="optional">hide</attribute>
 			</field>
                        <xpath expr="//button[@name='action_confirm']" position="before">
-                                <button name="action_set_draft" string="Inviter" type="object" icon="fa-check"
-                                        attrs="{'invisible': ['|', ('active', '=', False), ('state', '!=', 'identified')]}"/>
-				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope"
-					attrs="{'invisible': ['|', '|', '|', ('last_office365_mail_draft', 'not in', [False, '']), ('active', '=', False), ('mail_auto', '=', True), ('state', 'in', ['cancel', 'open'])]}"/>
+                                <button name="action_set_draft" string="Inviter" type="object" icon="fa-check" invisible="not active or state != 'identified'"/>
+				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft not in [False, ''] or not active or mail_auto or state in ['cancel', 'open']"/>
                         </xpath>
 		    </field>
 		</record>

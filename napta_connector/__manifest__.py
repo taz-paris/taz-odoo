@@ -11,15 +11,15 @@
     'license': 'LGPL-3',
 
     'category': 'Uncategorized',
-    'version': '0.1',
+    'version': '17.0',
 
     'depends': ['staffing', 'project_accounting', 'project', 'analytic'],
 
     'data': [
         'security/ir.model.access.csv',
         'data/cron_sync.xml',
-        'views/project.xml',
         'views/napta.xml',
+        'views/project.xml',
         'views/wizard_timesheet_mass_validation.xml',
     ],
 

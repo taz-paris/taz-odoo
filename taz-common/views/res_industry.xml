@@ -15,7 +15,7 @@
 						<field name="active" widget="boolean_toggle"/>
 						<field name="business_priority"/>
 						<field name="pillar_id"/>
-						<field name="partner_ids" widget="many2many_tags" required="1" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" />
+						<field name="partner_ids" widget="many2many_tags" required="1" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
 						<button type="object" name="action_open_contacts" string="Voir les contacts"/>
 						<button type="object" name="action_open_business_actions" string="Voir les actions commerciales"/>
 					</group>
@@ -31,8 +31,9 @@
 				<notebook>
 					  <page string="Objectifs commerciaux">
 						  <label for="customer_book_goal_ids" string="Objectifs annuels"/>
-						  <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_industry_id': active_id}">
+						  <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_industry_id': id}">
 							<tree editable="top">
+                        	 	  		  <field name="currency_id" column_invisible="1"/>
 		  					  <field name="company_id" optional="show"/>
 							  <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
 							  <field name="period_goal" optional="show" sum="Total"/>
@@ -40,7 +41,7 @@
 							  <field name="period_book" optional="show" sum="Total"/>
 		  					  <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="open_project_booked_this_year"/>
 							  <field name="period_delta" optional="show" sum="Total"/>
-							  <field name="period_ratio" optional="show"  widget="progressbar"/>
+							  <field name="period_ratio" optional="show" widget="progressbar"/>
 							  <field name="book_last_month" optional="show" string="Prise commande J-31" sum="Total"/>
 		  					  <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
 							  <field name="number_of_opportunities" optional="show" sum="Total"/>
@@ -48,18 +49,19 @@
 							</tree> 
 						  </field>
 						  <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>
-						  <field name="customer_book_followup_ids" context="{'default_industry_id': active_id, 'active_id': active_id}">
+						  <field name="customer_book_followup_ids" context="{'default_industry_id': id, 'active_id': id}">
 							 <tree editable="top" create="true">
+                        	 	  		      <field name="currency_id" column_invisible="1"/>
 		  					      <field name="company_id" optional="hide"/>
 							      <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
-							      <field name="customer_book_goal_id" force_save="1" optional="show" domain="[('industry_id', '=', active_id)]"/>
+							      <field name="customer_book_goal_id" force_save="1" optional="show" domain="[('industry_id', '=', id)]"/>
 							      <field name="date_update" optional="show"/>
-							      <field name="period_book" optional="show" force_save="1"  widget='monetary'/>
-							      <field name="period_futur_book" optional="show" widget='monetary'/>
-							      <field name="period_landing" optional="show" widget='monetary'/>
+							      <field name="period_book" optional="show" force_save="1" widget="monetary"/>
+							      <field name="period_futur_book" optional="show" widget="monetary"/>
+							      <field name="period_landing" optional="show" widget="monetary"/>
 							      <field name="period_goal" optional="show"/>
-							      <field name="period_delta" optional="show" widget='monetary'/>
-							      <field name="period_ratio" optional="show" widget="progressbar" />
+							      <field name="period_delta" optional="show" widget="monetary"/>
+							      <field name="period_ratio" optional="show" widget="progressbar"/>
 							      <field name="comment" optional="hide"/>
 							</tree> 
 						  </field>
@@ -83,23 +85,23 @@
             <field eval="6" name="priority"/>
             <field name="arch" type="xml">
 		<xpath expr="//tree" position="attributes">
-			<attribute name="editable"></attribute>
+			<attribute name="editable"/>
 			<attribute name="expand">1</attribute>
 		</xpath>
 		<field name="full_name" position="replace">
 		</field>
 		<field name="active" position="after">
-			<field name="ms_planner_plan_id"  optional="hide"/>
+			<field name="ms_planner_plan_id" optional="hide"/>
 			<field name="pillar_id" optional="hide"/>
-			<field name="user_id"  optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
-			<field name="challenger_id"  optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
-			<field name="contributor_ids"  optional="show" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
+			<field name="user_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
+			<field name="challenger_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
+			<field name="contributor_ids" optional="show" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
 			<field name="business_priority" optional="hide"/>
 			<field name="account_plan_url" widget="url" optional="hide"/>
 			<field name="partner_ids" optional="show" widget="many2many_tags"/>
 			<field name="business_partner_company_ids" widget="many2many_tags"/>
 			<field name="account_plan_url" invisible="1"/>
-		  	<button type="object" name="action_open_account_plan_url" icon="fa-eye" string="Plan de compte" title="open_project_opportunitie" attrs="{'invisible': [('account_plan_url','=', False)]}"/>
+		  	<button type="object" name="action_open_account_plan_url" icon="fa-eye" string="Plan de compte" title="open_project_opportunitie" invisible="not account_plan_url"/>
 		</field>
             </field>
         </record>
@@ -114,7 +116,7 @@
             	    <field name="challenger_id" string="Compte challenger (nom de famille)"/>
             	    <field name="contributor_ids" string="Contributeurs (nom de famille)"/>
 		    <field name="business_partner_company_ids"/>
-            	    <field name="partner_ids" />
+            	    <field name="partner_ids"/>
 		    <separator/>
 		    <filter name="filter_my_industries" string="Comptes (ex BD) auxquels je suis affecté" domain="['|', '|', ('contributor_ids', 'in', uid), ('user_id', '=', uid), ('challenger_id', '=', uid)]"/>
 		    <separator/>

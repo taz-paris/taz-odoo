@@ -104,13 +104,12 @@ class tazOfficePeople(models.TransientModel):
             }
 
      @api.model
-     def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None, **read_kwargs):
+     def web_search_read(self, domain, specification, offset=0, limit=None, order=None, count_limit=None):
         #s'il n'y a aucun enregistrement pour l'utilisateur appeler get_office365_people
         _logger.info("=========== Search read pour l'utilisateur %s %s" % (self.env.user.id, self.env.user.name))
-        if self.search([('user_id', '=', self.env.user.id)], count=True) == 0 :
-            #raise AccessDenied(_('Token de session Microsoft invalide : veuillez vous déconnecter puis vous reconnecter en SSO'))
+        if self.search_count([('user_id', '=', self.env.user.id)]) == 0 :
             self.get_office365_people()
-        return super().search_read(domain=domain, fields=fields, offset=offset, limit=limit, order=order, **read_kwargs)
+        return super().web_search_read(domain=domain, specification=specification, offset=offset, limit=limit, order=order, count_limit=count_limit)
      
     #def refresh_office365_people(self): #TODO : ajouter un bouton de rafraichissement manuel
          #forcer le raffraichissement pour un utilisateur => pas sur que ça soit utile car le transienModel est vaccum toutes les heures

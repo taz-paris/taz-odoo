@@ -1,6 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
+from odoo.tools import SQL
 
 from datetime import datetime, timedelta
 
@@ -75,7 +76,13 @@ class projectOutsourcingLink(models.Model):
         #_logger.info(query)
         if query == []:
             return []
-        query.add_where('analytic_distribution ? %s', analytic_account_ids)
+        query.add_where(
+            SQL(
+                "%s && %s",
+                analytic_account_ids,
+                self.env['purchase.order.line']._query_analytic_accounts(),
+            )
+        )
         query.order = None
         query_string, query_param = query.select('purchase_order_line.*')
         #_logger.info(query_string)

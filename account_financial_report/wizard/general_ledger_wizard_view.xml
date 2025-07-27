@@ -13,9 +13,7 @@
                         groups="base.group_multi_company"
                     />
                 </group>
-                <div
-                    attrs="{'invisible': [('not_only_one_unaffected_earnings_account', '=', True)]}"
-                >
+                <div invisible="not only_one_unaffected_earnings_account">
                     <group name="filters">
                         <group name="date_range">
                             <field name="date_range_id" />
@@ -95,13 +93,8 @@
                         </page>
                     </notebook>
                 </div>
-                <div
-                    attrs="{'invisible': [('not_only_one_unaffected_earnings_account', '=', False)]}"
-                >
-                    <field
-                        name="not_only_one_unaffected_earnings_account"
-                        invisible="1"
-                    />
+                <div invisible="only_one_unaffected_earnings_account">
+                    <field name="only_one_unaffected_earnings_account" invisible="1" />
                     <group />
                     <h4>
                         General Ledger can be computed only if selected company have
@@ -110,9 +103,7 @@
                     <group />
                 </div>
                 <footer>
-                    <div
-                        attrs="{'invisible': [('not_only_one_unaffected_earnings_account', '=', True)]}"
-                    >
+                    <div invisible="not only_one_unaffected_earnings_account">
                         <button
                             name="button_export_html"
                             string="View"
@@ -135,9 +126,7 @@
                         or
                         <button string="Cancel" class="oe_link" special="cancel" />
                     </div>
-                    <div
-                        attrs="{'invisible': [('not_only_one_unaffected_earnings_account', '=', False)]}"
-                    >
+                    <div invisible="only_one_unaffected_earnings_account">
                         <button string="Cancel" class="oe_link" special="cancel" />
                     </div>
                 </footer>

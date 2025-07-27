@@ -4,15 +4,11 @@
       <field name="name">Actions commerciales</field>
       <field name="model">taz.business_action</field>
       <field name="arch" type="xml">
-	  <tree editable="top"
-		decoration-info="state == 'wait'"
-		decoration-success="state == 'done'"
-		decoration-muted="state == 'cancelled'"
-		decoration-danger="state == 'todo' and today > date_deadline">
-		  <field name="partner_id" options="{'no_quick_create':True}" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+	  <tree editable="top" decoration-info="state == 'wait'" decoration-success="state == 'done'" decoration-muted="state == 'cancelled'" decoration-danger="state == 'todo' and today &gt; date_deadline">
+		  <field name="partner_id" options="{'no_quick_create':True}" required="True" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
 		  <field name="name" widget="text"/>
 		  <field name="state"/>
-		  <field name="owner_id" />
+		  <field name="owner_id"/>
 		  <field name="user_ids" widget="many2many_avatar_user"/>
 		  <field name="date_deadline" optional="show"/>
 		  <field name="note" optional="hide"/>
@@ -36,11 +32,11 @@
       	   <group>
 		  <group>
 		      <field name="name" widget="text"/>
-		      <field name="partner_id" options="{'no_quick_create': True}" attrs="{'required' : True}" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+		      <field name="partner_id" options="{'no_quick_create': True}" required="True" context="{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
 		      <field name="parent_partner_id"/>
 		      <field name="parent_partner_industry_id"/>
 		      <field name="state"/>
-		      <field name="owner_id" />
+		      <field name="owner_id"/>
 		      <field name="user_ids" widget="many2many_avatar_user"/>
 		      <field name="date_deadline"/>
 		  </group>
@@ -99,16 +95,11 @@
            <search string="Actions commerciales">
 		    <field name="partner_id" string="Contact"/>
 		    <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
-		    <filter string="Mes actions commerciales (porteur ou participant)" name="assigned_to_me"
-			domain="['|', ('owner_id', '=', uid), ('user_ids', 'in', uid)]"
-			help="Actions commerciales qui m'ont été assignées"/>
+		    <filter string="Mes actions commerciales (porteur ou participant)" name="assigned_to_me" domain="['|', ('owner_id', '=', uid), ('user_ids', 'in', uid)]" help="Actions commerciales qui m'ont été assignées"/>
 		    <separator/>
-		    <filter string="Actions avec échéance >= 01/M-6" name="m_6"
-			domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-5, day=1)).strftime('%Y-%m-%d')))]" />
-		    <filter string="Actions avec échéance >= 01/M-2" name="m_2"
-			domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')))]" />
-		    <filter string="Actions avec échéance sous 30 jours" name="j30"
-			domain="[('date_deadline','&lt;=', ((context_today() + relativedelta(days=30)).strftime('%Y-%m-%d')))]" />
+		    <filter string="Actions avec échéance &gt;= 01/M-6" name="m_6" domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-5, day=1)).strftime('%Y-%m-%d')))]"/>
+		    <filter string="Actions avec échéance &gt;= 01/M-2" name="m_2" domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')))]"/>
+		    <filter string="Actions avec échéance sous 30 jours" name="j30" domain="[('date_deadline','&lt;=', ((context_today() + relativedelta(days=30)).strftime('%Y-%m-%d')))]"/>
 		    <filter name="filter_deadline_date" date="date_deadline"/>
 		    <separator/>
             	    <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
@@ -135,7 +126,7 @@
         <field name="model">taz.business_action</field>
         <field name="arch" type="xml">
 		<kanban default_group_by="state" class="o_res_partner_kanban" sample="1">
-		     <field name="state" />
+		     <field name="state"/>
 		      <field name="name" widget="text"/>
 		      <field name="partner_id"/>
 		      <field name="owner_id"/>
@@ -213,7 +204,7 @@
             }</field>
     </record>
 
-    <menuitem name="Actions commerciales" sequence="40" id="taz-common.business_action" parent="taz-common.commerce" />
+    <menuitem name="Actions commerciales" sequence="40" id="taz-common.business_action" parent="taz-common.commerce"/>
     <menuitem name="Mes actions commerciales en cours" sequence="10" id="taz-common.current_business_action" parent="taz-common.business_action" action="taz-common.business_action_action"/>
     <menuitem name="Analyse 6 derniers mois" sequence="20" id="taz-common.history_business_action" parent="taz-common.business_action" action="taz-common.history_business_action_action"/>
      

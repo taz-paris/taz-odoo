@@ -24,7 +24,7 @@ class PurchaseOrder(models.Model):
                 project_id = analytic_account_id.project_ids[0] 
                 project_outsourcing_link_ids = self.env['project.outsourcing.link'].search([('company_id', '=', origin_company.id), ('project_id', '=', project_id.id), ('partner_id', '=', dest_company.partner_id.id)])
                 if len(project_outsourcing_link_ids) != 1:
-                    raise ValidationError(_("Le projet %s n'a pas de lien projet/sous-traitant avec la société %s" % (project_id.name_get()[0][1], dest_company.partner_id.name_get()[0][1])))
+                    raise ValidationError(_("Le projet %s n'a pas de lien projet/sous-traitant avec la société %s" % (project_id.display_name, dest_company.partner_id.display_name)))
                 project_outsourcing_link_id = project_outsourcing_link_ids[0]
                 dest_project = project_outsourcing_link_id.get_or_generate_inter_company_mirror_project()
                 dest_analytic_distribution[str(dest_project.analytic_account_id.id)] = rate
@@ -47,7 +47,7 @@ class PurchaseOrder(models.Model):
 
                 project_outsourcing_link_ids = self.env['project.outsourcing.link'].search([('inter_company_mirror_project', '=', project_id.id), ('company_id', '=', dest_company.id), ('partner_id', '=', origin_company.partner_id.id)])
                 if len(project_outsourcing_link_ids) != 1:
-                    raise ValidationError(_("Le projet %s n'a pas de lien projet/sous-traitant avec la société %s" % (project_id.name_get()[0][1], dest_company.partner_id.name_get()[0][1])))
+                    raise ValidationError(_("Le projet %s n'a pas de lien projet/sous-traitant avec la société %s" % (project_id.display_name, dest_company.partner_id.display_name)))
                 project_outsourcing_link_id = project_outsourcing_link_ids[0]
                 dest_project = project_outsourcing_link_id.project_id
                 dest_analytic_distribution[str(dest_project.analytic_account_id.id)] = rate
@@ -83,10 +83,3 @@ class PurchaseOrderLine(models.Model):
         res['price_unit'] = 'price_unit' 
         res['previsional_invoice_date'] = 'previsional_invoice_date'
         return res
-
-    def _get_allowed_sale_order_states(self):
-        allowed_states = super()._get_allowed_sale_order_states()
-        allowed_states.append("draft")
-        return allowed_states
-
-

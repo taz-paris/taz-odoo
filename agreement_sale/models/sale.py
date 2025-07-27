@@ -16,7 +16,6 @@ class SaleOrder(models.Model):
         tracking=True,
         #readonly=True,
         copy=False,
-        #states={"draft": [("readonly", False)], "sent": [("readonly", False)]},
     )
 
     agreement_type_id = fields.Many2one(

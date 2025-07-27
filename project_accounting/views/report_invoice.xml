@@ -1,18 +1,5 @@
 <odoo>
 	<template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
-		<xpath expr="//div[@id='total']/div" position="before">
-			<t t-if="o.partner_bank_id">
-			    <div class="col-auto">
-				Modalités de règlement : Règlement par virement
-					<ul>
-						<li>Banque : <span t-field="o.partner_bank_id.bank_id.name"/></li>
-						<li>BIC : <span t-field="o.partner_bank_id.bank_id.bic"/></li>
-						<li>IBAN : <b><span t-field="o.partner_bank_id.acc_number"/></b></li>
-					</ul>
-			    </div>
-			</t>
-		</xpath>
-
 		<xpath expr="//div[@name='origin']" position="replace">
 		</xpath>
 
@@ -54,12 +41,6 @@
                         <strong>N° de bon de commande</strong>
 		</xpath>
 
-		<!-- Chez nous les factures n'ont pas besoin de mentioner la quantité et le prix unitaire, sauf si l'on a des UO sur la commande 
-			=> C'est à dire si au moins une des lignes de la facture a un article qui appartient à un marché public
-			=> TODO : remplace display_quantity_price_unit par cette condition lorsque l'on aura développé l'objet marché public et le lien avec les articles
-
-			=> Dans le même esprit, on pourrait n'afficher la colonne taxe dans le tableau que s'il y a plusieurs taux de taxe sur la facture
-			-->
 		<xpath expr="//th[@name='th_quantity']" position="attributes">
 			<attribute name="t-if">display_quantity_price_unit</attribute>
 		</xpath>

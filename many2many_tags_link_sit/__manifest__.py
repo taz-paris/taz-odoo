@@ -1,7 +1,7 @@
 
 {
     'name': ' Many2Many Tags Link',
-    'version': '16.0.1.0.0',
+    'version': '17.0',
     'category': '',
     'summary': ' Many2Many Tags Link.',
     'description': """The Many2Many Tag Links module for Odoo is a feature-enhancing extension that addresses the limitation of non-clickable many-to-many tag widgets in the Odoo system. """,
@@ -17,8 +17,6 @@
     'assets': {
         'web.assets_backend': [
             'many2many_tags_link_sit/static/src/js/many2many_tags_field.js',
-            #'many2many_tags_link_sit/static/src/js/systray.js',
-            #'many2many_tags_link_sit/static/src/xml/systray.xml',
         ],
 
     },

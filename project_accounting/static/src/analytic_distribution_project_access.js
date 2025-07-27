@@ -3,25 +3,16 @@
 import { AnalyticDistribution } from '@analytic/components/analytic_distribution/analytic_distribution';
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 
-import { patch } from 'web.utils';
+import { patch } from "@web/core/utils/patch";
 
 const components = { AnalyticDistribution };
 
-patch(components.AnalyticDistribution.prototype, 'analytic_distribution', {
-	searchAnalyticDomain(searchTerm) {
-		return [
-		    '|',
-		    ["display_name", "ilike", searchTerm],
-		    '|',
-		    ['code', 'ilike', searchTerm],
-		    ['partner_id', 'ilike', searchTerm],
-		];
-	},
-
+patch(components.AnalyticDistribution.prototype, {
 	async getProjectUrl(ev) {
 		ev.stopPropagation();
 
-		var analytic_account_ids = Object.keys(this.listForJson).map(Number);
+		const jsonFieldValue = this.props.record.data[this.props.name];
+		const analytic_account_ids = jsonFieldValue ? Object.keys(jsonFieldValue).map((key) => key.split(',')).flat().map((id) => parseInt(id)) : [];
 		const args = {
 			    domain: [["id", "in", analytic_account_ids]],
 			    fields: ["id", "project_ids"],
@@ -39,21 +30,19 @@ patch(components.AnalyticDistribution.prototype, 'analytic_distribution', {
 				}
 			}
 
-			var url = window.location.href;
-			var searchParams = new URLSearchParams();
-			if (project_ids.lenght > 1) {
+			if (project_ids.length > 1) {
 				alert("Deux projets (ou plus) sont rattachés à ces comptes analytiques. Le premier de ces projets va s'ouvrir dans un nouvel onglet.");
-				// TODO : ça serait bien d'ouvrir la vue liste et d'afficher les N projets dans ce cas.
 			} 
-			searchParams.set("view_type", "form");
 			var target_project_id = project_ids[0];
-			searchParams.set("model", "project.project");
 			if (typeof target_project_id === 'undefined'){
 				alert("Le compte analytique n'est rattaché à aucun projet.");
 			} else {
+				var searchParams = new URLSearchParams();
+				searchParams.set("view_type", "form");
+				searchParams.set("model", "project.project");
 				searchParams.set("id", target_project_id);
-				//searchParams.delete("action");
-				// TODO : est-ce que la barre de menus serait alimentée sur l'ID action était défini ? Commment l'obtenir dynamiquement depuis le front ?
+				searchParams.set("menu_id", this.env.services.router.current.hash.menu_id);
+				var url = window.location.href;
 				var new_url = url.split("#")[0] + "#" + searchParams.toString();
 				window.open(new_url, "_blank");
 			}

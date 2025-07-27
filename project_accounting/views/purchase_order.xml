@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
 		<field name="product_id" position="before">
-			<field name="id" widget="open_tab" />
+			<field name="id" widget="open_tab"/>
 		</field>
                 <xpath expr="//field[@name='price_subtotal']" position="after">
 			<field name="previsional_invoice_date" optional="show" required="1"/>
@@ -17,9 +17,9 @@
 			<field name="reselling_price_unit" optional="show" on_change="1"/>
 			<field name="reselling_subtotal" optional="show" on_change="1" sum="Total"/>
 			<field name="margin_amount" optional="show" on_change="1"/>
-			<field name="margin_rate"  optional="hide" on_change="1"/>
-			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
-			<field name="qty_to_invoice"  optional="hide"/>
+			<field name="margin_rate" optional="hide" on_change="1"/>
+			<field name="invoice_lines" optional="hide" on_change="1" widget="many2many_tags"/>
+			<field name="qty_to_invoice" optional="hide"/>
                 </xpath>
 
 		<xpath expr="//field[@name='order_line']/tree" position="attributes">
@@ -76,7 +76,7 @@
 			<attribute name="invisible">1</attribute>
                 </xpath>
                 <xpath expr="//button[@name='confirm_reminder_mail']" position="after">
-			<button name="action_create_regularisation_invoice" string="Créer facture de régularisation (régul négative)" type="object" attrs="{'invisible': ['|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'in', ('no', 'invoiced'))]}"/>
+			<button name="action_create_regularisation_invoice" string="Créer facture de régularisation (régul négative)" type="object" invisible="state not in ('purchase', 'done') or invoice_status in ('no', 'invoiced')"/>
                 </xpath>
                 <field name="date_approve" position="attributes">
 			<attribute name="invisible">1</attribute>
@@ -149,7 +149,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='hide_cancelled']" position="before">
                     <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced'), ('direct_payment_sale_order_line_id', '=', False)]"/>
-                    <field string="Projet" name="analytic_distribution" />
+                    <field string="Projet" name="analytic_distribution"/>
                     <filter string="Échéances antérieures à la fin de ce mois" name="this_month" domain="['|', ('previsional_invoice_date','=', False), ('previsional_invoice_date', '&lt;', ((context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d')))]"/>
                     <filter string="Échéances antérieures à la date du jour" name="before_today" domain="['|', ('previsional_invoice_date','=', False), ('previsional_invoice_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
                 </xpath>
@@ -205,7 +205,6 @@
 	      -->
 	    </record>
 
-        <menuitem id="menu_action_purchase_order_line" name="Échéances de facturation"
-            parent="purchase.menu_purchase_root" action="action_purchase_order_line"/>
+        <menuitem id="menu_action_purchase_order_line" name="Échéances de facturation" parent="purchase.menu_purchase_root" action="action_purchase_order_line"/>
   </data>
 </odoo>

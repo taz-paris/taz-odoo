@@ -74,26 +74,25 @@
 			<field name="account_id" optional="hide" groups="account.group_account_readonly" />
 			<field name="analytic_distribution" optional="hide" widget="analytic_distribution" groups="analytic.group_analytic_accounting" />
 			<field name="quantity" optional="show"/>
-			<field name="product_uom_category_id" invisible="1"/>
+			<field name="product_uom_category_id" column_invisible="1"/>
 			<field name="product_uom_id" groups="uom.group_uom" optional="hide"/>
 			<field name="price_unit" />
 			<field name="discount"  optional="hide"/>
-			<field name="tax_ids" widget="many2many_tags" domain="[('type_tax_use', '=?', parent.invoice_filter_type_domain), ('company_id', '=', parent.company_id), ('country_id', '=', parent.tax_country_id)]" context="{'append_type_to_tax_name': not parent.invoice_filter_type_domain}" options="{'no_create': True}" optional="show"/>
-			<field name="price_subtotal_signed" groups="account.group_show_line_subtotals_tax_excluded"/>
+			<field name="price_subtotal_signed" />
 
 			<field name="parent_state" widget="badge" decoration-success="parent_state == 'posted'" decoration-info="parent_state == 'draft'" optional="show" on_change="1" />
 			<field name="parent_payment_state" widget="badge" decoration-danger="parent_payment_state == 'not_paid'" decoration-warning="parent_payment_state in ('partial', 'in_payment')" decoration-success="parent_payment_state in ('paid', 'reversed')" optional="show" />
 			<field name="amount_paid" optional="show"/>
 
 			<!-- Others fields -->
-			<field name="partner_id" invisible="1"/>
-			<field name="currency_id" invisible="1"/>
-			<field name="company_id" invisible="1"/>
-			<field name="company_currency_id" invisible="1"/>
-			<field name="display_type" force_save="1" invisible="1"/>
+			<field name="partner_id" column_invisible="1"/>
+			<field name="currency_id" column_invisible="1"/>
+			<field name="company_id" column_invisible="1"/>
+			<field name="company_currency_id" column_invisible="1"/>
+			<field name="display_type" force_save="1" column_invisible="1"/>
 			<!-- /l10n_in_edi.test_edi_json -->
 			<!-- required for @api.onchange('product_id') -->
-			<field name="product_uom_id" invisible="1"/>
+			<field name="product_uom_id" column_invisible="1"/>
 		</tree>
             </field>
         </record>

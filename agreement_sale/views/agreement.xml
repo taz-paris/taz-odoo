@@ -1,34 +1,17 @@
 <odoo>
-    <menuitem
-        id="agreement.agreement_menu"
-        action="agreement.agreement_action"
-        parent="sale.menu_sale_config"
-        sequence="100"
-    />
-    <menuitem
-        id="agreement.agreement_type_menu"
-        action="agreement.agreement_type_action"
-        parent="sale.menu_sale_config"
-        sequence="101"
-        groups="agreement.group_use_agreement_type"
-    />
-    <menuitem
-        id="agreement_subcontractor_menu"
-        parent="sale.menu_sale_config"
-        sequence="102"
-        name="Agreement Subcontractors"
-        action="agreement.agreement_subcontractor_action"
-    />
+    <menuitem id="agreement.agreement_menu" action="agreement.agreement_action" parent="sale.menu_sale_config" sequence="100"/>
+    <menuitem id="agreement.agreement_type_menu" action="agreement.agreement_type_action" parent="sale.menu_sale_config" sequence="101" groups="agreement.group_use_agreement_type"/>
+    <menuitem id="agreement_subcontractor_menu" parent="sale.menu_sale_config" sequence="102" name="Agreement Subcontractors" action="agreement.agreement_subcontractor_action"/>
     <record id="agreement_form_view_inherit" model="ir.ui.view">
         <field name="name">agreement.form.view</field>
         <field name="model">agreement</field>
-        <field name="inherit_id" ref="agreement.agreement_form" />
+        <field name="inherit_id" ref="agreement.agreement_form"/>
         <field name="arch" type="xml">
             <field name="max_amount" position="after">
                 <field name="total_order_amount"/>
-                <field name="other_contractors_total_sale_order" attrs="{'invisible': [('is_galaxy_agreement','!=',True)]}"/>
-                <field name="sold_rate" widget="progressbar" attrs="{'invisible': [('is_galaxy_agreement','!=',True)]}"/>
-                <field name="available_amount" attrs="{'invisible': [('is_galaxy_agreement','!=',True)]}"/>
+                <field name="other_contractors_total_sale_order" invisible="not is_galaxy_agreement"/>
+                <field name="sold_rate" widget="progressbar" invisible="not is_galaxy_agreement"/>
+                <field name="available_amount" invisible="not is_galaxy_agreement"/>
             </field>
             <xpath expr="//page[@name='config']" position="after">
                     <page string="Bons de commande clients liés" name="sale_orders">
@@ -41,12 +24,12 @@
     <record id="agreement_tree_view_inherit" model="ir.ui.view">
         <field name="name">agreement.tree.view</field>
         <field name="model">agreement</field>
-        <field name="inherit_id" ref="agreement.agreement_tree" />
+        <field name="inherit_id" ref="agreement.agreement_tree"/>
         <field name="arch" type="xml">
             <field name="end_date_contractors" position="after">
                 <field name="total_order_amount" optional="show"/>
 		<field name="other_contractors_total_sale_order" optional="show"/>
-		<field name="sold_rate" widget="progressbar" optional="show" />
+		<field name="sold_rate" widget="progressbar" optional="show"/>
 		<field name="available_amount" optional="show"/>
             </field>
         </field>

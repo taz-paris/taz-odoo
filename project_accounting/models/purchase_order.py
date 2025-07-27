@@ -140,15 +140,12 @@ class projectAccountingPurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
     
-    @api.depends('name', 'partner_ref')
-    def name_get(self):
-        result = []
+    @api.depends('order_id', 'order_id.name', 'order_id.partner_id', 'order_id.partner_id.name')
+    def _compute_display_name(self):
+        super()._compute_display_name()
         for pol in self:
-            name = pol.name
             if pol.order_id.partner_id.name and pol.order_id.name:
-                name += ' (' + pol.order_id.partner_id.name + ' / '+ pol.order_id.name + ')'
-            result.append((pol.id, name))
-        return result
+                pol.display_name += ' (' + pol.order_id.partner_id.name + ' / '+ pol.order_id.name + ')'
 
     @api.constrains('direct_payment_sale_order_line_id', 'analytic_distribution', 'price_subtotal')
     def check(self):
@@ -266,7 +263,7 @@ class projectAccountingPurchaseOrderLine(models.Model):
         #TODO : ajouter contrôles : order_direct_payment_validated_amount ne peut pas être supérieur à subtotal et doit être nul si direct_payment_sale_order_line_id = False
     order_direct_payment_validated_detail = fields.Text("Commentaire paiement direct", help='Détail des factures en paiement direct validées')
 
-    previsional_invoice_date = fields.Date('Date prev. de facturation', states={"draft": [("readonly", False)], "sent": [("readonly", False)]})
+    previsional_invoice_date = fields.Date('Date prev. de facturation')
     # TODO : ajouter reselling_unit_price en le prenant sur la fiche article (valeur par défaut mais modifiable) et faire la multiplication
     reselling_price_unit = fields.Float('PU HT de revente')
     reselling_subtotal = fields.Monetary('Sous-total HT de revente', default=0.0, compute=_compute_reselling_subtotal, inverse=_inverse_reselling_subtotal, help="Montant valorisé que l'on facture au client final. Somme du prix d'achat et du markup.")

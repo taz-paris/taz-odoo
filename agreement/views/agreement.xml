@@ -1,8 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!--
-  © 2017 Akretion (Alexis de Lattre <alexis.delattre@akretion.com>)
-  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
--->
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="agreement_form" model="ir.ui.view">
         <field name="name">agreement.form</field>
@@ -13,30 +9,21 @@
 			<field name="state" widget="statusbar" on_change="1"/>
 		</header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box" />
-                    <widget
-                        name="web_ribbon"
-                        title="Archived"
-                        bg_color="bg-danger"
-                        attrs="{'invisible': [('active', '=', True)]}"
-                    />
-                    <field name="active" invisible="1" />
+                    <div class="oe_button_box" name="button_box"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
                     <div class="oe_title">
-                        <label
-                            for="name"
-                            class="oe_edit_only"
-                            string="Libellé interne"
-                        />
+                        <label for="name" class="oe_edit_only" string="Libellé interne"/>
                         <h1>
-                            <field name="name" />
+                            <field name="name"/>
                         </h1>
                     </div>
 		    <group>
 			    <group>
 				<field name="agreement_procedure_id"/>
-                            	<field name="code" />
-                            	<field name="official_name" />
-                            	<field name="state" />
+                            	<field name="code"/>
+                            	<field name="official_name"/>
+                            	<field name="state"/>
 			    </group>
 			    <group>
                             	<field name="comments"/>
@@ -47,12 +34,7 @@
                         <page name="agreement_data" string="Données principales">
 				    <group name="main" col="4">
 					<group name="left" string="Acteurs">
-					    <field
-						name="partner_id"
-						string="Pouvoir adjudicateur"
-						attrs="{'required': [('is_template', '=', False)]}"
-						context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"
-					    />
+					    <field name="partner_id" string="Pouvoir adjudicateur" required="not is_template" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
 					    <field name="partner_company_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
 					    <field name="mandator_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
 					    <field name="cocontractor_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
@@ -62,10 +44,10 @@
 						    -->
 					</group>
 					<group name="right" string="Périodes">
-					    <field name="signature_date" />
-					    <field name="start_date" />
-					    <field name="end_date" string="Date limite de commande" />
-					    <field name="passed_time_rate" widget="progressbar" />
+					    <field name="signature_date"/>
+					    <field name="start_date"/>
+					    <field name="end_date" string="Date limite de commande"/>
+					    <field name="passed_time_rate" widget="progressbar"/>
 					    <field name="end_date_contractors"/>
 					</group>
 					<group name="left_bottom" string="Montant plafond">
@@ -73,26 +55,24 @@
 					</group>
 					<group name="right_bottom" string="Autres informations">
 					    <field name="teams_link" widget="url"/>
-					    <field
-						name="agreement_type_id"
-						groups="agreement.group_use_agreement_type"
-					    />
+					    <field name="agreement_type_id" groups="agreement.group_use_agreement_type"/>
 					    <field name="end_of_year_discount"/>
 					    <field name="markup_deal"/>
 					    <field name="social_clause"/>
 					    <field name="currency_id" invisible="1"/>
-					    <field name="domain" />
+					    <field name="domain"/>
 					    <field name="is_template" invisible="1"/>
 					    <field name="is_galaxy_agreement"/>
 
 					</group>
 				    </group>
 			</page>
-                        <page name="agreement_subcontractor" string="Sous-traitants de rang 1" attrs="{'invisible': [('domain','!=','sale')]}">
+                        <page name="agreement_subcontractor" string="Sous-traitants de rang 1" invisible="domain != 'sale'">
 				<field name="agreement_subcontractor_ids">
 					<tree>
+                        			<field name="currency_id" column_invisible="1"/>
 						<field name="partner_id"/>
-						<field name="max_amount" optional="show"/>
+						<field name="max_amount" optional="show" sum="Total"/>
 						<field name="start_date" optional="show"/>
 						<field name="end_date" optional="show"/>
 						<field name="partner_validation_date" optional="show"/>
@@ -101,18 +81,14 @@
                         </page>
 
 
-                        <page
-                            name="config"
-                            string="Configuration"
-                            attrs="{'invisible': True}"
-                        />
+                        <page name="config" string="Configuration" invisible="True"/>
                     </notebook>
 
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" widget="mail_followers" />
-                    <field name="activity_ids" widget="mail_activity" />
-                    <field name="message_ids" widget="mail_thread" />
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
                 </div>
             </form>
         </field>
@@ -122,18 +98,12 @@
         <field name="model">agreement</field>
         <field name="arch" type="xml">
             <tree string="Agreements">
-                <field name="partner_id" />
+                <field name="currency_id" column_invisible="1"/>
+                <field name="partner_id"/>
                 <field name="code" optional="hide"/>
                 <field name="agreement_procedure_id" optional="hide"/>
-                <field name="name" />
-		<field name="state" widget="badge" 
-			decoration-info="state == 'new'" 
-			decoration-success="state == 'won'" 
-			decoration-danger="state == 'cancelled' or state == 'revoked'" 
-			decoration-warning="state == 'lost'" 
-			decoration-muted="state == 'passed' or state == 'nogo'" 
-			decoration-primary="state == 'work_on_anwser'"
-			/>
+                <field name="name"/>
+		<field name="state" widget="badge" decoration-info="state == 'new'" decoration-success="state == 'won'" decoration-danger="state == 'cancelled' or state == 'revoked'" decoration-warning="state == 'lost'" decoration-muted="state == 'passed' or state == 'nogo'" decoration-primary="state == 'work_on_anwser'"/>
                 <field name="signature_date" optional="show"/>
                 <field name="start_date" optional="show"/>
                 <field name="end_date" optional="show"/>
@@ -148,41 +118,17 @@
         <field name="model">agreement</field>
         <field name="arch" type="xml">
             <search string="Search Agreements">
-                <field
-                    name="name"
-                    filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"
-                    string="Name or Number"
-                />
-                <field name="partner_id" />
-                <separator />
-                <filter name="sale" string="Sale" domain="[('domain', '=', 'sale')]" />
-                <filter
-                    name="purchase"
-                    string="Purchase"
-                    domain="[('domain', '=', 'purchase')]"
-                />
-                <separator />
-                <filter
-                    name="inactive"
-                    string="Archived"
-                    domain="[('active', '=', False)]"
-                />
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]" string="Name or Number"/>
+                <field name="partner_id"/>
+                <separator/>
+                <filter name="sale" string="Sale" domain="[('domain', '=', 'sale')]"/>
+                <filter name="purchase" string="Purchase" domain="[('domain', '=', 'purchase')]"/>
+                <separator/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
                 <group name="groupby">
-                    <filter
-                        name="partner_groupby"
-                        string="Partner"
-                        context="{'group_by': 'partner_id'}"
-                    />
-                    <filter
-                        name="signature_date_groupby"
-                        string="Signature Date"
-                        context="{'group_by': 'signature_date'}"
-                    />
-                    <filter
-                        name="domain_groupby"
-                        string="Domain"
-                        context="{'group_by': 'domain'}"
-                    />
+                    <filter name="partner_groupby" string="Partner" context="{'group_by': 'partner_id'}"/>
+                    <filter name="signature_date_groupby" string="Signature Date" context="{'group_by': 'signature_date'}"/>
+                    <filter name="domain_groupby" string="Domain" context="{'group_by': 'domain'}"/>
                 </group>
             </search>
         </field>
@@ -193,17 +139,6 @@
         <field name="view_mode">tree,form</field>
     </record>
     <!-- Top menu item -->
-    <menuitem
-        id="agreement_menu_root"
-        name="Agreements"
-        web_icon="agreement,static/description/icon.png"
-        sequence="10"
-    />
-    <menuitem
-        id="agreement_menu"
-        name="Agreements"
-        parent="agreement_menu_root"
-        sequence="0"
-        action="agreement_action"
-    />
+    <menuitem id="agreement_menu_root" name="Agreements" web_icon="agreement,static/description/icon.png" sequence="10"/>
+    <menuitem id="agreement_menu" name="Agreements" parent="agreement_menu_root" sequence="0" action="agreement_action"/>
 </odoo>

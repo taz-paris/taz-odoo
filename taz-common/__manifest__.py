@@ -18,7 +18,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','mail', 'auth_oauth', 'web', 'l10n_fr_siret', 'sale', 'account', 'purchase'],
+    'depends': ['base','mail', 'contacts', 'calendar', 'crm', 'auth_oauth', 'l10n_fr_siret_lookup', 'web', 'l10n_fr_siret', 'sale', 'account', 'purchase'],
 
     # always loaded
     'data': [

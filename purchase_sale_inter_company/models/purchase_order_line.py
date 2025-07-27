@@ -31,11 +31,10 @@ class PurchaseOrderLine(models.Model):
         """Sync lines between an confirmed unlocked purchase and a confirmed unlocked
         sale order"""
         lines = super().create(vals_list)
-        allowed_states = self._get_allowed_sale_order_states()
         for order in lines.order_id.filtered(
             lambda x: x.state == "purchase" and x.intercompany_sale_order_id
         ):
-            if order.intercompany_sale_order_id.sudo().state not in allowed_states:
+            if order.intercompany_sale_order_id.sudo().state in {"cancel", "done"}:
                 raise UserError(
                     _(
                         "You can't change this purchase order as the corresponding "
@@ -48,7 +47,7 @@ class PurchaseOrderLine(models.Model):
                 or self.env.user
             )
             sale_lines = []
-            for purchase_line in lines.filtered(lambda x: x.order_id == order):
+            for purchase_line in lines.filtered(lambda x, o=order: x.order_id == o):
                 sale_lines.append(
                     order._prepare_sale_order_line_data(
                         purchase_line,
@@ -88,9 +87,7 @@ class PurchaseOrderLine(models.Model):
         ).sudo()
         if not sale_lines:
             return res
-        closed_sale_lines = sale_lines.filtered(
-            lambda x: x.state not in self._get_allowed_sale_order_states()
-        )
+        closed_sale_lines = sale_lines.filtered(lambda x: x.state != "sale")
         if closed_sale_lines:
             raise UserError(
                 _(
@@ -105,7 +102,9 @@ class PurchaseOrderLine(models.Model):
                 {
                     "order_line": [
                         (1, line.id, update_vals)
-                        for line in sale_lines.filtered(lambda x: x.order_id == sale)
+                        for line in sale_lines.filtered(
+                            lambda x, s=sale: x.order_id == s
+                        )
                     ]
                 }
             )
@@ -124,9 +123,3 @@ class PurchaseOrderLine(models.Model):
                 )
                 % self.product_id.name
             )
-
-    def _get_allowed_sale_order_states(self):
-        allowed_states = ["sale"]
-        if self.env.context.get("allow_update_locked_sales", False):
-            allowed_states.append("done")
-        return allowed_states

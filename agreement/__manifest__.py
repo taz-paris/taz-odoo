@@ -4,14 +4,14 @@
 {
     "name": "Agreement",
     "summary": "Adds an agreement object",
-    "version": "14.0.1.1.0",
+    "version": "17.0",
     "category": "Contract",
     "author": "Akretion, "
     "Yves Goldberg (Ygol Internetwork), "
     "Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/contract",
     "license": "AGPL-3",
-    "depends": ["mail"],
+    "depends": ["mail", "taz-common"],
     "data": [
         "security/ir.model.access.csv",
         "security/agreement_security.xml",
@@ -20,7 +20,6 @@
         "views/agreement_type.xml",
         "views/agreement_subcontractor.xml"
     ],
-    "demo": ["demo/demo.xml"],
     "development_status": "Beta",
     "maintainers": [
         "ygol",

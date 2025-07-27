@@ -18,7 +18,7 @@
               <field name="arch" type="xml">
 			<field name="partner_id" position="after">
 				<field name="is_partner_id_res_company" invisible="1"/>
-				<field name="inter_company_mirror_project" force_save="1" attrs="{'invisible': [('inter_company_mirror_project', '=', False), ('is_partner_id_res_company', '=', False)],'readonly':[('inter_company_mirror_project', '!=', False)]}"/>
+				<field name="inter_company_mirror_project" force_save="1" invisible="not inter_company_mirror_project and not is_partner_id_res_company" readonly="inter_company_mirror_project"/>
 			</field>
 	      </field>
 	  </record>

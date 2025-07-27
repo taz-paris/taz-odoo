@@ -28,6 +28,7 @@ def _inter_company_create_sale_order(self, dest_company):
     # check pricelist currency should be same with PO/SO document
     if self.currency_id.id != (
         company_partner.property_product_pricelist.currency_id.id
+        or dest_company.currency_id.id
     ):
         raise UserError(
             _(

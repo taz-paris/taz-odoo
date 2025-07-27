@@ -1,0 +1,595 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* event_registration_light
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-26 20:41+0000\n"
+"PO-Revision-Date: 2025-07-26 20:41+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+",<br/>\n"
+"<br/>\n"
+"Je t'envoie ce mail pour t'informer que Tasmane est présent au CES chaque année. Je serais à ce rendez-vous international début janvier et nous avons organisé 2 actions en support à ce CES :"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+",<br/>\n"
+"<br/>\n"
+"Je vous envoie ce mail pour vous informer que Tasmane est présent au CES chaque année. Je serais à ce rendez-vous international début janvier et nous avons organisé 2 actions en support à ce CES :"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "2022"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "2023"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+"<br/><br/>\n"
+"A bientôt,<br/>"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_event__invitation_cc_address
+msgid "Adresse en CC"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__add_contact_user_link
+msgid "Ajouter à mon plan d'intimité"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.wizard_partner_event_resgitration_form
+msgid "Annuler"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields.selection,name:event_registration_light.selection__event_registration__state__cancel
+msgid "Annulé"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.actions.act_window,name:event_registration_light.launch_wizard_partner_event_registration
+#: model:ir.actions.act_window,name:event_registration_light.launch_wizard_partner_event_registration_contact_user_link
+msgid "Assistant d'inscription en masse aux évènements"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.actions.act_window,name:event_registration_light.act_event_registration_from_event_all
+msgid "Attendees"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_event__description_web_form
+msgid "Bloc HTML affiché sur le formulaire d'inscription"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "Bonjour"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_form_inherit
+msgid "Cancel"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,help:event_registration_light.field_event_registration__comment
+msgid ""
+"Ce commentaire est propre à l'inscription de ce contact pour cet évènement."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__comment
+msgid "Commentaire"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_event__company_id
+msgid "Company"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__rel_partner_parent_industry_id
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Compte (ex BD)"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Comptes Inditto"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Comptes à opportunités"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_form_inherit
+msgid "Confirm"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields.selection,name:event_registration_light.selection__event_registration__state__open
+msgid "Confirmé"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model,name:event_registration_light.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__partner_id
+msgid "Contacts"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Contacts de comptes actifs"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Contacts de comptes prioritaires"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Contacts dont je suis propriétaire"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__line_ids
+msgid "Contacts à inviter"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__create_uid
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__create_date
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__display_name
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+"En te souhaitant d'excellentes fêtes de fin d'année.<br/><br/>\n"
+" \n"
+"Pour te remémorer les années précédentes :"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+"En vous souhaitant d'excellentes fêtes de fin d'année.<br/><br/>\n"
+" \n"
+"Pour te remémorer les années précédentes :"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Entreprise"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model,name:event_registration_light.model_event_event
+msgid "Event"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model,name:event_registration_light.model_event_registration
+msgid "Event Registration"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model,name:event_registration_light.model_event_type
+msgid "Event Template"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_form_inherit
+#: model_terms:ir.ui.view,arch_db:event_registration_light.view_event_registration_form_inherit
+#: model_terms:ir.ui.view,arch_db:event_registration_light.view_event_registration_tree_inherit
+msgid "Générer brouillon mail"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__id
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__id
+msgid "ID"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields.selection,name:event_registration_light.selection__event_registration__state__identified
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Identifié"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.constraint,message:event_registration_light.constraint_event_registration_contact_event_uniq
+msgid ""
+"Impossible d'enregistrer plusieurs inscriptions le même couple {contact, "
+"évènement}."
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.registration_submit
+msgid "Inscription confirmée pour l'évènement."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner__event_registration_ids
+#: model:ir.model.fields,field_description:event_registration_light.field_res_users__event_registration_ids
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_form_inherit
+msgid "Inscriptions aux évènements"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_search_inherit
+msgid "Inscrit à l'évènement..."
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.registration_form
+msgid "Inscrivez votre adresse email ci-dessous *"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_form_inherit
+#: model_terms:ir.ui.view,arch_db:event_registration_light.view_event_registration_form_inherit
+msgid "Inviter"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.view_event_registration_tree_inherit
+msgid "Inviter (auto)"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.view_event_registration_tree_inherit
+msgid "Inviter (manuel)"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields.selection,name:event_registration_light.selection__event_registration__state__draft
+msgid "Invité (auto)"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields.selection,name:event_registration_light.selection__event_registration__state__draft_step2
+msgid "Invité (manuel)"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+"La possibilité de t'abonner pour recevoir directement notre daily CES chaque"
+" jour du salon dans ta boîte mail. Si tu souhaites te remémorer les dailys "
+"des années précédentes, ou bien découvrir de quoi il s'agit, les liens des "
+"dailys des années précédentes sont plus bas."
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+"La possibilité de vous abonner pour recevoir directement notre daily CES "
+"chaque jour du salon dans votre boîte mail. Si vous souhaitez vous remémorer"
+" les dailys des années précédentes, ou bien découvrir de quoi il s'agit, les"
+" liens des dailys des années précédentes sont plus bas."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__write_uid
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__write_date
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.registration_form
+#: model_terms:ir.ui.view,arch_db:event_registration_light.registration_submit
+msgid "Logo"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__mail_auto
+msgid "Mail auto"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Mail automatique"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Mail personnalisé"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_form_inherit
+msgid "Mark as Attending"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Mes invités (dont je suis responsable de l'envoi de l'invitation)"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__rel_partner_parent_industry_id_business_priority
+msgid "Niveau de priorité"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Niveau de priorité du compte"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.actions.act_window,help:event_registration_light.act_event_registration_from_event_all
+msgid "No Attendees yet!"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.registration_form
+msgid "Nom *"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.view_event_registration_tree_inherit
+msgid "Nom du contact"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__rel_partner_id_function
+msgid "Poste occupé"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "Pour recevoir le Daily durant les 4 jours du CES,"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__rel_partner_id_user_id
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Propriétaire"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Propriétaire du contact (nom de famille)"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.registration_form
+msgid "Prénom *"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields.selection,name:event_registration_light.selection__event_registration__state__done
+msgid "Présent"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.contact_form_inherit
+msgid "Registration"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_event__event_registrations_open
+msgid "Registration open"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,help:event_registration_light.field_event_event__event_registrations_open
+msgid ""
+"Registrations are open if:\n"
+"- the event is not ended\n"
+"- there are seats available on event\n"
+"- the tickets are sellable (if ticketing is used)"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__rel_partner_parent_id
+msgid "Related Company"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__contact_user_link_id
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__add_event_registration_owner
+#: model_terms:ir.ui.view,arch_db:event_registration_light.event_registration_view_search_event_inherit
+msgid "Responsable de l'invitation"
+msgstr ""
+
+#. module: event_registration_light
+#. odoo-python
+#: code:addons/event_registration_light/models/event_registration.py:0
+#, python-format
+msgid ""
+"Seul la personne responsable de l'invitation peut générer le brouillon sur "
+"sa boîte email."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__state
+msgid "Status"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__last_office365_mail_draft
+msgid "Structure JSON de la réponse Office365"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_event__invitation_mail_template
+msgid "Template du mail d'invitation"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,help:event_registration_light.field_event_registration__rel_partner_id_user_id
+msgid "The internal user in charge of this contact."
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+"Tu es également invité à la restitution du CES que nous organiserons dans "
+"nos locaux le <b>jeudi 8 janvier à 19h</b>. Toutes les informations sur cet "
+"évènement te seront envoyées début janvier."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_event__registration_form_url
+msgid "URL du formulaire d'inscription"
+msgstr ""
+
+#. module: event_registration_light
+#. odoo-python
+#: code:addons/event_registration_light/models/event_registration.py:0
+#, python-format
+msgid ""
+"Un administrateur du module Evènement doit définir le template du mail sur "
+"la fiche évènement."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,help:event_registration_light.field_event_registration__state
+msgid ""
+"Unconfirmed: registrations in a pending state waiting for an action (specific case, notably with sale status)\n"
+"Registered: registrations considered taken by a client\n"
+"Attended: registrations for which the attendee attended the event\n"
+"Cancelled: registrations cancelled manually"
+msgstr ""
+
+#. module: event_registration_light
+#. odoo-python
+#: code:addons/event_registration_light/models/wizard_partner_event_registration.py:0
+#, python-format
+msgid "Une entreprise est sélectionnée. Opération impossible."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_event_registration__registration_user_id
+msgid "User"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.wizard_partner_event_resgitration_form
+msgid "Valider"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid ""
+"Vous êtes également invité à la restitution du CES que nous organiserons "
+"dans nos locaux le <b>jeudi 8 janvier à 19h</b>. Toutes les informations sur"
+" cet évènement vous seront envoyées début janvier."
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.actions.act_window,help:event_registration_light.act_event_registration_from_event_all
+msgid ""
+"Wait until Attendees register to your Event or create their registrations "
+"manually."
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration_line__wizard_id
+msgid "Wizard"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model,name:event_registration_light.model_res_partner_mass_event_registration
+msgid "Wizard for mass event registration"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model,name:event_registration_light.model_res_partner_mass_event_registration_line
+msgid "Wizard for mass event registration line"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "c'est ici."
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "https://www.tasmane.com/actualites/ces-2022-daily-1"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "https://www.tasmane.com/actualites/ces-2022-daily-2"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "https://www.tasmane.com/actualites/ces-2022-daily-3"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "https://www.tasmane.com/actualites/ces-2022-daily-4"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "https://www.tasmane.com/actualites/ces-2023-daily-1"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "https://www.tasmane.com/actualites/ces-2023-daily-2"
+msgstr ""
+
+#. module: event_registration_light
+#: model_terms:ir.ui.view,arch_db:event_registration_light.invitation_email_template_soiree_annuelle_Tasmane_2023
+msgid "https://www.tasmane.com/actualites/ces-2023-daily-3"
+msgstr ""
+
+#. module: event_registration_light
+#: model:ir.model.fields,field_description:event_registration_light.field_res_partner_mass_event_registration__add_event_id
+msgid "Évènement"
+msgstr ""

@@ -1,0 +1,377 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* napta_connector
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-26 20:35+0000\n"
+"PO-Revision-Date: 2025-07-26 20:35+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_account_analytic_line__amount
+msgid "Amount"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_account_analytic_line
+msgid "Analytic Line"
+msgstr ""
+
+#. module: napta_connector
+#: model_terms:ir.ui.view,arch_db:napta_connector.wizard_timesheet_mass_validation_form
+msgid "Annuler"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.actions.act_window,name:napta_connector.launch_timesheet_mass_validation
+msgid "Assistant de cloture des Feuilles de temps Napta"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields.selection,name:napta_connector.selection__project_project__napta_billing_method__none
+msgid "Autre"
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"Ce projet n'est lié à aucun identifiant Napta : impossible d'ouvrir sa page "
+"Napta."
+msgstr ""
+
+#. module: napta_connector
+#: model_terms:ir.ui.view,arch_db:napta_connector.wizard_timesheet_mass_validation_form
+msgid ""
+"Ces feuilles de temps vont être validées sur Napta. Elles ne seront plus "
+"modifiables par les consultants. Attention : cette action peut prendre "
+"jusqu'à 15 minutes. Voulez-vous continuer ?"
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"Client API Napta inactif car les paramètres système Odoo napta_client_id et "
+"napta_client_secret ne sont pas tous les deux valorisés."
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_hr_contract
+msgid "Contract"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_hr_department
+msgid "Department"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_project_project__napta_to_sync
+msgid "Données à envoyer sur Napta"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_hr_employee
+msgid "Employee"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__timesheet_period_ids
+msgid "Feuilles de temps"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_res_partner__first_contract_date
+#: model:ir.model.fields,field_description:napta_connector.field_res_users__first_contract_date
+msgid "First Contract Date"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.actions.server,name:napta_connector.action_resync_napta_project_list
+msgid ""
+"Forcer l'envoi des données à Napta pour ce projet (liste des projets "
+"sélectionnés)"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields.selection,name:napta_connector.selection__project_project__napta_billing_method__fixed_price
+msgid "Forfait"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__id
+msgid "ID"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.constraint,message:napta_connector.constraint_hr_leave_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_project_project_napta_id__uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_project_project_stage_napta_id__uniq
+msgid "Impossible d'enregistrer deux objects avec le même Napta ID."
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.constraint,message:napta_connector.constraint_account_analytic_line_napta_id_uniq
+msgid ""
+"Impossible d'enregistrer deux objets account.analytic.line avec le même "
+"couple {Napta ID, category}."
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.constraint,message:napta_connector.constraint_hr_contract_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_hr_department_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_hr_job_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_hr_leave_type_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_hr_work_location_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_res_partner_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_res_users_napta_id_uniq
+#: model:ir.model.constraint,message:napta_connector.constraint_staffing_need_napta_id_uniq
+msgid "Impossible d'enregistrer deux objets avec le même Napta ID."
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"Impossible d'utiliser la fonction delete_not_found_anymore_object_on_napta "
+"pour l'objet Odoo account.analytic.line car le NaptaID n'est pas unique sur "
+"cet objet. Seul le couple (NaptaID,category) est unique pour cet objet."
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid "Impossible de supprimer ce projet car il est synchronisé avec Napta."
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"Impossible de supprimer ce projet sur Napta car il est lié à des lignes de "
+"prévisionnel ou de pointage (sur TazForce) qui ont été transmises par Napta."
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"Impossible de supprimer ce projet sur Napta car son id_napta est inconnu."
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_hr_job
+msgid "Job Position"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_project_project__napta_billing_method
+msgid "Méthode de facturation Napta"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.actions.server,name:napta_connector.napta_sync_scheduler_ir_actions_server
+msgid "Napta : synchronization Scheduler"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_account_analytic_line__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_hr_contract__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_hr_department__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_hr_employee__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_hr_job__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_hr_leave__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_hr_leave_type__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_hr_work_location__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_project_project__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_project_project_stage__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_res_partner__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_res_users__napta_id
+#: model:ir.model.fields,field_description:napta_connector.field_staffing_need__napta_id
+msgid "Napta ID"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_project_project__is_prevent_napta_creation
+msgid "Ne pas créer sur Napta (dont portage pur)"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_hr_contract__productive_share
+msgid "Part productive"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_project_project
+msgid "Project"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_project_project_stage
+msgid "Project Stage"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_account_analytic_line__unit_amount
+msgid "Quantity"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_staffing_need
+msgid "Record the staffing need"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields.selection,name:napta_connector.selection__project_project__napta_billing_method__time_and_materials
+msgid "Régie"
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"Several objects are return with this key_attribute_list => So this list in "
+"not carriing KEY, because it's not UNIQUE"
+msgstr ""
+
+#. module: napta_connector
+#: model_terms:ir.ui.view,arch_db:napta_connector.res_project_napta_view_form_inherit
+msgid "Supprimer sur Napta"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.actions.server,name:napta_connector.action_server_synchro_napta
+msgid "Synchro Napta - tous les projets : batch complet"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.ui.menu,name:napta_connector.project_accounting_closing_menu_napta_sync
+msgid "Synchro Napta manuelle"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_hr_leave
+msgid "Time Off"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_hr_leave_type
+msgid "Time Off Type"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_res_users
+msgid "User"
+msgstr ""
+
+#. module: napta_connector
+#: model_terms:ir.ui.view,arch_db:napta_connector.wizard_timesheet_mass_validation_form
+msgid "Valider"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_wizard_timesheet_mass_validation__date
+msgid "Valider toutes les feuilles de temps STRICTEMENT antérieures au"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_account_analytic_line__is_timesheet_closed_on_napta
+msgid "Validée sur Napta"
+msgstr ""
+
+#. module: napta_connector
+#: model_terms:ir.ui.view,arch_db:napta_connector.project_form_inherit
+msgid "Voir sur Napta"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model.fields,field_description:napta_connector.field_hr_work_location__address_id
+msgid "Work Address"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_hr_work_location
+msgid "Work Location"
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"dic should be a dictionnary that contains the values of the key attributes"
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid "dic should contains the values of the key attributes %s"
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid "key_attribute_list has to contains napta_id or id"
+msgstr ""
+
+#. module: napta_connector
+#. odoo-python
+#: code:addons/napta_connector/models/napta.py:0
+#, python-format
+msgid ""
+"values of the key attributes %s shouldn't be null/false/none %s for the "
+"odoo_model_name=%s"
+msgstr ""
+
+#. module: napta_connector
+#: model:ir.model,name:napta_connector.model_wizard_timesheet_mass_validation
+msgid "wizard_timesheet_mass_validation"
+msgstr ""

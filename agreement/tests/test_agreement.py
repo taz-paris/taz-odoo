@@ -26,13 +26,6 @@ class TestAgreement(TransactionCase):
         self.agreement.agreement_type_change()
         self.assertEqual(self.agreement.domain, self.agreement_type.domain)
 
-    def test_name_get(self):
-        res = self.agreement.name_get()
-        self.assertEqual(res[0][0], self.agreement.id)
-        self.assertEqual(
-            res[0][1], "[{}] {}".format(self.agreement.code, self.agreement.name)
-        )
-
     def test_copy(self):
         agreement1 = self.agreement.copy(default={"code": "Test Code"})
         agreement2 = self.agreement.copy()

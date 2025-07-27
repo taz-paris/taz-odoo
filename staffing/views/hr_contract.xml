@@ -1,18 +1,5 @@
 <odoo>
     <data>
-	<record id="hr_contract_view_form_inherit_staffing" model="ir.ui.view">
-            <field name="name">Contrat</field>
-            <field name="model">hr.contract</field>
-            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
-            <field name="arch" type="xml">
-                <field name="job_id" position="after">
-                        <field name="is_daily_cost_overridden" />
-			<field name="daily_cost" attrs="{'invisible': [('is_daily_cost_overridden', '=', False)]}"/>
-			<field name="productive_share" />
-                </field>
-            </field>
-        </record>
-
 	<record id="view_hr_contract_pivot" model="ir.ui.view">
 		<field name="name">Contrats</field>
 		<field name="model">hr.contract</field>
@@ -25,17 +12,9 @@
 		</field>
 	</record>
 
-        <record id="hr_contract_action" model="ir.actions.act_window">
-		<field name="name">Contrats</field>
-		<field name="res_model">hr.contract</field>
-		<field name="view_mode">tree,pivot</field>
+        <record id="hr_contract.action_hr_contract" model="ir.actions.act_window">
+		<field name="view_mode">list,pivot,kanban,form,activity</field>
 	</record>
 	
-	<menuitem name="Contrats" id="hr_contract_menu" parent="hr.menu_hr_employee_payroll" action="hr_contract_action"/>
-
-	<record id="hr_contract.hr_menu_contract_history" model="ir.ui.menu">
-		<field name="name">Historique des contrats</field>
-	</record>
-
    </data>
 </odoo>
