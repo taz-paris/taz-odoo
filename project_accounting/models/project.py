@@ -61,8 +61,9 @@ class projectAccountProject(models.Model):
             projects |= super().create(vals)
         return projects
 
-    @api.depends('name', 'number', 'partner_id')
+    @api.depends('name', 'number', 'partner_id', 'partner_id.name')
     def _compute_display_name(self):
+        super()._compute_display_name()
         for rec in self:
             display_name = "%s %s" % (rec.number or "", rec.name or "")
             if rec.partner_id : 
@@ -70,12 +71,11 @@ class projectAccountProject(models.Model):
             rec.display_name = display_name
 
     @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None, name_get_uid=None):
-        domain = list(domain or [])
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
         if name :
             domain += ['|', ('name', operator, name), ('number', operator, name)]
-        return self._search(domain, limit=limit, order=order, access_rights_uid=name_get_uid)
-
+        return self._search(domain, limit=limit, order=order)
 
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
     @api.depends('project_director_employee_id')

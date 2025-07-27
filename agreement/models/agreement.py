@@ -162,17 +162,6 @@ class Agreement(models.Model):
         if self.agreement_type_id and self.agreement_type_id.domain:
             self.domain = self.agreement_type_id.domain
 
-    """
-    def name_get(self):
-        res = []
-        for agr in self:
-            name = agr.name
-            if agr.code:
-                name = "[{}] {}".format(agr.code, agr.name)
-            res.append((agr.id, name))
-        return res
-    """
-
     _sql_constraints = [
         (
             "code_partner_company_unique",

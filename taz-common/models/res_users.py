@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
@@ -30,19 +28,20 @@ class tazResUsers(models.Model):
     #    res.append('first_name')
     #    return res
         
-    def name_get(self):
-         res = []
-         for rec in self:
-            res.append((rec.id, "%s %s" % (rec.first_name or "", rec.name or "")))
-         return res
+
+    @api.depends('first_name', 'name')
+    def _compute_display_name(self):
+        super()._compute_display_name()
+        for rec in self:
+            rec.display_name = f"{rec.first_name} {rec.name}"
+
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
-        args = args or []
-        recs = self.browse()
-        if not recs:
-            recs = self.search(['|', ('first_name', operator, name), ('name', operator, name)] + args, limit=limit)
-        return recs.name_get()
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
+        if name :
+            domain += ['|', ('first_name', operator, name), ('name', operator, name)]
+        return self._search(domain, limit=limit, order=order)
 
     
     @api.model

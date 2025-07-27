@@ -140,15 +140,12 @@ class projectAccountingPurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
     
-    @api.depends('name', 'partner_ref')
-    def name_get(self):
-        result = []
+    @api.depends('order_id', 'order_id.name', 'order_id.partner_id', 'order_id.partner_id.name')
+    def _compute_display_name(self):
+        super()._compute_display_name()
         for pol in self:
-            name = pol.name
             if pol.order_id.partner_id.name and pol.order_id.name:
-                name += ' (' + pol.order_id.partner_id.name + ' / '+ pol.order_id.name + ')'
-            result.append((pol.id, name))
-        return result
+                pol.display_name += ' (' + pol.order_id.partner_id.name + ' / '+ pol.order_id.name + ')'
 
     @api.constrains('direct_payment_sale_order_line_id', 'analytic_distribution', 'price_subtotal')
     def check(self):
