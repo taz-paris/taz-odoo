@@ -204,7 +204,7 @@ class tazResPartner(models.Model):
      def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         domain = domain or []
         if name :
-            domain += ['|', '|', '|', ('display_name', operator, name), ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)]
+            domain += ['|', '|', '|', '&', ('is_company', '=', False), ('display_name', operator, name), ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)]
         return self._search(domain, limit=limit, order=order)
 
      display_name = fields.Char(store=True) #Il est indispensable de stocker display_name s'il on veut pouvoir rechercher dessus dans _name_search, ce qui est utile pour les clients dont le nom est un prénom usuel type Hugues Bernard
