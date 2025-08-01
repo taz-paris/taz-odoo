@@ -15,7 +15,7 @@ from odoo.addons.hr_timesheet.models.hr_timesheet import AccountAnalyticLine as 
 #####     - si du code natif présupose que l'employee_id est toujours déifini si le project_id est défini... ces potentielles fonctions pourraient planter
 #####
 #####  Alternatives : 
-#####     - créer un objet Odoo dédié pour les userprojectperiod (impact : migration des données Fitnet existantes, ajustement des vues et fonctions de calculs du module staffing)
+#####     - créer un objet Odoo dédié pour les userprojectperiod (impact : migration des données existantes en base, ajustement des vues et fonctions de calculs du module staffing)
               # Impossibilité d'avoir le prévisionner te le pointer psur une même vue pivot
 #####         TODO : réaliser une étude d'impact plus approfondie) 
 #####

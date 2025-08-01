@@ -420,7 +420,7 @@ class projectAccountProject(models.Model):
             ('direct-paiement-outsourcing', 'Sous-traitance paiement direct'),
             ('direct-paiement-outsourcing-company', 'Sous-traitance paiement direct + paiement classique'),
             ('outsourcing', 'Sous-traitance paiement classique (pas de paiement direct)'),
-        ], string="Type de sous-traitance") #Attribut temporaire Fitnet à supprimer
+        ], string="Type de sous-traitance")
     agreement_id = fields.Many2one(
         comodel_name="agreement",
         string="Marché par défaut sur les BC clients",
@@ -428,7 +428,7 @@ class projectAccountProject(models.Model):
         tracking=True,
         readonly=False,
         copy=False,
-    ) #Attribut temporaire Fitnet à supprimer (l'agreement_id est sur le bon de commande client et non sur le projet en cible)
+    )
 
 
     #le modèle analytic_mixin est surchargé dans ce module project_accounting afin d'appeller cette fonction compute lorsqu'une ligne avec une distribution analytque liée à ce projet est créée/modifiée

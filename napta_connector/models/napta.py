@@ -1384,21 +1384,7 @@ def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=Fals
                     if napta_value and len(napta_value.strip())>0: 
                         #TODO : cette conversion ne donne pas le bon encodage => les commentaires avect des accent sont toujours raffraichis, même si Odoo a déjà la bonne valeur
                         html_napta = html.tostring(html.fromstring(napta_value)).decode('utf-8')
-                        #_logger.info(html_napta)
                         odoo_value = html_napta
-
-                        #html_fitnet5 = html.tostring(html.fromstring(napta_value.encode('utf-8'))).decode('utf-8')
-                        #_logger.info(html_fitnet5)
-                        #html_fitnet4 = html.tostring(html.fromstring(napta_value.encode('utf-8')), encoding='utf-8').decode('utf-8')
-                        #_logger.info(html_fitnet4)
-                        #html_fitnet3 = html.tostring(html.fromstring(napta_value, parser=html.HTMLParser(encoding='utf-8'))).decode('utf-8')
-                        #_logger.info(html_fitnet3)
-                        #html_fitnet2 = html.tostring(html.fromstring(napta_value))
-                        #_logger.info(html_fitnet2)
-
-                        #html_odoo =  html.tostring(odoo_object[odoo_field_name])
-                        #if html_fitnet == html_odoo:
-                        #    odoo_value = odoo_object[odoo_field_name]
 
                 if odoo_object :
                     if odoo_object[odoo_field_name] != odoo_value:

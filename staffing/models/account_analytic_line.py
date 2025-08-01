@@ -167,7 +167,7 @@ class staffingAnalyticLine(models.Model):
         #TODO : interdire de modifier le prévisionnel après la fin de la semaine
         #TODO : interdire d'avoir plus d'une ligne d'une catégorie, d'un projet / tesk et d'un employé par date
         #TODO : passer le pointage à validé pour toute la semaine et tous les projets en même temps
-        #TODO : interdire les affectations hors de la période du projet => ATTENTION : c'est autorisé sur Fitnet donc risque de blocage
+        #TODO : interdire les affectations hors de la période du projet
                 # En revanche : laisser la possibilité de pointer après la date de fin de l'affectation initiale, sinon ça ne sera pas pratique
 
 

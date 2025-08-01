@@ -32,8 +32,6 @@
         'views/res_company.xml',
         'views/timesheets.xml',
         'views/hr_contract.xml',
-        'data/cron_fitnet_sync.xml',
-        'views/synchroFitnet.xml',
         'views/employee_staffing_report.xml',
     ],
 

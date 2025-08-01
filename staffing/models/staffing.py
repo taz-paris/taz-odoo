@@ -67,7 +67,7 @@ class staffingNeed(models.Model):
 
     project_id = fields.Many2one('project.project', string="Projet", ondelete="restrict", required=True, check_company=True)
     project_stage = fields.Many2one(related='project_id.stage_id') #TODO : mettre l'attribut state du staffing_need à canceled lorsque le projet passe à perdu / annulé / clos comptablement
-    job_id = fields.Many2one('hr.job', string="Grade souhaité", check_company=True) #TODO : impossible de le mettre en required dans le modèle car la synchro fitnet importe des assignments qui n'ont pas de job_id
+    job_id = fields.Many2one('hr.job', string="Grade souhaité", check_company=True) 
     skill_ids = fields.Many2many('hr.skill', string="Compétences") #TODO : si on veut pouvoir spécifier le niveau, il faut un autre objet technique qui porte le skill et le level
     considered_employee_ids = fields.Many2many('hr.employee', string="Équipier(s) envisagé(s)", check_company=True)
     #Pour le moment, un staffing.need ne porte qu'un seul employé. Si besion de plusieurs employés avec le même profil, il faudra créer plusieurs besoins
@@ -76,7 +76,6 @@ class staffingNeed(models.Model):
     end_date = fields.Date('Date fin', compute=compute, store=True) #La date de fin n'est pas requise car pour les activités hors mission on a pas à mettre de date de fin
     nb_days_needed = fields.Float('Nb jours')
     description = fields.Text("Description du besoin")
-    ##TODO : impossible de le metrte en required car la synchro fitnet importe des assignments qui ont un budget jour initial à 0
     #percent_needed = fields.Float('Pourcentage besoin')
     analytic_line_forecast_ids = fields.One2many(
             'account.analytic.line',
