@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <menuitem id="agreement.agreement_menu" action="agreement.agreement_action" parent="sale.menu_sale_config" sequence="100"/>
     <menuitem id="agreement.agreement_type_menu" action="agreement.agreement_type_action" parent="sale.menu_sale_config" sequence="101" groups="agreement.group_use_agreement_type"/>
@@ -14,13 +15,12 @@
                 <field name="available_amount" invisible="not is_galaxy_agreement"/>
             </field>
             <xpath expr="//page[@name='config']" position="after">
-                    <page string="Bons de commande clients liés" name="sale_orders">
-                            <field name="sale_order_ids"/>
-                    </page>
-                </xpath>
+                <page string="Bons de commande clients liés" name="sale_orders">
+                    <field name="sale_order_ids"/>
+                </page>
+            </xpath>
         </field>
     </record>
-
     <record id="agreement_tree_view_inherit" model="ir.ui.view">
         <field name="name">agreement.tree.view</field>
         <field name="model">agreement</field>
@@ -28,9 +28,9 @@
         <field name="arch" type="xml">
             <field name="end_date_contractors" position="after">
                 <field name="total_order_amount" optional="show"/>
-		<field name="other_contractors_total_sale_order" optional="show"/>
-		<field name="sold_rate" widget="progressbar" optional="show"/>
-		<field name="available_amount" optional="show"/>
+                <field name="other_contractors_total_sale_order" optional="show"/>
+                <field name="sold_rate" widget="progressbar" optional="show"/>
+                <field name="available_amount" optional="show"/>
             </field>
         </field>
     </record>

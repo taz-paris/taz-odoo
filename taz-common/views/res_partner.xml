@@ -1,23 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-    <!-- COMPANY -->
-    <record model="ir.ui.view" id="taz-common.company_tree">
-      <field name="name">Entreprises</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="is_company" column_invisible="1"/>
-          <field name="name"/>
-	  <field name="long_company_name"/>
-          <field name="industry_id"/>
-          <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" optional="show"/>
-	  <field name="business_priority" optional="show" widget="badge" decoration-info="business_priority == 'not_tracked'" decoration-success="business_priority == 'active'" decoration-danger="business_priority == 'priority_target'"/>
-          <field name="child_mail_address_domain_list" optional="show"/>
-        </tree>
-      </field>
-    </record>
-
-    <!--
+    <data>
+        <!-- COMPANY -->
+        <record model="ir.ui.view" id="taz-common.company_tree">
+            <field name="name">Entreprises</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="is_company" column_invisible="1"/>
+                    <field name="name"/>
+                    <field name="long_company_name"/>
+                    <field name="industry_id"/>
+                    <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" optional="show"/>
+                    <field name="business_priority" optional="show" widget="badge" decoration-info="business_priority == 'not_tracked'" decoration-success="business_priority == 'active'" decoration-danger="business_priority == 'priority_target'"/>
+                    <field name="child_mail_address_domain_list" optional="show"/>
+                </tree>
+            </field>
+        </record>
+        <!--
    <record model="ir.actions.server" id="taz-common.company_refresh_child_mail_address_domain_list_action">
        <field name="name">MAJ forcée de la liste des domain mail</field>
        <field name="model_id" ref="model_res_partner"/>
@@ -27,657 +27,608 @@
        </field>
    </record>
     -->
-
-    <record model="ir.ui.view" id="taz-common.company_form">
-      <field name="name">Entreprises</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <form>
-	   <sheet>
-
-		   <field name="active" invisible="1"/>
-		   <widget name="web_ribbon" title="Archivée" bg_color="bg-danger" invisible="active"/>
-		<group>
-		  <group>
-		      <field name="name"/>
-		      <field name="long_company_name"/>
-		      <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
-                      <field name="comment"/>
-		  </group>
-		  <group>
-		      <field name="user_id" options="{'no_create': True, 'no_create_edit':True}" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-		      <field name="industry_id" options="{'no_create': True, 'no_create_edit':True}"/>
-		      <field name="business_priority"/>
-			  <field name="sector_id"/>
-		      <field name="type" groups="account.group_account_user"/>
-		  </group>
-		</group>
-		  <notebook>
-			  <page string="Entreprises/sites du groupe">
-				<field name="child_ids_company" context="{'default_parent_id':id, 'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
-					<tree delete="false">
-					  <field name="is_company" column_invisible="1"/>
-					  <field name="name"/>
-					  <field name="long_company_name"/>
-					  <field name="industry_id"/>
-					  <field name="type"/>
-					</tree>
-				</field>
-			  </page>
-
-			  <page string="Contacts de cette entreprise">
-				<field name="child_ids_contact" context="{'default_parent_id':id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
-					<tree delete="false">
-					  <field name="is_company" optional="hide" readonly="1"/>
-					  <field name="first_name"/>
-					  <field name="name"/>
-          				  <field name="email" optional="show"/>
-					</tree>
-				</field>
-			  </page>
-			  <page string="Facturation">
-				  <group>
-					<group string="Coordonnées" name="address">
-					    <field name="user_ids" invisible="1"/>
-					    <span class="o_form_label o_td_label" name="address_name">
-						<field name="type" invisible="is_company" required="not is_company" readonly="user_ids" class="fw-bold"/>
-						<b invisible="not is_company">Address</b>
-					    </span>
-					    <div class="o_address_format">
-						<field name="street" placeholder="Rue..." class="o_address_street"/>
-						<field name="street2" placeholder="Rue 2..." class="o_address_street"/>
-						<field name="street3" placeholder="Rue 3..." class="o_address_street"/>
-						<field name="city" placeholder="Commune" class="o_address_city"/>
-						<field name="state_id" class="o_address_state" placeholder="Région" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
-						<field name="zip" placeholder="Code postal" class="o_address_zip"/>
-						<div name="partner_address_country" class="d-flex justify-content-between">
-						    <field name="country_id" placeholder="Pays" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
-						</div>
-					    </div>
-					</group>
-					<group string="Autres adresses filles">
-					    <field name="lang" invisible="1"/>
-					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_external_auxiliary_code' : external_auxiliary_code,           'default_user_id': user_id,            'default_is_company' : True,           'default_currency_id' : currency_id,           'default_property_account_receivable_id' : property_account_receivable_id,           'default_property_account_payable_id' : property_account_payable_id,           'default_property_payment_term_id' : property_payment_term_id,           'default_property_account_position_id' : property_account_position_id,           'default_default_invoice_payement_bank_account' : property_payment_bank_account,           'default_type': 'invoice'}">
-							<tree delete="false">
-								  <field name="type"/>
-								  <field name="name"/>
-								  <field name="street" optional="hide"/>
-								  <field name="street2" optional="hide"/>
-								  <field name="street3" optional="hide"/>
-								  <field name="zip" optional="show"/>
-								  <field name="city" optional="show"/>
-								  <field name="country_id" optional="show"/>
-								  <field name="phone" optional="hide"/>
-								  <field name="email" optional="hide"/>
-							</tree>
-					     </field>
-					</group>
-					<group name="misc" string="Identifiants">
-		      				<field name="is_company" default="1" invisible="0"/>
-						<field name="ref" string="Référence interne"/>
-					    	<field name="vat" placeholder="Num TVA intracom UE" readonly="parent_id"/>
-						<field name="company_registry" on_change="1" invisible="1"/>
-						<field name="siren" on_change="1"/>
-						<field name="nic" on_change="1"/>
-						<field name="siret" on_change="1"/>
-			    			<field name="external_auxiliary_code"/>
-						<field name="parent_is_company" invisible="1"/>
-					</group>
-				</group>
-
-				<group>
-					<group string="Écritures comptables" name="accounting_entries">
-						<field name="currency_id" modifiers="{'invisible': true, 'readonly': true}"/>
-						<field name="property_account_receivable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
-						<field name="property_account_payable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
-					</group>
-					<group string="Achats/Ventes" name="sale" priority="1">
-						<field string="Conditions de paiement (ventes)" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
-						<field string="Conditions de paiement (achats)" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
-						<field name="property_account_position_id" options="{'no_create': True, 'no_open': True}" can_create="true" can_write="true"/>
-			    			<field name="property_payment_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
-					</group>
-				</group>
-			  </page>
-			  <page string="Autres informations">
-				<group>
-					<field name="child_mail_address_domain_list"/>
-					<field name="ref"/>
-					<!--
+        <record model="ir.ui.view" id="taz-common.company_form">
+            <field name="name">Entreprises</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <field name="active" invisible="1"/>
+                        <widget name="web_ribbon" title="Archivée" bg_color="bg-danger" invisible="active"/>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="long_company_name"/>
+                                <field name="parent_id" options="{'no_quick_create': True}" string="Groupe" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
+                                <field name="comment"/>
+                            </group>
+                            <group>
+                                <field name="user_id" options="{'no_create': True, 'no_create_edit':True}" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
+                                <field name="industry_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                                <field name="business_priority"/>
+                                <field name="sector_id"/>
+                                <field name="type" groups="account.group_account_user"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Entreprises/sites du groupe">
+                                <field name="child_ids_company" context="{'default_parent_id':id, 'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}">
+                                    <tree delete="false">
+                                        <field name="is_company" column_invisible="1"/>
+                                        <field name="name"/>
+                                        <field name="long_company_name"/>
+                                        <field name="industry_id"/>
+                                        <field name="type"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Contacts de cette entreprise">
+                                <field name="child_ids_contact" context="{'default_parent_id':id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
+                                    <tree delete="false">
+                                        <field name="is_company" optional="hide" readonly="1"/>
+                                        <field name="first_name"/>
+                                        <field name="name"/>
+                                        <field name="email" optional="show"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Facturation">
+                                <group>
+                                    <group string="Coordonnées" name="address">
+                                        <field name="user_ids" invisible="1"/>
+                                        <span class="o_form_label o_td_label" name="address_name">
+                                            <field name="type" invisible="is_company" required="not is_company" readonly="user_ids" class="fw-bold"/>
+                                            <b invisible="not is_company">Address</b>
+                                        </span>
+                                        <div class="o_address_format">
+                                            <field name="street" placeholder="Rue..." class="o_address_street"/>
+                                            <field name="street2" placeholder="Rue 2..." class="o_address_street"/>
+                                            <field name="street3" placeholder="Rue 3..." class="o_address_street"/>
+                                            <field name="city" placeholder="Commune" class="o_address_city"/>
+                                            <field name="state_id" class="o_address_state" placeholder="Région" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
+                                            <field name="zip" placeholder="Code postal" class="o_address_zip"/>
+                                            <div name="partner_address_country" class="d-flex justify-content-between">
+                                                <field name="country_id" placeholder="Pays" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
+                                            </div>
+                                        </div>
+                                    </group>
+                                    <group string="Autres adresses filles">
+                                        <field name="lang" invisible="1"/>
+                                        <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_external_auxiliary_code' : external_auxiliary_code,           'default_user_id': user_id,            'default_is_company' : True,           'default_currency_id' : currency_id,           'default_property_account_receivable_id' : property_account_receivable_id,           'default_property_account_payable_id' : property_account_payable_id,           'default_property_payment_term_id' : property_payment_term_id,           'default_property_account_position_id' : property_account_position_id,           'default_default_invoice_payement_bank_account' : property_payment_bank_account,           'default_type': 'invoice'}">
+                                            <tree delete="false">
+                                                <field name="type"/>
+                                                <field name="name"/>
+                                                <field name="street" optional="hide"/>
+                                                <field name="street2" optional="hide"/>
+                                                <field name="street3" optional="hide"/>
+                                                <field name="zip" optional="show"/>
+                                                <field name="city" optional="show"/>
+                                                <field name="country_id" optional="show"/>
+                                                <field name="phone" optional="hide"/>
+                                                <field name="email" optional="hide"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                    <group name="misc" string="Identifiants">
+                                        <field name="is_company" default="1" invisible="0"/>
+                                        <field name="ref" string="Référence interne"/>
+                                        <field name="vat" placeholder="Num TVA intracom UE" readonly="parent_id"/>
+                                        <field name="company_registry" on_change="1" invisible="1"/>
+                                        <field name="siren" on_change="1"/>
+                                        <field name="nic" on_change="1"/>
+                                        <field name="siret" on_change="1"/>
+                                        <field name="external_auxiliary_code"/>
+                                        <field name="parent_is_company" invisible="1"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group string="Écritures comptables" name="accounting_entries">
+                                        <field name="currency_id" modifiers="{'invisible': true, 'readonly': true}"/>
+                                        <field name="property_account_receivable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
+                                        <field name="property_account_payable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
+                                    </group>
+                                    <group string="Achats/Ventes" name="sale" priority="1">
+                                        <field string="Conditions de paiement (ventes)" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
+                                        <field string="Conditions de paiement (achats)" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
+                                        <field name="property_account_position_id" options="{'no_create': True, 'no_open': True}" can_create="true" can_write="true"/>
+                                        <field name="property_payment_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Autres informations">
+                                <group>
+                                    <field name="child_mail_address_domain_list"/>
+                                    <field name="ref"/>
+                                    <!--
 						<field name="company_registry" on_change="1" modifiers="{&quot;invisible&quot;: [[&quot;parent_id&quot;, &quot;!=&quot;, false]]}"/>
                     <field name="siret" modifiers="{&quot;invisible&quot;: [[&quot;is_company&quot;, &quot;=&quot;, false]]}"/>
 						<field name="siret" attrs="{'invisible': [('is_company', '=', False)]}"/>
 					-->
-				</group>
-			  </page>
-		  </notebook>
-
-		<group>
-			<group>
-				<field name="write_date"/>
-			</group>
-			<group>
-				<field name="create_date"/>
-			</group>
-		</group>
-	   </sheet>
-
-	    <div class="oe_chatter">
-		<field name="message_follower_ids"/>
-		<field name="message_ids"/>
-	    </div>
-        </form>
-      </field>
-    </record>
-
-    <record model="ir.ui.view" id="company_search">
-        <field name="name">res.partner.company.search</field>
-        <field name="model">res.partner</field>
-        <field name="arch" type="xml">
-           <search string="Entreprises">
-                <field name="name" string="Nom ou libellé long de l'entreprise" filter_domain="['|', ('long_company_name', 'ilike', self), ('name', 'ilike', self)]"/>
-		<separator/>
-		<field name="industry_id" string="Compte (ex BD)"/>
-		<field name="sector_id" string="Secteur"/>
-		<separator/>
-            	<filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
-		<separator/>
-            	<filter name="no_industry_id" string="Sans compte (ex BD)" domain="[('industry_id', '=', False)]"/>
-		<separator/>
-            	<filter name="no_sector_id" string="Sans secteur" domain="[('sector_id', '=', False)]"/>
-		<separator/>
-            	<filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
-		<separator/>
-            	<filter name="no_child" string="Sans contact" domain="[('child_ids_contact', '=', False)]"/>
-		<separator/>
-
-            	<filter string="Entreprise A REVOIR dont je suis propriétaire" name="to_review_assigned_to_me" domain="[('user_id', '=', uid), ('category_id', 'child_of', [236])]" help="Entreprises qui m'ont été assignées en vendeur principal et dont les fiches sont à revoir"/>
-		    <!-- Le tagg ID=236 est FICHE-A-REVOIR-CORRIGER-->
-
-		<filter string="Archivée" name="inactive" domain="[('active', '=', False)]"/>
-		<separator/>
-            	    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
-            	    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
-		    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
-		    <filter name="inditto" string="Comptes Inditto" domain="[('business_priority', '=', 'inditto')]"/>
-		<separator/>
-		<separator/>
-		<group expand="0" string="Group By">
-			<filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'industry_id'}"/>
-			<filter string="Secteur" name="group_sector" context="{'group_by': 'sector_id'}"/>
-			<filter string="Niveau de priorité du compte" name="group_business_priority" context="{'group_by': 'business_priority'}"/>
-			<filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
-		</group>
-        </search>
-        </field>
-    </record>
-
-    <record model="ir.actions.act_window" id="taz-common.action_partner_company">
-      <field name="name">Entreprises</field>
-      <field name="res_model">res.partner</field>
-      <field name="context">{"default_is_company":True}</field>
-      <field name="search_view_id" ref="company_search"/>
-      <!--
-      -->
-      <field name="view_mode">tree,form,kanban</field>
-		      <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),          ]"/>
-      <field name="domain">[('is_company', '=', True), ('type', '=', 'contact')]</field> 
-    </record>
-
-
-    <!-- CONTACTS -->
-    <record model="ir.ui.view" id="taz-common.contact_tree">
-      <field name="name">Contacts</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="is_company" column_invisible="1"/>
-          <field name="first_name"/>
-          <field name="name"/>
-          <field name="parent_id" options="{'no_quick_create': True}" optional="show"/>
-	  <field name="date_last_business_action" optional="show"/>
-          <field name="email" optional="show"/>
-	  <field name="parent_industry_id" optional="show"/> <!-- multi_edit="1" -->
-	  <field name="parent_industry_priority" optional="show" widget="badge" decoration-info="parent_industry_priority == 'not_tracked'" decoration-success="parent_industry_priority == 'active'" decoration-danger="parent_industry_priority == 'priority_target'"/>
-	  <field name="parent_sector_id" optional="hide"/>
-          <field name="category_id" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
-	  <field name="street" optional="hide"/>
-	  <field name="street2" optional="hide"/>
-	  <field name="street3" optional="hide"/>
-	  <field name="zip" optional="hide"/>
-	  <field name="city" optional="hide"/>
-	  <field name="country_id" optional="hide"/>
-	  <field name="function" optional="hide"/>
-        </tree>
-      </field>
-    </record>
-
-    <record model="ir.ui.view" id="taz-common.contact_form">
-      <field name="name">Contacts</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <form>
-                <sheet>
-		   <widget name="web_ribbon" title="Archivé" bg_color="bg-danger" invisible="active"/>
-		   <field name="active" invisible="1"/>
-                    <group>
-			<group>
-				<field name="is_company" invisible="1"/>
-				<field name="active" invisible="1"/>
-				<field name="company_id" invisible="1"/>
-				<field name="email" default_focus="1" placeholder="Adresse email" widget="email"/>
-				<field name="title" options="{'no_create': True, 'no_create_edit':True}" default_focus="0" placeholder="Madame / Monsieur"/>
-				<field name="first_name" placeholder="Prénom"/>
-				<field name="name" placeholder="Nom"/>
-
-			    <field name="parent_id" options="{'no_quick_create': True}" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
-				<field name="is_followed"/>
-				<field name="type" groups="account.group_account_user"/>
+                                </group>
+                            </page>
+                        </notebook>
+                        <group>
+                            <group>
+                                <field name="write_date"/>
+                            </group>
+                            <group>
+                                <field name="create_date"/>
+                            </group>
                         </group>
-			<group>
-                            <field name="function" invisible="is_company"/>
-                            <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_edit_color': True, 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
-                            <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-			    <field name="parent_industry_id" options="{'no_create': True, 'no_create_edit':True}"/>
-			    <field name="parent_industry_priority"/>
-			    <field name="parent_sector_id" options="{'no_create': True, 'no_create_edit':True}"/>
-			    <field name="date_last_business_action"/>
-			    <field name="linkedin_url" widget="url"/>
-                            <field name="comment"/>
-		            <field name="inhouse_influence_level"/>
-			</group>
-                    </group>
-		    <notebook>
-			<page string="Actions commerciales">
-				<field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': id}">
-					<tree editable="top">
-					  <field name="name" widget="text"/>
-					  <field name="state"/>
-					  <field name="owner_id"/>
-					  <field name="user_ids" widget="many2many_avatar_user"/>
-					  <field name="date_deadline" optional="show"/>
-					  <field name="note" optional="hide"/>
-					  <field name="action_type" optional="show"/>
-					  <field name="conclusion" optional="hide"/>
-		  			  <field name="report_url" widget="url" optional="show"/>
-		  			  <field name="is_rdv_to_be_taken_by_assistant" optional="hide"/>
-					  <field name="is_rdv_taken_by_assistant" optional="hide"/>
-					  <field name="parent_partner_id" options="{'no_create': True, 'no_create_edit':True}" optional="hide"/>
-					  <field name="parent_partner_industry_id" options="{'no_create': True, 'no_create_edit':True}" optional="hide"/>
-						<button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
-					</tree> 
-				</field>
-			</page>
-			<page string="Collaborateurs en contact">
-				<field name="contact_user_link_ids" context="{'default_partner_id': id}"/>
-			</page>
-			<page name="contact_channels" string="Coordonnées">
-				<group>
-					<group string="Adresse postale">
-					    <span class="o_form_label o_td_label" name="address_name">
-						    <!--
-						<field name="type" attrs="{'invisible': [('is_company','=', True)], 'required': [('is_company','!=', True)], 'readonly': [('user_ids', '!=', [])]}" class="fw-bold"/>
-						    -->
-						<b invisible="not is_company">Address</b>
-					    </span>
-					    <div class="o_address_format">
-						<field name="street" placeholder="Rue..." class="o_address_street"/>
-						<field name="street2" placeholder="Rue 2..." class="o_address_street"/>
-						<field name="street3" placeholder="Rue 3..." class="o_address_street"/>
-						<field name="zip" placeholder="Code postal" class="o_address_zip"/>
-						<field name="city" placeholder="Vlle" class="o_address_city"/>
-						<div name="partner_address_country" class="d-flex justify-content-between">
-							<field name="country_id" placeholder="Pays" class="o_address_country" options="{'no_open': True, 'no_quick_create': True}"/>
-						</div>
-					    </div>
-					</group>
-					<group string="Autres adresses filles">
-					    <field name="lang" invisible="1"/>
-					    <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_user_id': user_id,            'default_type': 'other'}">
-							<tree delete="false">
-								  <field name="type"/>
-								  <field name="name"/>
-								  <field name="street" optional="hide"/>
-								  <field name="street2" optional="hide"/>
-								  <field name="street3" optional="hide"/>
-								  <field name="zip" optional="show"/>
-								  <field name="city" optional="show"/>
-								  <field name="country_id" optional="show"/>
-								  <field name="phone" optional="hide"/>
-								  <field name="email" optional="hide"/>
-							</tree>
-					     </field>
-					</group>
-					<group>
-						<field name="mailchimp_status"/>
-						<field name="phone" widget="phone"/>
-						<field name="mobile" widget="phone"/>
-			    			<field name="assistant"/>
-						<field name="personal_phone" widget="phone"/>
-						<field name="personal_email" widget="email"/>
-						<field name="user_ids" invisible="1"/>
-					</group>
-					<group>
-						<field name="former_email_address"/>
-					</group>
-				</group>
-			</page>
-
-		</notebook>
-		<group>
-			<group>
-				<field name="write_date"/>
-			</group>
-			<group>
-				<field name="create_date"/>
-			</group>
-		</group>
-		
                     </sheet>
-		    <div class="oe_chatter">
+                    <div class="oe_chatter">
                         <field name="message_follower_ids"/>
                         <field name="message_ids"/>
-		    </div>
-        </form>
-      </field>
-    </record>
-
-
-
-    <record model="ir.ui.view" id="taz-common.contact_search">
-        <field name="name">res.partner.contact.search</field>
-        <field name="model">res.partner</field>
-        <field name="arch" type="xml">
-           <search string="Contacts">
-                <field name="name" string="Prénom Nom" filter_domain="[('display_name', 'ilike', self)]"/>
-                <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
-                <field name="email" string="Email" filter_domain="[('email', 'ilike', self)]"/>
-		<field name="category_id" string="Étiquette"/>
-		<field name="parent_industry_id" string="Compte du parent (ex BD)"/>
-		<field name="parent_sector_id" string="Secteur du parent"/>
-	    <filter string="Contact à suivre en Revue de compte" name="is_followed" domain="[('is_followed', '=', True)]"/>
-		<separator/>
-		    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('parent_industry_priority', '=', 'priority_target')]"/>
-		    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('parent_industry_priority', '=', 'active')]"/>
-		    <filter name="not_tracked" string="Comptes à opportunités" domain="[('parent_industry_priority', '=', 'not_tracked')]"/>
-		    <filter name="inditto" string="Comptes Inditto" domain="[('parent_industry_priority', '=', 'inditto')]"/>
-		<separator/>
-            <filter string="Contacts dont je suis propriétaire" name="assigned_to_me" domain="[('user_id', '=', uid)]" help="Contacts qui m'ont été assignés en vendeur principal"/>
-            <filter string="Contacts A REVOIR dont je suis propriétaire" name="to_review_assigned_to_me" domain="[('user_id', '=', uid), ('category_id', 'child_of', [236])]" help="Contacts qui m'ont été assignés en vendeur principal et dont les fiches sont à revoir"/>
-		    <!-- Le tagg ID=236 est FICHE-A-REVOIR-CORRIGER-->
-	    <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
-            <separator/>
-            <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
-	    <separator/>
-            <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
-	    <separator/>
-            <filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
-	    <separator/>
-		    <!-- ATTENTION : timedelta doesn't accept MONTHS nore YEAR arguments https://docs.python.org/2/library/datetime.html#datetime.timedelta -->
-	    <filter name="no_action_3months" string="Pas vus depuis &gt; 3 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
-	    <filter name="no_action_6months" string="Pas vus depuis &gt; 6 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=182)).strftime('%%Y-%%m-%%d')))]"/>
-	    <filter name="no_action_12months" string="Pas vus depuis &gt; 12 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
-            <separator/>
-	    <filter name="no_update_12months" string="Pas MAJ depuis &gt; 12 mois" domain="[('write_date','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
-            <separator/>
-	    <filter name="created_7days" string="Contacts créés au cours des 7 derniers jours" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(days=7)).strftime('%%Y-%%m-%%d')))]"/>
-	    <filter name="created_24hourss" string="Contacts créés au cours des 24 dernières heures" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(hours=7)).strftime('%%Y-%%m-%%d')))]"/>
-            <group expand="0" string="Group By">
-            	<filter string="Compte du parent (ex BD)" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
-            	<filter string="Nivau de priorité du compte du parent (ex BD)" name="group_industry_priority" context="{'group_by': 'parent_industry_priority'}"/>
-            	<filter string="Secteur du parent" name="group_sector" context="{'group_by': 'parent_sector_id'}"/>
-            	<filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
-		<filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
-            </group>
-        </search>
-        </field>
-    </record>
-
-    <record model="ir.actions.act_window" id="taz-common.action_partner_contact">
-      <field name="name">Contacts</field>
-      <field name="res_model">res.partner</field>
-      <field name="context">{
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="company_search">
+            <field name="name">res.partner.company.search</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <search string="Entreprises">
+                    <field name="name" string="Nom ou libellé long de l'entreprise" filter_domain="['|', ('long_company_name', 'ilike', self), ('name', 'ilike', self)]"/>
+                    <separator/>
+                    <field name="industry_id" string="Compte (ex BD)"/>
+                    <field name="sector_id" string="Secteur"/>
+                    <separator/>
+                    <filter name="multiple_domains" string="Entreprises avec plusieurs noms de domaine" domain="[('child_mail_address_domain_list', 'ilike', ',')]"/>
+                    <separator/>
+                    <filter name="no_industry_id" string="Sans compte (ex BD)" domain="[('industry_id', '=', False)]"/>
+                    <separator/>
+                    <filter name="no_sector_id" string="Sans secteur" domain="[('sector_id', '=', False)]"/>
+                    <separator/>
+                    <filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
+                    <separator/>
+                    <filter name="no_child" string="Sans contact" domain="[('child_ids_contact', '=', False)]"/>
+                    <separator/>
+                    <filter string="Entreprise A REVOIR dont je suis propriétaire" name="to_review_assigned_to_me" domain="[('user_id', '=', uid), ('category_id', 'child_of', [236])]" help="Entreprises qui m'ont été assignées en vendeur principal et dont les fiches sont à revoir"/>
+                    <!-- Le tagg ID=236 est FICHE-A-REVOIR-CORRIGER-->
+                    <filter string="Archivée" name="inactive" domain="[('active', '=', False)]"/>
+                    <separator/>
+                    <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
+                    <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
+                    <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
+                    <filter name="inditto" string="Comptes Inditto" domain="[('business_priority', '=', 'inditto')]"/>
+                    <separator/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'industry_id'}"/>
+                        <filter string="Secteur" name="group_sector" context="{'group_by': 'sector_id'}"/>
+                        <filter string="Niveau de priorité du compte" name="group_business_priority" context="{'group_by': 'business_priority'}"/>
+                        <filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="taz-common.action_partner_company">
+            <field name="name">Entreprises</field>
+            <field name="res_model">res.partner</field>
+            <field name="context">{"default_is_company":True}</field>
+            <field name="search_view_id" ref="company_search"/>
+            <!--
+      -->
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),          ]"/>
+            <field name="domain">[('is_company', '=', True), ('type', '=', 'contact')]</field>
+        </record>
+        <!-- CONTACTS -->
+        <record model="ir.ui.view" id="taz-common.contact_tree">
+            <field name="name">Contacts</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="is_company" column_invisible="1"/>
+                    <field name="first_name"/>
+                    <field name="name"/>
+                    <field name="parent_id" options="{'no_quick_create': True}" optional="show"/>
+                    <field name="date_last_business_action" optional="show"/>
+                    <field name="email" optional="show"/>
+                    <field name="parent_industry_id" optional="show"/>
+                    <!-- multi_edit="1" -->
+                    <field name="parent_industry_priority" optional="show" widget="badge" decoration-info="parent_industry_priority == 'not_tracked'" decoration-success="parent_industry_priority == 'active'" decoration-danger="parent_industry_priority == 'priority_target'"/>
+                    <field name="parent_sector_id" optional="hide"/>
+                    <field name="category_id" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+                    <field name="street" optional="hide"/>
+                    <field name="street2" optional="hide"/>
+                    <field name="street3" optional="hide"/>
+                    <field name="zip" optional="hide"/>
+                    <field name="city" optional="hide"/>
+                    <field name="country_id" optional="hide"/>
+                    <field name="function" optional="hide"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="taz-common.contact_form">
+            <field name="name">Contacts</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <widget name="web_ribbon" title="Archivé" bg_color="bg-danger" invisible="active"/>
+                        <field name="active" invisible="1"/>
+                        <group>
+                            <group>
+                                <field name="is_company" invisible="1"/>
+                                <field name="active" invisible="1"/>
+                                <field name="company_id" invisible="1"/>
+                                <field name="email" default_focus="1" placeholder="Adresse email" widget="email"/>
+                                <field name="title" options="{'no_create': True, 'no_create_edit':True}" default_focus="0" placeholder="Madame / Monsieur"/>
+                                <field name="first_name" placeholder="Prénom"/>
+                                <field name="name" placeholder="Nom"/>
+                                <field name="parent_id" options="{'no_quick_create': True}" widget="res_partner_many2one" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" placeholder="Entreprise de rattachement..." domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
+                                <field name="is_followed"/>
+                                <field name="type" groups="account.group_account_user"/>
+                            </group>
+                            <group>
+                                <field name="function" invisible="is_company"/>
+                                <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_edit_color': True, 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
+                                <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
+                                <field name="parent_industry_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                                <field name="parent_industry_priority"/>
+                                <field name="parent_sector_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                                <field name="date_last_business_action"/>
+                                <field name="linkedin_url" widget="url"/>
+                                <field name="comment"/>
+                                <field name="inhouse_influence_level"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Actions commerciales">
+                                <field name="business_action_ids" string="Actions commerciales" context="{'default_partner_id': id}">
+                                    <tree editable="top">
+                                        <field name="name" widget="text"/>
+                                        <field name="state"/>
+                                        <field name="owner_id"/>
+                                        <field name="user_ids" widget="many2many_avatar_user"/>
+                                        <field name="date_deadline" optional="show"/>
+                                        <field name="note" optional="hide"/>
+                                        <field name="action_type" optional="show"/>
+                                        <field name="conclusion" optional="hide"/>
+                                        <field name="report_url" widget="url" optional="show"/>
+                                        <field name="is_rdv_to_be_taken_by_assistant" optional="hide"/>
+                                        <field name="is_rdv_taken_by_assistant" optional="hide"/>
+                                        <field name="parent_partner_id" options="{'no_create': True, 'no_create_edit':True}" optional="hide"/>
+                                        <field name="parent_partner_industry_id" options="{'no_create': True, 'no_create_edit':True}" optional="hide"/>
+                                        <button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Collaborateurs en contact">
+                                <field name="contact_user_link_ids" context="{'default_partner_id': id}"/>
+                            </page>
+                            <page name="contact_channels" string="Coordonnées">
+                                <group>
+                                    <group string="Adresse postale">
+                                        <span class="o_form_label o_td_label" name="address_name">
+                                            <!--
+						<field name="type" attrs="{'invisible': [('is_company','=', True)], 'required': [('is_company','!=', True)], 'readonly': [('user_ids', '!=', [])]}" class="fw-bold"/>
+						    -->
+                                            <b invisible="not is_company">Address</b>
+                                        </span>
+                                        <div class="o_address_format">
+                                            <field name="street" placeholder="Rue..." class="o_address_street"/>
+                                            <field name="street2" placeholder="Rue 2..." class="o_address_street"/>
+                                            <field name="street3" placeholder="Rue 3..." class="o_address_street"/>
+                                            <field name="zip" placeholder="Code postal" class="o_address_zip"/>
+                                            <field name="city" placeholder="Vlle" class="o_address_city"/>
+                                            <div name="partner_address_country" class="d-flex justify-content-between">
+                                                <field name="country_id" placeholder="Pays" class="o_address_country" options="{'no_open': True, 'no_quick_create': True}"/>
+                                            </div>
+                                        </div>
+                                    </group>
+                                    <group string="Autres adresses filles">
+                                        <field name="lang" invisible="1"/>
+                                        <field name="child_ids_address" nolabel="1" colspan="2" mode="tree" context="{           'tree_view_ref':'taz-common.address_tree',            'form_view_ref':'taz-common.address_form',            'default_parent_id': id,            'default_lang': lang,            'default_user_id': user_id,            'default_type': 'other'}">
+                                            <tree delete="false">
+                                                <field name="type"/>
+                                                <field name="name"/>
+                                                <field name="street" optional="hide"/>
+                                                <field name="street2" optional="hide"/>
+                                                <field name="street3" optional="hide"/>
+                                                <field name="zip" optional="show"/>
+                                                <field name="city" optional="show"/>
+                                                <field name="country_id" optional="show"/>
+                                                <field name="phone" optional="hide"/>
+                                                <field name="email" optional="hide"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                    <group>
+                                        <field name="mailchimp_status"/>
+                                        <field name="phone" widget="phone"/>
+                                        <field name="mobile" widget="phone"/>
+                                        <field name="assistant"/>
+                                        <field name="personal_phone" widget="phone"/>
+                                        <field name="personal_email" widget="email"/>
+                                        <field name="user_ids" invisible="1"/>
+                                    </group>
+                                    <group>
+                                        <field name="former_email_address"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                        <group>
+                            <group>
+                                <field name="write_date"/>
+                            </group>
+                            <group>
+                                <field name="create_date"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="taz-common.contact_search">
+            <field name="name">res.partner.contact.search</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <search string="Contacts">
+                    <field name="name" string="Prénom Nom" filter_domain="[('display_name', 'ilike', self)]"/>
+                    <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
+                    <field name="email" string="Email" filter_domain="[('email', 'ilike', self)]"/>
+                    <field name="category_id" string="Étiquette"/>
+                    <field name="parent_industry_id" string="Compte du parent (ex BD)"/>
+                    <field name="parent_sector_id" string="Secteur du parent"/>
+                    <filter string="Contact à suivre en Revue de compte" name="is_followed" domain="[('is_followed', '=', True)]"/>
+                    <separator/>
+                    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('parent_industry_priority', '=', 'priority_target')]"/>
+                    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('parent_industry_priority', '=', 'active')]"/>
+                    <filter name="not_tracked" string="Comptes à opportunités" domain="[('parent_industry_priority', '=', 'not_tracked')]"/>
+                    <filter name="inditto" string="Comptes Inditto" domain="[('parent_industry_priority', '=', 'inditto')]"/>
+                    <separator/>
+                    <filter string="Contacts dont je suis propriétaire" name="assigned_to_me" domain="[('user_id', '=', uid)]" help="Contacts qui m'ont été assignés en vendeur principal"/>
+                    <filter string="Contacts A REVOIR dont je suis propriétaire" name="to_review_assigned_to_me" domain="[('user_id', '=', uid), ('category_id', 'child_of', [236])]" help="Contacts qui m'ont été assignés en vendeur principal et dont les fiches sont à revoir"/>
+                    <!-- Le tagg ID=236 est FICHE-A-REVOIR-CORRIGER-->
+                    <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
+                    <separator/>
+                    <filter name="no_parent" string="Sans entreprise" domain="[('parent_id', '=', False)]"/>
+                    <separator/>
+                    <filter name="no_mail" string="Sans adresse email" domain="[('email', '=', False)]"/>
+                    <separator/>
+                    <filter name="no_user_id" string="Sans propriétaire actif" domain="['|', ('user_id', '=', False), ('user_active', '=', False)]"/>
+                    <separator/>
+                    <!-- ATTENTION : timedelta doesn't accept MONTHS nore YEAR arguments https://docs.python.org/2/library/datetime.html#datetime.timedelta -->
+                    <filter name="no_action_3months" string="Pas vus depuis &gt; 3 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
+                    <filter name="no_action_6months" string="Pas vus depuis &gt; 6 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=182)).strftime('%%Y-%%m-%%d')))]"/>
+                    <filter name="no_action_12months" string="Pas vus depuis &gt; 12 mois" domain="[('date_last_business_action','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
+                    <separator/>
+                    <filter name="no_update_12months" string="Pas MAJ depuis &gt; 12 mois" domain="[('write_date','&lt;=', ((context_today()-datetime.timedelta(days=365)).strftime('%%Y-%%m-%%d')))]"/>
+                    <separator/>
+                    <filter name="created_7days" string="Contacts créés au cours des 7 derniers jours" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(days=7)).strftime('%%Y-%%m-%%d')))]"/>
+                    <filter name="created_24hourss" string="Contacts créés au cours des 24 dernières heures" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(hours=7)).strftime('%%Y-%%m-%%d')))]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Compte du parent (ex BD)" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
+                        <filter string="Nivau de priorité du compte du parent (ex BD)" name="group_industry_priority" context="{'group_by': 'parent_industry_priority'}"/>
+                        <filter string="Secteur du parent" name="group_sector" context="{'group_by': 'parent_sector_id'}"/>
+                        <filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
+                        <filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="taz-common.action_partner_contact">
+            <field name="name">Contacts</field>
+            <field name="res_model">res.partner</field>
+            <field name="context">{
                     'search_default_assigned_to_me': 0,
 	      	    'default_user_id' : uid,
             }</field>
-      <field name="search_view_id" ref="taz-common.contact_search"/>
-      <field name="view_mode">tree,form,kanban</field>
-		      <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),          ]"/>
-      <field name="domain">[('is_company', '=', False), ('type', '=', 'contact')]</field> 
-	      <!-- ('user_ids', '=', False),('employee_ids', '=', False), -->
-    </record>
-
-
-    <!-- ADDRESS -->
-    <record model="ir.ui.view" id="taz-common.address_tree">
-      <field name="name">Adresses</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-		<tree delete="false">
-			  <field name="is_company" optional="show"/>
-			  <field name="type" optional="show"/>
-			  <field name="name"/>
-			  <field name="street" optional="hide"/>
-			  <field name="street2" optional="hide"/>
-			  <field name="street3" optional="hide"/>
-			  <field name="zip" optional="show"/>
-			  <field name="city" optional="show"/>
-			  <field name="country_id" optional="show"/>
-			  <field name="phone" optional="hide"/>
-			  <field name="email" optional="hide"/>
-		</tree>
-      </field>
-    </record>
-	
-    <record model="ir.ui.view" id="taz-common.address_form">
-      <field name="name">Adresses</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-		<form string="Contact / Address">
-		    <sheet>
-			<group>
-				<field name="type" required="1" widget="radio" options="{'horizontal': true}"/>
-			</group>
-			<div class="text-muted oe_edit_only">
-			    <p class="mb-0" invisible="type != 'contact'">
-				<span>Utilisez ceci pour organiser les coordonnées des employés d'une entreprise donnée (par exemple, CEO, CFO, ...).</span>
-			    </p>
-			    <p class="mb-0" invisible="type != 'invoice'">
-				<span>Adresse préférée pour toutes les factures. Sélectionnée par défaut lorsque vous facturez une commande qui appartient à cette société.</span>
-			    </p>
-			    <p class="mb-0" invisible="type != 'delivery'">
-				<span>Adresse préférée pour toutes les livraisons. Sélectionnée par défaut lorsque vous livrez une commande appartenant à cette société.</span>
-			    </p>
-			    <p class="mb-0" invisible="type != 'other'">
-				<span>Utilisez ceci pour organiser les coordonnées des employés d'une entreprise donnée (par exemple, CEO, CFO, ...).</span>
-			    </p>
-			</div>
-			<hr/>
-			
-			<group>
-				<field name="parent_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
-			</group>
-			<group col="6">
-				<group colspan="5">
-				<field name="name" string="Nom de l'adresse" required="type == 'contact'"/>
-				</group>
-				<group colspan="1">
-				<button name="l10n_fr_siret_lookup.fr_siret_lookup_partner_action" type="action" string="Recherche SIRENE/INSEE"/>
-				</group>
-			</group>
-
-			<group string="Coordonnées">
-			   <group>
-				<field name="title" options="{'no_open': True}" placeholder="e.g. Mr." invisible="type != 'contact'"/>
-				<field name="function" placeholder="e.g. Sales Director" invisible="type != 'contact'"/>
-				<label for="street" string="Address" invisible="type == 'contact'"/>
-				<div invisible="type == 'contact'">
-				    <div class="o_address_format" name="div_address" string="Adresse">
-					<field name="street" placeholder="Rue..." class="o_address_street"/>
-					<field name="street2" placeholder="Rue 2..." class="o_address_street"/>
-					<field name="street3" placeholder="Rue 3..." class="o_address_street"/>
-					<field name="city" placeholder="Commune" class="o_address_city"/>
-					<field name="state_id" class="o_address_state" placeholder="Région" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
-					<field name="zip" placeholder="Code postale" class="o_address_zip"/>
-					<field name="country_id" placeholder="Pays" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
-				    </div>
-				</div>
-			    </group>
-			    <group>
-				<field name="email" widget="email"/>
-				<field name="phone" widget="phone"/>
-				<field name="mobile" widget="phone"/>
-				<field name="company_id" invisible="1"/>
-			    </group>
-			</group>
-			<group string="Identifiants">
-				<field name="ref" string="Référence interne"/>
-				<field name="vat" placeholder="Num TVA intracom UE" readonly="parent_id"/>
-				<field name="company_registry" on_change="1" invisible="1"/>
-				<field name="siren" on_change="1"/>
-				<field name="nic" on_change="1"/>
-				<field name="siret" on_change="1"/>
-				<field name="external_auxiliary_code" on_change="1"/>
-			</group>
-			<group>
-			    <field name="comment" placeholder="Internal notes..." colspan="2"/>
-			</group>
-			<group>
-				<group string="Écritures comptables" name="accounting_entries">
-					<field name="currency_id" modifiers="{'invisible': true, 'readonly': true}"/>
-					<field name="property_account_receivable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
-					<field name="property_account_payable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
-				</group>
-				<group string="Achats/Ventes" name="sale" priority="1">
-					<field string="Conditions de paiement (ventes)" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
-					<field string="Conditions de paiement (achats)" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
-					<field name="property_account_position_id" options="{'no_create': True, 'no_open': True}" can_create="true" can_write="true"/>
-			    		<field name="property_payment_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
-				</group>
-			</group>
-			<field name="lang" invisible="True"/>
-			<field name="user_id" invisible="True"/>
-		    </sheet>
-		</form>
-      </field>
-    </record>
-
-
-
-    <record model="ir.actions.act_window" id="taz-common.action_partner_address">
-	    <field name="name">Adresses de facturation/livraison</field>
-      <field name="res_model">res.partner</field>
-      <field name="context">{"default_is_company":True, 'default_type' : 'invoice' }</field>
-      <field name="search_view_id" ref="company_search"/>
-      <field name="view_mode">tree,form,kanban</field>
-		      <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.address_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.address_form')}),          ]"/>
-      <field name="domain">[('type', '!=', 'contact')]</field> 
-    </record>
-
-
-    <!-- AUTRES -->
-
-    <record id="taz-admin" model="res.groups">
-        <field name="name">TAZ-Admin</field>
-        <field name="comment">Administrator for TAZ* modules.</field>
-    </record>
-
-    <record id="taz-management" model="res.groups">
-        <field name="name">TAZ-Management</field>
-        <field name="comment">Rights for DM and Managers.</field>
-    </record>
-
-    <record id="taz-basic" model="res.groups">
-        <field name="name">TAZ-Basic</field>
-        <field name="comment">Basic rights.</field>
-    </record>
-
-    <record id="taz-adv" model="res.groups">
-        <field name="name">TAZ-ADV</field>
-        <field name="comment">Rights for accounting and projets management.</field>
-    </record>
-
-    <record id="taz-cdg" model="res.groups">
-        <field name="name">TAZ-CDG</field>
-        <field name="comment">Rights for C-levels.</field>
-    </record>
-
-    <!-- Masquer les modules de base, sauf poru le super admin -->
-    <record id="mail.menu_root_discuss" model="ir.ui.menu">
-	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
-    </record>
-    <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
-	    <field name="groups_id" eval="[(6, 0, [ref('taz-common.taz-management')])]"/>
-    </record>
-    <record id="calendar.mail_menu_calendar" model="ir.ui.menu">
-	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
-    </record>
-    <record id="contacts.menu_contacts" model="ir.ui.menu">
-	    <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
-    </record>
-    <record id="account.menu_finance" model="ir.ui.menu">
-	    <!-- on supprimer le menu Facturation si l'usager n'a que le droits readonly (qui est obligatoire pour tous les consultants pour enregister un nouveau contact) -->
-	    <!-- on ajouter le menu Facturation pour les DM/Manager -->
-	    <field name="groups_id" eval="[(3, ref('account.group_account_readonly')), (4, ref('taz-common.taz-management'))]"/>
-    </record>
-    <menuitem name="Commerce" id="taz-common.commerce" sequence="3"/>
-    <menuitem name="Contacts" sequence="10" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
-    <menuitem name="Entreprises" sequence="70" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
-    <menuitem name="Adresses de facturation/livraison" sequence="71" id="taz-common.partner_address" parent="taz-common.commerce" action="taz-common.action_partner_address"/>
-
-    
-    <menuitem id="taz-common.res_partner_menu_config" name="Configuration" parent="taz-common.commerce" groups="taz-common.taz-admin,taz-common.taz-management" sequence="100"/>
-
-    <menuitem id="taz-common.menu_partner_category_form" action="base.action_partner_category_form" name="Contact Tags" sequence="1" parent="taz-common.res_partner_menu_config"/>
-
-    <menuitem id="taz-common.menu_partner_title_contact" action="base.action_partner_title_contact" name="Contact Titles" parent="taz-common.res_partner_menu_config" sequence="3"/>
-
-    <menuitem id="taz-common.menu_localisation" name="Localization" parent="taz-common.res_partner_menu_config" sequence="5"/>
-
-    <menuitem id="taz-common.menu_country_partner" action="base.action_country" parent="taz-common.menu_localisation" sequence="1"/>
-
-    <menuitem id="taz-common.menu_country_group" action="base.action_country_group" name="Country Group" parent="taz-common.menu_localisation" sequence="3"/>
-
-    <menuitem id="taz-common.menu_country_state_partner" action="base.action_country_state" parent="taz-common.menu_localisation" sequence="2"/>
-
-    <record id="action_server_normalize_partner_casse" model="ir.actions.server">
-          <field name="name">Normalier la casse (email, prénom, nom, adresse)</field>
-          <field name="model_id" ref="model_res_partner"/>
-          <field name="binding_model_id" ref="model_res_partner"/>
-          <field name="state">code</field>
-	  <field name="code">
+            <field name="search_view_id" ref="taz-common.contact_search"/>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),          ]"/>
+            <field name="domain">[('is_company', '=', False), ('type', '=', 'contact')]</field>
+            <!-- ('user_ids', '=', False),('employee_ids', '=', False), -->
+        </record>
+        <!-- ADDRESS -->
+        <record model="ir.ui.view" id="taz-common.address_tree">
+            <field name="name">Adresses</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <tree delete="false">
+                    <field name="is_company" optional="show"/>
+                    <field name="type" optional="show"/>
+                    <field name="name"/>
+                    <field name="street" optional="hide"/>
+                    <field name="street2" optional="hide"/>
+                    <field name="street3" optional="hide"/>
+                    <field name="zip" optional="show"/>
+                    <field name="city" optional="show"/>
+                    <field name="country_id" optional="show"/>
+                    <field name="phone" optional="hide"/>
+                    <field name="email" optional="hide"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="taz-common.address_form">
+            <field name="name">Adresses</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <form string="Contact / Address">
+                    <sheet>
+                        <group>
+                            <field name="type" required="1" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        <div class="text-muted oe_edit_only">
+                            <p class="mb-0" invisible="type != 'contact'">
+                                <span>Utilisez ceci pour organiser les coordonnées des employés d'une entreprise donnée (par exemple, CEO, CFO, ...).</span>
+                            </p>
+                            <p class="mb-0" invisible="type != 'invoice'">
+                                <span>Adresse préférée pour toutes les factures. Sélectionnée par défaut lorsque vous facturez une commande qui appartient à cette société.</span>
+                            </p>
+                            <p class="mb-0" invisible="type != 'delivery'">
+                                <span>Adresse préférée pour toutes les livraisons. Sélectionnée par défaut lorsque vous livrez une commande appartenant à cette société.</span>
+                            </p>
+                            <p class="mb-0" invisible="type != 'other'">
+                                <span>Utilisez ceci pour organiser les coordonnées des employés d'une entreprise donnée (par exemple, CEO, CFO, ...).</span>
+                            </p>
+                        </div>
+                        <hr/>
+                        <group>
+                            <field name="parent_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
+                        </group>
+                        <group col="6">
+                            <group colspan="5">
+                                <field name="name" string="Nom de l'adresse" required="type == 'contact'"/>
+                            </group>
+                            <group colspan="1">
+                                <button name="l10n_fr_siret_lookup.fr_siret_lookup_partner_action" type="action" string="Recherche SIRENE/INSEE"/>
+                            </group>
+                        </group>
+                        <group string="Coordonnées">
+                            <group>
+                                <field name="title" options="{'no_open': True}" placeholder="e.g. Mr." invisible="type != 'contact'"/>
+                                <field name="function" placeholder="e.g. Sales Director" invisible="type != 'contact'"/>
+                                <label for="street" string="Address" invisible="type == 'contact'"/>
+                                <div invisible="type == 'contact'">
+                                    <div class="o_address_format" name="div_address" string="Adresse">
+                                        <field name="street" placeholder="Rue..." class="o_address_street"/>
+                                        <field name="street2" placeholder="Rue 2..." class="o_address_street"/>
+                                        <field name="street3" placeholder="Rue 3..." class="o_address_street"/>
+                                        <field name="city" placeholder="Commune" class="o_address_city"/>
+                                        <field name="state_id" class="o_address_state" placeholder="Région" options="{'no_open': True, 'no_quick_create': True}" context="{'country_id': country_id, 'default_country_id': country_id, 'zip': zip}"/>
+                                        <field name="zip" placeholder="Code postale" class="o_address_zip"/>
+                                        <field name="country_id" placeholder="Pays" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
+                                    </div>
+                                </div>
+                            </group>
+                            <group>
+                                <field name="email" widget="email"/>
+                                <field name="phone" widget="phone"/>
+                                <field name="mobile" widget="phone"/>
+                                <field name="company_id" invisible="1"/>
+                            </group>
+                        </group>
+                        <group string="Identifiants">
+                            <field name="ref" string="Référence interne"/>
+                            <field name="vat" placeholder="Num TVA intracom UE" readonly="parent_id"/>
+                            <field name="company_registry" on_change="1" invisible="1"/>
+                            <field name="siren" on_change="1"/>
+                            <field name="nic" on_change="1"/>
+                            <field name="siret" on_change="1"/>
+                            <field name="external_auxiliary_code" on_change="1"/>
+                        </group>
+                        <group>
+                            <field name="comment" placeholder="Internal notes..." colspan="2"/>
+                        </group>
+                        <group>
+                            <group string="Écritures comptables" name="accounting_entries">
+                                <field name="currency_id" modifiers="{'invisible': true, 'readonly': true}"/>
+                                <field name="property_account_receivable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
+                                <field name="property_account_payable_id" modifiers="{'required': true}" can_create="true" can_write="true"/>
+                            </group>
+                            <group string="Achats/Ventes" name="sale" priority="1">
+                                <field string="Conditions de paiement (ventes)" name="property_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
+                                <field string="Conditions de paiement (achats)" name="property_supplier_payment_term_id" options="{'no_open': True, 'no_create': True}" can_create="true" can_write="true"/>
+                                <field name="property_account_position_id" options="{'no_create': True, 'no_open': True}" can_create="true" can_write="true"/>
+                                <field name="property_payment_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
+                            </group>
+                        </group>
+                        <field name="lang" invisible="True"/>
+                        <field name="user_id" invisible="True"/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="taz-common.action_partner_address">
+            <field name="name">Adresses de facturation/livraison</field>
+            <field name="res_model">res.partner</field>
+            <field name="context">{"default_is_company":True, 'default_type' : 'invoice' }</field>
+            <field name="search_view_id" ref="company_search"/>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.address_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.address_form')}),          ]"/>
+            <field name="domain">[('type', '!=', 'contact')]</field>
+        </record>
+        <!-- AUTRES -->
+        <record id="taz-admin" model="res.groups">
+            <field name="name">TAZ-Admin</field>
+            <field name="comment">Administrator for TAZ* modules.</field>
+        </record>
+        <record id="taz-management" model="res.groups">
+            <field name="name">TAZ-Management</field>
+            <field name="comment">Rights for DM and Managers.</field>
+        </record>
+        <record id="taz-basic" model="res.groups">
+            <field name="name">TAZ-Basic</field>
+            <field name="comment">Basic rights.</field>
+        </record>
+        <record id="taz-adv" model="res.groups">
+            <field name="name">TAZ-ADV</field>
+            <field name="comment">Rights for accounting and projets management.</field>
+        </record>
+        <record id="taz-cdg" model="res.groups">
+            <field name="name">TAZ-CDG</field>
+            <field name="comment">Rights for C-levels.</field>
+        </record>
+        <!-- Masquer les modules de base, sauf poru le super admin -->
+        <record id="mail.menu_root_discuss" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+        <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('taz-common.taz-management')])]"/>
+        </record>
+        <record id="calendar.mail_menu_calendar" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+        <record id="contacts.menu_contacts" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+        <record id="account.menu_finance" model="ir.ui.menu">
+            <!-- on supprimer le menu Facturation si l'usager n'a que le droits readonly (qui est obligatoire pour tous les consultants pour enregister un nouveau contact) -->
+            <!-- on ajouter le menu Facturation pour les DM/Manager -->
+            <field name="groups_id" eval="[(3, ref('account.group_account_readonly')), (4, ref('taz-common.taz-management'))]"/>
+        </record>
+        <menuitem name="Commerce" id="taz-common.commerce" sequence="3"/>
+        <menuitem name="Contacts" sequence="10" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
+        <menuitem name="Entreprises" sequence="70" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>
+        <menuitem name="Adresses de facturation/livraison" sequence="71" id="taz-common.partner_address" parent="taz-common.commerce" action="taz-common.action_partner_address"/>
+        <menuitem id="taz-common.res_partner_menu_config" name="Configuration" parent="taz-common.commerce" groups="taz-common.taz-admin,taz-common.taz-management" sequence="100"/>
+        <menuitem id="taz-common.menu_partner_category_form" action="base.action_partner_category_form" name="Contact Tags" sequence="1" parent="taz-common.res_partner_menu_config"/>
+        <menuitem id="taz-common.menu_partner_title_contact" action="base.action_partner_title_contact" name="Contact Titles" parent="taz-common.res_partner_menu_config" sequence="3"/>
+        <menuitem id="taz-common.menu_localisation" name="Localization" parent="taz-common.res_partner_menu_config" sequence="5"/>
+        <menuitem id="taz-common.menu_country_partner" action="base.action_country" parent="taz-common.menu_localisation" sequence="1"/>
+        <menuitem id="taz-common.menu_country_group" action="base.action_country_group" name="Country Group" parent="taz-common.menu_localisation" sequence="3"/>
+        <menuitem id="taz-common.menu_country_state_partner" action="base.action_country_state" parent="taz-common.menu_localisation" sequence="2"/>
+        <record id="action_server_normalize_partner_casse" model="ir.actions.server">
+            <field name="name">Normalier la casse (email, prénom, nom, adresse)</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="binding_model_id" ref="model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">
 if records:
 	for rec in records:
 		action = rec.normalize_partner_casse()
 </field>
-	  <field name="groups_id" eval="[(4, ref('taz-common.taz-admin'))]"/>
-     </record>
-
-
-    <record id="action_server_list_name_duplicates" model="ir.actions.server">
-          <field name="name">Duplicats de noms</field>
-          <field name="model_id" ref="model_res_partner"/>
-          <field name="binding_model_id" eval="False"/>
-          <field name="state">code</field>
-          <field name="code">action =  env.get('res.partner').filter_name_duplicate()</field>
-     </record>
-    <menuitem name="Contacts en doublons ?" sequence="90" id="taz-common.partner_contact_duplicates" parent="taz-common.commerce" action="action_server_list_name_duplicates"/>
-	
-    <record id="action_server_list_company_shared_email_domain" model="ir.actions.server">
-          <field name="name">Entreprises qui partage au moins un nom de domain email</field>
-          <field name="model_id" ref="model_res_partner"/>
-          <field name="binding_model_id" eval="False"/>
-          <field name="state">code</field>
-          <field name="code">action =  env.get('res.partner').filter_company_shared_email_domain()</field>
-     </record>
-    <menuitem name="Entreprises partageant au moins un nom de domaine mail" sequence="80" id="taz-common.company_shared_email_domain" parent="taz-common.commerce" action="action_server_list_company_shared_email_domain"/>
-
-	<record id="mail.action_partner_mass_mail" model="ir.actions.act_window">
+            <field name="groups_id" eval="[(4, ref('taz-common.taz-admin'))]"/>
+        </record>
+        <record id="action_server_list_name_duplicates" model="ir.actions.server">
+            <field name="name">Duplicats de noms</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="binding_model_id" eval="False"/>
+            <field name="state">code</field>
+            <field name="code">action =  env.get('res.partner').filter_name_duplicate()</field>
+        </record>
+        <menuitem name="Contacts en doublons ?" sequence="90" id="taz-common.partner_contact_duplicates" parent="taz-common.commerce" action="action_server_list_name_duplicates"/>
+        <record id="action_server_list_company_shared_email_domain" model="ir.actions.server">
+            <field name="name">Entreprises qui partage au moins un nom de domain email</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="binding_model_id" eval="False"/>
+            <field name="state">code</field>
+            <field name="code">action =  env.get('res.partner').filter_company_shared_email_domain()</field>
+        </record>
+        <menuitem name="Entreprises partageant au moins un nom de domaine mail" sequence="80" id="taz-common.company_shared_email_domain" parent="taz-common.commerce" action="action_server_list_company_shared_email_domain"/>
+        <record id="mail.action_partner_mass_mail" model="ir.actions.act_window">
             <field name="binding_model_id" eval="False"/>
         </record>
-
         <record id="portal.partner_wizard_action_create_and_open" model="ir.actions.server">
             <field name="binding_model_id" eval="False"/>
         </record>
-  </data>
+    </data>
 </odoo>

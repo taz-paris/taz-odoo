@@ -1,64 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-        <data>
-            <record model="ir.ui.view" id="employee_staffing_report_tree">
-              <field name="name">Rapports d'activité</field>
-              <field name="model">hr.employee_staffing_report</field>
-              <field name="arch" type="xml">
-		      <tree create="false">	
-			      <field name="employee_id" optional="show"/>
-			      <field name="rel_job_id" optional="show"/>
-			      <field name="company_id" optional="hide"/>
-			      <field name="periodicity" optional="hide"/>
-			      <field name="rel_work_location_id" optional="hide"/>
-			      <field name="rel_department_id" optional="hide"/>
-			      <field name="start_date" optional="show"/>
-			      <field name="end_date" optional="show"/>
-			      <field name="workdays" optional="show"/>
-			      <field name="hollidays" optional="show"/>
-			      <field name="activity_days" optional="show"/>
-			      <field name="project_days" optional="show"/>
-			      <field name="activity_rate" widget="progressbar" optional="show"/>
-			      <field name="activity_rate_with_holidays" widget="progressbar" optional="show"/>
-			      <field name="learning_internal_days" optional="show"/>
-			      <field name="sales_internal_days" optional="show"/>
-			      <field name="other_internal_days" optional="show"/>
-			      <field name="available_days" optional="hide"/>
-			      <field name="activity_previsionnal_project_days" optional="hide" />
-			      <field name="activity_previsionnal_rate" widget="progressbar" optional="hide"/>
-			      <field name="delta_previsionnal_project_days" optional="hide"/>
-			      <button type="object" name="action_open_analytic_lines" string="Voir les lignes"/>
-		      </tree>
-              </field>
-            </record>
-              
+    <data>
+        <record model="ir.ui.view" id="employee_staffing_report_tree">
+            <field name="name">Rapports d'activité</field>
+            <field name="model">hr.employee_staffing_report</field>
+            <field name="arch" type="xml">
+                <tree create="false">
+                    <field name="employee_id" optional="show"/>
+                    <field name="rel_job_id" optional="show"/>
+                    <field name="company_id" optional="hide"/>
+                    <field name="periodicity" optional="hide"/>
+                    <field name="rel_work_location_id" optional="hide"/>
+                    <field name="rel_department_id" optional="hide"/>
+                    <field name="start_date" optional="show"/>
+                    <field name="end_date" optional="show"/>
+                    <field name="workdays" optional="show"/>
+                    <field name="hollidays" optional="show"/>
+                    <field name="activity_days" optional="show"/>
+                    <field name="project_days" optional="show"/>
+                    <field name="activity_rate" widget="progressbar" optional="show"/>
+                    <field name="activity_rate_with_holidays" widget="progressbar" optional="show"/>
+                    <field name="learning_internal_days" optional="show"/>
+                    <field name="sales_internal_days" optional="show"/>
+                    <field name="other_internal_days" optional="show"/>
+                    <field name="available_days" optional="hide"/>
+                    <field name="activity_previsionnal_project_days" optional="hide"/>
+                    <field name="activity_previsionnal_rate" widget="progressbar" optional="hide"/>
+                    <field name="delta_previsionnal_project_days" optional="hide"/>
+                    <button type="object" name="action_open_analytic_lines" string="Voir les lignes"/>
+                </tree>
+            </field>
+        </record>
         <record id="view_employee_staffing_report_pivot" model="ir.ui.view">
-		<field name="name">Rapports d'activité</field>
-		<field name="model">hr.employee_staffing_report</field>
-		<field name="arch" type="xml">
-		    <pivot string="Rapports d'activité" sample="1">
-			<field name="start_date" type="row" interval="month"/>
-			<!--
+            <field name="name">Rapports d'activité</field>
+            <field name="model">hr.employee_staffing_report</field>
+            <field name="arch" type="xml">
+                <pivot string="Rapports d'activité" sample="1">
+                    <field name="start_date" type="row" interval="month"/>
+                    <!--
 			<field name="rel_job_id" type="col" />
 			-->
-			<field name="activity_days" type="measure"/>
-			<field name="project_days" type="measure"/>
-		    </pivot>
-		</field>
-	</record>
-
-    <record model="ir.ui.view" id="view_employee_staffing_report_graph">
-      <field name="name">Rapports d'activité</field>
-      <field name="model">hr.employee_staffing_report</field>
-      <field name="arch" type="xml">
-	<graph type="line" string="Rapports d'activité" stacked="0">
-	    <field name="activity_rate" type="measure"/>
-	    <field name="start_date" interval="week"/>
-	</graph>
-      </field>
-    </record>
-
-
-
+                    <field name="activity_days" type="measure"/>
+                    <field name="project_days" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="view_employee_staffing_report_graph">
+            <field name="name">Rapports d'activité</field>
+            <field name="model">hr.employee_staffing_report</field>
+            <field name="arch" type="xml">
+                <graph type="line" string="Rapports d'activité" stacked="0">
+                    <field name="activity_rate" type="measure"/>
+                    <field name="start_date" interval="week"/>
+                </graph>
+            </field>
+        </record>
         <record id="view_employee_staffing_report_search" model="ir.ui.view">
             <field name="name">Rapports d'activité</field>
             <field name="model">hr.employee_staffing_report</field>
@@ -76,96 +72,87 @@
                     <separator/>
                     <filter string="Exclure sous-traitants" name="department_not_externals" domain="['|', ('rel_department_id', '=', False), ('rel_department_id', '!=', 18)]"/>
                     <separator/>
-		    <filter string="Cette année (début période > 1er janvier)" name="this_year" domain="[('start_date', '&gt;=', time.strftime('%%Y-01-01')), ('start_date', '&lt;=', time.strftime('%%Y-12-31'))]"/>
+                    <filter string="Cette année (début période &gt; 1er janvier)" name="this_year" domain="[('start_date', '&gt;=', time.strftime('%%Y-01-01')), ('start_date', '&lt;=', time.strftime('%%Y-12-31'))]"/>
                     <separator/>
-		    <filter string="Périodes terminées (fin de période &lt; date du jour)" name="passed_periods" domain="[('end_date', '&lt;=', (context_today().strftime('%Y-%m-%d')))]"/>
+                    <filter string="Périodes terminées (fin de période &lt; date du jour)" name="passed_periods" domain="[('end_date', '&lt;=', (context_today().strftime('%Y-%m-%d')))]"/>
                     <separator/>
-		    <filter string="Masquer les DM" name="hide_project_director" domain="[('rel_job_id.is_project_director', '=', False)]"/>
+                    <filter string="Masquer les DM" name="hide_project_director" domain="[('rel_job_id.is_project_director', '=', False)]"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
                         <filter string="Bureau" name="group_rel_work_location_id" context="{'group_by': 'rel_work_location_id'}"/>
                         <filter string="Date de début" name="group_start_date_year" context="{'group_by': 'start_date'}"/>
                         <filter string="Date de début (par semaine)" name="group_start_date_week" context="{'group_by': 'start_date:week'}" invisible="1"/>
-			<filter string="Date de fin" name="group_end_date" context="{'group_by': 'end_date'}"/>
+                        <filter string="Date de fin" name="group_end_date" context="{'group_by': 'end_date'}"/>
                         <filter string="Grade" name="group_rel_job_id" context="{'group_by': 'rel_job_id'}"/>
                         <filter string="Consultant" name="group_employee_id" context="{'group_by': 'employee_id'}"/>
                     </group>
                 </search>
             </field>
         </record>
-
         <menuitem name="Rapports d'activité" id="employee_staffing_report_menu" parent="staffing.staffing_root"/>
-
         <record id="employee_staffing_report_week_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille hebdomadaire)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot,graph</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_week' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_week' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'week'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille hebdomadaire)" id="employee_staffing_report_week_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_week_action"/>
-
         <record id="employee_staffing_report_month_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille mensuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot,graph</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'month'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille mensuelle)" id="employee_staffing_report_month_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_month_action"/>
-
         <record id="employee_staffing_report_quarter_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille trimestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot,graph</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'quarter'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille trimestrielle)" id="employee_staffing_report_quarter_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_quarter_action"/>
-
         <record id="employee_staffing_report_semester_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille semestrielle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot,graph</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : True, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'semester'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille semestrielle)" id="employee_staffing_report_semester_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_semester_action"/>
-	
-	<record id="employee_staffing_report_year_action" model="ir.actions.act_window">
+        <record id="employee_staffing_report_year_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité (maille annuelle)</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot,graph</field>
-	    <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : False, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
+            <field name="context">{'search_default_department_not_externals' : True, 'search_default_this_year' : False, 'search_default_passed_periods' : True, 'search_default_group_rel_job_id' : True, 'search_default_group_employee_id' : True, 'search_default_group_start_date_year' : True, 'search_default_hide_project_director' : True, 'search_default_group_company_id' : True}</field>
             <field name="domain">[('periodicity', '=', 'year'), '|', ('rel_job_id.contract_type_id', '=', False), ('rel_job_id.contract_type_id.name', '!=', 'Support')]</field>
         </record>
         <menuitem name="Rapports d'activité (maille annuelle)" id="employee_staffing_report_year_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_year_action"/>
-
-	<record id="employee_staffing_report_all_action" model="ir.actions.act_window">
+        <record id="employee_staffing_report_all_action" model="ir.actions.act_window">
             <field name="name">Rapports d'activité TOUTES MAILLES</field>
             <field name="res_model">hr.employee_staffing_report</field>
             <field name="view_mode">tree,pivot,graph</field>
-	    <field name="domain"></field>
+            <field name="domain"/>
         </record>
         <menuitem name="Rapports d'activité TOUTES MAILLES (pour tâches d'admin uniquement)" id="employee_staffing_report_year_menu" parent="staffing.employee_staffing_report_menu" action="employee_staffing_report_all_action" groups="taz-common.taz-admin"/>
-
-       <record id="reset_all_reports_action" model="ir.actions.server">
-          <field name="name">Supprimer puis recalculer tous les rapports d'activité (peut prendre plusieurs minutes)</field>
-          <field name="model_id" ref="model_hr_employee_staffing_report"/>
-          <field name="type">ir.actions.server</field>
-          <field name="state">code</field>
-          <field name="code">action = model.reset_all_reports()</field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]" />
-       </record>
-       <menuitem name="Supprimer puis recalculer tous les rapports d'activité (peut prendre plusieurs minutes)" id="reset_all_reports_menu" parent="staffing.employee_staffing_report_menu" action="reset_all_reports_action"/>
-
-	<record id="action_recompute_report" model="ir.actions.server">
+        <record id="reset_all_reports_action" model="ir.actions.server">
+            <field name="name">Supprimer puis recalculer tous les rapports d'activité (peut prendre plusieurs minutes)</field>
+            <field name="model_id" ref="model_hr_employee_staffing_report"/>
+            <field name="type">ir.actions.server</field>
+            <field name="state">code</field>
+            <field name="code">action = model.reset_all_reports()</field>
+            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+        </record>
+        <menuitem name="Supprimer puis recalculer tous les rapports d'activité (peut prendre plusieurs minutes)" id="reset_all_reports_menu" parent="staffing.employee_staffing_report_menu" action="reset_all_reports_action"/>
+        <record id="action_recompute_report" model="ir.actions.server">
             <field name="name">Recalculer les données de ce rapport d'activité</field>
             <field name="model_id" ref="model_hr_employee_staffing_report"/>
             <field name="binding_model_id" ref="model_hr_employee_staffing_report"/>
             <field name="state">code</field>
-	    <field name="code">
+            <field name="code">
 for rec in records:
     rec.with_context().availability()
     rec.with_context().compute_job()
@@ -173,9 +160,7 @@ for rec in records:
     rec.with_context().compute_department()
     rec.with_context().compute_company()
 	    </field>
-            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]" />
-  	</record>
-
-
-        </data>
+            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+        </record>
+    </data>
 </odoo>

@@ -1,319 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-	<record id="view_order_form_inherit" model="ir.ui.view">
+    <data>
+        <record id="view_order_form_inherit" model="ir.ui.view">
             <field name="name">Sale order</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
-		   
-		<field name="name" position="replace">
-		    <field name="client_order_ref" position="move"/>
-		</field>
-		<field name="fiscal_position_id" position="after">
-			<group>
-				<field name="name"/>
-				<field name="user_id"/>
-			</group>
-		</field>
-
-
-		<xpath expr="//button[@name='action_preview_sale_order']" position='replace'>
+                <field name="name" position="replace">
+                    <field name="client_order_ref" position="move"/>
+                </field>
+                <field name="fiscal_position_id" position="after">
+                    <group>
+                        <field name="name"/>
+                        <field name="user_id"/>
+                    </group>
+                </field>
+                <xpath expr="//button[@name='action_preview_sale_order']" position="replace">
 		</xpath>
-
-		<field name="client_order_ref" position="attributes">
- 			<attribute name="placeholder">Référence client du Bon de commande</attribute>
-		</field>
-
-		<field name="payment_term_id" position="attributes">
- 			<attribute name="required">1</attribute>
-		</field>
-
-		<field name="partner_id" position="attributes">
-			<attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
-		</field>
-
-		<field name="partner_invoice_id" position="attributes">
-			<attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
-		</field>
-
-		<field name="partner_shipping_id" position="attributes">
-			<attribute name="invisible">True</attribute>
-		</field>
-
-		<field name="order_line" position="before">
-			<group string="Lignes de commande de la part que nous pilotons (y/c co-traitance pour laquelle nous sommes mandataires)"/>
-		</field>
-
-
-		<xpath expr="//group[@name='note_group']" position="after">
-			<group string="Bon de commande du client final">
-				<group>
-					<field name="other_company_amount" />
-				</group>
-				<group>
-					<field name="final_customer_order_amount" />
-				</group>
-			</group>
-		</xpath>
-
-		<xpath expr="//notebook" position='inside'>
-			<page string="Avances (sans facture)">
-				<field name="advance_payment_ids" context="{'default_partner_id' : partner_id, 'default_advance_sale_order_id':id, 'default_ref' : 'Avance sans facture sur BC ' + (client_order_ref or '')}" />
-			</page>
-		</xpath>
-
-		<xpath expr="//group[@name='sales_person']" position="attributes">
-			<attribute name="invisible">True</attribute>
-		</xpath>
-		<xpath expr="//group[@name='sale_shipping']" position="attributes">
-			<attribute name="invisible">True</attribute>
-		</xpath>
-		<xpath expr="//group[@name='sale_reporting']" position="attributes">
-			<attribute name="invisible">True</attribute>
-		</xpath>
-
-		<field name="order_line" position="before">
-			<group>
-				<field name="target_amount" onchange="1"/>
-			</group>
-		</field>
-
-		<xpath expr="//tree/field[@name='product_uom_qty']" position="before">
-			<field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
-			<field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
-			<field name="untaxed_amount_to_invoice" optional="hide" on_change="1"/>
-			<field name="untaxed_amount_invoiced" optional="hide" on_change="1" />
-			<field name="previsional_invoice_date" optional="show" string="Date prev fact" on_change="1" required="1"/>
-			<field name="invoice_lines" optional="hide"  on_change="1" widget="many2many_tags"/>
-			<field name="comment" optional="show"  on_change="1" />
-		</xpath>
-
-		<xpath expr="//tree/field[@name='product_uom_qty']" position="attributes">
-			<attribute name="sum">Total</attribute>
-		</xpath>
-
-		<xpath expr="//tree/field[@name='qty_delivered']" position="attributes">
-			<attribute name="sum">Total</attribute>
-			<!--
+                <field name="client_order_ref" position="attributes">
+                    <attribute name="placeholder">Référence client du Bon de commande</attribute>
+                </field>
+                <field name="payment_term_id" position="attributes">
+                    <attribute name="required">1</attribute>
+                </field>
+                <field name="partner_id" position="attributes">
+                    <attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+                </field>
+                <field name="partner_invoice_id" position="attributes">
+                    <attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+                </field>
+                <field name="partner_shipping_id" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </field>
+                <field name="order_line" position="before">
+                    <group string="Lignes de commande de la part que nous pilotons (y/c co-traitance pour laquelle nous sommes mandataires)"/>
+                </field>
+                <xpath expr="//group[@name='note_group']" position="after">
+                    <group string="Bon de commande du client final">
+                        <group>
+                            <field name="other_company_amount"/>
+                        </group>
+                        <group>
+                            <field name="final_customer_order_amount"/>
+                        </group>
+                    </group>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Avances (sans facture)">
+                        <field name="advance_payment_ids" context="{'default_partner_id' : partner_id, 'default_advance_sale_order_id':id, 'default_ref' : 'Avance sans facture sur BC ' + (client_order_ref or '')}"/>
+                    </page>
+                </xpath>
+                <xpath expr="//group[@name='sales_person']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//group[@name='sale_shipping']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//group[@name='sale_reporting']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <field name="order_line" position="before">
+                    <group>
+                        <field name="target_amount" onchange="1"/>
+                    </group>
+                </field>
+                <xpath expr="//tree/field[@name='product_uom_qty']" position="before">
+                    <field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
+                    <field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
+                    <field name="untaxed_amount_to_invoice" optional="hide" on_change="1"/>
+                    <field name="untaxed_amount_invoiced" optional="hide" on_change="1"/>
+                    <field name="previsional_invoice_date" optional="show" string="Date prev fact" on_change="1" required="1"/>
+                    <field name="invoice_lines" optional="hide" on_change="1" widget="many2many_tags"/>
+                    <field name="comment" optional="show" on_change="1"/>
+                </xpath>
+                <xpath expr="//tree/field[@name='product_uom_qty']" position="attributes">
+                    <attribute name="sum">Total</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='qty_delivered']" position="attributes">
+                    <attribute name="sum">Total</attribute>
+                    <!--
 			<attribute name="attrs">attrs="{
 				'column_invisible': [('parent.state', 'not in', ['sale', 'done'])],
 				'readonly': [('qty_delivered_method', '!=', 'manual')]
 				}</attribute>
 			-->
-		</xpath>
-
-		<xpath expr="//tree/field[@name='qty_invoiced']" position="attributes">
-			<attribute name="sum">Total</attribute>
-		</xpath>
-
-		<xpath expr="//tree/field[@name='analytic_distribution']" position="attributes">
-			<attribute name="optional">show</attribute>
-		</xpath>
-
-		<xpath expr="//tree/field[@name='price_unit']" position="attributes">
-			<attribute name="onchange">1</attribute>
-		</xpath>
-		<xpath expr="//tree/field[@name='price_subtotal']" position="attributes">
-			<attribute name="onchange">1</attribute>
-		</xpath>
-		<field name="order_line" position="attributes">
-			<attribute name="context">{
+                </xpath>
+                <xpath expr="//tree/field[@name='qty_invoiced']" position="attributes">
+                    <attribute name="sum">Total</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='analytic_distribution']" position="attributes">
+                    <attribute name="optional">show</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='price_unit']" position="attributes">
+                    <attribute name="onchange">1</attribute>
+                </xpath>
+                <xpath expr="//tree/field[@name='price_subtotal']" position="attributes">
+                    <attribute name="onchange">1</attribute>
+                </xpath>
+                <field name="order_line" position="attributes">
+                    <attribute name="context">{
 				'default_analytic_distribution' : context.get('default_analytic_distribution'), 
 				'default_previsional_invoice_date' : context.get('default_previsional_invoice_date'),
 				'default_price_unit' : context.get('default_price_unit'),
 				}</attribute>
                 </field>
-
-		<xpath expr="//field[@name='order_line']/tree" position="attributes">
-			<attribute name="decoration-success">direct_payment_purchase_order_line_id != False</attribute>
-		</xpath>
-
+                <xpath expr="//field[@name='order_line']/tree" position="attributes">
+                    <attribute name="decoration-success">direct_payment_purchase_order_line_id != False</attribute>
+                </xpath>
             </field>
         </record>
-
-    	<record id="sale_order_form_quote_inherit" model="ir.ui.view">
-		<field name="name">sale.order.form.inherit.sale_management.inherit</field>
-		<field name="model">sale.order</field>
-		<field name="inherit_id" ref="sale_management.sale_order_form_quote"/>
-		<field name="arch" type="xml">
-			<xpath expr="//page[@name='optional_products']" position="attributes">
-				<attribute name="groups">base.group_system</attribute>
-			</xpath>
-		</field>
-	</record>
-
-
+        <record id="sale_order_form_quote_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit.sale_management.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_management.sale_order_form_quote"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='optional_products']" position="attributes">
+                    <attribute name="groups">base.group_system</attribute>
+                </xpath>
+            </field>
+        </record>
         <record id="view_order_tree_inherit" model="ir.ui.view">
             <field name="name">Sale order</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_tree"/>
-	    <field name="arch" type="xml">
-		<field name="name" position="replace">
-		  	<field name="id" widget="open_tab"/>
-			<field name="client_order_ref"/>
-			<field name="rel_project_ids" optional="show" widget="many2many_tags"/>
-		</field> 
+            <field name="arch" type="xml">
+                <field name="name" position="replace">
+                    <field name="id" widget="open_tab"/>
+                    <field name="client_order_ref"/>
+                    <field name="rel_project_ids" optional="show" widget="many2many_tags"/>
+                </field>
             </field>
         </record>
-
         <record id="view_quotation_tree_with_onboarding_inherit" model="ir.ui.view">
             <field name="name">Sale order</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
-	    <field name="arch" type="xml">
-		<field name="name" position="before">
-		  	<field name="id" widget="open_tab"/>
-		</field> 
-		<field name="name" position="replace">
-			<field name="client_order_ref"/>
-		  	<field name="rel_project_ids" optional="show" widget="many2many_tags"/>
-		</field> 
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="id" widget="open_tab"/>
+                </field>
+                <field name="name" position="replace">
+                    <field name="client_order_ref"/>
+                    <field name="rel_project_ids" optional="show" widget="many2many_tags"/>
+                </field>
             </field>
         </record>
-
-    <record id="sale.action_quotations_with_onboarding" model="ir.actions.act_window">
-        <field name="context">{'search_default_my_quotation': 0, 'search_default_draft': 1}</field>
-    </record>
-
-
-	<record id="view_sales_order_line_filter_inherit" model="ir.ui.view">
+        <record id="sale.action_quotations_with_onboarding" model="ir.actions.act_window">
+            <field name="context">{'search_default_my_quotation': 0, 'search_default_draft': 1}</field>
+        </record>
+        <record id="view_sales_order_line_filter_inherit" model="ir.ui.view">
             <field name="name">Sale order line search</field>
             <field name="model">sale.order.line</field>
             <field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
             <field name="arch" type="xml">
-		<xpath expr="//filter[@name='to_invoice']" position="before">
-		    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced'), ('direct_payment_purchase_order_line_id', '=', False)]"/>
-		    <field string="Projet" name="analytic_distribution" />
-		    <filter string="Échéances antérieures à la fin de ce mois" name="this_month" domain="[('previsional_invoice_date', '&lt;', ((context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d')))]"/>
-		    <filter string="Échéances antérieures à la date du jour" name="before_today" domain="[('previsional_invoice_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
-		</xpath>
+                <xpath expr="//filter[@name='to_invoice']" position="before">
+                    <filter string="Reste à livrer ou facturer" name="to_delivered_or_invoice" domain="[('invoice_status', '!=', 'invoiced'), ('direct_payment_purchase_order_line_id', '=', False)]"/>
+                    <field string="Projet" name="analytic_distribution"/>
+                    <filter string="Échéances antérieures à la fin de ce mois" name="this_month" domain="[('previsional_invoice_date', '&lt;', ((context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d')))]"/>
+                    <filter string="Échéances antérieures à la date du jour" name="before_today" domain="[('previsional_invoice_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                </xpath>
             </field>
         </record>
-
-	<record id="view_order_line_tree_inherit" model="ir.ui.view">
+        <record id="view_order_line_tree_inherit" model="ir.ui.view">
             <field name="name">Sale order line</field>
             <field name="model">sale.order.line</field>
             <field name="inherit_id" ref="sale.view_order_line_tree"/>
-	    <field name="arch" type="xml">
-		<xpath expr="//tree" position="attributes">
-			<attribute name="expand">1</attribute>
-		</xpath>
-		<field name="order_id"  position="attributes">
-			<attribute name="widget">many2one</attribute>
-		</field>
-		<field name="name"  position="attributes">
-			<attribute name="optional">hide</attribute>
-		</field>
-		<field name="salesman_id"  position="attributes">
-			<attribute name="optional">hide</attribute>
-		</field>
-		<field name="product_uom"  position="attributes">
-			<attribute name="optional">hide</attribute>
-		</field>
-		<field name="product_uom_qty"  position="attributes">
-			<attribute name="optional">hide</attribute>
-		</field>
-		<field name="qty_delivered"  position="attributes">
-			<attribute name="string">Quantité livrée</attribute>
-		</field>
-		<field name="qty_invoiced"  position="attributes">
-			<attribute name="optional">hide</attribute>
-		</field>
-		<field name="qty_to_invoice"  position="attributes">
-			<attribute name="optional">hide</attribute>
-		</field>
-		<field name="order_partner_id" position="after">
-			<field name="order_partner_invoice_id" optional="hide"/>
-		</field>
-		<field name="price_subtotal" position="after">
-			<field name="untaxed_amount_invoiced" optional="show" string="Facturé (HT)" />
-			<field name="untaxed_amount_to_invoice" optional="show" string="Livré à facturer (HT)"/>
-			<field name="previsional_invoice_date" optional="show" required="1"/>
-			<field name="direct_payment_purchase_order_line_id" optional="show"/>
-			<field name="invoice_lines" optional="hide" widget="many2many_tags"/>
-			<field name="invoice_status" optional="hide"/>
-			<field name="state" optional="show" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'" widget="badge" />
-			<field name="comment" optional="show"/>
-			<field name="analytic_distribution" optional="hide" widget="analytic_distribution"/>
-			<!--
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="expand">1</attribute>
+                </xpath>
+                <field name="order_id" position="attributes">
+                    <attribute name="widget">many2one</attribute>
+                </field>
+                <field name="name" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="salesman_id" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="product_uom" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="product_uom_qty" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="qty_delivered" position="attributes">
+                    <attribute name="string">Quantité livrée</attribute>
+                </field>
+                <field name="qty_invoiced" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="qty_to_invoice" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="order_partner_id" position="after">
+                    <field name="order_partner_invoice_id" optional="hide"/>
+                </field>
+                <field name="price_subtotal" position="after">
+                    <field name="untaxed_amount_invoiced" optional="show" string="Facturé (HT)"/>
+                    <field name="untaxed_amount_to_invoice" optional="show" string="Livré à facturer (HT)"/>
+                    <field name="previsional_invoice_date" optional="show" required="1"/>
+                    <field name="direct_payment_purchase_order_line_id" optional="show"/>
+                    <field name="invoice_lines" optional="hide" widget="many2many_tags"/>
+                    <field name="invoice_status" optional="hide"/>
+                    <field name="state" optional="show" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'" widget="badge"/>
+                    <field name="comment" optional="show"/>
+                    <field name="analytic_distribution" optional="hide" widget="analytic_distribution"/>
+                    <!--
 			<field name="fitnet_id" optional="hide"/>
 				-->
-		</field>
+                </field>
             </field>
         </record>
-
-
         <record id="view_sale_order_line_delivery_validation" model="ir.ui.view">
             <field name="name">Echéances de facturation</field>
-	    <field name="model">sale.order.line</field>
-	    <field name="priority" eval="50"/>
-	    <field name="arch" type="xml">
-		<tree editable="top" create="false">
-			<field name="salesman_id" readonly="1"/>
-			<field name="order_partner_id" readonly="1"/>
-			<field name="order_partner_invoice_id" optional="hide" readonly="1"/>
-			<field name="analytic_distribution" widget="analytic_distribution" readonly="1"/>
-			<field name="order_id" widget="many2one" on_change="1" required="1"/>
-			<field name="previsional_invoice_date" string="Echéance" optional="show" readonly="1"/>
-			<field name="name" optional="hide" required="1"/>
-			<field name="price_subtotal" sum="Montant HT" widget="monetary" readonly="1"/>
-
-			<field name="product_uom_qty" string="Qté" optional="show" on_change="1" readonly="1" required="1"/>
-			<field name="qty_delivered" optional="show" on_change="1"/>
-
-			<field name="qty_invoiced" optional="hide" on_change="1" readonly="1"/>
-			<field name="qty_to_invoice" optional="hide" readonly="1"/>
-			<field name="untaxed_amount_to_invoice" optional="hide" string="Reste à facturer (HT)" readonly="1"/>
-			<field name="direct_payment_purchase_order_line_id" optional="hide" on_change="1"/>
-			<field name="allowed_direct_payment_purchase_order_line_ids" column_invisible="1"/>
-			<field name="invoice_lines" optional="hide" readonly="1" widget="many2many_tags" />
-			<field name="currency_id" column_invisible="1"/>
-			<field name="invoice_status" optional="hide" />
-			<field name="state" optional="show" widget="badge" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'"/>
-			<field name="comment" optional="show"/>
-		</tree>
-	    </field>
-	</record>
-
-
-
-	<record id="view_sale_order_line_pivot" model="ir.ui.view">
-		<field name="name">sale.order.line.pivot</field>
-		<field name="model">sale.order.line</field>
-		<field name="arch" type="xml">
-		    <pivot string="Lignes de commande" sample="1">
-			<field name="previsional_invoice_date" type="row" interval="month"/>
-			<field name="price_subtotal" type="measure"/>
-		    </pivot>
-		</field>
-	</record>
-
-	    <record model="ir.actions.act_window" id="action_sale_order_line_delivery_validation">
-	      <field name="name">Échéances de facturation</field>
-	      <field name="res_model">sale.order.line</field>
-	      <field name="context">{'search_default_to_delivered_or_invoice' : 1}</field>
-	      <field name="view_mode">tree,form,kanban,pivot</field>
-			      <field name="view_ids" eval="
-				    [
-				    (5, 0, 0),
-				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),
-				      ]" />
-	    </record>
-
-	<menuitem name="Échéances de facturation" sequence="5" id="menu_sale_order_line_delivery_validation" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation"/>
-
-	<record model="ir.actions.act_window" id="action_sale_order_line_delivery_validation_month">
-              <field name="name">Mes échéances de facturation du mois</field>
-              <field name="res_model">sale.order.line</field>
-	      <field name="context">{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}</field>
-              <field name="view_mode">tree,form,kanban</field>
-                              <field name="view_ids" eval="
-                                    [
-                                    (5, 0, 0),
-                                    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),
-                                      ]" />
+            <field name="model">sale.order.line</field>
+            <field name="priority" eval="50"/>
+            <field name="arch" type="xml">
+                <tree editable="top" create="false">
+                    <field name="salesman_id" readonly="1"/>
+                    <field name="order_partner_id" readonly="1"/>
+                    <field name="order_partner_invoice_id" optional="hide" readonly="1"/>
+                    <field name="analytic_distribution" widget="analytic_distribution" readonly="1"/>
+                    <field name="order_id" widget="many2one" on_change="1" required="1"/>
+                    <field name="previsional_invoice_date" string="Echéance" optional="show" readonly="1"/>
+                    <field name="name" optional="hide" required="1"/>
+                    <field name="price_subtotal" sum="Montant HT" widget="monetary" readonly="1"/>
+                    <field name="product_uom_qty" string="Qté" optional="show" on_change="1" readonly="1" required="1"/>
+                    <field name="qty_delivered" optional="show" on_change="1"/>
+                    <field name="qty_invoiced" optional="hide" on_change="1" readonly="1"/>
+                    <field name="qty_to_invoice" optional="hide" readonly="1"/>
+                    <field name="untaxed_amount_to_invoice" optional="hide" string="Reste à facturer (HT)" readonly="1"/>
+                    <field name="direct_payment_purchase_order_line_id" optional="hide" on_change="1"/>
+                    <field name="allowed_direct_payment_purchase_order_line_ids" column_invisible="1"/>
+                    <field name="invoice_lines" optional="hide" readonly="1" widget="many2many_tags"/>
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="invoice_status" optional="hide"/>
+                    <field name="state" optional="show" widget="badge" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'"/>
+                    <field name="comment" optional="show"/>
+                </tree>
+            </field>
         </record>
-        
+        <record id="view_sale_order_line_pivot" model="ir.ui.view">
+            <field name="name">sale.order.line.pivot</field>
+            <field name="model">sale.order.line</field>
+            <field name="arch" type="xml">
+                <pivot string="Lignes de commande" sample="1">
+                    <field name="previsional_invoice_date" type="row" interval="month"/>
+                    <field name="price_subtotal" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_sale_order_line_delivery_validation">
+            <field name="name">Échéances de facturation</field>
+            <field name="res_model">sale.order.line</field>
+            <field name="context">{'search_default_to_delivered_or_invoice' : 1}</field>
+            <field name="view_mode">tree,form,kanban,pivot</field>
+            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),           ]"/>
+        </record>
+        <menuitem name="Échéances de facturation" sequence="5" id="menu_sale_order_line_delivery_validation" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation"/>
+        <record model="ir.actions.act_window" id="action_sale_order_line_delivery_validation_month">
+            <field name="name">Mes échéances de facturation du mois</field>
+            <field name="res_model">sale.order.line</field>
+            <field name="context">{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_ids" eval="                                     [                                     (5, 0, 0),                                     (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),                                       ]"/>
+        </record>
         <menuitem name="Mes échéances de facturation du mois" sequence="4" id="menu_sale_order_line_delivery_validation_month" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation_month"/>
-  </data>
+    </data>
 </odoo>

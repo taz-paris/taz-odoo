@@ -1,52 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-   <data>
-
-    <record model="ir.ui.view" id="employee_book_goal_tree">
-      <field name="name">Objectif de book</field>
-      <field name="model">project.employee_book_goal</field>
-      <field name="arch" type="xml">
-         <tree editable="top">
-                  <field name="currency_id" column_invisible="1"/>
-		  <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-		  <field name="company_id" column_invisible="1"/>
-                  <field name="employee_id" required="1" />
-                  <field name="rel_job_id" optional="show"/>
-                  <field name="reference_period" optional="show"/>
-                  <field name="period_goal" optional="show" sum="Total"/>
-                  <field name="period_book" optional="show" sum="Total"/>
-                  <field name="period_rate" optional="show" widget="progressbar"/>
-        </tree>
-      </field>
-    </record>
-
-        <record id="employee_book_goal_action" model="ir.actions.act_window">
-                <field name="name">Objectifs de book par consultant</field>
-                <field name="res_model">project.employee_book_goal</field>
-                <field name="view_mode">tree</field>
+    <data>
+        <record model="ir.ui.view" id="employee_book_goal_tree">
+            <field name="name">Objectif de book</field>
+            <field name="model">project.employee_book_goal</field>
+            <field name="arch" type="xml">
+                <tree editable="top">
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" column_invisible="1"/>
+                    <field name="employee_id" required="1"/>
+                    <field name="rel_job_id" optional="show"/>
+                    <field name="reference_period" optional="show"/>
+                    <field name="period_goal" optional="show" sum="Total"/>
+                    <field name="period_book" optional="show" sum="Total"/>
+                    <field name="period_rate" optional="show" widget="progressbar"/>
+                </tree>
+            </field>
         </record>
-
-
-    <record model="ir.ui.view" id="employee_book_goal_search">
-        <field name="name">employee.book_goal.search</field>
-        <field name="model">project.employee_book_goal</field>
-        <field name="arch" type="xml">
-           <search string="Project employee book goal">
-		    <field name="employee_id" string="Employé" filter_domain="['|', ('employee_id.name', 'ilike', self), ('employee_id.first_name', 'ilike', self)]"/>
+        <record id="employee_book_goal_action" model="ir.actions.act_window">
+            <field name="name">Objectifs de book par consultant</field>
+            <field name="res_model">project.employee_book_goal</field>
+            <field name="view_mode">tree</field>
+        </record>
+        <record model="ir.ui.view" id="employee_book_goal_search">
+            <field name="name">employee.book_goal.search</field>
+            <field name="model">project.employee_book_goal</field>
+            <field name="arch" type="xml">
+                <search string="Project employee book goal">
+                    <field name="employee_id" string="Employé" filter_domain="['|', ('employee_id.name', 'ilike', self), ('employee_id.first_name', 'ilike', self)]"/>
                     <field name="reference_period" string="Année de référence"/>
-
-		   <filter string="Mes objectifs" name="assigned_to_me" domain="[('employee_id.user_id', '=', uid)]" />
+                    <filter string="Mes objectifs" name="assigned_to_me" domain="[('employee_id.user_id', '=', uid)]"/>
                     <filter string="Cette année" name="this_year" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
                     <filter string="L'an dernier" name="previous_year" domain="[('reference_period', '=', (context_today() + relativedelta(years=-1)).strftime('%Y'))]"/>
-
                     <group expand="0" string="Group By">
                         <filter string="Employé" name="employe" context="{'group_by': 'employee_id'}"/>
                         <filter string="Année de référence" name="reference_period" context="{'group_by': 'reference_period'}"/>
-			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
-           </search>
-        </field>
-    </record>
-
-	<menuitem name="Objectifs de book par consultant / année" id="employee_book_goal" parent="project_book_menu" action="employee_book_goal_action"/>
-   </data>
+                </search>
+            </field>
+        </record>
+        <menuitem name="Objectifs de book par consultant / année" id="employee_book_goal" parent="project_book_menu" action="employee_book_goal_action"/>
+    </data>
 </odoo>

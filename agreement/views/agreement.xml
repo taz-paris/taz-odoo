@@ -1,13 +1,13 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="agreement_form" model="ir.ui.view">
         <field name="name">agreement.form</field>
         <field name="model">agreement</field>
         <field name="arch" type="xml">
             <form string="Agreement">
-		<header>
-			<field name="state" widget="statusbar" on_change="1"/>
-		</header>
+                <header>
+                    <field name="state" widget="statusbar" on_change="1"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box"/>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
@@ -18,72 +18,67 @@
                             <field name="name"/>
                         </h1>
                     </div>
-		    <group>
-			    <group>
-				<field name="agreement_procedure_id"/>
-                            	<field name="code"/>
-                            	<field name="official_name"/>
-                            	<field name="state"/>
-			    </group>
-			    <group>
-                            	<field name="comments"/>
-			    </group>
-		    </group>
-
+                    <group>
+                        <group>
+                            <field name="agreement_procedure_id"/>
+                            <field name="code"/>
+                            <field name="official_name"/>
+                            <field name="state"/>
+                        </group>
+                        <group>
+                            <field name="comments"/>
+                        </group>
+                    </group>
                     <notebook>
                         <page name="agreement_data" string="Données principales">
-				    <group name="main" col="4">
-					<group name="left" string="Acteurs">
-					    <field name="partner_id" string="Pouvoir adjudicateur" required="not is_template" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-					    <field name="partner_company_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-					    <field name="mandator_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-					    <field name="cocontractor_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-					    <field name="referent"/>
-						    <!--
+                            <group name="main" col="4">
+                                <group name="left" string="Acteurs">
+                                    <field name="partner_id" string="Pouvoir adjudicateur" required="not is_template" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                                    <field name="partner_company_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                                    <field name="mandator_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                                    <field name="cocontractor_ids" widget="many2many_tags" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                                    <field name="referent"/>
+                                    <!--
 						groups="agreement.group_use_agreement_template"
 						    -->
-					</group>
-					<group name="right" string="Périodes">
-					    <field name="signature_date"/>
-					    <field name="start_date"/>
-					    <field name="end_date" string="Date limite de commande"/>
-					    <field name="passed_time_rate" widget="progressbar"/>
-					    <field name="end_date_contractors"/>
-					</group>
-					<group name="left_bottom" string="Montant plafond">
-					    <field name="max_amount"/>
-					</group>
-					<group name="right_bottom" string="Autres informations">
-					    <field name="teams_link" widget="url"/>
-					    <field name="agreement_type_id" groups="agreement.group_use_agreement_type"/>
-					    <field name="end_of_year_discount"/>
-					    <field name="markup_deal"/>
-					    <field name="social_clause"/>
-					    <field name="currency_id" invisible="1"/>
-					    <field name="domain"/>
-					    <field name="is_template" invisible="1"/>
-					    <field name="is_galaxy_agreement"/>
-
-					</group>
-				    </group>
-			</page>
-                        <page name="agreement_subcontractor" string="Sous-traitants de rang 1" invisible="domain != 'sale'">
-				<field name="agreement_subcontractor_ids">
-					<tree>
-                        			<field name="currency_id" column_invisible="1"/>
-						<field name="partner_id"/>
-						<field name="max_amount" optional="show" sum="Total"/>
-						<field name="start_date" optional="show"/>
-						<field name="end_date" optional="show"/>
-						<field name="partner_validation_date" optional="show"/>
-					</tree>
-				</field>
+                                </group>
+                                <group name="right" string="Périodes">
+                                    <field name="signature_date"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date" string="Date limite de commande"/>
+                                    <field name="passed_time_rate" widget="progressbar"/>
+                                    <field name="end_date_contractors"/>
+                                </group>
+                                <group name="left_bottom" string="Montant plafond">
+                                    <field name="max_amount"/>
+                                </group>
+                                <group name="right_bottom" string="Autres informations">
+                                    <field name="teams_link" widget="url"/>
+                                    <field name="agreement_type_id" groups="agreement.group_use_agreement_type"/>
+                                    <field name="end_of_year_discount"/>
+                                    <field name="markup_deal"/>
+                                    <field name="social_clause"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="domain"/>
+                                    <field name="is_template" invisible="1"/>
+                                    <field name="is_galaxy_agreement"/>
+                                </group>
+                            </group>
                         </page>
-
-
+                        <page name="agreement_subcontractor" string="Sous-traitants de rang 1" invisible="domain != 'sale'">
+                            <field name="agreement_subcontractor_ids">
+                                <tree>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="partner_id"/>
+                                    <field name="max_amount" optional="show" sum="Total"/>
+                                    <field name="start_date" optional="show"/>
+                                    <field name="end_date" optional="show"/>
+                                    <field name="partner_validation_date" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
                         <page name="config" string="Configuration" invisible="True"/>
                     </notebook>
-
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
@@ -103,7 +98,7 @@
                 <field name="code" optional="hide"/>
                 <field name="agreement_procedure_id" optional="hide"/>
                 <field name="name"/>
-		<field name="state" widget="badge" decoration-info="state == 'new'" decoration-success="state == 'won'" decoration-danger="state == 'cancelled' or state == 'revoked'" decoration-warning="state == 'lost'" decoration-muted="state == 'passed' or state == 'nogo'" decoration-primary="state == 'work_on_anwser'"/>
+                <field name="state" widget="badge" decoration-info="state == 'new'" decoration-success="state == 'won'" decoration-danger="state == 'cancelled' or state == 'revoked'" decoration-warning="state == 'lost'" decoration-muted="state == 'passed' or state == 'nogo'" decoration-primary="state == 'work_on_anwser'"/>
                 <field name="signature_date" optional="show"/>
                 <field name="start_date" optional="show"/>
                 <field name="end_date" optional="show"/>

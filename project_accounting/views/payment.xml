@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
         <record id="account_view_account_payment_form_inherit" model="ir.ui.view">
@@ -5,37 +6,33 @@
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="account.view_account_payment_form"/>
             <field name="arch" type="xml">
-                   <field name="ref" position="before">
-                           <field name="advance_sale_order_id" readonly="1"/>
-                  </field>
-               </field>
+                <field name="ref" position="before">
+                    <field name="advance_sale_order_id" readonly="1"/>
+                </field>
+            </field>
         </record>
-
         <record id="account_view_account_payment_tree_inherit" model="ir.ui.view">
             <field name="name">Payment</field>
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="account.view_account_payment_tree"/>
             <field name="arch" type="xml">
-                   <field name="state" position="before">
-                           <field name="reconciled_invoice_ids" widget="many2many_tags" />
-                  </field>
-               </field>
+                <field name="state" position="before">
+                    <field name="reconciled_invoice_ids" widget="many2many_tags"/>
+                </field>
+            </field>
         </record>
-
-	<record id="view_payment_pivot" model="ir.ui.view">
-		<field name="name">account.payment.pivot</field>
-		<field name="model">account.payment</field>
-		<field name="arch" type="xml">
-		    <pivot string="Paiements" sample="1">
-			<field name="date" type="row" interval="month"/>
-			<field name="amount_company_currency_signed" type="measure"/>
-		    </pivot>
-		</field>
-	</record>
-
-	    <record model="ir.actions.act_window" id="account.action_account_payments">
-	      <field name="view_mode">tree,form,kanban,graph,pivot</field>
-	    </record>
-
+        <record id="view_payment_pivot" model="ir.ui.view">
+            <field name="name">account.payment.pivot</field>
+            <field name="model">account.payment</field>
+            <field name="arch" type="xml">
+                <pivot string="Paiements" sample="1">
+                    <field name="date" type="row" interval="month"/>
+                    <field name="amount_company_currency_signed" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="account.action_account_payments">
+            <field name="view_mode">tree,form,kanban,graph,pivot</field>
+        </record>
     </data>
 </odoo>

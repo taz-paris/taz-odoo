@@ -1,17 +1,17 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="agreement_subcontractor_tree" model="ir.ui.view">
         <field name="name">agreement.subcontractor.tree</field>
         <field name="model">agreement.subcontractor</field>
         <field name="arch" type="xml">
             <tree string="Agreement Subcontractors">
-                 <field name="currency_id" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
                 <field name="partner_id"/>
                 <field name="agreement_id"/>
                 <field name="start_date" optional="show"/>
                 <field name="partner_validation_date" optional="show"/>
                 <field name="end_date" optional="show"/>
-		<field name="max_amount" optional="show"/>
+                <field name="max_amount" optional="show"/>
             </tree>
         </field>
     </record>
@@ -28,31 +28,31 @@
                             <field name="max_amount"/>
                             <field name="is_partner_id_res_company" invisible="1"/>
                         </group>
-			<group name="center" string="Période">
+                        <group name="center" string="Période">
                             <field name="partner_validation_date"/>
                             <field name="start_date"/>
                             <field name="end_date"/>
-			</group>
+                        </group>
                         <group name="right" string="Autres informations">
                             <field name="code"/>
                             <field name="teams_link" widget="url"/>
                             <field name="comments"/>
-			    <field name="markup_deal"/>
+                            <field name="markup_deal"/>
                         </group>
                     </group>
-		    <group name="amount_rows">
-			  <group string="Total commandes">
-				  <field name="ordered_total"/>
-				  <field name="ordered_direct_payment" string="... dont prévus en paiement direct" invisible="is_partner_id_res_company"/>
-				  <field name="ordered_total_available"/>
-				  <!--<field name="ordered_direct_payment_available"/>-->
-			  </group>
-			  <group string="Total factures">
-				  <field name="invoiced_total"/>
-				  <field name="invoiced_direct_payment_validated_amount" string="... dont paiement direct" invisible="is_partner_id_res_company"/>
-				  <field name="invoiced_total_available"/>
-			  </group>
-		    </group>
+                    <group name="amount_rows">
+                        <group string="Total commandes">
+                            <field name="ordered_total"/>
+                            <field name="ordered_direct_payment" string="... dont prévus en paiement direct" invisible="is_partner_id_res_company"/>
+                            <field name="ordered_total_available"/>
+                            <!--<field name="ordered_direct_payment_available"/>-->
+                        </group>
+                        <group string="Total factures">
+                            <field name="invoiced_total"/>
+                            <field name="invoiced_direct_payment_validated_amount" string="... dont paiement direct" invisible="is_partner_id_res_company"/>
+                            <field name="invoiced_total_available"/>
+                        </group>
+                    </group>
                 </sheet>
             </form>
         </field>

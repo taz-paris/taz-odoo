@@ -1,22 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-    <record id="external_project_outsourcing_link" model="res.groups">
-        <field name="name">External project outsourcing link</field>
-        <field name="comment">Allow external users to access in readonly to project outsourcing links</field>
-    </record>
-
-	<record model="ir.rule" id="restrict_dfc">
-	    <field name="name">Restrict to project link with partner_id = DFC</field>
-	    <field name="model_id" ref="project_accounting.model_project_outsourcing_link"/>
-	    <field name="global" eval="True"/>
-	    <field name="groups" eval="[(4, ref('project_accounting.external_project_outsourcing_link'))]"/>
-	    <field name="domain_force">
+    <data>
+        <record id="external_project_outsourcing_link" model="res.groups">
+            <field name="name">External project outsourcing link</field>
+            <field name="comment">Allow external users to access in readonly to project outsourcing links</field>
+        </record>
+        <record model="ir.rule" id="restrict_dfc">
+            <field name="name">Restrict to project link with partner_id = DFC</field>
+            <field name="model_id" ref="project_accounting.model_project_outsourcing_link"/>
+            <field name="global" eval="True"/>
+            <field name="groups" eval="[(4, ref('project_accounting.external_project_outsourcing_link'))]"/>
+            <field name="domain_force">
 		[('company_id', 'in', company_ids), ('partner_id', '=', 59407)]
 	    </field>
-	</record>
-
-	
-	<!-- IF THIS RULE IS UNCOMMENTED, USER CAN'T SEE MIROR PROJECT OUTSOURCING IN PROJECT FORM IF MIROR COMPANY IS NOT SELECTED IN THE COMPANY SELECTOR 
+        </record>
+        <!-- IF THIS RULE IS UNCOMMENTED, USER CAN'T SEE MIROR PROJECT OUTSOURCING IN PROJECT FORM IF MIROR COMPANY IS NOT SELECTED IN THE COMPANY SELECTOR 
 		check_company=True WAS ADDED IN THE project_id attribute in the project_outsourcing_link MODEL to prevent creation of inconsistent project_outsourcing_link
 	   <record model="ir.rule" id="project_outsourcing_link_comp_rule">
 		<field name="name">Project outsourcing link: multi-company</field>
@@ -24,35 +22,35 @@
 		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
 	    </record>
 	-->
-	    <record model="ir.rule" id="project_employee_book_goal_comp_rule">
-		<field name="name">Project employee book goal: multi-company</field>
-		<field name="model_id" ref="model_project_employee_book_goal"/>
-		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-	    </record>
-	    <record model="ir.rule" id="project_accounting_closing_comp_rule">
-		<field name="name">Project accounting closing: multi-company</field>
-		<field name="model_id" ref="model_project_accounting_closing"/>
-		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-	    </record>
-	    <record model="ir.rule" id="project_group_comp_rule">
-		<field name="name">Project group: multi-company</field>
-		<field name="model_id" ref="model_project_group"/>
-		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-	    </record>
-	    <record model="ir.rule" id="project_book_employee_distribution_period_comp_rule">
-		<field name="name">Project book employee distribution period: multi-company</field>
-		<field name="model_id" ref="model_project_book_employee_distribution_period"/>
-		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-	    </record>
-	    <record model="ir.rule" id="project_book_employee_distribution_comp_rule">
-		<field name="name">Project book employee distribution: multi-company</field>
-		<field name="model_id" ref="model_project_book_employee_distribution"/>
-		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-    	    </record>
-	    <record model="ir.rule" id="project_book_period_comp_rule">
-		<field name="name">Project book period: multi-company</field>
-		<field name="model_id" ref="model_project_book_period"/>
-		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-	    </record>
-  </data>
+        <record model="ir.rule" id="project_employee_book_goal_comp_rule">
+            <field name="name">Project employee book goal: multi-company</field>
+            <field name="model_id" ref="model_project_employee_book_goal"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="project_accounting_closing_comp_rule">
+            <field name="name">Project accounting closing: multi-company</field>
+            <field name="model_id" ref="model_project_accounting_closing"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="project_group_comp_rule">
+            <field name="name">Project group: multi-company</field>
+            <field name="model_id" ref="model_project_group"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="project_book_employee_distribution_period_comp_rule">
+            <field name="name">Project book employee distribution period: multi-company</field>
+            <field name="model_id" ref="model_project_book_employee_distribution_period"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="project_book_employee_distribution_comp_rule">
+            <field name="name">Project book employee distribution: multi-company</field>
+            <field name="model_id" ref="model_project_book_employee_distribution"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="project_book_period_comp_rule">
+            <field name="name">Project book period: multi-company</field>
+            <field name="model_id" ref="model_project_book_period"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+    </data>
 </odoo>

@@ -1,72 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
+    <data>
         <record id="company_search_inherit" model="ir.ui.view">
             <field name="name">res.partner.company.search</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="taz-common.company_search"/>
             <field name="arch" type="xml">
                 <filter name="inactive" position="after">
-                        <filter string="Projet débuté sur cette année civile" name="book_this_year" domain="[('has_project_started_this_year', '=', True)]"/>
+                    <filter string="Projet débuté sur cette année civile" name="book_this_year" domain="[('has_project_started_this_year', '=', True)]"/>
                 </filter>
             </field>
-    	</record> 
-
+        </record>
         <record id="res_partner_project_accounting_view_form_inherit" model="ir.ui.view">
             <field name="name">Partner</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="taz-common.company_form"/>
             <field name="arch" type="xml">
-		    <field name="active" position="after">
-			    <field name="is_protected_partner" invisible="1"/>
-			    <div class="alert alert-warning mb-0" role="alert" invisible="not is_protected_partner">
+                <field name="active" position="after">
+                    <field name="is_protected_partner" invisible="1"/>
+                    <div class="alert alert-warning mb-0" role="alert" invisible="not is_protected_partner">
 				Cette fiche est protégée : seul un ADV peut modifier le nom, le libellé long, le groupe, l'adresse postale, et les données comptables (onglet Facturation) de cette fiche.
 			    </div>
-		    </field> 
-		    <field name="property_account_position_id" position="after">
-			    <field name="default_outsourcing_link_type"/>
-			    <field name="is_protected_partner"/>
-			    <field name="is_probono_partner"/>
-			    <field name="is_protected_partner"/>
-		    </field>
-		<xpath expr="//notebook" position="inside">
-			<page string="Projets">
-				<group>
-					<group>
-						<field name="has_project_started_this_year"/>
-					</group>
-				</group>
-				<field name="project_ids" readonly="1">
-					<tree>
-						<field name="number"/>
-						<field name="name"/>
-						<field name="stage_id"/>
-						<field name="date_start"/>
-						<field name="date" string="Date de fin"/>
-					</tree>
-				</field>
-			</page>
+                </field>
+                <field name="property_account_position_id" position="after">
+                    <field name="default_outsourcing_link_type"/>
+                    <field name="is_protected_partner"/>
+                    <field name="is_probono_partner"/>
+                    <field name="is_protected_partner"/>
+                </field>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Projets">
+                        <group>
+                            <group>
+                                <field name="has_project_started_this_year"/>
+                            </group>
+                        </group>
+                        <field name="project_ids" readonly="1">
+                            <tree>
+                                <field name="number"/>
+                                <field name="name"/>
+                                <field name="stage_id"/>
+                                <field name="date_start"/>
+                                <field name="date" string="Date de fin"/>
+                            </tree>
+                        </field>
+                    </page>
                 </xpath>
             </field>
         </record>
-
-
-	<record id="account_view_partner_property_form_inherit" model="ir.ui.view">
+        <record id="account_view_partner_property_form_inherit" model="ir.ui.view">
             <field name="name">Partner</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="account.view_partner_property_form"/>
             <field name="arch" type="xml">
-		    <field name="active" position="after">
-			    <field name="is_protected_partner" invisible="1"/>
-			    <div class="alert alert-warning mb-0" role="alert" invisible="not is_protected_partner">
+                <field name="active" position="after">
+                    <field name="is_protected_partner" invisible="1"/>
+                    <div class="alert alert-warning mb-0" role="alert" invisible="not is_protected_partner">
 			Une fiche est protégée lorsqu'un objet comptable ou paracomptable (bon de commande client/fournisseur) le référence. Cette fiche ne peut être modifiée que par un ADV.	
 			    </div>
-		    </field> 
-		    <field name="bank_ids" position="after">
-			    <field name="property_payment_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
-			    <field name="is_protected_partner"/>
-		    </field>
-	    </field>
-	</record>
-
-  </data>
+                </field>
+                <field name="bank_ids" position="after">
+                    <field name="property_payment_bank_account" options="{'no_create': True, 'no_create_edit':True}"/>
+                    <field name="is_protected_partner"/>
+                </field>
+            </field>
+        </record>
+    </data>
 </odoo>

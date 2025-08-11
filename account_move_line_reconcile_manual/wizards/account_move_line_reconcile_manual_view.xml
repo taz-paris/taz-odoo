@@ -1,54 +1,51 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
-<record id="account_move_line_reconcile_manual_form" model="ir.ui.view">
-    <field name="model">account.move.line.reconcile.manual</field>
-    <field name="arch" type="xml">
+    <record id="account_move_line_reconcile_manual_form" model="ir.ui.view">
+        <field name="model">account.move.line.reconcile.manual</field>
+        <field name="arch" type="xml">
             <form>
-                    <div class="alert alert-warning" role="alert" invisible="partner_count &lt; 2">
+                <div class="alert alert-warning" role="alert" invisible="partner_count &lt; 2">
                             You are trying to reconcile journal items from <field name="partner_count"/> different partners: make sure it is intented.
             </div>
-                    <group name="main">
-                            <field name="account_id"/>
-                            <field name="count"/>
-                            <field name="total_debit"/>
-                            <field name="total_credit"/>
-                            <field name="state" invisible="1"/>
-                            <field name="company_id" invisible="1"/>
-                            <field name="company_currency_id" invisible="1"/>
-                            <field name="partner_count" invisible="1"/>
-                            <field name="partner_id" invisible="1"/>
-                    </group>
-                    <!--TODO: Result from converting "states='writeoff'" attribute into an 'invisible' attribute
+                <group name="main">
+                    <field name="account_id"/>
+                    <field name="count"/>
+                    <field name="total_debit"/>
+                    <field name="total_credit"/>
+                    <field name="state" invisible="1"/>
+                    <field name="company_id" invisible="1"/>
+                    <field name="company_currency_id" invisible="1"/>
+                    <field name="partner_count" invisible="1"/>
+                    <field name="partner_id" invisible="1"/>
+                </group>
+                <!--TODO: Result from converting "states='writeoff'" attribute into an 'invisible' attribute
                          Manually combine states condition into any 'invisible' overrides in inheriting views as well-->
-                    <group name="writeoff" string="Write-off" invisible="state not in ['writeoff']">
-                            <field name="writeoff_model_id" widget="selection"/>
-                            <field name="writeoff_journal_id" widget="selection" required="state == 'writeoff'"/>
-                            <field name="writeoff_date" required="state == 'writeoff'" options="{'datepicker': {'warn_future': true}}"/>
-                            <field name="writeoff_ref"/>
-                            <field name="writeoff_amount"/>
-                            <field name="writeoff_type"/>
-                            <field name="writeoff_account_id" required="state == 'writeoff'"/>
-                            <field name="writeoff_analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting" options="{'account_field': 'writeoff_account_id', 'business_domain': 'general'}"/>
-                    </group>
-                    <footer>
-                            <button name="full_reconcile" type="object" invisible="state != 'start' or writeoff_type != 'none'" class="btn-primary" string="Full Reconcile"/>
-                            <button name="partial_reconcile" type="object" invisible="state != 'start' or writeoff_type == 'none'" class="btn-primary" string="Partial Reconcile"/>
-                            <button name="go_to_writeoff" type="object" invisible="state != 'start' or writeoff_type == 'none'" class="btn-primary" string="Reconcile with Write-off"/>
-                            <!--TODO: Result from converting "states='writeoff'" attribute into an 'invisible' attribute
+                <group name="writeoff" string="Write-off" invisible="state not in ['writeoff']">
+                    <field name="writeoff_model_id" widget="selection"/>
+                    <field name="writeoff_journal_id" widget="selection" required="state == 'writeoff'"/>
+                    <field name="writeoff_date" required="state == 'writeoff'" options="{'datepicker': {'warn_future': true}}"/>
+                    <field name="writeoff_ref"/>
+                    <field name="writeoff_amount"/>
+                    <field name="writeoff_type"/>
+                    <field name="writeoff_account_id" required="state == 'writeoff'"/>
+                    <field name="writeoff_analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting" options="{'account_field': 'writeoff_account_id', 'business_domain': 'general'}"/>
+                </group>
+                <footer>
+                    <button name="full_reconcile" type="object" invisible="state != 'start' or writeoff_type != 'none'" class="btn-primary" string="Full Reconcile"/>
+                    <button name="partial_reconcile" type="object" invisible="state != 'start' or writeoff_type == 'none'" class="btn-primary" string="Partial Reconcile"/>
+                    <button name="go_to_writeoff" type="object" invisible="state != 'start' or writeoff_type == 'none'" class="btn-primary" string="Reconcile with Write-off"/>
+                    <!--TODO: Result from converting "states='writeoff'" attribute into an 'invisible' attribute
                                  Manually combine states condition into any 'invisible' overrides in inheriting views as well-->
-                            <button name="reconcile_with_writeoff" type="object" invisible="state not in ['writeoff']" class="btn-primary" string="Reconcile with Write-off"/>
-                            <button special="cancel" string="Cancel"/>
-                    </footer>
-        </form>
-    </field>
-</record>
-
-<record id="account_move_line_reconcile_manual_action" model="ir.actions.act_window">
-    <field name="name">Reconcile</field>
-    <field name="res_model">account.move.line.reconcile.manual</field>
-    <field name="view_mode">form</field>
-    <field name="target">new</field>
-</record>
-
+                    <button name="reconcile_with_writeoff" type="object" invisible="state not in ['writeoff']" class="btn-primary" string="Reconcile with Write-off"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="account_move_line_reconcile_manual_action" model="ir.actions.act_window">
+        <field name="name">Reconcile</field>
+        <field name="res_model">account.move.line.reconcile.manual</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
 </odoo>

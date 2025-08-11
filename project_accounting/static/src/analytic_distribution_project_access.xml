@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
 	<t t-inherit-mode="extension" t-inherit="analytic.AnalyticDistribution">
 		<xpath expr="//div" position="before">
-				<a
-				    class="btn open_tab_widget fa fa-external-link"
-				    t-on-click="ev => this.getProjectUrl(ev)"
-				    style="padding : 0rem 0rem 0rem 0rem;"
-				>
+				<a class="btn open_tab_widget fa fa-external-link" t-on-click="ev =&gt; this.getProjectUrl(ev)" style="padding : 0rem 0rem 0rem 0rem;">
 				</a>
 		</xpath>
 	</t>

@@ -1,146 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-        <data>
-
-		<record id="view_event_registration_tree_inherit" model="ir.ui.view">
-		    <field name="name">Event registration</field>
-		    <field name="model">event.registration</field>
-		    <field name="inherit_id" ref="event.view_event_registration_tree"/>
-		    <field name="arch" type="xml">
-			<field name="state" position="before">
-				<field name="mail_auto"/>
-				<field name="contact_user_link_id"/>
-				<field name="registration_user_id" invisible="1"/>
-				<field name="last_office365_mail_draft" invisible="1"/>
-				<field name="comment" widget="text" optional="show"/>
-			</field>
-			<field name="create_date" position="attributes">
-				<attribute name="optional">hide</attribute>
-			</field>
-			<field name="create_date" position="after">
-				<field name="write_date"/>
-			</field>
-			<field name="phone" position="attributes">
-				<attribute name="optional">hide</attribute>
-			</field>
-			<field name="name" position="attributes">
-				<attribute name="optional">hide</attribute>
-			</field>
-			<field name="partner_id" position="attributes">
-				<attribute name="optional">show</attribute>
-				<attribute name="string">Nom du contact</attribute>
-			</field>
-			<field name="activity_ids" position="attributes">
-				<attribute name="optional">hide</attribute>
-			</field>
-			<field name="event_ticket_id" position="attributes">
-				<attribute name="optional">hide</attribute>
-			</field>
-
-
-			<field name="state" position="attributes">
-				<attribute name="decoration-warning">state == 'draft'</attribute>
-				<attribute name="decoration-info">state == 'open'</attribute>
-				<attribute name="decoration-danger">state == 'cancel'</attribute>
-				<attribute name="decoration-muted"/>
-			</field>
-			<field name="state" position="after">
-				<field name="rel_partner_parent_id" optional="hide"/>
-				<field name="rel_partner_parent_industry_id" optional="hide"/>
-				<field name="rel_partner_parent_industry_id_business_priority" optional="hide" widget="badge" decoration-info="rel_partner_parent_industry_id_business_priority == 'not_tracked'" decoration-success="rel_partner_parent_industry_id_business_priority == 'active'" decoration-danger="rel_partner_parent_industry_id_business_priority == 'priority_target'"/>
-				<field name="rel_partner_id_user_id" optional="hide"/>
-				<field name="rel_partner_id_function" optional="show"/>
-			</field>
-
-			<xpath expr="//button[@name='action_confirm']" position="before">
-				<button name="action_set_draft" string="Inviter (auto)" type="object" icon="fa-check" invisible="not active or state not in ['identified']"/>
-				<button name="action_set_draft_step2" string="Inviter (manuel)" type="object" icon="fa-check" invisible="not active or state not in ['draft']"/>
-				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft or not active or mail_auto or state in ['cancel', 'open']"/>
-			</xpath>
-			<xpath expr="//button[@name='action_confirm']" position="attributes">
-				<!--TODO: Result from 'attrs' -> 'invisible' conversion without also overriding 'states' attribute
+    <data>
+        <record id="view_event_registration_tree_inherit" model="ir.ui.view">
+            <field name="name">Event registration</field>
+            <field name="model">event.registration</field>
+            <field name="inherit_id" ref="event.view_event_registration_tree"/>
+            <field name="arch" type="xml">
+                <field name="state" position="before">
+                    <field name="mail_auto"/>
+                    <field name="contact_user_link_id"/>
+                    <field name="registration_user_id" invisible="1"/>
+                    <field name="last_office365_mail_draft" invisible="1"/>
+                    <field name="comment" widget="text" optional="show"/>
+                </field>
+                <field name="create_date" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="create_date" position="after">
+                    <field name="write_date"/>
+                </field>
+                <field name="phone" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="name" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="partner_id" position="attributes">
+                    <attribute name="optional">show</attribute>
+                    <attribute name="string">Nom du contact</attribute>
+                </field>
+                <field name="activity_ids" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="event_ticket_id" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <field name="state" position="attributes">
+                    <attribute name="decoration-warning">state == 'draft'</attribute>
+                    <attribute name="decoration-info">state == 'open'</attribute>
+                    <attribute name="decoration-danger">state == 'cancel'</attribute>
+                    <attribute name="decoration-muted"/>
+                </field>
+                <field name="state" position="after">
+                    <field name="rel_partner_parent_id" optional="hide"/>
+                    <field name="rel_partner_parent_industry_id" optional="hide"/>
+                    <field name="rel_partner_parent_industry_id_business_priority" optional="hide" widget="badge" decoration-info="rel_partner_parent_industry_id_business_priority == 'not_tracked'" decoration-success="rel_partner_parent_industry_id_business_priority == 'active'" decoration-danger="rel_partner_parent_industry_id_business_priority == 'priority_target'"/>
+                    <field name="rel_partner_id_user_id" optional="hide"/>
+                    <field name="rel_partner_id_function" optional="show"/>
+                </field>
+                <xpath expr="//button[@name='action_confirm']" position="before">
+                    <button name="action_set_draft" string="Inviter (auto)" type="object" icon="fa-check" invisible="not active or state not in ['identified']"/>
+                    <button name="action_set_draft_step2" string="Inviter (manuel)" type="object" icon="fa-check" invisible="not active or state not in ['draft']"/>
+                    <button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft or not active or mail_auto or state in ['cancel', 'open']"/>
+                </xpath>
+                <xpath expr="//button[@name='action_confirm']" position="attributes">
+                    <!--TODO: Result from 'attrs' -> 'invisible' conversion without also overriding 'states' attribute
 				     Check if this button tag contained a states attribute in any of the parent views, in which case it should be combined into this 'invisible' attribute
 				     (If any states attributes existed in parent views, they'll also be marked with a TODO)-->
-				<attribute name="invisible">not active or state in ['done']</attribute>
+                    <attribute name="invisible">not active or state in ['done']</attribute>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_event_registration_form_inherit" model="ir.ui.view">
+            <field name="name">Event registration</field>
+            <field name="model">event.registration</field>
+            <field name="inherit_id" ref="event.view_event_registration_form"/>
+            <field name="arch" type="xml">
+                <field name="state" position="attributes">
+                    <attribute name="statusbar_visible">identified,draft,open,done</attribute>
+                </field>
+                <field name="partner_id" position="attributes">
+                    <attribute name="context">{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}</attribute>
+                </field>
+                <field name="email" position="after">
+                    <field name="mail_auto"/>
+                    <field name="state" readonly="0"/>
+                    <field name="contact_user_link_id" options="{'no_quick_create' : True}" context="{'default_partner_id' : partner_id}"/>
+                    <field name="registration_user_id" invisible="1"/>
+                    <field name="last_office365_mail_draft" invisible="1"/>
+                    <field name="comment"/>
+                    <field name="rel_partner_parent_id"/>
+                    <field name="rel_partner_parent_industry_id"/>
+                    <field name="rel_partner_parent_industry_id_business_priority"/>
+                    <field name="rel_partner_id_user_id"/>
+                    <field name="rel_partner_id_function"/>
+                </field>
+                <field name="event_ticket_id" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </field>
+                <xpath expr="//button[@name='action_confirm']" position="before">
+                    <button name="action_set_draft" string="Inviter" type="object" icon="fa-check" invisible="not active or state != 'identified'"/>
+                    <button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft not in [False, ''] or not active or mail_auto or state in ['cancel', 'open']"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="event_registration_view_search_event_inherit" model="ir.ui.view">
+            <field name="name">event.registration.view.search.event.inherit</field>
+            <field name="model">event.registration</field>
+            <field name="inherit_id" ref="event.view_registration_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search/filter[@name='filter_is_ongoing']" position="before">
+                    <filter string="Contacts dont je suis propriétaire" name="contact_proprietary" domain="[('rel_partner_id_user_id', '=', uid)]"/>
+                    <separator/>
+                    <filter string="Mes invités (dont je suis responsable de l'envoi de l'invitation)" name="assigned_to_me" domain="[('registration_user_id', '=', uid)]"/>
+                    <separator/>
+                    <field name="registration_user_id" string="Responsable de l'invitation"/>
+                    <separator/>
+                    <field name="rel_partner_id_user_id" string="Propriétaire du contact (nom de famille)"/>
+                    <separator/>
+                    <field name="rel_partner_parent_id" string="Entreprise"/>
+                    <separator/>
+                    <field name="rel_partner_parent_industry_id" string="Compte (ex BD)"/>
+                    <separator/>
+                    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'priority_target')]"/>
+                    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'active')]"/>
+                    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'not_tracked')]"/>
+                    <filter name="inditto" string="Comptes Inditto" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'inditto')]"/>
+                    <separator/>
+                    <filter string="Mail automatique" name="mail_auto" domain="[('mail_auto', '=', True)]"/>
+                    <filter string="Mail personnalisé" name="mail_perso" domain="[('mail_auto', '=', False)]"/>
+                    <separator/>
+                    <filter string="Entreprise" name="group_rel_partner_parent_id" domain="[]" context="{'group_by':'rel_partner_parent_id'}"/>
+                    <filter string="Compte (ex BD)" name="group_rel_partner_parent_industry_id" domain="[]" context="{'group_by':'rel_partner_parent_industry_id'}"/>
+                    <filter string="Niveau de priorité du compte" name="group_rel_partner_parent_industry_id_business_priority" domain="[]" context="{'group_by':'rel_partner_parent_industry_id_business_priority'}"/>
+                    <filter string="Propriétaire" name="group_rel_partner_id_user_id" domain="[]" context="{'group_by':'rel_partner_id_user_id'}"/>
+                    <filter string="Responsable de l'invitation" name="group_registration_user_id" domain="[]" context="{'group_by':'registration_user_id'}"/>
+                </xpath>
+                <xpath expr="//search/filter[@name='unconfirmed']" position="before">
+                    <filter string="Identifié" name="identified" domain="[('state', '=', 'identified')]"/>
+                </xpath>
+                <xpath expr="//search/group/filter[@name='partner']" position="replace">
 			</xpath>
-		    </field>
-		</record>
-
-		<record id="view_event_registration_form_inherit" model="ir.ui.view">
-		    <field name="name">Event registration</field>
-		    <field name="model">event.registration</field>
-		    <field name="inherit_id" ref="event.view_event_registration_form"/>
-		    <field name="arch" type="xml">
-                        <field name="state" position="attributes">
-                                <attribute name="statusbar_visible">identified,draft,open,done</attribute>
-                        </field>
-                        <field name="partner_id" position="attributes">
-                                <attribute name="context">{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}</attribute>
-                        </field>
-			<field name="email" position="after">
-				<field name="mail_auto"/>
-				<field name="state" readonly="0"/>
-				<field name="contact_user_link_id" options="{'no_quick_create' : True}" context="{'default_partner_id' : partner_id}"/>
-				<field name="registration_user_id" invisible="1"/>
-				<field name="last_office365_mail_draft" invisible="1"/>
-				<field name="comment"/>
-				<field name="rel_partner_parent_id"/>
-				<field name="rel_partner_parent_industry_id"/>
-				<field name="rel_partner_parent_industry_id_business_priority"/>
-				<field name="rel_partner_id_user_id"/>
-				<field name="rel_partner_id_function"/>
-			</field>
-			<field name="event_ticket_id" position="attributes">
-				<attribute name="optional">hide</attribute>
-			</field>
-                       <xpath expr="//button[@name='action_confirm']" position="before">
-                                <button name="action_set_draft" string="Inviter" type="object" icon="fa-check" invisible="not active or state != 'identified'"/>
-				<button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft not in [False, ''] or not active or mail_auto or state in ['cancel', 'open']"/>
-                        </xpath>
-		    </field>
-		</record>
-
-	     <record id="event_registration_view_search_event_inherit" model="ir.ui.view">
-		<field name="name">event.registration.view.search.event.inherit</field>
-		<field name="model">event.registration</field>
-		<field name="inherit_id" ref="event.view_registration_search"/>
-		<field name="arch" type="xml">
-			<xpath expr="//search/filter[@name='filter_is_ongoing']" position="before">
-				<filter string="Contacts dont je suis propriétaire" name="contact_proprietary" domain="[('rel_partner_id_user_id', '=', uid)]"/>
-				<separator/>
-				<filter string="Mes invités (dont je suis responsable de l'envoi de l'invitation)" name="assigned_to_me" domain="[('registration_user_id', '=', uid)]"/>
-				<separator/>
-				<field name="registration_user_id" string="Responsable de l'invitation"/>
-				<separator/>
-				<field name="rel_partner_id_user_id" string="Propriétaire du contact (nom de famille)"/>
-				<separator/>
-				<field name="rel_partner_parent_id" string="Entreprise"/>
-				<separator/>
-				<field name="rel_partner_parent_industry_id" string="Compte (ex BD)"/>
-				<separator/>
-				    <filter name="priority_target" string="Contacts de comptes prioritaires" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'priority_target')]"/>
-				    <filter name="priority_active" string="Contacts de comptes actifs" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'active')]"/>
-				    <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'not_tracked')]"/>
-				    <filter name="inditto" string="Comptes Inditto" domain="[('rel_partner_parent_industry_id_business_priority', '=', 'inditto')]"/>
-				<separator/>
-				<filter string="Mail automatique" name="mail_auto" domain="[('mail_auto', '=', True)]"/>
-				<filter string="Mail personnalisé" name="mail_perso" domain="[('mail_auto', '=', False)]"/>
-				<separator/>
-				<filter string="Entreprise" name="group_rel_partner_parent_id" domain="[]" context="{'group_by':'rel_partner_parent_id'}"/>
-				<filter string="Compte (ex BD)" name="group_rel_partner_parent_industry_id" domain="[]" context="{'group_by':'rel_partner_parent_industry_id'}"/>
-				<filter string="Niveau de priorité du compte" name="group_rel_partner_parent_industry_id_business_priority" domain="[]" context="{'group_by':'rel_partner_parent_industry_id_business_priority'}"/>
-				<filter string="Propriétaire" name="group_rel_partner_id_user_id" domain="[]" context="{'group_by':'rel_partner_id_user_id'}"/>
-				<filter string="Responsable de l'invitation" name="group_registration_user_id" domain="[]" context="{'group_by':'registration_user_id'}"/>
-			</xpath>
-			<xpath expr="//search/filter[@name='unconfirmed']" position="before">
-				<filter string="Identifié" name="identified" domain="[('state', '=', 'identified')]"/>
-			</xpath>
-			<xpath expr="//search/group/filter[@name='partner']" position="replace">
-			</xpath>
-		</field>
-	    </record>
-        </data>
-
-	<!--
+            </field>
+        </record>
+    </data>
+    <!--
     <record id="event.act_event_registration_from_event" model="ir.actions.act_window">
         <field name="context">{'default_event_id': active_id}</field>
     </record>

@@ -1,134 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-	<record model="ir.ui.view" id="global_board_form">
-		<field name="name">Cockpit DM/Manager</field>
-		<field name="model">board.board</field>
-		<field name="arch" type="xml">
-			<form string="Dashboard">
-				<board style="1-1">
-					<column>
-						<action string="Mes projets en cours" name="%(project_accounting.project_action)d" context="{'search_default_own_projects':1, 'search_default_groupby_stage': 1}" domain="[('stage_id.state', '!=', 'closed')]"/> 
-						<action string="Mes échéances de facturation du mois" name="%(project_accounting.action_sale_order_line_delivery_validation_month)d" context="{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}"/>
-						<action string="Factures impayées et en retard de mes missions" name="%(account.action_move_out_invoice_type)d" context="{'search_default_late' : 1, 'search_default_myinvoices' : 1}" domain="[('move_type', '=', 'out_invoice')]"/>
-					</column>
-					<column>
-						<action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j30' : 1}"/>
-						<action string="Mes objectifs de book annuels personnels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
-						<action string="Les objectifs de prise de commande des comptes auxquels je contribue" name="%(taz-common.customer_book_goal_action)d" context="{'search_default_filter_my_customer_book_goal' : 1, 'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}"/>
-					</column>
-				</board>
-			</form>
-		</field>
-	</record>
-
-        <record id="global_board_action" model="ir.actions.act_window">
-		<field name="name">Cockpit DM/Manager</field>
-                <field name="res_model">board.board</field>
-                <field name="view_mode">form</field>
-		<field name="usage">menu</field>
-		<field name="view_id" ref="global_board_form"/>
+    <data>
+        <record model="ir.ui.view" id="global_board_form">
+            <field name="name">Cockpit DM/Manager</field>
+            <field name="model">board.board</field>
+            <field name="arch" type="xml">
+                <form string="Dashboard">
+                    <board style="1-1">
+                        <column>
+                            <action string="Mes projets en cours" name="%(project_accounting.project_action)d" context="{'search_default_own_projects':1, 'search_default_groupby_stage': 1}" domain="[('stage_id.state', '!=', 'closed')]"/>
+                            <action string="Mes échéances de facturation du mois" name="%(project_accounting.action_sale_order_line_delivery_validation_month)d" context="{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}"/>
+                            <action string="Factures impayées et en retard de mes missions" name="%(account.action_move_out_invoice_type)d" context="{'search_default_late' : 1, 'search_default_myinvoices' : 1}" domain="[('move_type', '=', 'out_invoice')]"/>
+                        </column>
+                        <column>
+                            <action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j30' : 1}"/>
+                            <action string="Mes objectifs de book annuels personnels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
+                            <action string="Les objectifs de prise de commande des comptes auxquels je contribue" name="%(taz-common.customer_book_goal_action)d" context="{'search_default_filter_my_customer_book_goal' : 1, 'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}"/>
+                        </column>
+                    </board>
+                </form>
+            </field>
         </record>
-
-	<record model="ir.ui.menu"
-		id="spreadsheet_dashboard.spreadsheet_dashboard_menu_dashboard">
-		<field name="sequence">10</field>
-		<field name="action" ref="spreadsheet_dashboard.ir_actions_dashboard_action"/>
-	</record>
-	
-	<record model="ir.ui.menu"
-		id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root">
-		<field name="action" ref="dashboard_global.global_board_action"/>
-	</record>
-
-	    <record id="open_view_project_new_form" model="ir.actions.act_window">
-		<field name="name">Projets</field>
-		<field name="res_model">project.project</field>
-		<field name="view_mode">form</field>
-		<field name="view_ids" eval="
-				    [
-				    (5, 0, 0),
-				    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
-				      ]" />
-	    </record>
-
-	    <record id="project_recent_change_action" model="ir.actions.act_window">
-		<field name="name">Projets ayant récemment changé de statut</field>
-		<field name="res_model">project.project</field>
-		<field name="view_mode">kanban,tree,form</field>
-		<field name="context">{'search_default_recent_project_changed':1, 'search_default_groupby_stage':1}</field>
-	    </record>
-
-	    <record id="open_view_contact_new_form" model="ir.actions.act_window">
-		<field name="name">Contacts</field>
-		<field name="res_model">res.partner</field>
-		<field name="view_mode">form</field>
-		<field name="view_ids" eval="
-				    [
-				    (5, 0, 0),
-				    (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),
-				      ]" />
-	    </record>
-
-	    <record id="open_view_business_action_new_form" model="ir.actions.act_window">
-		<field name="name">Actions commerciales</field>
-		<field name="res_model">taz.business_action</field>
-		<field name="view_mode">form</field>
-		<field name="view_ids" eval="
-				    [
-				    (5, 0, 0),
-				    (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.business_action_form')}),
-				      ]" />
-	    </record>
-
-	    <record id="open_business_module" model="ir.actions.act_url">
-		<field name="url">https://tfp.tasmane.com/web#action=629&amp;model=res.partner&amp;view_type=list&amp;cids=1&amp;menu_id=443</field>
-		<field name="target">self</field>
-		<field name="name">Redirection vers le module Commerce</field>
-	    </record>
-
-	    <record id="open_project_module" model="ir.actions.act_url">
-		<field name="url">https://tfp.tasmane.com/web#action=271&amp;model=project.project&amp;view_type=list&amp;cids=1&amp;menu_id=189</field>
-		<field name="target">self</field>
-		<field name="name">Redirection vers le module Projet</field>
-	    </record>
-
-	<menuitem name="Cockpit DM/Manager" id="global_board" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="global_board_action" sequence="5"/>
-
-	<menuitem name="Projet" id="projects" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="6"/>
-		<menuitem name="Créer un projet" id="new_project" parent="dashboard_global.projects" action="open_view_project_new_form" sequence="5"/>
-		<menuitem name="Mes projets" id="my_projects" parent="dashboard_global.projects" action="project.open_view_project_all_group_stage" sequence="10"/>
-		<menuitem name="Tous les projets" id="all_projects" parent="dashboard_global.projects" action="project_accounting.project_action" sequence="15"/>
-		<menuitem name=">>> Redirection vers le module Projet" id="project_module" parent="dashboard_global.projects" action="open_project_module" sequence="50"/>
-
-	<menuitem name="Commerce" id="sales" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="7"/>
-		<menuitem name="Créer un contact" id="new_contact" parent="dashboard_global.sales" action="open_view_contact_new_form" sequence="5"/>
-		<menuitem name="Tous les contacts" id="all_contacts" parent="dashboard_global.sales" action="taz-common.action_partner_contact" sequence="10"/>
-		<menuitem name="Créer une action commerciale" id="new_business_action" parent="dashboard_global.sales" action="open_view_business_action_new_form" sequence="20"/>
-		<menuitem name="Mes actions commerciales" id="all_business_actions" parent="dashboard_global.sales" action="taz-common.business_action_action" sequence="25"/>
-		<menuitem name="Comptes (ex BD) auxquels je suis affecté" id="res_industry" parent="dashboard_global.sales" action="taz-common.my_industries_action" sequence="30"/>
-		<menuitem name="Objectifs commerciaux annuels de mes comptes" id="all_customer_book_goal" parent="dashboard_global.sales" action="taz-common.my_customer_book_goal_action" sequence="35"/>
-		<menuitem name=">>> Redirection vers le module Commerce" id="business_module" parent="dashboard_global.sales" action="open_business_module" sequence="50"/>
-
-	<menuitem name="Pilotage" id="statistics_report_menu" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="10"/>
-		<menuitem name="Escale > Projet créés/ayant changé de statut sur les 7 derniers jours" id="project_recent_change_action_menu" parent="statistics_report_menu" action="project_recent_change_action" sequence="5"/>
-		<menuitem name="Stats commerciales" id="business_report_menu" parent="statistics_report_menu" sequence="20"/>
-			<menuitem name="Graphique de prise de commande N/N-1 par trimestre" id="project_win_loose" parent="dashboard_global.business_report_menu" action="open_view_project_win_loose_action" sequence="10"/>
-			<menuitem name="Objectifs commerciaux annuels par compte" id="customer_book_goal" parent="dashboard_global.business_report_menu" action="taz-common.customer_book_goal_action" sequence="20"/>
-			<menuitem name="Liste des comptes" id="res_partner_industry_menu" parent="dashboard_global.business_report_menu" action="base.res_partner_industry_action" sequence="21"/>
-			<menuitem name="Actions commerciales des 6 derniers mois" id="history_business_action_action" parent="dashboard_global.business_report_menu" action="taz-common.history_business_action_action" sequence="30"/>
-		<menuitem name="Stats de staffing" id="employee_staffing_report_menu" parent="statistics_report_menu" sequence="30"/>
-			<menuitem name="Rapports d'activité (maille hebdomadaire)" id="employee_staffing_report_week_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_week_action"/>
-			<menuitem name="Rapports d'activité (maille mensuelle)" id="employee_staffing_report_month_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_month_action"/>
-			<menuitem name="Rapports d'activité (maille trimestrielle)" id="employee_staffing_report_quarter_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_quarter_action"/>
-			<menuitem name="Rapports d'activité (maille semestrielle)" id="employee_staffing_report_semester_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_semester_action"/>
-			<menuitem name="Rapports d'activité (maille annuelle)" id="employee_staffing_report_year_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_year_action"/>
-
-
-	<menuitem id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="1"/>
-
-	    <!-- Masquer les modules de base, sauf C-levels and ADV -->
-	    <record  id="spreadsheet_dashboard.spreadsheet_dashboard_menu_dashboard" model="ir.ui.menu">
-		    <field name="groups_id" eval="[(6, 0, [ref('taz-common.taz-management')])]"/>
-	    </record>
-   </data>
+        <record id="global_board_action" model="ir.actions.act_window">
+            <field name="name">Cockpit DM/Manager</field>
+            <field name="res_model">board.board</field>
+            <field name="view_mode">form</field>
+            <field name="usage">menu</field>
+            <field name="view_id" ref="global_board_form"/>
+        </record>
+        <record model="ir.ui.menu" id="spreadsheet_dashboard.spreadsheet_dashboard_menu_dashboard">
+            <field name="sequence">10</field>
+            <field name="action" ref="spreadsheet_dashboard.ir_actions_dashboard_action"/>
+        </record>
+        <record model="ir.ui.menu" id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root">
+            <field name="action" ref="dashboard_global.global_board_action"/>
+        </record>
+        <record id="open_view_project_new_form" model="ir.actions.act_window">
+            <field name="name">Projets</field>
+            <field name="res_model">project.project</field>
+            <field name="view_mode">form</field>
+            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),           ]"/>
+        </record>
+        <record id="project_recent_change_action" model="ir.actions.act_window">
+            <field name="name">Projets ayant récemment changé de statut</field>
+            <field name="res_model">project.project</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="context">{'search_default_recent_project_changed':1, 'search_default_groupby_stage':1}</field>
+        </record>
+        <record id="open_view_contact_new_form" model="ir.actions.act_window">
+            <field name="name">Contacts</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">form</field>
+            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),           ]"/>
+        </record>
+        <record id="open_view_business_action_new_form" model="ir.actions.act_window">
+            <field name="name">Actions commerciales</field>
+            <field name="res_model">taz.business_action</field>
+            <field name="view_mode">form</field>
+            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.business_action_form')}),           ]"/>
+        </record>
+        <record id="open_business_module" model="ir.actions.act_url">
+            <field name="url">https://tfp.tasmane.com/web#action=629&amp;model=res.partner&amp;view_type=list&amp;cids=1&amp;menu_id=443</field>
+            <field name="target">self</field>
+            <field name="name">Redirection vers le module Commerce</field>
+        </record>
+        <record id="open_project_module" model="ir.actions.act_url">
+            <field name="url">https://tfp.tasmane.com/web#action=271&amp;model=project.project&amp;view_type=list&amp;cids=1&amp;menu_id=189</field>
+            <field name="target">self</field>
+            <field name="name">Redirection vers le module Projet</field>
+        </record>
+        <menuitem name="Cockpit DM/Manager" id="global_board" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="global_board_action" sequence="5"/>
+        <menuitem name="Projet" id="projects" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="6"/>
+        <menuitem name="Créer un projet" id="new_project" parent="dashboard_global.projects" action="open_view_project_new_form" sequence="5"/>
+        <menuitem name="Mes projets" id="my_projects" parent="dashboard_global.projects" action="project.open_view_project_all_group_stage" sequence="10"/>
+        <menuitem name="Tous les projets" id="all_projects" parent="dashboard_global.projects" action="project_accounting.project_action" sequence="15"/>
+        <menuitem name="&gt;&gt;&gt; Redirection vers le module Projet" id="project_module" parent="dashboard_global.projects" action="open_project_module" sequence="50"/>
+        <menuitem name="Commerce" id="sales" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="7"/>
+        <menuitem name="Créer un contact" id="new_contact" parent="dashboard_global.sales" action="open_view_contact_new_form" sequence="5"/>
+        <menuitem name="Tous les contacts" id="all_contacts" parent="dashboard_global.sales" action="taz-common.action_partner_contact" sequence="10"/>
+        <menuitem name="Créer une action commerciale" id="new_business_action" parent="dashboard_global.sales" action="open_view_business_action_new_form" sequence="20"/>
+        <menuitem name="Mes actions commerciales" id="all_business_actions" parent="dashboard_global.sales" action="taz-common.business_action_action" sequence="25"/>
+        <menuitem name="Comptes (ex BD) auxquels je suis affecté" id="res_industry" parent="dashboard_global.sales" action="taz-common.my_industries_action" sequence="30"/>
+        <menuitem name="Objectifs commerciaux annuels de mes comptes" id="all_customer_book_goal" parent="dashboard_global.sales" action="taz-common.my_customer_book_goal_action" sequence="35"/>
+        <menuitem name="&gt;&gt;&gt; Redirection vers le module Commerce" id="business_module" parent="dashboard_global.sales" action="open_business_module" sequence="50"/>
+        <menuitem name="Pilotage" id="statistics_report_menu" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="10"/>
+        <menuitem name="Escale &gt; Projet créés/ayant changé de statut sur les 7 derniers jours" id="project_recent_change_action_menu" parent="statistics_report_menu" action="project_recent_change_action" sequence="5"/>
+        <menuitem name="Stats commerciales" id="business_report_menu" parent="statistics_report_menu" sequence="20"/>
+        <menuitem name="Graphique de prise de commande N/N-1 par trimestre" id="project_win_loose" parent="dashboard_global.business_report_menu" action="open_view_project_win_loose_action" sequence="10"/>
+        <menuitem name="Objectifs commerciaux annuels par compte" id="customer_book_goal" parent="dashboard_global.business_report_menu" action="taz-common.customer_book_goal_action" sequence="20"/>
+        <menuitem name="Liste des comptes" id="res_partner_industry_menu" parent="dashboard_global.business_report_menu" action="base.res_partner_industry_action" sequence="21"/>
+        <menuitem name="Actions commerciales des 6 derniers mois" id="history_business_action_action" parent="dashboard_global.business_report_menu" action="taz-common.history_business_action_action" sequence="30"/>
+        <menuitem name="Stats de staffing" id="employee_staffing_report_menu" parent="statistics_report_menu" sequence="30"/>
+        <menuitem name="Rapports d'activité (maille hebdomadaire)" id="employee_staffing_report_week_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_week_action"/>
+        <menuitem name="Rapports d'activité (maille mensuelle)" id="employee_staffing_report_month_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_month_action"/>
+        <menuitem name="Rapports d'activité (maille trimestrielle)" id="employee_staffing_report_quarter_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_quarter_action"/>
+        <menuitem name="Rapports d'activité (maille semestrielle)" id="employee_staffing_report_semester_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_semester_action"/>
+        <menuitem name="Rapports d'activité (maille annuelle)" id="employee_staffing_report_year_menu" parent="dashboard_global.employee_staffing_report_menu" action="staffing.employee_staffing_report_year_action"/>
+        <menuitem id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="1"/>
+        <!-- Masquer les modules de base, sauf C-levels and ADV -->
+        <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_dashboard" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('taz-common.taz-management')])]"/>
+        </record>
+    </data>
 </odoo>

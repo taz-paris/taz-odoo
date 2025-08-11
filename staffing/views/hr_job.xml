@@ -1,34 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
+    <data>
         <record id="view_hr_job_form_inherit" model="ir.ui.view">
             <field name="name">Poste</field>
             <field name="model">hr.job</field>
             <field name="inherit_id" ref="hr.view_hr_job_form"/>
             <field name="arch" type="xml">
-		<xpath expr="//notebook" position="inside">
-			<page string="CJM">
-				<field name="cost_ids" context="{'default_job_id':id}">
-					<tree editable="top">
-						<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-						<field name="company_id" invisible="1"/>
-						<field name="job_id" invisible="0" optional="hide"/>
-						<field name="begin_date"/>
-						<field name="cost"/>
-						<field name="target_staffing_rate"/>
-						<field name="account_analytic_line_ids" optional="hide"/>
-					</tree>
-				</field>
-			</page>
-			<page string="Équipage">
-				<field name="employee_ids"/>
-			</page>
-		</xpath>
-		<field name="name" position="after">
-			<group>
-				<field name="is_project_director" />
-			</group>
-		</field>
+                <xpath expr="//notebook" position="inside">
+                    <page string="CJM">
+                        <field name="cost_ids" context="{'default_job_id':id}">
+                            <tree editable="top">
+                                <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="company_id" invisible="1"/>
+                                <field name="job_id" invisible="0" optional="hide"/>
+                                <field name="begin_date"/>
+                                <field name="cost"/>
+                                <field name="target_staffing_rate"/>
+                                <field name="account_analytic_line_ids" optional="hide"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Équipage">
+                        <field name="employee_ids"/>
+                    </page>
+                </xpath>
+                <field name="name" position="after">
+                    <group>
+                        <field name="is_project_director"/>
+                    </group>
+                </field>
             </field>
         </record>
-  </data>
+    </data>
 </odoo>

@@ -1,256 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-        <data>
-
-	    <record id="view_employee_pivot" model="ir.ui.view">
-		<field name="name">account.analytic.line.pivot</field>
-		<field name="model">account.analytic.line</field>
-		<field name="arch" type="xml">
-		    <pivot string="Analytic Items" sample="1">
-			<field name="date" type="col" interval="month"/>
-			<field name="date" type="col" interval="week"/>
-			<field name="category" type="col"/>
-			<field name="project_id" type="row"/>
-			<field name="unit_amount" type="measure" string="Jours"/>
-			<field name="amount" type="measure"/>
-		    </pivot>
-		</field>
-	    </record>
-
+    <data>
+        <record id="view_employee_pivot" model="ir.ui.view">
+            <field name="name">account.analytic.line.pivot</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+                <pivot string="Analytic Items" sample="1">
+                    <field name="date" type="col" interval="month"/>
+                    <field name="date" type="col" interval="week"/>
+                    <field name="category" type="col"/>
+                    <field name="project_id" type="row"/>
+                    <field name="unit_amount" type="measure" string="Jours"/>
+                    <field name="amount" type="measure"/>
+                </pivot>
+            </field>
+        </record>
         <record id="view_employee_filter_inherit" model="ir.ui.view">
             <field name="name">Employee</field>
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="hr.view_employee_filter"/>
-	    <field name="priority">5</field>
-	    <field name="arch" type="xml">
-		<xpath expr="//searchpanel" position="replace">
-			<searchpanel view_types="list,graph">
-			<field name="company_id" groups="base.group_multi_company" icon="fa-building" enable_counters="1"/>
+            <field name="priority">5</field>
+            <field name="arch" type="xml">
+                <xpath expr="//searchpanel" position="replace">
+                    <searchpanel view_types="list,graph">
+                        <field name="company_id" groups="base.group_multi_company" icon="fa-building" enable_counters="1"/>
                         <field name="job_id" icon="fa-users" select="multi" enable_counters="1"/>
-			</searchpanel>
-		</xpath>
-	    </field>
-	</record>
-
-
-	   <record model="ir.ui.view" id="staffing.employee_tree">
-              <field name="name">Équipage</field>
-              <field name="model">hr.employee</field>
-              <field name="arch" type="xml">
+                    </searchpanel>
+                </xpath>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="staffing.employee_tree">
+            <field name="name">Équipage</field>
+            <field name="model">hr.employee</field>
+            <field name="arch" type="xml">
                 <tree>
-                  <field name="first_name"/>
-                  <field name="name"/>
-                  <field name="job_id"/>
-                  <field name="daily_cost_today" optional="show"/>
+                    <field name="first_name"/>
+                    <field name="name"/>
+                    <field name="job_id"/>
+                    <field name="daily_cost_today" optional="show"/>
                 </tree>
-              </field>
-            </record>
-
-
-
-           <record model="ir.ui.view" id="staffing.employee_form">
-              <field name="name">Équipage</field>
-              <field name="model">hr.employee</field>
-              <field name="arch" type="xml">
+            </field>
+        </record>
+        <record model="ir.ui.view" id="staffing.employee_form">
+            <field name="name">Équipage</field>
+            <field name="model">hr.employee</field>
+            <field name="arch" type="xml">
                 <form>
-		  <sheet string="Employee">
-			  <field name="company_id" invisible="1"/>
-			  <div name="button_box" class="oe_button_box">
-				<field name="show_leaves" invisible="1"/>
-				<field name="is_absent" invisible="1"/>
-				<field name="hr_icon_display" invisible="1"/>
-				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" context="{'search_default_employee_ids': id}" invisible="not is_absent">
-					<div invisible="hr_icon_display != 'presence_holiday_present'" role="img" class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Off Till" title="Off Till"/>
-					<div invisible="hr_icon_display != 'presence_holiday_absent'" role="img" class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Off Till" title="Off Till"/>
-				    <div class="o_field_widget o_stat_info">
-					<span class="o_stat_text">
+                    <sheet string="Employee">
+                        <field name="company_id" invisible="1"/>
+                        <div name="button_box" class="oe_button_box">
+                            <field name="show_leaves" invisible="1"/>
+                            <field name="is_absent" invisible="1"/>
+                            <field name="hr_icon_display" invisible="1"/>
+                            <button name="action_time_off_dashboard" type="object" class="oe_stat_button" context="{'search_default_employee_ids': id}" invisible="not is_absent">
+                                <div invisible="hr_icon_display != 'presence_holiday_present'" role="img" class="fa fa-fw fa-plane o_button_icon text-success" aria-label="Off Till" title="Off Till"/>
+                                <div invisible="hr_icon_display != 'presence_holiday_absent'" role="img" class="fa fa-fw fa-plane o_button_icon text-warning" aria-label="Off Till" title="Off Till"/>
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">
 					    En congés jusqu'au
 					</span>
-					<span class="o_stat_value">
-					    <field name="leave_date_to"/>
+                                    <span class="o_stat_value">
+                                        <field name="leave_date_to"/>
+                                    </span>
+                                </div>
+                            </button>
+                            <button name="action_time_off_dashboard" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not show_leaves" context="{'search_default_employee_ids': id}" groups="base.group_user" help="Remaining leaves">
+                                <div class="o_field_widget o_stat_info" invisible="allocation_display == '0'">
+                                    <span class="o_stat_value"><field name="allocation_remaining_display"/>/<field name="allocation_display"/> Jours
 					</span>
-				    </div>
-				</button>
-				<button name="action_time_off_dashboard" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not show_leaves" context="{'search_default_employee_ids': id}" groups="base.group_user" help="Remaining leaves">
-				    <div class="o_field_widget o_stat_info" invisible="allocation_display == '0'">
-					<span class="o_stat_value">
-					    <field name="allocation_remaining_display"/>/<field name="allocation_display"/> Jours
-					</span>
-					<span class="o_stat_text">
+                                    <span class="o_stat_text">
 					    Congés
 					</span>
-				    </div>
-				    <div class="o_field_widget o_stat_info" invisible="allocation_display != '0'">
-					<span class="o_stat_text">
+                                </div>
+                                <div class="o_field_widget o_stat_info" invisible="allocation_display != '0'">
+                                    <span class="o_stat_text">
 					   Congés
 					</span>
-				    </div>
-				</button>
-                                    <button class="oe_stat_button" type="object" name="open_employee_pivot_timesheets" icon="fa-calendar">
-                                        <div class="o_form_field o_stat_info">
-                                           <span class="o_stat_text">Pointage/prévisionnel</span>
-                                            <!--
+                                </div>
+                            </button>
+                            <button class="oe_stat_button" type="object" name="open_employee_pivot_timesheets" icon="fa-calendar">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_text">Pointage/prévisionnel</span>
+                                    <!--
                                             <span class="o_stat_value">
                                                 <field name="balance" widget='monetary'/>
                                             </span>
                                             -->
-                                        </div>
-                                    </button>
-				<!--
+                                </div>
+                            </button>
+                            <!--
 				<button class="oe_stat_button" type="action" name="new_timesheet_action_from_employee" icon="fa-calendar" groups="hr_timesheet.group_hr_timesheet_user">
 				    <div class="o_stat_info">
 					<span class="o_stat_text">Pointage</span>
 				    </div>
 			    	</button>
 				-->
-				<field name="contract_warning" invisible="1"/>
-				<field name="employee_type" invisible="1"/>
-				<button name="action_open_contract" class="oe_stat_button" icon="fa-book" type="object" groups="hr_contract.group_hr_contract_manager" invisible="employee_type not in ['employee', 'student', 'trainee']">
-				    <div invisible="not first_contract_date" class="o_stat_info">
-					<span class="o_stat_text text-success" invisible="contract_warning" title="In Contract Since">Arrivé(e) le</span>
-					<span class="o_stat_value text-success" invisible="contract_warning">
-					    <field name="first_contract_date" readonly="1"/>
-					</span>
-					<span class="o_stat_text text-danger" invisible="not contract_warning" title="In Contract Since">
+                            <field name="contract_warning" invisible="1"/>
+                            <field name="employee_type" invisible="1"/>
+                            <button name="action_open_contract" class="oe_stat_button" icon="fa-book" type="object" groups="hr_contract.group_hr_contract_manager" invisible="employee_type not in ['employee', 'student', 'trainee']">
+                                <div invisible="not first_contract_date" class="o_stat_info">
+                                    <span class="o_stat_text text-success" invisible="contract_warning" title="In Contract Since">Arrivé(e) le</span>
+                                    <span class="o_stat_value text-success" invisible="contract_warning">
+                                        <field name="first_contract_date" readonly="1"/>
+                                    </span>
+                                    <span class="o_stat_text text-danger" invisible="not contract_warning" title="In Contract Since">
 					    En contrat depuis le
 					</span>
-					<span class="o_stat_value text-danger" invisible="not contract_warning">
-					    <field name="first_contract_date" readonly="1"/>
-					</span>
-				    </div>
-				    <div invisible="first_contract_date" class="o_stat_info">
-					<span class="o_stat_value text-danger">
-					   <field name="contracts_count"/>
-					</span>
-					<span invisible="contracts_count != 1" class="o_stat_text text-danger">
+                                    <span class="o_stat_value text-danger" invisible="not contract_warning">
+                                        <field name="first_contract_date" readonly="1"/>
+                                    </span>
+                                </div>
+                                <div invisible="first_contract_date" class="o_stat_info">
+                                    <span class="o_stat_value text-danger">
+                                        <field name="contracts_count"/>
+                                    </span>
+                                    <span invisible="contracts_count != 1" class="o_stat_text text-danger">
 					    Contrat
 					</span>
-					<span invisible="contracts_count == 1" class="o_stat_text text-danger">
+                                    <span invisible="contracts_count == 1" class="o_stat_text text-danger">
 					    Contrats
 					</span>
-				    </div>
-				</button>
-			  </div>
-			    <div class="alert alert-warning mb-0" role="alert" invisible="not is_late_validated_timesheet">
+                                </div>
+                            </button>
+                        </div>
+                        <div class="alert alert-warning mb-0" role="alert" invisible="not is_late_validated_timesheet">
 				Pointage en retard
 				<button name="send_email_timesheet_late" type="object" string="Envoyer un email de rappel" class="btn btn-link p-0"/>
 			    </div>
-
-			  <group>
-				 <group>
-					  <field name="first_name"/>
-					  <field name="name"/>
-					  <field name="work_email"/>
-					  <field name="first_contract_date"/>
-					  <field name="departure_date"/>
-					  <field name="identification_id"/>
-					  <field name="is_consultant"/>
-					  <field name="is_associate"/>
-					  <field name="sector_ids" widget="many2many_tags"/>
-					  <field name="cv_link" widget="url"/>
-					  <field name="vcard_link" widget="url"/>
-			  	</group>
-				<group>
-					  <field name="coach_id" can_create="true" can_write="true"/>
-					  <field name="mentee_ids" widget="many2many_tags"/>
-					  <field name="staffing_wishes"/>
-					  <field name="last_validated_timesheet_date"/>
-					  <field name="is_late_validated_timesheet"/>
-				</group>
-	  		</group>
-			<!--
+                        <group>
+                            <group>
+                                <field name="first_name"/>
+                                <field name="name"/>
+                                <field name="work_email"/>
+                                <field name="first_contract_date"/>
+                                <field name="departure_date"/>
+                                <field name="identification_id"/>
+                                <field name="is_consultant"/>
+                                <field name="is_associate"/>
+                                <field name="sector_ids" widget="many2many_tags"/>
+                                <field name="cv_link" widget="url"/>
+                                <field name="vcard_link" widget="url"/>
+                            </group>
+                            <group>
+                                <field name="coach_id" can_create="true" can_write="true"/>
+                                <field name="mentee_ids" widget="many2many_tags"/>
+                                <field name="staffing_wishes"/>
+                                <field name="last_validated_timesheet_date"/>
+                                <field name="is_late_validated_timesheet"/>
+                            </group>
+                        </group>
+                        <!--
 				<field name="availability_4_weeks" widget="progressbar" />
 				<div>
 				    <field name="availability_4_weeks_graph" widget="bokeh_chart" readonly="1" nolabel="1"/>
 				</div>
 			-->
-			<notebook>
-				<page string="Affectations validées">
-					<field name="staffing_need_ids" readonly="1" domain="[('state', '=', 'done')]">
-						<tree default_order="begin_date desc">
-							<field name="project_id"/>
-							<field name="begin_date"/>
-							<field name="end_date"/>
-							<field name="nb_days_needed"/>
-						</tree>
-					</field>
-				</page>
-				<page name="public" string="Expérience">
-				    <div class="row">
-					<div class="o_hr_skills_editable o_hr_skills_group o_group_resume col-lg-7 d-flex flex-column">
-					    <separator string="Reprendre"/>
-					    <!-- This field uses a custom tree view rendered by the 'resume_one2many' widget.
+                        <notebook>
+                            <page string="Affectations validées">
+                                <field name="staffing_need_ids" readonly="1" domain="[('state', '=', 'done')]">
+                                    <tree default_order="begin_date desc">
+                                        <field name="project_id"/>
+                                        <field name="begin_date"/>
+                                        <field name="end_date"/>
+                                        <field name="nb_days_needed"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page name="public" string="Expérience">
+                                <div class="row">
+                                    <div class="o_hr_skills_editable o_hr_skills_group o_group_resume col-lg-7 d-flex flex-column">
+                                        <separator string="Reprendre"/>
+                                        <!-- This field uses a custom tree view rendered by the 'resume_one2many' widget.
 						Adding fields in the tree arch below makes them accessible to the widget
 					    -->
-					    <field mode="tree" nolabel="1" name="resume_line_ids" widget="resume_one2many">
-						<tree>
-						    <field name="line_type_id"/>
-						    <field name="name" modifiers="{&quot;required&quot;: true}"/>
-						    <field name="description"/>
-						    <field name="date_start" modifiers="{&quot;required&quot;: true}"/>
-						    <field name="date_end"/>
-						    <field name="display_type" modifiers="{&quot;column_invisible&quot;: true}"/>
-						</tree>
-					    </field>
-
-					</div>
-					<div class="o_hr_skills_editable o_hr_skills_group o_group_skills col-lg-5 d-flex flex-column">
-					    <separator string="Compétences"/>
-					    <field mode="tree" nolabel="1" name="employee_skill_ids" widget="skills_one2many">
-						<tree>
-						    <field name="skill_type_id" on_change="1" modifiers="{&quot;required&quot;: true, &quot;column_invisible&quot;: true}"/>
-						    <field name="skill_id" on_change="1" modifiers="{&quot;required&quot;: true}"/>
-						    <field name="skill_level_id" on_change="1" modifiers="{&quot;required&quot;: true}"/>
-						    <field name="level_progress" widget="progressbar" modifiers="{&quot;readonly&quot;: true}"/>
-						</tree>
-					    </field>
-					    <!--
+                                        <field mode="tree" nolabel="1" name="resume_line_ids" widget="resume_one2many">
+                                            <tree>
+                                                <field name="line_type_id"/>
+                                                <field name="name" modifiers="{&quot;required&quot;: true}"/>
+                                                <field name="description"/>
+                                                <field name="date_start" modifiers="{&quot;required&quot;: true}"/>
+                                                <field name="date_end"/>
+                                                <field name="display_type" modifiers="{&quot;column_invisible&quot;: true}"/>
+                                            </tree>
+                                        </field>
+                                    </div>
+                                    <div class="o_hr_skills_editable o_hr_skills_group o_group_skills col-lg-5 d-flex flex-column">
+                                        <separator string="Compétences"/>
+                                        <field mode="tree" nolabel="1" name="employee_skill_ids" widget="skills_one2many">
+                                            <tree>
+                                                <field name="skill_type_id" on_change="1" modifiers="{&quot;required&quot;: true, &quot;column_invisible&quot;: true}"/>
+                                                <field name="skill_id" on_change="1" modifiers="{&quot;required&quot;: true}"/>
+                                                <field name="skill_level_id" on_change="1" modifiers="{&quot;required&quot;: true}"/>
+                                                <field name="level_progress" widget="progressbar" modifiers="{&quot;readonly&quot;: true}"/>
+                                            </tree>
+                                        </field>
+                                        <!--
 					    <field mode="tree" nolabel="1" name="employee_skill_ids" widget="one2many_list" context="{'group_by':'skill_type_id'}"/>
 					    -->
-					</div>
-				</div>
-					<group string="Éducation">
-						<field name="certificate"/>
-						<field name="study_field"/>
-						<field name="study_school"/>
-					</group>
-				</page>
-				    <page name="hr_settings" string="HR Settings" groups="hr.group_hr_user">
-					<group>
-					    <group string="Status" name="active_group">
-						<field name="employee_type"/>
-						<field name="user_id" string="Related User" domain="[('share', '=', False)]" context="{'allow_create_employee': False, 'default_create_employee': False}"/>
-					    </group>
-					</group>
-				    </page>
-			</notebook>
-		  </sheet>
+                                    </div>
+                                </div>
+                                <group string="Éducation">
+                                    <field name="certificate"/>
+                                    <field name="study_field"/>
+                                    <field name="study_school"/>
+                                </group>
+                            </page>
+                            <page name="hr_settings" string="HR Settings" groups="hr.group_hr_user">
+                                <group>
+                                    <group string="Status" name="active_group">
+                                        <field name="employee_type"/>
+                                        <field name="user_id" string="Related User" domain="[('share', '=', False)]" context="{'allow_create_employee': False, 'default_create_employee': False}"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
                 </form>
-              </field>
-            </record>
-
-	    <record id="staffing.employee_action" model="ir.actions.act_window">
-		<field name="name">Équipage</field>
-		<field name="res_model">hr.employee</field>
-		<field name="view_mode">tree,form</field>
-		<field name="domain"/>
-		<field name="context"/>
-	    </record>
-		    
-	    <record id="staffing.employee_action_view_tree" model="ir.actions.act_window.view">
-		<field name="sequence" eval="1"/>       
-		<field name="view_mode">tree</field>
-		<field name="act_window_id" ref="staffing.employee_action"/>
-		<field name="view_id" ref="staffing.employee_tree"/>
-	    </record>
-
-	    <record id="staffing.employee_action_view_form" model="ir.actions.act_window.view">
-		<field name="sequence" eval="2"/>       
-		<field name="view_mode">form</field>
-		<field name="act_window_id" ref="staffing.employee_action"/>
-		<field name="view_id" ref="staffing.employee_form"/>
-	    </record>
-
-	    <menuitem name="Équipage" id="staffing.employee_menu" parent="staffing.staffing_root" action="staffing.employee_action"/>
-
-        </data>
+            </field>
+        </record>
+        <record id="staffing.employee_action" model="ir.actions.act_window">
+            <field name="name">Équipage</field>
+            <field name="res_model">hr.employee</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain"/>
+            <field name="context"/>
+        </record>
+        <record id="staffing.employee_action_view_tree" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="act_window_id" ref="staffing.employee_action"/>
+            <field name="view_id" ref="staffing.employee_tree"/>
+        </record>
+        <record id="staffing.employee_action_view_form" model="ir.actions.act_window.view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="act_window_id" ref="staffing.employee_action"/>
+            <field name="view_id" ref="staffing.employee_form"/>
+        </record>
+        <menuitem name="Équipage" id="staffing.employee_menu" parent="staffing.staffing_root" action="staffing.employee_action"/>
+    </data>
 </odoo>

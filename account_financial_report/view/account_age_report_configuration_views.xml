@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2023 Ernesto Garcia <ernesto.garcia@tecnativa.com>
      Copyright 2023 Carolina Fernandez <carolina.fernandez@tecnativa.com>
      License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
@@ -10,13 +10,13 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="name" />
-                        <field name="company_id" />
+                        <field name="name"/>
+                        <field name="company_id"/>
                     </group>
                     <field name="line_ids">
                         <tree editable="bottom">
-                            <field name="name" />
-                            <field name="inferior_limit" />
+                            <field name="name"/>
+                            <field name="inferior_limit"/>
                         </tree>
                     </field>
                 </sheet>
@@ -28,8 +28,8 @@
         <field name="model">account.age.report.configuration</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="name" />
-                <field name="company_id" />
+                <field name="name"/>
+                <field name="company_id"/>
             </tree>
         </field>
     </record>

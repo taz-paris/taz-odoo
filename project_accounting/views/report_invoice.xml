@@ -1,58 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
-		<xpath expr="//div[@name='origin']" position="replace">
+    <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@name='origin']" position="replace">
 		</xpath>
-
-		<xpath expr="//div[@name='customer_code']" position="replace">
-		    <t t-if="o.partner_id.long_company_name">
-			<div class="col-auto col-3 mw-100 mb-2" name="customer_long_company_name">
-                                <strong>Client :</strong>
-                                <p class="m-0" t-field="o.partner_id.long_company_name"/>
-			</div>
-		    </t>
-		    <t t-else="">
-			 <div class="col-auto col-3 mw-100 mb-2" name="customer_name">
-                                <strong>Client :</strong>
-                                <p class="m-0" t-field="o.partner_id.name"/>
-                        </div>
-		    </t>
-		</xpath>
-
-		<xpath expr="//td[@name='account_invoice_line_name']" position="replace">
-			<td name="account_invoice_line_name">
-				<t t-if="line.rel_project_ids">
-					<t t-foreach="line.rel_project_ids" t-as="project">
+        <xpath expr="//div[@name='customer_code']" position="replace">
+            <t t-if="o.partner_id.long_company_name">
+                <div class="col-auto col-3 mw-100 mb-2" name="customer_long_company_name">
+                    <strong>Client :</strong>
+                    <p class="m-0" t-field="o.partner_id.long_company_name"/>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="col-auto col-3 mw-100 mb-2" name="customer_name">
+                    <strong>Client :</strong>
+                    <p class="m-0" t-field="o.partner_id.name"/>
+                </div>
+            </t>
+        </xpath>
+        <xpath expr="//td[@name='account_invoice_line_name']" position="replace">
+            <td name="account_invoice_line_name">
+                <t t-if="line.rel_project_ids">
+                    <t t-foreach="line.rel_project_ids" t-as="project">
 							Projet <span t-field="project.number" t-options="{'widget': 'text'}"/> - <span t-field="project.name" t-options="{'widget': 'text'}"/><br/>
 					</t>
-				</t>
-				<t t-if="line.sale_line_ids">
-					<t t-foreach="line.sale_line_ids" t-as="sale_line">
+                </t>
+                <t t-if="line.sale_line_ids">
+                    <t t-foreach="line.sale_line_ids" t-as="sale_line">
 							Bon de commande <span t-field="sale_line.order_id.client_order_ref" t-options="{'widget': 'text'}"/> <br/>
 					</t>
-				</t>
-				<br/>
-				<br/>
-				<span t-field="line.name" t-options="{'widget': 'text'}"/>
-			</td>
-		</xpath>
-
-
-		<xpath expr="//div[@name='reference']/strong" position="replace">
-                        <strong>N° de bon de commande</strong>
-		</xpath>
-
-		<xpath expr="//th[@name='th_quantity']" position="attributes">
-			<attribute name="t-if">display_quantity_price_unit</attribute>
-		</xpath>
-		<xpath expr="//th[@name='th_priceunit']" position="attributes">
-			<attribute name="t-if">display_quantity_price_unit</attribute>
-		</xpath>
-		<xpath expr="//span[@t-field='line.quantity']/.." position="attributes">
-			<attribute name="t-if">display_quantity_price_unit</attribute>
-		</xpath>
-		<xpath expr="//span[@t-field='line.price_unit']/.." position="attributes">
-			<attribute name="t-if">display_quantity_price_unit</attribute>
-		</xpath>
-	</template>
-
+                </t>
+                <br/>
+                <br/>
+                <span t-field="line.name" t-options="{'widget': 'text'}"/>
+            </td>
+        </xpath>
+        <xpath expr="//div[@name='reference']/strong" position="replace">
+            <strong>N° de bon de commande</strong>
+        </xpath>
+        <xpath expr="//th[@name='th_quantity']" position="attributes">
+            <attribute name="t-if">display_quantity_price_unit</attribute>
+        </xpath>
+        <xpath expr="//th[@name='th_priceunit']" position="attributes">
+            <attribute name="t-if">display_quantity_price_unit</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='line.quantity']/.." position="attributes">
+            <attribute name="t-if">display_quantity_price_unit</attribute>
+        </xpath>
+        <xpath expr="//span[@t-field='line.price_unit']/.." position="attributes">
+            <attribute name="t-if">display_quantity_price_unit</attribute>
+        </xpath>
+    </template>
 </odoo>

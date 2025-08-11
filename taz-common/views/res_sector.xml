@@ -1,20 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-    <record model="ir.ui.view" id="taz-common.res_sector_tree">
-      <field name="name">Secteur</field>
-      <field name="model">res.partner.sector</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="partner_ids"/>
-        </tree>
-      </field>
-    </record>
-    <record model="ir.actions.act_window" id="taz-common.action_sector">
-      <field name="name">Secteur</field>
-      <field name="res_model">res.partner.sector</field>
-      <field name="view_mode">tree,form</field>
-    </record>
-    <menuitem name="Secteurs" sequence="10" id="taz-common.sector" parent="taz-common.res_partner_menu_config" action="taz-common.action_sector"/>
-  </data>
+    <data>
+        <record model="ir.ui.view" id="taz-common.res_sector_tree">
+            <field name="name">Secteur</field>
+            <field name="model">res.partner.sector</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="partner_ids"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="taz-common.action_sector">
+            <field name="name">Secteur</field>
+            <field name="res_model">res.partner.sector</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem name="Secteurs" sequence="10" id="taz-common.sector" parent="taz-common.res_partner_menu_config" action="taz-common.action_sector"/>
+    </data>
 </odoo>

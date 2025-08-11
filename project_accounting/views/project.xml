@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
         <record id="view_project_search" model="ir.ui.view">
@@ -9,7 +10,7 @@
                     <field name="name" string="N° ou nom du projet" filter_domain="['|', ('number', 'ilike', self), ('name', 'ilike', self)]"/>
                     <field name="project_director_employee_id" string="Directeur de mission (nom de famille)"/>
                     <field name="partner_id" string="Client" filter_domain="[('partner_id', 'child_of', self)]"/>
-		    <field name="rel_partner_industry_id" string="Compte (commerce)"/>
+                    <field name="rel_partner_industry_id" string="Compte (commerce)"/>
                     <field name="stage_id" groups="project.group_project_stages"/>
                     <field name="project_group_id" string="Groupe de projets"/>
                     <filter string="Mes projets" name="own_projects" domain="[('user_enrolled_ids', 'in', uid)]"/>
@@ -25,18 +26,18 @@
                     <separator/>
                     <filter string="Date de début" name="start_date" date="date_start"/>
                     <filter string="Date de fin" name="end_date" date="date"/>
-		    <filter string="Date de passage gagné/perdu" name="date_win_loose" date="date_win_loose"/>
+                    <filter string="Date de passage gagné/perdu" name="date_win_loose" date="date_win_loose"/>
                     <separator/>
                     <filter string="Projets de comptes prioritaires" name="priority_target" domain="[('rel_industry_business_priority', '=', 'priority_target')]"/>
                     <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>
                     <filter string="Projets de comptes à opportunités" name="not_tracked" domain="[('rel_industry_business_priority', '=', ['inditto'])]"/>
                     <filter string="Projets de comptes Inditto" name="inditto" domain="[('rel_industry_business_priority', '=', 'inditto')]"/>
-		    <separator/>
-		    <filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', [False, 'to_be_capitalized','not_specified']),('deliverable_indexation', 'in', [False, 'to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', [False, 'yes_success_story','not_specified']),('commercial_reference_indexation', 'in', [False, 'yes_commercial_reference','not_specified'])]"/>
-		    <separator/>
-		    <filter string="Projet avec au moins un des 3 attributs RSE non renseigné" name="project_csr" domain="['|','|',('csr_project_initiative', 'in', [False,'not_specified']),('csr_project_environmental_level', 'in', [False, 'not_specified']), ('csr_project_social_level', 'in', [False,'not_specified'])]"/>
                     <separator/>
-		    <filter string="Projets non annulés/non perdus avec date de passage 3-Accord client/4-Commandé+ cette année ou non valorisée" name="win_loose_this_year" domain="[('stage_id.id', 'not in', [4,8]), '|', ('date_win_loose', '=', False), '&amp;', ('date_win_loose', '&gt;=', time.strftime('%%Y-01-01')), ('date_win_loose', '&lt;=', time.strftime('%%Y-12-31'))]"/>
+                    <filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', [False, 'to_be_capitalized','not_specified']),('deliverable_indexation', 'in', [False, 'to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', [False, 'yes_success_story','not_specified']),('commercial_reference_indexation', 'in', [False, 'yes_commercial_reference','not_specified'])]"/>
+                    <separator/>
+                    <filter string="Projet avec au moins un des 3 attributs RSE non renseigné" name="project_csr" domain="['|','|',('csr_project_initiative', 'in', [False,'not_specified']),('csr_project_environmental_level', 'in', [False, 'not_specified']), ('csr_project_social_level', 'in', [False,'not_specified'])]"/>
+                    <separator/>
+                    <filter string="Projets non annulés/non perdus avec date de passage 3-Accord client/4-Commandé+ cette année ou non valorisée" name="win_loose_this_year" domain="[('stage_id.id', 'not in', [4,8]), '|', ('date_win_loose', '=', False), '&amp;', ('date_win_loose', '&gt;=', time.strftime('%%Y-01-01')), ('date_win_loose', '&lt;=', time.strftime('%%Y-12-31'))]"/>
                     <separator/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                     <group expand="0" string="Group By">
@@ -45,576 +46,549 @@
                         <filter string="Compte (ex BD)" name="groupby_rel_partner_industry_id" context="{'group_by': 'rel_partner_industry_id'}"/>
                         <filter string="Niveau de priorité du compte" name="groupby_rel_industry_business_priority" context="{'group_by': 'rel_industry_business_priority'}"/>
                         <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
-						<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
             </field>
         </record>
-
-	   <record model="ir.ui.view" id="project_accounting.project_tree">
-	      <field name="name">Project</field>
-	      <field name="model">project.project</field>
-	      <field name="priority">5</field>
-	      <field name="arch" type="xml">
-		      <tree decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
-			      
-		  <field name="id" widget="open_tab"/>
-		  <field name="number"/>
-		  <field name="is_review_needed" column_invisible="1"/>
-		  <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" invisible="not is_review_needed"/>
-			  <!-- Ce panneau attetion n'est pas compatible avec le module web_remember_tree_column_width => celà conduit à des colonnes trop larges -->
-		  <field name="name"/>
-		  <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-		  <field name="company_id" column_invisible="1"/>
-		  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
-		  <field name="project_director_employee_id" optional="show"/>
-		  <field name="outsourcing" optional="hide"/>
-		  <field name="stage_id" widget="badge" optional="show" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"/>
-		  <field name="color_rel" column_invisible="1"/>
-		  <field name="date_start" optional="hide"/>
-		  <field name="date" optional="hide"/>
-		  <field name="book_employee_distribution_ids" optional="show" widget="many2many_tags"/>
-		  <field name="is_validated_book" optional="hide"/>
-		  <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés"/>
-		  <field name="remark" optional="hide"/>
-		  <field name="invoicing_comment" optional="show" groups="account.group_account_user"/>
-            	  <field name="order_to_invoice_company" optional="hide" sum="Total"/>
-            	  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
-		  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
-		  <field name="agreement_id" optional="hide"/>
-		  <field name="reporting_sum_company_outsource_code3_code_4" sum="Total" optional="show"/>
-		  <field name="reporting_sum_company_outsource_code3_code_4_delta" sum="Total" optional="show"/>
-		  <field name="sales_proposal_indexation" optional="hide"/>
-		  <field name="deliverable_indexation" optional="hide"/>
-		  <field name="success_story_indexation" optional="hide"/>
-		  <field name="commercial_reference_indexation" optional="hide"/>
-		  <field name="csr_project_initiative" optional="hide"/>
-		  <field name="csr_project_environmental_level" optional="hide"/>
-		  <field name="csr_project_social_level" optional="hide"/>
-		  <field name="csr_form_date" optional="hide"/>
-		  <field name="csr_form_author" optional="hide"/>
-		  <field name="csr_form_url" optional="hide"/>
-		  <field name="rel_partner_industry_id" optional="hide"/>
-		  <field name="company_part_amount_initial" optional="hide"/>
-		  <field name="outsource_part_marging_amount_initial" optional="hide"/>
-		  <field name="cosource_part_marging_amount_initial" optional="hide"/>
-		  <field name="other_part_marging_amount_initial" optional="hide"/>
-		</tree>
-	      </field>
-	    </record>
-
-
-	   <record model="ir.ui.view" id="project_accounting.project_form">
-	      <field name="name">Project</field>
-	      <field name="model">project.project</field>
-	      <field name="priority">1</field>
-	      <field name="arch" type="xml">
-		<form string="Project" class="o_form_project_project" js_class="project_form">
-			<header>
-				<!--
+        <record model="ir.ui.view" id="project_accounting.project_tree">
+            <field name="name">Project</field>
+            <field name="model">project.project</field>
+            <field name="priority">5</field>
+            <field name="arch" type="xml">
+                <tree decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
+                    <field name="id" widget="open_tab"/>
+                    <field name="number"/>
+                    <field name="is_review_needed" column_invisible="1"/>
+                    <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" invisible="not is_review_needed"/>
+                    <!-- Ce panneau attetion n'est pas compatible avec le module web_remember_tree_column_width => celà conduit à des colonnes trop larges -->
+                    <field name="name"/>
+                    <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" column_invisible="1"/>
+                    <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
+                    <field name="project_director_employee_id" optional="show"/>
+                    <field name="outsourcing" optional="hide"/>
+                    <field name="stage_id" widget="badge" optional="show" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"/>
+                    <field name="color_rel" column_invisible="1"/>
+                    <field name="date_start" optional="hide"/>
+                    <field name="date" optional="hide"/>
+                    <field name="book_employee_distribution_ids" optional="show" widget="many2many_tags"/>
+                    <field name="is_validated_book" optional="hide"/>
+                    <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés"/>
+                    <field name="remark" optional="hide"/>
+                    <field name="invoicing_comment" optional="show" groups="account.group_account_user"/>
+                    <field name="order_to_invoice_company" optional="hide" sum="Total"/>
+                    <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
+                    <field name="company_to_invoice_left" optional="hide" sum="Total"/>
+                    <field name="agreement_id" optional="hide"/>
+                    <field name="reporting_sum_company_outsource_code3_code_4" sum="Total" optional="show"/>
+                    <field name="reporting_sum_company_outsource_code3_code_4_delta" sum="Total" optional="show"/>
+                    <field name="sales_proposal_indexation" optional="hide"/>
+                    <field name="deliverable_indexation" optional="hide"/>
+                    <field name="success_story_indexation" optional="hide"/>
+                    <field name="commercial_reference_indexation" optional="hide"/>
+                    <field name="csr_project_initiative" optional="hide"/>
+                    <field name="csr_project_environmental_level" optional="hide"/>
+                    <field name="csr_project_social_level" optional="hide"/>
+                    <field name="csr_form_date" optional="hide"/>
+                    <field name="csr_form_author" optional="hide"/>
+                    <field name="csr_form_url" optional="hide"/>
+                    <field name="rel_partner_industry_id" optional="hide"/>
+                    <field name="company_part_amount_initial" optional="hide"/>
+                    <field name="outsource_part_marging_amount_initial" optional="hide"/>
+                    <field name="cosource_part_marging_amount_initial" optional="hide"/>
+                    <field name="other_part_marging_amount_initial" optional="hide"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="project_accounting.project_form">
+            <field name="name">Project</field>
+            <field name="model">project.project</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <form string="Project" class="o_form_project_project" js_class="project_form">
+                    <header>
+                        <!--
 				<field name="stage_id" widget="statusbar" readonly="1"/>
 					<field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" groups="project.group_project_stages"/>
 					-->
-			</header>
-			<field name="company_id" invisible="1"/>
-			<field name="analytic_account_id" invisible="1"/>
-			<sheet string="Project">
-
-				<widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
-
-                                <div class="oe_button_box" name="button_box">
-                                    <button class="oe_stat_button" type="object" name="action_open_all_account_move_lines" icon="fa-eye">
-                                        <div class="o_form_field o_stat_info">
-                                           <span class="o_stat_text">Toutes les écritures</span>
-                                        </div>
-                                    </button>
-			    	</div>
-
-				<field name="active" invisible="1"/>
-
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_sale_order_with_draft">
+                    </header>
+                    <field name="company_id" invisible="1"/>
+                    <field name="analytic_account_id" invisible="1"/>
+                    <sheet string="Project">
+                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" type="object" name="action_open_all_account_move_lines" icon="fa-eye">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_text">Toutes les écritures</span>
+                                </div>
+                            </button>
+                        </div>
+                        <field name="active" invisible="1"/>
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_sale_order_with_draft">
 					Le projet est en statut Accord client/Commandé/Terminé (on devrait avoir du book) mais il n'existe aucun BC client (quelque soit leur statut).
 				</div>
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_validated_order">
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_validated_order">
 					Au moins un bon de commande client n'est pas à l'état 'Bon de commande'.
 				</div>
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_validated_purchase_order">
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_validated_purchase_order">
 					Au moins un bon de commande fournisseur n'est pas à l'état 'Bon de commande'.
 				</div>
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_outsource_part_amount_current">
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_outsource_part_amount_current">
 					Le Montant HT du dispositif sous-traité à date n'est pas correct. En effet, la somme des 'Montants HT de revente' des lignes d'au moins un Bon de commande Fournisseur est nulle.
 				</div>
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_consistant_outsourcing">
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_consistant_outsourcing">
 					Le champ "Type de sous-traitance" n'est pas renseigné, ou bien il est incohérent avec les achats et le 'Montants HT de revente' enregistrés.
 				</div>
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_consistant_prevent_napta_creation">
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_consistant_prevent_napta_creation">
 					La case "Ne pas créer sur Napta" est cochée alors que le montant HT du dispositif interne (ou le coût de revient du dispositif interne) à date n'est pas nul et que la date de fin de la mission est postérieure au 1er janvier 2023.
 				</div>
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_affected_book">
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_affected_book">
 					Il n'existe aucune ligne de répartition du book par employé (et le book n'est pas validé). Si le book de cette mission n'est pas attribuable à des salariés, merci de valider le book. Sinon, merci de renseigner la répartition du book entre les Tasmaniens.
 				</div>
-				<div class="alert alert-warning mb-1" role="alert" invisible="is_validated_book">
+                        <div class="alert alert-warning mb-1" role="alert" invisible="is_validated_book">
 					Le DM n'a pas validé la répartition du book.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="other_part_marging_rate_controle_OK">
+                        <div class="alert alert-info mb-1" role="alert" invisible="other_part_marging_rate_controle_OK">
 					Le taux de marge actuel (sur prix de vente) sur les autres prestations est inférieur à la cote d'alerte.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="is_filled_sales_proposal_indexation">
+                        <div class="alert alert-info mb-1" role="alert" invisible="is_filled_sales_proposal_indexation">
 					Le champ "Proposition commerciale" dans l'onglet Capitalisation n'est pas renseigné.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="is_filled_deliverable_indexation">
+                        <div class="alert alert-info mb-1" role="alert" invisible="is_filled_deliverable_indexation">
 					Le champ "Livrable" dans l'onglet Capitalisation n'est pas renseigné.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="is_filled_commercial_reference_indexation">
+                        <div class="alert alert-info mb-1" role="alert" invisible="is_filled_commercial_reference_indexation">
 					Le champ "Référence commerciale" dans l'onglet Capitalisation n'est pas renseigné.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="is_filled_success_story_indexation">
+                        <div class="alert alert-info mb-1" role="alert" invisible="is_filled_success_story_indexation">
 					Le champ "Success story" dans l'onglet Capitalisation n'est pas renseigné.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="is_filled_csr_project_initiative">
+                        <div class="alert alert-info mb-1" role="alert" invisible="is_filled_csr_project_initiative">
 					Le champ "Réflexion apport RSE du projet" dans l'onglet Structure au lancement n'est pas renseigné.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="is_filled_csr_project_environmental_level">
+                        <div class="alert alert-info mb-1" role="alert" invisible="is_filled_csr_project_environmental_level">
 					Le champ "Bilan volet environnemental" dans l'onglet Capitalisation n'est pas renseigné.
 				</div>
-				<div class="alert alert-info mb-1" role="alert" invisible="is_filled_csr_project_social_level">
+                        <div class="alert alert-info mb-1" role="alert" invisible="is_filled_csr_project_social_level">
 					Le champ "Bilan volet social" dans l'onglet Capitalisation n'est pas renseigné.
 				</div>
-				<field name="is_validated_order" invisible="1"/>
-				<field name="is_validated_book" invisible="1"/>
-				<field name="is_consistant_outsourcing" invisible="1"/>
-				<field name="is_validated_purchase_order" invisible="1"/>
-				<field name="is_review_needed" invisible="1"/>
-				<field name="is_sale_order_with_draft" invisible="1"/>
-				<field name="is_consistant_prevent_napta_creation" invisible="1"/>
-				<field name="is_outsource_part_amount_current" invisible="1"/>
-				<field name="is_affected_book" invisible="1"/>
-				<field name="other_part_marging_rate_controle_OK" invisible="1"/>
-				<field name="is_filled_sales_proposal_indexation" invisible="1"/>
-				<field name="is_filled_deliverable_indexation" invisible="1"/>
-				<field name="is_filled_commercial_reference_indexation" invisible="1"/>
-				<field name="is_filled_success_story_indexation" invisible="1"/>
-				<field name="is_filled_csr_project_initiative" invisible="1"/>
-				<field name="is_filled_csr_project_environmental_level" invisible="1"/>
-				<field name="is_filled_csr_project_social_level" invisible="1"/>
-
-					
-				<div class="oe_title">
-					<h1 class="d-flex flex-row">
-				    		<field name="number" nolabel="1" style="width:12%%"/>
-				    		<field name="name" class="o_text_overflow" placeholder="Intitulé du projet" required="1"/>
-					</h1>
-                    		</div>
-				    <group>
-					<group>
-					    <field name="company_id" invisible="1"/>
-					    <field name="company_id" groups="base.group_multi_company"/>
-					    <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
-					    <field name="stage_id" required="1"/>
-					    <field name="state_last_change_date" invisible="1" readonly="1"/>
-					    <field name="date_win_loose" invisible="0"/>
-					    <field name="outsourcing"/>
-					    <field name="agreement_id"/>
-					    <field name="state" invisible="1"/>
-					</group>
-					<group>
-					    <field name="project_director_employee_id" required="1" options="{'no_create': True, 'no_create_edit': True}" readonly="not active"/>
-					    <field name="project_manager" required="1" options="{'no_create': True, 'no_create_edit': True}" readonly="not active"/>
-					    <label for="date_start" string="Dates de début/fin"/>
-					    <div name="dates" class="o_row">
-						<field name="date_start" widget="daterange" options="{&quot;related_end_date&quot;: &quot;date&quot;}"/>
-						<i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
-						<i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow" invisible="not date_start and not date"/>
-						<field name="date" widget="daterange" options="{&quot;related_start_date&quot;: &quot;date_start&quot;}"/>
-					    </div>
-					    <field name="project_group_id"/>
-					    <field name="remark"/>
-					    <field name="invoicing_comment" groups="account.group_account_user"/>
-					</group>
-				   </group>
-				<notebook>
-					<page name="dashboard" string="Synthèse à date">
-						<group col="3">
-							<group string="Commandes du client">
-                                                                <field name="order_sum_sale_order_lines_with_draft"/>
-								<field name="order_sum_sale_order_lines"/>
-								<button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
-								<button type="object" name="create_sale_order" string="Créer commande client"/> 
-                                                        </group>
-							<group string="Production pilotée par un co-traitant (Cas où notre ADV valide les factures émises par le cotraitant vers le client)" invisible="cosource_part_amount_current == 0 and cosource_part_cost_current == 0 and cosource_part_cost_futur == 0">
-                                                                <field name="cosource_part_amount_current"/>
-                                                                <field name="cosource_part_cost_current"/>
-                                                                <field name="cosource_part_cost_futur"/>
-                                                                <field name="cosource_part_marging_amount_current"/>
-                                                                <field name="cosource_part_marging_rate_current" widget="progressbar"/>
-                                                        </group>
-							<group string="Production pilotée (yc S/T)" style="background-color:#abdbff;" invisible="order_amount_current == 0 and order_cost_current == 0 and order_cost_futur == 0">
-                                                                <field name="order_amount_current"/>
-                                                                <field name="order_cost_current"/>
-                                                                <field name="order_cost_futur"/>
-                                                                <field name="order_marging_amount_current"/>
-                                                                <field name="order_marging_rate_current" widget="progressbar"/>
+                        <field name="is_validated_order" invisible="1"/>
+                        <field name="is_validated_book" invisible="1"/>
+                        <field name="is_consistant_outsourcing" invisible="1"/>
+                        <field name="is_validated_purchase_order" invisible="1"/>
+                        <field name="is_review_needed" invisible="1"/>
+                        <field name="is_sale_order_with_draft" invisible="1"/>
+                        <field name="is_consistant_prevent_napta_creation" invisible="1"/>
+                        <field name="is_outsource_part_amount_current" invisible="1"/>
+                        <field name="is_affected_book" invisible="1"/>
+                        <field name="other_part_marging_rate_controle_OK" invisible="1"/>
+                        <field name="is_filled_sales_proposal_indexation" invisible="1"/>
+                        <field name="is_filled_deliverable_indexation" invisible="1"/>
+                        <field name="is_filled_commercial_reference_indexation" invisible="1"/>
+                        <field name="is_filled_success_story_indexation" invisible="1"/>
+                        <field name="is_filled_csr_project_initiative" invisible="1"/>
+                        <field name="is_filled_csr_project_environmental_level" invisible="1"/>
+                        <field name="is_filled_csr_project_social_level" invisible="1"/>
+                        <div class="oe_title">
+                            <h1 class="d-flex flex-row">
+                                <field name="number" nolabel="1" style="width:12%%"/>
+                                <field name="name" class="o_text_overflow" placeholder="Intitulé du projet" required="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="company_id" invisible="1"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
+                                <field name="stage_id" required="1"/>
+                                <field name="state_last_change_date" invisible="1" readonly="1"/>
+                                <field name="date_win_loose" invisible="0"/>
+                                <field name="outsourcing"/>
+                                <field name="agreement_id"/>
+                                <field name="state" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="project_director_employee_id" required="1" options="{'no_create': True, 'no_create_edit': True}" readonly="not active"/>
+                                <field name="project_manager" required="1" options="{'no_create': True, 'no_create_edit': True}" readonly="not active"/>
+                                <label for="date_start" string="Dates de début/fin"/>
+                                <div name="dates" class="o_row">
+                                    <field name="date_start" widget="daterange" options="{&quot;related_end_date&quot;: &quot;date&quot;}"/>
+                                    <i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
+                                    <i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow" invisible="not date_start and not date"/>
+                                    <field name="date" widget="daterange" options="{&quot;related_start_date&quot;: &quot;date_start&quot;}"/>
+                                </div>
+                                <field name="project_group_id"/>
+                                <field name="remark"/>
+                                <field name="invoicing_comment" groups="account.group_account_user"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page name="dashboard" string="Synthèse à date">
+                                <group col="3">
+                                    <group string="Commandes du client">
+                                        <field name="order_sum_sale_order_lines_with_draft"/>
+                                        <field name="order_sum_sale_order_lines"/>
+                                        <button type="object" name="action_open_sale_order_lines" string="Voir les lignes de commande"/>
+                                        <button type="object" name="create_sale_order" string="Créer commande client"/>
+                                    </group>
+                                    <group string="Production pilotée par un co-traitant (Cas où notre ADV valide les factures émises par le cotraitant vers le client)" invisible="cosource_part_amount_current == 0 and cosource_part_cost_current == 0 and cosource_part_cost_futur == 0">
+                                        <field name="cosource_part_amount_current"/>
+                                        <field name="cosource_part_cost_current"/>
+                                        <field name="cosource_part_cost_futur"/>
+                                        <field name="cosource_part_marging_amount_current"/>
+                                        <field name="cosource_part_marging_rate_current" widget="progressbar"/>
+                                    </group>
+                                    <group string="Production pilotée (yc S/T)" style="background-color:#abdbff;" invisible="order_amount_current == 0 and order_cost_current == 0 and order_cost_futur == 0">
+                                        <field name="order_amount_current"/>
+                                        <field name="order_cost_current"/>
+                                        <field name="order_cost_futur"/>
+                                        <field name="order_marging_amount_current"/>
+                                        <field name="order_marging_rate_current" widget="progressbar"/>
+                                    </group>
+                                    <group string="Production par le dispositif interne" invisible="company_part_amount_current == 0 and company_part_cost_current == 0 and company_part_cost_futur == 0">
+                                        <field name="company_part_amount_current" force_save="1"/>
+                                        <field name="company_part_cost_current" force_save="1"/>
+                                        <field name="company_part_cost_futur" force_save="1"/>
+                                        <field name="company_part_marging_amount_current"/>
+                                        <field name="company_part_marging_rate_current" widget="progressbar"/>
+                                    </group>
+                                    <group string="Production sous-traitée" invisible="outsource_part_amount_current == 0 and outsource_part_cost_current == 0 and outsource_part_cost_futur == 0">
+                                        <field name="outsource_part_amount_current"/>
+                                        <field name="outsource_part_cost_current"/>
+                                        <field name="outsource_part_cost_futur"/>
+                                        <field name="outsource_part_marging_amount_current"/>
+                                        <field name="outsource_part_marging_rate_current" widget="progressbar"/>
+                                        <field name="outsource_part_markup_rate_current" widget="progressbar"/>
+                                    </group>
+                                    <group string="Autres prestations (exemple : séminaire dans nos locaux, frais de déplacement, etc.)" invisible="other_part_amount_current == 0 and other_part_cost_current == 0 and other_part_cost_futur == 0">
+                                        <field name="other_part_amount_current" force_save="1"/>
+                                        <field name="other_part_cost_current"/>
+                                        <field name="other_part_cost_futur"/>
+                                        <field name="other_part_marging_amount_current"/>
+                                        <field name="other_part_marging_rate_current" widget="progressbar"/>
+                                    </group>
+                                </group>
+                                <group name="margin_graph_tab" string="Graphique de production interne" invisible="company_part_amount_current == 0 and company_part_cost_current == 0 and company_part_cost_futur == 0">
+                                    <div>
+                                        <field name="margin_graph" widget="bokeh_chart" nolabel="1"/>
+                                    </div>
+                                    <!-- <br/>-->
+                                    <div>
+                                        <field name="activity_graph" widget="bokeh_chart" nolabel="1"/>
+                                    </div>
+                                </group>
+                            </page>
+                            <page name="project_structure" string="Structure au lancement">
+                                <group>
+                                    <field name="csr_project_initiative"/>
+                                </group>
+                                <group col="3">
+                                    <group string="Dispositif interne">
+                                        <field name="company_part_amount_initial"/>
+                                        <field name="company_part_cost_initial"/>
+                                        <field name="company_part_marging_amount_initial"/>
+                                        <field name="company_part_marging_rate_initial" widget="progressbar"/>
+                                    </group>
+                                    <group string="Production sous-traitée">
+                                        <field name="outsource_part_amount_initial"/>
+                                        <field name="outsource_part_cost_initial"/>
+                                        <field name="outsource_part_marging_amount_initial"/>
+                                        <field name="outsource_part_marging_rate_initial" widget="progressbar"/>
+                                        <field name="outsource_part_markup_rate_initial" widget="progressbar"/>
+                                    </group>
+                                    <group string="Autres prestations (exemple : séminaire dans nos locaux, frais de déplacement, etc.)">
+                                        <field name="other_part_amount_initial"/>
+                                        <field name="other_part_cost_initial"/>
+                                        <field name="other_part_marging_amount_initial"/>
+                                        <field name="other_part_marging_rate_initial" widget="progressbar"/>
+                                    </group>
+                                    <group string="Production pilotée (yc S/T)" style="background-color:#abdbff;">
+                                        <field name="order_amount_initial"/>
+                                        <field name="order_cost_initial"/>
+                                        <field name="order_marging_amount_initial"/>
+                                        <field name="order_marging_rate_initial" widget="progressbar"/>
+                                    </group>
+                                    <group string="Production pilotée par un co-traitant (Cas où notre ADV valide des factures émises par le cotraitant vers le client)">
+                                        <field name="cosource_part_amount_initial"/>
+                                        <field name="cosource_part_cost_initial"/>
+                                        <field name="cosource_part_marging_amount_initial"/>
+                                        <field name="cosource_part_marging_rate_initial" widget="progressbar"/>
+                                    </group>
+                                    <group string="Commandes du client">
+                                        <field name="sale_order_amount_initial"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page name="customer_invoicing" string="Facturation client">
+                                <group>
+                                    <group>
+                                        <field name="partner_secondary_ids" widget="many2many_tags"/>
+                                        <button type="object" colspan="2" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
+                                    </group>
+                                    <group>
 							</group>
-							<group string="Production par le dispositif interne" invisible="company_part_amount_current == 0 and company_part_cost_current == 0 and company_part_cost_futur == 0">
-					    			<field name="company_part_amount_current" force_save="1"/>
-					    			<field name="company_part_cost_current" force_save="1"/>
-					    			<field name="company_part_cost_futur" force_save="1"/>
-					    			<field name="company_part_marging_amount_current"/>
-					    			<field name="company_part_marging_rate_current" widget="progressbar"/>
-							</group>
-                                                	<group string="Production sous-traitée" invisible="outsource_part_amount_current == 0 and outsource_part_cost_current == 0 and outsource_part_cost_futur == 0">
-                                                                <field name="outsource_part_amount_current"/>
-                                                                <field name="outsource_part_cost_current"/>
-                                                                <field name="outsource_part_cost_futur"/>
-                                                                <field name="outsource_part_marging_amount_current"/>
-                                                                <field name="outsource_part_marging_rate_current" widget="progressbar"/>
-                                                                <field name="outsource_part_markup_rate_current" widget="progressbar"/>
-                                                        </group>
-                                                	<group string="Autres prestations (exemple : séminaire dans nos locaux, frais de déplacement, etc.)" invisible="other_part_amount_current == 0 and other_part_cost_current == 0 and other_part_cost_futur == 0">
-                                                                <field name="other_part_amount_current" force_save="1"/>
-                                                                <field name="other_part_cost_current"/>
-                                                                <field name="other_part_cost_futur"/>
-                                                                <field name="other_part_marging_amount_current"/>
-                                                                <field name="other_part_marging_rate_current" widget="progressbar"/>
-                                                        </group>
-						</group>
-						<group name="margin_graph_tab" string="Graphique de production interne" invisible="company_part_amount_current == 0 and company_part_cost_current == 0 and company_part_cost_futur == 0">
-							<div>
-								<field name="margin_graph" widget="bokeh_chart" nolabel="1"/>
-							</div>
-								<!-- <br/>-->
-							<div>
-								<field name="activity_graph" widget="bokeh_chart" nolabel="1"/>
-							</div>
-						</group>
-
-					</page>
-					<page name="project_structure" string="Structure au lancement">
-						<group>
-							<field name="csr_project_initiative"/>
-						</group>
-						<group col="3">
-							<group string="Dispositif interne">
-								<field name="company_part_amount_initial"/>
-								<field name="company_part_cost_initial"/>
-								<field name="company_part_marging_amount_initial"/>
-								<field name="company_part_marging_rate_initial" widget="progressbar"/>
-							</group>
-							<group string="Production sous-traitée">
-								<field name="outsource_part_amount_initial"/>
-								<field name="outsource_part_cost_initial"/>
-								<field name="outsource_part_marging_amount_initial"/>
-								<field name="outsource_part_marging_rate_initial" widget="progressbar"/>
-								<field name="outsource_part_markup_rate_initial" widget="progressbar"/>
-							</group>  
-							<group string="Autres prestations (exemple : séminaire dans nos locaux, frais de déplacement, etc.)">
-								<field name="other_part_amount_initial"/>
-								<field name="other_part_cost_initial"/>
-								<field name="other_part_marging_amount_initial"/>
-								<field name="other_part_marging_rate_initial" widget="progressbar"/>
-							</group>  
-							<group string="Production pilotée (yc S/T)" style="background-color:#abdbff;">
-								<field name="order_amount_initial"/>
-								<field name="order_cost_initial"/>
-								<field name="order_marging_amount_initial"/>
-								<field name="order_marging_rate_initial" widget="progressbar"/>
-							</group>
-							<group string="Production pilotée par un co-traitant (Cas où notre ADV valide des factures émises par le cotraitant vers le client)">
-								<field name="cosource_part_amount_initial"/>
-								<field name="cosource_part_cost_initial"/>
-								<field name="cosource_part_marging_amount_initial"/>
-								<field name="cosource_part_marging_rate_initial" widget="progressbar"/>
-							</group>  
-							<group string="Commandes du client">
-                                                                <field name="sale_order_amount_initial"/>
-							</group>
-						</group>
-					</page>
-					<page name="customer_invoicing" string="Facturation client">
-						<group>
-							<group>
-								<field name="partner_secondary_ids" widget="many2many_tags"/>
-								<button type="object" colspan="2" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
-							</group>
-							<group>
-							</group>
-						</group>
-						<group col="3">
-							<group string="Facturation HT au client">
-            							<field name="order_to_invoice_company"/>
-            							<field name="company_invoice_sum_move_lines"/>
-								<field name="company_to_invoice_left"/>
-							</group>
-							<group string="Facturation TTC au client">
-            							<field name="order_to_invoice_company_with_tax"/>
-								<field name="company_invoice_sum_move_lines_with_tax"/>
-								<field name="company_to_invoice_left_with_tax"/>
-							</group>
-							<group string="Paiement TTC du client">
-								<field name="company_paid"/>
-								<field name="company_residual"/>
-							</group>
-						</group>
-					</page>
-					<page name="purchase" string="Achats">
-							<field name="project_outsourcing_link_ids" context="{'default_project_id' : id}">
-								<tree>    
-                        						<field name="currency_id" column_invisible="1"/>
-									<field name="project_id" optional="hide"/>
-									<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
-									<field name="link_type"/>
-									<field name="outsource_part_amount_current" string="Prix revente HT" sum="Total"/>
-									<field name="order_sum_purchase_order_lines" string="Commandé HT" sum="Total"/>
-									<field name="order_direct_payment_amount" string="Part en paiement direct HT" sum="Total"/>
-									<field name="order_company_payment_amount" string="Part en paiement classique HT" sum="Total"/>
-									<field name="sum_account_move_lines" sum="Total"/>
-								</tree>                                
-							</field>
-					</page>
-					<page name="book" string="Book">
-						<group string="Book brut du projet">
-							<group>
-								<field name="default_book_end"/>
-								<field name="is_book_manually_computed" groups="account.group_account_user"/>
-								<field name="is_book_manually_computed" invisible="1"/>
-							</group>
-							<group>
-								<field name="book_period_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
-									<tree editable="top">
-                        							<field name="currency_id" column_invisible="1"/>
-										<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-										<field name="company_id" column_invisible="1"/>
-										<field name="project_id" column_invisible="1"/>
-										<field name="reference_period"/>
-										<field name="period_project_book" sum="Total"/>
-									</tree>
-								</field>
-							</group>
-						</group>
-						<group string="Valorisation du book par DM/manager">
-							<group>
-								<field name="book_validation_employee_id"/>
-								<field name="book_validation_datetime" readonly="1" force_save="1"/>
-								<field name="project_book_factor" readonly="book_validation_datetime"/>
-								<field name="book_comment" column_invisible="not is_book_manually_computed"/>
-							</group>
-							<group>
-								<field name="book_employee_distribution_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" invisible="is_book_manually_computed">
-									<tree editable="top">
-										<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-										<field name="company_id" column_invisible="1"/>
-										<field name="project_id" column_invisible="1"/>
-										<field name="employee_id"/>
-										<field name="book_factor" sum="Total"/>
-										<field name="final_book_factor" sum="Total"/>
-									</tree>   
-								</field>
-							</group>
-						</group>
-						<field name="book_employee_distribution_period_ids" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
-							<tree editable="top">
-                        					<field name="currency_id" column_invisible="1"/>
-								<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-								<field name="company_id" column_invisible="1"/>
-								<field name="employee_id" readonly="not rel_is_book_manually_computed"/>
-									<!--
+                                </group>
+                                <group col="3">
+                                    <group string="Facturation HT au client">
+                                        <field name="order_to_invoice_company"/>
+                                        <field name="company_invoice_sum_move_lines"/>
+                                        <field name="company_to_invoice_left"/>
+                                    </group>
+                                    <group string="Facturation TTC au client">
+                                        <field name="order_to_invoice_company_with_tax"/>
+                                        <field name="company_invoice_sum_move_lines_with_tax"/>
+                                        <field name="company_to_invoice_left_with_tax"/>
+                                    </group>
+                                    <group string="Paiement TTC du client">
+                                        <field name="company_paid"/>
+                                        <field name="company_residual"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page name="purchase" string="Achats">
+                                <field name="project_outsourcing_link_ids" context="{'default_project_id' : id}">
+                                    <tree>
+                                        <field name="currency_id" column_invisible="1"/>
+                                        <field name="project_id" optional="hide"/>
+                                        <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
+                                        <field name="link_type"/>
+                                        <field name="outsource_part_amount_current" string="Prix revente HT" sum="Total"/>
+                                        <field name="order_sum_purchase_order_lines" string="Commandé HT" sum="Total"/>
+                                        <field name="order_direct_payment_amount" string="Part en paiement direct HT" sum="Total"/>
+                                        <field name="order_company_payment_amount" string="Part en paiement classique HT" sum="Total"/>
+                                        <field name="sum_account_move_lines" sum="Total"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page name="book" string="Book">
+                                <group string="Book brut du projet">
+                                    <group>
+                                        <field name="default_book_end"/>
+                                        <field name="is_book_manually_computed" groups="account.group_account_user"/>
+                                        <field name="is_book_manually_computed" invisible="1"/>
+                                    </group>
+                                    <group>
+                                        <field name="book_period_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
+                                            <tree editable="top">
+                                                <field name="currency_id" column_invisible="1"/>
+                                                <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                                                <field name="company_id" column_invisible="1"/>
+                                                <field name="project_id" column_invisible="1"/>
+                                                <field name="reference_period"/>
+                                                <field name="period_project_book" sum="Total"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                </group>
+                                <group string="Valorisation du book par DM/manager">
+                                    <group>
+                                        <field name="book_validation_employee_id"/>
+                                        <field name="book_validation_datetime" readonly="1" force_save="1"/>
+                                        <field name="project_book_factor" readonly="book_validation_datetime"/>
+                                        <field name="book_comment" column_invisible="not is_book_manually_computed"/>
+                                    </group>
+                                    <group>
+                                        <field name="book_employee_distribution_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" invisible="is_book_manually_computed">
+                                            <tree editable="top">
+                                                <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                                                <field name="company_id" column_invisible="1"/>
+                                                <field name="project_id" column_invisible="1"/>
+                                                <field name="employee_id"/>
+                                                <field name="book_factor" sum="Total"/>
+                                                <field name="final_book_factor" sum="Total"/>
+                                            </tree>
+                                        </field>
+                                    </group>
+                                </group>
+                                <field name="book_employee_distribution_period_ids" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
+                                    <tree editable="top">
+                                        <field name="currency_id" column_invisible="1"/>
+                                        <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                                        <field name="company_id" column_invisible="1"/>
+                                        <field name="employee_id" readonly="not rel_is_book_manually_computed"/>
+                                        <!--
 								<field name="project_id" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="rel_is_book_manually_computed" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="rel_book_comment" optional="hide" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 								<field name="reference_period" attrs="{'readonly': [('rel_is_book_manually_computed', '=', False)]}"/>
 									-->
-								<field name="rel_is_book_manually_computed" column_invisible="1"/>
-								<field name="project_book_period_id" domain="[('project_id', '=', context.get('default_project_id'))]" readonly="not rel_is_book_manually_computed"/>
-								<field name="period_project_book" column_invisible="parent.is_book_manually_computed" readonly="not rel_is_book_manually_computed"/>
-								<field name="final_book_factor" column_invisible="parent.is_book_manually_computed" readonly="not rel_is_book_manually_computed"/>
-								<field name="period_project_book_employee" sum="Total" readonly="not rel_is_book_manually_computed"/>
-							</tree>    
-						</field>
-					</page>
-					<page name="steering" string="Pilotage">
-						<group>
-							<group string="Au 1er janvier N (si la cloture au 31/12/N-1 est faite !)">
-								<field name="begin_year_stage_id"/>
-								<field name="begin_year_past_internal_revenue"/>
-								<field name="begin_year_futur_internal_revenue"/>
-							</group>
-							<group string="À date">
-								<field name="reporting_sum_company_outsource_code3_code_4"/>
-								<field name="reporting_sum_company_outsource_code3_code_4_delta"/>
-								<field name="past_internal_revenue"/>
-								<field name="futur_internal_revenue"/>
-								<field name="last_closing_production_balance"/>
-							</group>
-						</group>
-					</page>
-					<page name="account_closing" string="Clôtures comptables">
-						<group>
-							<group>
-								<field name="is_generate_project_accounting_closing" groups="account.group_account_user"/>
-							</group>
-							<group>
-								<field name="has_provision_running"/>
-							</group>
-						</group>
-						<field name="accounting_closing_ids" context="{'default_project_id':id}">
-							<tree>
-								<!-- ATTENTION : ne pas mettre la closing_date dans cette vue, sinon (pour une raison inconnue) lorsque l'on change le statut du projet, la closing date de la dernière cloture du projet est mise à jour avec la même valeur. Or le statut du projet est un related stocké sur la cloture, donc il déclenche la mise à jour de la cloture et embarque donc (en plus de la mise à jour du statut du projet) la mise à jour de la closing_date. Or la closing_date ne peut pas changer lorsqu'une clôture est validée. Donc la mise à jour de la cloture tombe en erreur, et entraine également un rollback sur la mise à jour du statut sur l'objet project.project.
+                                        <field name="rel_is_book_manually_computed" column_invisible="1"/>
+                                        <field name="project_book_period_id" domain="[('project_id', '=', context.get('default_project_id'))]" readonly="not rel_is_book_manually_computed"/>
+                                        <field name="period_project_book" column_invisible="parent.is_book_manually_computed" readonly="not rel_is_book_manually_computed"/>
+                                        <field name="final_book_factor" column_invisible="parent.is_book_manually_computed" readonly="not rel_is_book_manually_computed"/>
+                                        <field name="period_project_book_employee" sum="Total" readonly="not rel_is_book_manually_computed"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page name="steering" string="Pilotage">
+                                <group>
+                                    <group string="Au 1er janvier N (si la cloture au 31/12/N-1 est faite !)">
+                                        <field name="begin_year_stage_id"/>
+                                        <field name="begin_year_past_internal_revenue"/>
+                                        <field name="begin_year_futur_internal_revenue"/>
+                                    </group>
+                                    <group string="À date">
+                                        <field name="reporting_sum_company_outsource_code3_code_4"/>
+                                        <field name="reporting_sum_company_outsource_code3_code_4_delta"/>
+                                        <field name="past_internal_revenue"/>
+                                        <field name="futur_internal_revenue"/>
+                                        <field name="last_closing_production_balance"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page name="account_closing" string="Clôtures comptables">
+                                <group>
+                                    <group>
+                                        <field name="is_generate_project_accounting_closing" groups="account.group_account_user"/>
+                                    </group>
+                                    <group>
+                                        <field name="has_provision_running"/>
+                                    </group>
+                                </group>
+                                <field name="accounting_closing_ids" context="{'default_project_id':id}">
+                                    <tree>
+                                        <!-- ATTENTION : ne pas mettre la closing_date dans cette vue, sinon (pour une raison inconnue) lorsque l'on change le statut du projet, la closing date de la dernière cloture du projet est mise à jour avec la même valeur. Or le statut du projet est un related stocké sur la cloture, donc il déclenche la mise à jour de la cloture et embarque donc (en plus de la mise à jour du statut du projet) la mise à jour de la closing_date. Or la closing_date ne peut pas changer lorsqu'une clôture est validée. Donc la mise à jour de la cloture tombe en erreur, et entraine également un rollback sur la mise à jour du statut sur l'objet project.project.
 								-->
-								<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-								<field name="company_id" invisible="1"/>
-								<field name="original_stage_id" optional="show"/>
-								<field name="closing_date" optional="show"/>
-								<field name="previous_closing" optional="hide"/>
-								<!-- Validation -->
-								<field name="is_validated" optional="show"/>
-								<field name="comment" optional="hide" widget="text"/>
-								<field name="comment_previous" optional="hide" widget="text"/>
-							</tree>
-						</field>
-					</page>
-					<page string="Autres info et contrôles (debug admin)" groups="base.group_system">
-						<group>
-							<group>
-					    		    <field name="description" options="{'resizable': true}" placeholder="Description du projet..."/>
-							    <field name="is_purchase_order_received"/>
-							    <field name="purchase_order_number"/>
-							    <field name="amount"/>
-							    <field name="billed_amount"/>
-							    <field name="payed_amount"/>
-							    <field name="stage_is_part_of_booking"/>
-							    <field name="state"/>
-							</group>
-							<group>
-					    			<field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-					    			<field name="analytic_account_id" readonly="1"/>
-							</group>
-							<group string="Contrôles automatisés">
-								<field name="is_validated_order"/>
-								<field name="is_validated_book"/>
-								<field name="is_consistant_outsourcing"/>
-								<field name="is_validated_purchase_order"/>
-								<field name="is_sale_order_with_draft"/>
-								<field name="is_consistant_prevent_napta_creation"/>
-								<field name="is_outsource_part_amount_current"/>
-								<field name="is_affected_book"/>
-								<field name="other_part_marging_rate_controle_OK"/>
-								<field name="is_filled_sales_proposal_indexation"/>
-								<field name="is_filled_deliverable_indexation"/>
-								<field name="is_filled_commercial_reference_indexation"/>
-								<field name="is_filled_success_story_indexation"/>
-								<field name="is_filled_csr_project_initiative"/>
-								<field name="is_filled_csr_project_environmental_level"/>
-								<field name="is_filled_csr_project_social_level"/>
-								<field name="is_review_needed"/>
-							</group>
-
-						</group>
-					</page>
-					<page string="Capitalisation/RSE">
-						<group>
-							<group string="Capitalisation">
-								<field name="sales_proposal_indexation"/>
-								<field name="deliverable_indexation"/>
-								<field name="success_story_indexation"/>
-								<field name="commercial_reference_indexation"/>
-							</group>
-							<group string="Bilan RSE du projet">
-								<field name="csr_project_social_level"/>
-								<field name="csr_project_environmental_level"/>
-								  <field name="csr_form_date"/>
-								  <field name="csr_form_author"/>
-								  <field name="csr_form_url"/>
-							</group>
-						</group>
-					</page>
-				</notebook>
-			</sheet>
-		<div class="oe_chatter">
-                    <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
-		    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
-		</form>
-	      </field>
-	    </record>
-
-
-           <record model="ir.ui.view" id="project_pivot">
-              <field name="name">Project</field>
-	      <field name="model">project.project</field>
-              <field name="priority">1</field>
-	      <field name="arch" type="xml">
-		<pivot string="Projet">
-		    <field name="name" type="row"/>
-		    <field name="user_id"/>
-		    <field name="stage_id"/>
-		    <field name="partner_id"/>
-		    <field name="order_sum_sale_order_lines_with_draft" type="measure"/>
-
-		    <field name="futur_internal_revenue" type="measure"/>
-		    <field name="last_closing_production_balance" type="measure"/>
-
-		    <field name="order_amount_current" type="measure"/>
-		    <field name="order_cost_current" type="measure"/>
-		    <field name="order_cost_futur" type="measure"/>
-		    <field name="order_marging_amount_current" type="measure"/>
-
-		    <field name="company_part_amount_current" type="measure"/>
-		    <field name="company_part_cost_current" type="measure"/>
-		    <field name="company_part_cost_futur" type="measure"/>
-		    <field name="company_part_marging_amount_current" type="measure"/>
-
-		    <field name="outsource_part_amount_current" type="measure"/>
-		    <field name="outsource_part_cost_current" type="measure"/>
-		    <field name="outsource_part_cost_futur" type="measure"/>
-		    <field name="outsource_part_marging_amount_current" type="measure"/>
-
-		    <field name="other_part_amount_current" type="measure"/>
-		    <field name="other_part_cost_current" type="measure"/>
-		    <field name="other_part_cost_futur" type="measure"/>
-		    <field name="other_part_marging_amount_current" type="measure"/>
-		</pivot>
-	      </field>
-	  </record>
-
-	    <record id="project_action" model="ir.actions.act_window">
-		<field name="name">Projets</field>
-		<field name="res_model">project.project</field>
-		<field name="view_mode">tree,form</field>
-		<field name="context">{'search_default_open_projects':1}</field>
-	    </record>
-
-	    <record id="project_action_view_tree" model="ir.actions.act_window.view">
-		<field name="sequence" eval="1"/>       
-		<field name="view_mode">tree</field>
-		<field name="act_window_id" ref="project_accounting.project_action"/>
-		<field name="view_id" ref="project_accounting.project_tree"/>
-	    </record>
-
-	    <record id="project_action_view_form" model="ir.actions.act_window.view">
-		<field name="sequence" eval="2"/>       
-		<field name="view_mode">form</field>
-		<field name="act_window_id" ref="project_accounting.project_action"/>
-		<field name="view_id" ref="project_accounting.project_form"/>
-	    </record>
-
-	    <record id="project_action_view_form" model="ir.actions.act_window.view">
-		<field name="sequence" eval="3"/>       
-		<field name="view_mode">pivot</field>
-		<field name="act_window_id" ref="project_accounting.project_action"/>
-		<field name="view_id" ref="project_accounting.project_pivot"/>
-	    </record>
-
-
-	    <menuitem name="Projets ADV" id="project_menu" sequence="5" parent="project.menu_main_pm" action="project_action"/>
-
-
-	   <record model="ir.ui.view" id="project_kanban">
-	      <field name="name">Project</field>
-	      <field name="model">project.project</field>
-	      <field name="priority">1</field>
-	      <field name="arch" type="xml">
-		<kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" sample="1" default_order="sequence, number">
+                                        <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                                        <field name="company_id" invisible="1"/>
+                                        <field name="original_stage_id" optional="show"/>
+                                        <field name="closing_date" optional="show"/>
+                                        <field name="previous_closing" optional="hide"/>
+                                        <!-- Validation -->
+                                        <field name="is_validated" optional="show"/>
+                                        <field name="comment" optional="hide" widget="text"/>
+                                        <field name="comment_previous" optional="hide" widget="text"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Autres info et contrôles (debug admin)" groups="base.group_system">
+                                <group>
+                                    <group>
+                                        <field name="description" options="{'resizable': true}" placeholder="Description du projet..."/>
+                                        <field name="is_purchase_order_received"/>
+                                        <field name="purchase_order_number"/>
+                                        <field name="amount"/>
+                                        <field name="billed_amount"/>
+                                        <field name="payed_amount"/>
+                                        <field name="stage_is_part_of_booking"/>
+                                        <field name="state"/>
+                                    </group>
+                                    <group>
+                                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                        <field name="analytic_account_id" readonly="1"/>
+                                    </group>
+                                    <group string="Contrôles automatisés">
+                                        <field name="is_validated_order"/>
+                                        <field name="is_validated_book"/>
+                                        <field name="is_consistant_outsourcing"/>
+                                        <field name="is_validated_purchase_order"/>
+                                        <field name="is_sale_order_with_draft"/>
+                                        <field name="is_consistant_prevent_napta_creation"/>
+                                        <field name="is_outsource_part_amount_current"/>
+                                        <field name="is_affected_book"/>
+                                        <field name="other_part_marging_rate_controle_OK"/>
+                                        <field name="is_filled_sales_proposal_indexation"/>
+                                        <field name="is_filled_deliverable_indexation"/>
+                                        <field name="is_filled_commercial_reference_indexation"/>
+                                        <field name="is_filled_success_story_indexation"/>
+                                        <field name="is_filled_csr_project_initiative"/>
+                                        <field name="is_filled_csr_project_environmental_level"/>
+                                        <field name="is_filled_csr_project_social_level"/>
+                                        <field name="is_review_needed"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Capitalisation/RSE">
+                                <group>
+                                    <group string="Capitalisation">
+                                        <field name="sales_proposal_indexation"/>
+                                        <field name="deliverable_indexation"/>
+                                        <field name="success_story_indexation"/>
+                                        <field name="commercial_reference_indexation"/>
+                                    </group>
+                                    <group string="Bilan RSE du projet">
+                                        <field name="csr_project_social_level"/>
+                                        <field name="csr_project_environmental_level"/>
+                                        <field name="csr_form_date"/>
+                                        <field name="csr_form_author"/>
+                                        <field name="csr_form_url"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="project_pivot">
+            <field name="name">Project</field>
+            <field name="model">project.project</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <pivot string="Projet">
+                    <field name="name" type="row"/>
+                    <field name="user_id"/>
+                    <field name="stage_id"/>
+                    <field name="partner_id"/>
+                    <field name="order_sum_sale_order_lines_with_draft" type="measure"/>
+                    <field name="futur_internal_revenue" type="measure"/>
+                    <field name="last_closing_production_balance" type="measure"/>
+                    <field name="order_amount_current" type="measure"/>
+                    <field name="order_cost_current" type="measure"/>
+                    <field name="order_cost_futur" type="measure"/>
+                    <field name="order_marging_amount_current" type="measure"/>
+                    <field name="company_part_amount_current" type="measure"/>
+                    <field name="company_part_cost_current" type="measure"/>
+                    <field name="company_part_cost_futur" type="measure"/>
+                    <field name="company_part_marging_amount_current" type="measure"/>
+                    <field name="outsource_part_amount_current" type="measure"/>
+                    <field name="outsource_part_cost_current" type="measure"/>
+                    <field name="outsource_part_cost_futur" type="measure"/>
+                    <field name="outsource_part_marging_amount_current" type="measure"/>
+                    <field name="other_part_amount_current" type="measure"/>
+                    <field name="other_part_cost_current" type="measure"/>
+                    <field name="other_part_cost_futur" type="measure"/>
+                    <field name="other_part_marging_amount_current" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+        <record id="project_action" model="ir.actions.act_window">
+            <field name="name">Projets</field>
+            <field name="res_model">project.project</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_open_projects':1}</field>
+        </record>
+        <record id="project_action_view_tree" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="act_window_id" ref="project_accounting.project_action"/>
+            <field name="view_id" ref="project_accounting.project_tree"/>
+        </record>
+        <record id="project_action_view_form" model="ir.actions.act_window.view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="act_window_id" ref="project_accounting.project_action"/>
+            <field name="view_id" ref="project_accounting.project_form"/>
+        </record>
+        <record id="project_action_view_form" model="ir.actions.act_window.view">
+            <field name="sequence" eval="3"/>
+            <field name="view_mode">pivot</field>
+            <field name="act_window_id" ref="project_accounting.project_action"/>
+            <field name="view_id" ref="project_accounting.project_pivot"/>
+        </record>
+        <menuitem name="Projets ADV" id="project_menu" sequence="5" parent="project.menu_main_pm" action="project_action"/>
+        <record model="ir.ui.view" id="project_kanban">
+            <field name="name">Project</field>
+            <field name="model">project.project</field>
+            <field name="priority">1</field>
+            <field name="arch" type="xml">
+                <kanban class="oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors" sample="1" default_order="sequence, number">
                     <field name="display_name"/>
                     <field name="partner_id"/>
                     <field name="color"/>
@@ -639,7 +613,7 @@
                     <field name="tag_ids"/>
                     <field name="number"/>
                     <field name="company_id"/>
-		    <field name="is_review_needed"/>
+                    <field name="is_review_needed"/>
                     <progressbar field="last_update_status" colors="{&quot;on_track&quot;: &quot;success&quot;, &quot;at_risk&quot;: &quot;warning&quot;, &quot;off_track&quot;: &quot;danger&quot;, &quot;on_hold&quot;: &quot;info&quot;}"/>
                     <field name="sequence" widget="handle"/>
                     <templates>
@@ -649,17 +623,22 @@
                                     <div class="o_kanban_card_content mw-100">
                                         <div class="o_kanban_primary_left">
                                             <div class="o_primary">
-                                                <span class="o_text_overflow" t-att-title="record.display_name.value"><t t-esc="record.display_name.value"/></span>
+                                                <span class="o_text_overflow" t-att-title="record.display_name.value">
+                                                    <t t-esc="record.display_name.value"/>
+                                                </span>
                                                 <span class="o_text_overflow text-muted" t-if="record.partner_id.value">
-                                                    <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/><t t-esc="record.partner_id.value"/>
+                                                    <span class="fa fa-user me-2" aria-label="Partner" title="Partner"/>
+                                                    <t t-esc="record.partner_id.value"/>
                                                 </span>
                                                 <div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted o_row">
-                                                    <span class="fa fa-clock-o me-2" title="Dates"/><field name="date_start"/>
+                                                    <span class="fa fa-clock-o me-2" title="Dates"/>
+                                                    <field name="date_start"/>
                                                     <i t-if="record.date.raw_value and record.date_start.raw_value" class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
                                                     <field name="date"/>
                                                 </div>
                                                 <div t-if="record.alias_name.value and record.alias_domain.value" class="text-muted text-truncate" t-att-title="record.alias_id.value">
-                                                    <span class="fa fa-envelope-o me-2" aria-label="Domain Alias" title="Domain Alias"/><t t-esc="record.alias_id.value"/>
+                                                    <span class="fa fa-envelope-o me-2" aria-label="Domain Alias" title="Domain Alias"/>
+                                                    <t t-esc="record.alias_id.value"/>
                                                 </div>
                                                 <div t-if="record.rating_active.raw_value and record.rating_count.raw_value &gt; 0" class="text-muted" groups="project.group_project_rating">
                                                     <b class="me-1">
@@ -670,85 +649,69 @@
                                                     <field name="rating_avg_percentage" widget="percentage"/>
                                                 </div>
                                                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-						<span t-if="record.is_review_needed.raw_value" class="o_text_overflow text-muted">
-							<span title="warning_is_review_needed" class="fa fa-exclamation-triangle me-2" aria-label="Partner"/>
+                                                <span t-if="record.is_review_needed.raw_value" class="o_text_overflow text-muted"><span title="warning_is_review_needed" class="fa fa-exclamation-triangle me-2" aria-label="Partner"/>
 							Contrôle(s) en échec
 						</span>
                                             </div>
                                         </div>
                                     </div>
                                     <span>
-                                       <field name="is_favorite" widget="boolean_favorite" nolabel="1" force_save="1"/>
+                                        <field name="is_favorite" widget="boolean_favorite" nolabel="1" force_save="1"/>
                                     </span>
                                 </div>
                             </div>
                         </t>
                     </templates>
                 </kanban>
-	      </field>
-	   </record>
-		
-    <record id="action_recompute_project" model="ir.actions.server">
-          <field name="name">Recalculer les agrégats du projet</field>
-          <field name="model_id" ref="model_project_project"/>
-          <field name="binding_model_id" ref="model_project_project"/>
-          <field name="state">code</field>
-          <field name="code">for rec in records:
+            </field>
+        </record>
+        <record id="action_recompute_project" model="ir.actions.server">
+            <field name="name">Recalculer les agrégats du projet</field>
+            <field name="model_id" ref="model_project_project"/>
+            <field name="binding_model_id" ref="model_project_project"/>
+            <field name="state">code</field>
+            <field name="code">for rec in records:
                   rec.compute()</field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
-  </record>
-
-	    <!-- ACTION APPLICAQUE AUX UTILISATUER QUI ONT LE droit de gestion des étapes du projet (ie admin) -->
-	    <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
-		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
-      		<field name="search_view_id" ref="view_project_search"/>
-		<field name="view_mode">tree,form,pivot,kanban,calendar,activity</field>
-	    </record>
-
-
-            <record id="project.open_view_project_all_group_stage_kanban_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="20"/>
-                <field name="view_mode">kanban</field>
-                <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
-                <field name="view_id" ref="project_accounting.project_kanban"/>
-            </record>
-
-            <record id="project.open_view_project_all_group_stage_tree_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="1"/>
-                <field name="view_mode">tree</field>
-                <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
-                <field name="view_id" ref="project_accounting.project_tree"/>
-            </record>
-
-            <record id="open_view_project_all_group_stage_form_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="2"/>
-                <field name="view_mode">form</field>
-                <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
-                <field name="view_id" ref="project_accounting.project_form"/>
-            </record>
-
-            <record id="open_view_project_all_group_stage_pivot_view" model="ir.actions.act_window.view">
-                <field name="sequence" eval="3"/>
-                <field name="view_mode">pivot</field>
-                <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
-                <field name="view_id" ref="project_accounting.project_pivot"/>
-            </record>
-
-	    <!-- ACTION APPLICAQUE AUX UTILISATUER SANS LE droit de gestion des étapes du projet -->
-	    <record id="project.open_view_project_all" model="ir.actions.act_window">
-		<field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
-      		<field name="search_view_id" ref="view_project_search"/>
-		<field name="view_ids" eval="[
-			(5, 0, 0),
-			(0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),
-			(0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),
-			(0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),
-			(0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),
-		]"/>
-	    </record>
-
-    <record id="project.menu_main_pm" model="ir.ui.menu">
-	    <field name="sequence">4</field>
-    </record>
-   </data>
+            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+        </record>
+        <!-- ACTION APPLICAQUE AUX UTILISATUER QUI ONT LE droit de gestion des étapes du projet (ie admin) -->
+        <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
+            <field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
+            <field name="search_view_id" ref="view_project_search"/>
+            <field name="view_mode">tree,form,pivot,kanban,calendar,activity</field>
+        </record>
+        <record id="project.open_view_project_all_group_stage_kanban_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">kanban</field>
+            <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
+            <field name="view_id" ref="project_accounting.project_kanban"/>
+        </record>
+        <record id="project.open_view_project_all_group_stage_tree_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
+            <field name="view_id" ref="project_accounting.project_tree"/>
+        </record>
+        <record id="open_view_project_all_group_stage_form_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
+            <field name="view_id" ref="project_accounting.project_form"/>
+        </record>
+        <record id="open_view_project_all_group_stage_pivot_view" model="ir.actions.act_window.view">
+            <field name="sequence" eval="3"/>
+            <field name="view_mode">pivot</field>
+            <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
+            <field name="view_id" ref="project_accounting.project_pivot"/>
+        </record>
+        <!-- ACTION APPLICAQUE AUX UTILISATUER SANS LE droit de gestion des étapes du projet -->
+        <record id="project.open_view_project_all" model="ir.actions.act_window">
+            <field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
+            <field name="search_view_id" ref="view_project_search"/>
+            <field name="view_ids" eval="[    (5, 0, 0),    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),    (0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),   ]"/>
+        </record>
+        <record id="project.menu_main_pm" model="ir.ui.menu">
+            <field name="sequence">4</field>
+        </record>
+    </data>
 </odoo>

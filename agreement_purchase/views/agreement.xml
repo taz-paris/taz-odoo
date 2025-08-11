@@ -1,29 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <menuitem
-        id="agreement.agreement_menu"
-        action="agreement.agreement_action"
-        parent="purchase.menu_purchase_config"
-        sequence="100"
-    />
-    <menuitem
-        id="agreement.agreement_type_menu"
-        action="agreement.agreement_type_action"
-        parent="purchase.menu_purchase_config"
-        sequence="101"
-        groups="agreement.group_use_agreement_type"
-    />
-
-        <record id="agreement_form_inherit" model="ir.ui.view">
-            <field name="name">Agreement</field>
-            <field name="model">agreement</field>
-            <field name="inherit_id" ref="agreement.agreement_form"/>
-            <field name="arch" type="xml">
-		<xpath expr="//page[@name='config']" position="after">
-		    <page string="Bons de commande fournisseurs liés" name="purchase_orders">
-			    <field name="purchase_order_ids"/>
-		    </page>
-		</xpath>
-	    </field>
-	</record>
-
+    <menuitem id="agreement.agreement_menu" action="agreement.agreement_action" parent="purchase.menu_purchase_config" sequence="100"/>
+    <menuitem id="agreement.agreement_type_menu" action="agreement.agreement_type_action" parent="purchase.menu_purchase_config" sequence="101" groups="agreement.group_use_agreement_type"/>
+    <record id="agreement_form_inherit" model="ir.ui.view">
+        <field name="name">Agreement</field>
+        <field name="model">agreement</field>
+        <field name="inherit_id" ref="agreement.agreement_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='config']" position="after">
+                <page string="Bons de commande fournisseurs liés" name="purchase_orders">
+                    <field name="purchase_order_ids"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
 </odoo>

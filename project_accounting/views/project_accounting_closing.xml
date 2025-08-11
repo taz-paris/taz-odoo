@@ -1,180 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<data>
-           <record model="ir.ui.view" id="project_accounting.project_accounting_closing_tree">
-              <field name="name">Project accounting closing</field>
-              <field name="model">project.accounting_closing</field>
-              <field name="arch" type="xml">
+    <data>
+        <record model="ir.ui.view" id="project_accounting.project_accounting_closing_tree">
+            <field name="name">Project accounting closing</field>
+            <field name="model">project.accounting_closing</field>
+            <field name="arch" type="xml">
                 <tree create="true">
-			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-                        <field name="company_id" column_invisible="1"/>
-                        <field name="currency_id" column_invisible="1"/>
-                  	<field name="project_id" optional="show"/>
-                  	<field name="original_stage_id" optional="show"/>
-                  	<field name="rel_project_stage_id" optional="show"/>
-                  	<field name="closing_date" required="1" optional="show"/>
-			<field name="previous_closing" optional="hide"/>
-			<!-- Validation -->
-			<field name="is_validated" optional="show"/>
-			<field name="comment" optional="hide" widget="text"/>
-			<field name="comment_previous" optional="hide" widget="text"/>
-			<!-- Facturation -->
-			<field name="invoice_period_amount" optional="show" sum="Total"/>
-			<!-- Achats-->
-			<field name="purchase_period_amount" optional="show" sum="Total"/>
-			<!-- Total provision -->
-			<field name="provision_previous_balance_sum" optional="hide"/>
-			<field name="provision_balance_sum" optional="hide"/>
-			<!-- PCA -->
-			<field name="pca_previous_balance" optional="hide"/>
-			<field name="pca_period_amount" optional="show" sum="Total"/>
-			<field name="pca_balance" optional="hide"/>
-			<!-- FAE -->
-			<field name="fae_previous_balance" optional="hide"/>
-			<field name="fae_period_amount" optional="show" sum="Total"/>
-			<field name="fae_balance" optional="hide"/>
-			<!-- CCA -->
-			<field name="cca_previous_balance" optional="hide"/>
-			<field name="cca_period_amount" optional="show" sum="Total"/>
-			<field name="cca_balance" optional="hide"/>
-			<!-- FNP -->
-			<field name="fnp_previous_balance" optional="hide"/>
-			<field name="fnp_period_amount" optional="show" sum="Total"/>
-			<field name="fnp_balance" optional="hide"/>
-			<!-- Production -->
-			<field name="production_previous_balance" optional="hide"/>
-			<field name="production_period_amount" optional="show" sum="Total"/>
-			<field name="production_stock" optional="show"/>
-			<field name="production_destocking" optional="show" sum="Total"/>
-			<field name="production_balance" optional="hide"/>
-			<!-- Chiffre d'afffaire -->
-			<field name="gross_revenue" optional="hide" sum="Total"/>
-			<field name="internal_revenue" optional="hide" sum="Total"/>
-			<field name="internal_margin_amount" optional="hide" sum="Total"/>
-			<field name="internal_margin_rate" widget="progressbar" optional="hide"/>
+                    <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" column_invisible="1"/>
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="project_id" optional="show"/>
+                    <field name="original_stage_id" optional="show"/>
+                    <field name="rel_project_stage_id" optional="show"/>
+                    <field name="closing_date" required="1" optional="show"/>
+                    <field name="previous_closing" optional="hide"/>
+                    <!-- Validation -->
+                    <field name="is_validated" optional="show"/>
+                    <field name="comment" optional="hide" widget="text"/>
+                    <field name="comment_previous" optional="hide" widget="text"/>
+                    <!-- Facturation -->
+                    <field name="invoice_period_amount" optional="show" sum="Total"/>
+                    <!-- Achats-->
+                    <field name="purchase_period_amount" optional="show" sum="Total"/>
+                    <!-- Total provision -->
+                    <field name="provision_previous_balance_sum" optional="hide"/>
+                    <field name="provision_balance_sum" optional="hide"/>
+                    <!-- PCA -->
+                    <field name="pca_previous_balance" optional="hide"/>
+                    <field name="pca_period_amount" optional="show" sum="Total"/>
+                    <field name="pca_balance" optional="hide"/>
+                    <!-- FAE -->
+                    <field name="fae_previous_balance" optional="hide"/>
+                    <field name="fae_period_amount" optional="show" sum="Total"/>
+                    <field name="fae_balance" optional="hide"/>
+                    <!-- CCA -->
+                    <field name="cca_previous_balance" optional="hide"/>
+                    <field name="cca_period_amount" optional="show" sum="Total"/>
+                    <field name="cca_balance" optional="hide"/>
+                    <!-- FNP -->
+                    <field name="fnp_previous_balance" optional="hide"/>
+                    <field name="fnp_period_amount" optional="show" sum="Total"/>
+                    <field name="fnp_balance" optional="hide"/>
+                    <!-- Production -->
+                    <field name="production_previous_balance" optional="hide"/>
+                    <field name="production_period_amount" optional="show" sum="Total"/>
+                    <field name="production_stock" optional="show"/>
+                    <field name="production_destocking" optional="show" sum="Total"/>
+                    <field name="production_balance" optional="hide"/>
+                    <!-- Chiffre d'afffaire -->
+                    <field name="gross_revenue" optional="hide" sum="Total"/>
+                    <field name="internal_revenue" optional="hide" sum="Total"/>
+                    <field name="internal_margin_amount" optional="hide" sum="Total"/>
+                    <field name="internal_margin_rate" widget="progressbar" optional="hide"/>
                 </tree>
-              </field>
-            </record>
-
-
-           <record model="ir.ui.view" id="project_accounting.project_accounting_closing_form">
-              <field name="name">Project accounting closing</field>
-              <field name="model">project.accounting_closing</field>
-              <field name="arch" type="xml">
+            </field>
+        </record>
+        <record model="ir.ui.view" id="project_accounting.project_accounting_closing_form">
+            <field name="name">Project accounting closing</field>
+            <field name="model">project.accounting_closing</field>
+            <field name="arch" type="xml">
                 <form>
-			<group name="general" col="3">
-				<group string="Projet">
-					<field name="company_id" invisible="1"/>
-					<field name="company_id" groups="base.group_multi_company"/>
-					<field name="project_id" readonly="project_id" force_save="1"/>
-					<field name="rel_project_user_id" string="Directeur de mission"/>
-					<field name="rel_project_manager_user_id"/>
-				    <label for="rel_project_date_start" string="Dates de début/fin"/>
-				    <div name="dates" class="o_row">
-					<field name="rel_project_date_start" widget="daterange"/>
-					<i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
-					<field name="rel_project_date" widget="daterange"/>
-				    </div>
-					<field name="rel_project_stage_id"/>
-					<button type="object" name="goto_napta" string="Voir sur Napta" colspan="2"/>
-				</group>
-				<group string="Clôture précédente">
-					<field name="previous_closing"/>
-					<field name="comment_previous" widget="text"/>
-				</group>
-				<group string="Clôture en cours">
-					<field name="closing_date" required="1"/>
-					<field name="original_stage_id"/>
-					<field name="is_validated"/>
-					<field name="comment" widget="text"/>
-				</group>
-			</group>
-			<notebook>
-				<page name="closing_data" string="Données de clôture">
-					<group col="3">
-						<group name="invoice" string="Facturation client">
-							<field name="invoice_period_amount"/>
-							<button type="object" name="action_open_out_account_move_lines" colspan="2" string="Voir les lignes de facturation client"/>
-						</group>
-						<group name="purchase" string="Facturation fournisseurs">
-							<field name="purchase_period_amount"/>
-							<button type="object" name="action_open_in_account_move_lines" colspan="2" string="Voir les lignes de facturation fournisseur"/>
-						</group>
-						<group name="prov" string="Total provisions">
-							<field name="provision_previous_balance_sum"/>
-							<field name="provision_balance_sum"/>
-						</group>
-					</group>
-					<group col="4">
-						<group name="pca" string="PCA">
-							<field name="pca_previous_balance"/>
-							<field name="pca_period_amount" readonly="is_validated"/>
-							<field name="pca_balance"/>
-						</group>
-						<group name="fae" string="FAE">
-							<field name="fae_previous_balance"/>
-							<field name="fae_period_amount" readonly="is_validated"/>
-							<field name="fae_balance"/>
-						</group>
-						<group name="cca" string="CCA">
-							<field name="cca_previous_balance"/>
-							<field name="cca_period_amount" readonly="is_validated"/>
-							<field name="cca_balance"/>
-						</group>
-						<group name="fnp" string="FNP">
-							<field name="fnp_previous_balance"/>
-							<field name="fnp_period_amount" readonly="is_validated"/>
-							<field name="fnp_balance"/>
-						</group>
-					</group>
-					<group>
-						<group name="prod" string="Production">
-							<group>
-								<field name="production_previous_balance"/>
-								<field name="production_period_amount"/>
-								<field name="production_stock"/>
-							</group>
-							<group>
-								<field name="production_destocking" readonly="is_validated"/>
-								<field name="production_balance"/>
-								<button type="object" name="action_open_analytic_lines" colspan="2" string="Voir les lignes de pointage"/>
-							</group>
-						</group>
-						<group name="revenue" string="Chiffre d'affaire">
-							<group>
-								<field name="gross_revenue"/>
-								<field name="internal_revenue"/>
-							</group>
-							<group>
-								<field name="internal_margin_amount"/>
-								<field name="internal_margin_rate" widget="progressbar"/>
-							</group>
-						</group>
-					</group>
-				</page>
-				<page name="history_data" string="Historique des clôtures du projet">
-					<field name="rel_project_accounting_closing_ids"/>
-				</page>
-			</notebook>
+                    <group name="general" col="3">
+                        <group string="Projet">
+                            <field name="company_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="project_id" readonly="project_id" force_save="1"/>
+                            <field name="rel_project_user_id" string="Directeur de mission"/>
+                            <field name="rel_project_manager_user_id"/>
+                            <label for="rel_project_date_start" string="Dates de début/fin"/>
+                            <div name="dates" class="o_row">
+                                <field name="rel_project_date_start" widget="daterange"/>
+                                <i class="fa fa-long-arrow-right mx-2 oe_edit_only" aria-label="Arrow icon" title="Arrow"/>
+                                <field name="rel_project_date" widget="daterange"/>
+                            </div>
+                            <field name="rel_project_stage_id"/>
+                            <button type="object" name="goto_napta" string="Voir sur Napta" colspan="2"/>
+                        </group>
+                        <group string="Clôture précédente">
+                            <field name="previous_closing"/>
+                            <field name="comment_previous" widget="text"/>
+                        </group>
+                        <group string="Clôture en cours">
+                            <field name="closing_date" required="1"/>
+                            <field name="original_stage_id"/>
+                            <field name="is_validated"/>
+                            <field name="comment" widget="text"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="closing_data" string="Données de clôture">
+                            <group col="3">
+                                <group name="invoice" string="Facturation client">
+                                    <field name="invoice_period_amount"/>
+                                    <button type="object" name="action_open_out_account_move_lines" colspan="2" string="Voir les lignes de facturation client"/>
+                                </group>
+                                <group name="purchase" string="Facturation fournisseurs">
+                                    <field name="purchase_period_amount"/>
+                                    <button type="object" name="action_open_in_account_move_lines" colspan="2" string="Voir les lignes de facturation fournisseur"/>
+                                </group>
+                                <group name="prov" string="Total provisions">
+                                    <field name="provision_previous_balance_sum"/>
+                                    <field name="provision_balance_sum"/>
+                                </group>
+                            </group>
+                            <group col="4">
+                                <group name="pca" string="PCA">
+                                    <field name="pca_previous_balance"/>
+                                    <field name="pca_period_amount" readonly="is_validated"/>
+                                    <field name="pca_balance"/>
+                                </group>
+                                <group name="fae" string="FAE">
+                                    <field name="fae_previous_balance"/>
+                                    <field name="fae_period_amount" readonly="is_validated"/>
+                                    <field name="fae_balance"/>
+                                </group>
+                                <group name="cca" string="CCA">
+                                    <field name="cca_previous_balance"/>
+                                    <field name="cca_period_amount" readonly="is_validated"/>
+                                    <field name="cca_balance"/>
+                                </group>
+                                <group name="fnp" string="FNP">
+                                    <field name="fnp_previous_balance"/>
+                                    <field name="fnp_period_amount" readonly="is_validated"/>
+                                    <field name="fnp_balance"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group name="prod" string="Production">
+                                    <group>
+                                        <field name="production_previous_balance"/>
+                                        <field name="production_period_amount"/>
+                                        <field name="production_stock"/>
+                                    </group>
+                                    <group>
+                                        <field name="production_destocking" readonly="is_validated"/>
+                                        <field name="production_balance"/>
+                                        <button type="object" name="action_open_analytic_lines" colspan="2" string="Voir les lignes de pointage"/>
+                                    </group>
+                                </group>
+                                <group name="revenue" string="Chiffre d'affaire">
+                                    <group>
+                                        <field name="gross_revenue"/>
+                                        <field name="internal_revenue"/>
+                                    </group>
+                                    <group>
+                                        <field name="internal_margin_amount"/>
+                                        <field name="internal_margin_rate" widget="progressbar"/>
+                                    </group>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="history_data" string="Historique des clôtures du projet">
+                            <field name="rel_project_accounting_closing_ids"/>
+                        </page>
+                    </notebook>
                 </form>
-              </field>
-            </record>
-
-	<record id="project_accounting.project_accounting_closing_pivot" model="ir.ui.view">
-		<field name="name">project.accounting_closing.pivot</field>
-		<field name="model">project.accounting_closing</field>
-		<field name="arch" type="xml">
-		    <pivot string="Clôtures comptables" sample="1">
-			<field name="closing_date" type="row" interval="month"/>
-			<field name="invoice_period_amount" type="measure"/>
-			<field name="purchase_period_amount" type="measure"/>
-			<field name="production_period_amount" type="measure"/>
-			<field name="production_destocking" type="measure"/>
-			<field name="internal_margin_amount" type="measure"/>
-			<field name="fnp_period_amount" type="measure"/>
-			<field name="fae_period_amount" type="measure"/>
-			<field name="pca_period_amount" type="measure"/>
-			<field name="cca_period_amount" type="measure"/>
-			<!--
+            </field>
+        </record>
+        <record id="project_accounting.project_accounting_closing_pivot" model="ir.ui.view">
+            <field name="name">project.accounting_closing.pivot</field>
+            <field name="model">project.accounting_closing</field>
+            <field name="arch" type="xml">
+                <pivot string="Clôtures comptables" sample="1">
+                    <field name="closing_date" type="row" interval="month"/>
+                    <field name="invoice_period_amount" type="measure"/>
+                    <field name="purchase_period_amount" type="measure"/>
+                    <field name="production_period_amount" type="measure"/>
+                    <field name="production_destocking" type="measure"/>
+                    <field name="internal_margin_amount" type="measure"/>
+                    <field name="fnp_period_amount" type="measure"/>
+                    <field name="fae_period_amount" type="measure"/>
+                    <field name="pca_period_amount" type="measure"/>
+                    <field name="cca_period_amount" type="measure"/>
+                    <!--
 			<field name="closing_date" type="col" interval="year"/>
 			<field name="project_id" type="row"/>
 			<field name="provision_previous_balance_sum" type="measure"/>
@@ -184,38 +182,36 @@
 			<field name="internal_revenue" type="measure"/>
 			<field name="internal_margin_rate" type="measure"/>
 			-->
-		    </pivot>
-		</field>
-	</record>
-
-	<record id="project_accounting.project_accounting_closing_graph" model="ir.ui.view">
-	      <field name="name">project.accounting_closing.graph</field>
-	      <field name="model">project.accounting_closing</field>
-	      <field name="arch" type="xml">
-		<graph type="line" string="Clôtures comptables">
-		    <field name="closing_date" interval="month"/>
-                       <field name="invoice_period_amount" type="measure"/>
-                        <field name="purchase_period_amount" type="measure"/>
-                        <field name="production_period_amount" type="measure"/>
-                        <field name="production_destocking" type="measure"/>
-                        <field name="production_balance" type="measure"/>
-                        <field name="internal_margin_amount" type="measure"/>
-                        <field name="fnp_period_amount" type="measure"/>
-                        <field name="fae_period_amount" type="measure"/>
-                        <field name="pca_period_amount" type="measure"/>
-                        <field name="cca_period_amount" type="measure"/>
-		</graph>
-	      </field>
-    </record>
-
+                </pivot>
+            </field>
+        </record>
+        <record id="project_accounting.project_accounting_closing_graph" model="ir.ui.view">
+            <field name="name">project.accounting_closing.graph</field>
+            <field name="model">project.accounting_closing</field>
+            <field name="arch" type="xml">
+                <graph type="line" string="Clôtures comptables">
+                    <field name="closing_date" interval="month"/>
+                    <field name="invoice_period_amount" type="measure"/>
+                    <field name="purchase_period_amount" type="measure"/>
+                    <field name="production_period_amount" type="measure"/>
+                    <field name="production_destocking" type="measure"/>
+                    <field name="production_balance" type="measure"/>
+                    <field name="internal_margin_amount" type="measure"/>
+                    <field name="fnp_period_amount" type="measure"/>
+                    <field name="fae_period_amount" type="measure"/>
+                    <field name="pca_period_amount" type="measure"/>
+                    <field name="cca_period_amount" type="measure"/>
+                </graph>
+            </field>
+        </record>
         <record id="view_project_accounting_closing_search" model="ir.ui.view">
             <field name="name">project.accounting_closing</field>
             <field name="model">project.accounting_closing</field>
             <field name="arch" type="xml">
                 <search string="Search Project accounting closing">
-		    <field name="project_id" string="Projet"/>
+                    <field name="project_id" string="Projet"/>
                     <field name="rel_project_user_id" string="Directeur de mission (nom de famille)"/>
-					<field name="rel_project_manager_user_id" string="Partner ou manager en appui de l'administration du projet (nom de famille)"/>
+                    <field name="rel_project_manager_user_id" string="Partner ou manager en appui de l'administration du projet (nom de famille)"/>
                     <field name="rel_project_partner_id" string="Client" filter_domain="[('rel_project_partner_id', 'child_of', self)]"/>
                     <separator/>
                     <filter string="Date de la clôture comptable" name="closing_date" date="closing_date"/>
@@ -224,41 +220,38 @@
                     <separator/>
                     <filter string="Clôture non validée" name="not_validated" domain="[('is_validated', '=', False)]"/>
                     <separator/>
-					<filter string="Mes clôtures" name="my_project_accounting_closing" domain="['|',('rel_project_user_id', '=', uid),('rel_project_manager_user_id', '=', uid)]"/>
+                    <filter string="Mes clôtures" name="my_project_accounting_closing" domain="['|',('rel_project_user_id', '=', uid),('rel_project_manager_user_id', '=', uid)]"/>
                     <separator/>
                     <group expand="0" string="Group By">
-			<filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
-			<filter string="Date de la clôture comptable" name="closing_date" context="{'group_by': 'closing_date'}"/>
+                        <filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
+                        <filter string="Date de la clôture comptable" name="closing_date" context="{'group_by': 'closing_date'}"/>
                         <filter string="Directeur de mission" name="project_director" context="{'group_by': 'rel_project_user_id'}"/>
-			<filter string="Partner ou manager en appui de l'administration du projet" name="project_manager" context="{'group_by': 'rel_project_manager_user_id'}"/>
+                        <filter string="Partner ou manager en appui de l'administration du projet" name="project_manager" context="{'group_by': 'rel_project_manager_user_id'}"/>
                         <filter string="Client" name="partner" context="{'group_by': 'rel_project_partner_id'}"/>
                         <filter string="Etat de validation" name="groupby_is_validated" context="{'group_by': 'is_validated'}"/>
                         <filter string="Statut du projet au début de la clôture" name="groupby_original_stage_id" context="{'group_by': 'original_stage_id'}"/>
                         <filter string="Statut du projet actuel" name="groupby_rel_project_stage_id" context="{'group_by': 'rel_project_stage_id'}"/>
-		        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                     </group>
                 </search>
             </field>
         </record>
-
         <record id="project_accounting_closing_action" model="ir.actions.act_window">
-                <field name="name">Clôtures comptables par projet</field>
-                <field name="res_model">project.accounting_closing</field>
-                <field name="view_mode">tree,form,pivot,graph</field>
-	</record>
-
-	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm"/>
-	<menuitem name="Clôtures comptables" id="project_accounting_closing_menu_list" parent="project_accounting_closing_menu_root" action="project_accounting_closing_action"/>
-	<menuitem name="Sociétés" id="project_accounting_closing_menu_res_company" parent="project_accounting_closing_menu_root" action="base.action_res_company_form"/>
-
-   <record id="action_recompute_closing" model="ir.actions.server">
-          <field name="name">Recalculer les données de cette fiche cloture</field>
-          <field name="model_id" ref="model_project_accounting_closing"/>
-          <field name="binding_model_id" ref="model_project_accounting_closing"/>
-          <field name="state">code</field>
-          <field name="code">for rec in records:
+            <field name="name">Clôtures comptables par projet</field>
+            <field name="res_model">project.accounting_closing</field>
+            <field name="view_mode">tree,form,pivot,graph</field>
+        </record>
+        <menuitem name="Clôtures comptables" id="project_accounting_closing_menu_root" parent="project.menu_main_pm"/>
+        <menuitem name="Clôtures comptables" id="project_accounting_closing_menu_list" parent="project_accounting_closing_menu_root" action="project_accounting_closing_action"/>
+        <menuitem name="Sociétés" id="project_accounting_closing_menu_res_company" parent="project_accounting_closing_menu_root" action="base.action_res_company_form"/>
+        <record id="action_recompute_closing" model="ir.actions.server">
+            <field name="name">Recalculer les données de cette fiche cloture</field>
+            <field name="model_id" ref="model_project_accounting_closing"/>
+            <field name="binding_model_id" ref="model_project_accounting_closing"/>
+            <field name="state">code</field>
+            <field name="code">for rec in records:
                   rec.compute()</field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
-  </record>
-	</data>
+            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+        </record>
+    </data>
 </odoo>

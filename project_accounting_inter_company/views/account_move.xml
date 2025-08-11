@@ -1,18 +1,17 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="view_move_form_inherit" model="ir.ui.view">
         <field name="name">account.move.form</field>
         <field name="model">account.move</field>
-        <field name="inherit_id" ref="project_accounting.view_move_form_inherit" />
+        <field name="inherit_id" ref="project_accounting.view_move_form_inherit"/>
         <field name="arch" type="xml">
-		<xpath expr="//tree/field[@name='tax_ids']" position="after">
-                	<field name="auto_invoice_line_id" optional="hide"/>
-            	</xpath>
-		<field name="fiscal_position_id" position="after">
-                	<field name="auto_generated"/>
-                	<field name="auto_invoice_id"/>
-            	</field>
+            <xpath expr="//tree/field[@name='tax_ids']" position="after">
+                <field name="auto_invoice_line_id" optional="hide"/>
+            </xpath>
+            <field name="fiscal_position_id" position="after">
+                <field name="auto_generated"/>
+                <field name="auto_invoice_id"/>
+            </field>
         </field>
     </record>
 </odoo>
-

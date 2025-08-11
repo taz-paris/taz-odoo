@@ -1,81 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
         <record id="project_group_tree" model="ir.ui.view">
             <field name="name">Project group</field>
             <field name="model">project.group</field>
-            <field name="arch" type="xml">      
-                <tree>    
-		  	<field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-		  	<field name="company_id" invisible="1"/>
-                        <field name="name"/>
-                        <field name="description"/>
-                        <field name="project_ids" widget="many2many_tags"/>
-		</tree>                                
-            </field>                                    
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" invisible="1"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="project_ids" widget="many2many_tags"/>
+                </tree>
+            </field>
         </record>
-
         <record id="project_group_form" model="ir.ui.view">
             <field name="name">Project group</field>
             <field name="model">project.group</field>
-            <field name="arch" type="xml">      
-                <form>    
-			<widget name="web_ribbon" title="Archivé" bg_color="bg-danger" invisible="active"/>
-		   	<field name="active" invisible="1"/>
-			<group>
-				<group>
-                        		<field name="name"/>
-                        		<field name="description"/>
-                        		<field name="active"/>
-				</group>
-			</group>
-			<field name="project_ids">
-				  <tree delete="false" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
-                        	  <field name="currency_id" column_invisible="1"/>
-				  <field name="id" widget="open_tab"/>
-				  <field name="number"/>
-				  <field name="is_review_needed" invisible="1"/>
-				  <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" invisible="not is_review_needed"/>
-					  <!-- Ce panneau attetion n'est pas compatible avec le module web_remember_tree_column_width => celà conduit à des colonnes trop larges -->
-				  <field name="name"/>
-				  <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-				  <field name="company_id" invisible="1"/>
-				  <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" optional="hide"/>
-				  <field name="project_director_employee_id" optional="show"/>
-				  <field name="outsourcing" optional="hide"/>
-				  <field name="stage_id" widget="badge" optional="show" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"/>
-				  <field name="color_rel" invisible="1"/>
-				  <field name="book_employee_distribution_ids" optional="hide" widget="many2many_tags"/>
-				  <field name="is_validated_book" optional="hide"/>
-				  <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés HT" sum="Total"/>
-				  <field name="order_to_invoice_company" optional="hide" sum="Total"/>
-				  <field name="order_amount_current" optional="hide" sum="Total"/>
-				  <field name="order_cost_current" optional="hide" sum="Total"/>
-				  <field name="order_cost_futur" optional="hide" sum="Total"/>
-				  <field name="order_marging_amount_current" optional="hide" sum="Total"/>
-				  <field name="order_marging_rate_current" optional="hide"/>
-				  <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
-				  <field name="company_to_invoice_left" optional="hide" sum="Total"/>
-				  <field name="company_part_amount_current" optional="show" sum="Total"/>
-				  <field name="company_part_cost_current" optional="hide" sum="Total"/>
-				  <field name="company_part_cost_futur" optional="hide" sum="Total"/>
-				  <field name="company_part_marging_amount_current" optional="hide" sum="Total"/>
-				  <field name="company_part_marging_rate_current" optional="show"/>
-				  <field name="outsource_part_amount_current" optional="show" sum="Total"/>
-				  <field name="outsource_part_cost_current" optional="hide" sum="Total"/>
-				  <field name="outsource_part_cost_futur" optional="hide" sum="Total"/>
-				  <field name="outsource_part_marging_amount_current" optional="hide" sum="Total"/>
-				  <field name="outsource_part_marging_rate_current" optional="show"/>
-				  <field name="other_part_amount_current" optional="hide" sum="Total"/>
-				  <field name="other_part_cost_current" optional="hide" sum="Total"/>
-				  <field name="other_part_cost_futur" optional="hide" sum="Total"/>
-				  <field name="other_part_marging_amount_current" optional="hide" sum="Total"/>
-				  <field name="other_part_marging_rate_current" optional="hide"/>
-				</tree>
-			</field>
-		</form>                                
-            </field>                                    
+            <field name="arch" type="xml">
+                <form>
+                    <widget name="web_ribbon" title="Archivé" bg_color="bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="description"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <field name="project_ids">
+                        <tree delete="false" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="id" widget="open_tab"/>
+                            <field name="number"/>
+                            <field name="is_review_needed" invisible="1"/>
+                            <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" invisible="not is_review_needed"/>
+                            <!-- Ce panneau attetion n'est pas compatible avec le module web_remember_tree_column_width => celà conduit à des colonnes trop larges -->
+                            <field name="name"/>
+                            <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" optional="hide"/>
+                            <field name="project_director_employee_id" optional="show"/>
+                            <field name="outsourcing" optional="hide"/>
+                            <field name="stage_id" widget="badge" optional="show" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"/>
+                            <field name="color_rel" invisible="1"/>
+                            <field name="book_employee_distribution_ids" optional="hide" widget="many2many_tags"/>
+                            <field name="is_validated_book" optional="hide"/>
+                            <field name="order_sum_sale_order_lines" optional="hide" string="€ commandés HT" sum="Total"/>
+                            <field name="order_to_invoice_company" optional="hide" sum="Total"/>
+                            <field name="order_amount_current" optional="hide" sum="Total"/>
+                            <field name="order_cost_current" optional="hide" sum="Total"/>
+                            <field name="order_cost_futur" optional="hide" sum="Total"/>
+                            <field name="order_marging_amount_current" optional="hide" sum="Total"/>
+                            <field name="order_marging_rate_current" optional="hide"/>
+                            <field name="company_invoice_sum_move_lines" optional="hide" sum="Total"/>
+                            <field name="company_to_invoice_left" optional="hide" sum="Total"/>
+                            <field name="company_part_amount_current" optional="show" sum="Total"/>
+                            <field name="company_part_cost_current" optional="hide" sum="Total"/>
+                            <field name="company_part_cost_futur" optional="hide" sum="Total"/>
+                            <field name="company_part_marging_amount_current" optional="hide" sum="Total"/>
+                            <field name="company_part_marging_rate_current" optional="show"/>
+                            <field name="outsource_part_amount_current" optional="show" sum="Total"/>
+                            <field name="outsource_part_cost_current" optional="hide" sum="Total"/>
+                            <field name="outsource_part_cost_futur" optional="hide" sum="Total"/>
+                            <field name="outsource_part_marging_amount_current" optional="hide" sum="Total"/>
+                            <field name="outsource_part_marging_rate_current" optional="show"/>
+                            <field name="other_part_amount_current" optional="hide" sum="Total"/>
+                            <field name="other_part_cost_current" optional="hide" sum="Total"/>
+                            <field name="other_part_cost_futur" optional="hide" sum="Total"/>
+                            <field name="other_part_marging_amount_current" optional="hide" sum="Total"/>
+                            <field name="other_part_marging_rate_current" optional="hide"/>
+                        </tree>
+                    </field>
+                </form>
+            </field>
         </record>
-
         <record id="view_project_group_search" model="ir.ui.view">
             <field name="name">Groupe de projets</field>
             <field name="model">project.group</field>
@@ -84,25 +83,22 @@
                 <search string="Search Project Group">
                     <field name="name" string="Nom" filter_domain="[('name', 'ilike', self)]"/>
                     <separator/>
-		    <!--
+                    <!--
                     <filter string="Actif" name="active" domain="[('active', '=', True)]"/>
 		    -->
                     <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
                 </search>
             </field>
         </record>
-
-	<record id="project_group_action" model="ir.actions.act_window">
-                <field name="name">Groupe de projets</field>
-                <field name="res_model">project.group</field>
-                <field name="view_mode">tree,form</field>
-		<field name="context"/>
-		<!--
+        <record id="project_group_action" model="ir.actions.act_window">
+            <field name="name">Groupe de projets</field>
+            <field name="res_model">project.group</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context"/>
+            <!--
 		<field name="context">{'search_default_active':1}</field>
 		-->
-            </record>
-
-            <menuitem name="Groupe de projets" id="project_group_menu" parent="project.menu_main_pm" action="project_group_action"/>
-
+        </record>
+        <menuitem name="Groupe de projets" id="project_group_menu" parent="project.menu_main_pm" action="project_group_action"/>
     </data>
 </odoo>

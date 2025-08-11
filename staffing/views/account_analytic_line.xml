@@ -1,56 +1,55 @@
-<odoo>                      
-  <data>
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
         <record id="timesheet_view_tree_inherit" model="ir.ui.view">
             <field name="name">Timesheet</field>
             <field name="model">account.analytic.line</field>
             <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
-	    <field name="priority">5</field>
+            <field name="priority">5</field>
             <field name="arch" type="xml">
-		<field name="date" position="after">
-			<field name="date_end"/>
-			<field name="company_id" groups="base.group_multi_company"/>
-			<field name="employee_id"/>
-			<field name="category"/>
-			<field name="rel_project_staffing_aggregation"/>
-			<field name="account_id" optional="hide"/>
-		</field>
+                <field name="date" position="after">
+                    <field name="date_end"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="employee_id"/>
+                    <field name="category"/>
+                    <field name="rel_project_staffing_aggregation"/>
+                    <field name="account_id" optional="hide"/>
+                </field>
                 <field name="unit_amount" position="replace">
-			<!-- suppression du widget timesheet_uom qui empêche de saisir tous les montants-->
-			<field name="unit_amount" optional="show" sum="Total" />
-			<field name="amount" string="Valorisation €" optional="show" sum="Total" />
+                    <!-- suppression du widget timesheet_uom qui empêche de saisir tous les montants-->
+                    <field name="unit_amount" optional="show" sum="Total"/>
+                    <field name="amount" string="Valorisation €" optional="show" sum="Total"/>
                 </field>
             </field>
         </record>
-
         <record id="hr_timesheet_line_my_timesheet_search_inherit" model="ir.ui.view">
             <field name="name">Timesheet</field>
             <field name="model">account.analytic.line</field>
             <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
             <field name="arch" type="xml">
-		<field name="manager_id" position="after">
-			<separator/>
-			<filter name="category_project_forecast" string="Catégorie = Prévisionnel" domain="[('category', '=', 'project_forecast')]"/>
-			<filter name="category_project_employee_validated" string="Catégorie = Pointage (validé ou non)" domain="[('category', '=', 'project_employee_validated')]"/>
-			<separator/>
-			<filter name="unit_amount_null" string="Nombre de jours nul" domain="[('unit_amount', '=', 0)]"/>
-			<filter name="amount_null" string="Valorisation en € du pointage nul" domain="[('amount', '=', 0)]"/>
-			<filter name="amount_null_with_unit_amount_not_nul" string="Valorisation du pointage en € nul (alors que nb j. non nul)" domain="[('amount', '=', 0), ('unit_amount', '!=', 0)]"/>
-			<separator/>
-			<filter string="Mois en cours" name="current_month" domain="[('date','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('date','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
-			<filter string="Mois M-1" name="prev_month" domain="[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01')),('date','&lt;',time.strftime('%%Y-%%m-01'))]"/>
-			<filter string="Mois M-2" name="prev_month2" domain="[('date','&gt;=',(context_today()-relativedelta(months=2)).strftime('%%Y-%%m-01')),('date','&lt;',(context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01'))]"/>
-			<filter string="Mois M-3" name="prev_month3" domain="[('date','&gt;=',(context_today()-relativedelta(months=3)).strftime('%%Y-%%m-01')),('date','&lt;',(context_today()-relativedelta(months=2)).strftime('%%Y-%%m-01'))]"/>
-			<separator/>
-			<filter name="date_end" string="Date de fin" date="date"/>
-		</field>
-		<xpath expr="//filter[@name='groupby_employee']">
-			<filter name="group_by_partner" string="Client" context="{'group_by': 'partner_id'}"/>
-			<filter name="group_by_date_week" string="Date" context="{'group_by': 'date:week'}"/>
-			<filter name="group_by_project" string="Projet" invisible="1" context="{'group_by': 'project_id'}"/>
-		</xpath>
+                <field name="manager_id" position="after">
+                    <separator/>
+                    <filter name="category_project_forecast" string="Catégorie = Prévisionnel" domain="[('category', '=', 'project_forecast')]"/>
+                    <filter name="category_project_employee_validated" string="Catégorie = Pointage (validé ou non)" domain="[('category', '=', 'project_employee_validated')]"/>
+                    <separator/>
+                    <filter name="unit_amount_null" string="Nombre de jours nul" domain="[('unit_amount', '=', 0)]"/>
+                    <filter name="amount_null" string="Valorisation en € du pointage nul" domain="[('amount', '=', 0)]"/>
+                    <filter name="amount_null_with_unit_amount_not_nul" string="Valorisation du pointage en € nul (alors que nb j. non nul)" domain="[('amount', '=', 0), ('unit_amount', '!=', 0)]"/>
+                    <separator/>
+                    <filter string="Mois en cours" name="current_month" domain="[('date','&lt;',(context_today()+relativedelta(months=1)).strftime('%%Y-%%m-01')), ('date','&gt;=',time.strftime('%%Y-%%m-01'))]"/>
+                    <filter string="Mois M-1" name="prev_month" domain="[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01')),('date','&lt;',time.strftime('%%Y-%%m-01'))]"/>
+                    <filter string="Mois M-2" name="prev_month2" domain="[('date','&gt;=',(context_today()-relativedelta(months=2)).strftime('%%Y-%%m-01')),('date','&lt;',(context_today()-relativedelta(months=1)).strftime('%%Y-%%m-01'))]"/>
+                    <filter string="Mois M-3" name="prev_month3" domain="[('date','&gt;=',(context_today()-relativedelta(months=3)).strftime('%%Y-%%m-01')),('date','&lt;',(context_today()-relativedelta(months=2)).strftime('%%Y-%%m-01'))]"/>
+                    <separator/>
+                    <filter name="date_end" string="Date de fin" date="date"/>
+                </field>
+                <xpath expr="//filter[@name='groupby_employee']">
+                    <filter name="group_by_partner" string="Client" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_by_date_week" string="Date" context="{'group_by': 'date:week'}"/>
+                    <filter name="group_by_project" string="Projet" invisible="1" context="{'group_by': 'project_id'}"/>
+                </xpath>
             </field>
         </record>
-
         <record id="timesheet_action_last_month" model="ir.actions.act_window">
             <field name="name">Feuille de temps</field>
             <field name="res_model">account.analytic.line</field>
@@ -65,37 +64,32 @@
 		'search_default_group_by_project':1,
             }</field>
         </record>
-
-	<menuitem name="Pointage du mois M-1" id="project_accounting_closing_menu_timesheet_action_last_month" parent="project_accounting.project_accounting_closing_menu_root" action="staffing.timesheet_action_last_month"/>
-
+        <menuitem name="Pointage du mois M-1" id="project_accounting_closing_menu_timesheet_action_last_month" parent="project_accounting.project_accounting_closing_menu_root" action="staffing.timesheet_action_last_month"/>
         <record id="timesheet_action_last_month_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="4"/>
             <field name="view_mode">tree</field>
             <field name="view_id" ref="hr_timesheet.timesheet_view_tree_user"/>
             <field name="act_window_id" ref="staffing.timesheet_action_last_month"/>
         </record>
-
-    <record id="action_recompute_timesheet_amount" model="ir.actions.server">
-          <field name="name">Recalculer le montant des feuilles de temps</field>
-          <field name="model_id" ref="model_account_analytic_line"/>
-          <field name="binding_model_id" ref="model_account_analytic_line"/>
-          <field name="state">code</field>
-	  <field name="code">
+        <record id="action_recompute_timesheet_amount" model="ir.actions.server">
+            <field name="name">Recalculer le montant des feuilles de temps</field>
+            <field name="model_id" ref="model_account_analytic_line"/>
+            <field name="binding_model_id" ref="model_account_analytic_line"/>
+            <field name="state">code</field>
+            <field name="code">
 for rec in records:
     rec.with_context(do_not_update_staffing_report=True, do_not_update_project=True).refresh_amount()
 env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
 env['project.project'].sudo().recompute_if_has_to_be_recomputed()
   	  </field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]" />
-   </record>
-
-
+            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+        </record>
         <record id="hr_timesheet_line_tree_period_depending" model="ir.ui.view">
             <field name="name">account.analytic.line.tree.hr_timesheet</field>
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
-		 <tree>
-		    <field name="date" />
+                <tree>
+                    <field name="date"/>
                     <field name="date_end"/>
                     <field name="employee_id"/>
                     <field name="category"/>
@@ -104,10 +98,10 @@ env['project.project'].sudo().recompute_if_has_to_be_recomputed()
                     <field name="unit_amount" sum="Total" optional="hide"/>
                     <field name="period_unit_amount" sum="Total"/>
                     <field name="period_amount" sum="Total"/>
-		    <field name="project_id" optional="hide"/>
+                    <field name="project_id" optional="hide"/>
                     <field name="name" optional="hide"/>
                 </tree>
             </field>
         </record>
-  </data>
+    </data>
 </odoo>

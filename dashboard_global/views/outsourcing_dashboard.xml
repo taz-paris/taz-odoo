@@ -1,7 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<template id="outsourcing_dashboard" name="Outsourcing Dashboard">
-<head>
-<style>
+    <template id="outsourcing_dashboard" name="Outsourcing Dashboard">
+        <head>
+            <style>
 body {
 	font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Liberation Sans", Arial, "Odoo Unicode Support Noto", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 	font-size: 14;
@@ -121,141 +122,207 @@ tr:last-child {
 }
 
 </style>
-</head>
-<body>
-
-<h1>Projets avec des achats à <span t-esc="supplier"/></h1>
-
-<ul id="myUL">
-  <li t-foreach="data" t-as="customer"><span class="caret"><span t-esc="customer['name']"/></span>
-    <ul class="nested">
-	    <li t-foreach="customer['projects']" t-as='project'>
-		<span class="caret">
-		    <span class="green badge" t-if="project['stage_id'][0] == 2" t-esc="project['stage_id'][1]"/>
-		    <span class="yellow badge" t-if="project['stage_id'][0] == 6" t-esc="project['stage_id'][1]"/>
-		    <span class="cyan badge" t-if="project['stage_id'][0] == 1" t-esc="project['stage_id'][1]"/>
-		    <span class="cyan badge" t-if="project['stage_id'][0] == 7" t-esc="project['stage_id'][1]"/>
-		    <span class="pink badge" t-if="project['stage_id'][0] == 9" t-esc="project['stage_id'][1]"/>
-		    <span class="gray badge" t-if="project['stage_id'][0] == 3" t-esc="project['stage_id'][1]"/>
-		    <span class="red badge" t-if="project['stage_id'][0] == 8" t-esc="project['stage_id'][1]"/>
-		    <span class="red badge" t-if="project['stage_id'][0] == 4" t-esc="project['stage_id'][1]"/>
-		    <span class="bold" t-esc="project['number']"/> <span t-esc="project['name']"/> du <span class="date" t-esc="project['date_start']"/> au <span class="date" t-esc="project['date']"/> (<span t-esc="project['project_director_employee_id'][1]"/>)</span>
-        <ul class="nested">
-		<li>
-			<table class="master">
-				<tr class="master">
-				   <td class="master">
-					<table>
-						<tr><th>Remarques</th><th>Commentaire ADV</th></tr>
-						<tr><td><span class="br" t-out="project['remark']"/></td><td><span class="br" t-out="project['invoicing_comment']"/></td></tr>
-					</table>
-				    </td>
-				</tr>
-				<tr class="master"><td class="master">
-				<table>
-					<caption>Lignes de commande client</caption>
-					<tr>
-						<th>Ref</th>
-						<th>PU HT</th>
-						<th>Qté</th>
-						<th>Montant HT</th>
-						<th>Comment</th>
-						<th>Date factu. prév</th>
-						<th>Nom</th>
-					</tr>
-					<tr t-foreach="project['sale_order_lines']" t-as='sale_order_line'>
-						<td><span t-esc="sale_order_line['order_id'][1]"/></td>
-						<td class="tright"><span class="currency" t-out="sale_order_line['price_unit']"/></td>
-						<td class="tright"><span t-out="sale_order_line['product_uom_qty']"/></td>
-						<td class="tright"><span class="currency" t-out="sale_order_line['price_subtotal']"/></td>
-						<td><span class="br" t-out="sale_order_line['comment']"/></td>
-						<td><span class="date" t-out="sale_order_line['previsional_invoice_date']"/></td>
-						<td><span class="br" t-out="sale_order_line['name']"/></td>
-					</tr>
-				</table>
-			</td><td class="master" width="50%">
-				<table>
-					<caption>Lignes de facture client</caption>
-					<tr>
-						<th>Date</th>
-						<th>Ref</th>
-						<th>PU HT</th>
-						<th>Qté</th>
-						<th>Montant HT</th>
-						<th>Paiement</th>
-						<th>Nom</th>
-					</tr>
-					<tr t-foreach="project['sale_order_lines']" t-as='sale_order_line'>
-						<tr t-foreach="sale_order_line['invoice_lines']" t-as='invoice_line'>
-							<td><span class="date" t-esc="invoice_line['date']"/></td>
-							<td><span t-esc="invoice_line['ref']"/></td>
-							<td class="tright"><span class="currency" t-esc="invoice_line['price_unit']"/></td>
-							<td class="tright"><span t-esc="invoice_line['quantity']"/></td>
-							<td class="tright"><span class="currency" t-esc="invoice_line['price_subtotal_signed']"/></td>
-							<td><span t-esc="invoice_line['parent_payment_state']"/></td>
-							<td><span class="br" t-out="invoice_line['name']"/></td>
-						</tr>
-					</tr>
-				</table>
-			</td></tr></table>
-		</li>
-		<br/>
-		<li>
-                      <table class="master"><tr class="master"><td class="master">
-                                <table>
-                                        <caption>Lignes de commande fournisseur <span t-esc="supplier"/></caption>
-					<tr>
-						<th>Ref</th>
-						<th>PU HT</th>
-						<th>Qté</th>
-						<th>Montant HT</th>
-						<th>Date factu. prév</th>
-						<th>Etat</th>
-						<th>Nom</th>
-					</tr>
-                                        <tr t-foreach="project['purchase_order_lines']" t-as='purchase_order_line'>
-						<td><span t-esc="purchase_order_line['order_id'][1]"/></td>
-						<td class="tright"><span class="currency" t-esc="purchase_order_line['price_unit']"/></td>
-						<td class="tright"><span t-esc="purchase_order_line['product_uom_qty']"/></td>
-						<td class="tright"><span class="currency" t-esc="purchase_order_line['price_subtotal']"/></td>
-						<td><span class="date" t-esc="purchase_order_line['previsional_invoice_date']"/></td>
-						<td><span t-esc="purchase_order_line['state']"/></td>
-                                                <td><span class="br" t-out="purchase_order_line['name']"/></td>
+        </head>
+        <body>
+            <h1>Projets avec des achats à <span t-esc="supplier"/></h1>
+            <ul id="myUL">
+                <li t-foreach="data" t-as="customer">
+                    <span class="caret">
+                        <span t-esc="customer['name']"/>
+                    </span>
+                    <ul class="nested">
+                        <li t-foreach="customer['projects']" t-as="project">
+                            <span class="caret"><span class="green badge" t-if="project['stage_id'][0] == 2" t-esc="project['stage_id'][1]"/><span class="yellow badge" t-if="project['stage_id'][0] == 6" t-esc="project['stage_id'][1]"/><span class="cyan badge" t-if="project['stage_id'][0] == 1" t-esc="project['stage_id'][1]"/><span class="cyan badge" t-if="project['stage_id'][0] == 7" t-esc="project['stage_id'][1]"/><span class="pink badge" t-if="project['stage_id'][0] == 9" t-esc="project['stage_id'][1]"/><span class="gray badge" t-if="project['stage_id'][0] == 3" t-esc="project['stage_id'][1]"/><span class="red badge" t-if="project['stage_id'][0] == 8" t-esc="project['stage_id'][1]"/><span class="red badge" t-if="project['stage_id'][0] == 4" t-esc="project['stage_id'][1]"/><span class="bold" t-esc="project['number']"/><span t-esc="project['name']"/> du <span class="date" t-esc="project['date_start']"/> au <span class="date" t-esc="project['date']"/> (<span t-esc="project['project_director_employee_id'][1]"/>)</span>
+                            <ul class="nested">
+                                <li>
+                                    <table class="master">
+                                        <tr class="master">
+                                            <td class="master">
+                                                <table>
+                                                    <tr>
+                                                        <th>Remarques</th>
+                                                        <th>Commentaire ADV</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="br" t-out="project['remark']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span class="br" t-out="project['invoicing_comment']"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
                                         </tr>
-                                </table>
-                        </td><td class="master">
-                                <table>
-                                        <caption>Lignes de facture fournisseur <span t-esc="supplier"/></caption>
-                                        <tr>
-                                                <th>Date</th>
-                                                <th>Ref</th>
-                                                <th>PU HT</th>
-                                                <th>Qté</th>
-                                                <th>Montant HT</th>
-                                                <th>Paiement</th>
-                                                <th>Nom</th>
+                                        <tr class="master">
+                                            <td class="master">
+                                                <table>
+                                                    <caption>Lignes de commande client</caption>
+                                                    <tr>
+                                                        <th>Ref</th>
+                                                        <th>PU HT</th>
+                                                        <th>Qté</th>
+                                                        <th>Montant HT</th>
+                                                        <th>Comment</th>
+                                                        <th>Date factu. prév</th>
+                                                        <th>Nom</th>
+                                                    </tr>
+                                                    <tr t-foreach="project['sale_order_lines']" t-as="sale_order_line">
+                                                        <td>
+                                                            <span t-esc="sale_order_line['order_id'][1]"/>
+                                                        </td>
+                                                        <td class="tright">
+                                                            <span class="currency" t-out="sale_order_line['price_unit']"/>
+                                                        </td>
+                                                        <td class="tright">
+                                                            <span t-out="sale_order_line['product_uom_qty']"/>
+                                                        </td>
+                                                        <td class="tright">
+                                                            <span class="currency" t-out="sale_order_line['price_subtotal']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span class="br" t-out="sale_order_line['comment']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span class="date" t-out="sale_order_line['previsional_invoice_date']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span class="br" t-out="sale_order_line['name']"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <td class="master" width="50%">
+                                                <table>
+                                                    <caption>Lignes de facture client</caption>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Ref</th>
+                                                        <th>PU HT</th>
+                                                        <th>Qté</th>
+                                                        <th>Montant HT</th>
+                                                        <th>Paiement</th>
+                                                        <th>Nom</th>
+                                                    </tr>
+                                                    <tr t-foreach="project['sale_order_lines']" t-as="sale_order_line">
+                                                        <tr t-foreach="sale_order_line['invoice_lines']" t-as="invoice_line">
+                                                            <td>
+                                                            <span class="date" t-esc="invoice_line['date']"/>
+                                                            </td>
+                                                            <td>
+                                                            <span t-esc="invoice_line['ref']"/>
+                                                            </td>
+                                                            <td class="tright">
+                                                            <span class="currency" t-esc="invoice_line['price_unit']"/>
+                                                            </td>
+                                                            <td class="tright">
+                                                            <span t-esc="invoice_line['quantity']"/>
+                                                            </td>
+                                                            <td class="tright">
+                                                            <span class="currency" t-esc="invoice_line['price_subtotal_signed']"/>
+                                                            </td>
+                                                            <td>
+                                                            <span t-esc="invoice_line['parent_payment_state']"/>
+                                                            </td>
+                                                            <td>
+                                                            <span class="br" t-out="invoice_line['name']"/>
+                                                            </td>
+                                                        </tr>
+                                                    </tr>
+                                                </table>
+                                            </td>
                                         </tr>
-                                        <tr t-foreach="project['purchase_order_lines']" t-as='purchase_order_line'>
-                                                <tr t-foreach="purchase_order_line['invoice_lines']" t-as='invoice_line'>
-                                                        <td><span class="date" t-esc="invoice_line['date']"/></td>
-                                                        <td><span t-esc="invoice_line['ref']"/></td>
-                                                        <td class="tright"><span class="currency" t-esc="invoice_line['price_unit']"/></td>
-                                                        <td class="tright"><span t-esc="invoice_line['quantity']"/></td>
-                                                        <td class="tright"><span class="currency" t-esc="invoice_line['price_subtotal_signed'] * -1"/></td>
-                                                        <td><span t-esc="invoice_line['parent_payment_state']"/></td>
-                                                        <td><span class="br" t-out="invoice_line['name']"/></td>
-                                                </tr>
+                                    </table>
+                                </li>
+                                <br/>
+                                <li>
+                                    <table class="master">
+                                        <tr class="master">
+                                            <td class="master">
+                                                <table>
+                                                    <caption>Lignes de commande fournisseur <span t-esc="supplier"/></caption>
+                                                    <tr>
+                                                        <th>Ref</th>
+                                                        <th>PU HT</th>
+                                                        <th>Qté</th>
+                                                        <th>Montant HT</th>
+                                                        <th>Date factu. prév</th>
+                                                        <th>Etat</th>
+                                                        <th>Nom</th>
+                                                    </tr>
+                                                    <tr t-foreach="project['purchase_order_lines']" t-as="purchase_order_line">
+                                                        <td>
+                                                            <span t-esc="purchase_order_line['order_id'][1]"/>
+                                                        </td>
+                                                        <td class="tright">
+                                                            <span class="currency" t-esc="purchase_order_line['price_unit']"/>
+                                                        </td>
+                                                        <td class="tright">
+                                                            <span t-esc="purchase_order_line['product_uom_qty']"/>
+                                                        </td>
+                                                        <td class="tright">
+                                                            <span class="currency" t-esc="purchase_order_line['price_subtotal']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span class="date" t-esc="purchase_order_line['previsional_invoice_date']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-esc="purchase_order_line['state']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span class="br" t-out="purchase_order_line['name']"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <td class="master">
+                                                <table>
+                                                    <caption>Lignes de facture fournisseur <span t-esc="supplier"/></caption>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Ref</th>
+                                                        <th>PU HT</th>
+                                                        <th>Qté</th>
+                                                        <th>Montant HT</th>
+                                                        <th>Paiement</th>
+                                                        <th>Nom</th>
+                                                    </tr>
+                                                    <tr t-foreach="project['purchase_order_lines']" t-as="purchase_order_line">
+                                                        <tr t-foreach="purchase_order_line['invoice_lines']" t-as="invoice_line">
+                                                            <td>
+                                                            <span class="date" t-esc="invoice_line['date']"/>
+                                                            </td>
+                                                            <td>
+                                                            <span t-esc="invoice_line['ref']"/>
+                                                            </td>
+                                                            <td class="tright">
+                                                            <span class="currency" t-esc="invoice_line['price_unit']"/>
+                                                            </td>
+                                                            <td class="tright">
+                                                            <span t-esc="invoice_line['quantity']"/>
+                                                            </td>
+                                                            <td class="tright">
+                                                            <span class="currency" t-esc="invoice_line['price_subtotal_signed'] * -1"/>
+                                                            </td>
+                                                            <td>
+                                                            <span t-esc="invoice_line['parent_payment_state']"/>
+                                                            </td>
+                                                            <td>
+                                                            <span class="br" t-out="invoice_line['name']"/>
+                                                            </td>
+                                                        </tr>
+                                                    </tr>
+                                                </table>
+                                            </td>
                                         </tr>
-                                </table>
-                        </td></tr></table>
-		</li>
-        </ul>
-      </li>  
-    </ul>
-  </li>
-</ul>
-
-<script>
+                                    </table>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <script>
 var toggler = document.getElementsByClassName("caret");
 var i;
 
@@ -289,9 +356,6 @@ for(var i = 0; i &lt; date_strings.length; i++){
 	}
 };
 </script>
-
-</body>
-
-	</template>
-
+        </body>
+    </template>
 </odoo>

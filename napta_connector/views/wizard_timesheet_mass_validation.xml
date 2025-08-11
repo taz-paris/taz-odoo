@@ -1,35 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<data>
-	    <record model="ir.ui.view" id="wizard_timesheet_mass_validation_form">
-	      <field name="name">Assistant de cloture des Feuilles de temps Napta</field>
-	      <field name="model">wizard_timesheet_mass_validation</field>
-	      <field name="arch" type="xml">
-		<form>
-			<group>
-				<group>
-					<field name="date" colspan="2" />
-					<field name="timesheet_period_ids" colspan="3" />
-				</group>
-			</group>
-			<footer>
-				<button name="action_validate" string="Valider" type="object" confirm="Ces feuilles de temps vont être validées sur Napta. Elles ne seront plus modifiables par les consultants. Attention : cette action peut prendre jusqu'à 15 minutes. Voulez-vous continuer ?"/>
-               	 		<button name="action_cancel" special="cancel" string="Annuler" type="object"/>
-            		</footer>
-		</form>
-	      </field>
-	    </record>
-		
-	<record id="launch_timesheet_mass_validation" model="ir.actions.act_window">
-		<field name="name">Assistant de cloture des Feuilles de temps Napta</field>
-	    <field name="res_model">wizard_timesheet_mass_validation</field>
-	    <field name="view_mode">form</field>
-	    <field name="target">new</field>
-	    <field name="context"></field>
-	</record>
-	
-	<!-- Denis utilisera les IHM de Napta pour verrouiller les feuilles de temps
+    <data>
+        <record model="ir.ui.view" id="wizard_timesheet_mass_validation_form">
+            <field name="name">Assistant de cloture des Feuilles de temps Napta</field>
+            <field name="model">wizard_timesheet_mass_validation</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="date" colspan="2"/>
+                            <field name="timesheet_period_ids" colspan="3"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_validate" string="Valider" type="object" confirm="Ces feuilles de temps vont être validées sur Napta. Elles ne seront plus modifiables par les consultants. Attention : cette action peut prendre jusqu'à 15 minutes. Voulez-vous continuer ?"/>
+                        <button name="action_cancel" special="cancel" string="Annuler" type="object"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="launch_timesheet_mass_validation" model="ir.actions.act_window">
+            <field name="name">Assistant de cloture des Feuilles de temps Napta</field>
+            <field name="res_model">wizard_timesheet_mass_validation</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context"/>
+        </record>
+        <!-- Denis utilisera les IHM de Napta pour verrouiller les feuilles de temps
 	<menuitem name="Clôturer les feuilles de temps Napta" id="project_accounting_closing_menu_close_napta_timesheet" parent="project_accounting.project_accounting_closing_menu_root" action="launch_timesheet_mass_validation"/>
 	-->
-
-	</data>
+    </data>
 </odoo>

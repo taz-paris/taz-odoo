@@ -1,61 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-	<record id="action_server_synchro_napta" model="ir.actions.server">
-          <field name="name">Synchro Napta - tous les projets : batch complet</field>
-          <field name="model_id" ref="model_project_project"/>
-          <field name="binding_model_id"/>
-          <field name="state">code</field>
-	  <field name="code">action =  env['project.project'].sudo().synchAllNapta()</field>
-          <field name="groups_id" eval="[(4,ref('account.group_account_user'))]"/>
-     </record>
-
-	<menuitem name="Synchro Napta manuelle" id="project_accounting_closing_menu_napta_sync" parent="project_accounting.project_accounting_closing_menu_root" action="napta_connector.action_server_synchro_napta"/>
-
-   <record id="action_resync_napta_project_list" model="ir.actions.server">
-          <field name="name">Forcer l'envoi des données à Napta pour ce projet (liste des projets sélectionnés)</field>
-          <field name="model_id" ref="model_project_project"/>
-          <field name="binding_model_id" ref="model_project_project"/>
-          <field name="state">code</field>
-          <field name="code">for rec in records:
+    <data>
+        <record id="action_server_synchro_napta" model="ir.actions.server">
+            <field name="name">Synchro Napta - tous les projets : batch complet</field>
+            <field name="model_id" ref="model_project_project"/>
+            <field name="binding_model_id"/>
+            <field name="state">code</field>
+            <field name="code">action =  env['project.project'].sudo().synchAllNapta()</field>
+            <field name="groups_id" eval="[(4,ref('account.group_account_user'))]"/>
+        </record>
+        <menuitem name="Synchro Napta manuelle" id="project_accounting_closing_menu_napta_sync" parent="project_accounting.project_accounting_closing_menu_root" action="napta_connector.action_server_synchro_napta"/>
+        <record id="action_resync_napta_project_list" model="ir.actions.server">
+            <field name="name">Forcer l'envoi des données à Napta pour ce projet (liste des projets sélectionnés)</field>
+            <field name="model_id" ref="model_project_project"/>
+            <field name="binding_model_id" ref="model_project_project"/>
+            <field name="state">code</field>
+            <field name="code">for rec in records:
                   rec.create_update_napta()</field>
-          <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
-  </record>
-
+            <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+        </record>
         <record id="res_partner_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Partner</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="taz-common.company_form"/>
             <field name="arch" type="xml">
                 <field name="ref" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
         <record id="res_project_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Project</field>
             <field name="model">project.project</field>
             <field name="inherit_id" ref="project_accounting.project_form"/>
             <field name="arch" type="xml">
                 <field name="tag_ids" position="after">
-                        <field name="napta_to_sync" readonly="1"/>
-                        <field name="napta_id" readonly="1"/>
-			<button type="object" name="delete_on_napta" string="Supprimer sur Napta" colspan="2" invisible="not napta_id" groups="base.group_system"/>
+                    <field name="napta_to_sync" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
+                    <button type="object" name="delete_on_napta" string="Supprimer sur Napta" colspan="2" invisible="not napta_id" groups="base.group_system"/>
                 </field>
                 <field name="active" position="after">
-                        <field name="napta_id" readonly="1" invisible="1"/>
+                    <field name="napta_id" readonly="1" invisible="1"/>
                 </field>
             </field>
         </record>
-
         <record id="timesheet_view_tree_user_inherit" model="ir.ui.view">
             <field name="name">Analytic lines</field>
             <field name="model">account.analytic.line</field>
             <field name="inherit_id" ref="hr_timesheet.timesheet_view_tree_user"/>
             <field name="arch" type="xml">
                 <field name="date" position="after">
-                        <field name="napta_id" readonly="1" optional="hide"/>
-			<field name="is_timesheet_closed_on_napta" readonly="1"/>
+                    <field name="napta_id" readonly="1" optional="hide"/>
+                    <field name="is_timesheet_closed_on_napta" readonly="1"/>
                 </field>
             </field>
         </record>
@@ -65,123 +61,110 @@
             <field name="inherit_id" ref="base.view_users_form"/>
             <field name="arch" type="xml">
                 <field name="company_id" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
         <record id="view_hr_job_form_inherit2" model="ir.ui.view">
             <field name="name">Poste</field>
             <field name="model">hr.job</field>
             <field name="inherit_id" ref="hr.view_hr_job_form"/>
             <field name="arch" type="xml">
                 <field name="contract_type_id" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
-    </record>
-
+        </record>
         <record id="view_department_form_inherit" model="ir.ui.view">
             <field name="name">Département</field>
             <field name="model">hr.department</field>
             <field name="inherit_id" ref="hr.view_department_form"/>
             <field name="arch" type="xml">
                 <field name="parent_id" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
         <record id="hr_contract_history_view_form_inherit" model="ir.ui.view">
             <field name="name">Contract history</field>
-            <field name="model">hr.contract.history</field> 
+            <field name="model">hr.contract.history</field>
             <field name="inherit_id" ref="hr_contract.hr_contract_history_view_form"/>
             <field name="arch" type="xml">
-		<xpath expr="//tree/field[@name='state']" position="before">
-			<field name="napta_id" readonly="1" optional="hide"/>
+                <xpath expr="//tree/field[@name='state']" position="before">
+                    <field name="napta_id" readonly="1" optional="hide"/>
                 </xpath>
             </field>
-        </record> 
-
-
+        </record>
         <record id="hr_contract_view_form_inherit" model="ir.ui.view">
             <field name="name">Contrat</field>
             <field name="model">hr.contract</field>
             <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
             <field name="arch" type="xml">
                 <field name="hr_responsible_id" position="after">
-                        <field name="napta_id" readonly="1"/>
-                        <field name="work_location_id"/>
+                    <field name="napta_id" readonly="1"/>
+                    <field name="work_location_id"/>
                 </field>
             </field>
         </record>
-
         <record id="hr_leave_view_form_inherit" model="ir.ui.view">
             <field name="name">Congés</field>
             <field name="model">hr.leave</field>
             <field name="inherit_id" ref="hr_holidays.hr_leave_view_form_manager"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
         <record id="hr_leave_type_view_form_inherit" model="ir.ui.view">
             <field name="name">Type de congés</field>
             <field name="model">hr.leave.type</field>
             <field name="inherit_id" ref="hr_holidays.edit_holiday_status_form"/>
             <field name="arch" type="xml">
                 <field name="icon_id" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
-
         <record id="hr_work_location_view_form_inherit" model="ir.ui.view">
             <field name="name">Lieu de travail</field>
             <field name="model">hr.work.location</field>
             <field name="inherit_id" ref="hr.hr_work_location_form_view"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
         <record id="res_project_stage_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Project stage</field>
             <field name="model">project.project.stage</field>
             <field name="inherit_id" ref="project.project_project_stage_view_tree"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
         <record id="hr_employee_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Équipage</field>
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="staffing.employee_form"/>
             <field name="arch" type="xml">
                 <field name="user_id" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-
-
         <record id="staffing_need_napta_view_form_inherit" model="ir.ui.view">
             <field name="name">Besoin de staffing</field>
             <field name="model">staffing.need</field>
             <field name="inherit_id" ref="staffing.need_form"/>
             <field name="arch" type="xml">
                 <field name="description" position="after">
-                        <field name="napta_id" readonly="1"/>
+                    <field name="napta_id" readonly="1"/>
                 </field>
             </field>
         </record>
-   </data>
+    </data>
 </odoo>

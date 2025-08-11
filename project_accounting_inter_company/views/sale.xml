@@ -1,17 +1,16 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="view_sale_order_form_inherit" model="ir.ui.view">
         <field name="name">sale.order.form</field>
         <field name="model">sale.order</field>
-        <field name="inherit_id" ref="project_accounting.view_order_form_inherit" />
+        <field name="inherit_id" ref="project_accounting.view_order_form_inherit"/>
         <field name="arch" type="xml">
-		<xpath expr="//tree/field[@name='tax_id']" position="after">
-                	<field name="auto_purchase_line_id" optional="hide"/>
-            	</xpath>
-		<field name="payment_term_id" position="after">
-                	<field name="auto_purchase_order_id"/>
-            	</field>
+            <xpath expr="//tree/field[@name='tax_id']" position="after">
+                <field name="auto_purchase_line_id" optional="hide"/>
+            </xpath>
+            <field name="payment_term_id" position="after">
+                <field name="auto_purchase_order_id"/>
+            </field>
         </field>
     </record>
 </odoo>
-

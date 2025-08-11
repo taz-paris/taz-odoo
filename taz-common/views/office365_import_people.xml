@@ -1,53 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-    <record model="ir.ui.view" id="taz-common.office365_import_people_tree">
-      <field name="name">Importer mes contacts Office365 personnels</field>
-      <field name="model">taz.office_people</field>
-      <field name="arch" type="xml">
-        <tree create="false" editable="top">
-          <field name="display_name" readonly="odoo_contact_id" optional="hide"/>
-          <field name="email" readonly="1"/>
-          <field name="first_name" readonly="odoo_contact_id"/>
-          <field name="last_name" readonly="odoo_contact_id"/>
-          <field name="parent_id" readonly="odoo_contact_id" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
-          <field name="category_id" widget="many2many_tags" readonly="odoo_contact_id"/>
-          <field name="odoo_contact_id" readonly="1" optional="hide"/>
-          <field name="origin_user_id" optional="hide" readonly="1"/>
-	  <field name="user_id" readonly="odoo_contact_id" optional="show"/>
-	  <button string="Importer" name="import_partner" type="object" class="oe_highlight" invisible="odoo_contact_id" context="{'category_id' : category_id, 'first_name' : first_name, 'last_name' : last_name, 'parent_id' : parent_id, 'user_id' : user_id}"/>
-      	  <button string="Modifier" icon="fa-eye" name="open_res_partner" type="object" class="oe_highlight" invisible="not odoo_contact_id"/>
-        </tree>
-      </field>
-    </record>
-
-    <record model="ir.ui.view" id="taz-common.office365_import_people_search">
-        <field name="name">taz.office_people_search</field>
-        <field name="model">taz.office_people</field>
-        <field name="arch" type="xml">
-           <search string="Importer mes contacts Office365 personnels">
-                <field name="first_name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('last_name', 'ilike', self)]"/>
-                <field name="email" string="email" filter_domain="[('email', 'ilike', self)]"/>
-                <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
-                <field name="category_id" string="Étiquette"/>
-            <filter string="Contacts absents de notre base lors de l'import" name="contacts_not_in_odoo" domain="[('already_in_odoo', '=', False)]" help="N'afficher que les contacts qui ne sont pas encore sur Odoo lors de l'appel à l'API Office"/>
-            <separator/>
-            <group expand="0" string="Group By">
-                <filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
-            </group>
-        </search>
-        </field>
-    </record>
-
-    <record id="taz-common.office365_import_people_action" model="ir.actions.act_window">
-        <field name="name">Importer mes contacts Office365 personnels</field>
-        <field name="res_model">taz.office_people</field>
-        <field name="view_mode">tree</field>
-	<field name="domain">[('origin_user_id', '=', uid)]</field>	
-        <field name="context">{
+    <data>
+        <record model="ir.ui.view" id="taz-common.office365_import_people_tree">
+            <field name="name">Importer mes contacts Office365 personnels</field>
+            <field name="model">taz.office_people</field>
+            <field name="arch" type="xml">
+                <tree create="false" editable="top">
+                    <field name="display_name" readonly="odoo_contact_id" optional="hide"/>
+                    <field name="email" readonly="1"/>
+                    <field name="first_name" readonly="odoo_contact_id"/>
+                    <field name="last_name" readonly="odoo_contact_id"/>
+                    <field name="parent_id" readonly="odoo_contact_id" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                    <field name="category_id" widget="many2many_tags" readonly="odoo_contact_id"/>
+                    <field name="odoo_contact_id" readonly="1" optional="hide"/>
+                    <field name="origin_user_id" optional="hide" readonly="1"/>
+                    <field name="user_id" readonly="odoo_contact_id" optional="show"/>
+                    <button string="Importer" name="import_partner" type="object" class="oe_highlight" invisible="odoo_contact_id" context="{'category_id' : category_id, 'first_name' : first_name, 'last_name' : last_name, 'parent_id' : parent_id, 'user_id' : user_id}"/>
+                    <button string="Modifier" icon="fa-eye" name="open_res_partner" type="object" class="oe_highlight" invisible="not odoo_contact_id"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="taz-common.office365_import_people_search">
+            <field name="name">taz.office_people_search</field>
+            <field name="model">taz.office_people</field>
+            <field name="arch" type="xml">
+                <search string="Importer mes contacts Office365 personnels">
+                    <field name="first_name" string="Prénom ou Nom" filter_domain="['|', ('first_name', 'ilike', self), ('last_name', 'ilike', self)]"/>
+                    <field name="email" string="email" filter_domain="[('email', 'ilike', self)]"/>
+                    <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
+                    <field name="category_id" string="Étiquette"/>
+                    <filter string="Contacts absents de notre base lors de l'import" name="contacts_not_in_odoo" domain="[('already_in_odoo', '=', False)]" help="N'afficher que les contacts qui ne sont pas encore sur Odoo lors de l'appel à l'API Office"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record id="taz-common.office365_import_people_action" model="ir.actions.act_window">
+            <field name="name">Importer mes contacts Office365 personnels</field>
+            <field name="res_model">taz.office_people</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[('origin_user_id', '=', uid)]</field>
+            <field name="context">{
                     'search_default_contacts_not_in_odoo': 1, 
             }</field>
-    </record>
-    <menuitem name="Import contacts Office365" sequence="30" id="taz-common.office365_import_people" parent="taz-common.commerce" action="taz-common.office365_import_people_action"/>
-
-  </data>
+        </record>
+        <menuitem name="Import contacts Office365" sequence="30" id="taz-common.office365_import_people" parent="taz-common.commerce" action="taz-common.office365_import_people_action"/>
+    </data>
 </odoo>

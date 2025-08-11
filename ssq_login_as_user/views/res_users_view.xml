@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-
         <record id="view_impersonate_user_tree" model="ir.ui.view">
             <field name="name">res.users.impoersonate.tree.inherit</field>
             <field name="model">res.users</field>
@@ -11,6 +11,5 @@
                 </xpath>
             </field>
         </record>
-
     </data>
 </odoo>

@@ -1,34 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-	<record id="staffing_admin" model="res.groups">
-        	<field name="name">Staffing admin</field>
-        	<field name="comment">Staffing administration</field>
-	</record>
-	<record id="staffing_readonly" model="res.groups">
-        	<field name="name">Staffing readonly</field>
-        	<field name="comment">Staffing readonly</field>
-	</record>
-    <record model="ir.rule" id="staffing_need_comp_rule">
-        <field name="name">Staffing need: multi-company</field>
-        <field name="model_id" ref="model_staffing_need"/>
-        <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-    </record>
-    <record model="ir.rule" id="staffing_proposal_comp_rule">
-        <field name="name">Staffing proposal: multi-company</field>
-        <field name="model_id" ref="model_staffing_proposal"/>
-        <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-    </record>
-    <record model="ir.rule" id="hr_cost_comp_rule">
-        <field name="name">HR cost: multi-company</field>
-        <field name="model_id" ref="model_hr_cost"/>
-        <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-    </record>
-	<record model="ir.rule" id="employee_staffing_report_comp_rule">
-	    <field name="name">employee_staffing_report Record: multi-company</field>
-	    <field name="model_id" ref="model_hr_employee_staffing_report"/>
-	    <field name="domain_force">
+    <data>
+        <record id="staffing_admin" model="res.groups">
+            <field name="name">Staffing admin</field>
+            <field name="comment">Staffing administration</field>
+        </record>
+        <record id="staffing_readonly" model="res.groups">
+            <field name="name">Staffing readonly</field>
+            <field name="comment">Staffing readonly</field>
+        </record>
+        <record model="ir.rule" id="staffing_need_comp_rule">
+            <field name="name">Staffing need: multi-company</field>
+            <field name="model_id" ref="model_staffing_need"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="staffing_proposal_comp_rule">
+            <field name="name">Staffing proposal: multi-company</field>
+            <field name="model_id" ref="model_staffing_proposal"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="hr_cost_comp_rule">
+            <field name="name">HR cost: multi-company</field>
+            <field name="model_id" ref="model_hr_cost"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+        <record model="ir.rule" id="employee_staffing_report_comp_rule">
+            <field name="name">employee_staffing_report Record: multi-company</field>
+            <field name="model_id" ref="model_hr_employee_staffing_report"/>
+            <field name="domain_force">
 		['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
 	    </field>
-	</record>
-  </data>
+        </record>
+    </data>
 </odoo>

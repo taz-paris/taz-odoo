@@ -1,49 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<data>
-
-           <record model="ir.ui.view" id="project_form_inherit">
-              <field name="name">Project</field>
-	      <field name="inherit_id" ref="project_accounting.project_form"/>
-              <field name="model">project.project</field>
-              <field name="priority">5</field>
-	      <field name="arch" type="xml">
-                	<field name="name" position="after">
-				<button type="object" name="goto_napta" string="Voir sur Napta" invisible="not napta_id"/>
-                	</field>
-                	<field name="partner_id" position="after">
-				<field name="is_prevent_napta_creation" readonly="napta_id"/>
-                	</field>
-                	<field name="date_start" position="attributes">
-				<attribute name="readonly">not is_prevent_napta_creation</attribute>
-				<!--TODO: Result from converting 'attrs' attribute override without options for ['invisible', 'required', 'column_invisible'] to separate attributes
+    <data>
+        <record model="ir.ui.view" id="project_form_inherit">
+            <field name="name">Project</field>
+            <field name="inherit_id" ref="project_accounting.project_form"/>
+            <field name="model">project.project</field>
+            <field name="priority">5</field>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <button type="object" name="goto_napta" string="Voir sur Napta" invisible="not napta_id"/>
+                </field>
+                <field name="partner_id" position="after">
+                    <field name="is_prevent_napta_creation" readonly="napta_id"/>
+                </field>
+                <field name="date_start" position="attributes">
+                    <attribute name="readonly">not is_prevent_napta_creation</attribute>
+                    <!--TODO: Result from converting 'attrs' attribute override without options for ['invisible', 'required', 'column_invisible'] to separate attributes
 				     Remove redundant empty tags below for any of those attributes that are not present in the field tag in any of the parent views
 				     If someone later adds one of these attributes in the parent views, they would likely be unaware it's still overridden in this view, resulting in unexpected behaviour, which should be avoided-->
-				<!--TODO: Result from 'attrs' -> 'invisible' conversion without also overriding 'states' attribute
+                    <!--TODO: Result from 'attrs' -> 'invisible' conversion without also overriding 'states' attribute
 				     Check if this field tag contained a states attribute in any of the parent views, that should be combined into this 'invisible' attribute
 				     (If any states attributes existed in parent views, they'll also be marked with a TODO)-->
-				<attribute name="invisible"/>
-				<attribute name="required"/>
-				<attribute name="column_invisible"/>
-                	</field>
-                	<field name="date" position="attributes">
-				<attribute name="readonly">not is_prevent_napta_creation</attribute>
-				<!--TODO: Result from converting 'attrs' attribute override without options for ['invisible', 'required', 'column_invisible'] to separate attributes
+                    <attribute name="invisible"/>
+                    <attribute name="required"/>
+                    <attribute name="column_invisible"/>
+                </field>
+                <field name="date" position="attributes">
+                    <attribute name="readonly">not is_prevent_napta_creation</attribute>
+                    <!--TODO: Result from converting 'attrs' attribute override without options for ['invisible', 'required', 'column_invisible'] to separate attributes
 				     Remove redundant empty tags below for any of those attributes that are not present in the field tag in any of the parent views
 				     If someone later adds one of these attributes in the parent views, they would likely be unaware it's still overridden in this view, resulting in unexpected behaviour, which should be avoided-->
-				<!--TODO: Result from 'attrs' -> 'invisible' conversion without also overriding 'states' attribute
+                    <!--TODO: Result from 'attrs' -> 'invisible' conversion without also overriding 'states' attribute
 				     Check if this field tag contained a states attribute in any of the parent views, that should be combined into this 'invisible' attribute
 				     (If any states attributes existed in parent views, they'll also be marked with a TODO)-->
-				<attribute name="invisible"/>
-				<attribute name="required"/>
-				<attribute name="column_invisible"/>
-                	</field>
-                	<field name="partner_secondary_ids" position="after">
-				<field name="napta_billing_method"/>
-                	</field>
-	      </field>
-	    </record>
-
-<!--
+                    <attribute name="invisible"/>
+                    <attribute name="required"/>
+                    <attribute name="column_invisible"/>
+                </field>
+                <field name="partner_secondary_ids" position="after">
+                    <field name="napta_billing_method"/>
+                </field>
+            </field>
+        </record>
+        <!--
      <record id="forecast_action" model="ir.actions.server">
           <field name="name">Forecast</field>
           <field name="model_id" ref="model_project_project"/>
@@ -51,5 +50,5 @@
           <field name="code">env.get('project.project').open_forecast_pivot_timesheets()</field>
      </record>
 -->
-	</data>
+    </data>
 </odoo>

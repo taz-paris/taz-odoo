@@ -1,48 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<data>
-	    <record model="ir.ui.view" id="wizard_partner_event_resgitration_form">
-		    <field name="name">Assistant d'inscription en masse aux évènements</field>
-	      <field name="model">res_partner_mass_event_registration</field>
-	      <field name="arch" type="xml">
-		<form>
-			<group>
-				<group>
-					<field name="add_event_id" domain="[('stage_id.pipe_end', '!=', 'False')]"/>
-					<field name="line_ids" colspan="3">
-						<tree editable="top">
-						  <field name="partner_id"/>
-						  <field name="add_contact_user_link"/>
-						  <field name="add_event_registration_owner"/>
-						</tree>
-					</field>
-				</group>
-			</group>
-			<footer>
-               	 		<button name="action_validate" string="Valider" type="object"/>
-               	 		<button name="action_cancel" special="cancel" string="Annuler" type="object"/>
-            		</footer>
-		</form>
-	      </field>
-	    </record>
-		
-	<record id="launch_wizard_partner_event_registration" model="ir.actions.act_window">
-		<field name="name">Assistant d'inscription en masse aux évènements</field>
-	    <field name="res_model">res_partner_mass_event_registration</field>
-	    <field name="view_mode">form</field>
-	    <field name="target">new</field>
-	    <field name="context">{'default_partner_ids':active_ids}</field>
-	    <field name="binding_model_id" ref="base.model_res_partner"/>
-	</record>
-	
-		
-	<record id="launch_wizard_partner_event_registration_contact_user_link" model="ir.actions.act_window">
-		<field name="name">Assistant d'inscription en masse aux évènements</field>
-		<field name="res_model">res_partner_mass_event_registration</field>
-	    <field name="view_mode">form</field>
-	    <field name="target">new</field>
-	    <field name="context">{'default_contact_user_link_ids':active_ids}</field>
-	    <field name="binding_model_id" ref="taz-common.model_taz_contact_user_link"/>
-	</record>
-	
-	</data>
+    <data>
+        <record model="ir.ui.view" id="wizard_partner_event_resgitration_form">
+            <field name="name">Assistant d'inscription en masse aux évènements</field>
+            <field name="model">res_partner_mass_event_registration</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="add_event_id" domain="[('stage_id.pipe_end', '!=', 'False')]"/>
+                            <field name="line_ids" colspan="3">
+                                <tree editable="top">
+                                    <field name="partner_id"/>
+                                    <field name="add_contact_user_link"/>
+                                    <field name="add_event_registration_owner"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_validate" string="Valider" type="object"/>
+                        <button name="action_cancel" special="cancel" string="Annuler" type="object"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="launch_wizard_partner_event_registration" model="ir.actions.act_window">
+            <field name="name">Assistant d'inscription en masse aux évènements</field>
+            <field name="res_model">res_partner_mass_event_registration</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_partner_ids':active_ids}</field>
+            <field name="binding_model_id" ref="base.model_res_partner"/>
+        </record>
+        <record id="launch_wizard_partner_event_registration_contact_user_link" model="ir.actions.act_window">
+            <field name="name">Assistant d'inscription en masse aux évènements</field>
+            <field name="res_model">res_partner_mass_event_registration</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_contact_user_link_ids':active_ids}</field>
+            <field name="binding_model_id" ref="taz-common.model_taz_contact_user_link"/>
+        </record>
+    </data>
 </odoo>

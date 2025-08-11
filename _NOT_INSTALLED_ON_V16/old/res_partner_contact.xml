@@ -1,86 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-    <record model="ir.ui.view" id="taz-common.contact_tree">
-      <field name="name">Contacts</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <tree>
-                        <field name="is_company" invisible="1"/>
-          <field name="first_name"/>
-          <field name="name"/>
-          <field name="parent_id"/>
-          <field name="email"/>
-        </tree>
-      </field>
-    </record>
-
-    <record model="ir.ui.view" id="taz-common.contact_form">
-      <field name="name">Contacts</field>
-      <field name="model">res.partner</field>
-      <field name="arch" type="xml">
-        <form>
-                <sheet>
-                    <div class="oe_title mb24">
-                        <field name="is_company" invisible="1"/>
-                        <field name="active" invisible="1"/>
-                        <field name="company_id" invisible="1"/>
-                        <h1>
-				<field name="first_name" placeholder="Prénom"/>
-				<field name="name" placeholder="Nom"/>
-                        </h1>
-                    </div>
-                    <group>
-			<group>
-			    <field name="parent_id" widget="res_partner_many2one" placeholder="Company Name..." domain="[('is_company', '=', True)]" context="{'default_is_company': True}"/>
-                            <field name="function" placeholder="e.g. Sales Director" invisible="is_company"/>
-                            <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
-			    <field name="parent_industry_id"/>
+    <data>
+        <record model="ir.ui.view" id="taz-common.contact_tree">
+            <field name="name">Contacts</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="is_company" invisible="1"/>
+                    <field name="first_name"/>
+                    <field name="name"/>
+                    <field name="parent_id"/>
+                    <field name="email"/>
+                </tree>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="taz-common.contact_form">
+            <field name="name">Contacts</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title mb24">
+                            <field name="is_company" invisible="1"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" invisible="1"/>
+                            <h1>
+                                <field name="first_name" placeholder="Prénom"/>
+                                <field name="name" placeholder="Nom"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="parent_id" widget="res_partner_many2one" placeholder="Company Name..." domain="[('is_company', '=', True)]" context="{'default_is_company': True}"/>
+                                <field name="function" placeholder="e.g. Sales Director" invisible="is_company"/>
+                                <field name="category_id" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="e.g. &quot;B2B&quot;, &quot;VIP&quot;, &quot;Consulting&quot;, ..."/>
+                                <field name="parent_industry_id"/>
+                            </group>
+                            <group>
+                                <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
+                                <field name="industry_id" invisible="not is_company" options="{'no_create': True}"/>
+                                <field name="comment" placeholder="Internal notes..."/>
+                            </group>
                         </group>
-			<group>
-                                    <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]"/>
-                                    <field name="industry_id" invisible="not is_company" options="{'no_create': True}"/>
-                            <field name="comment" placeholder="Internal notes..."/>
-			</group>
-                    </group>
-		    <notebook>
-			<page string="Actions commerciales">
-				<field name="business_action_ids" string="Actions commerciales" context="{'search_default_partner_id': active_id, 'default_partner_id': active_id, 'partner_id':active_id, 'default_note':active_id}"/>
-			</page>
-			<page string="Coordonnées">
-				<group>
-                            <field name="phone" widget="phone"/>
-                            <field name="mobile" widget="phone"/>
-                            <field name="email" widget="email" context="{'gravatar_image': True}" required="user_ids"/>
-			    	    <field name="user_ids" invisible="1"/>
-		    <!--
+                        <notebook>
+                            <page string="Actions commerciales">
+                                <field name="business_action_ids" string="Actions commerciales" context="{'search_default_partner_id': active_id, 'default_partner_id': active_id, 'partner_id':active_id, 'default_note':active_id}"/>
+                            </page>
+                            <page string="Coordonnées">
+                                <group>
+                                    <field name="phone" widget="phone"/>
+                                    <field name="mobile" widget="phone"/>
+                                    <field name="email" widget="email" context="{'gravatar_image': True}" required="user_ids"/>
+                                    <field name="user_ids" invisible="1"/>
+                                    <!--
 		    !-->
-				</group>
-			</page>
-		    </notebook>
-		
+                                </group>
+                            </page>
+                        </notebook>
                     </sheet>
-		    <div class="oe_chatter">
+                    <div class="oe_chatter">
                         <field name="message_follower_ids"/>
                         <field name="message_ids"/>
-		    </div>
-        </form>
-      </field>
-    </record>
-
-    <record model="ir.actions.act_window" id="taz-common.action_partner_contact">
-      <field name="name">Contacts</field>
-      <field name="res_model">res.partner</field>
-      <field name="context">{}</field>
-      <field name="view_mode">tree,form,kanban</field>
-		      <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),          ]"/>
-      <field name="help" type="html">
-		<p class="oe_view_nocontent_create"> Click to enter . </p><p> Use this menu to enter the details .</p>
-      </field>
-
-      <field name="domain">[('is_company', '=', False)]</field> 
-      <field name="filter">[('is_company', '!=', True)]</field> 
-    </record>
-
-	    <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
-   </data>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="taz-common.action_partner_contact">
+            <field name="name">Contacts</field>
+            <field name="res_model">res.partner</field>
+            <field name="context">{}</field>
+            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),          ]"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create"> Click to enter . </p>
+                <p> Use this menu to enter the details .</p>
+            </field>
+            <field name="domain">[('is_company', '=', False)]</field>
+            <field name="filter">[('is_company', '!=', True)]</field>
+        </record>
+        <menuitem name="Contacts" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
+    </data>
 </odoo>

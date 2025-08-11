@@ -1,20 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-	<record id="view_hr_contract_pivot" model="ir.ui.view">
-		<field name="name">Contrats</field>
-		<field name="model">hr.contract</field>
-		<field name="arch" type="xml">
-			<pivot string="Contrats">
-				<field name="job_id" type="row"/>
-				<field name="employee_id" type="row"/>
-				<field name="productive_share" type="measure"/>
-			</pivot>
-		</field>
-	</record>
-
+        <record id="view_hr_contract_pivot" model="ir.ui.view">
+            <field name="name">Contrats</field>
+            <field name="model">hr.contract</field>
+            <field name="arch" type="xml">
+                <pivot string="Contrats">
+                    <field name="job_id" type="row"/>
+                    <field name="employee_id" type="row"/>
+                    <field name="productive_share" type="measure"/>
+                </pivot>
+            </field>
+        </record>
         <record id="hr_contract.action_hr_contract" model="ir.actions.act_window">
-		<field name="view_mode">list,pivot,kanban,form,activity</field>
-	</record>
-	
-   </data>
+            <field name="view_mode">list,pivot,kanban,form,activity</field>
+        </record>
+    </data>
 </odoo>

@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-  <data>
-	    <record model="ir.rule" id="customer_book_goal_comp_rule">
-		<field name="name">Customer book goal : multi-company</field>
-		<field name="model_id" ref="model_taz_customer_book_goal"/>
-		<field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
-	    </record>
-  </data>
+    <data>
+        <record model="ir.rule" id="customer_book_goal_comp_rule">
+            <field name="name">Customer book goal : multi-company</field>
+            <field name="model_id" ref="model_taz_customer_book_goal"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+    </data>
 </odoo>

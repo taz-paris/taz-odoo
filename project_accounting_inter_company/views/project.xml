@@ -1,38 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="project_form_inherit" model="ir.ui.view">
         <field name="name">project.project.form.view</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project_accounting.project_form"/>
-	<field name="arch" type="xml">  
-		<field name="invoicing_comment" position="after">
-			<field name="mirored_project_outsourcing_link_ids" readonly="1" invisible="not mirored_project_outsourcing_link_ids">
-				<tree delete="false" edit="false" create="false">
-					<field name="project_id" widget="many2onebutton"/>
-					<field name="company_id"/>
-				</tree>
-			</field>
-			<field name="outsourcing_link_with_inter_company_project_ids" readonly="1" invisible="not outsourcing_link_with_inter_company_project_ids">
-				<tree delete="false" edit="false" create="false">
-					<field name="inter_company_mirror_project" optional="show" widget="many2onebutton"/>
-					<field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
-				</tree>                                
-			</field>
-		</field>
-		<xpath expr="//field[@name='project_outsourcing_link_ids']/tree/field[@name='link_type']" position="after">
-			<field name="inter_company_mirror_project" optional="show" widget="many2onebutton"/>
-		</xpath>
+        <field name="arch" type="xml">
+            <field name="invoicing_comment" position="after">
+                <field name="mirored_project_outsourcing_link_ids" readonly="1" invisible="not mirored_project_outsourcing_link_ids">
+                    <tree delete="false" edit="false" create="false">
+                        <field name="project_id" widget="many2onebutton"/>
+                        <field name="company_id"/>
+                    </tree>
+                </field>
+                <field name="outsourcing_link_with_inter_company_project_ids" readonly="1" invisible="not outsourcing_link_with_inter_company_project_ids">
+                    <tree delete="false" edit="false" create="false">
+                        <field name="inter_company_mirror_project" optional="show" widget="many2onebutton"/>
+                        <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
+                    </tree>
+                </field>
+            </field>
+            <xpath expr="//field[@name='project_outsourcing_link_ids']/tree/field[@name='link_type']" position="after">
+                <field name="inter_company_mirror_project" optional="show" widget="many2onebutton"/>
+            </xpath>
         </field>
     </record>
-
     <record id="project_tree_inherit" model="ir.ui.view">
         <field name="name">project.project.tree.view</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project_accounting.project_tree"/>
-	<field name="arch" type="xml">  
-		<field name="id" position="after">
-			<field name="is_related_to_miror_project" invisible="1"/>
-			<button name="chain_is_related_to_miror_project" title="Lié à un projet miroir" icon="fa-chain" invisible="not is_related_to_miror_project"/>
-		</field>
+        <field name="arch" type="xml">
+            <field name="id" position="after">
+                <field name="is_related_to_miror_project" invisible="1"/>
+                <button name="chain_is_related_to_miror_project" title="Lié à un projet miroir" icon="fa-chain" invisible="not is_related_to_miror_project"/>
+            </field>
         </field>
     </record>
 </odoo>

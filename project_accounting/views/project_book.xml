@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
         <record id="project_book_period_tree" model="ir.ui.view">
@@ -5,23 +6,21 @@
             <field name="model">project.book_period</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
-                        <field name="currency_id" column_invisible="1"/>
-			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-			<field name="company_id" column_invisible="1"/>
-                        <field name="project_id"/>
-                        <field name="reference_period"/>
-                        <field name="period_project_book" sum="Total"/>
-			<field name="rel_project_director_employee_id" optional="hide"/>
-                        <field name="rel_stage_id" optional="hide"/>
-                        <field name="rel_is_book_manually_computed" optional="hide"/>
-                        <field name="rel_book_validation_employee_id" optional="hide"/>
-                        <field name="rel_book_validation_datetime" optional="hide"/>
-                        <field name="rel_book_comment" optional="hide"/>
-                </tree>                      
-            </field>                       
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" column_invisible="1"/>
+                    <field name="project_id"/>
+                    <field name="reference_period"/>
+                    <field name="period_project_book" sum="Total"/>
+                    <field name="rel_project_director_employee_id" optional="hide"/>
+                    <field name="rel_stage_id" optional="hide"/>
+                    <field name="rel_is_book_manually_computed" optional="hide"/>
+                    <field name="rel_book_validation_employee_id" optional="hide"/>
+                    <field name="rel_book_validation_datetime" optional="hide"/>
+                    <field name="rel_book_comment" optional="hide"/>
+                </tree>
+            </field>
         </record>
-
-
         <record id="view_project_book_period_search" model="ir.ui.view">
             <field name="name">Book projet/année</field>
             <field name="model">project.book_period</field>
@@ -29,194 +28,175 @@
                 <search string="Search">
                     <field name="project_id" string="Projet"/>
                     <field name="reference_period" string="Année de référence"/>
-		    <field name="rel_project_director_employee_id" string="Directeur de mission (nom de famille)"/>
-		    <field name="rel_stage_id" string="Statut de la mission"/>
-		    <field name="rel_book_validation_employee_id" string="Valideur du book"/>
-
+                    <field name="rel_project_director_employee_id" string="Directeur de mission (nom de famille)"/>
+                    <field name="rel_stage_id" string="Statut de la mission"/>
+                    <field name="rel_book_validation_employee_id" string="Valideur du book"/>
                     <filter string="Les projets dont je suis DM" name="own_projects" domain="[('project_id.project_director_employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Les books que j'ai validés" name="book_i_validated" domain="[('rel_book_validation_employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Book calculé manuellement" name="is_book_manually_computed" domain="[('rel_is_book_manually_computed', '=', True)]"/>
                     <filter string="Book calculé automatiquement" name="is_book_manually_computed_false" domain="[('rel_is_book_manually_computed', '=', False)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Cette année" name="this_year" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
                     <filter string="L'an dernier" name="previous_year" domain="[('reference_period', '=', (context_today() + relativedelta(years=-1)).strftime('%Y'))]"/>
-		    <separator/>
-		    <filter string="Date de validation" name="validation_date" date="rel_book_validation_datetime"/>
-		    <separator/>
-		    <filter string="Book validé" name="book_validated" domain="[('rel_book_validation_datetime', '!=', False)]"/>
-		    <filter string="Book non validé" name="book_not_validated" domain="[('rel_book_validation_datetime', '=', False)]"/>
-
+                    <separator/>
+                    <filter string="Date de validation" name="validation_date" date="rel_book_validation_datetime"/>
+                    <separator/>
+                    <filter string="Book validé" name="book_validated" domain="[('rel_book_validation_datetime', '!=', False)]"/>
+                    <filter string="Book non validé" name="book_not_validated" domain="[('rel_book_validation_datetime', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Année de référence" name="reference_period" context="{'group_by': 'reference_period'}"/>
                         <filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
-			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
-			<filter string="Directeur de mission" name="rel_project_director_employee_id" context="{'group_by': 'rel_project_director_employee_id'}"/>
-			<filter string="Valideur du book" name="rel_book_validation_employee_id" context="{'group_by': 'rel_book_validation_employee_id'}"/>
-			<filter string="Statut de la mission" name="rel_stage_id" context="{'group_by': 'rel_stage_id'}"/>
-			<filter string="Date de validation" name="rel_book_validation_datetime" context="{'group_by': 'rel_book_validation_datetime'}"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Directeur de mission" name="rel_project_director_employee_id" context="{'group_by': 'rel_project_director_employee_id'}"/>
+                        <filter string="Valideur du book" name="rel_book_validation_employee_id" context="{'group_by': 'rel_book_validation_employee_id'}"/>
+                        <filter string="Statut de la mission" name="rel_stage_id" context="{'group_by': 'rel_stage_id'}"/>
+                        <filter string="Date de validation" name="rel_book_validation_datetime" context="{'group_by': 'rel_book_validation_datetime'}"/>
                     </group>
                 </search>
             </field>
         </record>
-
-
         <record id="book_employee_distribution_tree" model="ir.ui.view">
             <field name="name">book employee distribution</field>
             <field name="model">project.book_employee_distribution</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
-			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-			<field name="company_id" column_invisible="1"/>
-                        <field name="project_id"/>
-                        <field name="employee_id"/>
-                        <field name="book_factor" sum="Total"/>
-			<field name="final_book_factor" sum="Total"/>
-			<field name="rel_project_director_employee_id" optional="hide"/>
-                        <field name="rel_stage_id" optional="hide"/>
-                        <field name="rel_is_book_manually_computed" optional="hide"/>
-                        <field name="rel_book_validation_employee_id" optional="hide"/>
-                        <field name="rel_book_validation_datetime" optional="hide"/>
-                        <field name="rel_book_comment" optional="hide"/>
-                </tree>                      
-            </field>                       
+                    <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" column_invisible="1"/>
+                    <field name="project_id"/>
+                    <field name="employee_id"/>
+                    <field name="book_factor" sum="Total"/>
+                    <field name="final_book_factor" sum="Total"/>
+                    <field name="rel_project_director_employee_id" optional="hide"/>
+                    <field name="rel_stage_id" optional="hide"/>
+                    <field name="rel_is_book_manually_computed" optional="hide"/>
+                    <field name="rel_book_validation_employee_id" optional="hide"/>
+                    <field name="rel_book_validation_datetime" optional="hide"/>
+                    <field name="rel_book_comment" optional="hide"/>
+                </tree>
+            </field>
         </record>
-
-
         <record id="view_project_book_employee_distribution_search" model="ir.ui.view">
             <field name="name">Distribution du book projet/salarié</field>
             <field name="model">project.book_employee_distribution</field>
             <field name="arch" type="xml">
                 <search string="Search">
-		    <field name="employee_id" string="Employé" filter_domain="['|', ('employee_id.name', 'ilike', self), ('employee_id.first_name', 'ilike', self)]"/>
+                    <field name="employee_id" string="Employé" filter_domain="['|', ('employee_id.name', 'ilike', self), ('employee_id.first_name', 'ilike', self)]"/>
                     <field name="project_id" string="Projet"/>
-		    <field name="rel_project_director_employee_id" string="Directeur de mission (nom de famille)"/>
-		    <field name="rel_stage_id" string="Statut de la mission"/>
-		    <field name="rel_book_validation_employee_id" string="Valideur du book"/>
-
-
+                    <field name="rel_project_director_employee_id" string="Directeur de mission (nom de famille)"/>
+                    <field name="rel_stage_id" string="Statut de la mission"/>
+                    <field name="rel_book_validation_employee_id" string="Valideur du book"/>
                     <filter string="Mon book" name="my_book" domain="[('employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Les projets dont je suis DM" name="own_projects" domain="[('project_id.project_director_employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Les books que j'ai validés" name="book_i_validated" domain="[('rel_book_validation_employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Book calculé manuellement" name="is_book_manually_computed" domain="[('rel_is_book_manually_computed', '=', True)]"/>
                     <filter string="Book calculé automatiquement" name="is_book_manually_computed_false" domain="[('rel_is_book_manually_computed', '=', False)]"/>
-		    <separator/>
-		    <filter string="Date de validation" name="validation_date" date="rel_book_validation_datetime"/>
-		    <separator/>
-		    <filter string="Book validé" name="book_validated" domain="[('rel_book_validation_datetime', '!=', False)]"/>
-		    <filter string="Book non validé" name="book_not_validated" domain="[('rel_book_validation_datetime', '=', False)]"/>
-
+                    <separator/>
+                    <filter string="Date de validation" name="validation_date" date="rel_book_validation_datetime"/>
+                    <separator/>
+                    <filter string="Book validé" name="book_validated" domain="[('rel_book_validation_datetime', '!=', False)]"/>
+                    <filter string="Book non validé" name="book_not_validated" domain="[('rel_book_validation_datetime', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Employé" name="employe" context="{'group_by': 'employee_id'}"/>
                         <filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
-			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
-			<filter string="Directeur de mission" name="rel_project_director_employee_id" context="{'group_by': 'rel_project_director_employee_id'}"/>
-			<filter string="Valideur du book" name="rel_book_validation_employee_id" context="{'group_by': 'rel_book_validation_employee_id'}"/>
-			<filter string="Statut de la mission" name="rel_stage_id" context="{'group_by': 'rel_stage_id'}"/>
-			<filter string="Date de validation" name="rel_book_validation_datetime" context="{'group_by': 'rel_book_validation_datetime'}"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Directeur de mission" name="rel_project_director_employee_id" context="{'group_by': 'rel_project_director_employee_id'}"/>
+                        <filter string="Valideur du book" name="rel_book_validation_employee_id" context="{'group_by': 'rel_book_validation_employee_id'}"/>
+                        <filter string="Statut de la mission" name="rel_stage_id" context="{'group_by': 'rel_stage_id'}"/>
+                        <filter string="Date de validation" name="rel_book_validation_datetime" context="{'group_by': 'rel_book_validation_datetime'}"/>
                     </group>
                 </search>
             </field>
         </record>
-
         <record id="book_employee_distribution_period_tree" model="ir.ui.view">
             <field name="name">book employee distribution period</field>
             <field name="model">project.book_employee_distribution_period</field>
             <field name="arch" type="xml">
                 <tree create="false" edit="false">
-                        <field name="currency_id" column_invisible="1"/>
-			<field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
-			<field name="company_id" column_invisible="1"/>
-                        <field name="project_id"/>
-                        <field name="rel_project_director_employee_id" optional="show"/>
-                        <field name="rel_stage_id" optional="show"/>
-                        <field name="employee_id"/>
-			<field name="project_book_period_id"/>
-                        <field name="rel_is_book_manually_computed" optional="show"/>
-                        <field name="rel_book_validation_employee_id" optional="show"/>
-                        <field name="rel_book_validation_datetime" optional="show"/>
-                        <field name="rel_book_comment" optional="show"/>
-			<!--
+                    <field name="currency_id" column_invisible="1"/>
+                    <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="company_id" column_invisible="1"/>
+                    <field name="project_id"/>
+                    <field name="rel_project_director_employee_id" optional="show"/>
+                    <field name="rel_stage_id" optional="show"/>
+                    <field name="employee_id"/>
+                    <field name="project_book_period_id"/>
+                    <field name="rel_is_book_manually_computed" optional="show"/>
+                    <field name="rel_book_validation_employee_id" optional="show"/>
+                    <field name="rel_book_validation_datetime" optional="show"/>
+                    <field name="rel_book_comment" optional="show"/>
+                    <!--
                         <field name="reference_period"/>
 			-->
-                        <field name="period_project_book" optional="show"/>
-                        <field name="final_book_factor" optional="show"/>
-			<field name="period_project_book_employee" sum="Total"/>
-                </tree>                      
-            </field>                       
+                    <field name="period_project_book" optional="show"/>
+                    <field name="final_book_factor" optional="show"/>
+                    <field name="period_project_book_employee" sum="Total"/>
+                </tree>
+            </field>
         </record>
-
         <record id="project_book_employee_distribution_period_action" model="ir.actions.act_window">
-		<field name="name">Distribution du book projet/salarié/année</field>
-                <field name="res_model">project.book_employee_distribution_period</field>
-                <field name="view_mode">tree</field>
-		<field name="context">{'search_default_my_book' : 1, 'search_default_this_year' : 1}</field>
+            <field name="name">Distribution du book projet/salarié/année</field>
+            <field name="res_model">project.book_employee_distribution_period</field>
+            <field name="view_mode">tree</field>
+            <field name="context">{'search_default_my_book' : 1, 'search_default_this_year' : 1}</field>
         </record>
-
         <record id="project_book_period_action" model="ir.actions.act_window">
-		<field name="name">Book par projet/année</field>
-             	<field name="res_model">project.book_period</field>
-                <field name="view_mode">tree</field>
+            <field name="name">Book par projet/année</field>
+            <field name="res_model">project.book_period</field>
+            <field name="view_mode">tree</field>
         </record>
-
         <record id="project_book_employee_distribution_action" model="ir.actions.act_window">
-		<field name="name">Facteur de book par projet/consultant</field>
-             	<field name="res_model">project.book_employee_distribution</field>
-                <field name="view_mode">tree</field>
+            <field name="name">Facteur de book par projet/consultant</field>
+            <field name="res_model">project.book_employee_distribution</field>
+            <field name="view_mode">tree</field>
         </record>
-
-
         <record id="view_project_book_employee_distribution_period_search" model="ir.ui.view">
             <field name="name">Distribution du book projet/salarié/année</field>
             <field name="model">project.book_employee_distribution_period</field>
             <field name="arch" type="xml">
                 <search string="Search">
-		    <field name="employee_id" string="Employé" filter_domain="['|', ('employee_id.name', 'ilike', self), ('employee_id.first_name', 'ilike', self)]"/>
+                    <field name="employee_id" string="Employé" filter_domain="['|', ('employee_id.name', 'ilike', self), ('employee_id.first_name', 'ilike', self)]"/>
                     <field name="project_id" string="Projet"/>
                     <field name="reference_period" string="Année de référence"/>
-		    <field name="rel_project_director_employee_id" string="Directeur de mission (nom de famille)"/>
-		    <field name="rel_stage_id" string="Statut de la mission"/>
-		    <field name="rel_book_validation_employee_id" string="Valideur du book"/>
-
-
+                    <field name="rel_project_director_employee_id" string="Directeur de mission (nom de famille)"/>
+                    <field name="rel_stage_id" string="Statut de la mission"/>
+                    <field name="rel_book_validation_employee_id" string="Valideur du book"/>
                     <filter string="Mon book" name="my_book" domain="[('employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Les projets dont je suis DM" name="own_projects" domain="[('project_id.project_director_employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Les books que j'ai validés" name="book_i_validated" domain="[('rel_book_validation_employee_id.user_id.id', '=', uid)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Book calculé manuellement" name="is_book_manually_computed" domain="[('rel_is_book_manually_computed', '=', True)]"/>
                     <filter string="Book calculé automatiquement" name="is_book_manually_computed_false" domain="[('rel_is_book_manually_computed', '=', False)]"/>
-		    <separator/>
+                    <separator/>
                     <filter string="Cette année" name="this_year" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
                     <filter string="L'an dernier" name="previous_year" domain="[('reference_period', '=', (context_today() + relativedelta(years=-1)).strftime('%Y'))]"/>
-		    <separator/>
-		    <filter string="Date de validation" name="validation_date" date="rel_book_validation_datetime"/>
-		    <separator/>
-		    <filter string="Book validé" name="book_validated" domain="[('rel_book_validation_datetime', '!=', False)]"/>
-		    <filter string="Book non validé" name="book_not_validated" domain="[('rel_book_validation_datetime', '=', False)]"/>
-
+                    <separator/>
+                    <filter string="Date de validation" name="validation_date" date="rel_book_validation_datetime"/>
+                    <separator/>
+                    <filter string="Book validé" name="book_validated" domain="[('rel_book_validation_datetime', '!=', False)]"/>
+                    <filter string="Book non validé" name="book_not_validated" domain="[('rel_book_validation_datetime', '=', False)]"/>
                     <group expand="0" string="Group By">
                         <filter string="Employé" name="employe" context="{'group_by': 'employee_id'}"/>
                         <filter string="Année de référence" name="reference_period" context="{'group_by': 'reference_period'}"/>
                         <filter string="Projet" name="project" context="{'group_by': 'project_id'}"/>
-			<filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
-			<filter string="Directeur de mission" name="rel_project_director_employee_id" context="{'group_by': 'rel_project_director_employee_id'}"/>
-			<filter string="Valideur du book" name="rel_book_validation_employee_id" context="{'group_by': 'rel_book_validation_employee_id'}"/>
-			<filter string="Statut de la mission" name="rel_stage_id" context="{'group_by': 'rel_stage_id'}"/>
-			<filter string="Date de validation" name="rel_book_validation_datetime" context="{'group_by': 'rel_book_validation_datetime'}"/>
+                        <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Directeur de mission" name="rel_project_director_employee_id" context="{'group_by': 'rel_project_director_employee_id'}"/>
+                        <filter string="Valideur du book" name="rel_book_validation_employee_id" context="{'group_by': 'rel_book_validation_employee_id'}"/>
+                        <filter string="Statut de la mission" name="rel_stage_id" context="{'group_by': 'rel_stage_id'}"/>
+                        <filter string="Date de validation" name="rel_book_validation_datetime" context="{'group_by': 'rel_book_validation_datetime'}"/>
                     </group>
                 </search>
             </field>
         </record>
-
-	<menuitem name="Gestion du book" id="project_book_menu" parent="project.menu_main_pm" />
-	<menuitem name="Répartition du book par projet/année/consultant" id="project_book_distribution_menu" parent="project_book_menu" action="project_book_employee_distribution_period_action"/>
-	<menuitem name="Book par année/projet" id="project_book_period_menu" parent="project_book_menu" action="project_book_period_action"/>
-	<menuitem name="Facteur de book par consultant/projet" id="project_book_employee_distribution" parent="project_book_menu" action="project_book_employee_distribution_action"/>
-   </data>
+        <menuitem name="Gestion du book" id="project_book_menu" parent="project.menu_main_pm"/>
+        <menuitem name="Répartition du book par projet/année/consultant" id="project_book_distribution_menu" parent="project_book_menu" action="project_book_employee_distribution_period_action"/>
+        <menuitem name="Book par année/projet" id="project_book_period_menu" parent="project_book_menu" action="project_book_period_action"/>
+        <menuitem name="Facteur de book par consultant/projet" id="project_book_employee_distribution" parent="project_book_menu" action="project_book_employee_distribution_action"/>
+    </data>
 </odoo>

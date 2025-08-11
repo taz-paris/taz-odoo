@@ -1,40 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<data noupdate="1">
-		<record id="seq_project" model="ir.sequence">
-			<field name="name">Preject number sequence</field>
-			<field name="code">project.project</field>
-			<field name="active">True</field>
-			<field name="prefix">%(y)s</field>
-			<field name="number_increment">1</field>
-			<field name="number_next">1</field>
-			<field name="padding">3</field>
-			<field name="implementation">standard</field>
-		</record>
-
-	    <record model="ir.cron" forcecreate="True" id="update_project_margin_projection">
-		<field name="name">Update project each monday morning to update margin projection</field>
-		<field name="model_id" ref="model_project_project"/>
-		<field name="state">code</field>
-		<field name="code">model.cron_update_margin_weekly()</field>
-		<field name="user_id" ref="base.user_root"/>
-		<field name="interval_number">1</field>
-		<field name="interval_type">weeks</field>
-		<field name="nextcall" eval="(datetime.now() + timedelta(days=7-datetime.today().weekday())).replace(hour=7, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')" />
-		<field name="numbercall">-1</field>
-		<field name="doall" eval="True" />
-	    </record>
-
-	    <record model="ir.cron" forcecreate="True" id="update_project_begin_year_stage_id">
-		<field name="name">Update project each first of January with begin_year_stage_id</field>
-		<field name="model_id" ref="model_project_project"/>
-		<field name="state">code</field>
-		<field name="code">model.cron_update_begin_year_stage_id()</field>
-		<field name="user_id" ref="base.user_root"/>
-		<field name="interval_number">12</field>
-		<field name="interval_type">months</field>
-		<field name="nextcall" eval="datetime.now().replace(year=datetime.now().year+1, month=1, day=1, hour=4, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')" />
-		<field name="numbercall">-1</field>
-		<field name="doall" eval="True" />
-	    </record>
-	</data>
+    <data noupdate="1">
+        <record id="seq_project" model="ir.sequence">
+            <field name="name">Preject number sequence</field>
+            <field name="code">project.project</field>
+            <field name="active">True</field>
+            <field name="prefix">%(y)s</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="padding">3</field>
+            <field name="implementation">standard</field>
+        </record>
+        <record model="ir.cron" forcecreate="True" id="update_project_margin_projection">
+            <field name="name">Update project each monday morning to update margin projection</field>
+            <field name="model_id" ref="model_project_project"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_update_margin_weekly()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            <field name="nextcall" eval="(datetime.now() + timedelta(days=7-datetime.today().weekday())).replace(hour=7, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="True"/>
+        </record>
+        <record model="ir.cron" forcecreate="True" id="update_project_begin_year_stage_id">
+            <field name="name">Update project each first of January with begin_year_stage_id</field>
+            <field name="model_id" ref="model_project_project"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_update_begin_year_stage_id()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">12</field>
+            <field name="interval_type">months</field>
+            <field name="nextcall" eval="datetime.now().replace(year=datetime.now().year+1, month=1, day=1, hour=4, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="True"/>
+        </record>
+    </data>
 </odoo>

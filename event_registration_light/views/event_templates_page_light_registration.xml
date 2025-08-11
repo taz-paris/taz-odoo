@@ -1,42 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
-<template id="registration_form" name="Registration form">
-		<head>
-			<link rel="stylesheet" type="text/css" href="/event_registration_light/static/style.css"/>
-			<title><t t-esc="event.name or 'Subscription'"/></title>
-			<link type="image/x-icon" rel="shortcut icon" href="/web/image/res.company/1/favicon" />
-		</head>
-		<body class="event_registration_light">
-			<img class="event_registration_light" src='/event_registration_light/static/img/logo.png' alt="Logo"/>
-			<!--
+    <template id="registration_form" name="Registration form">
+        <head>
+            <link rel="stylesheet" type="text/css" href="/event_registration_light/static/style.css"/>
+            <title>
+                <t t-esc="event.name or 'Subscription'"/>
+            </title>
+            <link type="image/x-icon" rel="shortcut icon" href="/web/image/res.company/1/favicon"/>
+        </head>
+        <body class="event_registration_light">
+            <img class="event_registration_light" src="/event_registration_light/static/img/logo.png" alt="Logo"/>
+            <!--
 			<p>Merci de confirmer votre présence pour l'évènement <t t-esc="event.name" /> <br/> qui aura lieu le <t t-esc="formated_dates"/></p>
 			-->
-
-			<t t-esc="event.description_web_form" />
-			
-			<form class="event_registration_light" t-attf-action="/eventlight/#{event.id}/registration/submit" method="post">
-				<input class="event_registration_light" type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-				<label class="event_registration_light" form="email">Inscrivez votre adresse email ci-dessous *</label>
-				<input class="event_registration_light" type="email" name="email" id="email" required="True" />
-				<label class="event_registration_light" form="first_name">Prénom *</label>
-				<input class="event_registration_light" type="text" name="first_name" id="first_name" required="True" />
-				<label class="event_registration_light" form="email">Nom *</label>
-				<input class="event_registration_light" type="text" name="name" id="name" required="True" />
-				<input class="event_registration_light_button" type="submit" value="Je m'inscris" />
-			</form>
-		</body>
-</template>
-
-<template id="registration_submit" name="Registration result">
-		<head>
-			<link rel="stylesheet" type="text/css" href="/event_registration_light/static/style.css"/>
-			<title><t t-esc="event.name or 'Subscription'"/></title>
-			<link type="image/x-icon" rel="shortcut icon" href="/web/image/res.company/1/favicon" />
-		</head>
-		<body  class="event_registration_light">
-			<img class="event_registration_light" src='/event_registration_light/static/img/logo.png' alt="Logo"/>
-			<p class="event_registration_light">Inscription confirmée pour l'évènement.</p>
-		</body>
-</template>
-
+            <t t-esc="event.description_web_form"/>
+            <form class="event_registration_light" t-attf-action="/eventlight/#{event.id}/registration/submit" method="post">
+                <input class="event_registration_light" type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <label class="event_registration_light" form="email">Inscrivez votre adresse email ci-dessous *</label>
+                <input class="event_registration_light" type="email" name="email" id="email" required="True"/>
+                <label class="event_registration_light" form="first_name">Prénom *</label>
+                <input class="event_registration_light" type="text" name="first_name" id="first_name" required="True"/>
+                <label class="event_registration_light" form="email">Nom *</label>
+                <input class="event_registration_light" type="text" name="name" id="name" required="True"/>
+                <input class="event_registration_light_button" type="submit" value="Je m'inscris"/>
+            </form>
+        </body>
+    </template>
+    <template id="registration_submit" name="Registration result">
+        <head>
+            <link rel="stylesheet" type="text/css" href="/event_registration_light/static/style.css"/>
+            <title>
+                <t t-esc="event.name or 'Subscription'"/>
+            </title>
+            <link type="image/x-icon" rel="shortcut icon" href="/web/image/res.company/1/favicon"/>
+        </head>
+        <body class="event_registration_light">
+            <img class="event_registration_light" src="/event_registration_light/static/img/logo.png" alt="Logo"/>
+            <p class="event_registration_light">Inscription confirmée pour l'évènement.</p>
+        </body>
+    </template>
 </odoo>

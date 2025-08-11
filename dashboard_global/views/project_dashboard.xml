@@ -1,173 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-           <record model="ir.ui.view" id="project_win_loose_pivot">
-	      <field name="name">pivot.project_win_loose_pivot</field>
-	      <field name="model">project.project</field>
-	      <field name="arch" type="xml">
-		<pivot string="Projet" display_quantity="1" default_order="rel_industry_business_priority asc">
-		    <field name="rel_industry_business_priority" type="row"/>
-		    <field name="rel_partner_industry_id" type="row"/>
-
-		    <field name="date_win_loose" interval="month" type="col"/>
-
-		    <field name="reporting_sum_company_outsource_code3_code_4" type="measure" string="Total 'prise de commande'"/>
-
-
-	            <field name="sale_order_amount_initial" invisible="1"/>
-	            <field name="order_amount_initial" invisible="1"/>
-	            <field name="order_amount_current" invisible="1"/>
-	            <field name="order_sum_sale_order_lines_with_draft" invisible="1"/>
-	            <field name="order_sum_sale_order_lines" invisible="1"/>
-	            <field name="order_cost_initial" invisible="1"/>
-	            <field name="order_marging_amount_initial" invisible="1"/>
-	            <field name="order_marging_rate_initial" invisible="1"/>
-	            <field name="order_cost_current" invisible="1"/>
-	            <field name="order_cost_futur" invisible="1"/>
-	            <field name="order_marging_amount_current" invisible="1"/>
-	            <field name="order_marging_rate_current" invisible="1"/>
-	            <field name="order_to_invoice_company" invisible="1"/>
-	            <field name="order_to_invoice_company_with_tax" invisible="1"/>
-	            <field name="company_invoice_sum_move_lines" invisible="1"/>
-	            <field name="company_invoice_sum_move_lines_with_tax" invisible="1"/>
-	            <field name="company_to_invoice_left" invisible="1"/>
-	            <field name="company_to_invoice_left_with_tax" invisible="1"/>
-	            <field name="company_paid" invisible="1"/>
-	            <field name="company_residual" invisible="1"/>
-	            <field name="company_part_amount_initial" invisible="1"/>
-	            <field name="company_part_cost_initial" invisible="1"/>
-	            <field name="company_part_marging_amount_initial" invisible="1"/>
-	            <field name="company_part_marging_rate_initial" invisible="1"/>
-	            <field name="company_part_amount_current" invisible="1"/>
-	            <field name="company_part_cost_current" invisible="1"/>
-	            <field name="company_part_cost_futur" invisible="1"/>
-	            <field name="company_part_marging_amount_current" invisible="1"/>
-	            <field name="company_part_marging_rate_current" invisible="1"/>
-	            <field name="outsource_part_amount_initial" invisible="1"/>
-	            <field name="outsource_part_cost_initial" invisible="1"/>
-	            <field name="outsource_part_marging_amount_initial" invisible="1"/>
-	            <field name="outsource_part_marging_rate_initial" invisible="1"/>
-	            <field name="outsource_part_amount_current" invisible="1"/>
-	            <field name="outsource_part_cost_current" invisible="1"/>
-	            <field name="outsource_part_cost_futur" invisible="1"/>
-	            <field name="outsourcing_link_purchase_order_with_draft" invisible="1"/>
-	            <field name="outsource_part_marging_amount_current" invisible="1"/>
-	            <field name="outsource_part_marging_rate_current" invisible="1"/>
-	            <field name="cosource_part_amount_initial" invisible="1"/>
-	            <field name="cosource_part_cost_initial" invisible="1"/>
-	            <field name="cosource_part_marging_amount_initial" invisible="1"/>
-	            <field name="cosource_part_marging_rate_initial" invisible="1"/>
-	            <field name="cosource_part_amount_current" invisible="1"/>
-	            <field name="cosource_part_cost_current" invisible="1"/>
-	            <field name="cosource_part_cost_futur" invisible="1"/>
-	            <field name="cosource_part_marging_amount_current" invisible="1"/>
-	            <field name="cosource_part_marging_rate_current" invisible="1"/>
-	            <field name="other_part_amount_initial" invisible="1"/>
-	            <field name="other_part_cost_initial" invisible="1"/>
-	            <field name="other_part_marging_amount_initial" invisible="1"/>
-	            <field name="other_part_marging_rate_initial" invisible="1"/>
-	            <field name="other_part_amount_current" invisible="1"/>
-	            <field name="other_part_cost_current" invisible="1"/>
-	            <field name="other_part_cost_futur" invisible="1"/>
-	            <field name="other_part_marging_amount_current" invisible="1"/>
-	            <field name="other_part_marging_rate_current" invisible="1"/>
-	            <field name="default_book_end" invisible="1"/>
-	            <field name="project_book_factor" invisible="1"/>
-	            <field name="allocated_hours" invisible="1"/>
-	            <field name="sequence" invisible="1"/>
-	            <field name="color" invisible="1"/>
-	            <field name="payed_amount" invisible="1"/>
-	            <field name="amount" invisible="1"/>
-	            <field name="billed_amount" invisible="1"/>
-
-		</pivot>
-	      </field>
-	  </record>
-
-           <record model="ir.ui.view" id="project_win_loose_graph">
-	      <field name="name">graph.project_win_loose_pivot</field>
-	      <field name="model">project.project</field>
-	      <field name="arch" type="xml">
-		<graph string="Projet" type="bar" order="date_win_loose asc">
-		    <field name="reporting_sum_company_outsource_code3_code_4" type="measure" string="Total 'prise de commande'"/>
-		    <field name="date_win_loose" interval="month" />
-
-
-	            <field name="sale_order_amount_initial" invisible="1"/>
-	            <field name="order_amount_initial" invisible="1"/>
-	            <field name="order_amount_current" invisible="1"/>
-	            <field name="order_sum_sale_order_lines_with_draft" invisible="1"/>
-	            <field name="order_sum_sale_order_lines" invisible="1"/>
-	            <field name="order_cost_initial" invisible="1"/>
-	            <field name="order_marging_amount_initial" invisible="1"/>
-	            <field name="order_marging_rate_initial" invisible="1"/>
-	            <field name="order_cost_current" invisible="1"/>
-	            <field name="order_cost_futur" invisible="1"/>
-	            <field name="order_marging_amount_current" invisible="1"/>
-	            <field name="order_marging_rate_current" invisible="1"/>
-	            <field name="order_to_invoice_company" invisible="1"/>
-	            <field name="order_to_invoice_company_with_tax" invisible="1"/>
-	            <field name="company_invoice_sum_move_lines" invisible="1"/>
-	            <field name="company_invoice_sum_move_lines_with_tax" invisible="1"/>
-	            <field name="company_to_invoice_left" invisible="1"/>
-	            <field name="company_to_invoice_left_with_tax" invisible="1"/>
-	            <field name="company_paid" invisible="1"/>
-	            <field name="company_residual" invisible="1"/>
-	            <field name="company_part_amount_initial" invisible="1"/>
-	            <field name="company_part_cost_initial" invisible="1"/>
-	            <field name="company_part_marging_amount_initial" invisible="1"/>
-	            <field name="company_part_marging_rate_initial" invisible="1"/>
-	            <field name="company_part_amount_current" invisible="1"/>
-	            <field name="company_part_cost_current" invisible="1"/>
-	            <field name="company_part_cost_futur" invisible="1"/>
-	            <field name="company_part_marging_amount_current" invisible="1"/>
-	            <field name="company_part_marging_rate_current" invisible="1"/>
-	            <field name="outsource_part_amount_initial" invisible="1"/>
-	            <field name="outsource_part_cost_initial" invisible="1"/>
-	            <field name="outsource_part_marging_amount_initial" invisible="1"/>
-	            <field name="outsource_part_marging_rate_initial" invisible="1"/>
-	            <field name="outsource_part_amount_current" invisible="1"/>
-	            <field name="outsource_part_cost_current" invisible="1"/>
-	            <field name="outsource_part_cost_futur" invisible="1"/>
-	            <field name="outsourcing_link_purchase_order_with_draft" invisible="1"/>
-	            <field name="outsource_part_marging_amount_current" invisible="1"/>
-	            <field name="outsource_part_marging_rate_current" invisible="1"/>
-	            <field name="cosource_part_amount_initial" invisible="1"/>
-	            <field name="cosource_part_cost_initial" invisible="1"/>
-	            <field name="cosource_part_marging_amount_initial" invisible="1"/>
-	            <field name="cosource_part_marging_rate_initial" invisible="1"/>
-	            <field name="cosource_part_amount_current" invisible="1"/>
-	            <field name="cosource_part_cost_current" invisible="1"/>
-	            <field name="cosource_part_cost_futur" invisible="1"/>
-	            <field name="cosource_part_marging_amount_current" invisible="1"/>
-	            <field name="cosource_part_marging_rate_current" invisible="1"/>
-	            <field name="other_part_amount_initial" invisible="1"/>
-	            <field name="other_part_cost_initial" invisible="1"/>
-	            <field name="other_part_marging_amount_initial" invisible="1"/>
-	            <field name="other_part_marging_rate_initial" invisible="1"/>
-	            <field name="other_part_amount_current" invisible="1"/>
-	            <field name="other_part_cost_current" invisible="1"/>
-	            <field name="other_part_cost_futur" invisible="1"/>
-	            <field name="other_part_marging_amount_current" invisible="1"/>
-	            <field name="other_part_marging_rate_current" invisible="1"/>
-	            <field name="default_book_end" invisible="1"/>
-	            <field name="project_book_factor" invisible="1"/>
-	            <field name="allocated_hours" invisible="1"/>
-	            <field name="sequence" invisible="1"/>
-	            <field name="color" invisible="1"/>
-	            <field name="payed_amount" invisible="1"/>
-	            <field name="amount" invisible="1"/>
-	            <field name="billed_amount" invisible="1"/>
-
-		</graph>
-	      </field>
-	  </record>
-
-	    <record id="open_view_project_win_loose_action" model="ir.actions.act_window">
-		<field name="name">Prise de commande des projets passés</field>
-		<field name="res_model">project.project</field>
-		<field name="view_mode">graph,pivot</field>
-		<field name="domain">[("date_win_loose", ">=", "2022-12-31 23:00:00"), ('stage_id.id', 'not in', [4,8])]</field>
-		<!--
+        <record model="ir.ui.view" id="project_win_loose_pivot">
+            <field name="name">pivot.project_win_loose_pivot</field>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <pivot string="Projet" display_quantity="1" default_order="rel_industry_business_priority asc">
+                    <field name="rel_industry_business_priority" type="row"/>
+                    <field name="rel_partner_industry_id" type="row"/>
+                    <field name="date_win_loose" interval="month" type="col"/>
+                    <field name="reporting_sum_company_outsource_code3_code_4" type="measure" string="Total 'prise de commande'"/>
+                    <field name="sale_order_amount_initial" invisible="1"/>
+                    <field name="order_amount_initial" invisible="1"/>
+                    <field name="order_amount_current" invisible="1"/>
+                    <field name="order_sum_sale_order_lines_with_draft" invisible="1"/>
+                    <field name="order_sum_sale_order_lines" invisible="1"/>
+                    <field name="order_cost_initial" invisible="1"/>
+                    <field name="order_marging_amount_initial" invisible="1"/>
+                    <field name="order_marging_rate_initial" invisible="1"/>
+                    <field name="order_cost_current" invisible="1"/>
+                    <field name="order_cost_futur" invisible="1"/>
+                    <field name="order_marging_amount_current" invisible="1"/>
+                    <field name="order_marging_rate_current" invisible="1"/>
+                    <field name="order_to_invoice_company" invisible="1"/>
+                    <field name="order_to_invoice_company_with_tax" invisible="1"/>
+                    <field name="company_invoice_sum_move_lines" invisible="1"/>
+                    <field name="company_invoice_sum_move_lines_with_tax" invisible="1"/>
+                    <field name="company_to_invoice_left" invisible="1"/>
+                    <field name="company_to_invoice_left_with_tax" invisible="1"/>
+                    <field name="company_paid" invisible="1"/>
+                    <field name="company_residual" invisible="1"/>
+                    <field name="company_part_amount_initial" invisible="1"/>
+                    <field name="company_part_cost_initial" invisible="1"/>
+                    <field name="company_part_marging_amount_initial" invisible="1"/>
+                    <field name="company_part_marging_rate_initial" invisible="1"/>
+                    <field name="company_part_amount_current" invisible="1"/>
+                    <field name="company_part_cost_current" invisible="1"/>
+                    <field name="company_part_cost_futur" invisible="1"/>
+                    <field name="company_part_marging_amount_current" invisible="1"/>
+                    <field name="company_part_marging_rate_current" invisible="1"/>
+                    <field name="outsource_part_amount_initial" invisible="1"/>
+                    <field name="outsource_part_cost_initial" invisible="1"/>
+                    <field name="outsource_part_marging_amount_initial" invisible="1"/>
+                    <field name="outsource_part_marging_rate_initial" invisible="1"/>
+                    <field name="outsource_part_amount_current" invisible="1"/>
+                    <field name="outsource_part_cost_current" invisible="1"/>
+                    <field name="outsource_part_cost_futur" invisible="1"/>
+                    <field name="outsourcing_link_purchase_order_with_draft" invisible="1"/>
+                    <field name="outsource_part_marging_amount_current" invisible="1"/>
+                    <field name="outsource_part_marging_rate_current" invisible="1"/>
+                    <field name="cosource_part_amount_initial" invisible="1"/>
+                    <field name="cosource_part_cost_initial" invisible="1"/>
+                    <field name="cosource_part_marging_amount_initial" invisible="1"/>
+                    <field name="cosource_part_marging_rate_initial" invisible="1"/>
+                    <field name="cosource_part_amount_current" invisible="1"/>
+                    <field name="cosource_part_cost_current" invisible="1"/>
+                    <field name="cosource_part_cost_futur" invisible="1"/>
+                    <field name="cosource_part_marging_amount_current" invisible="1"/>
+                    <field name="cosource_part_marging_rate_current" invisible="1"/>
+                    <field name="other_part_amount_initial" invisible="1"/>
+                    <field name="other_part_cost_initial" invisible="1"/>
+                    <field name="other_part_marging_amount_initial" invisible="1"/>
+                    <field name="other_part_marging_rate_initial" invisible="1"/>
+                    <field name="other_part_amount_current" invisible="1"/>
+                    <field name="other_part_cost_current" invisible="1"/>
+                    <field name="other_part_cost_futur" invisible="1"/>
+                    <field name="other_part_marging_amount_current" invisible="1"/>
+                    <field name="other_part_marging_rate_current" invisible="1"/>
+                    <field name="default_book_end" invisible="1"/>
+                    <field name="project_book_factor" invisible="1"/>
+                    <field name="allocated_hours" invisible="1"/>
+                    <field name="sequence" invisible="1"/>
+                    <field name="color" invisible="1"/>
+                    <field name="payed_amount" invisible="1"/>
+                    <field name="amount" invisible="1"/>
+                    <field name="billed_amount" invisible="1"/>
+                </pivot>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="project_win_loose_graph">
+            <field name="name">graph.project_win_loose_pivot</field>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <graph string="Projet" type="bar" order="date_win_loose asc">
+                    <field name="reporting_sum_company_outsource_code3_code_4" type="measure" string="Total 'prise de commande'"/>
+                    <field name="date_win_loose" interval="month"/>
+                    <field name="sale_order_amount_initial" invisible="1"/>
+                    <field name="order_amount_initial" invisible="1"/>
+                    <field name="order_amount_current" invisible="1"/>
+                    <field name="order_sum_sale_order_lines_with_draft" invisible="1"/>
+                    <field name="order_sum_sale_order_lines" invisible="1"/>
+                    <field name="order_cost_initial" invisible="1"/>
+                    <field name="order_marging_amount_initial" invisible="1"/>
+                    <field name="order_marging_rate_initial" invisible="1"/>
+                    <field name="order_cost_current" invisible="1"/>
+                    <field name="order_cost_futur" invisible="1"/>
+                    <field name="order_marging_amount_current" invisible="1"/>
+                    <field name="order_marging_rate_current" invisible="1"/>
+                    <field name="order_to_invoice_company" invisible="1"/>
+                    <field name="order_to_invoice_company_with_tax" invisible="1"/>
+                    <field name="company_invoice_sum_move_lines" invisible="1"/>
+                    <field name="company_invoice_sum_move_lines_with_tax" invisible="1"/>
+                    <field name="company_to_invoice_left" invisible="1"/>
+                    <field name="company_to_invoice_left_with_tax" invisible="1"/>
+                    <field name="company_paid" invisible="1"/>
+                    <field name="company_residual" invisible="1"/>
+                    <field name="company_part_amount_initial" invisible="1"/>
+                    <field name="company_part_cost_initial" invisible="1"/>
+                    <field name="company_part_marging_amount_initial" invisible="1"/>
+                    <field name="company_part_marging_rate_initial" invisible="1"/>
+                    <field name="company_part_amount_current" invisible="1"/>
+                    <field name="company_part_cost_current" invisible="1"/>
+                    <field name="company_part_cost_futur" invisible="1"/>
+                    <field name="company_part_marging_amount_current" invisible="1"/>
+                    <field name="company_part_marging_rate_current" invisible="1"/>
+                    <field name="outsource_part_amount_initial" invisible="1"/>
+                    <field name="outsource_part_cost_initial" invisible="1"/>
+                    <field name="outsource_part_marging_amount_initial" invisible="1"/>
+                    <field name="outsource_part_marging_rate_initial" invisible="1"/>
+                    <field name="outsource_part_amount_current" invisible="1"/>
+                    <field name="outsource_part_cost_current" invisible="1"/>
+                    <field name="outsource_part_cost_futur" invisible="1"/>
+                    <field name="outsourcing_link_purchase_order_with_draft" invisible="1"/>
+                    <field name="outsource_part_marging_amount_current" invisible="1"/>
+                    <field name="outsource_part_marging_rate_current" invisible="1"/>
+                    <field name="cosource_part_amount_initial" invisible="1"/>
+                    <field name="cosource_part_cost_initial" invisible="1"/>
+                    <field name="cosource_part_marging_amount_initial" invisible="1"/>
+                    <field name="cosource_part_marging_rate_initial" invisible="1"/>
+                    <field name="cosource_part_amount_current" invisible="1"/>
+                    <field name="cosource_part_cost_current" invisible="1"/>
+                    <field name="cosource_part_cost_futur" invisible="1"/>
+                    <field name="cosource_part_marging_amount_current" invisible="1"/>
+                    <field name="cosource_part_marging_rate_current" invisible="1"/>
+                    <field name="other_part_amount_initial" invisible="1"/>
+                    <field name="other_part_cost_initial" invisible="1"/>
+                    <field name="other_part_marging_amount_initial" invisible="1"/>
+                    <field name="other_part_marging_rate_initial" invisible="1"/>
+                    <field name="other_part_amount_current" invisible="1"/>
+                    <field name="other_part_cost_current" invisible="1"/>
+                    <field name="other_part_cost_futur" invisible="1"/>
+                    <field name="other_part_marging_amount_current" invisible="1"/>
+                    <field name="other_part_marging_rate_current" invisible="1"/>
+                    <field name="default_book_end" invisible="1"/>
+                    <field name="project_book_factor" invisible="1"/>
+                    <field name="allocated_hours" invisible="1"/>
+                    <field name="sequence" invisible="1"/>
+                    <field name="color" invisible="1"/>
+                    <field name="payed_amount" invisible="1"/>
+                    <field name="amount" invisible="1"/>
+                    <field name="billed_amount" invisible="1"/>
+                </graph>
+            </field>
+        </record>
+        <record id="open_view_project_win_loose_action" model="ir.actions.act_window">
+            <field name="name">Prise de commande des projets passés</field>
+            <field name="res_model">project.project</field>
+            <field name="view_mode">graph,pivot</field>
+            <field name="domain">[("date_win_loose", "&gt;=", "2022-12-31 23:00:00"), ('stage_id.id', 'not in', [4,8])]</field>
+            <!--
 	        <field name="context">{
                         'group_by': [],
                         'graph_measure': 'reporting_sum_company_outsource_code3_code_4',
@@ -185,15 +176,7 @@
                                         }
                         }</field>
 		-->
-		<field name="view_ids" eval="
-				    [
-				    (5, 0, 0),
-				    (0, 0, {'view_mode': 'graph', 'view_id': ref('dashboard_global.project_win_loose_graph')}),
-				    (0, 0, {'view_mode': 'pivot', 'view_id': ref('dashboard_global.project_win_loose_pivot')}),
-				      ]" />
-	    </record>
-
-
-
-   </data>
+            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'graph', 'view_id': ref('dashboard_global.project_win_loose_graph')}),         (0, 0, {'view_mode': 'pivot', 'view_id': ref('dashboard_global.project_win_loose_pivot')}),           ]"/>
+        </record>
+    </data>
 </odoo>
