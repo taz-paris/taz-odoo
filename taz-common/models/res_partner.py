@@ -43,7 +43,7 @@ class tazResPartner(models.Model):
             if old_email:
                 old_email = old_email.strip().lower()
 
-            res = super().write(vals) #TODO : ça ne devrait pas être vals[self.id] ?
+            res = super().write(vals)
 
             if old_parent_id: 
                 old_parent_id._compute_child_mail_address_domain_list()
@@ -237,7 +237,7 @@ class tazResPartner(models.Model):
                  list_match = []
                  for e in email_list :
                      if str(e.id) != str(self.id).replace("New_", ""):
-                        list_match.append("%s [id = %s]" % (e.name_get()[0][1], str(e.id)))
+                        list_match.append("%s [id = %s]" % (e.display_name, str(e.id)))
                  if len(email_list) > 1 and mail is not False:
                      raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel ou anciennes adresses email). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) ! \n\nContact concerné : %s' % ('\n'.join(list_match) or "")))
 
