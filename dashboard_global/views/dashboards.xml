@@ -59,22 +59,44 @@
             <field name="view_mode">form</field>
             <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.business_action_form')}),           ]"/>
         </record>
-        <record id="open_business_module" model="ir.actions.act_url">
-            <field name="url">https://tfp.tasmane.com/web#action=629&amp;model=res.partner&amp;view_type=list&amp;cids=1&amp;menu_id=443</field>
-            <field name="target">self</field>
-            <field name="name">Redirection vers le module Commerce</field>
-        </record>
-        <record id="open_project_module" model="ir.actions.act_url">
-            <field name="url">https://tfp.tasmane.com/web#action=271&amp;model=project.project&amp;view_type=list&amp;cids=1&amp;menu_id=189</field>
-            <field name="target">self</field>
-            <field name="name">Redirection vers le module Projet</field>
-        </record>
+	<record model="ir.actions.server" id="taz-common_redirect">
+	    <field name="name">Redirect to the module taz-common</field>
+	    <field name="model_id" ref="taz-common.model_res_partner"/>
+	    <field name="state">code</field>
+	    <field name="type">ir.actions.server</field>
+	    <field name="code">
+base_url = env['ir.config_parameter'].sudo().get_param('web.base.url')
+target_url = f"{base_url}/web#action={env.ref('taz-common.action_partner_contact').id}&amp;model=res.partner&amp;view_type=list&amp;menu_id={env.ref('taz-common.commerce').id}"
+
+action = {
+    "type": "ir.actions.act_url",
+    "target": "self",
+    "url": target_url,
+}
+	    </field>
+	</record>
+	<record model="ir.actions.server" id="project_redirect">
+	    <field name="name">Redirect to the module project</field>
+	    <field name="model_id" ref="project.model_project_project"/>
+	    <field name="state">code</field>
+	    <field name="type">ir.actions.server</field>
+	    <field name="code">
+base_url = env['ir.config_parameter'].sudo().get_param('web.base.url')
+target_url = f"{base_url}/web#action={env.ref('project_accounting.project_action').id}&amp;model=project.project&amp;view_type=list&amp;menu_id={env.ref('project.menu_main_pm').id}"
+
+action = {
+    "type": "ir.actions.act_url",
+    "target": "self",
+    "url": target_url,
+}
+	    </field>
+	</record>
         <menuitem name="Cockpit DM/Manager" id="global_board" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" action="global_board_action" sequence="5"/>
         <menuitem name="Projet" id="projects" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="6"/>
         <menuitem name="Créer un projet" id="new_project" parent="dashboard_global.projects" action="open_view_project_new_form" sequence="5"/>
         <menuitem name="Mes projets" id="my_projects" parent="dashboard_global.projects" action="project.open_view_project_all_group_stage" sequence="10"/>
         <menuitem name="Tous les projets" id="all_projects" parent="dashboard_global.projects" action="project_accounting.project_action" sequence="15"/>
-        <menuitem name="&gt;&gt;&gt; Redirection vers le module Projet" id="project_module" parent="dashboard_global.projects" action="open_project_module" sequence="50"/>
+        <menuitem name="&gt;&gt;&gt; Redirection vers le module Projet" id="project_module" parent="dashboard_global.projects" action="project_redirect" sequence="50"/>
         <menuitem name="Commerce" id="sales" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="7"/>
         <menuitem name="Créer un contact" id="new_contact" parent="dashboard_global.sales" action="open_view_contact_new_form" sequence="5"/>
         <menuitem name="Tous les contacts" id="all_contacts" parent="dashboard_global.sales" action="taz-common.action_partner_contact" sequence="10"/>
@@ -82,7 +104,7 @@
         <menuitem name="Mes actions commerciales" id="all_business_actions" parent="dashboard_global.sales" action="taz-common.business_action_action" sequence="25"/>
         <menuitem name="Comptes (ex BD) auxquels je suis affecté" id="res_industry" parent="dashboard_global.sales" action="taz-common.my_industries_action" sequence="30"/>
         <menuitem name="Objectifs commerciaux annuels de mes comptes" id="all_customer_book_goal" parent="dashboard_global.sales" action="taz-common.my_customer_book_goal_action" sequence="35"/>
-        <menuitem name="&gt;&gt;&gt; Redirection vers le module Commerce" id="business_module" parent="dashboard_global.sales" action="open_business_module" sequence="50"/>
+        <menuitem name="&gt;&gt;&gt; Redirection vers le module Commerce" id="business_module" parent="dashboard_global.sales" action="taz-common_redirect" sequence="50"/>
         <menuitem name="Pilotage" id="statistics_report_menu" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="10"/>
         <menuitem name="Escale &gt; Projet créés/ayant changé de statut sur les 7 derniers jours" id="project_recent_change_action_menu" parent="statistics_report_menu" action="project_recent_change_action" sequence="5"/>
         <menuitem name="Stats commerciales" id="business_report_menu" parent="statistics_report_menu" sequence="20"/>
