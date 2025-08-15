@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+	<!-- Main taz-common app menu -->
+        <menuitem name="Commerce" id="taz-common.commerce" sequence="3"/>
+
+	<!-- Configuration menu -->
+        <menuitem id="taz-common.res_partner_menu_config" name="Configuration" parent="taz-common.commerce" groups="taz-common.taz-admin,taz-common.taz-management" sequence="100"/>
+        <menuitem id="taz-common.menu_partner_category_form" action="base.action_partner_category_form" name="Contact Tags" sequence="1" parent="taz-common.res_partner_menu_config"/>
+        <menuitem id="taz-common.menu_partner_title_contact" action="base.action_partner_title_contact" name="Contact Titles" parent="taz-common.res_partner_menu_config" sequence="3"/>
+        <menuitem id="taz-common.menu_localisation" name="Localization" parent="taz-common.res_partner_menu_config" sequence="5"/>
+        <menuitem id="taz-common.menu_country_partner" action="base.action_country" parent="taz-common.menu_localisation" sequence="1"/>
+        <menuitem id="taz-common.menu_country_group" action="base.action_country_group" name="Country Group" parent="taz-common.menu_localisation" sequence="3"/>
+        <menuitem id="taz-common.menu_country_state_partner" action="base.action_country_state" parent="taz-common.menu_localisation" sequence="2"/>
+
+        <!-- Masquer les modules de base, sauf pour le super admin -->
+        <record id="mail.menu_root_discuss" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+        <record id="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('taz-common.taz-management')])]"/>
+        </record>
+        <record id="calendar.mail_menu_calendar" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+        <record id="contacts.menu_contacts" model="ir.ui.menu">
+            <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+        </record>
+        <record id="account.menu_finance" model="ir.ui.menu">
+            <!-- on supprime le menu Facturation si l'usager n'a que le droit readonly (qui est obligatoire pour tous les consultants pour enregister un nouveau contact) -->
+            <!-- on ajouter le menu Facturation pour les DM/Manager -->
+            <field name="groups_id" eval="[(3, ref('account.group_account_readonly')), (4, ref('taz-common.taz-management'))]"/>
+        </record>
+
+
+    </data>
+</odoo>
