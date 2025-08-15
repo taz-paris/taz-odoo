@@ -96,7 +96,7 @@ class tazResPartner(models.Model):
                          domain_list.append(domain)
              liste = ','.join(domain_list)
              if self.child_mail_address_domain_list != liste:
-                 _logger.info("mise à jour de la liste pour des noms de domaine pour l'entreprise %s : %s" % (self.name or "", self.child_mail_address_domain_list or ""))
+                 #_logger.info("mise à jour de la liste pour des noms de domaine pour l'entreprise %s : %s" % (self.name or "", self.child_mail_address_domain_list or ""))
                  self.child_mail_address_domain_list = liste
              #_logger.info("FIN _compute_child_mail_address_domain_list")
 
@@ -167,24 +167,6 @@ class tazResPartner(models.Model):
              domain=_get_default_property_payment_bank_account_domain)
 
 
-     """
-     def name_get(self):
-         res = []
-         for rec in self:
-             display_name = rec.display_name
-             if not (self._context.get('show_address_only') or self._context.get('show_address') or self._context.get('partner_show_db_id') or self._context.get('address_inline') or self._context.get('show_email') or self._context.get('html_format') or self._context.get('show_vat')): #Sans cette condition, l'adresse postale n'apparaît pas sur les factures
-                 if (rec.is_company == False):
-                     display_name = "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")
-                 else:
-                     display_name = rec.name or ""
-                     if (rec.long_company_name):
-                         display_name += " - %s" % rec.long_company_name or ""
-                     if (rec.parent_id):
-                         display_name += " (%s)" % rec.parent_id.name or ""
-             res.append((rec.id, display_name))
-         return res
-     """
-
      @api.depends('first_name', 'name', 'parent_id', 'parent_id.name', 'long_company_name')
      def _compute_display_name(self):
          super()._compute_display_name()
@@ -237,6 +219,7 @@ class tazResPartner(models.Model):
                  list_match = []
                  for e in email_list :
                      if str(e.id) != str(self.id).replace("New_", ""):
+                     #if str(e.id) != str(self.id):
                         list_match.append("%s [id = %s]" % (e.display_name, str(e.id)))
                  if len(email_list) > 1 and mail is not False:
                      raise ValidationError(_('Cette adresse email est déjà utilisée sur une autre fiche contact (dans le champ email ou email personnel ou anciennes adresses email). Enregistrement impossible (il ne faudrait pas créer des doublons de contact ;-)) ! \n\nContact concerné : %s' % ('\n'.join(list_match) or "")))
