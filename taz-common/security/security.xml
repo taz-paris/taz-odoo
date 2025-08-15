@@ -6,5 +6,28 @@
             <field name="model_id" ref="model_taz_customer_book_goal"/>
             <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
         </record>
+
+	<!-- GROUPS -->
+        <record id="taz-admin" model="res.groups">
+            <field name="name">TAZ-Admin</field>
+            <field name="comment">Administrator for TAZ* modules.</field>
+        </record>
+        <record id="taz-management" model="res.groups">
+            <field name="name">TAZ-Management</field>
+            <field name="comment">Rights for DM and Managers.</field>
+        </record>
+        <record id="taz-basic" model="res.groups">
+            <field name="name">TAZ-Basic</field>
+            <field name="comment">Basic rights.</field>
+        </record>
+        <record id="taz-adv" model="res.groups">
+            <field name="name">TAZ-ADV</field>
+            <field name="comment">Rights for accounting and projets management.</field>
+        </record>
+        <record id="taz-cdg" model="res.groups">
+            <field name="name">TAZ-CDG</field>
+            <field name="comment">Rights for C-levels.</field>
+        </record>
+
     </data>
 </odoo>

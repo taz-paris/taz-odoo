@@ -207,12 +207,13 @@
             <field name="res_model">res.partner</field>
             <field name="context">{"default_is_company":True}</field>
             <field name="search_view_id" ref="company_search"/>
-            <!--
-      -->
             <field name="view_mode">tree,form,kanban</field>
             <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),          ]"/>
             <field name="domain">[('is_company', '=', True), ('type', '=', 'contact')]</field>
         </record>
+
+
+
         <!-- CONTACTS -->
         <record model="ir.ui.view" id="taz-common.contact_tree">
             <field name="name">Contacts</field>
@@ -226,7 +227,6 @@
                     <field name="date_last_business_action" optional="show"/>
                     <field name="email" optional="show"/>
                     <field name="parent_industry_id" optional="show"/>
-                    <!-- multi_edit="1" -->
                     <field name="parent_industry_priority" optional="show" widget="badge" decoration-info="parent_industry_priority == 'not_tracked'" decoration-success="parent_industry_priority == 'active'" decoration-danger="parent_industry_priority == 'priority_target'"/>
                     <field name="parent_sector_id" optional="hide"/>
                     <field name="category_id" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
@@ -302,9 +302,6 @@
                                 <group>
                                     <group string="Adresse postale">
                                         <span class="o_form_label o_td_label" name="address_name">
-                                            <!--
-						<field name="type" attrs="{'invisible': [('is_company','=', True)], 'required': [('is_company','!=', True)], 'readonly': [('user_ids', '!=', [])]}" class="fw-bold"/>
-						    -->
                                             <b invisible="not is_company">Address</b>
                                         </span>
                                         <div class="o_address_format">
@@ -427,6 +424,7 @@
             <field name="domain">[('is_company', '=', False), ('type', '=', 'contact')]</field>
             <!-- ('user_ids', '=', False),('employee_ids', '=', False), -->
         </record>
+
         <!-- ADDRESS -->
         <record model="ir.ui.view" id="taz-common.address_tree">
             <field name="name">Adresses</field>
@@ -546,27 +544,7 @@
             <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.address_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.address_form')}),          ]"/>
             <field name="domain">[('type', '!=', 'contact')]</field>
         </record>
-        <!-- AUTRES -->
-        <record id="taz-admin" model="res.groups">
-            <field name="name">TAZ-Admin</field>
-            <field name="comment">Administrator for TAZ* modules.</field>
-        </record>
-        <record id="taz-management" model="res.groups">
-            <field name="name">TAZ-Management</field>
-            <field name="comment">Rights for DM and Managers.</field>
-        </record>
-        <record id="taz-basic" model="res.groups">
-            <field name="name">TAZ-Basic</field>
-            <field name="comment">Basic rights.</field>
-        </record>
-        <record id="taz-adv" model="res.groups">
-            <field name="name">TAZ-ADV</field>
-            <field name="comment">Rights for accounting and projets management.</field>
-        </record>
-        <record id="taz-cdg" model="res.groups">
-            <field name="name">TAZ-CDG</field>
-            <field name="comment">Rights for C-levels.</field>
-        </record>
+
         <!-- Masquer les modules de base, sauf poru le super admin -->
         <record id="mail.menu_root_discuss" model="ir.ui.menu">
             <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
