@@ -60,7 +60,7 @@ class staffingLeave(models.Model):
                         _logger.info("old timesheet unlinked %s" % str(old_timesheets.ids))
 
                     # create the timesheet on the vacation project
-                    holidays._timesheet_create_lines()
+                    holidays._generate_timesheets()
 
                     # update timesheets of all overlapped leaves
                     overlapped_leaves =  self.env['hr.leave'].search([
@@ -110,40 +110,73 @@ class staffingLeave(models.Model):
         super()._get_leaves_on_public_holiday()
         return False
 
+
     #override to deal with uom in days and request_date_to_period
-    #odoo/addons/project_timesheet_holidays/models/hr_holidays.py 
-    def _timesheet_create_lines(self):
+    # https://github.com/odoo/odoo/blob/b274b305edd9e70aed0e26237395d9b9d0d45305/addons/project_timesheet_holidays/models/hr_holidays.py#L62C1-L103C67
+    def _generate_timesheets(self):
+        """ Timesheet will be generated only if timesheet_generate is True
+            If company is set, timesheet_project_id and timesheet_task_id from leave type are
+            used as project_id and task_id.
+            Else, internal_project_id and leave_timesheet_task_id are used.
+            The generated timesheet will be attached to this project/task.
+        """
         vals_list = []
+        leave_ids = []
+        calendar_leaves_data = self.env['resource.calendar.leaves']._read_group([('holiday_id', 'in', self.ids)], ['holiday_id'], ['id:array_agg'])
+        mapped_calendar_leaves = {leave: calendar_leave_ids[0] for leave, calendar_leave_ids in calendar_leaves_data}
         for leave in self:
+            if leave.holiday_type != 'employee' or not leave.holiday_status_id.timesheet_generate:
+                continue
+
+            if leave.holiday_status_id.company_id:
+                project, task = leave.holiday_status_id.timesheet_project_id, leave.holiday_status_id.timesheet_task_id
+            else:
+                project, task = leave.employee_id.company_id.internal_project_id, leave.employee_id.company_id.leave_timesheet_task_id
+
+            if not project or not task:
+                continue
+
+            leave_ids.append(leave.id)
             if not leave.employee_id:
                 continue
 
             encoding_uom_id = self.env.company.timesheet_encode_uom_id
             if encoding_uom_id == self.env.ref("uom.product_uom_hour"):
-                return super()._timesheet_create_lines()
-                #for index, (day_date, work_hours_count) in enumerate(work_hours_data):
-                #    vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count))
-            if encoding_uom_id == self.env.ref("uom.product_uom_day"):
+                work_hours_data = leave.employee_id.list_work_time_per_day(
+                    leave.date_from,
+                    leave.date_to,
+                    domain=[('id', '!=', mapped_calendar_leaves[leave])] if leave in mapped_calendar_leaves else None)
 
+                for index, (day_date, work_hours_count) in enumerate(work_hours_data):
+                    vals_list.append(leave._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count, project, task))
+
+            elif encoding_uom_id == self.env.ref("uom.product_uom_day"):
                 leave_timesheets_by_day, list_work_days = leave.get_leave_timesheets_by_day()
                 index = 0
                 for str_date, day_dic in leave_timesheets_by_day.items() :
                     if day_dic['selected_timesheets_unit_amount_sum'] < day_dic['target_unit_amount']:
                         unit_amount_to_create = day_dic['target_unit_amount'] - day_dic['selected_timesheets_unit_amount_sum']
-                        vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_dic['date'], unit_amount_to_create))
+                        vals_list.append(leave._timesheet_prepare_line_values(index, list_work_days, day_dic['date'], unit_amount_to_create, project, task))
                         index += 1
 
             else : 
                 raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
 
-        return self.env['account.analytic.line'].sudo().create(vals_list)
+        # Unlink previous timesheets to avoid doublon (shouldn't happen on the interface but meh). Necessary when the function is called to regenerate timesheets.
+        old_timesheets = self.env["account.analytic.line"].sudo().search([('project_id', '!=', False), ('holiday_id', 'in', leave_ids)])
+        if old_timesheets:
+            old_timesheets.holiday_id = False
+            old_timesheets.unlink()
+
+        self.env['account.analytic.line'].sudo().create(vals_list)
 
 
-    def _timesheet_prepare_line_values(self, index, work_hours_data, day_date, work_hours_count):
+
+    def _timesheet_prepare_line_values(self, index, work_hours_data, day_date, work_hours_count, project, task):
         # surchargé pour mieux gérer le multi-company. Napta stockera tous les congés sur le même type, hors le standard Odoo se sert du type de congés pour déterminer le projet et la tache à associer aux analytic.lines créées à la validation du congés.
         # cette surcharge force à utiliser le projet/tache de congés défini dans la configuration générale de l'entreprise. Il ne sera plus possible d'associer des congés à des tâches différentes suivante le type de congés utilisé. En revanche les analytic.line seront rattachés à la bonne entreprise
         self.ensure_one()
-        res = super()._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count)
+        res = super()._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count, project, task)
         res['project_id'] = self.employee_company_id.internal_project_id.id
         res['task_id'] = self.employee_company_id.leave_timesheet_task_id.id
         res['account_id'] = self.employee_company_id.internal_project_id.analytic_account_id.id
