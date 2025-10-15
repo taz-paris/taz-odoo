@@ -18,7 +18,7 @@
     'version': '17.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'mail', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement'],
+    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement'],
 
     # always loaded
     'data': [

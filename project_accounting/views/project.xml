@@ -47,6 +47,7 @@
                         <filter string="Niveau de priorité du compte" name="groupby_rel_industry_business_priority" context="{'group_by': 'rel_industry_business_priority'}"/>
                         <filter string="Statut" name="groupby_stage" context="{'group_by': 'stage_id'}" groups="project.group_project_stages"/>
                         <filter string="Company" name="company" context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
+                        <filter string="Source" name="source" context="{'group_by': 'source_id'}" />
                     </group>
                 </search>
             </field>
@@ -66,6 +67,7 @@
                     <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                     <field name="company_id" column_invisible="1"/>
                     <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
+                    <field name="source_id" optional="show"/>
                     <field name="project_director_employee_id" optional="show"/>
                     <field name="outsourcing" optional="hide"/>
                     <field name="stage_id" widget="badge" optional="show" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"/>
@@ -201,6 +203,7 @@
                                 <field name="company_id" invisible="1"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                                 <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
+                    		<field name="source_id" />
                                 <field name="stage_id" required="1"/>
                                 <field name="state_last_change_date" invisible="1" readonly="1"/>
                                 <field name="date_win_loose" invisible="0"/>
