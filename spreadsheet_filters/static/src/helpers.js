@@ -13,6 +13,8 @@ export function getRelativeDateDomainNewFilters(now, offset, rangeType, fieldNam
     //console.log(rangeType);
     let endDate = now.minus({ day: 1 }).endOf("day");
     let startDate = endDate;
+    //console.log(now);
+
     switch (rangeType) {
         case "year_to_last_closed_month": {
             const offsetParam = { years: offset };
@@ -57,19 +59,22 @@ export function getRelativeDateDomainNewFilters(now, offset, rangeType, fieldNam
 
     let leftBound, rightBound;
 
-    console.log(startDate);
-    console.log(endDate);
     if (fieldType === "date") {
-	    console.log("serializeDate");
         leftBound = serializeDate(startDate);
         rightBound = serializeDate(endDate);
     } else {
-	//console.log("serializeDateTime");
-        leftBound = serializeDateTime(startDate);
-        rightBound = serializeDateTime(endDate);
+	// BUG du core ? Le fonction serializeDateTime from "@web/core/l10n/dates" force le passage à UTC : setZone("utc").
+	    // Ce qui conduit à remonter les clotures comptables du 31/12/N-1 puisque leftBound est le 31/12 à 23h en UTC.
+	const SERVER_DATE_FORMAT = "yyyy-MM-dd";
+	const SERVER_TIME_FORMAT = "HH:mm:ss";
+	const SERVER_DATETIME_FORMAT = `${SERVER_DATE_FORMAT} ${SERVER_TIME_FORMAT}`;
+	leftBound = startDate.toFormat(SERVER_DATETIME_FORMAT, { numberingSystem: "latn" })
+	rightBound = endDate.toFormat(SERVER_DATETIME_FORMAT, { numberingSystem: "latn" })
     }
-    console.log(leftBound);
-    console.log(rightBound);
+    //console.log('======');
+    //console.log(rangeType);
+    //console.log(leftBound);
+    //console.log(rightBound);
 
     return new Domain(["&", [fieldName, ">=", leftBound], [fieldName, "<=", rightBound]]);
 }

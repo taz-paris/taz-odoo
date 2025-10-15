@@ -122,6 +122,7 @@
                     <field name="invoice_lines" widget="many2many_tags" optional="hide"/>
                     <field name="qty_to_invoice" optional="hide"/>
                     <field name="state" optional="show"/>
+		    <field name="analytic_distribution" optional="hide" context="{'default_analytic_distribution' : context.get('default_analytic_distribution')}" />
                 </field>
                 <field name="price_unit" position="replace">
                     <field name="price_subtotal" optional="show"/>

@@ -91,4 +91,3 @@ msgstr "Odoo vous aide à suivre toutes les activités liées à vos contacts."
 #: model:ir.model,name:contacts.model_res_users
 msgid "User"
 msgstr "Utilisateur"
-

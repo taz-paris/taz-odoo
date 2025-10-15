@@ -130,7 +130,6 @@ class tazResPartner(models.Model):
      former_email_address = fields.Char("Anciennes adresses email", readonly=True)
 
      assistant = fields.Html('Assistant(e)')
-     user_id = fields.Many2one(string="Propriétaire") #override the string of the native field
      date_last_business_action = fields.Date('Date du dernier RDV', compute=_compute_date_last_business_action, store=True)
      inhouse_influence_level = fields.Selection([
          ('1', "1 - Réseau - pas de lien direct"),
@@ -141,9 +140,9 @@ class tazResPartner(models.Model):
 
      street3 = fields.Char('Rue3')
      title = fields.Many2one(string="Civilité")
-     user_id = fields.Many2one(tracking=True, string="Propriétaire")
+     user_id = fields.Many2one(string="Propriétaire", tracking=True)
      user_active = fields.Boolean('Statut du propriétaire', related='user_id.active')
-     function = fields.Char(tracking=True, string="Poste occupé")
+     function = fields.Char(string="Poste occupé", tracking=True) 
 
      personal_phone = fields.Char("Tel personnel", unaccent=False)
      personal_email = fields.Char("Email personnel")
