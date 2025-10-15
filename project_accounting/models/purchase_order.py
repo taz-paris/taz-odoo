@@ -139,6 +139,12 @@ class projectAccountingPurchaseOrder(models.Model):
 class projectAccountingPurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
+    @api.onchange('order_id')
+    def _onchange_order_id_copy_analytic(self):
+        if self.order_id and self.order_id.order_line:
+            first_line = self.order_id.order_line[0]
+            if first_line.analytic_distribution:
+                self.analytic_distribution = first_line.analytic_distribution
     
     @api.depends('order_id', 'order_id.name', 'order_id.partner_id', 'order_id.partner_id.name')
     def _compute_display_name(self):

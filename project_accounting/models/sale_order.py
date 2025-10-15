@@ -79,7 +79,13 @@ class projectAccountingSaleOrderLine(models.Model):
             ('direct_payment_purchase_order_line_id_uniq', 'UNIQUE (direct_payment_purchase_order_line_id)',  "Impossible d'enregistrer deux fois la même lignes de commande de SOUS-TRAITANT (purchase.order.line) dans l'attribut direct_payment_purchase_order_line_id.")
     ]
 
-
+    @api.onchange('order_id')
+    def _onchange_order_id_copy_analytic(self):
+        if self.order_id and self.order_id.order_line:
+            first_line = self.order_id.order_line[0]
+            if first_line.analytic_distribution:
+                self.analytic_distribution = first_line.analytic_distribution
+ 
 
     #ATTENTION :
     #  Sur les sale.order et purchase.order seule la QUANTITE restant à facturer sur chaque ligne détermine si la ligne a un reliquat de facturation et en aucun cas le MONTANT
