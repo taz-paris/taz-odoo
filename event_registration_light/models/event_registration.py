@@ -36,8 +36,12 @@ class eventRegistration(models.Model):
     registration_user_id = fields.Many2one("res.users", "User", related="contact_user_link_id.user_id", store=True)
     state = fields.Selection(selection_add=[
             ('identified', 'Identifié'),
-            ('draft', 'Invité (auto)'), ('draft_step2', 'Invité (manuel)'), ('cancel', 'Annulé'),
-            ('open', 'Confirmé'), ('done', 'Présent')
+            ('draft', 'Invité (auto)'),
+            ('draft_step2', 'Invité (manuel)'),
+            ('cancel', 'Annulé'),
+            ('refused', 'Invitation refusée'),
+            ('open', 'Confirmé'),
+            ('done', 'Présent')
             ], default='identified')
     last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
     comment = fields.Text("Commentaire", help="Ce commentaire est propre à l'inscription de ce contact pour cet évènement.")
@@ -49,6 +53,9 @@ class eventRegistration(models.Model):
 
     def action_set_draft_step2(self):
         self.write({'state': 'draft_step2'})
+
+    def action_set_refused(self):
+        self.write({'state': 'refused'})
 
     def get_html_invitation(self):
         self.ensure_one()
