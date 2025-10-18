@@ -403,7 +403,7 @@
                     <filter name="created_24hourss" string="Contacts créés au cours des 24 dernières heures" domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(hours=7)).strftime('%%Y-%%m-%%d')))]"/>
                     <group expand="0" string="Group By">
                         <filter string="Compte du parent (ex BD)" name="group_industry" context="{'group_by': 'parent_industry_id'}"/>
-                        <filter string="Nivau de priorité du compte du parent (ex BD)" name="group_industry_priority" context="{'group_by': 'parent_industry_priority'}"/>
+                        <filter string="Niveau de priorité du compte du parent (ex BD)" name="group_industry_priority" context="{'group_by': 'parent_industry_priority'}"/>
                         <filter string="Secteur du parent" name="group_sector" context="{'group_by': 'parent_sector_id'}"/>
                         <filter string="Entreprise" name="group_parent" context="{'group_by': 'parent_id'}"/>
                         <filter string="Propriétaire" name="group_user_id" context="{'group_by': 'user_id'}"/>
