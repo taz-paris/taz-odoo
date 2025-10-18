@@ -67,7 +67,7 @@ class ContactUserLink(models.Model):
     def _compute_next_meeting_before(self):
         for rec in self:
             if rec.date_last_business_action and rec.target_contact_frequency_id :
-                rec.next_meeting_before = rec.date_business_action + relativedelta(days=rec.target_contact_frequency_id.day_number)
+                rec.next_meeting_before = rec.date_last_business_action + relativedelta(days=rec.target_contact_frequency_id.day_number)
             else :
                 rec.next_meeting_before = False
 
