@@ -677,19 +677,19 @@
                   rec.compute()</field>
             <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
         </record>
-        <!-- ACTION APPLICAQUE AUX UTILISATUER QUI ONT LE droit de gestion des étapes du projet (ie admin) -->
+        <!-- ACTION APPLICABLE AUX UTILISATEURS QUI ONT LE droit de gestion des étapes du projet (ie admin) -->
         <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
             <field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
             <field name="search_view_id" ref="view_project_search"/>
             <field name="view_mode">tree,form,pivot,kanban,calendar,activity</field>
         </record>
-        <record id="project.open_view_project_all_group_stage_kanban_view" model="ir.actions.act_window.view">
+        <record id="open_view_project_all_group_stage_kanban_view" model="ir.actions.act_window.view">
             <field name="sequence" eval="20"/>
             <field name="view_mode">kanban</field>
             <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
             <field name="view_id" ref="project_accounting.project_kanban"/>
         </record>
-        <record id="project.open_view_project_all_group_stage_tree_view" model="ir.actions.act_window.view">
+        <record id="open_view_project_all_group_stage_tree_view" model="ir.actions.act_window.view">
             <field name="sequence" eval="1"/>
             <field name="view_mode">tree</field>
             <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
@@ -707,14 +707,39 @@
             <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
             <field name="view_id" ref="project_accounting.project_pivot"/>
         </record>
-        <!-- ACTION APPLICAQUE AUX UTILISATUER SANS LE droit de gestion des étapes du projet -->
+        <!-- ACTION APPLICABLE AUX UTILISATEURS SANS LE droit de gestion des étapes du projet -->
         <record id="project.open_view_project_all" model="ir.actions.act_window">
             <field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
             <field name="search_view_id" ref="view_project_search"/>
-            <field name="view_ids" eval="[    (5, 0, 0),    (0, 0, {'view_mode': 'kanban', 'view_id': ref('project_accounting.project_kanban')}),    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.project_tree')}),    (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),    (0, 0, {'view_mode': 'pivot', 'view_id': ref('project_accounting.project_pivot')}),   ]"/>
+            <field name="view_mode">tree,form,pivot,kanban,calendar,activity</field>
         </record>
+        <record model="ir.actions.act_window.view" id="action_open_view_project_all_view_kanban">
+            <field name="sequence" eval="1"/>
+	    <field name="view_mode">kanban</field>
+	    <field name="view_id" ref="project_accounting.project_kanban"/>
+	    <field name="act_window_id" ref="project.open_view_project_all"/>
+	</record>
+        <record model="ir.actions.act_window.view" id="action_open_view_project_all_view_tree">
+            <field name="sequence" eval="2"/>
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="project_accounting.project_tree"/>
+	    <field name="act_window_id" ref="project.open_view_project_all"/>
+	</record>
+        <record model="ir.actions.act_window.view" id="action_open_view_project_all_view_form">
+            <field name="sequence" eval="3"/>
+	    <field name="view_mode">form</field>
+	    <field name="view_id" ref="project_accounting.project_form"/>
+	    <field name="act_window_id" ref="project.open_view_project_all"/>
+	</record>
+        <record model="ir.actions.act_window.view" id="action_open_view_project_all_view_pivot">
+            <field name="sequence" eval="4"/>
+	    <field name="view_mode">pivot</field>
+	    <field name="view_id" ref="project_accounting.project_pivot"/>
+	    <field name="act_window_id" ref="project.open_view_project_all"/>
+	</record>
         <record id="project.menu_main_pm" model="ir.ui.menu">
             <field name="sequence">4</field>
         </record>
+
     </data>
 </odoo>

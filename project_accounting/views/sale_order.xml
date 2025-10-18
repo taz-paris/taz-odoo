@@ -256,7 +256,7 @@
             <field name="res_model">sale.order.line</field>
             <field name="context">{'search_default_to_delivered_or_invoice' : 1}</field>
             <field name="view_mode">tree,form,kanban,pivot</field>
-            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),           ]"/>
+	    <field name="view_id" ref="project_accounting.view_sale_order_line_delivery_validation"/>
         </record>
         <menuitem name="Échéances de facturation" sequence="5" id="menu_sale_order_line_delivery_validation" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation"/>
         <record model="ir.actions.act_window" id="action_sale_order_line_delivery_validation_month">
@@ -264,7 +264,7 @@
             <field name="res_model">sale.order.line</field>
             <field name="context">{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}</field>
             <field name="view_mode">tree,form,kanban</field>
-            <field name="view_ids" eval="                                     [                                     (5, 0, 0),                                     (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),                                       ]"/>
+	    <field name="view_id" ref="project_accounting.view_sale_order_line_delivery_validation"/>
         </record>
         <menuitem name="Mes échéances de facturation du mois" sequence="4" id="menu_sale_order_line_delivery_validation_month" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation_month"/>
     </data>

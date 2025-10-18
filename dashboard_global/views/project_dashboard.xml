@@ -176,7 +176,20 @@
                                         }
                         }</field>
 		-->
-            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'graph', 'view_id': ref('dashboard_global.project_win_loose_graph')}),         (0, 0, {'view_mode': 'pivot', 'view_id': ref('dashboard_global.project_win_loose_pivot')}),           ]"/>
         </record>
+
+        <record model="ir.actions.act_window.view" id="open_view_project_win_loose_action_view_graph">
+            <field name="sequence" eval="10"/>
+            <field name="view_mode">graph</field>
+            <field name="view_id" ref="dashboard_global.project_win_loose_graph"/>
+            <field name="act_window_id" ref="open_view_project_win_loose_action"/>
+        </record>
+        <record model="ir.actions.act_window.view" id="open_view_project_win_loose_action_view_pivot">
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">pivot</field>
+            <field name="view_id" ref="dashboard_global.project_win_loose_pivot"/>
+            <field name="act_window_id" ref="open_view_project_win_loose_action"/>
+        </record>
+
     </data>
 </odoo>

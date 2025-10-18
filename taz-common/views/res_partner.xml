@@ -208,9 +208,20 @@
             <field name="context">{"default_is_company":True}</field>
             <field name="search_view_id" ref="company_search"/>
             <field name="view_mode">tree,form,kanban</field>
-            <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.company_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.company_form')}),          ]"/>
             <field name="domain">[('is_company', '=', True), ('type', '=', 'contact')]</field>
         </record>
+
+
+        <record model="ir.actions.act_window.view" id="taz-common.action_partner_company_view_tree">
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="taz-common.company_tree"/>
+	    <field name="act_window_id" ref="taz-common.action_partner_company"/>
+	</record>
+        <record model="ir.actions.act_window.view" id="taz-common.action_partner_company_view_form">
+	    <field name="view_mode">form</field>
+	    <field name="view_id" ref="taz-common.company_form"/>
+	    <field name="act_window_id" ref="taz-common.action_partner_company"/>
+	</record>
 
 
 
@@ -420,10 +431,19 @@
             }</field>
             <field name="search_view_id" ref="taz-common.contact_search"/>
             <field name="view_mode">tree,form,kanban</field>
-            <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.contact_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),          ]"/>
             <field name="domain">[('is_company', '=', False), ('type', '=', 'contact')]</field>
-            <!-- ('user_ids', '=', False),('employee_ids', '=', False), -->
         </record>
+
+        <record model="ir.actions.act_window.view" id="taz-common.action_partner_contact_view_tree">
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="taz-common.contact_tree"/>
+	    <field name="act_window_id" ref="taz-common.action_partner_contact"/>
+	</record>
+        <record model="ir.actions.act_window.view" id="taz-common.action_partner_contact_view_form">
+	    <field name="view_mode">form</field>
+	    <field name="view_id" ref="taz-common.contact_form"/>
+	    <field name="act_window_id" ref="taz-common.action_partner_contact"/>
+	</record>
 
         <!-- ADDRESS -->
         <record model="ir.ui.view" id="taz-common.address_tree">
@@ -541,9 +561,20 @@
             <field name="context">{"default_is_company":True, 'default_type' : 'invoice' }</field>
             <field name="search_view_id" ref="company_search"/>
             <field name="view_mode">tree,form,kanban</field>
-            <field name="view_ids" eval="                             [                             (5, 0, 0),                             (0, 0, {'view_mode': 'tree', 'view_id': ref('taz-common.address_tree')}),                             (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.address_form')}),          ]"/>
             <field name="domain">[('type', '!=', 'contact')]</field>
         </record>
+
+        <record model="ir.actions.act_window.view" id="taz-common.action_partner_address_view_tree">
+	    <field name="view_mode">tree</field>
+	    <field name="view_id" ref="taz-common.address_tree"/>
+	    <field name="act_window_id" ref="taz-common.action_partner_address"/>
+	</record>
+        <record model="ir.actions.act_window.view" id="taz-common.action_partner_address_view_form">
+	    <field name="view_mode">form</field>
+	    <field name="view_id" ref="taz-common.address_form"/>
+	    <field name="act_window_id" ref="taz-common.action_partner_address"/>
+	</record>
+
 
         <menuitem name="Contacts" sequence="10" id="taz-common.partner_contact" parent="taz-common.commerce" action="taz-common.action_partner_contact"/>
         <menuitem name="Entreprises" sequence="70" id="taz-common.partner_company" parent="taz-common.commerce" action="taz-common.action_partner_company"/>

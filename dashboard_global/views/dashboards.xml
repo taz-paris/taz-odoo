@@ -39,7 +39,7 @@
             <field name="name">Projets</field>
             <field name="res_model">project.project</field>
             <field name="view_mode">form</field>
-            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'form', 'view_id': ref('project_accounting.project_form')}),           ]"/>
+	    <field name="view_id" ref="project_accounting.project_form"/>
         </record>
         <record id="project_recent_change_action" model="ir.actions.act_window">
             <field name="name">Projets ayant récemment changé de statut</field>
@@ -51,13 +51,13 @@
             <field name="name">Contacts</field>
             <field name="res_model">res.partner</field>
             <field name="view_mode">form</field>
-            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.contact_form')}),           ]"/>
+	    <field name="view_id" ref="taz-common.contact_form"/>
         </record>
         <record id="open_view_business_action_new_form" model="ir.actions.act_window">
             <field name="name">Actions commerciales</field>
             <field name="res_model">taz.business_action</field>
             <field name="view_mode">form</field>
-            <field name="view_ids" eval="         [         (5, 0, 0),         (0, 0, {'view_mode': 'form', 'view_id': ref('taz-common.business_action_form')}),           ]"/>
+	    <field name="view_id" ref="taz-common.business_action_form"/>
         </record>
 	<record model="ir.actions.server" id="taz-common_redirect">
 	    <field name="name">Redirect to the module taz-common</field>
