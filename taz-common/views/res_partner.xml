@@ -368,7 +368,7 @@
             <field name="model">res.partner</field>
             <field name="arch" type="xml">
                 <search string="Contacts">
-                    <field name="name" string="Prénom Nom" filter_domain="[('display_name', 'ilike', self)]"/>
+                    <field name="name" string="Prénom Nom" filter_domain="[('complete_name', 'ilike', self)]"/>
                     <field name="parent_id" string="Entreprise" filter_domain="[('parent_id', 'ilike', self)]"/>
                     <field name="email" string="Email" filter_domain="[('email', 'ilike', self)]"/>
                     <field name="category_id" string="Étiquette"/>

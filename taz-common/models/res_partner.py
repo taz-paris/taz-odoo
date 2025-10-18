@@ -166,13 +166,37 @@ class tazResPartner(models.Model):
              domain=_get_default_property_payment_bank_account_domain)
 
 
-     @api.depends('first_name', 'name', 'parent_id', 'parent_id.name', 'long_company_name')
+     @api.model
+     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
+        if name :
+            domain += ['|', '|', '|', '&', ('is_company', '=', False), ('complete_name', operator, name), ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)]
+        return self._search(domain, limit=limit, order=order)
+
+
+     @api.depends('is_company', 'name', 'first_name', 'parent_id.name', 'type', 'company_name', 'commercial_company_name') #Ajout de la dépendance à first_name
+     def _compute_complete_name(self):
+         super()._compute_complete_name()
+
+
+     def _get_complete_name(self):
+         complete_name = super()._get_complete_name()
+         if (self.is_company == False): 
+             complete_name = "%s %s" % (self.first_name or "", self.name or "")
+         return complete_name
+
+
+     @api.depends('first_name', 'name', 'parent_id', 'parent_id.name', 'long_company_name', 'complete_name', 'email', 'vat', 'state_id', 'country_id', 'commercial_company_name')
+     @api.depends_context(
+        'show_address', 'partner_show_db_id',
+        'show_email', 'show_vat', 'lang', 'formatted_display_name'
+     )
      def _compute_display_name(self):
          super()._compute_display_name()
          for rec in self:
-             if not (self._context.get('show_address_only') or self._context.get('show_address') or self._context.get('partner_show_db_id') or self._context.get('address_inline') or self._context.get('show_email') or self._context.get('html_format') or self._context.get('show_vat')): #Sans cette condition, l'adresse postale n'apparaît pas sur les factures
+             if not (self._context.get('show_address') or self._context.get('partner_show_db_id') or self._context.get('formatted_display_name') or self._context.get('show_email') or self._context.get('show_vat')): #Sans cette condition, l'adresse postale n'apparaît pas sur les factures
                  if (rec.is_company == False):
-                     display_name = "%s %s (%s)" % (rec.first_name or "", rec.name or "", rec.parent_id.name or "")
+                     display_name = "%s (%s)" % (rec.complete_name or "", rec.parent_id.name or "")
                  else:
                      display_name = rec.name or ""
                      if (rec.long_company_name):
@@ -181,14 +205,6 @@ class tazResPartner(models.Model):
                          display_name += " (%s)" % rec.parent_id.name or ""
                  rec.display_name = display_name
 
-     @api.model
-     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        domain = domain or []
-        if name :
-            domain += ['|', '|', '|', '&', ('is_company', '=', False), ('display_name', operator, name), ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)]
-        return self._search(domain, limit=limit, order=order)
-
-     display_name = fields.Char(store=True) #Il est indispensable de stocker display_name s'il on veut pouvoir rechercher dessus dans _name_search, ce qui est utile pour les clients dont le nom est un prénom usuel type Hugues Bernard
 
      @api.model
      def fields_get(self, allfields=None, attributes=None):
