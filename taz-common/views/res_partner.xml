@@ -63,7 +63,7 @@
                                 </field>
                             </page>
                             <page string="Contacts de cette entreprise">
-                                <field name="child_ids_contact" context="{'default_parent_id':id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
+                                <field name="child_ids_contact" context="{'default_force_child_is_company' : True, 'default_user_id' : uid, 'default_type' : 'contact', 'default_parent_id':id, 'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}">
                                     <tree delete="false">
                                         <field name="is_company" optional="hide" readonly="1"/>
                                         <field name="first_name"/>
@@ -262,6 +262,7 @@
                         <group>
                             <group>
                                 <field name="is_company" invisible="1"/>
+                                <field name="force_child_is_company" invisible="1"/>
                                 <field name="active" invisible="1"/>
                                 <field name="company_id" invisible="1"/>
                                 <field name="email" default_focus="1" placeholder="Adresse email" widget="email"/>
