@@ -15,20 +15,6 @@
                 </pivot>
             </field>
         </record>
-        <record id="view_employee_filter_inherit" model="ir.ui.view">
-            <field name="name">Employee</field>
-            <field name="model">hr.employee</field>
-            <field name="inherit_id" ref="hr.view_employee_filter"/>
-            <field name="priority">5</field>
-            <field name="arch" type="xml">
-                <xpath expr="//searchpanel" position="replace">
-                    <searchpanel view_types="list,graph">
-                        <field name="company_id" groups="base.group_multi_company" icon="fa-building" enable_counters="1"/>
-                        <field name="job_id" icon="fa-users" select="multi" enable_counters="1"/>
-                    </searchpanel>
-                </xpath>
-            </field>
-        </record>
         <record model="ir.ui.view" id="staffing.employee_tree">
             <field name="name">Équipage</field>
             <field name="model">hr.employee</field>
