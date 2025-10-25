@@ -1099,7 +1099,7 @@ class projectAccountProject(models.Model):
             last_closing_sorted = rec.accounting_closing_ids.filtered(lambda r: r.is_validated==True).sorted(key=lambda r: r.closing_date, reverse=True)
             if len(last_closing_sorted):
                 last_closing = last_closing_sorted[0]
-                if last_closing.pca_balance or last_closing.fae_balance or last_closing.fnp_balance or last_closing.cca_balance or last_closing.production_balance :
+                if last_closing.pca_balance or last_closing.fae_balance or last_closing.fnp_balance or last_closing.cca_balance or last_closing.production_balance or last_closing.production_external_balance :
                     rec.has_provision_running = True
                 rec.last_closing_production_balance = last_closing.production_balance
 
@@ -1494,7 +1494,7 @@ class projectAccountProject(models.Model):
 
     past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu à date", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net S/T de toutes les clôtures comptables du projet")
     futur_internal_revenue = fields.Monetary("CA net S/T à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet]")
-    last_closing_production_balance = fields.Monetary("Stock de production", compute=compute_has_provision_running, store=True, help="Valeur de Stock prod après destokage de la clôture validée la plus récente")
+    last_closing_production_balance = fields.Monetary("Stock de production interne", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production interne après destokage de la clôture validée la plus récente")
 
     # CAPITALIZATION
     is_filled_sales_proposal_indexation = fields.Boolean("Champ Proposition commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé")

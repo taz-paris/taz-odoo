@@ -22,6 +22,8 @@
                     <field name="invoice_period_amount" optional="show" sum="Total"/>
                     <!-- Achats-->
                     <field name="purchase_period_amount" optional="show" sum="Total"/>
+                    <field name="purchase_outsourcing_period_amount" optional="show" sum="Total"/>
+                    <field name="purchase_other_period_amount" optional="show" sum="Total"/>
                     <!-- Total provision -->
                     <field name="provision_previous_balance_sum" optional="hide"/>
                     <field name="provision_balance_sum" optional="hide"/>
@@ -41,13 +43,25 @@
                     <field name="fnp_previous_balance" optional="hide"/>
                     <field name="fnp_period_amount" optional="show" sum="Total"/>
                     <field name="fnp_balance" optional="hide"/>
-                    <!-- Production -->
+                    <!-- Production interne -->
                     <field name="production_previous_balance" optional="hide"/>
                     <field name="production_period_amount" optional="show" sum="Total"/>
                     <field name="production_stock" optional="show"/>
                     <field name="production_destocking" optional="show" sum="Total"/>
                     <field name="production_balance" optional="hide"/>
-                    <!-- Chiffre d'afffaire -->
+                    <!-- Production externe -->
+                    <field name="production_external_previous_balance" optional="hide"/>
+                    <field name="production_external_period_amount" optional="show" sum="Total"/>
+                    <field name="production_external_stock" optional="show"/>
+                    <field name="production_external_destocking" optional="show" sum="Total"/>
+                    <field name="production_external_balance" optional="hide"/>
+		    <!-- Production totale (interne + externe) -->
+                    <field name="production_total_previous_balance" optional="hide"/>
+                    <field name="production_total_period_amount" optional="show" sum="Total"/>
+                    <field name="production_total_stock" optional="show"/>
+                    <field name="production_total_destocking" optional="show" sum="Total"/>
+                    <field name="production_total_balance" optional="hide"/>
+                    <!-- Chiffre d'afffaires -->
                     <field name="gross_revenue" optional="hide" sum="Total"/>
                     <field name="internal_revenue" optional="hide" sum="Total"/>
                     <field name="internal_margin_amount" optional="hide" sum="Total"/>
@@ -96,6 +110,8 @@
                                 </group>
                                 <group name="purchase" string="Facturation fournisseurs">
                                     <field name="purchase_period_amount"/>
+				    <field name="purchase_outsourcing_period_amount" string="... dont S/T générant de la prod externe"/>
+                                    <field name="purchase_other_period_amount" string="... dont autres achats"/>
                                     <button type="object" name="action_open_in_account_move_lines" colspan="2" string="Voir les lignes de facturation fournisseur"/>
                                 </group>
                                 <group name="prov" string="Total provisions">
@@ -126,7 +142,7 @@
                                 </group>
                             </group>
                             <group>
-                                <group name="prod" string="Production">
+                                <group name="internal_prod" string="Production interne">
                                     <group>
                                         <field name="production_previous_balance"/>
                                         <field name="production_period_amount"/>
@@ -136,6 +152,30 @@
                                         <field name="production_destocking" readonly="is_validated"/>
                                         <field name="production_balance"/>
                                         <button type="object" name="action_open_analytic_lines" colspan="2" string="Voir les lignes de pointage"/>
+                                    </group>
+                                </group>
+                                <group name="external_prod" string="Production externe">
+                                    <group>
+                                        <field name="production_external_previous_balance"/>
+                                        <field name="production_external_period_amount"/>
+                                        <field name="production_external_stock"/>
+                                    </group>
+                                    <group>
+                                        <field name="production_external_destocking" readonly="is_validated"/>
+                                        <field name="production_external_balance"/>
+                                    </group>
+                                </group>
+                            </group>
+                            <group>
+                                <group name="total_prod" string="Production totale (interne + externe)">
+                                    <group>
+                                        <field name="production_total_previous_balance"/>
+                                        <field name="production_total_period_amount"/>
+                                        <field name="production_total_stock"/>
+                                    </group>
+                                    <group>
+                                        <field name="production_total_destocking"/>
+                                        <field name="production_total_balance"/>
                                     </group>
                                 </group>
                                 <group name="revenue" string="Chiffre d'affaire">
