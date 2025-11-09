@@ -9,13 +9,13 @@
                     <group>
                         <group>
                             <field name="partner_ids" colspan="3" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="first_name"/>
                                     <field name="name"/>
                                     <field name="long_company_name"/>
                                     <field name="industry_id"/>
                                     <field name="parent_id"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </group>

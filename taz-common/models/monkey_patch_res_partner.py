@@ -65,7 +65,7 @@ def write(self, vals):
                 partner.child_ids.write({'company_id': company_id})
     result = True
     # To write in SUPERUSER on field is_company and avoid access rights problems.
-    if 'is_company' in vals and self.user_has_groups('base.group_partner_manager') and not self.env.su:
+    if 'is_company' in vals and self.env.user.has_group('base.group_partner_manager') and not self.env.su:
         result = super(PartnerInherit_base, self.sudo()).write({'is_company': vals.get('is_company')})
         del vals['is_company']
     result = result and super(PartnerInherit_base, self).write(vals)

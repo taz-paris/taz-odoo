@@ -5,7 +5,7 @@
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="project_accounting.purchase_order_form_inherit"/>
         <field name="arch" type="xml">
-            <xpath expr="//tree/field[@name='margin_amount']" position="after">
+            <xpath expr="//list/field[@name='margin_amount']" position="after">
                 <field name="intercompany_sale_line_id" optional="hide"/>
             </xpath>
             <field name="fiscal_position_id" position="after">

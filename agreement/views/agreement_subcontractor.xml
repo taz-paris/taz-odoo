@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="agreement_subcontractor_tree" model="ir.ui.view">
-        <field name="name">agreement.subcontractor.tree</field>
+        <field name="name">agreement.subcontractor.list</field>
         <field name="model">agreement.subcontractor</field>
         <field name="arch" type="xml">
-            <tree string="Agreement Subcontractors">
+            <list>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="partner_id"/>
                 <field name="agreement_id"/>
@@ -12,7 +12,7 @@
                 <field name="partner_validation_date" optional="show"/>
                 <field name="end_date" optional="show"/>
                 <field name="max_amount" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
     <record id="agreement_subcontractor_form" model="ir.ui.view">
@@ -23,7 +23,7 @@
                 <sheet>
                     <group name="main" col="3">
                         <group name="left" string="Synthèse">
-                            <field name="partner_id" context="{'default_is_company': 1, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                            <field name="partner_id" context="{'default_is_company': 1, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
                             <field name="agreement_id"/>
                             <field name="max_amount"/>
                             <field name="is_partner_id_res_company" invisible="1"/>
@@ -60,7 +60,7 @@
     <record id="agreement_subcontractor_action" model="ir.actions.act_window">
         <field name="name">Accords de sous-traitance (DC4)</field>
         <field name="res_model">agreement.subcontractor</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <!-- Top menu item -->
 </odoo>

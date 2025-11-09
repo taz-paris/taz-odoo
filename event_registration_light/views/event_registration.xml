@@ -71,7 +71,7 @@
                     <attribute name="statusbar_visible">identified,draft,open,done</attribute>
                 </field>
                 <field name="partner_id" position="attributes">
-                    <attribute name="context">{'tree_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}</attribute>
+                    <attribute name="context">{'list_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}</attribute>
                 </field>
                 <field name="email" position="after">
                     <field name="mail_auto"/>

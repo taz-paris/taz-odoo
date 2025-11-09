@@ -57,7 +57,7 @@
             <field name="model">project.project</field>
             <field name="priority">5</field>
             <field name="arch" type="xml">
-                <tree decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
+                <list decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
                     <field name="id" widget="open_tab"/>
                     <field name="number"/>
                     <field name="is_review_needed" column_invisible="1"/>
@@ -66,7 +66,7 @@
                     <field name="name"/>
                     <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                     <field name="company_id" column_invisible="1"/>
-                    <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
+                    <field name="partner_id" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
                     <field name="source_id" optional="show"/>
                     <field name="project_director_employee_id" optional="show"/>
                     <field name="outsourcing" optional="hide"/>
@@ -100,7 +100,7 @@
                     <field name="outsource_part_marging_amount_initial" optional="hide"/>
                     <field name="cosource_part_marging_amount_initial" optional="hide"/>
                     <field name="other_part_marging_amount_initial" optional="hide"/>
-                </tree>
+                </list>
             </field>
         </record>
         <record model="ir.ui.view" id="project_accounting.project_form">
@@ -202,7 +202,7 @@
                             <group>
                                 <field name="company_id" invisible="1"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
-                                <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
+                                <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
                     		<field name="source_id" required="1"/>
                                 <field name="stage_id" required="1"/>
                                 <field name="state_last_change_date" invisible="1" readonly="1"/>
@@ -351,17 +351,17 @@
                             </page>
                             <page name="purchase" string="Achats">
                                 <field name="project_outsourcing_link_ids" context="{'default_project_id' : id}">
-                                    <tree>
+                                    <list>
                                         <field name="currency_id" column_invisible="1"/>
                                         <field name="project_id" optional="hide"/>
-                                        <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
+                                        <field name="partner_id" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]"/>
                                         <field name="link_type"/>
                                         <field name="outsource_part_amount_current" string="Prix revente HT" sum="Total"/>
                                         <field name="order_sum_purchase_order_lines" string="Commandé HT" sum="Total"/>
                                         <field name="order_direct_payment_amount" string="Part en paiement direct HT" sum="Total"/>
                                         <field name="order_company_payment_amount" string="Part en paiement classique HT" sum="Total"/>
                                         <field name="sum_account_move_lines" sum="Total"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                             <page name="book" string="Book">
@@ -373,14 +373,14 @@
                                     </group>
                                     <group>
                                         <field name="book_period_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
-                                            <tree editable="top">
+                                            <list editable="top">
                                                 <field name="currency_id" column_invisible="1"/>
                                                 <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                                                 <field name="company_id" column_invisible="1"/>
                                                 <field name="project_id" column_invisible="1"/>
                                                 <field name="reference_period"/>
                                                 <field name="period_project_book" sum="Total"/>
-                                            </tree>
+                                            </list>
                                         </field>
                                     </group>
                                 </group>
@@ -393,19 +393,19 @@
                                     </group>
                                     <group>
                                         <field name="book_employee_distribution_ids" colspan="2" nolabel="1" context="{'default_project_id':id}" invisible="is_book_manually_computed">
-                                            <tree editable="top">
+                                            <list editable="top">
                                                 <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                                                 <field name="company_id" column_invisible="1"/>
                                                 <field name="project_id" column_invisible="1"/>
                                                 <field name="employee_id"/>
                                                 <field name="book_factor" sum="Total"/>
                                                 <field name="final_book_factor" sum="Total"/>
-                                            </tree>
+                                            </list>
                                         </field>
                                     </group>
                                 </group>
                                 <field name="book_employee_distribution_period_ids" context="{'default_project_id':id}" readonly="not is_book_manually_computed">
-                                    <tree editable="top">
+                                    <list editable="top">
                                         <field name="currency_id" column_invisible="1"/>
                                         <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                                         <field name="company_id" column_invisible="1"/>
@@ -421,7 +421,7 @@
                                         <field name="period_project_book" column_invisible="parent.is_book_manually_computed" readonly="not rel_is_book_manually_computed"/>
                                         <field name="final_book_factor" column_invisible="parent.is_book_manually_computed" readonly="not rel_is_book_manually_computed"/>
                                         <field name="period_project_book_employee" sum="Total" readonly="not rel_is_book_manually_computed"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                             <page name="steering" string="Pilotage">
@@ -450,7 +450,7 @@
                                     </group>
                                 </group>
                                 <field name="accounting_closing_ids" context="{'default_project_id':id}">
-                                    <tree>
+                                    <list>
                                         <!-- ATTENTION : ne pas mettre la closing_date dans cette vue, sinon (pour une raison inconnue) lorsque l'on change le statut du projet, la closing date de la dernière cloture du projet est mise à jour avec la même valeur. Or le statut du projet est un related stocké sur la cloture, donc il déclenche la mise à jour de la cloture et embarque donc (en plus de la mise à jour du statut du projet) la mise à jour de la closing_date. Or la closing_date ne peut pas changer lorsqu'une clôture est validée. Donc la mise à jour de la cloture tombe en erreur, et entraine également un rollback sur la mise à jour du statut sur l'objet project.project.
 								-->
                                         <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
@@ -462,7 +462,7 @@
                                         <field name="is_validated" optional="show"/>
                                         <field name="comment" optional="hide" widget="text"/>
                                         <field name="comment_previous" optional="hide" widget="text"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                             <page string="Autres info et contrôles (debug admin)" groups="base.group_system">
@@ -521,11 +521,7 @@
                             </page>
                         </notebook>
                     </sheet>
-                    <div class="oe_chatter">
-                        <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
-                        <field name="activity_ids"/>
-                        <field name="message_ids"/>
-                    </div>
+                    <chatter/>
                 </form>
             </field>
         </record>
@@ -564,12 +560,12 @@
         <record id="project_action" model="ir.actions.act_window">
             <field name="name">Projets</field>
             <field name="res_model">project.project</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
             <field name="context">{'search_default_open_projects':1}</field>
         </record>
         <record id="project_action_view_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="1"/>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">list</field>
             <field name="act_window_id" ref="project_accounting.project_action"/>
             <field name="view_id" ref="project_accounting.project_tree"/>
         </record>
@@ -681,7 +677,7 @@
         <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
             <field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
             <field name="search_view_id" ref="view_project_search"/>
-            <field name="view_mode">tree,form,pivot,kanban,calendar,activity</field>
+            <field name="view_mode">list,form,pivot,kanban,calendar,activity</field>
         </record>
         <record id="open_view_project_all_group_stage_kanban_view" model="ir.actions.act_window.view">
             <field name="sequence" eval="20"/>
@@ -691,7 +687,7 @@
         </record>
         <record id="open_view_project_all_group_stage_tree_view" model="ir.actions.act_window.view">
             <field name="sequence" eval="1"/>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">list</field>
             <field name="act_window_id" ref="project.open_view_project_all_group_stage"/>
             <field name="view_id" ref="project_accounting.project_tree"/>
         </record>
@@ -711,7 +707,7 @@
         <record id="project.open_view_project_all" model="ir.actions.act_window">
             <field name="context">{'search_default_groupby_stage' : 1, 'search_default_recent_project_changed' : 0, 'search_default_own_projects' : 1}</field>
             <field name="search_view_id" ref="view_project_search"/>
-            <field name="view_mode">tree,form,pivot,kanban,calendar,activity</field>
+            <field name="view_mode">list,form,pivot,kanban,calendar,activity</field>
         </record>
         <record model="ir.actions.act_window.view" id="action_open_view_project_all_view_kanban">
             <field name="sequence" eval="1"/>
@@ -721,7 +717,7 @@
 	</record>
         <record model="ir.actions.act_window.view" id="action_open_view_project_all_view_tree">
             <field name="sequence" eval="2"/>
-	    <field name="view_mode">tree</field>
+	    <field name="view_mode">list</field>
 	    <field name="view_id" ref="project_accounting.project_tree"/>
 	    <field name="act_window_id" ref="project.open_view_project_all"/>
 	</record>

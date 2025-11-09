@@ -53,7 +53,7 @@
         <record id="timesheet_action_last_month" model="ir.actions.act_window">
             <field name="name">Feuille de temps</field>
             <field name="res_model">account.analytic.line</field>
-            <field name="view_mode">tree,form,kanban,pivot,graph</field>
+            <field name="view_mode">list,form,kanban,pivot,graph</field>
             <field name="search_view_id" ref="hr_timesheet.hr_timesheet_line_search"/>
             <field name="domain">[('project_id', '!=', False)]</field>
             <field name="context">{
@@ -67,7 +67,7 @@
         <menuitem name="Pointage du mois M-1" id="project_accounting_closing_menu_timesheet_action_last_month" parent="project_accounting.project_accounting_closing_menu_root" action="staffing.timesheet_action_last_month"/>
         <record id="timesheet_action_last_month_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="4"/>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">list</field>
             <field name="view_id" ref="hr_timesheet.timesheet_view_tree_user"/>
             <field name="act_window_id" ref="staffing.timesheet_action_last_month"/>
         </record>
@@ -85,10 +85,10 @@ env['project.project'].sudo().recompute_if_has_to_be_recomputed()
             <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
         </record>
         <record id="hr_timesheet_line_tree_period_depending" model="ir.ui.view">
-            <field name="name">account.analytic.line.tree.hr_timesheet</field>
+            <field name="name">account.analytic.line.list.hr_timesheet</field>
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="date"/>
                     <field name="date_end"/>
                     <field name="employee_id"/>
@@ -100,7 +100,7 @@ env['project.project'].sudo().recompute_if_has_to_be_recomputed()
                     <field name="period_amount" sum="Total"/>
                     <field name="project_id" optional="hide"/>
                     <field name="name" optional="hide"/>
-                </tree>
+                </list>
             </field>
         </record>
     </data>
