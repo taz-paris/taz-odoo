@@ -13,7 +13,9 @@
                             <field name="fiscalyear_last_month"/>
                         </group>
                         <group>
-                            <field name="period_lock_date"/>
+                            <field name="sale_lock_date"/>
+                            <field name="purchase_lock_date"/>
+                            <field name="hard_lock_date"/>
                             <field name="fiscalyear_lock_date"/>
                             <field name="tax_lock_date"/>
                         </group>
