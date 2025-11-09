@@ -6,25 +6,25 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2024-04-20 18:37+0000\n"
-"Last-Translator: Ediz Duman <neps1192@gmail.com>\n"
+"PO-Revision-Date: 2025-10-06 17:42+0000\n"
+"Last-Translator: Betül Öğmen <betulo@eska.biz>\n"
 "Language-Team: none\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.17\n"
+"X-Generator: Weblate 5.10.4\n"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "&gt; 120 d."
-msgstr "&gt; 120 d."
+msgstr "&gt; 120 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "1 - 30 d."
-msgstr "1 - 30 d."
+msgstr "1 - 30 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
@@ -34,17 +34,17 @@ msgstr "10"
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "31 - 60 d."
-msgstr ""
+msgstr "31 - 60 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "61 - 90 d."
-msgstr ""
+msgstr "61 - 90 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 msgid "91 - 120 d."
-msgstr ""
+msgstr "91 - 120 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
@@ -59,11 +59,14 @@ msgid ""
 "                    Duplicate amounts may be shown because more than one "
 "analytical account may be defined in the journal items."
 msgstr ""
+"<i class=\"fa fa-exclamation-triangle mr-3\"/>\n"
+"                    Yevmiye kalemlerinde birden fazla analitik hesap "
+"tanımlanmış olabileceğinden dolayı mükerrer tutarlar gösterilebilir."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
 msgid "<span class=\"o_form_label\">Intervals configuration</span>"
-msgstr ""
+msgstr "<span class=\"o_form_label\">Aralıklar yapılandırması</span>"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
@@ -71,22 +74,22 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.open_items_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.trial_balance_wizard
 msgid "<span class=\"oe_inline\">To</span>"
-msgstr ""
+msgstr "<span class=\"oe_inline\">Bitiş</span>"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_account_financial_report_abstract_report
 msgid "Abstract Report"
-msgstr ""
+msgstr "Temel Rapor"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_account_financial_report_abstract_wizard
 msgid "Abstract Wizard"
-msgstr ""
+msgstr "Temel Sihirbaz"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_report_account_financial_report_abstract_report_xlsx
 msgid "Abstract XLSX Account Financial Report"
-msgstr ""
+msgstr "Temel XLSX Mali Hesap Raporu"
 
 #. module: account_financial_report
 #. odoo-python
@@ -101,14 +104,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
-#, python-format
 msgid "Account"
 msgstr "Hesap"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__account_age_report_config_id
 msgid "Account Age Report Config"
-msgstr ""
+msgstr "Hesap Yaş Raporu Yapılandırması"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__account_code_from
@@ -134,7 +136,6 @@ msgstr "Hesap Grubu"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Account Name"
 msgstr "Hesap Adı"
 
@@ -142,7 +143,6 @@ msgstr "Hesap Adı"
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "Account at 0 filter"
 msgstr "0 filtresindeki hesap"
 
@@ -152,7 +152,6 @@ msgstr "0 filtresindeki hesap"
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
-#, python-format
 msgid "Account balance at 0 filter"
 msgstr "0 Filtrelenen Hesap Bakiyesi"
 
@@ -174,7 +173,7 @@ msgstr "Ek Filtreleme"
 #. module: account_financial_report
 #: model:ir.actions.act_window,name:account_financial_report.action_aged_partner_report_configuration
 msgid "Age Partner Report Configuration"
-msgstr ""
+msgstr "Yaşlandırılmış İş Ortağı Raporu Yapılandırması"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
@@ -182,13 +181,14 @@ msgid ""
 "Age ≤ 120\n"
 "                            d."
 msgstr ""
+"Yaş ≤ 120\n"
+"                            gün."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, python-format
 msgid "Age ≤ 120 d."
-msgstr ""
+msgstr "Yaş ≤ 120 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
@@ -196,13 +196,14 @@ msgid ""
 "Age ≤ 30\n"
 "                            d."
 msgstr ""
+"Yaş ≤ 30\n"
+"                            gün."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, python-format
 msgid "Age ≤ 30 d."
-msgstr ""
+msgstr "Yaş ≤ 30 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
@@ -210,13 +211,14 @@ msgid ""
 "Age ≤ 60\n"
 "                            d."
 msgstr ""
+"Yaş ≤ 60\n"
+"                            gün."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, python-format
 msgid "Age ≤ 60 d."
-msgstr ""
+msgstr "Yaş ≤ 60 gün."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
@@ -224,13 +226,14 @@ msgid ""
 "Age ≤ 90\n"
 "                            d."
 msgstr ""
+"Yaş ≤ 90\n"
+"                            gün."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, python-format
 msgid "Age ≤ 90 d."
-msgstr ""
+msgstr "Yaş ≤ 90 d."
 
 #. module: account_financial_report
 #. odoo-python
@@ -239,7 +242,6 @@ msgstr ""
 #: model:ir.actions.report,name:account_financial_report.action_print_report_aged_partner_balance_html
 #: model:ir.actions.report,name:account_financial_report.action_print_report_aged_partner_balance_qweb
 #: model:ir.ui.menu,name:account_financial_report.menu_aged_partner_balance_wizard
-#, python-format
 msgid "Aged Partner Balance"
 msgstr "Yaşlandırılmış İş Ortağı Bakiyesi"
 
@@ -271,7 +273,6 @@ msgstr "Yaşlandırılmış İş Ortağı Bakiye XLS"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
-#, python-format
 msgid "All"
 msgstr "Hepsi"
 
@@ -303,7 +304,6 @@ msgstr "İşlenen Tüm Girişler"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "All entries"
 msgstr "Tüm Kayıtlar"
 
@@ -317,19 +317,17 @@ msgstr "Tüm Kayıtlar"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "All posted entries"
 msgstr "Tüm onaylı kayıtlar"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "Amount Cur."
-msgstr ""
+msgstr "Döviz tutar."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Amount Currency"
 msgstr "Tutar Para Birimi"
 
@@ -337,9 +335,8 @@ msgstr "Tutar Para Birimi"
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
-#, python-format
 msgid "Amount cur."
-msgstr ""
+msgstr "Döviz tutar."
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_move_line__analytic_account_ids
@@ -351,7 +348,6 @@ msgstr "Analitik Hesap"
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
-#, python-format
 msgid "Analytic Distribution"
 msgstr "Analitik Dağılım"
 
@@ -365,41 +361,37 @@ msgstr "Bakiye"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 msgid "Base Amount"
-msgstr ""
+msgstr "Matrah Tutarı"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Base Balance"
-msgstr ""
+msgstr "Matrah Bakiyesi"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Base Credit"
-msgstr ""
+msgstr "Matrah Alacak"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Base Debit"
-msgstr ""
+msgstr "Matrah Borç"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__based_on
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_filters
 msgid "Based On"
-msgstr ""
+msgstr "Esas"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
-#, python-format
 msgid "Based on"
-msgstr ""
+msgstr "Esas"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
@@ -415,7 +407,6 @@ msgstr "İptal"
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
-#, python-format
 msgid "Centralize filter"
 msgstr "Merkezi Filtre"
 
@@ -435,7 +426,6 @@ msgstr "Alt Gruplar"
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_base
-#, python-format
 msgid "Code"
 msgstr "Kod"
 
@@ -450,24 +440,23 @@ msgstr "Kod"
 #: model:ir.model.fields,field_description:account_financial_report.field_open_items_report_wizard__company_id
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__company_id
 #: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__company_id
-#, python-format
 msgid "Company"
 msgstr "Firma"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_group__compute_account_ids
 msgid "Compute accounts"
-msgstr ""
+msgstr "Grup hesapları"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "Yapılandırma Ayarları"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
 msgid "Configurations"
-msgstr ""
+msgstr "Yapılandırmalar"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__create_uid
@@ -503,7 +492,6 @@ msgstr "Oluşturulma"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
-#, python-format
 msgid "Credit"
 msgstr "Alacak"
 
@@ -511,15 +499,13 @@ msgstr "Alacak"
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
-#, python-format
 msgid "Cumul cur."
-msgstr ""
+msgstr "Kümüle Bak."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
-#, python-format
 msgid "Cumul. Bal."
 msgstr "Cumul. Bal."
 
@@ -528,30 +514,26 @@ msgstr "Cumul. Bal."
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Cur."
-msgstr ""
+msgstr "Döviz"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Cur. Original"
-msgstr ""
+msgstr "Döviz Orjinal"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Cur. Residual"
-msgstr ""
+msgstr "Döviz Kalan"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Currency"
 msgstr "Para Birimi"
 
@@ -559,9 +541,8 @@ msgstr "Para Birimi"
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
-#, python-format
 msgid "Current"
-msgstr ""
+msgstr "Güncel"
 
 #. module: account_financial_report
 #. odoo-python
@@ -574,7 +555,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Date"
 msgstr "Tarih"
 
@@ -606,14 +586,12 @@ msgstr "Tarihine"
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
-#, python-format
 msgid "Date at filter"
 msgstr "Filtre Tarihi"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
-#, python-format
 msgid "Date from"
 msgstr "Tarihinden"
 
@@ -632,14 +610,12 @@ msgstr "Tarih Aralığı"
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "Date range filter"
 msgstr "Tarih Aralığı Filtre"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
-#, python-format
 msgid "Date to"
 msgstr "Tarihine"
 
@@ -653,7 +629,6 @@ msgstr "Tarihine"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
-#, python-format
 msgid "Debit"
 msgstr "Borç"
 
@@ -662,7 +637,6 @@ msgstr "Borç"
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
-#, python-format
 msgid "Description"
 msgstr "Açıklama"
 
@@ -723,7 +697,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
-#, python-format
 msgid "Due date"
 msgstr "Vade Tarihi"
 
@@ -761,7 +734,6 @@ msgstr "Hesabı bir aralıkta sonlandırma"
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_ending_cumul
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
-#, python-format
 msgid "Ending balance"
 msgstr "Kapanış Bakiyesi"
 
@@ -771,11 +743,12 @@ msgid ""
 "Ending balance\n"
 "                        cur."
 msgstr ""
+"Kapanış döviz\n"
+"                        bak."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Entries sorted by"
 msgstr "Girişler Göre Sırala"
 
@@ -789,21 +762,18 @@ msgstr "Girişler Göre Sırala"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Entry"
 msgstr "Yevmiye Girişi"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
-#, python-format
 msgid "Entry number"
 msgstr "Giriş Numarası"
 
 #. module: account_financial_report
 #. odoo-javascript
 #: code:addons/account_financial_report/static/src/xml/report.xml:0
-#, python-format
 msgid "Export"
 msgstr "Dışa Aktar"
 
@@ -866,6 +836,11 @@ msgid "Foreign Currency"
 msgstr "Yabancı Para Birimi"
 
 #. module: account_financial_report
+#: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
+msgid "Format"
+msgstr ""
+
+#. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.aged_partner_balance_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
 #: model_terms:ir.ui.view,arch_db:account_financial_report.open_items_wizard
@@ -884,7 +859,6 @@ msgstr "İtibaren:"
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
-#, python-format
 msgid "From: %(date_from)s To: %(date_to)s"
 msgstr "Den: %(date_from)s To: %(date_to)s"
 
@@ -902,7 +876,7 @@ msgstr "Tam Ad"
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__fy_start_date
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__fy_start_date
 msgid "Fy Start Date"
-msgstr ""
+msgstr "Mali Yıl Başlangıç Tarihi"
 
 #. module: account_financial_report
 #. odoo-python
@@ -912,7 +886,6 @@ msgstr ""
 #: model:ir.actions.report,name:account_financial_report.action_print_report_general_ledger_html
 #: model:ir.actions.report,name:account_financial_report.action_print_report_general_ledger_qweb
 #: model:ir.ui.menu,name:account_financial_report.menu_general_ledger_wizard
-#, python-format
 msgid "General Ledger"
 msgstr "Büyük Defter"
 
@@ -954,10 +927,11 @@ msgstr ""
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__group_option
 msgid "Group entries by"
-msgstr ""
+msgstr "Giriş gruplama"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__grouped_by
+#: model:ir.model.fields,field_description:account_financial_report.field_open_items_report_wizard__grouped_by
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__grouped_by
 msgid "Grouped By"
 msgstr "Gruplanma"
@@ -966,7 +940,7 @@ msgstr "Gruplanma"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
 msgid ""
 "Here you can set the intervals that will appear on the Aged Partner Balance."
-msgstr ""
+msgstr "Burada İş Ortağı Bakiyesinde görünecek aralıkları ayarlayabilirsiniz."
 
 #. module: account_financial_report
 #. odoo-python
@@ -976,7 +950,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "Hide"
 msgstr "Gizle"
 
@@ -1014,18 +987,19 @@ msgid ""
 "If flagged, no details will be displayed in the General Ledger report (the "
 "webkit one only), only centralized amounts per period."
 msgstr ""
+"İşaretlenirse Büyük Defter raporunda ayrıntılar gösterilmez, sadece "
+"merkezileştirilmiş dönem tutarları gösterilir."
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration_line__inferior_limit
 msgid "Inferior Limit"
-msgstr ""
+msgstr "Alt Limit"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/models/account_age_report_configuration.py:0
-#, python-format
 msgid "Inferior Limit must be greather than zero"
-msgstr ""
+msgstr "Alt Limit sıfırdan büyük olmalıdır"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
@@ -1033,6 +1007,8 @@ msgid ""
 "Initial\n"
 "                        balance cur."
 msgstr ""
+"Başlangıç\n"
+"                        bakiye döviz."
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
@@ -1048,7 +1024,6 @@ msgstr ""
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
-#, python-format
 msgid "Initial balance"
 msgstr "Açılış Bakiyesi"
 
@@ -1056,7 +1031,7 @@ msgstr "Açılış Bakiyesi"
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__age_partner_config_id
 #: model:ir.model.fields,field_description:account_financial_report.field_res_config_settings__age_partner_config_id
 msgid "Intervals configuration"
-msgstr ""
+msgstr "Aralıklar yapılandırması"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1068,7 +1043,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Journal"
 msgstr "Yevmiye"
 
@@ -1088,7 +1062,6 @@ msgstr "Yevmiye Öğeleri Alanı"
 #: model:ir.actions.act_window,name:account_financial_report.action_journal_ledger_wizard
 #: model:ir.actions.report,name:account_financial_report.action_print_journal_ledger_wizard_html
 #: model:ir.ui.menu,name:account_financial_report.menu_journal_ledger_wizard
-#, python-format
 msgid "Journal Ledger"
 msgstr "Yevmiye Defteri"
 
@@ -1122,9 +1095,19 @@ msgstr "Yevmiye Defteri XLSX Rapor"
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__journal_ids
 #: model_terms:ir.ui.view,arch_db:account_financial_report.journal_ledger_wizard
-#, python-format
 msgid "Journals"
 msgstr "Yevmiyeler"
+
+#. module: account_financial_report
+#: model:ir.model.fields,field_description:account_financial_report.field_account_financial_report_abstract_wizard__label_text_limit
+#: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__label_text_limit
+#: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__label_text_limit
+#: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__label_text_limit
+#: model:ir.model.fields,field_description:account_financial_report.field_open_items_report_wizard__label_text_limit
+#: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__label_text_limit
+#: model:ir.model.fields,field_description:account_financial_report.field_vat_report_wizard__label_text_limit
+msgid "Label Text Limit"
+msgstr ""
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__write_uid
@@ -1159,7 +1142,6 @@ msgstr "Seviye"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
-#, python-format
 msgid "Level %s"
 msgstr "Seviye %s"
 
@@ -1168,33 +1150,38 @@ msgstr "Seviye %s"
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__limit_hierarchy_level
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "Limit hierarchy levels"
 msgstr "Hiyerarşi düzeylerini sınırlayın"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_account_age_report_configuration__line_ids
 msgid "Line"
-msgstr ""
+msgstr "Satır"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger.py:0
 #: code:addons/account_financial_report/report/open_items.py:0
+#: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: code:addons/account_financial_report/report/trial_balance.py:0
-#, python-format
 msgid "Missing Partner"
-msgstr ""
+msgstr "Eksik İş Ortağı"
+
+#. module: account_financial_report
+#. odoo-python
+#: code:addons/account_financial_report/report/open_items.py:0
+msgid "Missing Salesperson"
+msgstr "Eksik Satış Temsilcisi"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_account_age_report_configuration_line
 msgid "Model to set interval lines for Age partner balance report"
-msgstr ""
+msgstr "İş Ortağı Bakiye Raporu için aralık satırlarını ayarlamak için model"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_account_age_report_configuration
 msgid "Model to set intervals for Age partner balance report"
-msgstr ""
+msgstr "İş Ortağı Bakiye Raporu için aralıkları ayarlamak için model"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__move_target
@@ -1209,9 +1196,8 @@ msgstr "Hareketler"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/models/account_age_report_configuration.py:0
-#, python-format
 msgid "Must complete Configuration Lines"
-msgstr ""
+msgstr "Yapılandırma Satırlarını Tamamlamalısınız"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1222,23 +1208,18 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_all_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_base
-#, python-format
 msgid "Name"
 msgstr "Adı"
 
 #. module: account_financial_report
-#. odoo-python
-#: code:addons/account_financial_report/models/account_age_report_configuration.py:0
 #: model:ir.model.constraint,message:account_financial_report.constraint_account_age_report_configuration_line_unique_name_config_combination
-#, python-format
 msgid "Name must be unique per report configuration"
-msgstr ""
+msgstr "İsim rapor yapılandırması için benzersiz olmalıdır"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_base
-#, python-format
 msgid "Net"
 msgstr "Net"
 
@@ -1248,14 +1229,12 @@ msgstr "Net"
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
-#, python-format
 msgid "No"
 msgstr "Yok"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
-#, python-format
 msgid "No group"
 msgstr "Grupsuz"
 
@@ -1263,19 +1242,17 @@ msgstr "Grupsuz"
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "No limit"
 msgstr "Limitsiz"
 
 #. module: account_financial_report
-#: model:ir.model.fields.selection,name:account_financial_report.selection__general_ledger_report_wizard__grouped_by__
+#: model:ir.model.fields.selection,name:account_financial_report.selection__general_ledger_report_wizard__grouped_by__none
 msgid "None"
 msgstr "Hiçbiri"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
-#, python-format
 msgid "Not Posted"
 msgstr "Onaylanmamış"
 
@@ -1287,7 +1264,7 @@ msgstr "Vadesi Gelmemiş"
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.res_config_settings_view_form
 msgid "OCA Aged Report Configuration"
-msgstr ""
+msgstr "OCA Yaşlandırılmış Rapor Yapılandırması"
 
 #. module: account_financial_report
 #: model:ir.ui.menu,name:account_financial_report.menu_oca_reports
@@ -1298,7 +1275,6 @@ msgstr "OCA Muhasebe Raporları"
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
-#, python-format
 msgid "Older"
 msgstr "Daha Eski"
 
@@ -1306,7 +1282,7 @@ msgstr "Daha Eski"
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__only_one_unaffected_earnings_account
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__only_one_unaffected_earnings_account
 msgid "Only One Unaffected Earnings Account"
-msgstr ""
+msgstr "Sadece Bir Etkilenmemiş Net Kar Zarar Hesabı"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1315,7 +1291,6 @@ msgstr ""
 #: model:ir.actions.report,name:account_financial_report.action_print_report_open_items_html
 #: model:ir.actions.report,name:account_financial_report.action_print_report_open_items_qweb
 #: model:ir.ui.menu,name:account_financial_report.menu_open_items_wizard
-#, python-format
 msgid "Open Items"
 msgstr "Açık Pozisyonlar"
 
@@ -1358,7 +1333,6 @@ msgstr "Seçenekler"
 #. odoo-python
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Original"
 msgstr "Orijinal"
 
@@ -1375,7 +1349,6 @@ msgstr "Orijinal"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
-#, python-format
 msgid "Partner"
 msgstr "İş Ortağı"
 
@@ -1385,18 +1358,23 @@ msgid ""
 "Partner\n"
 "                    cumul aged balance"
 msgstr ""
+"İş ortağı\n"
+"                    kümülatif yaşlandırılmış bakiyesi"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
-#, python-format
 msgid "Partner Initial balance"
 msgstr "İş Ortağı Başlangıç bakiyesi"
 
 #. module: account_financial_report
+#: model:ir.model.fields.selection,name:account_financial_report.selection__open_items_report_wizard__grouped_by__salesperson
+msgid "Partner Salesperson"
+msgstr "İş Ortağı Satış Temsilcisi"
+
+#. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/aged_partner_balance_xlsx.py:0
-#, python-format
 msgid "Partner cumul aged balance"
 msgstr "İş ortağı kümülatif yaşlandırılmış bakiyesi"
 
@@ -1406,7 +1384,6 @@ msgstr "İş ortağı kümülatif yaşlandırılmış bakiyesi"
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_ending_cumul
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_ending_cumul
-#, python-format
 msgid "Partner ending balance"
 msgstr "İş ortağı kapanış bakiyesi"
 
@@ -1417,6 +1394,7 @@ msgstr "Ortak başlangıç bakiyesi"
 
 #. module: account_financial_report
 #: model:ir.model.fields.selection,name:account_financial_report.selection__general_ledger_report_wizard__grouped_by__partners
+#: model:ir.model.fields.selection,name:account_financial_report.selection__open_items_report_wizard__grouped_by__partners
 msgid "Partners"
 msgstr "İş Ortakları"
 
@@ -1437,7 +1415,6 @@ msgstr "Yüzdeler"
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_lines_header
-#, python-format
 msgid "Period balance"
 msgstr "Dönem Bakiyesi"
 
@@ -1449,7 +1426,6 @@ msgstr "Dönemler"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/journal_ledger_wizard.py:0
-#, python-format
 msgid "Posted"
 msgstr "İşlenmiş"
 
@@ -1457,9 +1433,8 @@ msgstr "İşlenmiş"
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
-#, python-format
 msgid "Rec."
-msgstr ""
+msgstr "Uzl."
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_aged_partner_balance_report_wizard__receivable_accounts_only
@@ -1495,14 +1470,13 @@ msgstr ""
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
-#, python-format
 msgid "Ref - Label"
 msgstr "Ref - Etiketi"
 
 #. module: account_financial_report
 #: model:ir.model,name:account_financial_report.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Rapor İşlemi"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1511,7 +1485,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_lines_header
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_move_lines
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_lines_header
-#, python-format
 msgid "Residual"
 msgstr "Kalan"
 
@@ -1519,7 +1492,6 @@ msgstr "Kalan"
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
-#, python-format
 msgid "Sequence"
 msgstr "Sıra"
 
@@ -1531,7 +1503,6 @@ msgstr "Sıra"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "Show"
 msgstr "Göster"
 
@@ -1564,7 +1535,6 @@ msgstr "İş Ortağı Ayrıntılarını Göster"
 #: model:ir.model.fields,field_description:account_financial_report.field_general_ledger_report_wizard__foreign_currency
 #: model:ir.model.fields,field_description:account_financial_report.field_open_items_report_wizard__foreign_currency
 #: model:ir.model.fields,field_description:account_financial_report.field_trial_balance_report_wizard__foreign_currency
-#, python-format
 msgid "Show foreign currency"
 msgstr "Yabancı Para Birimini Göster"
 
@@ -1593,15 +1563,14 @@ msgstr "Başlama Tarihi"
 #: model:ir.model.fields,help:account_financial_report.field_general_ledger_report_wizard__account_code_from
 #: model:ir.model.fields,help:account_financial_report.field_trial_balance_report_wizard__account_code_from
 msgid "Starting account in a range"
-msgstr ""
+msgstr "Hesap kod aralığı başlangıcı"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance.py:0
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
-#, python-format
 msgid "TOTAL"
-msgstr ""
+msgstr "TOPLAM"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
@@ -1628,7 +1597,6 @@ msgstr "Hedef Harketler"
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_open_items_filters
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
-#, python-format
 msgid "Target moves filter"
 msgstr "Hedef Hareket Filtresi"
 
@@ -1636,7 +1604,6 @@ msgstr "Hedef Hareket Filtresi"
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_vat_report_base
-#, python-format
 msgid "Tax"
 msgstr "Vergi"
 
@@ -1649,21 +1616,18 @@ msgstr "Vergi Tutarı"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Tax Balance"
 msgstr "Vergi Bakiyesi"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Tax Credit"
 msgstr "Vergi İndirimi"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/journal_ledger_xlsx.py:0
-#, python-format
 msgid "Tax Debit"
 msgstr "Vergi Borcu"
 
@@ -1671,14 +1635,12 @@ msgstr "Vergi Borcu"
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #: model:ir.model.fields.selection,name:account_financial_report.selection__vat_report_wizard__based_on__taxgroups
-#, python-format
 msgid "Tax Groups"
 msgstr "Vergi Grupları"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
-#, python-format
 msgid "Tax Initial balance"
 msgstr "Vergi Açılış Bakiyesi"
 
@@ -1686,7 +1648,6 @@ msgstr "Vergi Açılış Bakiyesi"
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
 #: model:ir.model.fields.selection,name:account_financial_report.selection__vat_report_wizard__based_on__taxtags
-#, python-format
 msgid "Tax Tags"
 msgstr "Vergi Etiketleri"
 
@@ -1694,7 +1655,6 @@ msgstr "Vergi Etiketleri"
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_ending_cumul
-#, python-format
 msgid "Tax ending balance"
 msgstr "Vergi Kapanş Bakiyesi"
 
@@ -1710,72 +1670,71 @@ msgstr "Vergi Açılış Bakiyesi"
 #: model:ir.model.fields.selection,name:account_financial_report.selection__general_ledger_report_wizard__grouped_by__taxes
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_lines
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
-#, python-format
 msgid "Taxes"
 msgstr "Vergiler"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/general_ledger_wizard.py:0
-#, python-format
 msgid ""
 "The Company in the General Ledger Report Wizard and in Date Range must be "
 "the same."
 msgstr ""
+"Büyük Defter Rapor Sihirbazı ve Tarih Aralığının şirketi aynı olmalıdır."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/trial_balance_wizard.py:0
-#, python-format
 msgid ""
 "The Company in the Trial Balance Report Wizard and in Date Range must be the "
 "same."
 msgstr ""
+"Geçici Mizan Rapor Sihirbazı ve Tarih Aralığının şirketi aynı olmalıdır."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/vat_report_wizard.py:0
-#, python-format
 msgid ""
 "The Company in the Vat Report Wizard and in Date Range must be the same."
-msgstr ""
+msgstr "Vergi Rapor Sihirbazı ve Tarih Aralığının şirketi aynı olmalıdır."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/wizard/trial_balance_wizard.py:0
-#, python-format
 msgid "The hierarchy level to filter on must be greater than 0."
-msgstr ""
+msgstr "Filtrelenecek Hiyerarşi seviyesi sıfırdan büyük olmalıdır."
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance.py:0
-#, python-format
 msgid ""
 "There is a problem in the structure of the account groups. You may need to "
 "create some child group of %s."
 msgstr ""
+"Hesap grupları yapısında bir sorun var. %s'nin bazı alt gruplarını "
+"oluşturmanız gerekebilir."
 
 #. module: account_financial_report
 #: model:ir.model.fields,help:account_financial_report.field_general_ledger_report_wizard__domain
 msgid "This domain will be used to select specific domain for Journal Items"
 msgstr ""
+"Bu alan adı Yevmiye Kalemleri için özel bir alan adı seçmek için "
+"kullanılacaktır"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_trial_balance_filters
 msgid "To"
-msgstr ""
+msgstr "Bitiş"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
 msgid "To:"
-msgstr ""
+msgstr "Bitiş:"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_aged_partner_balance_account_ending_cumul
-#, python-format
 msgid "Total"
 msgstr "Toplam"
 
@@ -1786,7 +1745,6 @@ msgstr "Toplam"
 #: model:ir.actions.report,name:account_financial_report.action_report_trial_balance_html
 #: model:ir.actions.report,name:account_financial_report.action_report_trial_balance_qweb
 #: model:ir.ui.menu,name:account_financial_report.menu_trial_balance_wizard
-#, python-format
 msgid "Trial Balance"
 msgstr "Geçici Mizan"
 
@@ -1838,11 +1796,14 @@ msgid ""
 "If partners are filtered, debits and credits totals will not match the trial "
 "balance."
 msgstr ""
+"Bu filtreyi başlangıç bakiyesi 0 olan iş ortaklarını gizlemek için kullanın. "
+"Eğer iş ortakları filtrelenirse, borç alacak toplamları geçici mizanla "
+"tutmayacaktır."
 
 #. module: account_financial_report
 #: model:ir.model.fields,help:account_financial_report.field_trial_balance_report_wizard__show_hierarchy
 msgid "Use when your account groups are hierarchical"
-msgstr ""
+msgstr "Hesap gruplarınız hiyerarşik ise kullanın"
 
 #. module: account_financial_report
 #: model:ir.actions.act_window,name:account_financial_report.action_vat_report_wizard
@@ -1875,7 +1836,6 @@ msgstr "KDV Raporu XLSX"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/vat_report_xlsx.py:0
-#, python-format
 msgid "Vat Report"
 msgstr "KDV Raporu"
 
@@ -1905,6 +1865,8 @@ msgid ""
 "When this option is enabled, the trial balance will not display accounts "
 "that have initial balance = debit = credit = end balance = 0"
 msgstr ""
+"Bu seçenek açılırsa, geçici mizan başlangıç bakiyesi = borç = alacak = bitiş "
+"bakiyesi = 0 olan hesapları göstermeyecektir"
 
 #. module: account_financial_report
 #: model:ir.model.fields,field_description:account_financial_report.field_journal_ledger_report_wizard__with_account_name
@@ -1914,9 +1876,8 @@ msgstr "Hesap Adıyla"
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/trial_balance.py:0
-#, python-format
 msgid "Without analytic account"
-msgstr ""
+msgstr "Analitik Hesap olmadan"
 
 #. module: account_financial_report
 #. odoo-python
@@ -1924,16 +1885,14 @@ msgstr ""
 #: code:addons/account_financial_report/report/open_items_xlsx.py:0
 #: code:addons/account_financial_report/report/trial_balance_xlsx.py:0
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_general_ledger_filters
-#, python-format
 msgid "Yes"
 msgstr "Evet"
 
 #. module: account_financial_report
 #. odoo-python
 #: code:addons/account_financial_report/report/general_ledger.py:0
-#, python-format
 msgid "future"
-msgstr ""
+msgstr "gelecek"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.general_ledger_wizard
@@ -1952,37 +1911,37 @@ msgstr "Yevmiye Defteri"
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal
 msgid "to"
-msgstr ""
+msgstr "-"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "width: 16.21%;"
-msgstr ""
+msgstr "genişlik: 16.21%;"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "width: 23.24%;"
-msgstr ""
+msgstr "genişlik: 23.24%;"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "width: 23.78%;"
-msgstr ""
+msgstr "genişlik: 23.78%;"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "width: 31.35%;"
-msgstr ""
+msgstr "enişlik: 31.35%;"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "width: 38.92%;"
-msgstr ""
+msgstr "genişlik: 38.92%;"
 
 #. module: account_financial_report
 #: model_terms:ir.ui.view,arch_db:account_financial_report.report_journal_ledger_journal_table_header
 msgid "width: 8.11%;"
-msgstr ""
+msgstr "genişlik: 8.11%;"
 
 #~ msgid "Last Modified on"
 #~ msgstr "Son D??zenleme"

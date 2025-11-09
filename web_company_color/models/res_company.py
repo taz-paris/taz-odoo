@@ -107,7 +107,7 @@ class ResCompany(models.Model):
             background-color: %(color_navbar_bg_hover)s !important;
           }
         }
-        .o_menu_sections .o-dropdown .dropdown-toggle {
+        .o_menu_sections .dropdown-toggle {
           background: %(color_navbar_bg)s !important;
           background-color: %(color_navbar_bg)s !important;
           color: %(color_navbar_text)s !important;
@@ -115,7 +115,10 @@ class ResCompany(models.Model):
             background-color: %(color_navbar_bg_hover)s !important;
           }
         }
-        .o_menu_systray .o-dropdown .dropdown-toggle {
+        .o_menu_systray button,
+        .o_navbar_breadcrumbs,
+        .o_main_navbar button,
+        .o_menu_toggle {
             color: %(color_navbar_text)s !important;
             &:hover, &:focus, &:active, &:focus:active {
                 background-color: %(color_navbar_bg_hover)s !important;

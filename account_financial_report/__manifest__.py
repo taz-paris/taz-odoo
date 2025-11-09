@@ -2,11 +2,11 @@
 # Author: Julien Coux
 # Copyright 2016 Camptocamp SA
 # Copyright 2020 ForgeFlow S.L. (https://www.forgeflow.com)
-# Copyright 2021 Tecnativa - Jo??o Marques
+# Copyright 2021 Tecnativa - João Marques
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 {
     "name": "Account Financial Reports",
-    "version": "17.0.1.6.10",
+    "version": "18.0.1.4.1",
     "category": "Reporting",
     "summary": "OCA Financial Reports",
     "author": "Camptocamp,"
