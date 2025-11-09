@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError, AccessError
@@ -105,7 +104,7 @@ class tazResIndustry(models.Model):
             'name': _('Liste des contacts des entreprises du compte '+self.name),
             'type': 'ir.actions.act_window',
             'res_model': 'res.partner',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'view_id': [self.env.ref("taz-common.contact_tree").id, self.env.ref("taz-common.contact_form").id],
             'domain': [('id', 'in', contact_ids)],
             'target': 'current',
@@ -124,7 +123,7 @@ class tazResIndustry(models.Model):
             'name': _('Liste des actions commerciales des entreprises du compte '+self.name),
             'type': 'ir.actions.act_window',
             'res_model': 'taz.business_action',
-            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', business_action_ids.ids)],
             'target': 'current',
             'limit': 150,

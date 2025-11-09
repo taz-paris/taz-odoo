@@ -288,7 +288,7 @@ class HrEmployeeStaffingReport(models.Model):
                 'name': 'Lignes valorisées sur la période du %s au %s' % (self.start_date.strftime("%d/%m/%Y"), self.end_date.strftime("%d/%m/%Y")),
                 'res_model': 'account.analytic.line',
                 'view_type': 'tree',
-                'view_mode': 'tree',
+                'view_mode': 'list',
                 'view_id': view_id.id,          
                 'target': 'current',                    
                 'domain': [('id', 'in', analytic_lines.ids)],

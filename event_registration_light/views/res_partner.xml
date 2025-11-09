@@ -22,7 +22,7 @@
                 <xpath expr="//page[@name='contact_channels']" position="after">
                     <page string="Inscriptions aux évènements">
                         <field name="event_registration_ids">
-                            <tree string="Registration" editable="top" sample="1" expand="1" class="o_event_registration_view_tree">
+                            <list editable="top" sample="1" expand="1" class="o_event_registration_view_tree">
                                 <field name="id" widget="open_tab"/>
                                 <field name="active" invisible="1"/>
                                 <field name="event_id" domain="[('event_registrations_open', '=', True)]"/>
@@ -41,7 +41,7 @@
                                 <button name="action_set_draft" string="Inviter" type="object" icon="fa-check" invisible="not active or state != 'identified'"/>
                                 <button name="create_office365_mail_draft" string="Générer brouillon mail" type="object" icon="fa-envelope" invisible="last_office365_mail_draft or not active or mail_auto or state in ['cancel', 'open']"/>
                                 <field name="activity_exception_decoration" widget="activity_exception"/>
-                            </tree>
+                            </list>
                         </field>
                     </page>
                 </xpath>

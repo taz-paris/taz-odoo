@@ -31,7 +31,7 @@
                             </group>
                         </group>
                         <field name="staffing_need_ids" context="{'default_project_id': id}">
-                            <tree editable="top">
+                            <list editable="top">
                                 <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="company_id" invisible="1"/>
                                 <field name="id" widget="open_tab"/>
@@ -43,7 +43,7 @@
                                 <field name="begin_date" optional="show"/>
                                 <field name="end_date" optional="show"/>
                                 <field name="nb_days_needed" optional="show"/>
-                            </tree>
+                            </list>
                         </field>
                     </page>
                 </xpath>

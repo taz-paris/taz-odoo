@@ -5,7 +5,7 @@
             <field name="name">Objectif de book</field>
             <field name="model">taz.customer_book_goal</field>
             <field name="arch" type="xml">
-                <tree editable="top" expand="1">
+                <list editable="top" expand="1">
                     <field name="currency_id" column_invisible="1"/>
                     <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}" readonly="id"/>
                     <field name="company_id" optional="show"/>
@@ -21,7 +21,7 @@
                     <field name="expected_prorated_revenue" optional="show" string="PDC espérée" sum="Total"/>
                     <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
                     <field name="comment" optional="show" widget="text"/>
-                </tree>
+                </list>
             </field>
         </record>
         <record model="ir.ui.view" id="taz-common.customer_book_goal_search">
@@ -65,7 +65,7 @@
             <field name="name">Suivi du book</field>
             <field name="model">taz.customer_book_followup</field>
             <field name="arch" type="xml">
-                <tree editable="top" create="true">
+                <list editable="top" create="true">
                     <field name="currency_id" column_invisible="1"/>
                     <field name="company_id" optional="hide"/>
                     <field name="industry_id" optional="hide"/>
@@ -78,7 +78,7 @@
                     <field name="period_delta" optional="show"/>
                     <field name="period_ratio" optional="show" widget="progressbar"/>
                     <field name="comment" optional="hide"/>
-                </tree>
+                </list>
             </field>
         </record>
         <record model="ir.ui.view" id="taz-common.customer_book_followup_pivot">
@@ -137,19 +137,19 @@
         <record id="taz-common.customer_book_goal_action" model="ir.actions.act_window">
             <field name="name">Objectifs commerciaux annuels</field>
             <field name="res_model">taz.customer_book_goal</field>
-            <field name="view_mode">tree,pivot,graph</field>
+            <field name="view_mode">list,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}</field>
         </record>
         <record id="taz-common.my_customer_book_goal_action" model="ir.actions.act_window">
             <field name="name">Mes objectifs commerciaux annuels</field>
             <field name="res_model">taz.customer_book_goal</field>
-            <field name="view_mode">tree,pivot,graph</field>
+            <field name="view_mode">list,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True, 'search_default_filter_my_customer_book_goal' : True}</field>
         </record>
         <record id="taz-common.customer_book_followup_action" model="ir.actions.act_window">
             <field name="name">Photos des objectifs commerciaux</field>
             <field name="res_model">taz.customer_book_followup</field>
-            <field name="view_mode">tree,pivot,graph</field>
+            <field name="view_mode">list,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True}</field>
         </record>
         <menuitem name="Comptes / Objectifs" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>

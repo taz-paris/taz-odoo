@@ -21,25 +21,25 @@
                     <field name="invoice_lines" optional="hide" on_change="1" widget="many2many_tags"/>
                     <field name="qty_to_invoice" optional="hide"/>
                 </xpath>
-                <xpath expr="//field[@name='order_line']/tree" position="attributes">
+                <xpath expr="//field[@name='order_line']/list" position="attributes">
                     <attribute name="limit">150</attribute>
                 </xpath>
                 <field name="partner_id" position="attributes">
-                    <attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+                    <attribute name="context">{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
                 </field>
                 <field name="payment_term_id" position="attributes">
                     <attribute name="required">1</attribute>
                 </field>
-                <xpath expr="//tree/field[@name='product_qty']" position="attributes">
+                <xpath expr="//list/field[@name='product_qty']" position="attributes">
                     <attribute name="sum">Total</attribute>
                 </xpath>
-                <xpath expr="//tree/field[@name='qty_received']" position="attributes">
+                <xpath expr="//list/field[@name='qty_received']" position="attributes">
                     <attribute name="sum">Total</attribute>
                 </xpath>
-                <xpath expr="//tree/field[@name='qty_invoiced']" position="attributes">
+                <xpath expr="//list/field[@name='qty_invoiced']" position="attributes">
                     <attribute name="sum">Total</attribute>
                 </xpath>
-                <xpath expr="//tree/field[@name='margin_amount']" position="attributes">
+                <xpath expr="//list/field[@name='margin_amount']" position="attributes">
                     <attribute name="sum">Total</attribute>
                 </xpath>
                 <xpath expr="//field[@name='analytic_distribution']" position="attributes">
@@ -77,7 +77,7 @@
                     <attribute name="invisible">1</attribute>
                 </field>
                 <!--
-		<xpath expr="//field[@name='order_line']/tree" position="attributes">
+		<xpath expr="//field[@name='order_line']/list" position="attributes">
 			<attribute name="decoration-success">direct_payment_sale_order_line_id == True</attribute>
 		</xpath>
 		-->
@@ -109,7 +109,7 @@
             <field name="model">purchase.order.line</field>
             <field name="inherit_id" ref="purchase.purchase_history_tree"/>
             <field name="arch" type="xml">
-                <xpath expr="//tree" position="attributes">
+                <xpath expr="//list" position="attributes">
                     <attribute name="expand">1</attribute>
                 </xpath>
                 <field name="date_approve" position="replace">
@@ -142,7 +142,7 @@
             </field>
         </record>
         <record id="purchase_order_kpis_tree_inherit" model="ir.ui.view">
-            <field name="name">purchase.order.kpis.tree.inherit</field>
+            <field name="name">purchase.order.kpis.list.inherit</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
             <field name="arch" type="xml">
@@ -153,7 +153,7 @@
             </field>
         </record>
         <record id="purchase_order_view_tree_inherit" model="ir.ui.view">
-            <field name="name">purchase.order.tree.inherit</field>
+            <field name="name">purchase.order.list.inherit</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
             <field name="arch" type="xml">
@@ -175,13 +175,13 @@
         <record model="ir.actions.act_window" id="action_purchase_order_line">
             <field name="name">Échéances de facturation</field>
             <field name="res_model">purchase.order.line</field>
-            <field name="view_mode">tree,form,kanban,pivot</field>
+            <field name="view_mode">list,form,kanban,pivot</field>
             <field name="context">{'search_default_to_delivered_or_invoice' : 1, 'search_default_before_today' : 1}</field>
             <!--
 			      <field name="view_ids" eval="
 				    [
 				    (5, 0, 0),
-				    (0, 0, {'view_mode': 'tree', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),
+				    (0, 0, {'view_mode': 'list', 'view_id': ref('project_accounting.view_sale_order_line_delivery_validation')}),
 				      ]" />
 	      -->
         </record>

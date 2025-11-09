@@ -6,7 +6,7 @@
             <field name="model">account.analytic.line</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
-                <tree editable="top" default_order="date" create="false">
+                <list editable="top" default_order="date" create="false">
                     <field name="employee_id" optional="hide" readonly="1"/>
                     <field name="project_id" optional="show" readonly="1"/>
                     <field name="staffing_need_id" optional="hide" readonly="1" domain="[('staffed_employee_id', '=', context.get('employee_id'))]"/>
@@ -22,7 +22,7 @@
 				<field name="fitnet_id" optional="show" readonly="1"/>
 				-->
                     <field name="id" optional="show" readonly="1"/>
-                </tree>
+                </list>
             </field>
         </record>
         <record id="view_timesheets_wizard" model="ir.ui.view">

@@ -22,7 +22,7 @@
         </field>
     </record>
     <record id="agreement_tree_view_inherit" model="ir.ui.view">
-        <field name="name">agreement.tree.view</field>
+        <field name="name">agreement.list.view</field>
         <field name="model">agreement</field>
         <field name="inherit_id" ref="agreement.agreement_tree"/>
         <field name="arch" type="xml">

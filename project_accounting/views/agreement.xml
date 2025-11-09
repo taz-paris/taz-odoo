@@ -14,7 +14,7 @@
                 <xpath expr="//page[@name='config']" position="after">
                     <page string="Projets liés" name="projects">
                         <field name="project_ids">
-                            <tree delete="false" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
+                            <list delete="false" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
                                 <field name="currency_id" column_invisible="1"/>
                                 <field name="id" widget="open_tab"/>
                                 <field name="number"/>
@@ -24,7 +24,7 @@
                                 <field name="name"/>
                                 <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                                 <field name="company_id" column_invisible="1"/>
-                                <field name="partner_id" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" optional="hide"/>
+                                <field name="partner_id" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True)]" optional="hide"/>
                                 <field name="project_director_employee_id" optional="show"/>
                                 <field name="outsourcing" optional="hide"/>
                                 <field name="stage_id" widget="badge" optional="show" decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'"/>
@@ -55,7 +55,7 @@
                                 <field name="other_part_cost_futur" optional="hide" sum="Total"/>
                                 <field name="other_part_marging_amount_current" optional="hide" sum="Total"/>
                                 <field name="other_part_marging_rate_current" optional="hide"/>
-                            </tree>
+                            </list>
                         </field>
                     </page>
                 </xpath>
