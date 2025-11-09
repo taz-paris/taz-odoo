@@ -1,7 +1,7 @@
 # Author: Damien Crier
 # Author: Julien Coux
 # Copyright 2016 Camptocamp SA
-# Copyright 2021 Tecnativa - Jo??o Marques
+# Copyright 2021 Tecnativa - João Marques
 # Copyright 2022 Tecnativa - V??ctor Mart??nez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
@@ -195,18 +195,17 @@ class GeneralLedgerXslx(models.AbstractModel):
                             taxes_description += taxes_data[tax_id]["tax_name"] + " "
                         if line["tax_line_id"]:
                             taxes_description += line["tax_line_id"][1]
-                        analytic_list = []
-                        for account_ids, percentage in line[
-                            "analytic_distribution"
-                        ].items():
+                        for account_ids, value in line["analytic_distribution"].items():
                             for account_id in account_ids.split(","):
-                                name = analytic_data[int(account_id)]["name"]
-                                if percentage < 100:
-                                    analytic_list.append(f"{name} {int(percentage)}%")
+                                if value < 100:
+                                    analytic_distribution += "%s %d%% " % (
+                                        analytic_data[int(account_id)]["name"],
+                                        value,
+                                    )
                                 else:
-                                    analytic_list.append(name)
-                        analytic_distribution = ", ".join(analytic_list)
-
+                                    analytic_distribution += (
+                                        f"{analytic_data[int(account_id)]['name']} "
+                                    )
                         line.update(
                             {
                                 "taxes_description": taxes_description,
@@ -305,18 +304,19 @@ class GeneralLedgerXslx(models.AbstractModel):
                                 taxes_description += (
                                     taxes_data[tax_id]["tax_name"] + " "
                                 )
-                            for account_id, value in line[
+                            for account_ids, value in line[
                                 "analytic_distribution"
                             ].items():
-                                if value < 100:
-                                    analytic_distribution += "%s %d%% " % (
-                                        analytic_data[int(account_id)]["name"],
-                                        value,
-                                    )
-                                else:
-                                    analytic_distribution += (
-                                        "%s " % analytic_data[int(account_id)]["name"]
-                                    )
+                                for account_id in account_ids.split(","):
+                                    if value < 100:
+                                        analytic_distribution += "%s %d%% " % (
+                                            analytic_data[int(account_id)]["name"],
+                                            value,
+                                        )
+                                    else:
+                                        analytic_distribution += (
+                                            f"{analytic_data[int(account_id)]['name']} "
+                                        )
                             line.update(
                                 {
                                     "taxes_description": taxes_description,

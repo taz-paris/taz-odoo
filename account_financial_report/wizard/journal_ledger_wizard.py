@@ -1,7 +1,7 @@
 # Copyright 2017 ACSONE SA/NV
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 
 class JournalLedgerReportWizard(models.TransientModel):
@@ -38,15 +38,19 @@ class JournalLedgerReportWizard(models.TransientModel):
 
     @api.model
     def _get_move_targets(self):
-        return [("all", _("All")), ("posted", _("Posted")), ("draft", _("Not Posted"))]
+        return [
+            ("all", self.env._("All")),
+            ("posted", self.env._("Posted")),
+            ("draft", self.env._("Not Posted")),
+        ]
 
     @api.model
     def _get_sort_options(self):
-        return [("move_name", _("Entry number")), ("date", _("Date"))]
+        return [("move_name", self.env._("Entry number")), ("date", self.env._("Date"))]
 
     @api.model
     def _get_group_options(self):
-        return [("journal", _("Journal")), ("none", _("No group"))]
+        return [("journal", self.env._("Journal")), ("none", self.env._("No group"))]
 
     @api.onchange("date_range_id")
     def onchange_date_range_id(self):
@@ -75,7 +79,7 @@ class JournalLedgerReportWizard(models.TransientModel):
 
     def _print_report(self, report_type):
         self.ensure_one()
-        data = self._prepare_report_journal_ledger()
+        data = self._prepare_report_data()
         if report_type == "xlsx":
             report_name = "a_f_r.report_journal_ledger_xlsx"
         else:
@@ -90,6 +94,7 @@ class JournalLedgerReportWizard(models.TransientModel):
         )
 
     def _prepare_report_journal_ledger(self):
+        # TODO: Kept for compatibility - To be merged into _prepare_report_data in 19
         self.ensure_one()
         journals = self.journal_ids
         if not journals:
@@ -111,6 +116,11 @@ class JournalLedgerReportWizard(models.TransientModel):
             "account_financial_report_lang": self.env.lang,
             "with_auto_sequence": self.with_auto_sequence,
         }
+
+    def _prepare_report_data(self):
+        res = super()._prepare_report_data()
+        res.update(self._prepare_report_journal_ledger())
+        return res
 
     def _export(self, report_type):
         """Default export is PDF."""

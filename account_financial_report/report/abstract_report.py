@@ -143,7 +143,9 @@ class AgedPartnerBalanceReport(models.AbstractModel):
         return accounts_data
 
     def _get_journals_data(self, journals_ids):
-        journals = self.env["account.journal"].browse(journals_ids)
+        journals = self.env["account.journal"].search_fetch(
+            [("id", "in", journals_ids)], ["code"]
+        )
         journals_data = {}
         for journal in journals:
             journals_data.update({journal.id: {"id": journal.id, "code": journal.code}})
@@ -160,3 +162,9 @@ class AgedPartnerBalanceReport(models.AbstractModel):
             "debit",
             "amount_currency",
         ]
+
+    def _get_report_values(self, docids, data):
+        wizard = self.env[data["wizard_name"]].browse(data["wizard_id"])
+        return {
+            "limit_text": wizard._limit_text,
+        }

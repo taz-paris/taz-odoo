@@ -20,6 +20,7 @@ class ResConfigSettings(models.TransientModel):
         "intercompany rules. If not set the user initiating the"
         "transaction will be used",
     )
+
     intercompany_invoicing = fields.Boolean(
         string="Generate Inter company Invoices",
         related="company_id.intercompany_invoicing",

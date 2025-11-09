@@ -70,6 +70,9 @@ class MassEditingWizard(models.TransientModel):
         return res
 
     def onchange(self, values, field_names, fields_spec):
+        # Make sure the values passed to the super cover the dynamic fields.
+        # No onchanges are defined, but Odoo will call the onchange with empty
+        # values for all fields when opening the wizard form view.
         first_call = not field_names
         if first_call:
             field_names = [fname for fname in values if fname != "id"]
@@ -90,10 +93,10 @@ class MassEditingWizard(models.TransientModel):
             values["selection__" + line.field_id.name] = "ignore"
             values[line.field_id.name] = False
 
+            # Make sure there is an entry for the default value retrieved above.
             dynamic_fields["selection__" + line.field_id.name] = fields.Selection(
-                [()], default="ignore"
+                [("ignore", _("Don't touch"))], default="ignore"
             )
-
             dynamic_fields[line.field_id.name] = fields.Text([()], default=False)
 
         self._fields.update(dynamic_fields)
@@ -180,33 +183,33 @@ class MassEditingWizard(models.TransientModel):
         if field.ttype == "one2many":
             comodel = self.env[field.relation]
             dummy, form_view = comodel._get_view(view_type="form")
-            dummy, tree_view = comodel._get_view(view_type="tree")
+            dummy, list_view = comodel._get_view(view_type="list")
             field_context = {}
             if form_view:
                 field_context["form_view_ref"] = form_view.xml_id
-            if tree_view:
-                field_context["tree_view_ref"] = tree_view.xml_id
+            if list_view:
+                field_context["list_view_ref"] = list_view.xml_id
             if field_context:
                 field_element.attrib["context"] = json.dumps(field_context)
             else:
                 model_arch, dummy = self.env[field.model]._get_view(view_type="form")
-                embedded_tree = None
-                for node in model_arch.xpath(f"//field[@name='{field.name}'][./tree]"):
-                    embedded_tree = node.xpath("./tree")[0]
+                embedded_list = None
+                for node in model_arch.xpath(f"//field[@name='{field.name}'][./list]"):
+                    embedded_list = node.xpath("./list")[0]
                     break
-                if embedded_tree is not None:
-                    for node in embedded_tree.xpath("./*"):
+                if embedded_list is not None:
+                    for node in embedded_list.xpath("./*"):
                         modifiers = node.get("modifiers")
                         if modifiers:
                             node.attrib["modifiers"] = modifiers
-                    field_element.insert(0, embedded_tree)
+                    field_element.insert(0, embedded_list)
 
         return field_element
 
     def _get_field_options(self, field):
         return {
             "name": field.name,
-            "invisible": 'selection__%s in ["ignore", "remove", False]' % field.name,
+            "invisible": f'selection__{field.name} in ["ignore", "remove", False]',
             "class": "w-75",
         }
 
@@ -276,8 +279,7 @@ class MassEditingWizard(models.TransientModel):
     def create(self, vals_list):
         server_action_id = self.env.context.get("server_action_id")
         server_action = self.env["ir.actions.server"].sudo().browse(server_action_id)
-        active_ids = self.env.context.get("active_ids", [])
-        if server_action and active_ids:
+        if server_action:
             for vals in vals_list:
                 values = {}
                 for key, val in vals.items():
@@ -308,13 +310,14 @@ class MassEditingWizard(models.TransientModel):
                             values.update({split_key: vals.get(split_key, False)})
 
                 if values:
-                    for active_id in active_ids:
-                        self.env[server_action.model_id.model].browse(
-                            active_id
-                        ).with_context(
-                            mass_edit=True,
-                        ).write(values)
+                    self._exec_write(server_action, values)
         return super().create([{}])
+
+    def _exec_write(self, server_action, vals):
+        active_ids = self.env.context.get("active_ids", [])
+        model = self.env[server_action.model_id.model].with_context(mass_edit=True)
+        records = model.browse(active_ids)
+        records.write(vals)
 
     def _prepare_create_values(self, vals_list):
         return vals_list
