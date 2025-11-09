@@ -11,7 +11,7 @@
     'license': 'LGPL-3',
 
     'category': 'Uncategorized',
-    'version': '17.0',
+    'version': '18.0',
 
     'depends': ['staffing', 'project_accounting', 'project', 'analytic'],
 
