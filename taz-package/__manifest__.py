@@ -7,7 +7,7 @@
     'website': "https://www.dumaine.me",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '17.0',
+    'version': '18.0',
     'depends': [
 		'account_financial_report',
 		'account_invoice_inter_company',
