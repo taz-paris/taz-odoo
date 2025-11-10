@@ -86,7 +86,8 @@
                 </xpath>
                 <field name="full_name" position="replace">
 		</field>
-                <field name="active" position="after">
+                <field name="name" position="after">
+                    <field name="active" optional="show"/>
                     <field name="ms_planner_plan_id" optional="hide"/>
                     <field name="pillar_id" optional="hide"/>
                     <field name="user_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
