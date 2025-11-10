@@ -9,6 +9,7 @@
     "category": "Reporting",
     "maintainers": ["ivantodorovich"],
     "depends": [
+        "base",
         "base_automation",
     ],
     "data": [
