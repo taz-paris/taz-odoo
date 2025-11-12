@@ -126,8 +126,8 @@ class staffingAnalyticLine(models.Model):
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
     date_end = fields.Date("Date de fin")
 
-    period_unit_amount = fields.Float("J. période", group_operator='sum', help="Nombre de jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(18,8), compute=compute_period_amounts)
-    period_amount = fields.Float("Montant période", group_operator='sum', help="Valorisation en € des jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(13,3), compute=compute_period_amounts)
+    period_unit_amount = fields.Float("J. période", aggregator='sum', help="Nombre de jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(18,8), compute=compute_period_amounts)
+    period_amount = fields.Float("Montant période", aggregator='sum', help="Valorisation en € des jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(13,3), compute=compute_period_amounts)
           
 
     def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):
