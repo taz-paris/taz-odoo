@@ -128,7 +128,7 @@ class projectAccountingClosing(models.Model):
             for purchase_periode_line_id in purchase_periode_line_ids:
                 purchase_periode_line = self.env['account.move.line'].browse(purchase_periode_line_id)
                 if purchase_periode_line.product_id and purchase_periode_line.product_id.is_external_production == True :
-                    purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.analytic_account_id.id)]/100.0
+                    purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.account_id.id)]/100.0
             rec.purchase_outsourcing_period_amount = -1 * purchase_outsourcing_period_amount
             rec.purchase_other_period_amount = rec.purchase_period_amount - rec.purchase_outsourcing_period_amount
 
@@ -197,7 +197,7 @@ class projectAccountingClosing(models.Model):
             'groups_limit' : 150,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.account_id.id): 100},
                 'search_default_group_by_move' : 1,
             }
         }
@@ -228,7 +228,7 @@ class projectAccountingClosing(models.Model):
             'groups_limit' : 150,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.account_id.id): 100},
                 'search_default_group_by_move' : 1,
             }
         }
