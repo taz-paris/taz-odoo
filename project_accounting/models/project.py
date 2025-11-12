@@ -1489,11 +1489,11 @@ class projectAccountProject(models.Model):
     reporting_sum_company_outsource_code3_code_4_delta = fields.Float('Evol PDC J-31', help="Evolution du montant de la prise de commande du projet sur les 31 derniers jours calendaires", compute=compute_reporting_sum_company_outsource_code3_code_4_delta, store=False)
 
     begin_year_stage_id = fields.Many2one('project.project.stage', string='Statut au 1er janvier N', ondelete='restrict', groups="project.group_project_stages", readonly=True)
-    begin_year_past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net S/T de toutes les clôtures comptables du projet antérieures ou égales au 31/12/N-1")
+    begin_year_past_internal_revenue = fields.Monetary("CA net déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net de toutes les clôtures comptables du projet antérieures ou égales au 31/12/N-1")
     begin_year_futur_internal_revenue = fields.Monetary("CA à venir (daté du 1er janvier N)", compute=compute_begin_year_futur_revenue, store=True, help="Suivant l'étape du projet au 1/1/N : \n    - Si le projet était en code 3/4/5 au 1/1/N = [Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet <= 31/12N-1]\n    - Sinon, 0")
 
-    past_internal_revenue = fields.Monetary("CA net S/T déjà reconnu à date", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net S/T de toutes les clôtures comptables du projet")
-    futur_internal_revenue = fields.Monetary("CA net S/T à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet]")
+    past_internal_revenue = fields.Monetary("CA net déjà reconnu à date", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net de toutes les clôtures comptables du projet")
+    futur_internal_revenue = fields.Monetary("CA net à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet]")
     last_closing_production_balance = fields.Monetary("Stock de production interne", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production interne après destokage de la clôture validée la plus récente")
 
     # CAPITALIZATION
