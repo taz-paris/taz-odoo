@@ -438,7 +438,7 @@ class TestAccountInvoiceInterCompanyBase(TransactionCase):
                 default_company_id = cls.project_b.company_id.id,
                 default_partner_id = cls.project_link_b.partner_id.id,
                 default_agreement_id = cls.project_b.agreement_id.id,
-                default_analytic_distribution = {str(cls.project_b.analytic_account_id.id): 100},
+                default_analytic_distribution = {str(cls.project_b.account_id.id): 100},
                 default_previsional_invoice_date = datetime.today()
                 )
         )
