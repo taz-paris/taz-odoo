@@ -125,10 +125,11 @@ class projectAccountingClosing(models.Model):
             rec.purchase_period_amount = -1 * purchase_period_subtotal
 
             purchase_outsourcing_period_amount = 0.0
-            for purchase_periode_line_id in purchase_periode_line_ids:
-                purchase_periode_line = self.env['account.move.line'].browse(purchase_periode_line_id)
-                if purchase_periode_line.product_id and purchase_periode_line.product_id.is_external_production == True :
-                    purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.analytic_account_id.id)]/100.0
+            if closing_date > datetime.date(2025,9,30) :
+                for purchase_periode_line_id in purchase_periode_line_ids:
+                    purchase_periode_line = self.env['account.move.line'].browse(purchase_periode_line_id)
+                    if purchase_periode_line.product_id and purchase_periode_line.product_id.is_external_production == True :
+                        purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.analytic_account_id.id)]/100.0
             rec.purchase_outsourcing_period_amount = -1 * purchase_outsourcing_period_amount
             rec.purchase_other_period_amount = rec.purchase_period_amount - rec.purchase_outsourcing_period_amount
 
@@ -327,7 +328,7 @@ class projectAccountingClosing(models.Model):
     production_total_balance = fields.Monetary('Solde total prod après destockage', compute=compute, store=True, group_operator='sum')
     
     gross_revenue = fields.Monetary('CA brut', compute=compute, store=True)
-    internal_revenue = fields.Monetary('CA net de ST', compute=compute, store=True)
-    internal_margin_amount = fields.Monetary('Marge nette ST (€)', compute=compute, store=True)
-    internal_margin_rate = fields.Monetary('Marge nette ST (%)', compute=compute, store=True, group_operator=False)
+    internal_revenue = fields.Monetary('CA net d\'achats', compute=compute, store=True)
+    internal_margin_amount = fields.Monetary('Marge nette d\'achats (€)', compute=compute, store=True)
+    internal_margin_rate = fields.Monetary('Marge nette d\'achats (%)', compute=compute, store=True, group_operator=False)
 
