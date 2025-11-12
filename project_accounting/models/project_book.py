@@ -172,11 +172,11 @@ class projectBookEmployeeDistributionPeriod(models.Model):
     project_book_period_id = fields.Many2one('project.book_period', string="Année", required=True, ondelete='cascade', check_company=True)
 
     # Computed data
-    period_project_book_employee = fields.Monetary("Book HT pour l'année/projet/employé", compute=compute, store=True, group_operator='sum')
+    period_project_book_employee = fields.Monetary("Book HT pour l'année/projet/employé", compute=compute, store=True, aggregator='sum')
 
     # Related book_employee_distribution_id
     employee_id = fields.Many2one('hr.employee', related='book_employee_distribution_id.employee_id', required=True, readonly=False, string="Employé", store=True, ondelete='restrict', check_company=True)
-    final_book_factor = fields.Float(related="book_employee_distribution_id.final_book_factor", string="Coef. pour le projet/année/employée", store=True, group_operator=False)
+    final_book_factor = fields.Float(related="book_employee_distribution_id.final_book_factor", string="Coef. pour le projet/année/employée", store=True, aggregator=False)
 
     # Related project_book_period_id
     project_id = fields.Many2one('project.project', related='project_book_period_id.project_id', string="Projet", store=True, check_company=True)
@@ -184,7 +184,7 @@ class projectBookEmployeeDistributionPeriod(models.Model):
     reference_period = fields.Selection(related='project_book_period_id.reference_period', store=True)
     company_id = fields.Many2one('res.company', related="project_book_period_id.company_id")
     currency_id = fields.Many2one('res.currency', related="project_book_period_id.currency_id")
-    period_project_book = fields.Monetary(related="project_book_period_id.period_project_book", string="Book HT du projet pour l'année", store=True, readonly=False, group_operator=False)
+    period_project_book = fields.Monetary(related="project_book_period_id.period_project_book", string="Book HT du projet pour l'année", store=True, readonly=False, aggregator=False)
     rel_book_comment = fields.Text(related='project_id.book_comment')
     rel_is_book_manually_computed = fields.Boolean(related="project_id.is_book_manually_computed")
     rel_project_director_employee_id = fields.Many2one(related="project_id.project_director_employee_id", store=True)
