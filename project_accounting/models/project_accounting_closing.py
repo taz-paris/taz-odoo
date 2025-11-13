@@ -125,7 +125,7 @@ class projectAccountingClosing(models.Model):
             rec.purchase_period_amount = -1 * purchase_period_subtotal
 
             purchase_outsourcing_period_amount = 0.0
-            if closing_date > datetime.date(2025,9,30) :
+            if rec.closing_date > datetime.date(2025,9,30) :
                 for purchase_periode_line_id in purchase_periode_line_ids:
                     purchase_periode_line = self.env['account.move.line'].browse(purchase_periode_line_id)
                     if purchase_periode_line.product_id and purchase_periode_line.product_id.is_external_production == True :
