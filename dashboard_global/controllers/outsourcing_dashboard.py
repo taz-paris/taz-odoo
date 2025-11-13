@@ -1,6 +1,4 @@
 from odoo import fields, http, _
-from odoo.addons.http_routing.models.ir_http import slug
-#from odoo.addons.website.controllers.main import QueryURL
 from odoo.http import request
 from odoo.osv import expression
 from odoo.tools.misc import get_lang
