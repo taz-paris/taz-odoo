@@ -28,6 +28,7 @@ class projectOutsourcingLink(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        self = self.with_context(skip_mirror=True)
         records = super().create(vals_list)
         for record in records:
             if record.is_partner_id_res_company:
@@ -36,6 +37,8 @@ class projectOutsourcingLink(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
+        if self.env.context.get('skip_mirror'):
+            return res
         for rec in self :
             if rec.is_partner_id_res_company and not(rec.inter_company_mirror_project) :
                 rec.get_or_generate_inter_company_mirror_project()
