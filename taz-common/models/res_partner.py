@@ -11,6 +11,7 @@ import unicodedata
 
 class tazResPartner(models.Model):
      _inherit = "res.partner"
+     _rec_names_search = ['complete_name', 'email', 'ref', 'vat', 'company_registry', 'long_company_name']
      
      @api.model
      def _address_fields(self):
@@ -164,14 +165,6 @@ class tazResPartner(models.Model):
              string="Compte bancaire de paiement",
              help="Compte bancaire qui apparaitra par défaut sur les factures envoyées à ce client, et sur lequel le client devra payer la facture.",
              domain=_get_default_property_payment_bank_account_domain)
-
-
-     @api.model
-     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        domain = domain or []
-        if name :
-            domain += ['|', '|', '|', '&', ('is_company', '=', False), ('complete_name', operator, name), ('first_name', operator, name), ('long_company_name', operator, name), ('name', operator, name)]
-        return self._search(domain, limit=limit, order=order)
 
 
      @api.depends('is_company', 'name', 'first_name', 'parent_id.name', 'type', 'company_name', 'commercial_company_name') #Ajout de la dépendance à first_name

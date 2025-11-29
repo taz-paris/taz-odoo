@@ -26,6 +26,7 @@ class projectAccountProject(models.Model):
         ('number_uniq', 'UNIQUE (number)',  "Impossible d'enregistrer deux projets avec le même numéro."),
         ('check_probability', 'check(probability >= 0 and probability <= 100)', 'La probabilité de conclure l’affaire doit être comprise entre 0 % et 100 % !')
     ]
+    _rec_names_search = ['name', 'number']
 
     @api.constrains('stage_id', 'partner_id', 'date_win_loose')
     def _check_customer_book_goal(self):
@@ -70,13 +71,6 @@ class projectAccountProject(models.Model):
             if rec.partner_id : 
                 display_name += "("+str(rec.partner_id.name)+")"
             rec.display_name = display_name
-
-    @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        domain = domain or []
-        if name :
-            domain += ['|', ('name', operator, name), ('number', operator, name)]
-        return self._search(domain, limit=limit, order=order)
 
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
     @api.depends('project_director_employee_id')

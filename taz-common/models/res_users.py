@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.osv import expression
 from odoo.exceptions import UserError, ValidationError
 from odoo import _
 import requests
@@ -35,15 +36,15 @@ class tazResUsers(models.Model):
         for rec in self:
             rec.display_name = f"{rec.first_name} {rec.name}"
 
-
     @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        domain = domain or []
-        if name :
-            domain += ['|', ('first_name', operator, name), ('name', operator, name)]
-        return self._search(domain, limit=limit, order=order)
+    def _search_display_name(self, operator, value):
+        domain = super()._search_display_name(operator, value)
+        if operator in ('=', 'ilike') and value:
+            first_name_domain = [('first_name', 'ilike', value)]
+            domain = expression.OR([first_name_domain, domain])
+        return domain
 
-    
+
     @api.model
     def _get_valid_access_token(self):
         #TODO : tester la date de fin de validité du token

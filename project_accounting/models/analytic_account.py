@@ -10,13 +10,6 @@ class analyticAccount(models.Model):
     _inherit = 'account.analytic.account'
     _order = 'display_name'
 
-    @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        domain = domain or []
-        if name :
-            domain += ['|', ('name', operator, name), ('display_name', operator, name)]
-        return self._search(domain, limit=limit, order=order)
-
     @api.depends('project_ids', 'project_ids.number', 'project_ids.name', 'name')
     def _compute_display_name(self):
         super()._compute_display_name()
