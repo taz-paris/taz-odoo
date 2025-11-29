@@ -11,6 +11,7 @@ _logger = logging.getLogger(__name__)
 class staffingEmployee(models.Model):
     _inherit = "hr.employee"
     _order = "first_name, name"
+    _rec_names_search = ['name', 'first_name']
 
     def _sync_user(self, user, employee_has_image=False):
         vals  = super()._sync_user(user, employee_has_image) 
@@ -153,13 +154,6 @@ class staffingEmployee(models.Model):
         super()._compute_display_name()
         for rec in self:
             rec.display_name = f"{rec.first_name} {rec.name}"
-
-    @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        domain = domain or []
-        if name :
-            domain += ['|', ('first_name', operator, name), ('name', operator, name)]
-        return self._search(domain, limit=limit, order=order)
 
     def _get_contract(self, date):
         res = False
