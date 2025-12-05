@@ -29,10 +29,29 @@ def create(self, vals_list):
     user_ids = []
     employee_ids = []
     # 1/ Collect the user_ids and employee_ids from each timesheet vals
-    vals_list = self._timesheet_preprocess(vals_list)
     for vals in vals_list:
-        if not vals.get('project_id'):
+        task = self.env['project.task'].sudo().browse(vals.get('task_id'))
+        project = self.env['project.project'].sudo().browse(vals.get('project_id'))
+        if not (task or project):
+            # It is not a timesheet
             continue
+        elif task:
+            if not task.project_id:
+                raise ValidationError(_('Timesheets cannot be created on a private task.'))
+            if not project:
+                vals['project_id'] = task.project_id.id
+
+        company = task.company_id or project.company_id or self.env['res.company'].browse(vals.get('company_id'))
+        vals['company_id'] = company.id
+        vals.update({
+            fname: account_id
+            for fname, account_id in self._timesheet_preprocess_get_accounts(vals).items()
+            if fname not in vals
+        })
+
+        if not vals.get('product_uom_id'):
+            vals['product_uom_id'] = company.project_time_mode_id.id
+
         if not vals.get('name'):
             vals['name'] = '/'
         employee_id = vals.get('employee_id', self._context.get('default_employee_id', False))
@@ -65,7 +84,7 @@ def create(self, vals_list):
             employee_id_per_company_per_user[employee.user_id.id][employee.company_id.id] = employee.id
 
     # 4/ Put valid employee_id in each vals
-    error_msg = _lt('Timesheets must be created with an active employee in the selected companies.')
+    error_msg = _('Timesheets must be created with an active employee in the selected companies.')
     for vals in vals_list:
         if not vals.get('project_id'):
             continue
@@ -81,7 +100,7 @@ def create(self, vals_list):
                 vals['user_id'] = valid_employee_per_id[employee_in_id].sudo().user_id.id   # (A) OK
                 continue
             else:
-                raise ValidationError(error_msg)                                      # (C) KO
+                raise ValidationError(error_msg)                                            # (C) KO
         else:
             user_id = vals.get('user_id', default_user_id)                                  # (B)...
 
@@ -90,7 +109,7 @@ def create(self, vals_list):
         employee_out_id = False
         if employee_per_company:
             company_id = list(employee_per_company)[0] if len(employee_per_company) == 1\
-                    else vals.get('company_id', self.env.company.id)
+                    else vals.get('company_id') or self.env.company.id
             employee_out_id = employee_per_company.get(company_id, False)
 
         if employee_out_id:

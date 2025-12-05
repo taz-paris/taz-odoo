@@ -15,7 +15,7 @@
                                 <field name="active" widget="boolean_toggle"/>
                                 <field name="business_priority"/>
                                 <field name="pillar_id"/>
-                                <field name="partner_ids" widget="many2many_tags" required="1" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
+                                <field name="partner_ids" widget="many2many_tags" required="1" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
                                 <button type="object" name="action_open_contacts" string="Voir les contacts"/>
                                 <button type="object" name="action_open_business_actions" string="Voir les actions commerciales"/>
                             </group>
@@ -32,7 +32,7 @@
                             <page string="Objectifs commerciaux">
                                 <label for="customer_book_goal_ids" string="Objectifs annuels"/>
                                 <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_industry_id': id}">
-                                    <tree editable="top">
+                                    <list editable="top">
                                         <field name="currency_id" column_invisible="1"/>
                                         <field name="company_id" optional="show"/>
                                         <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
@@ -46,11 +46,11 @@
                                         <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
                                         <field name="number_of_opportunities" optional="show" sum="Total"/>
                                         <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
-                                    </tree>
+                                    </list>
                                 </field>
                                 <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>
                                 <field name="customer_book_followup_ids" context="{'default_industry_id': id, 'active_id': id}">
-                                    <tree editable="top" create="true">
+                                    <list editable="top" create="true">
                                         <field name="currency_id" column_invisible="1"/>
                                         <field name="company_id" optional="hide"/>
                                         <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
@@ -63,16 +63,13 @@
                                         <field name="period_delta" optional="show" widget="monetary"/>
                                         <field name="period_ratio" optional="show" widget="progressbar"/>
                                         <field name="comment" optional="hide"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>
                     </sheet>
                     <!--
-			<div class="oe_chatter">
-			    <field name="message_follower_ids" options="{'post_refresh':True}" help="Follow this project to automatically track the events associated to tasks and issues of this project." groups="base.group_user"/>
-			    <field name="message_ids"/>
-			</div>
+			<chatter/>
 			-->
                 </xpath>
             </field>
@@ -83,13 +80,14 @@
             <field name="inherit_id" ref="base.res_partner_industry_view_tree"/>
             <field eval="6" name="priority"/>
             <field name="arch" type="xml">
-                <xpath expr="//tree" position="attributes">
+                <xpath expr="//list" position="attributes">
                     <attribute name="editable"/>
                     <attribute name="expand">1</attribute>
                 </xpath>
                 <field name="full_name" position="replace">
 		</field>
-                <field name="active" position="after">
+                <field name="name" position="after">
+                    <field name="active" optional="show"/>
                     <field name="ms_planner_plan_id" optional="hide"/>
                     <field name="pillar_id" optional="hide"/>
                     <field name="user_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>

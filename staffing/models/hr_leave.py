@@ -179,7 +179,7 @@ class staffingLeave(models.Model):
         res = super()._timesheet_prepare_line_values(index, work_hours_data, day_date, work_hours_count, project, task)
         res['project_id'] = self.employee_company_id.internal_project_id.id
         res['task_id'] = self.employee_company_id.leave_timesheet_task_id.id
-        res['account_id'] = self.employee_company_id.internal_project_id.analytic_account_id.id
+        res['account_id'] = self.employee_company_id.internal_project_id.account_id.id
         res['company_id'] = self.employee_company_id.id
         return res
 

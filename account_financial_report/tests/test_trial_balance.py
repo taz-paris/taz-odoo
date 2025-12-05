@@ -3,6 +3,8 @@
 # Copyright 2020 ForgeFlow S.L. (https://www.forgeflow.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
+import re
+
 from odoo.tests import tagged
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
@@ -11,8 +13,8 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 @tagged("post_install", "-at_install")
 class TestTrialBalanceReport(AccountTestInvoicingCommon):
     @classmethod
-    def setUpClass(cls, chart_template_ref=None):
-        super().setUpClass(chart_template_ref=chart_template_ref)
+    def setUpClass(cls):
+        super().setUpClass()
         cls.env = cls.env(
             context=dict(
                 cls.env.context,
@@ -36,12 +38,10 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
             {
                 "code": "001",
                 "name": "Account 001",
-                "group_id": cls.group2.id,
                 "account_type": "income_other",
             },
         )
         cls.account100 = cls.company_data["default_account_receivable"]
-        cls.account100.group_id = cls.group1.id
         cls.account110 = cls.env["account.account"].search(
             [
                 (
@@ -57,7 +57,6 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
             {
                 "code": "200",
                 "name": "Account 200",
-                "group_id": cls.group2.id,
                 "account_type": "income_other",
             },
         )
@@ -69,12 +68,11 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
                 "account_type": "income_other",
             },
         )
-        cls.account301 = cls._create_account_account(
+        cls.account201 = cls._create_account_account(
             cls,
             {
-                "code": "301",
-                "name": "Account 301",
-                "group_id": cls.group2.id,
+                "code": "201",
+                "name": "Account 201",
                 "account_type": "income_other",
             },
         )
@@ -98,8 +96,6 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
 
     def _create_account_account(self, vals):
         item = self.env["account.account"].create(vals)
-        if "group_id" in vals:
-            item.group_id = vals["group_id"]
         return item
 
     def _add_move(
@@ -167,7 +163,7 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
                         "debit": receivable_credit,
                         "credit": receivable_debit,
                         "partner_id": partner.id,
-                        "account_id": self.account301.id,
+                        "account_id": self.account201.id,
                     },
                 ),
             ],
@@ -192,7 +188,7 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
                 "show_partner_details": with_partners,
             }
         )
-        data = trial_balance._prepare_report_trial_balance()
+        data = trial_balance._prepare_report_data()
         res_data = self.env[
             "report.account_financial_report.trial_balance"
         ]._get_report_values(trial_balance, data)
@@ -547,7 +543,7 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
                 "fy_start_date": self.fy_date_start,
             }
         )
-        data = trial_balance._prepare_report_trial_balance()
+        data = trial_balance._prepare_report_data()
         res_data = self.env[
             "report.account_financial_report.trial_balance"
         ]._get_report_values(trial_balance, data)
@@ -600,7 +596,7 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
                 "fy_start_date": self.fy_date_start,
             }
         )
-        data = trial_balance._prepare_report_trial_balance()
+        data = trial_balance._prepare_report_data()
         res_data = self.env[
             "report.account_financial_report.trial_balance"
         ]._get_report_values(trial_balance, data)
@@ -654,7 +650,7 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
                 "fy_start_date": self.fy_date_start,
             }
         )
-        data = trial_balance._prepare_report_trial_balance()
+        data = trial_balance._prepare_report_data()
         res_data = self.env[
             "report.account_financial_report.trial_balance"
         ]._get_report_values(trial_balance, data)
@@ -686,8 +682,13 @@ class TestTrialBalanceReport(AccountTestInvoicingCommon):
         self.assertEqual(total_debit, total_credit)
 
     def test_05_all_accounts_loaded(self):
-        # Tests if all accounts are loaded when the account_code_ fields changed
-        all_accounts = self.env["account.account"].search([], order="code")
+        # Tests if all accounts which code is number are loaded
+        # when the account_code_ fields changed
+        all_accounts = (
+            self.env["account.account"]
+            .search([], order="code")
+            .filtered(lambda acc: re.fullmatch(r"[0-9]+(\.[0-9]+)?", acc.code))
+        )
         company = self.env.user.company_id
         trial_balance = self.env["trial.balance.report.wizard"].create(
             {

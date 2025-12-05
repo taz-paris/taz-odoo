@@ -8,12 +8,12 @@
             <field name="name">Besoins de staffing</field>
             <field name="model">staffing.need</field>
             <field name="arch" type="xml">
-                <tree editable="top" expand="1">
+                <list editable="top" expand="1">
                     <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                     <field name="company_id" invisible="1"/>
                     <field name="name" optional="hide"/>
                     <field name="id" widget="open_tab"/>
-                    <field name="project_id" options="{'no_quick_create': True}" context="{'tree_view_ref':'staffing.project_tree', 'form_view_ref':'staffing.project_form'}"/>
+                    <field name="project_id" options="{'no_quick_create': True}" context="{'list_view_ref':'staffing.project_tree', 'form_view_ref':'staffing.project_form'}"/>
                     <field name="project_stage" optional="show"/>
                     <field name="description" optional="show"/>
                     <field name="job_id" optional="show"/>
@@ -24,7 +24,7 @@
                     <field name="nb_days_needed" optional="show"/>
                     <field name="state" optional="show"/>
                     <field name="staffed_employee_id" optional="hide"/>
-                </tree>
+                </list>
             </field>
         </record>
         <record model="ir.ui.view" id="staffing.need_form">
@@ -43,7 +43,7 @@
                             <field name="company_id" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="name" invisible="1"/>
-                            <field name="project_id" context="{'tree_view_ref':'staffing.project_tree', 'form_view_ref':'staffing.project_form'}" modifiers="{'no_quick_create': True, &quot;readonly&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}"/>
+                            <field name="project_id" context="{'list_view_ref':'staffing.project_tree', 'form_view_ref':'staffing.project_form'}" modifiers="{'no_quick_create': True, &quot;readonly&quot;: [[&quot;state&quot;, &quot;in&quot;, [&quot;done&quot;, &quot;canceled&quot;]]]}"/>
                             <field name="description"/>
                         </group>
                         <group>
@@ -189,7 +189,7 @@
         <record id="staffing.need" model="ir.actions.act_window">
             <field name="name">Besoins de staffing</field>
             <field name="res_model">staffing.need</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
             <field name="context">{
                     'search_default_state_open': 1,
                     'search_default_group_project' : 1,

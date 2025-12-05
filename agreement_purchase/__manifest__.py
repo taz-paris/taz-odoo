@@ -1,7 +1,7 @@
 {
     "name": "Agreement Purchase",
     "summary": "Agreement on purchases",
-    "version": "17.0",
+    "version": "18.0.1.0.0",
     "category": "Contract",
     "author": "Aurelien Dumaine",
     "license": "AGPL-3",

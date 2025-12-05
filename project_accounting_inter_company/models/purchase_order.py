@@ -27,7 +27,7 @@ class PurchaseOrder(models.Model):
                     raise ValidationError(_("Le projet %s n'a pas de lien projet/sous-traitant avec la société %s" % (project_id.display_name, dest_company.partner_id.display_name)))
                 project_outsourcing_link_id = project_outsourcing_link_ids[0]
                 dest_project = project_outsourcing_link_id.get_or_generate_inter_company_mirror_project()
-                dest_analytic_distribution[str(dest_project.analytic_account_id.id)] = rate
+                dest_analytic_distribution[str(dest_project.account_id.id)] = rate
 
         return dest_analytic_distribution
 

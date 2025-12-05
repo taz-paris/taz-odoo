@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 {
     'name': "staffing",
 
@@ -15,7 +14,7 @@
     # Check https://github.com/odoo/odoo/blob/16.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '17.0',
+    'version': "18.0.1.0.0",
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'hr_contract', 'project_timesheet_holidays', 'hr_skills', 'taz-common', 'project_accounting', 'web_widget_bokeh_chart'],

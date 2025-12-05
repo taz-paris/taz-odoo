@@ -31,7 +31,7 @@ def _inter_company_create_sale_order(self, dest_company):
         or dest_company.currency_id.id
     ):
         raise UserError(
-            _(
+            self.env._((
                 "You cannot create SO from PO because "
                 "sale price list currency is different than "
                 "purchase price list currency."
@@ -60,6 +60,7 @@ def _inter_company_create_sale_order(self, dest_company):
     # Validation of sale order
     if dest_company.sale_auto_validation:
         sale_order.with_user(intercompany_user.id).sudo().action_confirm()
+    return sale_order
 
 
 PurchaseOrder_inherit._inter_company_create_sale_order = _inter_company_create_sale_order

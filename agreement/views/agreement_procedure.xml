@@ -19,19 +19,19 @@
         </field>
     </record>
     <record id="agreement_procedure_tree" model="ir.ui.view">
-        <field name="name">agreement.procedure.tree</field>
+        <field name="name">agreement.procedure.list</field>
         <field name="model">agreement.procedure</field>
         <field name="arch" type="xml">
-            <tree string="Agreement procedure">
+            <list>
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="agreement_ids" widget="many2many_tags"/>
-            </tree>
+            </list>
         </field>
     </record>
     <record id="agreement_procedure_action" model="ir.actions.act_window">
         <field name="name">Marché / Procédure de passation</field>
         <field name="res_model">agreement.procedure</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

@@ -89,7 +89,7 @@ class wizardAccountingClosingMassCreation(models.TransientModel):
                 'res_model': 'account.analytic.line',
                 'domain' : [('id', 'in', analytic_lines.ids)],
                 'view_type': 'tree',
-                'view_mode': 'tree',
+                'view_mode': 'list',
                 'view_id': view_id.id,
                 'context': {},
                 # if you want to open the form in edit mode direclty

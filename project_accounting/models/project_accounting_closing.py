@@ -128,7 +128,7 @@ class projectAccountingClosing(models.Model):
             for purchase_periode_line_id in purchase_periode_line_ids:
                 purchase_periode_line = self.env['account.move.line'].browse(purchase_periode_line_id)
                 if purchase_periode_line.product_id and purchase_periode_line.product_id.is_external_production == True :
-                    purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.analytic_account_id.id)]/100.0
+                    purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.account_id.id)]/100.0
             rec.purchase_outsourcing_period_amount = -1 * purchase_outsourcing_period_amount
             rec.purchase_other_period_amount = rec.purchase_period_amount - rec.purchase_outsourcing_period_amount
 
@@ -187,17 +187,17 @@ class projectAccountingClosing(models.Model):
             'name': _("Lignes de factures / avoirs clients"),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
-            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids), ('display_type', 'in', ['product'])],
             'view_type': 'form',
-            'view_mode': 'tree',
+            'view_mode': 'list',
             'target' : 'current',
             'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
             'limit' : 150,
             'groups_limit' : 150,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.account_id.id): 100},
                 'search_default_group_by_move' : 1,
             }
         }
@@ -218,17 +218,17 @@ class projectAccountingClosing(models.Model):
             'name': _('Lignes de factures / avoirs fournisseurs'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
-            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids), ('display_type', 'in', ['product'])],
             'view_type': 'form',
-            'view_mode': 'tree',
+            'view_mode': 'list',
             'target' : 'current',
             'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
             'limit' : 150,
             'groups_limit' : 150,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.account_id.id): 100},
                 'search_default_group_by_move' : 1,
             }
         }
@@ -247,7 +247,7 @@ class projectAccountingClosing(models.Model):
                 'name': 'Pointage du mois',
                 'res_model': 'account.analytic.line',
                 'view_type': 'tree',
-                'view_mode': 'tree',
+                'view_mode': 'list',
                 'view_id': view_id.id,
                 'target': 'current',
                 'domain': [('id', 'in', analytic_lines.ids)],
@@ -289,45 +289,45 @@ class projectAccountingClosing(models.Model):
     purchase_outsourcing_period_amount = fields.Monetary('Achats de S/T (production externe) HT sur la periode', compute=compute, store=True)
     purchase_other_period_amount = fields.Monetary('Autres achats HT sur la periode', compute=compute, store=True)
     
-    pca_previous_balance = fields.Monetary('Précédent solde PCA', compute=compute, group_operator='sum', store=True)
+    pca_previous_balance = fields.Monetary('Précédent solde PCA', compute=compute, aggregator='sum', store=True)
     pca_period_amount = fields.Monetary('PCA(-)')
-    pca_balance = fields.Monetary('Solde PCA', compute=compute, store=True, group_operator='sum')
+    pca_balance = fields.Monetary('Solde PCA', compute=compute, store=True, aggregator='sum')
     
-    fae_previous_balance = fields.Monetary('Précédent solde FAE', compute=compute, group_operator='sum', store=True)
+    fae_previous_balance = fields.Monetary('Précédent solde FAE', compute=compute, aggregator='sum', store=True)
     fae_period_amount = fields.Monetary('FAE(+)')
-    fae_balance = fields.Monetary('Solde FAE', compute=compute, store=True, group_operator='sum')
+    fae_balance = fields.Monetary('Solde FAE', compute=compute, store=True, aggregator='sum')
     
-    cca_previous_balance = fields.Monetary('Précédent solde CCA', compute=compute, group_operator='sum', store=True)
+    cca_previous_balance = fields.Monetary('Précédent solde CCA', compute=compute, aggregator='sum', store=True)
     cca_period_amount = fields.Monetary('CCA(+)')
-    cca_balance = fields.Monetary('Solde CCA', compute=compute, store=True, group_operator='sum')
+    cca_balance = fields.Monetary('Solde CCA', compute=compute, store=True, aggregator='sum')
     
-    fnp_previous_balance = fields.Monetary('Précédent solde FNP', compute=compute, group_operator='sum', store=True)
+    fnp_previous_balance = fields.Monetary('Précédent solde FNP', compute=compute, aggregator='sum', store=True)
     fnp_period_amount = fields.Monetary('FNP(-)')
-    fnp_balance = fields.Monetary('Solde FNP', compute=compute, store=True, group_operator='sum')
+    fnp_balance = fields.Monetary('Solde FNP', compute=compute, store=True, aggregator='sum')
 
-    provision_previous_balance_sum = fields.Monetary('Somme reprise prov.', compute=compute, store=True, group_operator=False)
-    provision_balance_sum = fields.Monetary('Somme solde prov.', compute=compute, store=True, group_operator=False)
+    provision_previous_balance_sum = fields.Monetary('Somme reprise prov.', compute=compute, store=True, aggregator=False)
+    provision_balance_sum = fields.Monetary('Somme solde prov.', compute=compute, store=True, aggregator=False)
     
-    production_previous_balance = fields.Monetary('Précédent stock interne', compute=compute, group_operator='sum', store=True)
+    production_previous_balance = fields.Monetary('Précédent stock interne', compute=compute, aggregator='sum', store=True)
     production_period_amount = fields.Monetary('Production interne sur la période', compute=compute, store=True, help="Somme des pointages internes de la période, valorisés au coût de revient")
-    production_stock = fields.Monetary('Stock interne', compute=compute, store=True, group_operator='sum')
+    production_stock = fields.Monetary('Stock interne', compute=compute, store=True, aggregator='sum')
     production_destocking = fields.Monetary('Destockage interne')
-    production_balance = fields.Monetary('Solde prod interne après destockage', compute=compute, store=True, group_operator='sum')
+    production_balance = fields.Monetary('Solde prod interne après destockage', compute=compute, store=True, aggregator='sum')
     
-    production_external_previous_balance = fields.Monetary('Précédent stock externe', compute=compute, group_operator='sum', store=True)
+    production_external_previous_balance = fields.Monetary('Précédent stock externe', compute=compute, aggregator='sum', store=True)
     production_external_period_amount = fields.Monetary('Production externe sur la période', compute=compute, store=True, help="Somme du prix d'achat HT des lignes de factures/avoirs fournisseurs de la période lorsque l'article est configuré pour générer de la production externe - coche sur l'onglet Achat de la fiche produit")
-    production_external_stock = fields.Monetary('Stock externe', compute=compute, store=True, group_operator='sum')
+    production_external_stock = fields.Monetary('Stock externe', compute=compute, store=True, aggregator='sum')
     production_external_destocking = fields.Monetary('Destockage externe')
-    production_external_balance = fields.Monetary('Solde externe prod après destockage', compute=compute, store=True, group_operator='sum')
+    production_external_balance = fields.Monetary('Solde externe prod après destockage', compute=compute, store=True, aggregator='sum')
     
-    production_total_previous_balance = fields.Monetary('Précédent stock total', compute=compute, group_operator='sum', store=True)
+    production_total_previous_balance = fields.Monetary('Précédent stock total', compute=compute, aggregator='sum', store=True)
     production_total_period_amount = fields.Monetary('Production totale sur la période', compute=compute, store=True, help="Somme de la production interne et de la production externe sur la période")
-    production_total_stock = fields.Monetary('Stock total', compute=compute, store=True, group_operator='sum')
-    production_total_destocking = fields.Monetary('Destockage total', compute=compute, store=True, group_operator='sum')
-    production_total_balance = fields.Monetary('Solde total prod après destockage', compute=compute, store=True, group_operator='sum')
+    production_total_stock = fields.Monetary('Stock total', compute=compute, store=True, aggregator='sum')
+    production_total_destocking = fields.Monetary('Destockage total', compute=compute, store=True, aggregator='sum')
+    production_total_balance = fields.Monetary('Solde total prod après destockage', compute=compute, store=True, aggregator='sum')
     
     gross_revenue = fields.Monetary('CA brut', compute=compute, store=True)
     internal_revenue = fields.Monetary('CA net de ST', compute=compute, store=True)
     internal_margin_amount = fields.Monetary('Marge nette ST (€)', compute=compute, store=True)
-    internal_margin_rate = fields.Monetary('Marge nette ST (%)', compute=compute, store=True, group_operator=False)
+    internal_margin_rate = fields.Monetary('Marge nette ST (%)', compute=compute, store=True, aggregator=False)
 

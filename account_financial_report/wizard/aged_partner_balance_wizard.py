@@ -63,7 +63,7 @@ class AgedPartnerBalanceWizard(models.TransientModel):
             )
             if self.company_id:
                 self.account_ids = self.account_ids.filtered(
-                    lambda a: a.company_id == self.company_id
+                    lambda a: self.company_id in a.company_ids
                 )
         return {
             "domain": {
@@ -84,13 +84,15 @@ class AgedPartnerBalanceWizard(models.TransientModel):
                 self.onchange_type_accounts_only()
             else:
                 self.account_ids = self.account_ids.filtered(
-                    lambda a: a.company_id == self.company_id
+                    lambda a: self.company_id in a.company_ids
                 )
         res = {"domain": {"account_ids": [], "partner_ids": []}}
         if not self.company_id:
             return res
         else:
-            res["domain"]["account_ids"] += [("company_id", "=", self.company_id.id)]
+            res["domain"]["account_ids"] += [
+                ("company_ids", "in", [self.company_id.id])
+            ]
             res["domain"]["partner_ids"] += self._get_partner_ids_domain()
         return res
 
@@ -101,7 +103,7 @@ class AgedPartnerBalanceWizard(models.TransientModel):
     @api.onchange("receivable_accounts_only", "payable_accounts_only")
     def onchange_type_accounts_only(self):
         """Handle receivable/payable accounts only change."""
-        domain = [("company_id", "=", self.company_id.id)]
+        domain = [("company_ids", "in", [self.company_id.id])]
         if self.receivable_accounts_only or self.payable_accounts_only:
             if self.receivable_accounts_only and self.payable_accounts_only:
                 domain += [
@@ -117,7 +119,7 @@ class AgedPartnerBalanceWizard(models.TransientModel):
 
     def _print_report(self, report_type):
         self.ensure_one()
-        data = self._prepare_report_aged_partner_balance()
+        data = self._prepare_report_data()
         if report_type == "xlsx":
             report_name = "a_f_r.report_aged_partner_balance_xlsx"
         else:
@@ -132,6 +134,7 @@ class AgedPartnerBalanceWizard(models.TransientModel):
         )
 
     def _prepare_report_aged_partner_balance(self):
+        # TODO: Kept for compatibility - To be merged into _prepare_report_data in 19
         self.ensure_one()
         return {
             "wizard_id": self.id,
@@ -145,6 +148,11 @@ class AgedPartnerBalanceWizard(models.TransientModel):
             "account_financial_report_lang": self.env.lang,
             "age_partner_config_id": self.age_partner_config_id.id,
         }
+
+    def _prepare_report_data(self):
+        res = super()._prepare_report_data()
+        res.update(self._prepare_report_aged_partner_balance())
+        return res
 
     def _export(self, report_type):
         """Default export is PDF."""

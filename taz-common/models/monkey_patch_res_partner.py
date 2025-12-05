@@ -10,8 +10,6 @@
 
 from odoo import models, fields, api
 from odoo.addons.base.models.res_partner import Partner as PartnerInherit_base
-from odoo.addons.auth_signup.models.res_partner import ResPartner as PartnerInherit_auth_signup
-
 
 
 ###############################################################
@@ -33,7 +31,7 @@ def write(self, vals):
         self.invalidate_recordset(['user_ids'])
         users = self.env['res.users'].sudo().search([('partner_id', 'in', self.ids)])
         if users:
-            if self.env['res.users'].sudo(False).check_access_rights('write', raise_exception=False):
+            if self.env['res.users'].sudo(False).has_access('write'):
                 error_msg = _('You cannot archive contacts linked to an active user.\n'
                               'You first need to archive their associated user.\n\n'
                               'Linked active users : %(names)s', names=", ".join([u.display_name for u in users]))
@@ -65,42 +63,15 @@ def write(self, vals):
                 partner.child_ids.write({'company_id': company_id})
     result = True
     # To write in SUPERUSER on field is_company and avoid access rights problems.
-    if 'is_company' in vals and self.user_has_groups('base.group_partner_manager') and not self.env.su:
+    if 'is_company' in vals and not self.env.su and self.env.user.has_group('base.group_partner_manager'):
         result = super(PartnerInherit_base, self.sudo()).write({'is_company': vals.get('is_company')})
         del vals['is_company']
     result = result and super(PartnerInherit_base, self).write(vals)
     for partner in self:
         #if any(u._is_internal() for u in partner.user_ids if u != self.env.user): #ADU
-        #    self.env['res.users'].check_access_rights('write') #ADU
+        #    self.env['res.users'].check_access('write') #ADU
         partner._fields_sync(vals)
     return result
 
 
 PartnerInherit_base.write = write
-
-
-###############################################################
-#
-#       Class odoo.addons.auth_signup.models.res_partner
-#
-##############################################################
-
-def _compute_signup_url(self):
-     #Overrride this function from odoo/addons/auth_signup/models/res_partner.py To allow change postal address of a partner related to a user by a user without write acces on res.users.
-     """ proxy for function field towards actual implementation """
-     result = self.sudo()._get_signup_url_for_action()
-     for partner in self:
-         if any(u._is_internal() for u in partner.user_ids if u != self.env.user):
-             res = self.env['res.users'].check_access_rights('write', raise_exception=False) #ADU
-             if not res : #ADU
-                 partner.signup_url = False #ADU
-                 return #ADU
-         if any(u.has_group('base.group_portal') for u in partner.user_ids if u != self.env.user):
-             res = self.env['res.partner'].check_access_rights('write', raise_exception=False) #ADU
-             if not res : #ADU
-                 partner.signup_url = False #ADU
-                 return #ADU
-         partner.signup_url = result.get(partner.id, False)
-
-PartnerInherit_auth_signup._compute_signup_url = _compute_signup_url
-

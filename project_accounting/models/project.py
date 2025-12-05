@@ -25,6 +25,7 @@ class projectAccountProject(models.Model):
     _sql_constraints = [
         ('number_uniq', 'UNIQUE (number)',  "Impossible d'enregistrer deux projets avec le même numéro.")
     ]
+    _rec_names_search = ['name', 'number']
 
     @api.constrains('stage_id', 'partner_id', 'date_win_loose')
     def _check_customer_book_goal(self):
@@ -69,13 +70,6 @@ class projectAccountProject(models.Model):
             if rec.partner_id : 
                 display_name += "("+str(rec.partner_id.name)+")"
             rec.display_name = display_name
-
-    @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        domain = domain or []
-        if name :
-            domain += ['|', ('name', operator, name), ('number', operator, name)]
-        return self._search(domain, limit=limit, order=order)
 
     #inspiré de https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_timesheet/models/hr_timesheet.py#L116
     @api.depends('project_director_employee_id')
@@ -789,9 +783,9 @@ class projectAccountProject(models.Model):
                 continue
             if line.state not in status_list_to_keep:
                 continue
-            if str(self.analytic_account_id.id) in line.analytic_distribution.keys():
-                total += line.price_subtotal * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
-                total_with_tax += line.price_total * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            if str(self.account_id.id) in line.analytic_distribution.keys():
+                total += line.price_subtotal * line.analytic_distribution[str(self.account_id.id)]/100.0
+                total_with_tax += line.price_total * line.analytic_distribution[str(self.account_id.id)]/100.0
         #_logger.info(total)
         #_logger.info('----------END compute_sale_order_total')
         return total, total_with_tax
@@ -803,14 +797,14 @@ class projectAccountProject(models.Model):
             'name': _('Lignes de commande client'),
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order.line',
-            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
             'target' : 'current',
             'limit' : 150,
             'groups_limit' : 150,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.account_id.id): 100},
                 'search_default_order' : 1,
             }
         }
@@ -832,7 +826,7 @@ class projectAccountProject(models.Model):
         query.add_where(
             SQL(
                 "%s && %s",
-                [str(self.analytic_account_id.id)],
+                [str(self.account_id.id)],
                 self.env['sale.order.line']._query_analytic_accounts(),
             )
         )
@@ -857,7 +851,7 @@ class projectAccountProject(models.Model):
         query.add_where(
             SQL(
                 "%s && %s",
-                [str(self.analytic_account_id.id)],
+                [str(self.account_id.id)],
                 self.env['account.move.line']._query_analytic_accounts(),
             )
         )
@@ -897,9 +891,9 @@ class projectAccountProject(models.Model):
         paid = 0.0
         for line_id in line_ids:
             line = self.env['account.move.line'].browse(line_id)
-            subtotal += line.price_subtotal_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
-            total += line.price_total_signed * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
-            paid += line.amount_paid * line.analytic_distribution[str(self.analytic_account_id.id)]/100.0
+            subtotal += line.price_subtotal_signed * line.analytic_distribution[str(self.account_id.id)]/100.0
+            total += line.price_total_signed * line.analytic_distribution[str(self.account_id.id)]/100.0
+            paid += line.amount_paid * line.analytic_distribution[str(self.account_id.id)]/100.0
         return subtotal, total, paid, line_ids
 
     def action_open_out_account_move_lines(self):
@@ -910,17 +904,17 @@ class projectAccountProject(models.Model):
             'name': _("Lignes de factures / avoirs"),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
-            #'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            #'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
             'view_type': 'form',
-            'view_mode': 'tree',
+            'view_mode': 'list',
             'target' : 'current',
             'limit' : 150,
             'groups_limit' : 150,
             'view_id': self.env.ref("project_accounting.view_invoicelines_tree").id,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.account_id.id): 100},
                 'default_move_type' : 'out_invoice',
                 'search_default_group_by_move' : 1,
             }
@@ -941,14 +935,14 @@ class projectAccountProject(models.Model):
             'name': _('Invoice and refound lines'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
-            #'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            #'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
             'view_type': 'form',
-            'view_mode': 'tree',
+            'view_mode': 'list',
             'view_id': self.env.ref("account.view_move_line_tree").id,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.account_id.id): 100},
             }
         }
 
@@ -981,7 +975,7 @@ class projectAccountProject(models.Model):
                 'default_partner_id' : self.partner_id.id,
                 'default_agreement_id' : self.agreement_id.id,
                 'default_user_id' : self.user_id.id,
-                'default_analytic_distribution': {str(self.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.account_id.id): 100},
                 'default_previsional_invoice_date' : self.date,
                 #'default_price_unit' : price_unit,
             }
@@ -1051,18 +1045,18 @@ class projectAccountProject(models.Model):
         for rec in self:
 
             if rec.partner_id.id in rec.partner_secondary_ids.ids:
-                raise ValidationError(_("Le client final ne peut pas être un client intermédiaire (onglet Facturation)."))
+                raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : Le client final ne peut pas être un client intermédiaire (onglet Facturation)." % (rec.number, rec.name)))
                 # Nota bene : on peut avoir des projets avec un BCC pour la maison mère et un BCC pour l'une de ses filiales, comme sur le projet 23138 commandé en partie par Total Energies et en partie par TGITS
             
             supplier_ids = rec.get_all_supplier_ids()
             for partner_id in [rec.partner_id.id] + rec.partner_id.child_ids_address.ids + rec.partner_id.child_ids_company.ids:
                 if partner_id in supplier_ids:
-                    raise ValidationError(_("Le client final (et ses établissements/filiales) ne peut pas être un fournisseur (onglet Achats) pour ce même projet."))
+                    raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : Le client final (et ses établissements/filiales) ne peut pas être un fournisseur (onglet Achats) pour ce même projet." % (rec.number, rec.name)))
             
             for sec_part in rec.partner_secondary_ids:
                 for sp in [sec_part.id] + sec_part.child_ids_address.ids + sec_part.child_ids_company.ids:
                     if sp in supplier_ids:
-                        raise ValidationError(_("Le client intermédiaire (onglet Facturation) ni ses établissements/filiales ne peuvent être fournisseur (onglet Achats) pour ce même projet."))
+                        raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : Le client intermédiaire (onglet Facturation) ni ses établissements/filiales ne peuvent être fournisseur (onglet Achats) pour ce même projet." % (rec.number, rec.name)))
             
             rec.check_partners_objects_consitency()
 
@@ -1086,7 +1080,7 @@ class projectAccountProject(models.Model):
                 raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande clients liées à un projet doivent obligatoirement concerner soit le client final, soit le client intermédiaire (onglet Facturation)." % (rec.number, rec.name)))
                 #TODO : réduire au client final ?
 
-            purchase_order_line_ids = self.env['project.outsourcing.link'].get_purchase_order_line_ids(filter_list=[('partner_id', 'not in', all_supplier)], analytic_account_ids=[str(rec.analytic_account_id.id)]) 
+            purchase_order_line_ids = self.env['project.outsourcing.link'].get_purchase_order_line_ids(filter_list=[('partner_id', 'not in', all_supplier)], analytic_account_ids=[str(rec.account_id.id)]) 
             if len(purchase_order_line_ids) :
                 raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)." % (rec.number, rec.name)))
 

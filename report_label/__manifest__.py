@@ -1,7 +1,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 {
     "name": "Report Labels",
-    "version": "17.0",
+    "version": "18.0.1.0.0",
     "summary": "Print configurable self-adhesive labels reports",
     "author": "Iván Todorovich, Moka Tourisme, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/reporting-engine",
@@ -9,6 +9,7 @@
     "category": "Reporting",
     "maintainers": ["ivantodorovich"],
     "depends": [
+        "base",
         "base_automation",
     ],
     "data": [

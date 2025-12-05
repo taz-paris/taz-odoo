@@ -40,6 +40,12 @@ class AccountMove(models.Model):
         )
         return company or False
 
+    def _set_intercompany_supplier_invoice_ref(self):
+        self.ensure_one()
+        supplier_invoice = self.auto_invoice_id
+        if not supplier_invoice.ref:
+            supplier_invoice.write({"ref": self.name})
+
     def action_post(self):
         """Validated invoice generate cross invoice base on company rules"""
         res = super().action_post()
@@ -51,8 +57,7 @@ class AccountMove(models.Model):
             dest_company = src_invoice._find_company_from_invoice_partner()
             if not dest_company:
                 continue
-            # If one of the involved companies have the intercompany
-            # setting disabled, skip
+            # Skip if one of the involved companies have intercompany setting disabled
             if (
                 not dest_company.intercompany_invoicing
                 or not src_invoice.company_id.intercompany_invoicing
@@ -69,6 +74,12 @@ class AccountMove(models.Model):
                 )._inter_company_create_invoice(dest_company)
             if src_invoice.is_sale_document():
                 src_invoice._attach_original_pdf_report()
+        # set invoice ref on supplier invoice when the customer invoice is validated
+        # (case where the source invoice was the supplier one)
+        for invoice in self.filtered(
+            lambda i: i.is_sale_document() and i.auto_generated
+        ):
+            invoice.sudo()._set_intercompany_supplier_invoice_ref()
         return res
 
     def _attach_original_pdf_report(self):
@@ -99,7 +110,7 @@ class AccountMove(models.Model):
                     dest_user
                 ).with_context(
                     **{"allowed_company_ids": [dest_company.id]}
-                ).check_access_rule("read")
+                ).check_access("read")
             except AccessError as e:
                 raise UserError(
                     _(

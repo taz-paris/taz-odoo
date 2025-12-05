@@ -22,10 +22,10 @@
                     <group>
                         <group string="Projets pour lesquels générer une clôture comptables">
                             <field name="project_ids" colspan="4" nolabel="1">
-                                <tree>
+                                <list>
                                     <field name="number"/>
                                     <field name="name"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </group>

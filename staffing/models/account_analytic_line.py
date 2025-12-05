@@ -14,7 +14,7 @@ class staffingAnalyticLine(models.Model):
         if 'staffing_need_id' in vals.keys():
             vals = self._sync_project(vals)
         if 'project_id' in vals.keys() and 'account_id' not in vals.keys():
-            vals['account_id'] = self.env['project.project'].browse([vals['project_id']])[0].analytic_account_id.id
+            vals['account_id'] = self.env['project.project'].browse([vals['project_id']])[0].account_id.id
         #_logger.info(vals)
         res = super().write(vals)
         if 'amount' in vals.keys() or 'unit_amount' in vals.keys(): #TODO : contrôler si elle change de date ou de catégorie ?
@@ -56,7 +56,7 @@ class staffingAnalyticLine(models.Model):
         need = needs[0]
 
         vals['project_id'] = need.project_id.id
-        vals['account_id'] = need.project_id.analytic_account_id.id
+        vals['account_id'] = need.project_id.account_id.id
         vals['employee_id'] =  need.staffed_employee_id.id
         return vals
 
@@ -126,8 +126,8 @@ class staffingAnalyticLine(models.Model):
     employee_job_id = fields.Many2one(string="Grade", related='employee_id.job_id')
     date_end = fields.Date("Date de fin")
 
-    period_unit_amount = fields.Float("J. période", group_operator='sum', help="Nombre de jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(18,8), compute=compute_period_amounts)
-    period_amount = fields.Float("Montant période", group_operator='sum', help="Valorisation en € des jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(13,3), compute=compute_period_amounts)
+    period_unit_amount = fields.Float("J. période", aggregator='sum', help="Nombre de jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(18,8), compute=compute_period_amounts)
+    period_amount = fields.Float("Montant période", aggregator='sum', help="Valorisation en € des jours affectés à la période passée en contexte, 0 si aucune période n'est transmise en context.", digits=(13,3), compute=compute_period_amounts)
           
 
     def get_timesheet_grouped(self, pivot_date, date_start=None, date_end=None, filters=None):

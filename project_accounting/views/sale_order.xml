@@ -24,10 +24,10 @@
                     <attribute name="required">1</attribute>
                 </field>
                 <field name="partner_id" position="attributes">
-                    <attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+                    <attribute name="context">{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
                 </field>
                 <field name="partner_invoice_id" position="attributes">
-                    <attribute name="context">{'default_is_company': True, 'tree_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
+                    <attribute name="context">{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}</attribute>
                 </field>
                 <field name="partner_shipping_id" position="attributes">
                     <attribute name="invisible">True</attribute>
@@ -64,7 +64,7 @@
                         <field name="target_amount" onchange="1"/>
                     </group>
                 </field>
-                <xpath expr="//tree/field[@name='product_uom_qty']" position="before">
+                <xpath expr="//list/field[@name='product_uom_qty']" position="before">
                     <field name="direct_payment_purchase_order_line_id" optional="show" on_change="1"/>
                     <field name="allowed_direct_payment_purchase_order_line_ids" invisible="1" on_change="1"/>
                     <field name="untaxed_amount_to_invoice" optional="hide" on_change="1"/>
@@ -73,10 +73,10 @@
                     <field name="invoice_lines" optional="hide" on_change="1" widget="many2many_tags"/>
                     <field name="comment" optional="show" on_change="1"/>
                 </xpath>
-                <xpath expr="//tree/field[@name='product_uom_qty']" position="attributes">
+                <xpath expr="//list/field[@name='product_uom_qty']" position="attributes">
                     <attribute name="sum">Total</attribute>
                 </xpath>
-                <xpath expr="//tree/field[@name='qty_delivered']" position="attributes">
+                <xpath expr="//list/field[@name='qty_delivered']" position="attributes">
                     <attribute name="sum">Total</attribute>
                     <!--
 			<attribute name="attrs">attrs="{
@@ -85,16 +85,16 @@
 				}</attribute>
 			-->
                 </xpath>
-                <xpath expr="//tree/field[@name='qty_invoiced']" position="attributes">
+                <xpath expr="//list/field[@name='qty_invoiced']" position="attributes">
                     <attribute name="sum">Total</attribute>
                 </xpath>
-                <xpath expr="//tree/field[@name='analytic_distribution']" position="attributes">
+                <xpath expr="//list/field[@name='analytic_distribution']" position="attributes">
                     <attribute name="optional">show</attribute>
                 </xpath>
-                <xpath expr="//tree/field[@name='price_unit']" position="attributes">
+                <xpath expr="//list/field[@name='price_unit']" position="attributes">
                     <attribute name="onchange">1</attribute>
                 </xpath>
-                <xpath expr="//tree/field[@name='price_subtotal']" position="attributes">
+                <xpath expr="//list/field[@name='price_subtotal']" position="attributes">
                     <attribute name="onchange">1</attribute>
                 </xpath>
                 <field name="order_line" position="attributes">
@@ -104,7 +104,7 @@
 				'default_price_unit' : context.get('default_price_unit'),
 				}</attribute>
                 </field>
-                <xpath expr="//field[@name='order_line']/tree" position="attributes">
+                <xpath expr="//field[@name='order_line']/list" position="attributes">
                     <attribute name="decoration-success">direct_payment_purchase_order_line_id != False</attribute>
                 </xpath>
             </field>
@@ -166,7 +166,7 @@
             <field name="model">sale.order.line</field>
             <field name="inherit_id" ref="sale.view_order_line_tree"/>
             <field name="arch" type="xml">
-                <xpath expr="//tree" position="attributes">
+                <xpath expr="//list" position="attributes">
                     <attribute name="expand">1</attribute>
                 </xpath>
                 <field name="order_id" position="attributes">
@@ -217,7 +217,7 @@
             <field name="model">sale.order.line</field>
             <field name="priority" eval="50"/>
             <field name="arch" type="xml">
-                <tree editable="top" create="false">
+                <list editable="top" create="false">
                     <field name="salesman_id" readonly="1"/>
                     <field name="order_partner_id" readonly="1"/>
                     <field name="order_partner_invoice_id" optional="hide" readonly="1"/>
@@ -238,7 +238,7 @@
                     <field name="invoice_status" optional="hide"/>
                     <field name="state" optional="show" widget="badge" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'"/>
                     <field name="comment" optional="show"/>
-                </tree>
+                </list>
             </field>
         </record>
         <record id="view_sale_order_line_pivot" model="ir.ui.view">
@@ -255,7 +255,7 @@
             <field name="name">Échéances de facturation</field>
             <field name="res_model">sale.order.line</field>
             <field name="context">{'search_default_to_delivered_or_invoice' : 1}</field>
-            <field name="view_mode">tree,form,kanban,pivot</field>
+            <field name="view_mode">list,form,kanban,pivot</field>
 	    <field name="view_id" ref="project_accounting.view_sale_order_line_delivery_validation"/>
         </record>
         <menuitem name="Échéances de facturation" sequence="5" id="menu_sale_order_line_delivery_validation" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation"/>
@@ -263,7 +263,7 @@
             <field name="name">Mes échéances de facturation du mois</field>
             <field name="res_model">sale.order.line</field>
             <field name="context">{'search_default_my_sales_order_lines': 1, 'search_default_this_month' : 1, 'search_default_to_delivered_or_invoice' : 1}</field>
-            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_mode">list,form,kanban</field>
 	    <field name="view_id" ref="project_accounting.view_sale_order_line_delivery_validation"/>
         </record>
         <menuitem name="Mes échéances de facturation du mois" sequence="4" id="menu_sale_order_line_delivery_validation_month" parent="sale.menu_sale_invoicing" action="action_sale_order_line_delivery_validation_month"/>

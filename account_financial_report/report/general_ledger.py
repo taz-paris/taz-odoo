@@ -1,4 +1,4 @@
-# ?? 2016 Julien Coux (Camptocamp)
+# © 2016 Julien Coux (Camptocamp)
 # Copyright 2020 ForgeFlow S.L. (https://www.forgeflow.com)
 # Copyright 2022 Tecnativa - V??ctor Mart??nez
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
@@ -17,7 +17,9 @@ class GeneralLedgerReport(models.AbstractModel):
     _inherit = "report.account_financial_report.abstract_report"
 
     def _get_analytic_data(self, account_ids):
-        analytic_accounts = self.env["account.analytic.account"].browse(account_ids)
+        analytic_accounts = self.env["account.analytic.account"].search_fetch(
+            [("id", "in", account_ids)], ["name", "code"]
+        )
         analytic_data = {}
         for account in analytic_accounts:
             name = f"[{account.code}] {account.name}" if account.code else account.name
@@ -25,7 +27,9 @@ class GeneralLedgerReport(models.AbstractModel):
         return analytic_data
 
     def _get_taxes_data(self, taxes_ids):
-        taxes = self.env["account.tax"].browse(taxes_ids)
+        taxes = self.env["account.tax"].search_fetch(
+            [("id", "in", taxes_ids)], ["amount", "amount_type", "display_name"]
+        )
         taxes_data = {}
         for tax in taxes:
             taxes_data.update(
@@ -62,7 +66,7 @@ class GeneralLedgerReport(models.AbstractModel):
 
     def _get_acc_prt_accounts_ids(self, company_id, grouped_by):
         accounts_domain = [
-            ("company_id", "=", company_id),
+            ("company_ids", "in", [company_id]),
         ] + self._get_account_type_domain(grouped_by)
         acc_prt_accounts = self.env["account.account"].search(accounts_domain)
         return acc_prt_accounts.ids
@@ -71,7 +75,7 @@ class GeneralLedgerReport(models.AbstractModel):
         self, account_ids, company_id, date_from, base_domain, grouped_by, acc_prt=False
     ):
         accounts_domain = [
-            ("company_id", "=", company_id),
+            ("company_ids", "in", [company_id]),
             ("include_initial_balance", "=", True),
         ]
         if account_ids:
@@ -89,7 +93,7 @@ class GeneralLedgerReport(models.AbstractModel):
         self, account_ids, company_id, date_from, fy_start_date, base_domain
     ):
         accounts_domain = [
-            ("company_id", "=", company_id),
+            ("company_ids", "in", [company_id]),
             ("include_initial_balance", "=", False),
         ]
         if account_ids:
@@ -119,7 +123,7 @@ class GeneralLedgerReport(models.AbstractModel):
         self, account_ids, company_id, fy_start_date, base_domain
     ):
         accounts_domain = [
-            ("company_id", "=", company_id),
+            ("company_ids", "in", [company_id]),
             ("include_initial_balance", "=", False),
         ]
         if account_ids:
@@ -156,7 +160,13 @@ class GeneralLedgerReport(models.AbstractModel):
         return pl_initial_balance
 
     def _get_gl_initial_acc(
-        self, account_ids, company_id, date_from, fy_start_date, base_domain, grouped_by
+        self,
+        account_ids,
+        company_id,
+        date_from,
+        fy_start_date,
+        base_domain,
+        grouped_by,
     ):
         initial_domain_bs = self._get_initial_balances_bs_ml_domain(
             account_ids, company_id, date_from, base_domain, grouped_by
@@ -181,9 +191,8 @@ class GeneralLedgerReport(models.AbstractModel):
             acc_id = gl["account_id"][0]
             data[acc_id] = self._prepare_gen_ld_data_item(gl)
             data[acc_id]["id"] = acc_id
-            if grouped_by:
-                data[acc_id][grouped_by] = False
-        method = "_prepare_gen_ld_data_group_%s" % grouped_by
+            data[acc_id][grouped_by] = False
+        method = f"_prepare_gen_ld_data_group_{grouped_by}"
         if not hasattr(self, method):
             return data
         return getattr(self, method)(data, domain, grouped_by)
@@ -266,7 +275,7 @@ class GeneralLedgerReport(models.AbstractModel):
             unaffected_earnings_account = False
         base_domain = []
         if company_id:
-            base_domain += [("company_id", "=", company_id)]
+            base_domain += [("company_id", "in", [company_id])]
         if partner_ids:
             base_domain += [("partner_id", "in", partner_ids)]
         if only_posted_moves:
@@ -332,7 +341,7 @@ class GeneralLedgerReport(models.AbstractModel):
             "rec_id": move_line["full_reconcile_id"][0]
             if move_line["full_reconcile_id"]
             else False,
-            "rec_name": move_line["full_reconcile_id"][1]
+            "rec_name": move_line["matching_number"]
             if move_line["full_reconcile_id"]
             else "",
             "currency_id": move_line["currency_id"],
@@ -376,7 +385,6 @@ class GeneralLedgerReport(models.AbstractModel):
             domain += [("move_id.state", "=", "posted")]
         else:
             domain += [("move_id.state", "in", ["posted", "draft"])]
-
         if cost_center_ids:
             domain += [("analytic_account_ids", "in", cost_center_ids)]
         return domain
@@ -424,7 +432,9 @@ class GeneralLedgerReport(models.AbstractModel):
                 res.append({"id": item_id, "name": item_name})
             elif move_line["tax_ids"]:
                 for tax_id in move_line["tax_ids"]:
-                    tax_item = self.env["account.tax"].browse(tax_id)
+                    tax_item = self.env["account.tax"].search_fetch(
+                        [("id", "=", tax_id)], ["name"]
+                    )
                     res.append({"id": tax_item.id, "name": tax_item.name})
             else:
                 res.append({"id": 0, "name": "Missing Tax"})
@@ -471,8 +481,9 @@ class GeneralLedgerReport(models.AbstractModel):
             journal_ids.add(move_line["journal_id"][0])
             for tax_id in move_line["tax_ids"]:
                 taxes_ids.add(tax_id)
-            for ids in (move_line["analytic_distribution"] or {}).keys():
-                analytic_ids.update(map(int, ids.split(",")))
+            for analytic_account in move_line["analytic_distribution"] or {}:
+                for analytic_account_id in analytic_account.split(","):
+                    analytic_ids.add(int(analytic_account_id))
             if move_line["full_reconcile_id"]:
                 rec_id = move_line["full_reconcile_id"][0]
                 if rec_id not in full_reconcile_ids:
@@ -480,7 +491,7 @@ class GeneralLedgerReport(models.AbstractModel):
                         {
                             rec_id: {
                                 "id": rec_id,
-                                "name": move_line["full_reconcile_id"][1],
+                                "name": move_line["matching_number"],
                             }
                         }
                     )
@@ -491,15 +502,13 @@ class GeneralLedgerReport(models.AbstractModel):
                 gen_ld_data[acc_id] = self._initialize_data(foreign_currency)
                 gen_ld_data[acc_id]["id"] = acc_id
                 gen_ld_data[acc_id]["mame"] = move_line["account_id"][1]
-                if grouped_by:
-                    gen_ld_data[acc_id][grouped_by] = False
+                gen_ld_data[acc_id][grouped_by] = False
             if acc_id in acc_prt_account_ids:
                 item_ids = self._prepare_ml_items(move_line, grouped_by)
                 for item in item_ids:
                     item_id = item["id"]
                     if item_id not in gen_ld_data[acc_id]:
-                        if grouped_by:
-                            gen_ld_data[acc_id][grouped_by] = True
+                        gen_ld_data[acc_id][grouped_by] = True
                         gen_ld_data[acc_id][item_id] = self._initialize_data(
                             foreign_currency
                         )
@@ -518,9 +527,9 @@ class GeneralLedgerReport(models.AbstractModel):
                         "balance"
                     ]
                     if foreign_currency:
-                        gen_ld_data[acc_id][item_id]["fin_bal"][
-                            "bal_curr"
-                        ] += move_line["amount_currency"]
+                        gen_ld_data[acc_id][item_id]["fin_bal"]["bal_curr"] += (
+                            move_line["amount_currency"]
+                        )
             else:
                 gen_ld_data[acc_id][ml_id] = self._get_move_line_data(move_line)
             gen_ld_data[acc_id]["fin_bal"]["credit"] += move_line["credit"]
@@ -650,7 +659,7 @@ class GeneralLedgerReport(models.AbstractModel):
                     "grouped_by": grouped_by,
                 }
             )
-            if grouped_by and not gen_led_data[acc_id][grouped_by]:
+            if not gen_led_data[acc_id][grouped_by]:
                 account = self._create_account(
                     account, acc_id, gen_led_data, rec_after_date_to_ids
                 )
@@ -664,37 +673,23 @@ class GeneralLedgerReport(models.AbstractModel):
                 ):
                     continue
             else:
-                if grouped_by:
-                    account, list_grouped = self._get_list_grouped_item(
-                        gen_led_data[acc_id],
-                        account,
-                        rec_after_date_to_ids,
-                        hide_account_at_0,
-                        rounding,
+                account, list_grouped = self._get_list_grouped_item(
+                    gen_led_data[acc_id],
+                    account,
+                    rec_after_date_to_ids,
+                    hide_account_at_0,
+                    rounding,
+                )
+                account.update({"list_grouped": list_grouped})
+                if (
+                    hide_account_at_0
+                    and float_is_zero(
+                        gen_led_data[acc_id]["init_bal"]["balance"],
+                        precision_rounding=rounding,
                     )
-                    account.update({"list_grouped": list_grouped})
-                    if (
-                        hide_account_at_0
-                        and float_is_zero(
-                            gen_led_data[acc_id]["init_bal"]["balance"],
-                            precision_rounding=rounding,
-                        )
-                        and account["list_grouped"] == []
-                    ):
-                        continue
-                else:
-                    account = self._create_account_not_show_item(
-                        account, acc_id, gen_led_data, rec_after_date_to_ids, grouped_by
-                    )
-                    if (
-                        hide_account_at_0
-                        and float_is_zero(
-                            gen_led_data[acc_id]["init_bal"]["balance"],
-                            precision_rounding=rounding,
-                        )
-                        and account["move_lines"] == []
-                    ):
-                        continue
+                    and account["list_grouped"] == []
+                ):
+                    continue
             general_ledger += [account]
         return general_ledger
 
@@ -743,7 +738,7 @@ class GeneralLedgerReport(models.AbstractModel):
         centralized_ml = {}
         if isinstance(date_to, str):
             date_to = datetime.datetime.strptime(date_to, "%Y-%m-%d").date()
-        if grouped_by and account[grouped_by]:
+        if account[grouped_by]:
             for item in account["list_grouped"]:
                 for move_line in item["move_lines"]:
                     centralized_ml = self._calculate_centralization(
@@ -765,6 +760,7 @@ class GeneralLedgerReport(models.AbstractModel):
 
     # flake8: noqa: C901
     def _get_report_values(self, docids, data):
+        res = super()._get_report_values(docids, data)
         wizard_id = data["wizard_id"]
         company = self.env["res.company"].browse(data["company_id"])
         company_id = data["company_id"]
@@ -834,7 +830,7 @@ class GeneralLedgerReport(models.AbstractModel):
                         gen_ld_data[account["id"]]["init_bal"]["balance"],
                         rec_after_date_to_ids,
                     )
-                    if grouped_by and account[grouped_by]:
+                    if account[grouped_by]:
                         account[grouped_by] = False
                         del account["list_grouped"]
         general_ledger = sorted(general_ledger, key=lambda k: k["code"])
@@ -845,7 +841,7 @@ class GeneralLedgerReport(models.AbstractModel):
                 continue
             if (
                 not gl_item["currency_id"]
-                or gl_item["currency_id"] != company.currency_id
+                or gl_item["currency_id"] != company.currency_id.id
             ):
                 gl_item["fin_bal"]["bal_curr"] -= gl_item["init_bal"]["bal_curr"]
                 gl_item["init_bal"]["bal_curr"] = 0
@@ -894,29 +890,32 @@ class GeneralLedgerReport(models.AbstractModel):
             if not gl_item["currency_id"] and len(fin_bal_currency_ids) == 1:
                 fin_bal_currency_id = fin_bal_currency_ids[0]
             gl_item["fin_bal_currency_id"] = fin_bal_currency_id
-        return {
-            "doc_ids": [wizard_id],
-            "doc_model": "general.ledger.report.wizard",
-            "docs": self.env["general.ledger.report.wizard"].browse(wizard_id),
-            "foreign_currency": data["foreign_currency"],
-            "company_name": company.display_name,
-            "company_currency": company.currency_id,
-            "currency_name": company.currency_id.name,
-            "date_from": data["date_from"],
-            "date_to": data["date_to"],
-            "only_posted_moves": data["only_posted_moves"],
-            "hide_account_at_0": data["hide_account_at_0"],
-            "show_cost_center": data["show_cost_center"],
-            "general_ledger": general_ledger,
-            "accounts_data": accounts_data,
-            "journals_data": journals_data,
-            "full_reconcile_data": full_reconcile_data,
-            "taxes_data": taxes_data,
-            "centralize": centralize,
-            "analytic_data": analytic_data,
-            "filter_partner_ids": True if partner_ids else False,
-            "currency_model": self.env["res.currency"],
-        }
+        res.update(
+            {
+                "doc_ids": [wizard_id],
+                "doc_model": "general.ledger.report.wizard",
+                "docs": self.env["general.ledger.report.wizard"].browse(wizard_id),
+                "foreign_currency": data["foreign_currency"],
+                "company_name": company.display_name,
+                "company_currency": company.currency_id,
+                "currency_name": company.currency_id.name,
+                "date_from": data["date_from"],
+                "date_to": data["date_to"],
+                "only_posted_moves": data["only_posted_moves"],
+                "hide_account_at_0": data["hide_account_at_0"],
+                "show_cost_center": data["show_cost_center"],
+                "general_ledger": general_ledger,
+                "accounts_data": accounts_data,
+                "journals_data": journals_data,
+                "full_reconcile_data": full_reconcile_data,
+                "taxes_data": taxes_data,
+                "centralize": centralize,
+                "analytic_data": analytic_data,
+                "filter_partner_ids": True if partner_ids else False,
+                "currency_model": self.env["res.currency"],
+            }
+        )
+        return res
 
     def _get_ml_fields(self):
         return self.COMMON_ML_FIELDS + [
@@ -930,4 +929,5 @@ class GeneralLedgerReport(models.AbstractModel):
             "balance",
             "tax_ids",
             "move_name",
+            "matching_number",
         ]

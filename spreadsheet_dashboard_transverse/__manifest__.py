@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 {
     'name': "spreadsheet_dashboard_transverse",
 
@@ -15,7 +14,7 @@
     # Check https://github.com/odoo/odoo/blob/16.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '17.0',
+    'version': "18.0.1.0.0",
 
     'depends': ['spreadsheet_dashboard', 'taz-common', 'project_accounting', 'spreadsheet_filters', 'staffing'],
 

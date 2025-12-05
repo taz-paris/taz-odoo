@@ -8,6 +8,7 @@ from odoo import api, models
 
 
 class VATReport(models.AbstractModel):
+    _inherit = "report.account_financial_report.abstract_report"
     _name = "report.account_financial_report.vat_report"
     _description = "Vat Report Report"
 
@@ -97,7 +98,9 @@ class VATReport(models.AbstractModel):
         return vat_data, tax_data
 
     def _get_tax_group_data(self, tax_group_ids):
-        tax_groups = self.env["account.tax.group"].browse(tax_group_ids)
+        tax_groups = self.env["account.tax.group"].search_fetch(
+            [("id", "in", tax_group_ids)], ["name", "sequence"]
+        )
         tax_group_data = {}
         for tax_group in tax_groups:
             tax_group_data.update(
@@ -135,7 +138,7 @@ class VATReport(models.AbstractModel):
                 vat_report[tax_group_id]["tax"] += tax_move_line["tax"]
                 vat_report[tax_group_id][tax_id]["net"] += tax_move_line["net"]
                 vat_report[tax_group_id][tax_id]["tax"] += tax_move_line["tax"]
-        tax_group_data = self._get_tax_group_data(vat_report.keys())
+        tax_group_data = self._get_tax_group_data(list(vat_report.keys()))
         vat_report_list = []
         for tax_group_id in vat_report.keys():
             vat_report[tax_group_id]["name"] = tax_group_data[tax_group_id]["name"]
@@ -151,7 +154,9 @@ class VATReport(models.AbstractModel):
         return vat_report_list
 
     def _get_tags_data(self, tags_ids):
-        tags = self.env["account.account.tag"].browse(tags_ids)
+        tags = self.env["account.account.tag"].search_fetch(
+            [("id", "in", tags_ids)], ["name"]
+        )
         tags_data = {}
         for tag in tags:
             tags_data.update({tag.id: {"code": "", "name": tag.name}})
@@ -183,7 +188,7 @@ class VATReport(models.AbstractModel):
                         vat_report[tag_id][tax_id]["tax"] += tax_move_line["tax"]
                         vat_report[tag_id]["net"] += tax_move_line["net"]
                         vat_report[tag_id]["tax"] += tax_move_line["tax"]
-        tags_data = self._get_tags_data(vat_report.keys())
+        tags_data = self._get_tags_data(list(vat_report.keys()))
         vat_report_list = []
         for tag_id in vat_report.keys():
             vat_report[tag_id]["name"] = tags_data[tag_id]["name"]
@@ -197,6 +202,7 @@ class VATReport(models.AbstractModel):
         return vat_report_list
 
     def _get_report_values(self, docids, data):
+        res = super()._get_report_values(docids, data)
         wizard_id = data["wizard_id"]
         company = self.env["res.company"].browse(data["company_id"])
         company_id = data["company_id"]
@@ -216,18 +222,21 @@ class VATReport(models.AbstractModel):
             vat_report = self._get_vat_report_tag_data(
                 vat_report_data, tax_data, tax_detail
             )
-        return {
-            "doc_ids": [wizard_id],
-            "doc_model": "vat.report.wizard",
-            "docs": self.env["vat.report.wizard"].browse(wizard_id),
-            "company_name": company.display_name,
-            "currency_name": company.currency_id.name,
-            "date_to": data["date_to"],
-            "date_from": data["date_from"],
-            "based_on": data["based_on"],
-            "tax_detail": data["tax_detail"],
-            "vat_report": vat_report,
-        }
+        res.update(
+            {
+                "doc_ids": [wizard_id],
+                "doc_model": "vat.report.wizard",
+                "docs": self.env["vat.report.wizard"].browse(wizard_id),
+                "company_name": company.display_name,
+                "currency_name": company.currency_id.name,
+                "date_to": data["date_to"],
+                "date_from": data["date_from"],
+                "based_on": data["based_on"],
+                "tax_detail": data["tax_detail"],
+                "vat_report": vat_report,
+            }
+        )
+        return res
 
     def _get_ml_fields_vat_report(self):
         return [

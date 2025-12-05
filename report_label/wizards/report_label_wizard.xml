@@ -8,12 +8,12 @@
                     <group>
                     </group>
                     <field name="line_ids">
-                        <tree editable="bottom" create="false">
+                        <list editable="bottom" create="false">
                             <field name="sequence" widget="handle"/>
                             <field name="res_id" invisible="1"/>
                             <field name="res_name" string="Record"/>
                             <field name="quantity"/>
-                        </tree>
+                        </list>
                     </field>
                     <group name="settings" string="Settings">
                         <group>

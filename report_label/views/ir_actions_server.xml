@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="view_server_action_form" model="ir.ui.view">
+    <record id="ir_actions_server_view_form"  model="ir.ui.view">
+        <field name="name">ir.actions.server.view.form.inherit.report_label</field>
         <field name="model">ir.actions.server</field>
         <field name="inherit_id" ref="base.view_server_action_form"/>
         <field name="arch" type="xml">
             <header position="inside">
                 <button name="report_label_associated_view" type="object" string="View QWeb templates" invisible="state != 'report_label' or not label_template" help="Display a button in the sidebar of related model to open a wizard"/>
             </header>
-            <field name="type" position="after">
-                <field name="label_paperformat_id" invisible="state != 'report_label'"/>
-                <field name="label_template" invisible="state != 'report_label'"/>
-            </field>
+            <xpath expr="//h1" position="after">
+		<group invisible="state != 'report_label'">
+                    <group>
+                        <field name="label_paperformat_id" invisible="state != 'report_label'"/>
+                        <field name="label_template" invisible="state != 'report_label'"/>
+		    </group>
+		</group>
+            </xpath>
         </field>
     </record>
+
     <record id="report_label_action" model="ir.actions.act_window">
         <field name="name">Label Reports</field>
         <field name="res_model">ir.actions.server</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[("state", "=", "report_label")]</field>
         <field name="context">{"default_state": "report_label"}</field>
     </record>

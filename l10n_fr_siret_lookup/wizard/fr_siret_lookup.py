@@ -3,7 +3,7 @@
 # @author: Alexis de Lattre <alexis.delattre@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -12,8 +12,10 @@ class FrSiretLookup(models.TransientModel):
     _description = "Get values from companies"
 
     name = fields.Char(string="Name to Search", required=True)
-    line_ids = fields.One2many("fr.siret.lookup.line", "wizard_id", string="Results")
-    partner_id = fields.Many2one("res.partner", required=True)
+    line_ids = fields.One2many(
+        "fr.siret.lookup.line", "wizard_id", string="Results", readonly=True
+    )
+    partner_id = fields.Many2one("res.partner", readonly=True, required=True)
 
     @api.model
     def default_get(self, fields_list):
@@ -25,7 +27,10 @@ class FrSiretLookup(models.TransientModel):
             partner = self.env["res.partner"].browse(self.env.context["active_id"])
             if not partner.is_company:
                 raise UserError(
-                    _("Partner '%s' is not a company. This action is not relevant.")
+                    self.env._(
+                        f"Partner {partner.display_name} is not a company. "
+                        "This action is not relevant."
+                    )
                     % partner.display_name
                 )
             res.update(
@@ -61,6 +66,7 @@ class FrSiretLookup(models.TransientModel):
             "ape_label": data.get("divisionunitelegale"),
             "legal_type": data.get("naturejuridiqueunitelegale"),
             "staff": data.get("trancheeffectifsunitelegale", 0),
+            "active": data.get("etatadministratifetablissement") == "Actif",
         }
 
     def get_lines(self):
@@ -76,8 +82,10 @@ class FrSiretLookup(models.TransientModel):
             res = self._prepare_partner_from_data(company["fields"])
             companies_vals.append((0, 0, res))
         self.line_ids = companies_vals
+        current_context = dict(self.env.context)
+        current_context["active_test"] = False
         return {
-            "context": self.env.context,
+            "context": current_context,
             "view_mode": "form",
             "res_model": self._name,
             "res_id": self.id,
@@ -105,6 +113,7 @@ class FrSiretLookupLine(models.TransientModel):
     creation_date = fields.Date()
     staff = fields.Char("# Staff")
     category = fields.Char()
+    active = fields.Boolean()
 
     def _prepare_partner_values(self):
         self.ensure_one()
@@ -124,4 +133,6 @@ class FrSiretLookupLine(models.TransientModel):
         self.ensure_one()
         partner = self.wizard_id.partner_id
         partner.write(self._prepare_partner_values())
-        partner.message_post(body=_("Partner updated via the opendatasoft.com API."))
+        partner.message_post(
+            body=self.env._("Partner updated via the opendatasoft.com API.")
+        )

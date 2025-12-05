@@ -288,7 +288,7 @@ class HrEmployeeStaffingReport(models.Model):
                 'name': 'Lignes valorisées sur la période du %s au %s' % (self.start_date.strftime("%d/%m/%Y"), self.end_date.strftime("%d/%m/%Y")),
                 'res_model': 'account.analytic.line',
                 'view_type': 'tree',
-                'view_mode': 'tree',
+                'view_mode': 'list',
                 'view_id': view_id.id,          
                 'target': 'current',                    
                 'domain': [('id', 'in', analytic_lines.ids)],
@@ -409,12 +409,12 @@ class HrEmployeeStaffingReport(models.Model):
     project_days = fields.Float("J. produits mission", help="Nombre de jours produits en mission sur la période (y compris les missions de la fondation)", store=True)
     activity_rate = fields.Float("TACE", 
             help="Taux d'Activité Congés Exclus sur la période : taux d'activité congés exclus. Somme des jours produits sur mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.), sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", 
-            store=True, group_operator='avg')
+            store=True, aggregator='avg')
     activity_rate_with_holidays = fields.Float("TACI", 
             help="% TACI = Taux d’Activité Congés Inclus. Somme des jours produits sur mission exclusivement, sur jours ouvrés. Ce n'est pas un indicateur qui montre si on a bien utilisé le temps disponible, mais il permet de se rendre compte du rythme de production (plus faible en période de congés)",
-            store=True, group_operator='avg')
+            store=True, aggregator='avg')
 
     available_days = fields.Float("J. dispo", help="Nombre de jours facturables - nombre de jours pointés en mission exclusivement (toutes missions, y compris Fondation) (sans inclure donc avant-vente / formations / etc.) sur la période", store=True)
-    activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", store=True, group_operator='avg')
+    activity_previsionnal_rate = fields.Float("% prévisionnel", help="Taux d'activité prévisionnel sur la période = somme des jours staffés en prévisionnel sur une mission sur les jours réellement disponibles (jours ouvrés moins les jours d'absence de tous types)", store=True, aggregator='avg')
     activity_previsionnal_project_days = fields.Float('Prév. (j)', store=True)
     delta_previsionnal_project_days = fields.Float('Delta prev-pointé (j)', store=True)

@@ -44,7 +44,7 @@
         <record id="project_recent_change_action" model="ir.actions.act_window">
             <field name="name">Projets ayant récemment changé de statut</field>
             <field name="res_model">project.project</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">kanban,list,form</field>
             <field name="context">{'search_default_recent_project_changed':1, 'search_default_groupby_stage':1}</field>
         </record>
         <record id="open_view_contact_new_form" model="ir.actions.act_window">

@@ -11,13 +11,13 @@
                             <field name="add_category_ids" widget="many2many_tags"/>
                             <field name="remove_category_ids" widget="many2many_tags"/>
                             <field name="partner_ids" colspan="3" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="first_name"/>
                                     <field name="name"/>
                                     <field name="long_company_name"/>
                                     <field name="industry_id"/>
                                     <field name="parent_id"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                     </group>

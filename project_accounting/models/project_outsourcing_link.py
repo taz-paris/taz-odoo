@@ -37,8 +37,8 @@ class projectOutsourcingLink(models.Model):
                     continue
                 if line.state not in status_list_to_keep:
                     continue
-                if str(rec.project_id.analytic_account_id.id) in line.analytic_distribution.keys():
-                    total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.analytic_account_id.id)]/100.0
+                if str(rec.project_id.account_id.id) in line.analytic_distribution.keys():
+                    total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.account_id.id)]/100.0
             return total
 
     def action_open_purchase_order_lines(self):
@@ -48,13 +48,13 @@ class projectOutsourcingLink(models.Model):
             'name': _('Lignes de BC fournisseur'),
             'type': 'ir.actions.act_window',
             'res_model': 'purchase.order.line',
-            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
             'limit' : 150,
             'groups_limit' : 150,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.account_id.id): 100},
                 'search_default_order_reference' : 1,
             }
         }
@@ -70,7 +70,7 @@ class projectOutsourcingLink(models.Model):
         if filter_list == None :
             filter_list = [('partner_id', '=', self.partner_id.id)]
         if analytic_account_ids == None:
-            analytic_account_ids=[str(self.project_id.analytic_account_id.id)]
+            analytic_account_ids=[str(self.project_id.account_id.id)]
 
         query = self.env['purchase.order.line']._search(filter_list)
         #_logger.info(query)
@@ -107,13 +107,13 @@ class projectOutsourcingLink(models.Model):
             'name': _('Lignes de factures / avoirs fournisseurs'),
             'type': 'ir.actions.act_window',
             'res_model': 'account.move.line',
-            'views': [[False, 'tree'], [False, 'form'], [False, 'kanban']],
+            'views': [[False, 'list'], [False, 'form'], [False, 'kanban']],
             'domain': [('id', 'in', line_ids)],
             'limit' : 150,
             'groups_limit' : 150,
             'context': {
                 'create': False,
-                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.account_id.id): 100},
                 'search_default_group_by_move' : 1,
             }
         }
@@ -141,7 +141,7 @@ class projectOutsourcingLink(models.Model):
             'context': {
                 'create': False,
                 'default_company_id' : self.company_id.id,
-                'default_analytic_distribution': {str(self.project_id.analytic_account_id.id): 100},
+                'default_analytic_distribution': {str(self.project_id.account_id.id): 100},
                 'default_partner_id' : self.partner_id.id,
                 'default_date_planned' : self.project_id.date,
                 'default_previsional_invoice_date' : self.project_id.date,
