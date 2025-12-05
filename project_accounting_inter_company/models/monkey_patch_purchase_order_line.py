@@ -17,10 +17,10 @@ def create(self, vals_list):
     ):
         if order.intercompany_sale_order_id.sudo().state in {"cancel", "done"}:
             raise UserError(
-                _(
+                self.env._(
                     "You can't change this purchase order as the corresponding "
                     "sale is %(state)s",
-                    state=order.state,
+                    state=order.intercompany_sale_order_id.sudo().state,
                 )
             )
         intercompany_user = (
@@ -66,7 +66,7 @@ def write(self, vals):
     closed_sale_lines = sale_lines.filtered(lambda x: x.state not in ["sale", "draft"])
     if closed_sale_lines:
         raise UserError(
-            _(
+            self.env._(
                 "The generated sale orders with reference %(orders)s can't be "
                 "modified. They're either unconfirmed or locked for modifications.",
                 orders=",".join(closed_sale_lines.order_id.mapped("name")),
