@@ -80,10 +80,8 @@ class OAuthResUsers(models.Model):
         _logger.info("====== _auth_oauth_signin")
         _logger.info(validation)
         try:
-            oauth_user = False 
             #oauth_user = self.search([("oauth_uid", "=", oauth_uid), ('oauth_provider_id', '=', provider)])
-            if not oauth_user:#ADU
-                oauth_user = self.search([("login", "=", str(validation['mail']))]) #ADU
+            oauth_user = self.search([("login", "=", str(validation['mail']))]) #ADU
             if not oauth_user:
                 raise AccessDenied()
             assert len(oauth_user) == 1
