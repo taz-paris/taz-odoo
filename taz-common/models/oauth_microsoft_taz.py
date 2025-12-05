@@ -1,5 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 import json
 
 import requests
@@ -12,7 +10,6 @@ from odoo.addons.auth_signup.models.res_users import SignupError
 import datetime
 
 from odoo.addons import base
-#base.models.res_users.USER_PRIVATE_FIELDS.append('oauth_access_token')
 base.models.res_users.USER_PRIVATE_FIELDS.append('oauth_refresh_token')#ADU
 
 import logging
@@ -23,23 +20,6 @@ class OAuthResUsers(models.Model):
 
     oauth_token_expires_at = fields.Char("Date d'expiration du token") #ADU
     oauth_refresh_token = fields.Char("Refresh token") #ADU
-
-    def _auth_oauth_rpc(self, endpoint, access_token):
-        if self.env['ir.config_parameter'].sudo().get_param('auth_oauth.authorization_header'):
-            response = requests.get(endpoint, headers={'Authorization': 'Bearer %s' % access_token}, timeout=10)
-        else:
-            response = requests.get(endpoint, params={'access_token': access_token}, timeout=10)
-
-        if response.ok: # nb: could be a successful failure
-            return response.json()
-
-        auth_challenge = werkzeug.http.parse_www_authenticate_header(
-            response.headers.get('WWW-Authenticate'))
-        if auth_challenge.type == 'bearer' and 'error' in auth_challenge:
-            return dict(auth_challenge)
-
-        return {'error': 'invalid_request'}
-
 
     @api.model
     def _auth_oauth_validate(self, provider, access_token):
