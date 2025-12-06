@@ -497,13 +497,14 @@ class tazResPartner(models.Model):
 
      force_child_is_company = fields.Boolean('force_child_is_company')
 
-     @api.model
-     def create(self, vals):
+     @api.model_create_multi
+     def create(self, vals_list):
         # In V17, the context added to the one2many widget is not sent to create() method when 1/click on Add a line 2/fill the form 3/clik Save and close 4/clik the cloud icone on the parent view 
         #   So when adding default_is_company = False in the child_ids_contact context in the taz-common.company_form view, it's not enought, it's not send to back. The vals dict received by the reate() méthod  
         #      do not contain is_company key... and is ovewritten by the default_is_company=True of the action taz-common.action_partner_company
         #   So, on the taz-common.company_form view, when creating a new contact (using the Company's contacts tab) we need to enforce the is_company=False
         # TODO : check on V18 if it's corected.
-        if vals.get('force_child_is_company') == True:
-            vals['is_company'] = False
-        return super().create(vals)
+        for vals in vals_list:
+            if vals.get('force_child_is_company') == True:
+                vals['is_company'] = False
+        return super().create(vals_list)
