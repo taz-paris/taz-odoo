@@ -31,7 +31,7 @@ def _inter_company_create_sale_order(self, dest_company):
         or dest_company.currency_id.id
     ):
         raise UserError(
-            self.env._((
+            self.env._(
                 "You cannot create SO from PO because "
                 "sale price list currency is different than "
                 "purchase price list currency."
