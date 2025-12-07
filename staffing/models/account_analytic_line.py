@@ -307,6 +307,24 @@ class staffingAnalyticLine(models.Model):
         return amount, cost_line
 
 
+    def check_amount_consistency(self):
+        _logger.info("---- check_amount_consistency")
+        records = self.env['account.analytic.line'].search([('category', 'in', ['project_employee_validated']), ('employee_id', 'not in', [False]),('date', '>=', '2020-01-01')]) 
+        #records = self.env['account.analytic.line'].search([('category', 'in', ['project_forecast']), ('employee_id', 'not in', [False]),('date', '>=', '2025-01-01')]) 
+        _logger.info("---- Lines")
+        total = len(records)
+        _logger.info("Total : %s" % total)
+        i = 0
+        for rec in records:
+            i = i+1
+            if i%1000 == 0:
+                _logger.info("============================ compteur %s / %s" % (i, total))
+            amount, cost_line = rec.compute_amount()
+            if "{:.3f}".format(rec.amount) != "{:.3f}".format(float_round(amount, precision_digits=3, precision_rounding=None, rounding_method='HALF-UP')) :
+                _logger.info(rec.read())
+                _logger.info("          Inconsistency detected amount of line in database =%s  ===> amount computed =%s" % (rec.amount, amount))
+
+
     def refresh_amount(self):
         _logger.info("---- refresh_amount")
         _logger.info(self.read())

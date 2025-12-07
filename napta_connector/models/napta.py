@@ -964,7 +964,7 @@ class naptaHrContract(models.Model):
                 continue
 
             if user_history['attributes']['start_date'] == None :
-                #_logger.info("----- Evnement non importé sur Odoo car il n'a pas de date de fin")
+                #_logger.info("----- Evnement non importé sur Odoo car il n'a pas de date de début.")
                 #_logger.info(user_history['attributes'])
                 continue
 
