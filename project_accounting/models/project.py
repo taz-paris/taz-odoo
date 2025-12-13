@@ -87,6 +87,8 @@ class projectAccountProject(models.Model):
         #_logger.info('----- projet WRITE odooID=%s' % str(self.id))
         #_logger.info(vals)
         for record in self :
+            if 'futur_internal_revenue_current_year' in vals.keys():
+                vals['date_last_update_futur_internal_revenue_current_year'] = datetime.now()
             if 'stage_id' in vals.keys():
                 #_logger.info('stage ID est dans le dic vals')
                 vals['state_last_change_date'] = datetime.today()
@@ -1090,18 +1092,20 @@ class projectAccountProject(models.Model):
             if len(purchase_order_line_ids) :
                 raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)." % (rec.number, rec.name)))
 
-    @api.depends('accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.production_balance', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance')
+    @api.depends('accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.production_balance', 'accounting_closing_ids.production_external_balance', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance')
     def compute_has_provision_running(self):
         for rec in self:
             #_logger.info('=======compute_has_provision_running')
             rec.has_provision_running = False
             rec.last_closing_production_balance = 0.0
+            rec.last_closing_production_external_balance = 0.0
             last_closing_sorted = rec.accounting_closing_ids.filtered(lambda r: r.is_validated==True).sorted(key=lambda r: r.closing_date, reverse=True)
             if len(last_closing_sorted):
                 last_closing = last_closing_sorted[0]
                 if last_closing.pca_balance or last_closing.fae_balance or last_closing.fnp_balance or last_closing.cca_balance or last_closing.production_balance or last_closing.production_external_balance :
                     rec.has_provision_running = True
                 rec.last_closing_production_balance = last_closing.production_balance
+                rec.last_closing_production_external_balance = last_closing.production_external_balance
 
 
     def compute_margin_graph(self):
@@ -1278,10 +1282,11 @@ class projectAccountProject(models.Model):
         project_ids = self.env['project.project'].search([])
         for project_id in project_ids:
             project_id.begin_year_stage_id = project_id.stage_id.id
+            project_id.futur_internal_revenue_current_year = 0.0
         _logger.info("FIN cron_update_begin_year_stage_id")
 
 
-    @api.depends('reporting_sum_company_outsource_code3_code_4', 'accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance')  # Recalculé lorsqu'une nouvelle cloture comptable est ajoutée ou modifiée. On recalcule aussi les valeur au 1er janvier (begin_year_past_internal_revenu et begin_year_futur_internal_revenue) car la clôture au 31/12 est enregistrée au cours du premier trimestre, bien après le 1er janvier
+    @api.depends('reporting_sum_company_outsource_code3_code_4', 'futur_internal_revenue_current_year', 'accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance', 'accounting_closing_ids.production_external_destocking')  # Recalculé lorsqu'une nouvelle cloture comptable est ajoutée ou modifiée. On recalcule aussi les valeur au 1er janvier (begin_year_past_internal_revenu et begin_year_futur_internal_revenue) car la clôture au 31/12 est enregistrée au cours du premier trimestre, bien après le 1er janvier
     def compute_begin_year_futur_revenue(self):
         #_logger.info('--- compute_begin_year_futur_revenue')
         for rec in self:
@@ -1291,9 +1296,9 @@ class projectAccountProject(models.Model):
             begin_year_past_internal_revenue = 0.0
             past_internal_revenue = 0.0
             for accounting_closing_id in rec.accounting_closing_ids:
-                past_internal_revenue += accounting_closing_id.internal_revenue
+                past_internal_revenue += accounting_closing_id.internal_revenue - accounting_closing_id.production_external_destocking
                 if accounting_closing_id.closing_date < date_begin_year :
-                    begin_year_past_internal_revenue += accounting_closing_id.internal_revenue
+                    begin_year_past_internal_revenue += accounting_closing_id.internal_revenue - accounting_closing_id.production_external_destocking
             rec.begin_year_past_internal_revenue = begin_year_past_internal_revenue
             rec.past_internal_revenue = past_internal_revenue
 
@@ -1306,6 +1311,8 @@ class projectAccountProject(models.Model):
                 rec.futur_internal_revenue = 0.0
             else :
                 rec.futur_internal_revenue = rec.reporting_sum_company_outsource_code3_code_4 - rec.past_internal_revenue
+
+            rec.futur_internal_revenue_next_year = rec.futur_internal_revenue - rec.futur_internal_revenue_current_year
 
 
     @api.model
@@ -1489,12 +1496,16 @@ class projectAccountProject(models.Model):
     reporting_sum_company_outsource_code3_code_4_delta = fields.Float('Evol PDC J-31', help="Evolution du montant de la prise de commande du projet sur les 31 derniers jours calendaires", compute=compute_reporting_sum_company_outsource_code3_code_4_delta, store=False)
 
     begin_year_stage_id = fields.Many2one('project.project.stage', string='Statut au 1er janvier N', ondelete='restrict', groups="project.group_project_stages", readonly=True)
-    begin_year_past_internal_revenue = fields.Monetary("CA net déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net de toutes les clôtures comptables du projet antérieures ou égales au 31/12/N-1")
-    begin_year_futur_internal_revenue = fields.Monetary("CA à venir (daté du 1er janvier N)", compute=compute_begin_year_futur_revenue, store=True, help="Suivant l'étape du projet au 1/1/N : \n    - Si le projet était en code 3/4/5 au 1/1/N = [Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet <= 31/12N-1]\n    - Sinon, 0")
+    begin_year_past_internal_revenue = fields.Monetary("CA net de S/T déjà reconnu au 31/12/N-1", compute=compute_begin_year_futur_revenue, store=True, help="Somme des [CA net - destockag externe] de toutes les clôtures comptables du projet antérieures ou égales au 31/12/N-1")
+    begin_year_futur_internal_revenue = fields.Monetary("CA net de S/T à venir (daté du 1er janvier N)", compute=compute_begin_year_futur_revenue, store=True, help="Suivant l'étape du projet au 1/1/N : \n    - Si le projet était en code 3/4/5 au 1/1/N = [Prise de commande à date] - [CA net de S/T déjà reconnu dans les clôtures comptables du projet <= 31/12N-1]\n    - Sinon, 0")
 
-    past_internal_revenue = fields.Monetary("CA net déjà reconnu à date", compute=compute_begin_year_futur_revenue, store=True, help="Somme des CA net de toutes les clôtures comptables du projet")
-    futur_internal_revenue = fields.Monetary("CA net à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA déjà reconnu dans les clôtures comptables du projet]")
+    past_internal_revenue = fields.Monetary("CA net de S/T déjà reconnu à date", compute=compute_begin_year_futur_revenue, store=True, help="Somme des [CA net - destockage externe] de toutes les clôtures comptables du projet")
+    futur_internal_revenue = fields.Monetary("CA net de S/T à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA net de S/T déjà reconnu à date]")
+    futur_internal_revenue_current_year = fields.Monetary("CA net de S/T estimé pour l'année en cours", help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre avant le 31/12/N (inclus)")
+    futur_internal_revenue_next_year = fields.Monetary("CA net de S/T estimé pour l'année prochaine", compute=compute_begin_year_futur_revenue, store=True, help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre après le 31/12/N (exclus)")
+    date_last_update_futur_internal_revenue_current_year = fields.Datetime("Date MAJ CA N", help="Date de dernière MAJ du CA à reconnaitre cette année")
     last_closing_production_balance = fields.Monetary("Stock de production interne", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production interne après destokage de la clôture validée la plus récente")
+    last_closing_production_external_balance = fields.Monetary("Stock de production externe", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production externe après destokage de la clôture validée la plus récente")
 
     # CAPITALIZATION
     is_filled_sales_proposal_indexation = fields.Boolean("Champ Proposition commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé")

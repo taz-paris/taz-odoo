@@ -425,19 +425,29 @@
                                 </field>
                             </page>
                             <page name="steering" string="Pilotage">
-                                <group>
-                                    <group string="Au 1er janvier N (si la cloture au 31/12/N-1 est faite !)">
+                                <group col="3">
+                                    <group string="Au 1er janvier N (si la cloture au 31/12/N-1 est faite !)" colspan="1">
                                         <field name="begin_year_stage_id"/>
                                         <field name="begin_year_past_internal_revenue"/>
                                         <field name="begin_year_futur_internal_revenue"/>
                                     </group>
-                                    <group string="À date">
-                                        <field name="reporting_sum_company_outsource_code3_code_4"/>
-                                        <field name="reporting_sum_company_outsource_code3_code_4_delta"/>
-                                        <field name="past_internal_revenue"/>
-                                        <field name="futur_internal_revenue"/>
-                                        <field name="last_closing_production_balance"/>
-                                    </group>
+                                    <group string="À date" col="3" colspan="2">
+					    <group>
+						<field name="reporting_sum_company_outsource_code3_code_4"/>
+						<field name="reporting_sum_company_outsource_code3_code_4_delta"/>
+					    </group>
+					    <group>
+						<field name="past_internal_revenue"/>
+						<field name="futur_internal_revenue"/>
+						<field name="futur_internal_revenue_current_year" string="... à venir &lt;= 31/12/N"/>
+						<field name="futur_internal_revenue_next_year" string="... à venir &gt; 31/12/N"/>
+						<field name="date_last_update_futur_internal_revenue_current_year"/>
+					    </group>
+					    <group>
+						<field name="last_closing_production_balance"/>
+						<field name="last_closing_production_external_balance"/>
+					    </group>
+				    </group>
                                 </group>
                             </page>
                             <page name="account_closing" string="Clôtures comptables">
