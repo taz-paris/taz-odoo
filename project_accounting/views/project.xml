@@ -439,7 +439,7 @@
 					    <group>
 						<field name="past_internal_revenue"/>
 						<field name="futur_internal_revenue"/>
-						<field name="futur_internal_revenue_current_year" string="... à venir &lt;= 31/12/N"/>
+						<field name="futur_internal_revenue_current_year" string="... à venir &lt;= 31/12/N" readonly="(futur_internal_revenue_current_year == 0) and (stage_id not in [6, 2, 9])"/>
 						<field name="futur_internal_revenue_next_year" string="... à venir &gt; 31/12/N"/>
 						<field name="date_last_update_futur_internal_revenue_current_year"/>
 					    </group>

@@ -1503,7 +1503,7 @@ class projectAccountProject(models.Model):
     futur_internal_revenue = fields.Monetary("CA net de S/T à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA net de S/T déjà reconnu à date]")
     futur_internal_revenue_current_year = fields.Monetary("CA net de S/T estimé pour l'année en cours", help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre avant le 31/12/N (inclus)")
     futur_internal_revenue_next_year = fields.Monetary("CA net de S/T estimé pour l'année prochaine", compute=compute_begin_year_futur_revenue, store=True, help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre après le 31/12/N (exclus)")
-    date_last_update_futur_internal_revenue_current_year = fields.Datetime("Date MAJ CA N", help="Date de dernière MAJ du CA à reconnaitre cette année")
+    date_last_update_futur_internal_revenue_current_year = fields.Datetime("Date MAJ CA N", readonly=True, help="Date de dernière MAJ du CA à reconnaitre cette année")
     last_closing_production_balance = fields.Monetary("Stock de production interne", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production interne après destokage de la clôture validée la plus récente")
     last_closing_production_external_balance = fields.Monetary("Stock de production externe", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production externe après destokage de la clôture validée la plus récente")
 
