@@ -328,7 +328,7 @@ class projectAccountingClosing(models.Model):
     production_total_balance = fields.Monetary('Solde total prod après destockage', compute=compute, store=True, group_operator='sum')
     
     gross_revenue = fields.Monetary('CA brut', compute=compute, store=True, help="CA brut = factures/avoirs clients + PCA + FAE")
-    internal_revenue = fields.Monetary('CA net d\achats AUTRES (mais pas de S/T)', compute=compute, store=True, help="CA net d'achats AUTRES = CA brut - factures/avoires fournisseurs AUTRES + CCA + FNP")
+    internal_revenue = fields.Monetary('CA net d\'achats AUTRES (mais pas de S/T)', compute=compute, store=True, help="CA net d'achats AUTRES = CA brut - factures/avoires fournisseurs AUTRES + CCA + FNP")
     internal_margin_amount = fields.Monetary('Marge nette d\'achats AUTRES (€)', compute=compute, store=True, help="Marge nette (€) = CA net - destockage interne - destockage externe")
     internal_margin_rate = fields.Monetary('Marge nette d\'achats AURTES (%)', compute=compute, store=True, group_operator=False)
 
