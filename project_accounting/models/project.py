@@ -23,7 +23,8 @@ class projectAccountProject(models.Model):
     _inherit = "project.project"
     _order = "number desc"
     _sql_constraints = [
-        ('number_uniq', 'UNIQUE (number)',  "Impossible d'enregistrer deux projets avec le même numéro.")
+        ('number_uniq', 'UNIQUE (number)',  "Impossible d'enregistrer deux projets avec le même numéro."),
+        ('check_probability', 'check(probability >= 0 and probability <= 100)', 'La probabilité de conclure l’affaire doit être comprise entre 0 % et 100 % !')
     ]
 
     @api.constrains('stage_id', 'partner_id', 'date_win_loose')
@@ -89,6 +90,8 @@ class projectAccountProject(models.Model):
         for record in self :
             if 'futur_internal_revenue_current_year' in vals.keys():
                 vals['date_last_update_futur_internal_revenue_current_year'] = datetime.now()
+            if 'expected_revenue' in vals.keys() or 'probability' in vals.keys():
+                vals['date_last_update_prorated_revenue'] = datetime.now()
             if 'stage_id' in vals.keys():
                 #_logger.info('stage ID est dans le dic vals')
                 vals['state_last_change_date'] = datetime.today()
@@ -1314,6 +1317,15 @@ class projectAccountProject(models.Model):
 
             rec.futur_internal_revenue_next_year = rec.futur_internal_revenue - rec.futur_internal_revenue_current_year
 
+    @api.depends('expected_revenue', 'probability', 'stage_id')
+    def _compute_prorated_revenue(self):
+        for rec in self:
+            if rec.stage_id.id in [False, 1, 7]: #Pas défini / code_1 = Avant-vente froide / code_2 = Avant-vente chaude
+                rec.prorated_revenue = round((rec.expected_revenue or 0.0) * (rec.probability or 0) / 100.0, 2)
+            else :
+                rec.prorated_revenue = 0.0
+
+
 
     @api.model
     def _create_analytic_account_from_values(self, values):
@@ -1492,6 +1504,8 @@ class projectAccountProject(models.Model):
     margin_graph = fields.Char("Margin graph", compute=compute_margin_graph)
     activity_graph = fields.Char("Activity graph", compute=compute_margin_graph)
 
+
+    # STEERING DATA
     reporting_sum_company_outsource_code3_code_4 = fields.Float('Prise de commande', tracking=True, help="Somme Montant dispositif interne + markup S/T + markup cotraitant + marge ventes Autres (ex : séminaires) pour les projets en code 3-Accord client (données saisies par le DM sur l'onglet Structure au lancement) ou en code 4/5/6 (données calculées et affichées sur l'onglet Synthèse à date).", compute=compute_reporting_shortcuts, store=True)
     reporting_sum_company_outsource_code3_code_4_delta = fields.Float('Evol PDC J-31', help="Evolution du montant de la prise de commande du projet sur les 31 derniers jours calendaires", compute=compute_reporting_sum_company_outsource_code3_code_4_delta, store=False)
 
@@ -1501,11 +1515,17 @@ class projectAccountProject(models.Model):
 
     past_internal_revenue = fields.Monetary("CA net de S/T déjà reconnu à date", compute=compute_begin_year_futur_revenue, store=True, help="Somme des [CA net - destockage externe] de toutes les clôtures comptables du projet")
     futur_internal_revenue = fields.Monetary("CA net de S/T à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA net de S/T déjà reconnu à date]")
-    futur_internal_revenue_current_year = fields.Monetary("CA net de S/T estimé pour l'année en cours", help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre avant le 31/12/N (inclus)")
+    futur_internal_revenue_current_year = fields.Monetary("CA net de S/T estimé pour l'année en cours", tracking=True, help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre avant le 31/12/N (inclus)")
     futur_internal_revenue_next_year = fields.Monetary("CA net de S/T estimé pour l'année prochaine", compute=compute_begin_year_futur_revenue, store=True, help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre après le 31/12/N (exclus)")
     date_last_update_futur_internal_revenue_current_year = fields.Datetime("Date MAJ CA N", readonly=True, help="Date de dernière MAJ du CA à reconnaitre cette année")
     last_closing_production_balance = fields.Monetary("Stock de production interne", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production interne après destokage de la clôture validée la plus récente")
     last_closing_production_external_balance = fields.Monetary("Stock de production externe", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production externe après destokage de la clôture validée la plus récente")
+
+    # LEAD
+    expected_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', tracking=True, default=0.0)
+    probability = fields.Float('Probablité (de 0 à 100)', tracking=True, default=0.0, help="Probabilité de conclure l'affaire")
+    prorated_revenue = fields.Monetary('Espérance de PDC pondérée (hors S/T)', store=True, compute="_compute_prorated_revenue")
+    date_last_update_prorated_revenue = fields.Datetime("Date MAJ espérance CA", readonly=True, help="Date de dernière MAJ de l'espérence de prise de commande pondérée, induite par l'évolution de l'espérance de prise de commande, ou de la probabilité de conclure l'affaire.")
 
     # CAPITALIZATION
     is_filled_sales_proposal_indexation = fields.Boolean("Champ Proposition commerciale valorisé", store=True, compute=compute, help="FAUX si le champ Proposition commerciale dans l'onglet Capitalisation n'est pas valorisé")

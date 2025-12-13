@@ -49,7 +49,7 @@ class tazCustomerBookGoal(models.Model):
             else :
                 record.period_ratio = 0.0
             record.book_last_month, last_month_project_ids = record.industry_id.get_book_delta(begin_year, end_year, record.company_id)
-            record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_number_of_opportunities(record.company_id)
+            record.expected_prorated_revenue, record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_opportunities(record.company_id)
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -74,7 +74,7 @@ class tazCustomerBookGoal(models.Model):
         return res
 
     def action_open_project_opportunities(self):
-        number_of_opportunities, opportunities_project_ids = self.industry_id.get_number_of_opportunities(self.company_id)
+        expected_prorated_revenue, number_of_opportunities, opportunities_project_ids = self.industry_id.get_opportunities(self.company_id)
         view_id = self.env.ref("project_accounting.project_tree")
         return {
                 'type': 'ir.actions.act_window',
@@ -142,6 +142,7 @@ class tazCustomerBookGoal(models.Model):
     period_ratio = fields.Float("Ratio objectif", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
+    expected_prorated_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', compute=compute)
     comment = fields.Text("Commentaire pour cette année")
 
 

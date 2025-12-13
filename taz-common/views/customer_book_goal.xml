@@ -18,6 +18,7 @@
                     <field name="book_last_month" optional="show" string="Commande J-31" sum="Total"/>
                     <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
                     <field name="number_of_opportunities" optional="show" string="Nb AVT" sum="Total"/>
+                    <field name="expected_prorated_revenue" optional="show" string="PDC espérée" sum="Total"/>
                     <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
                     <field name="comment" optional="show" widget="text"/>
                 </tree>

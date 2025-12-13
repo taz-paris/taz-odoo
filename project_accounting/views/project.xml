@@ -100,6 +100,13 @@
                     <field name="outsource_part_marging_amount_initial" optional="hide"/>
                     <field name="cosource_part_marging_amount_initial" optional="hide"/>
                     <field name="other_part_marging_amount_initial" optional="hide"/>
+                    <field name="expected_revenue" optional="hide"/>
+                    <field name="probability" optional="hide"/>
+                    <field name="prorated_revenue" optional="hide" widget="progressbar"/>
+                    <field name="date_last_update_prorated_revenue" optional="hide"/>
+                    <field name="futur_internal_revenue_current_year" optional="hide"/>
+                    <field name="futur_internal_revenue_next_year" optional="hide"/>
+                    <field name="date_last_update_futur_internal_revenue_current_year" optional="hide"/>
                 </tree>
             </field>
         </record>
@@ -227,6 +234,16 @@
                             </group>
                         </group>
                         <notebook>
+                            <page name="presale" string="Avant-vente" invisible="stage_id not in [False, 1, 7]">
+                                <group>
+					<group>
+						<field name="expected_revenue"/>
+						<field name="probability"/>
+						<field name="prorated_revenue"/>
+						<field name="date_last_update_prorated_revenue"/>
+					</group>
+				</group>
+			    </page>
                             <page name="dashboard" string="Synthèse à date">
                                 <group col="3">
                                     <group string="Commandes du client">
