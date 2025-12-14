@@ -101,8 +101,8 @@
                     <field name="cosource_part_marging_amount_initial" optional="hide"/>
                     <field name="other_part_marging_amount_initial" optional="hide"/>
                     <field name="expected_revenue" optional="hide"/>
-                    <field name="probability" optional="hide"/>
-                    <field name="prorated_revenue" optional="hide" widget="progressbar"/>
+                    <field name="probability" optional="hide" widget="progressbar"/>
+                    <field name="prorated_revenue" optional="hide"/>
                     <field name="date_last_update_prorated_revenue" optional="hide"/>
                     <field name="futur_internal_revenue_current_year" optional="hide"/>
                     <field name="futur_internal_revenue_next_year" optional="hide"/>
