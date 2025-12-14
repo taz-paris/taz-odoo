@@ -99,7 +99,7 @@ class ContactUserLink(models.Model):
                 if last_draft_date and 'createdDateTime' in last_draft_date.keys() :
                     last_draft_date = datetime.datetime.strptime(last_draft_date['createdDateTime'], "%Y-%m-%dT%H:%M:%SZ")
                     last_draft_date = datetime.date(last_draft_date.year, last_draft_date.month, last_draft_date.day)
-            if (rec.communication_preference not in ['email_perso', 'email_auto']) or (last_draft_date and (last_draft_date > datetime.date.today() + relativedelta(months=-2, day=1))) or (self.env.user.id != rec.user_id.id) or not rec.mail_template :
+            if (rec.communication_preference not in ['email_perso']) or (last_draft_date and (last_draft_date > datetime.date.today() + relativedelta(months=-2, day=1))) or (self.env.user.id != rec.user_id.id) or not rec.mail_template :
                 rec.can_generate_office365_mail_draft = False 
             else :
                 rec.can_generate_office365_mail_draft = True
@@ -138,10 +138,8 @@ class ContactUserLink(models.Model):
         ('tu_prenom', 'Tu + prénom'),
         ], "Tu/vous")
     communication_preference = fields.Selection([
-            ('email_auto', "email auto"),
-            ('email_perso', "email personalisé"),
-            ('paper_auto', "papier auto"),
-            ('paper_perso', "papier personalisé"),
+            ('email_perso', "email"),
+            ('paper_perso', "papier"),
         ], string="Pref. com. voeux") 
     mail_template = fields.Many2one('ir.ui.view', "Modèle mail voeux", domain=[('name', 'ilike', 'voeux'), ('type', '=', 'qweb')])
     last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
