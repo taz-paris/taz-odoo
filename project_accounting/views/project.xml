@@ -210,7 +210,7 @@
                                 <field name="company_id" invisible="1"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                                 <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
-                    		<field name="source_id" required="stage_id in [1, 7, 6]"/>
+                    		        <field name="source_id" required="stage_id in [1, 7, 6]"/>
                                 <field name="stage_id" required="1"/>
                                 <field name="state_last_change_date" invisible="1" readonly="1"/>
                                 <field name="date_win_loose" invisible="0"/>
