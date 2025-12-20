@@ -149,13 +149,29 @@ class projectAccountingSaleOrderLine(models.Model):
             line.price_unit = line.order_id.target_amount - (line.order_id.amount_untaxed -line.price_subtotal)
 
 
+    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity')
+    def _compute_qty_invoiced(self):
+        super()._compute_qty_invoiced()
+        for line in self:
+            #Complément nécessaire pour que les factures de régularisation (on émet une facture FOURNISSEUR vers un Client : out_invoice/out_refund) soient comptées sur les BC Client
+            #       car en natif Odoo, seuls les factures et avoirs CLIENT (out_invoice et out_refund) sont décomptés de la quantitée facturée/restant à facturée sur le BC Client
+            #C'est notamment utile dans les projets où l'on a créé une facture FOURNISSEUR de management fees, et que le fournisseur devient aussi un client intermédiaire du projet.
+            #   Comme un même tiers ne peut pas être à la fois client et fournisseur sur un même projet, on doit basculer la facture FOURNISSEUR sur le BC client.
+            #   Exemple : projet 24TS237 -> facturer fournisseur de management fees 25/06/FF033 rappartiée en fin de projet sur le BCC PO2501006458
+            for inv_line in line._get_invoice_lines():
+                if inv_line.move_id.state not in ['cancel'] or inv_line.move_id.payment_state == 'invoicing_legacy':
+                    if inv_line.move_id.move_type == 'in_invoice':
+                        line.qty_invoiced -= inv_line.product_uom_id._compute_quantity(inv_line.quantity, line.product_uom)
+                    elif inv_line.move_id.move_type == 'in_refund':
+                        line.qty_invoiced += inv_line.product_uom_id._compute_quantity(inv_line.quantity, line.product_uom)
+
+
     @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'state', 'direct_payment_purchase_order_line_id')
     def _compute_qty_to_invoice(self):
         super()._compute_qty_to_invoice()
         for line in self:
             if line.direct_payment_purchase_order_line_id:
                 line.qty_to_invoice = 0
-    #TODO : ajouter un attribut permettant de suivre les PV / validation de facture des sous-traitants en paiement direct ?
 
 
     @api.constrains('direct_payment_purchase_order_line_id', 'analytic_distribution', 'price_subtotal')

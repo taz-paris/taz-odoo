@@ -269,14 +269,22 @@ class staffingAnalyticLine(models.Model):
                 return result #sinon boucle infinie
 
             for timesheet in sudo_self:
+                if not timesheet.account_id.active:
+                    project_plan, _other_plans = self.env['account.analytic.plan']._get_all_plans()
+                    raise ValidationError(_(
+                        "Timesheets must be created with at least an active analytic account defined in the plan '%(plan_name)s'.",
+                        plan_name=project_plan.name
+                    ))
+                accounts = timesheet._get_analytic_accounts()
+                companies = timesheet.company_id | accounts.company_id | timesheet.task_id.company_id | timesheet.project_id.company_id
+                if len(companies) > 1:
+                    raise ValidationError(_('The project, the task and the analytic accounts of the timesheet must belong to the same company.'))
+
                 amount_converted, cost_line = timesheet.compute_amount()
-                #if not amount_converted:
-                #    continue
                 result[timesheet.id].update({
                     'amount': amount_converted,
                     'hr_cost_id' : cost_line,
                 })
-        #_logger.info(result)
         return result
     
 
@@ -305,6 +313,24 @@ class staffingAnalyticLine(models.Model):
         #on ne réalise pas de conversion monaitaire car ça n'est pas utile et que ça force une précision à 2 décimales alors que l'on a besoin de 3 décimales
 
         return amount, cost_line
+
+
+    def check_amount_consistency(self):
+        _logger.info("---- check_amount_consistency")
+        records = self.env['account.analytic.line'].search([('category', 'in', ['project_employee_validated']), ('employee_id', 'not in', [False]),('date', '>=', '2020-01-01')]) 
+        #records = self.env['account.analytic.line'].search([('category', 'in', ['project_forecast']), ('employee_id', 'not in', [False]),('date', '>=', '2025-01-01')]) 
+        _logger.info("---- Lines")
+        total = len(records)
+        _logger.info("Total : %s" % total)
+        i = 0
+        for rec in records:
+            i = i+1
+            if i%1000 == 0:
+                _logger.info("============================ compteur %s / %s" % (i, total))
+            amount, cost_line = rec.compute_amount()
+            if "{:.3f}".format(rec.amount) != "{:.3f}".format(float_round(amount, precision_digits=3, precision_rounding=None, rounding_method='HALF-UP')) :
+                _logger.info(rec.read())
+                _logger.info("          Inconsistency detected amount of line in database =%s  ===> amount computed =%s" % (rec.amount, amount))
 
 
     def refresh_amount(self):

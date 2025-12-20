@@ -45,6 +45,7 @@
                                         <field name="book_last_month" optional="show" string="Prise commande J-31" sum="Total"/>
                                         <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
                                         <field name="number_of_opportunities" optional="show" sum="Total"/>
+                                        <field name="expected_prorated_revenue" optional="show" sum="Total"/>
                                         <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
                                     </list>
                                 </field>

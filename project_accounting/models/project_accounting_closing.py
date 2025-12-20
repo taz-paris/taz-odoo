@@ -125,10 +125,11 @@ class projectAccountingClosing(models.Model):
             rec.purchase_period_amount = -1 * purchase_period_subtotal
 
             purchase_outsourcing_period_amount = 0.0
-            for purchase_periode_line_id in purchase_periode_line_ids:
-                purchase_periode_line = self.env['account.move.line'].browse(purchase_periode_line_id)
-                if purchase_periode_line.product_id and purchase_periode_line.product_id.is_external_production == True :
-                    purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.account_id.id)]/100.0
+            if rec.closing_date and (rec.closing_date > datetime.date(2025,9,30)) : # Les champs propres au stock externes ont été ajoutés en octobre 2025. Avant cette date, la production externe était gérée comme des achats "autres" (gestion avec des provisions et non suivant la logique de rpoduction / stock / destockage).
+                for purchase_periode_line_id in purchase_periode_line_ids:
+                    purchase_periode_line = self.env['account.move.line'].browse(purchase_periode_line_id)
+                    if purchase_periode_line.product_id and purchase_periode_line.product_id.is_external_production == True :
+                        purchase_outsourcing_period_amount += purchase_periode_line.price_subtotal_signed * purchase_periode_line.analytic_distribution[str(proj_id.account_id.id)]/100.0
             rec.purchase_outsourcing_period_amount = -1 * purchase_outsourcing_period_amount
             rec.purchase_other_period_amount = rec.purchase_period_amount - rec.purchase_outsourcing_period_amount
 
@@ -157,7 +158,7 @@ class projectAccountingClosing(models.Model):
             rec.production_total_balance = rec.production_balance + rec.production_external_balance
 
             rec.gross_revenue = rec.invoice_period_amount + rec.pca_period_amount + rec.fae_period_amount
-            rec.internal_revenue = rec.gross_revenue + - rec.purchase_period_amount + rec.cca_period_amount + rec.fnp_period_amount
+            rec.internal_revenue = rec.gross_revenue - rec.purchase_other_period_amount + rec.cca_period_amount + rec.fnp_period_amount
             rec.internal_margin_amount = rec.internal_revenue - rec.production_destocking - rec.production_external_destocking
             rec.internal_margin_rate = 0.0
             if rec.internal_revenue :
@@ -286,8 +287,8 @@ class projectAccountingClosing(models.Model):
 
     invoice_period_amount = fields.Monetary('Facturation HT sur la période', compute=compute, store=True)
     purchase_period_amount = fields.Monetary('Achats HT sur la periode', compute=compute, store=True)
-    purchase_outsourcing_period_amount = fields.Monetary('Achats de S/T (production externe) HT sur la periode', compute=compute, store=True)
-    purchase_other_period_amount = fields.Monetary('Autres achats HT sur la periode', compute=compute, store=True)
+    purchase_outsourcing_period_amount = fields.Monetary('Achats de S/T (production externe) HT sur la periode', compute=compute, store=True, help="Somme des lignes d'achat dont la case 'Génère de la prod externe en compta' est cochée sur l'onglet Achats de la fiche du produit")
+    purchase_other_period_amount = fields.Monetary('Autres achats HT sur la periode', compute=compute, store=True, help="Autres achats = Achats - Achats de S/T")
     
     pca_previous_balance = fields.Monetary('Précédent solde PCA', compute=compute, aggregator='sum', store=True)
     pca_period_amount = fields.Monetary('PCA(-)')
@@ -326,8 +327,8 @@ class projectAccountingClosing(models.Model):
     production_total_destocking = fields.Monetary('Destockage total', compute=compute, store=True, aggregator='sum')
     production_total_balance = fields.Monetary('Solde total prod après destockage', compute=compute, store=True, aggregator='sum')
     
-    gross_revenue = fields.Monetary('CA brut', compute=compute, store=True)
-    internal_revenue = fields.Monetary('CA net de ST', compute=compute, store=True)
-    internal_margin_amount = fields.Monetary('Marge nette ST (€)', compute=compute, store=True)
-    internal_margin_rate = fields.Monetary('Marge nette ST (%)', compute=compute, store=True, aggregator=False)
+    gross_revenue = fields.Monetary('CA brut', compute=compute, store=True, help="CA brut = factures/avoirs clients + PCA + FAE")
+    internal_revenue = fields.Monetary('CA net d\'achats AUTRES (mais pas de S/T)', compute=compute, store=True, help="CA net d'achats AUTRES = CA brut - factures/avoires fournisseurs AUTRES + CCA + FNP")
+    internal_margin_amount = fields.Monetary('Marge nette d\'achats AUTRES (€)', compute=compute, store=True, help="Marge nette (€) = CA net - destockage interne - destockage externe")
+    internal_margin_rate = fields.Monetary('Marge nette d\'achats AURTES (%)', compute=compute, store=True, aggregator=False)
 

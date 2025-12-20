@@ -68,7 +68,7 @@ class tazResIndustry(models.Model):
                 target_project_ids.append(project.id)
         return book_period, target_project_ids
 
-    def get_number_of_opportunities(self, company_id):
+    def get_opportunities(self, company_id):
         search_param_list = [
             ('partner_id', 'in', self.partner_ids.ids),
             ('stage_is_part_of_booking', '=', False),
@@ -76,7 +76,13 @@ class tazResIndustry(models.Model):
             ('company_id', '=', company_id.id),
         ]
         project_ids = self.env['project.project'].sudo().search(search_param_list)
-        return len(project_ids), project_ids
+
+        expected_prorated_revenue = 0.0
+        for project in project_ids :
+            expected_prorated_revenue += project.prorated_revenue
+
+        return expected_prorated_revenue, len(project_ids), project_ids
+
 
     def action_open_account_plan_url(self):
         if self.account_plan_url:

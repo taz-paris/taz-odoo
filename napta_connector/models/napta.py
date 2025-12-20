@@ -964,7 +964,7 @@ class naptaHrContract(models.Model):
                 continue
 
             if user_history['attributes']['start_date'] == None :
-                #_logger.info("----- Evnement non importé sur Odoo car il n'a pas de date de fin")
+                #_logger.info("----- Evnement non importé sur Odoo car il n'a pas de date de début.")
                 #_logger.info(user_history['attributes'])
                 continue
 
@@ -1200,7 +1200,10 @@ class naptaHrLeave(models.Model):
         _logger.info('%s hr.leave à corriger : %s' % (str(len(incorrect_leave_ids)), str(incorrect_leave_ids)))
         if auto_correct==True :
             for incorrect_leave in incorrect_leave_ids :
-                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).number_of_days = incorrect_leave.number_of_days
+                #incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).number_of_days = incorrect_leave.number_of_days
+                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).action_refuse()
+                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).action_draft()
+                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).action_confirm()
 
             self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
             self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()

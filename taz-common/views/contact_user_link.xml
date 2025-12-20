@@ -101,10 +101,8 @@
                 <filter name="rel_inhouse_influence_level_3" string="Influence = Niveau 3" domain="[('rel_inhouse_influence_level', '=', '3')]"/>
                 <filter name="rel_inhouse_influence_level_4" string="Influence = Niveau 4" domain="[('rel_inhouse_influence_level', '=', '4')]"/>
                 <separator/>
-                <filter name="communication_preference_email_auto" string="Préférence de com. = email auto" domain="[('communication_preference', '=', 'email_auto')]"/>
-                <filter name="communication_preference_email_perso" string="Préférence de com. = email perso" domain="[('communication_preference', '=', 'email_perso')]"/>
-                <filter name="communication_preference_paper_auto" string="Préférence de com. = papier auto" domain="[('communication_preference', '=', 'paper_auto')]"/>
-                <filter name="communication_preference_paper_perso" string="Préférence de com. = papier perso" domain="[('communication_preference', '=', 'paper_perso')]"/>
+                <filter name="communication_preference_email_perso" string="Préférence de com. = email" domain="[('communication_preference', '=', 'email_perso')]"/>
+                <filter name="communication_preference_paper_perso" string="Préférence de com. = papier" domain="[('communication_preference', '=', 'paper_perso')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
                     <filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
