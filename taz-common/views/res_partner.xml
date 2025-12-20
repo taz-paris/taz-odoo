@@ -68,6 +68,9 @@
                                         <field name="is_company" optional="hide" readonly="1"/>
                                         <field name="first_name"/>
                                         <field name="name"/>
+					<field name="function" optional="show"/>
+					<field name="user_id" optional="show"/>
+					<field name="date_last_business_action" optional="show"/>
                                         <field name="email" optional="show"/>
                                     </tree>
                                 </field>
@@ -234,20 +237,15 @@
                     <field name="is_company" column_invisible="1"/>
                     <field name="first_name"/>
                     <field name="name"/>
+                    <field name="function" optional="show"/>
                     <field name="parent_id" options="{'no_quick_create': True}" optional="show"/>
-                    <field name="date_last_business_action" optional="show"/>
-                    <field name="email" optional="show"/>
                     <field name="parent_industry_id" optional="show"/>
                     <field name="parent_industry_priority" optional="show" widget="badge" decoration-info="parent_industry_priority == 'not_tracked'" decoration-success="parent_industry_priority == 'active'" decoration-danger="parent_industry_priority == 'priority_target'"/>
+                    <field name="user_id" optional="show"/>
+                    <field name="date_last_business_action" optional="show"/>
                     <field name="parent_sector_id" optional="hide"/>
                     <field name="category_id" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
-                    <field name="street" optional="hide"/>
-                    <field name="street2" optional="hide"/>
-                    <field name="street3" optional="hide"/>
-                    <field name="zip" optional="hide"/>
-                    <field name="city" optional="hide"/>
-                    <field name="country_id" optional="hide"/>
-                    <field name="function" optional="hide"/>
+                    <field name="email" optional="hide"/>
                 </tree>
             </field>
         </record>
