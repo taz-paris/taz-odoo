@@ -12,6 +12,7 @@ export class GridController extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.action = useService("action");
         this.model = reactive(new GridModel(this.orm));
         this.searchBarToggler = useSearchBarToggler();
 
@@ -60,7 +61,10 @@ export class GridController extends Component {
             colField: archInfo.colField.name,
             cellField: archInfo.cellField.name,
             domain,
-            range: this.state.currentRange,
+            range: {
+                ...this.state.currentRange,
+                anchor: this.model.metaData.range ? this.model.metaData.range.anchor : null,
+            },
             context,
             adjustment: archInfo.adjustment,
             adjustName: archInfo.adjustName,
@@ -120,7 +124,25 @@ export class GridController extends Component {
         this.render();
     }
 
+    get hasData() {
+        return this.model.data && this.model.data.rows && this.model.data.rows.length > 0;
+    }
+
     async onAddLine() {
-        // Placeholder for add line functionality
+        const { resModel, context } = this.props;
+        await this.action.doAction({
+            type: "ir.actions.act_window",
+            res_model: resModel,
+            views: [[false, "form"]],
+            target: "new",
+            context: {
+                ...context,
+                default_date: this.model.metaData.range ? this.model.metaData.range.anchor || new Date().toISOString().split('T')[0] : null,
+            },
+        }, {
+            onClose: async () => {
+                await this.loadData();
+            },
+        });
     }
 }

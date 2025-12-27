@@ -8,9 +8,28 @@ export class GridRenderer extends Component {
         model: Object,
         archInfo: Object,
         rowFields: Array,
+        fields: Object,
         onCellUpdate: Function,
         onToggleRow: Function,
+        onAddLine: Function,
     };
+
+    isMany2one(row) {
+        const fieldName = this.props.rowFields[row.depth].name.split(':')[0];
+        const field = this.props.fields[fieldName];
+        return field && field.type === "many2one" && row.full_key && row.full_key[row.depth];
+    }
+
+    onLabelClick(row) {
+        const fieldName = this.props.rowFields[row.depth].name.split(':')[0];
+        const field = this.props.fields[fieldName];
+        const resId = row.full_key ? row.full_key[row.depth] : null;
+
+        if (field && field.type === "many2one" && resId) {
+            const url = `/web#id=${resId}&model=${field.relation}&view_type=form`;
+            window.open(url, '_blank');
+        }
+    }
 
     get rows() {
         return this.props.model.data ? (this.props.model.data.processedRows || this.props.model.data.rows) : [];

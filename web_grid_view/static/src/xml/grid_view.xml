@@ -8,15 +8,21 @@
             </t>
             
             <div class="o_grid_control_panel d-flex justify-content-between p-2 border-bottom flex-0-0-auto">
-                <div class="o_grid_range_buttons btn-group">
-                    <t t-foreach="props.archInfo.ranges" t-as="range" t-key="range.name">
-                        <button type="button" 
-                                class="btn btn-secondary" 
-                                t-att-class="{active: state.currentRange.name === range.name}"
-                                t-on-click="() => this.onRangeSelected(range.name)">
-                            <t t-esc="range.string"/>
-                        </button>
-                    </t>
+                <div class="o_grid_buttons d-flex gap-1">
+                    <button t-if="!props.archInfo.createInline || (!hasData &amp;&amp; !props.archInfo.displayEmpty)"
+                            type="button" class="btn btn-primary o_grid_button_add" t-on-click="onAddLine">
+                        Add a line
+                    </button>
+                    <div class="o_grid_range_buttons btn-group">
+                        <t t-foreach="props.archInfo.ranges" t-as="range" t-key="range.name">
+                            <button type="button" 
+                                    class="btn btn-secondary" 
+                                    t-att-class="{active: state.currentRange.name === range.name}"
+                                    t-on-click="() => this.onRangeSelected(range.name)">
+                                <t t-esc="range.string"/>
+                            </button>
+                        </t>
+                    </div>
                 </div>
                 <div class="o_grid_navigation_buttons btn-group">
                     <button type="button" class="btn btn-secondary" t-on-click="onPrev">
@@ -31,13 +37,31 @@
                 </div>
             </div>
             
-            <GridRenderer 
-                model="model" 
-                rowFields="rowFields"
-                archInfo="props.archInfo" 
-                onCellUpdate.bind="onCellUpdate"
-                onToggleRow.bind="onToggleRow"
-            />
+            <div class="o_grid_content flex-grow-1">
+                <t t-if="hasData || props.archInfo.displayEmpty">
+                    <GridRenderer 
+                        model="model" 
+                        rowFields="rowFields"
+                        fields="props.fields"
+                        archInfo="props.archInfo" 
+                        onCellUpdate.bind="onCellUpdate"
+                        onToggleRow.bind="onToggleRow"
+                        onAddLine.bind="onAddLine"
+                    />
+                </t>
+                <t t-else="">
+                    <div class="o_view_nocontent">
+                        <div class="o_nocontent_help">
+                            <p class="o_view_nocontent_smiling_face">
+                                No data available for this period.
+                            </p>
+                            <p>
+                                Click on "Add a line" to start recording.
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </div>
         </Layout>
     </t>
 
@@ -65,7 +89,10 @@
                                    style="cursor: pointer; margin-right: 5px;"
                                 />
                                 <span t-if="row.isLeaf &amp;&amp; row.depth" style="margin-left: 20px;"/>
-                                <t t-esc="row.label || row.values[props.rowFields[0].name]"/>
+                                <span t-att-class="{ 'o_grid_clickable_label': this.isMany2one(row) }"
+                                      t-on-click="() => this.isMany2one(row) &amp;&amp; this.onLabelClick(row)">
+                                    <t t-esc="row.label || row.values[props.rowFields[0].name]"/>
+                                </span>
                             </td>
                             <td t-foreach="getRowGrid(row)" t-as="cell" t-key="cell_index" class="o_grid_cell">
                                 <input t-if="!row.readonly &amp;&amp; !cell.readonly &amp;&amp; row.isLeaf"
@@ -81,6 +108,14 @@
                             <td class="o_grid_row_total fw-bold text-end pe-2">
                                 <t t-esc="formatValue(row.rowTotal)"/>
                             </td>
+                        </tr>
+                        <tr t-if="props.archInfo.createInline" class="o_grid_add_line_row">
+                            <td class="o_grid_row_header">
+                                <button type="button" class="btn btn-link o_grid_add_line" t-on-click="props.onAddLine">
+                                    <i class="fa fa-plus me-1"/>Add a line
+                                </button>
+                            </td>
+                            <td t-att-colspan="cols.length + 1"></td>
                         </tr>
                     </tbody>
                     <tfoot>
