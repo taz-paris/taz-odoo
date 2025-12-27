@@ -66,6 +66,14 @@ $grid-bg: #fff;
                         padding: 0.4rem; // Reduced padding
                         font-size: 0.85rem; // Slightly smaller font
 
+                        &.o_grid_sortable_header {
+                            cursor: pointer;
+
+                            &:hover {
+                                background-color: #f1f1f1 !important;
+                            }
+                        }
+
                         &.o_grid_header:first-child {
                             position: sticky;
                             left: 0;

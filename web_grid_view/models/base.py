@@ -12,7 +12,7 @@ class Base(models.AbstractModel):
     _inherit = 'base'
 
     @api.model
-    def read_grid(self, row_fields, col_field, cell_field, domain=None, grid_range=None, readonly_field=None):
+    def read_grid(self, row_fields, col_field, cell_field, domain=None, grid_range=None, readonly_field=None, orderby=None):
         _logger.info(f"READ_GRID called with range: {grid_range}")
         domain = domain or []
         
@@ -28,7 +28,18 @@ class Base(models.AbstractModel):
         for i in range(1, len(row_fields) + 1):
             current_row_fields = row_fields[:i]
             groupby = current_row_fields + [f"{col_field}:{column_info['format']}"]
-            groups = self.read_group(grid_domain, [cell_field], groupby, lazy=False)
+            
+            # Apply orderby if provided. It usually follows the format 'field ASC/DESC'
+            # We only apply it to the last row field of the current hierarchy level
+            current_orderby = None
+            if orderby:
+                # Example orderby: "project_id asc"
+                sort_field = orderby.split(' ')[0]
+                sort_order = orderby.split(' ')[1] if ' ' in orderby else 'asc'
+                if sort_field in current_row_fields:
+                    current_orderby = f"{sort_field} {sort_order}"
+
+            groups = self.read_group(grid_domain, [cell_field], groupby, lazy=False, orderby=current_orderby)
             # Add level info to groups
             for g in groups:
                 g['__level'] = i
@@ -55,15 +66,14 @@ class Base(models.AbstractModel):
             if row_key not in rows_data:
                 # Initialize grid with empty cell objects
                 grid = []
+                row_domain = []
+                for f_idx, f in enumerate(row_fields[:level]):
+                    row_domain.append((f, '=', row_key_list[f_idx]))
+                
                 for col in columns:
-                    # Construct domain for this cell
-                    cell_row_domain = []
-                    for f_idx, f in enumerate(row_fields[:level]):
-                        cell_row_domain.append((f, '=', row_key_list[f_idx]))
-                    
                     grid.append({
                         'value': 0,
-                        'domain': expression.AND([domain, cell_row_domain, col['domain']]),
+                        'domain': expression.AND([domain, row_domain, col['domain']]),
                         'readonly': level < len(row_fields) # Parent rows are readonly
                     })
 
@@ -71,6 +81,7 @@ class Base(models.AbstractModel):
                     'level': level,
                     'values': row_values,
                     'full_key': row_key_list,
+                    'domain': row_domain,
                     'grid': grid,
                     'row_total': 0,
                     'is_leaf': level == len(row_fields)
@@ -112,8 +123,67 @@ class Base(models.AbstractModel):
         col_totals = [round(v, 10) for v in col_totals]
         grand_total = round(grand_total, 10)
 
-        # Sort rows
-        sorted_rows = sorted(rows_data.values(), key=lambda x: (x['level'], str(x['values'])))
+        # 5. Dynamic Sorting
+        def segment_key(row):
+            """Returns a list of values representing the path to the row, used for hierarchical sorting."""
+            return tuple(row['full_key'])
+
+        # Determine if we are sorting by a specific column
+        sort_col_idx = None
+        sort_order = 'asc'
+        if orderby:
+            parts = orderby.split(' ')
+            sort_field = parts[0]
+            sort_order = parts[1].lower() if len(parts) > 1 else 'asc'
+            
+            # Check if sorting by a date column
+            if ':' in sort_field:
+                col_name, col_val = sort_field.split(':')
+                for idx, col in enumerate(columns):
+                    if col['values'].get(col_name) == col_val:
+                        sort_col_idx = idx
+                        break
+
+        def sort_key(row):
+            # Primary sort: cell value (if requested) or label
+            if sort_col_idx is not None:
+                val = row['grid'][sort_col_idx]['value']
+            else:
+                # Default/Group sorting: Use the label of the last field in the key
+                # We need to sort by the value at the current level
+                val = row['full_key'][row['level']-1]
+                if isinstance(val, (list, tuple)):
+                    val = val[1] # Use the string part of m2o if available (though here it's likely raw id)
+            
+            return val
+
+        # We need to sort groups hierarchically. 
+        # For each level, we sort the children of a given parent.
+        # This is complex in a flat list. 
+        # Let's group by parent key first.
+        
+        rows_by_parent = {}
+        for row in rows_data.values():
+            parent_key = tuple(row['full_key'][:-1]) if row['level'] > 1 else ()
+            if parent_key not in rows_by_parent:
+                rows_by_parent[parent_key] = []
+            rows_by_parent[parent_key].append(row)
+        
+        # Sort each sibling group
+        reverse = (sort_order == 'desc')
+        for p_key in rows_by_parent:
+            rows_by_parent[p_key].sort(key=sort_key, reverse=reverse)
+            
+        # Flatten hierarchically
+        sorted_rows = []
+        def add_descendants(p_key):
+            if p_key in rows_by_parent:
+                for row in rows_by_parent[p_key]:
+                    sorted_rows.append(row)
+                    child_key = tuple(row['full_key'])
+                    add_descendants(child_key)
+        
+        add_descendants(())
 
         return {
             'rows': sorted_rows,

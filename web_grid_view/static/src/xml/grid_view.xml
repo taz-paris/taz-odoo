@@ -47,6 +47,8 @@
                         onCellUpdate.bind="onCellUpdate"
                         onToggleRow.bind="onToggleRow"
                         onAddLine.bind="onAddLine"
+                        onSort.bind="onSort"
+                        sort="state.sort"
                     />
                 </t>
                 <t t-else="">
@@ -71,10 +73,25 @@
                 <table class="table table-bordered table-sm o_grid_table">
                     <thead>
                         <tr>
-                            <th class="o_grid_header">Group By</th>
-                            <th t-foreach="cols" t-as="col" t-key="col.values[props.archInfo.colField.name]" class="o_grid_header">
+                            <th class="o_grid_header o_grid_sortable_header" t-on-click="() => props.onSort('group')">
+                                <span>Grouped by:</span>
+                                <t t-esc="props.rowFields.map(f => f.string).join(', ')"/>
+                                <i t-att-class="{
+                                    'fa fa-sort ms-1 opacity-50': props.sort.field !== 'group' || !props.sort.order,
+                                    'fa fa-sort-asc ms-1': props.sort.field === 'group' &amp;&amp; props.sort.order === 'asc',
+                                    'fa fa-sort-desc ms-1': props.sort.field === 'group' &amp;&amp; props.sort.order === 'desc'
+                                }"/>
+                            </th>
+                            <th t-foreach="cols" t-as="col" t-key="col.values[props.archInfo.colField.name]" 
+                                class="o_grid_header o_grid_sortable_header"
+                                t-on-click="() => props.onSort(col.values[props.archInfo.colField.name])">
                                 <div t-att-class="{ 'text-primary fw-bold': col.is_current }">
                                     <t t-esc="col.label"/>
+                                    <i t-att-class="{
+                                        'fa fa-sort ms-1 opacity-25': props.sort.field !== col.values[props.archInfo.colField.name] || !props.sort.order,
+                                        'fa fa-sort-asc ms-1': props.sort.field === col.values[props.archInfo.colField.name] &amp;&amp; props.sort.order === 'asc',
+                                        'fa fa-sort-desc ms-1': props.sort.field === col.values[props.archInfo.colField.name] &amp;&amp; props.sort.order === 'desc'
+                                    }"/>
                                 </div>
                             </th>
                             <th class="o_grid_total fw-bold o_grid_header">Total</th>

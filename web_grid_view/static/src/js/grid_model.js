@@ -12,28 +12,46 @@ export class GridModel {
     }
 
     async load(params) {
-        this.metaData = { ...this.metaData, ...params };
-        // Reset expanded rows if fields change
-        if (params.rowFields) {
-            this.expandedRows.clear();
-        }
-        await this.fetchData();
+        const { resModel, rowFields, colField, cellField, domain, range, context, adjustment, adjustName } = params;
+        this.metaData = {
+            resModel,
+            rowFields,
+            colField,
+            cellField,
+            domain,
+            range,
+            context,
+            adjustment,
+            adjustName,
+            sort: params.sort || { field: 'group', order: null },
+        };
+        return this.fetchData();
     }
 
     async fetchData() {
-        const { resModel, rowFields, colField, cellField, domain, range, context } = this.metaData;
+        const { resModel, rowFields, colField, cellField, domain, range, context, sort } = this.metaData;
 
-        const result = await this.keepLast.add(
-            this.orm.call(resModel, "read_grid", [
-                rowFields,
-                colField,
-                cellField,
-                domain,
-                range
-            ], { context })
-        );
+        let orderby = null;
+        if (sort && sort.order) {
+            if (sort.field === 'group') {
+                orderby = `${rowFields[0]} ${sort.order}`;
+            } else {
+                // sort.field is the date value, e.g. "2025-10-23"
+                orderby = `${colField}:${sort.field} ${sort.order}`;
+            }
+        }
 
-        this.data = result;
+        const data = await this.orm.call(resModel, "read_grid", [], {
+            row_fields: rowFields,
+            col_field: colField,
+            cell_field: cellField,
+            domain,
+            grid_range: range,
+            orderby: orderby,
+            context,
+        });
+
+        this.data = data;
         this._processData();
     }
 

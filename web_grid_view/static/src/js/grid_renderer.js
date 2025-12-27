@@ -12,6 +12,8 @@ export class GridRenderer extends Component {
         onCellUpdate: Function,
         onToggleRow: Function,
         onAddLine: Function,
+        onSort: Function,
+        sort: Object,
     };
 
     isMany2one(row) {

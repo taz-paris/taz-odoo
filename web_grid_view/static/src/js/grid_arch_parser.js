@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { visitXML } from "@web/core/utils/xml";
+import { _t } from "@web/core/l10n/translation";
 
 export class GridArchParser {
     parse(arch) {
@@ -25,15 +26,15 @@ export class GridArchParser {
                 const string = node.getAttribute("string");
 
                 if (type === "row") {
-                    archInfo.rowFields.push({ name, string });
+                    archInfo.rowFields.push({ name, string: _t(string) });
                 } else if (type === "col") {
-                    archInfo.colField = { name, string };
+                    archInfo.colField = { name, string: _t(string) };
                     // Parse ranges
                     for (const child of node.children) {
                         if (child.tagName === "range") {
                             archInfo.ranges.push({
                                 name: child.getAttribute("name"),
-                                string: child.getAttribute("string"),
+                                string: _t(child.getAttribute("string")),
                                 span: child.getAttribute("span"),
                                 step: child.getAttribute("step"),
                             });
@@ -42,7 +43,7 @@ export class GridArchParser {
                 } else if (type === "measure") {
                     archInfo.cellField = {
                         name,
-                        string,
+                        string: _t(string),
                         widget: node.getAttribute("widget")
                     };
                 }
@@ -59,7 +60,7 @@ export class GridArchParser {
 
         // Default range if none
         if (archInfo.ranges.length === 0 && archInfo.colField) {
-            archInfo.ranges.push({ name: "month", string: "Month", span: "month", step: "day" });
+            archInfo.ranges.push({ name: "month", string: _t("Month"), span: "month", step: "day" });
         }
 
         return archInfo;

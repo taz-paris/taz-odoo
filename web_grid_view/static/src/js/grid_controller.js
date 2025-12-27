@@ -18,6 +18,7 @@ export class GridController extends Component {
 
         this.state = useState({
             currentRange: this.props.archInfo.ranges[0],
+            sort: { field: 'group', order: null }, // field can be 'group' or a specific date/col value
         });
 
         onWillStart(async () => {
@@ -33,6 +34,22 @@ export class GridController extends Component {
         });
     }
 
+    onSort(field) {
+        if (this.state.sort.field === field) {
+            if (!this.state.sort.order) {
+                this.state.sort.order = 'asc';
+            } else if (this.state.sort.order === 'asc') {
+                this.state.sort.order = 'desc';
+            } else {
+                this.state.sort.order = null;
+            }
+        } else {
+            this.state.sort.field = field;
+            this.state.sort.order = 'asc';
+        }
+        this.loadData();
+    }
+
     getRowFields(props) {
         const { groupBy, archInfo, fields } = props;
         if (groupBy && groupBy.length > 0) {
@@ -44,7 +61,10 @@ export class GridController extends Component {
                 };
             });
         }
-        return archInfo.rowFields;
+        return archInfo.rowFields.map(f => ({
+            ...f,
+            string: f.string || (fields[f.name] ? fields[f.name].string : f.name)
+        }));
     }
 
     get rowFields() {
@@ -63,11 +83,12 @@ export class GridController extends Component {
             domain,
             range: {
                 ...this.state.currentRange,
-                anchor: this.model.metaData.range ? this.model.metaData.range.anchor : null,
+                anchor: this.model.metaData && this.model.metaData.range ? this.model.metaData.range.anchor : null,
             },
             context,
             adjustment: archInfo.adjustment,
             adjustName: archInfo.adjustName,
+            sort: this.state.sort,
         });
 
         this.render();
