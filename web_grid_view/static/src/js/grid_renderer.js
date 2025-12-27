@@ -7,6 +7,7 @@ export class GridRenderer extends Component {
     static props = {
         model: Object,
         archInfo: Object,
+        rowFields: Array,
         onCellUpdate: Function,
     };
 

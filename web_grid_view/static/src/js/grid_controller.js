@@ -24,18 +24,39 @@ export class GridController extends Component {
         });
 
         onWillUpdateProps(async (nextProps) => {
-            if (nextProps.domain !== this.props.domain) {
+            const domainChanged = JSON.stringify(nextProps.domain) !== JSON.stringify(this.props.domain);
+            const groupByChanged = JSON.stringify(nextProps.groupBy) !== JSON.stringify(this.props.groupBy);
+            if (domainChanged || groupByChanged) {
                 await this.loadData(nextProps);
             }
         });
     }
 
+    getRowFields(props) {
+        const { groupBy, archInfo, fields } = props;
+        if (groupBy && groupBy.length > 0) {
+            return groupBy.map(fieldName => {
+                const name = fieldName.split(':')[0];
+                return {
+                    name: fieldName,
+                    string: fields[name] ? fields[name].string : fieldName
+                };
+            });
+        }
+        return archInfo.rowFields;
+    }
+
+    get rowFields() {
+        return this.getRowFields(this.props);
+    }
+
     async loadData(props = this.props) {
         const { archInfo, resModel, domain, context } = props;
+        const rowFields = this.getRowFields(props);
 
         await this.model.load({
             resModel,
-            rowFields: archInfo.rowFields.map(f => f.name),
+            rowFields: rowFields.map(f => f.name),
             colField: archInfo.colField.name,
             cellField: archInfo.cellField.name,
             domain,

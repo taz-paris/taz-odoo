@@ -33,6 +33,7 @@
             
             <GridRenderer 
                 model="model" 
+                rowFields="rowFields"
                 archInfo="props.archInfo" 
                 onCellUpdate.bind="onCellUpdate"
             />
@@ -45,7 +46,7 @@
                 <table class="table table-bordered table-sm o_grid_table">
                     <thead>
                         <tr>
-                            <th t-foreach="props.archInfo.rowFields" t-as="field" t-key="field.name" class="o_grid_header">
+                            <th t-foreach="props.rowFields" t-as="field" t-key="field.name" class="o_grid_header">
                                 <t t-esc="field.string"/>
                             </th>
                             <th t-foreach="cols" t-as="col" t-key="col.values[props.archInfo.colField.name]" class="o_grid_header">
@@ -58,7 +59,7 @@
                     </thead>
                     <tbody>
                         <tr t-foreach="rows" t-as="row" t-key="row_index">
-                            <td t-foreach="props.archInfo.rowFields" t-as="field" t-key="field.name" class="o_grid_row_header">
+                            <td t-foreach="props.rowFields" t-as="field" t-key="field.name" class="o_grid_row_header">
                                 <t t-esc="row.values[field.name]"/>
                             </td>
                             <td t-foreach="grid[row_index]" t-as="cell" t-key="cell_index" class="o_grid_cell">
@@ -76,7 +77,7 @@
                     </tbody>
                     <tfoot>
                         <tr class="o_grid_total_row fw-bold">
-                            <td t-att-colspan="props.archInfo.rowFields.length">Total</td>
+                            <td t-att-colspan="props.rowFields.length">Total</td>
                             <td t-foreach="colTotals" t-as="total" t-key="total_index" class="text-end">
                                 <t t-esc="formatValue(total)"/>
                             </td>
