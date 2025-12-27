@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web_grid_view.GridView" owl="1">
+        <Layout display="props.display" className="'o_grid_view h-100'">
+            <t t-set-slot="layout-actions">
+                <SearchBar/>
+            </t>
+            
+            <div class="o_grid_control_panel d-flex justify-content-between p-2 border-bottom flex-0-0-auto">
+                <div class="o_grid_range_buttons btn-group">
+                    <t t-foreach="props.archInfo.ranges" t-as="range" t-key="range.name">
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                t-att-class="{active: state.currentRange.name === range.name}"
+                                t-on-click="() => this.onRangeSelected(range.name)">
+                            <t t-esc="range.string"/>
+                        </button>
+                    </t>
+                </div>
+                <div class="o_grid_navigation_buttons btn-group">
+                    <button type="button" class="btn btn-secondary" t-on-click="onPrev">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button type="button" class="btn btn-secondary" t-on-click="onToday">
+                        Today
+                    </button>
+                    <button type="button" class="btn btn-secondary" t-on-click="onNext">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+            </div>
+            
+            <GridRenderer 
+                model="model" 
+                archInfo="props.archInfo" 
+                onCellUpdate.bind="onCellUpdate"
+            />
+        </Layout>
+    </t>
+
+    <t t-name="web_grid_view.GridRenderer" owl="1">
+        <div class="o_grid_renderer">
+            <div class="o_grid_scrollable">
+                <table class="table table-bordered table-sm o_grid_table">
+                    <thead>
+                        <tr>
+                            <th t-foreach="props.archInfo.rowFields" t-as="field" t-key="field.name" class="o_grid_header">
+                                <t t-esc="field.string"/>
+                            </th>
+                            <th t-foreach="cols" t-as="col" t-key="col.values[props.archInfo.colField.name]" class="o_grid_header">
+                                <div t-att-class="{ 'text-primary fw-bold': col.is_current }">
+                                    <t t-esc="col.label"/>
+                                </div>
+                            </th>
+                            <th class="o_grid_total fw-bold o_grid_header">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="rows" t-as="row" t-key="row_index">
+                            <td t-foreach="props.archInfo.rowFields" t-as="field" t-key="field.name" class="o_grid_row_header">
+                                <t t-esc="row.values[field.name]"/>
+                            </td>
+                            <td t-foreach="grid[row_index]" t-as="cell" t-key="cell_index" class="o_grid_cell">
+                                <input type="text" 
+                                       class="o_grid_input form-control form-control-sm text-end" 
+                                       t-att-value="formatValue(cell.value)"
+                                       t-att-readonly="cell.readonly"
+                                       t-on-change="(ev) => this.onCellChange(row_index, cell_index, ev)"
+                                />
+                            </td>
+                            <td class="o_grid_row_total fw-bold text-end">
+                                <t t-esc="formatValue(rowTotals[row_index])"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="o_grid_total_row fw-bold">
+                            <td t-att-colspan="props.archInfo.rowFields.length">Total</td>
+                            <td t-foreach="colTotals" t-as="total" t-key="total_index" class="text-end">
+                                <t t-esc="formatValue(total)"/>
+                            </td>
+                            <td class="text-end">
+                                <t t-esc="formatValue(grandTotal)"/>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </t>
+
+</templates>
