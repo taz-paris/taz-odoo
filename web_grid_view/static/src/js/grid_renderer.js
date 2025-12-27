@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component } from "@odoo/owl";
+import { localization } from "@web/core/l10n/localization";
 
 export class GridRenderer extends Component {
     static template = "web_grid_view.GridRenderer";
@@ -66,16 +67,20 @@ export class GridRenderer extends Component {
             const sign = val < 0 ? "-" : "";
             return `${sign}${hours}:${minutes.toString().padStart(2, "0")}`;
         }
+        // Localized decimal point
+        if (typeof value === 'number' || !isNaN(parseFloat(value))) {
+            return (value || 0).toString().replace('.', localization.decimalPoint);
+        }
         return value;
     }
 
     onCellChange(rowIndex, colIndex, ev) {
-        const value = ev.target.value;
-        let parsedValue = parseFloat(value);
-        if (this.props.archInfo.cellField.widget === 'float_time') {
+        const value = ev.target.value.replace(',', '.');
+        let parsedValue = parseFloat(value || 0);
+        if (this.props.archInfo.cellField.widget === 'float_time' && value.includes(':')) {
             const parts = value.split(':');
             if (parts.length === 2) {
-                parsedValue = parseInt(parts[0]) + parseInt(parts[1]) / 60;
+                parsedValue = (parseFloat(parts[0]) || 0) + (parseFloat(parts[1]) || 0) / 60;
             }
         }
 
