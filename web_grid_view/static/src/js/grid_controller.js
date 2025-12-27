@@ -115,6 +115,11 @@ export class GridController extends Component {
         this.render();
     }
 
+    onToggleRow(stringKey) {
+        this.model.toggleRow(stringKey);
+        this.render();
+    }
+
     async onAddLine() {
         // Placeholder for add line functionality
     }

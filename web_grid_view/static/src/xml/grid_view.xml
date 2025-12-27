@@ -36,6 +36,7 @@
                 rowFields="rowFields"
                 archInfo="props.archInfo" 
                 onCellUpdate.bind="onCellUpdate"
+                onToggleRow.bind="onToggleRow"
             />
         </Layout>
     </t>
@@ -46,9 +47,7 @@
                 <table class="table table-bordered table-sm o_grid_table">
                     <thead>
                         <tr>
-                            <th t-foreach="props.rowFields" t-as="field" t-key="field.name" class="o_grid_header">
-                                <t t-esc="field.string"/>
-                            </th>
+                            <th class="o_grid_header">Group By</th>
                             <th t-foreach="cols" t-as="col" t-key="col.values[props.archInfo.colField.name]" class="o_grid_header">
                                 <div t-att-class="{ 'text-primary fw-bold': col.is_current }">
                                     <t t-esc="col.label"/>
@@ -58,26 +57,35 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr t-foreach="rows" t-as="row" t-key="row_index">
-                            <td t-foreach="props.rowFields" t-as="field" t-key="field.name" class="o_grid_row_header">
-                                <t t-esc="row.values[field.name]"/>
+                        <tr t-foreach="rows" t-as="row" t-key="row.stringKey || row_index">
+                            <td class="o_grid_row_header" t-att-style="'padding-left: ' + ((row.depth || 0) * 20 + 10) + 'px !important'">
+                                <i t-if="!row.isLeaf" 
+                                   t-att-class="'fa fa-fw ' + (props.model.expandedRows.has(row.stringKey) ? 'fa-caret-down' : 'fa-caret-right')"
+                                   t-on-click="() => props.onToggleRow(row.stringKey)"
+                                   style="cursor: pointer; margin-right: 5px;"
+                                />
+                                <span t-if="row.isLeaf &amp;&amp; row.depth" style="margin-left: 20px;"/>
+                                <t t-esc="row.label || row.values[props.rowFields[0].name]"/>
                             </td>
-                            <td t-foreach="grid[row_index]" t-as="cell" t-key="cell_index" class="o_grid_cell">
-                                <input type="text" 
+                            <td t-foreach="getRowGrid(row)" t-as="cell" t-key="cell_index" class="o_grid_cell">
+                                <input t-if="!row.readonly &amp;&amp; !cell.readonly &amp;&amp; row.isLeaf"
+                                       type="text" 
                                        class="o_grid_input form-control form-control-sm text-end" 
                                        t-att-value="formatValue(cell.value)"
-                                       t-att-readonly="cell.readonly"
-                                       t-on-change="(ev) => this.onCellChange(row_index, cell_index, ev)"
+                                       t-on-change="(ev) => this.onCellChange(rows.indexOf(row), cell_index, ev)"
                                 />
+                                <span t-else="" class="d-block text-end pe-2">
+                                    <t t-esc="formatValue(cell.value)"/>
+                                </span>
                             </td>
-                            <td class="o_grid_row_total fw-bold text-end">
-                                <t t-esc="formatValue(rowTotals[row_index])"/>
+                            <td class="o_grid_row_total fw-bold text-end pe-2">
+                                <t t-esc="formatValue(row.rowTotal)"/>
                             </td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr class="o_grid_total_row fw-bold">
-                            <td t-att-colspan="props.rowFields.length">Total</td>
+                            <td>Total</td>
                             <td t-foreach="colTotals" t-as="total" t-key="total_index" class="text-end">
                                 <t t-esc="formatValue(total)"/>
                             </td>

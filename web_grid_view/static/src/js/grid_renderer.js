@@ -9,18 +9,19 @@ export class GridRenderer extends Component {
         archInfo: Object,
         rowFields: Array,
         onCellUpdate: Function,
+        onToggleRow: Function,
     };
 
     get rows() {
-        return this.props.model.data ? this.props.model.data.rows : [];
+        return this.props.model.data ? (this.props.model.data.processedRows || this.props.model.data.rows) : [];
     }
 
     get cols() {
         return this.props.model.data ? this.props.model.data.cols : [];
     }
 
-    get grid() {
-        return this.props.model.data ? this.props.model.data.grid : [];
+    getRowGrid(row) {
+        return row.grid || [];
     }
 
     get rowTotals() {
