@@ -8,39 +8,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class timesheetNavigator(models.TransientModel):
-    _name = 'timesheet.navigator'
-    _description = "Technical object for storing navigation session data."
-
-    user_id = fields.Many2one('res.users', string="Who looks") 
-    employee_id = fields.Many2one('hr.employee', string="Consultant")
-    begin_date = fields.Date("Semaine du")
-
-    def open_timesheet_navigator(self):
-        navigators = self.env['timesheet.navigator'].search([('user_id', '=', self.env.user.id)])
-        if len(navigators) == 1:
-            rec = navigators[0]
-        else :
-            d = datetime.today()
-            new_current_monday = d - timedelta(days=d.weekday())
-            new_current_monday = new_current_monday.date()
-            employ = self.env.user.employee_id
-            if employ :
-                rec = self.env['timesheet.navigator'].create({'user_id' : self.env.user.id, 'begin_date' : new_current_monday, 'employee_id': employ.id})
-        return {                
-                'type': 'ir.actions.act_window',
-                'name': 'Sélection de la semaine et du consultant',
-                'res_model': 'timesheet.navigator',
-                'res_id': rec.id,
-                'view_type': 'form',
-                'view_mode': 'form',
-                'target': 'new',
-            }
-
-    def validate(self):
-        return self.env['project.project'].open_timesheet_navigate_weeks('no-change', target='main')
-
-
 class staffingProject(models.Model):
     _inherit = "project.project"
     _order = "number desc"
@@ -113,64 +80,6 @@ class staffingProject(models.Model):
             }
 
 
-
-
-
-    def open_timesheet_navigate_weeks(self, sens, target='current'):
-        _logger.info('--open_timesheet_navigate_weeks')
-        view_id = self.env.ref("staffing.view_timesheets_tree")
-        #Impossible to send context to a server action from a menuItem, so we use a dédicated transient model
-        # TODO : LIMITS : if the user has 2 web browser tabs opened, the navigation will have conflicts 
-        navigators = self.env['timesheet.navigator'].search([('user_id', '=', self.env.user.id)])
-        if len(navigators) == 1:
-            navigator = navigators[0]
-            bd = navigator.begin_date 
-            timesheet_current_monday = bd - timedelta(days=bd.weekday())
-            if sens == 'next':
-                new_current_monday = timesheet_current_monday + timedelta(days=7)
-            elif sens == 'previous' :
-                new_current_monday = timesheet_current_monday - timedelta(days=7)
-            elif sens == 'no-change' :
-                new_current_monday = timesheet_current_monday
-            employ = navigator.employee_id
-            navigator.begin_date = new_current_monday
-        else :
-            d = datetime.today()
-            new_current_monday = d - timedelta(days=d.weekday())
-            new_current_monday = new_current_monday.date()
-            employ = self.env.user.employee_id
-            if employ :
-                self.env['timesheet.navigator'].create({'user_id' : self.env.user.id, 'begin_date' : new_current_monday, 'employee_id': employ.id})
-
-        sunday = new_current_monday + timedelta(days=6)
-
-        #TODO : créer à la volée les lignes de prévisionel/pointage manquante (pour tous les staffing qui ont une date début < sunday et une date de fin > monday)
-            # ça permettra d'être ceinture et bretelle, notamment pour les lignes de projets interne, formation etc.
-
-        #TODO : si employ == False : ouvrir le wizzard de sélection de l'emplpoyee/date
-        date = datetime.today()
-        timesheets_data = self.env['account.analytic.line'].get_timesheet_grouped(date, date_start=new_current_monday, date_end=sunday, filters=[('employee_id', '=', employ.id)])
-        lines = timesheets_data['aggreation_by_project_type']
-
-        analytic_lines_list_ids = []
-        for aggregation in lines.values() :
-            for category in aggregation.values() :
-                for timesheet in category['timesheet_ids']:
-                    analytic_lines_list_ids.append(timesheet.id)
-
-        domain = [('date', '>=', new_current_monday), ('date', '<=', sunday), ('id', 'in', analytic_lines_list_ids)]
-
-        return {
-                'type': 'ir.actions.act_window',
-                'name': 'Pointage semaine du %s au %s de %s %s ' % (new_current_monday.strftime('%d/%m/%Y'), str(sunday.strftime('%d/%m/%Y')), employ.first_name or ' ', employ.name or ''),
-                'res_model': 'account.analytic.line',
-                'view_type': 'tree',
-                'view_mode': 'list',
-                'view_id': view_id.id,
-                'domain' : domain,
-                'target': target,
-                'context' : {'employee_id' : employ.id},
-            }
 
     def default_project_director_employee_id(self):
         res = self.env.user.employee_id
