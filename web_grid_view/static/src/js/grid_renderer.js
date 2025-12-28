@@ -16,6 +16,7 @@ export class GridRenderer extends Component {
         onAddLine: Function,
         onSort: Function,
         sort: Object,
+        range: Object,
     };
 
     isMany2one(row) {

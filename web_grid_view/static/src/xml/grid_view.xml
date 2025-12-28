@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web_grid_view.GridView" owl="1">
-        <Layout display="props.display" className="'o_grid_view h-100'">
+        <Layout display="props.display" className="'o_grid_view h-100 d-flex flex-column overflow-hidden'">
             <t t-set-slot="layout-actions">
                 <SearchBar/>
             </t>
@@ -37,38 +37,37 @@
                 </div>
             </div>
             
-            <div class="o_grid_content flex-grow-1">
-                <t t-if="hasData || props.archInfo.displayEmpty">
-                    <GridRenderer 
-                        model="model" 
-                        rowFields="rowFields"
-                        fields="props.fields"
-                        archInfo="props.archInfo" 
-                        onCellUpdate.bind="onCellUpdate"
-                        onToggleRow.bind="onToggleRow"
-                        onAddLine.bind="onAddLine"
-                        onSort.bind="onSort"
-                        sort="state.sort"
-                    />
-                </t>
-                <t t-else="">
-                    <div class="o_view_nocontent">
-                        <div class="o_nocontent_help">
-                            <p class="o_view_nocontent_smiling_face">
-                                No data available for this period.
-                            </p>
-                            <p>
-                                Click on "Add a line" to start recording.
-                            </p>
-                        </div>
+            <t t-if="hasData || props.archInfo.displayEmpty">
+                <GridRenderer 
+                    model="model" 
+                    rowFields="rowFields"
+                    fields="props.fields"
+                    archInfo="props.archInfo" 
+                    range="state.currentRange"
+                    onCellUpdate.bind="onCellUpdate"
+                    onToggleRow.bind="onToggleRow"
+                    onAddLine.bind="onAddLine"
+                    onSort.bind="onSort"
+                    sort="state.sort"
+                />
+            </t>
+            <t t-else="">
+                <div class="o_view_nocontent flex-grow-1">
+                    <div class="o_nocontent_help">
+                        <p class="o_view_nocontent_smiling_face">
+                            No data available for this period.
+                        </p>
+                        <p>
+                            Click on "Add a line" to start recording.
+                        </p>
                     </div>
-                </t>
-            </div>
+                </div>
+            </t>
         </Layout>
     </t>
 
     <t t-name="web_grid_view.GridRenderer" owl="1">
-        <div class="o_grid_renderer">
+        <div class="o_grid_renderer" t-attf-class="o_grid_range_{{props.range.name}}">
             <div class="o_grid_scrollable">
                 <table class="table table-bordered table-sm o_grid_table">
                     <thead>
