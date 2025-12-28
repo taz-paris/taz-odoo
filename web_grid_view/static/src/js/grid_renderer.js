@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
 import { Component } from "@odoo/owl";
-import { localization } from "@web/core/l10n/localization";
+import { formatFloat, formatFloatTime } from "@web/views/fields/formatters";
+import { parseFloat as odooParseFloat, parseFloatTime } from "@web/views/fields/parsers";
 
 export class GridRenderer extends Component {
     static template = "web_grid_view.GridRenderer";
@@ -59,29 +60,28 @@ export class GridRenderer extends Component {
     }
 
     formatValue(value) {
+        const fieldName = this.props.archInfo.cellField.name;
+        const field = this.props.fields[fieldName];
         const widget = this.props.archInfo.cellField.widget;
+        const options = { field, digits: [42, 2] };
         if (widget === 'float_time') {
-            const val = parseFloat(value || 0);
-            const hours = Math.floor(Math.abs(val));
-            const minutes = Math.round((Math.abs(val) % 1) * 60);
-            const sign = val < 0 ? "-" : "";
-            return `${sign}${hours}:${minutes.toString().padStart(2, "0")}`;
+            return formatFloatTime(value || 0, options);
         }
-        // Localized decimal point
-        if (typeof value === 'number' || !isNaN(parseFloat(value))) {
-            return (value || 0).toString().replace('.', localization.decimalPoint);
-        }
-        return value;
+        return formatFloat(value || 0, options);
     }
 
     onCellChange(rowIndex, colIndex, ev) {
-        const value = ev.target.value.replace(',', '.');
-        let parsedValue = parseFloat(value || 0);
-        if (this.props.archInfo.cellField.widget === 'float_time' && value.includes(':')) {
-            const parts = value.split(':');
-            if (parts.length === 2) {
-                parsedValue = (parseFloat(parts[0]) || 0) + (parseFloat(parts[1]) || 0) / 60;
+        const value = ev.target.value;
+        let parsedValue;
+        try {
+            if (this.props.archInfo.cellField.widget === 'float_time') {
+                parsedValue = parseFloatTime(value);
+            } else {
+                parsedValue = odooParseFloat(value);
             }
+        } catch (e) {
+            // If parsing fails (e.g. invalid characters), fallback to 0 or previous value
+            parsedValue = 0;
         }
 
         const row = this.rows[rowIndex];
