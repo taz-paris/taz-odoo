@@ -10,6 +10,7 @@ export class GridArchParser {
             colField: null,
             cellField: null,
             ranges: [],
+            steps: [],
             buttons: [],
             adjustment: arch.getAttribute("adjustment"),
             adjustName: arch.getAttribute("adjust_name"),
@@ -19,6 +20,32 @@ export class GridArchParser {
             displayEmpty: arch.getAttribute("display_empty") === "true",
         };
 
+        const parseDecorations = (node) => {
+            const decorations = {};
+            for (const attr of node.attributes) {
+                if (attr.name.startsWith("decoration-")) {
+                    decorations[attr.name] = attr.value;
+                }
+            }
+            return decorations;
+        };
+
+        const parseStep = (node) => {
+            return {
+                name: node.getAttribute("name"),
+                string: _t(node.getAttribute("string")),
+                step: node.getAttribute("step"),
+                decorations: parseDecorations(node),
+            };
+        };
+
+        const parseStepDecorator = (node) => {
+            return {
+                stepName: node.getAttribute("step"), // Reference to a <step name="..."/>
+                decorations: parseDecorations(node),
+            };
+        };
+
         visitXML(arch, (node) => {
             if (node.tagName === "field") {
                 const type = node.getAttribute("type");
@@ -26,18 +53,26 @@ export class GridArchParser {
                 const string = node.getAttribute("string");
 
                 if (type === "row") {
-                    archInfo.rowFields.push({ name, string: _t(string) });
+                    const rowField = { name, string: _t(string), stepDecorators: [] };
+                    for (const child of node.children) {
+                        if (child.tagName === "step_decorator") {
+                            rowField.stepDecorators.push(parseStepDecorator(child));
+                        }
+                    }
+                    archInfo.rowFields.push(rowField);
                 } else if (type === "col") {
-                    archInfo.colField = { name, string: _t(string) };
-                    // Parse ranges
+                    archInfo.colField = { name, string: _t(string), decorations: parseDecorations(node) };
+                    // Parse ranges and steps
                     for (const child of node.children) {
                         if (child.tagName === "range") {
                             archInfo.ranges.push({
                                 name: child.getAttribute("name"),
                                 string: _t(child.getAttribute("string")),
                                 span: child.getAttribute("span"),
-                                step: child.getAttribute("step"),
+                                decorations: parseDecorations(child),
                             });
+                        } else if (child.tagName === "step") {
+                            archInfo.steps.push(parseStep(child));
                         }
                     }
                 } else if (type === "measure") {
@@ -58,9 +93,12 @@ export class GridArchParser {
             }
         });
 
-        // Default range if none
+        // Default range/step if none defined
         if (archInfo.ranges.length === 0 && archInfo.colField) {
-            archInfo.ranges.push({ name: "month", string: _t("Month"), span: "month", step: "day" });
+            archInfo.ranges.push({ name: "month", string: _t("Month"), span: "month", decorations: {} });
+        }
+        if (archInfo.steps.length === 0 && archInfo.colField) {
+            archInfo.steps.push({ name: "day", string: _t("Day"), step: "day", decorations: {} });
         }
 
         return archInfo;

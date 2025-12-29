@@ -55,27 +55,53 @@ export class GridController extends Component {
         this.model = reactive(new GridModel(this.orm));
         this.searchBarToggler = useSearchBarToggler();
 
-        const defaultRange = this.props.archInfo.ranges[0] || { span: 'month', step: 'day' };
+        const firstRange = this.props.archInfo.ranges[0] || { span: 'month', name: 'month' };
+        const firstStepDef = this.props.archInfo.steps[0] || { step: 'day', name: 'day' };
+
+        let initialSpan = firstRange.span;
+        let initialStepName = firstStepDef.name; // Use name here
+        let initialAnchor = null;
+
+        const context = this.props.context || {};
+
+        // Handle grid_range (name of the <range/> tag)
+        if (context.grid_range) {
+            const range = this.props.archInfo.ranges.find(r => r.name === context.grid_range);
+            if (range) {
+                initialSpan = range.span;
+            }
+        }
+
+        // Handle grid_step (name of the <step/> tag or direct step value)
+        if (context.grid_step) {
+            const stepDef = (this.props.archInfo.steps || []).find(s => s.name === context.grid_step || s.step === context.grid_step);
+            if (stepDef) {
+                initialStepName = stepDef.name;
+            }
+        }
+
+        // Handle grid_anchor (date string)
+        if (context.grid_anchor) {
+            initialAnchor = context.grid_anchor;
+        }
+
         this.state = useState({
-            currentSpan: defaultRange.span,
-            currentStep: defaultRange.step,
+            currentSpan: initialSpan,
+            currentStep: initialStepName,
+            anchor: initialAnchor,
             sort: { field: 'group', order: null },
+            rowFields: this.getRowFields(this.props), // Store rowFields in state
         });
 
-        // Filter unique spans and steps from ranges
-        this.availableSpans = [
-            { name: 'week', string: _t('Week') },
-            { name: 'month', string: _t('Month') },
-            { name: 'quarter', string: _t('Quarter') },
-            { name: 'year', string: _t('Year') },
-        ];
-        this.availableSteps = [
-            { name: 'day', string: _t('Day') },
-            { name: 'week', string: _t('Week') },
-            { name: 'month', string: _t('Month') },
-            { name: 'quarter', string: _t('Quarter') },
-            { name: 'year', string: _t('Year') },
-        ];
+        // Populations of dropdowns now strictly follows the XML tags
+        this.availableSpans = this.props.archInfo.ranges.map(r => ({
+            name: r.span,
+            string: r.string
+        }));
+        this.availableSteps = this.props.archInfo.steps.map(s => ({
+            name: s.name, // Use NAME here
+            string: s.string
+        }));
 
         onWillStart(async () => {
             await this.loadData();
@@ -111,9 +137,11 @@ export class GridController extends Component {
         if (groupBy && groupBy.length > 0) {
             return groupBy.map(fieldName => {
                 const name = fieldName.split(':')[0];
+                const archRowField = archInfo.rowFields.find(f => f.name === name) || {};
                 return {
                     name: fieldName,
-                    string: fields[name] ? fields[name].string : fieldName
+                    string: fields[name] ? fields[name].string : fieldName,
+                    stepDecorators: archRowField.stepDecorators || [],
                 };
             });
         }
@@ -124,12 +152,15 @@ export class GridController extends Component {
     }
 
     get rowFields() {
-        return this.getRowFields(this.props);
+        return this.state.rowFields;
     }
 
     async loadData(props = this.props) {
         const { archInfo, resModel, domain, context } = props;
-        const rowFields = this.getRowFields(props);
+        this.state.rowFields = this.getRowFields(props);
+        const rowFields = this.state.rowFields;
+
+        const stepDef = this.props.archInfo.steps.find(s => s.name === this.state.currentStep) || { step: 'day' };
 
         await this.model.load({
             resModel,
@@ -139,8 +170,9 @@ export class GridController extends Component {
             domain,
             range: {
                 span: this.state.currentSpan,
-                step: this.state.currentStep,
-                anchor: this.model.metaData && this.model.metaData.range ? this.model.metaData.range.anchor : null,
+                step: stepDef.step, // Actual value for the backend
+                stepName: this.state.currentStep, // Tag name for decoration lookup
+                anchor: (this.model.metaData && this.model.metaData.range) ? this.model.metaData.range.anchor : this.state.anchor,
             },
             context,
             adjustment: archInfo.adjustment,

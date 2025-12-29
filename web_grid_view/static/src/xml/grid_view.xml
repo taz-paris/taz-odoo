@@ -65,7 +65,11 @@
                     rowFields="rowFields"
                     fields="props.fields"
                     archInfo="props.archInfo" 
-                    range="{ span: state.currentSpan, step: state.currentStep, name: state.currentSpan }"
+                    range="{ 
+                        span: state.currentSpan, 
+                        step: (props.archInfo.steps.find(s => s.name === state.currentStep) || {}).step || state.currentStep,
+                        stepName: state.currentStep 
+                    }"
                     onCellUpdate.bind="onCellUpdate"
                     onToggleRow.bind="onToggleRow"
                     onAddLine.bind="onAddLine"
@@ -132,12 +136,13 @@
                                     <t t-esc="row.label || row.values[props.rowFields[0].name]"/>
                                 </span>
                             </td>
-                            <td t-foreach="getRowGrid(row)" t-as="cell" t-key="cell_index" class="o_grid_cell">
+                            <td t-foreach="getRowGrid(row)" t-as="cell" t-key="cell_index" class="o_grid_cell" t-att-class="getCellClass(cell, row)">
                                 <input t-if="!row.readonly &amp;&amp; !cell.readonly &amp;&amp; row.isLeaf"
                                        type="text" 
                                        class="o_grid_input form-control form-control-sm text-end" 
                                        t-att-value="formatValue(cell.value)"
                                        t-on-change="(ev) => this.onCellChange(rows.indexOf(row), cell_index, ev)"
+                                       t-att-class="getCellClass(cell, row)"
                                 />
                                 <span t-else="" class="d-block text-end pe-2">
                                     <t t-esc="formatValue(cell.value)"/>
