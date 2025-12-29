@@ -13,25 +13,37 @@
                             type="button" class="btn btn-primary o_grid_button_add" t-on-click="onAddLine">
                         Add a line
                     </button>
-                    <div class="o_grid_span_buttons btn-group me-2">
-                        <t t-foreach="availableSpans" t-as="span" t-key="span.name">
-                            <button type="button" 
-                                    class="btn btn-secondary" 
-                                    t-att-class="{active: state.currentSpan === span.name}"
-                                    t-on-click="() => this.onSpanSelected(span.name)">
-                                <t t-esc="span.string"/>
-                            </button>
-                        </t>
+                    <div class="dropdown me-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <t t-esc="'Période : ' + currentSpanLabel"/>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <t t-foreach="availableSpans" t-as="span" t-key="span.name">
+                                <li>
+                                    <a class="dropdown-item" href="#" 
+                                       t-att-class="{ active: state.currentSpan === span.name }"
+                                       t-on-click.prevent="() => this.onSpanSelected(span.name)">
+                                        <t t-esc="span.string"/>
+                                    </a>
+                                </li>
+                            </t>
+                        </ul>
                     </div>
-                    <div class="o_grid_step_buttons btn-group">
-                        <t t-foreach="availableSteps" t-as="step" t-key="step.name">
-                            <button type="button" 
-                                    class="btn btn-secondary" 
-                                    t-att-class="{active: state.currentStep === step.name}"
-                                    t-on-click="() => this.onStepSelected(step.name)">
-                                <t t-esc="step.string"/>
-                            </button>
-                        </t>
+                    <div class="dropdown me-2">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <t t-esc="'Regrouper par : ' + currentStepLabel"/>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <t t-foreach="availableSteps" t-as="step" t-key="step.name">
+                                <li>
+                                    <a class="dropdown-item" href="#" 
+                                       t-att-class="{ active: state.currentStep === step.name }"
+                                       t-on-click.prevent="() => this.onStepSelected(step.name)">
+                                        <t t-esc="step.string"/>
+                                    </a>
+                                </li>
+                            </t>
+                        </ul>
                     </div>
                 </div>
                 <div class="o_grid_navigation_buttons btn-group">

@@ -6,6 +6,43 @@ import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
 import { GridRenderer } from "./grid_renderer";
 import { GridModel } from "./grid_model";
+import { Dialog } from "@web/core/dialog/dialog";
+import { View } from "@web/views/view";
+import { xml } from "@odoo/owl";
+
+class GridFormViewDialog extends Component {
+    static template = xml`
+        <Dialog title="props.title">
+            <div class="o_form_view_dialog">
+                <View t-props="viewProps"/>
+            </div>
+            <t t-set-slot="footer">
+                <!-- Buttons are handled by the FormView inside View -->
+                <button class="btn btn-secondary" t-on-click="props.close">Close</button>
+            </t>
+        </Dialog>
+    `;
+    static components = { Dialog, View };
+
+    get viewProps() {
+        return {
+            type: "form",
+            resModel: this.props.resModel,
+            context: this.props.context,
+            arch: this.props.arch,
+            fields: this.props.fields,
+            relatedModels: {
+                [this.props.resModel]: { fields: this.props.fields }
+            },
+            onSave: async () => {
+                if (this.props.onSave) {
+                    await this.props.onSave();
+                }
+                this.props.close();
+            },
+        };
+    }
+}
 
 export class GridController extends Component {
     static template = "web_grid_view.GridView";
@@ -14,6 +51,7 @@ export class GridController extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.dialogService = useService("dialog");
         this.model = reactive(new GridModel(this.orm));
         this.searchBarToggler = useSearchBarToggler();
 
@@ -166,23 +204,98 @@ export class GridController extends Component {
         this.render();
     }
 
+    get currentSpanLabel() {
+        const span = this.availableSpans.find(s => s.name === this.state.currentSpan);
+        return span ? span.string : '';
+    }
+
+    get currentStepLabel() {
+        const step = this.availableSteps.find(s => s.name === this.state.currentStep);
+        return step ? step.string : '';
+    }
+
     get hasData() {
         return this.model.data && this.model.data.rows && this.model.data.rows.length > 0;
     }
 
     async onAddLine() {
-        const { resModel, context } = this.props;
-        await this.action.doAction({
-            type: "ir.actions.act_window",
-            res_model: resModel,
-            views: [[false, "form"]],
-            target: "new",
-            context: {
-                ...context,
-                default_date: this.model.metaData.range ? this.model.metaData.range.anchor || new Date().toISOString().split('T')[0] : null,
-            },
-        }, {
-            onClose: async () => {
+        const { resModel, context, domain, archInfo } = this.props;
+
+        // 1. Extract defaults from domain
+        const domainDefaults = {};
+        const extract = (d) => {
+            if (!d || !Array.isArray(d)) return;
+            d.forEach(leaf => {
+                if (Array.isArray(leaf)) {
+                    if (leaf.length === 3 && leaf[1] === '=') {
+                        domainDefaults[leaf[0]] = leaf[2];
+                    } else {
+                        extract(leaf);
+                    }
+                }
+            });
+        };
+        extract(domain);
+
+        // 2. Identify fields to show and which should be readonly
+        const rowFields = archInfo.rowFields.map(f => f.name);
+        const colField = archInfo.colField.name;
+        const cellField = archInfo.cellField.name;
+
+        const gridFields = new Set([colField, ...rowFields]);
+        const contextFields = new Set();
+        Object.keys(context).forEach(key => {
+            if (key.startsWith('default_')) {
+                contextFields.add(key.replace('default_', ''));
+            }
+        });
+        const domainFields = new Set(Object.keys(domainDefaults));
+
+        // Combined set of fields to display in the form (filtered by model fields)
+        const allFieldsToShow = new Set();
+        [...gridFields, ...contextFields, ...domainFields].forEach(fname => {
+            if (this.props.fields[fname] && fname !== cellField) {
+                allFieldsToShow.add(fname);
+            }
+        });
+
+        // 3. Construct a dynamic XML arch for the form
+        let arch = `<?xml version="1.0"?>
+            <form string="${_t('Add a line')}">
+                <sheet>
+                    <group>
+        `;
+
+        allFieldsToShow.forEach(fieldName => {
+            // Fields from domain or context are marked as readonly
+            const isReadonly = domainFields.has(fieldName) || contextFields.has(fieldName);
+            arch += `<field name="${fieldName}" ${isReadonly ? 'readonly="1"' : ''}/>\n`;
+        });
+
+        arch += `
+                    </group>
+                </sheet>
+            </form>
+        `;
+
+        // 4. Prepare final context
+        const finalContext = { ...context };
+        Object.keys(domainDefaults).forEach(k => {
+            finalContext[`default_${k}`] = domainDefaults[k];
+        });
+
+        // Set default date if it's not already in domain/context
+        if (!finalContext.default_date && colField === 'date') {
+            finalContext.default_date = this.model.metaData.range ? this.model.metaData.range.anchor || new Date().toISOString().split('T')[0] : null;
+        }
+
+        this.dialogService.add(GridFormViewDialog, {
+            title: _t("Add a line"),
+            resModel: resModel,
+            context: finalContext,
+            arch: arch,
+            fields: this.props.fields,
+            onSave: async () => {
                 await this.loadData();
             },
         });
