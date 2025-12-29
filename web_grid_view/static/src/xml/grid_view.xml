@@ -13,13 +13,23 @@
                             type="button" class="btn btn-primary o_grid_button_add" t-on-click="onAddLine">
                         Add a line
                     </button>
-                    <div class="o_grid_range_buttons btn-group">
-                        <t t-foreach="props.archInfo.ranges" t-as="range" t-key="range.name">
+                    <div class="o_grid_span_buttons btn-group me-2">
+                        <t t-foreach="availableSpans" t-as="span" t-key="span.name">
                             <button type="button" 
                                     class="btn btn-secondary" 
-                                    t-att-class="{active: state.currentRange.name === range.name}"
-                                    t-on-click="() => this.onRangeSelected(range.name)">
-                                <t t-esc="range.string"/>
+                                    t-att-class="{active: state.currentSpan === span.name}"
+                                    t-on-click="() => this.onSpanSelected(span.name)">
+                                <t t-esc="span.string"/>
+                            </button>
+                        </t>
+                    </div>
+                    <div class="o_grid_step_buttons btn-group">
+                        <t t-foreach="availableSteps" t-as="step" t-key="step.name">
+                            <button type="button" 
+                                    class="btn btn-secondary" 
+                                    t-att-class="{active: state.currentStep === step.name}"
+                                    t-on-click="() => this.onStepSelected(step.name)">
+                                <t t-esc="step.string"/>
                             </button>
                         </t>
                     </div>
@@ -43,7 +53,7 @@
                     rowFields="rowFields"
                     fields="props.fields"
                     archInfo="props.archInfo" 
-                    range="state.currentRange"
+                    range="{ span: state.currentSpan, step: state.currentStep, name: state.currentSpan }"
                     onCellUpdate.bind="onCellUpdate"
                     onToggleRow.bind="onToggleRow"
                     onAddLine.bind="onAddLine"

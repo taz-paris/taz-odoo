@@ -25,7 +25,15 @@
         overflow: hidden !important;
 
         &.o_grid_range_month .o_grid_table {
-            min-width: 3000px !important; // Absolute force for Month view
+            min-width: 3000px !important;
+        }
+
+        &.o_grid_range_quarter .o_grid_table {
+            min-width: 9000px !important;
+        }
+
+        &.o_grid_range_year .o_grid_table {
+            min-width: 35000px !important;
         }
 
         .o_grid_scrollable {
@@ -61,7 +69,7 @@
                         padding: 0.4rem;
                         font-size: 0.85rem;
                         font-weight: bold !important;
-                        min-width: 100px;
+                        min-width: 50px;
 
                         &.o_grid_sortable_header {
                             cursor: pointer;
@@ -175,7 +183,7 @@
                 }
 
                 .o_grid_cell {
-                    min-width: 100px;
+                    min-width: 50px;
                     white-space: nowrap !important;
 
                     .o_grid_input {

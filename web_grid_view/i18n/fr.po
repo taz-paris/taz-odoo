@@ -24,35 +24,5 @@ msgstr "Regroupé par :"
 #. module: web_grid_view
 #. odoo-javascript
 #: code:addons/web_grid_view/static/src/xml/grid_view.xml:0
-msgid "Add a line"
-msgstr "Ajouter une ligne"
-
-#. module: web_grid_view
-#. odoo-javascript
-#: code:addons/web_grid_view/static/src/xml/grid_view.xml:0
-msgid "Today"
-msgstr "Aujourd'hui"
-
-#. module: web_grid_view
-#. odoo-javascript
-#: code:addons/web_grid_view/static/src/xml/grid_view.xml:0
 msgid "No data available"
 msgstr "Aucune donnée disponible"
-
-#. module: web_grid_view
-#. odoo-javascript
-#: code:addons/web_grid_view/static/src/xml/grid_view.xml:0
-msgid "Total"
-msgstr "Total"
-
-#. module: web_grid_view
-#. odoo-javascript
-#: code:addons/web_grid_view/static/src/xml/grid_view.xml:0
-msgid "Week"
-msgstr "Semaine"
-
-#. module: web_grid_view
-#. odoo-javascript
-#: code:addons/web_grid_view/static/src/xml/grid_view.xml:0
-msgid "Month"
-msgstr "Mois"

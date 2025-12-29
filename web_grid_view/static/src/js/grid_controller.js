@@ -1,4 +1,5 @@
 import { Component, useState, onWillStart, onWillUpdateProps, reactive } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 import { Layout } from "@web/search/layout";
 import { useService } from "@web/core/utils/hooks";
 import { SearchBar } from "@web/search/search_bar/search_bar";
@@ -16,10 +17,27 @@ export class GridController extends Component {
         this.model = reactive(new GridModel(this.orm));
         this.searchBarToggler = useSearchBarToggler();
 
+        const defaultRange = this.props.archInfo.ranges[0] || { span: 'month', step: 'day' };
         this.state = useState({
-            currentRange: this.props.archInfo.ranges[0],
-            sort: { field: 'group', order: null }, // field can be 'group' or a specific date/col value
+            currentSpan: defaultRange.span,
+            currentStep: defaultRange.step,
+            sort: { field: 'group', order: null },
         });
+
+        // Filter unique spans and steps from ranges
+        this.availableSpans = [
+            { name: 'week', string: _t('Week') },
+            { name: 'month', string: _t('Month') },
+            { name: 'quarter', string: _t('Quarter') },
+            { name: 'year', string: _t('Year') },
+        ];
+        this.availableSteps = [
+            { name: 'day', string: _t('Day') },
+            { name: 'week', string: _t('Week') },
+            { name: 'month', string: _t('Month') },
+            { name: 'quarter', string: _t('Quarter') },
+            { name: 'year', string: _t('Year') },
+        ];
 
         onWillStart(async () => {
             await this.loadData();
@@ -82,7 +100,8 @@ export class GridController extends Component {
             cellField: archInfo.cellField.name,
             domain,
             range: {
-                ...this.state.currentRange,
+                span: this.state.currentSpan,
+                step: this.state.currentStep,
                 anchor: this.model.metaData && this.model.metaData.range ? this.model.metaData.range.anchor : null,
             },
             context,
@@ -94,12 +113,14 @@ export class GridController extends Component {
         this.render();
     }
 
-    async onRangeSelected(rangeName) {
-        const range = this.props.archInfo.ranges.find(r => r.name === rangeName);
-        if (range) {
-            this.state.currentRange = range;
-            await this.loadData();
-        }
+    async onSpanSelected(spanName) {
+        this.state.currentSpan = spanName;
+        await this.loadData();
+    }
+
+    async onStepSelected(stepName) {
+        this.state.currentStep = stepName;
+        await this.loadData();
     }
 
     async onPrev() {

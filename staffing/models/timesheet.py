@@ -1,4 +1,6 @@
 from odoo import models, api
+import logging
+_logger = logging.getLogger(__name__)
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -13,13 +15,23 @@ class AccountAnalyticLine(models.Model):
         :param cell_field: name of the cell field (e.g. 'unit_amount')
         :param change: new value for the cell
         """
+        _logger.info("========== Adjusting grid cell")
+        _logger.info(row_domain)
+        _logger.info(column_field)
+        _logger.info(column_value)
+        _logger.info(cell_field)
+        _logger.info(change)
         # 1. Find existing record
         domain = row_domain + [(column_field, '=', column_value)]
+        _logger.info(domain)
         record = self.search(domain, limit=1)
+        _logger.info(record)
         
         if record:
+            _logger.info("Record found, updating")
             record.write({cell_field: change})
         else:
+            """
             # 2. Create new record
             vals = {
                 column_field: column_value,
@@ -33,5 +45,7 @@ class AccountAnalyticLine(models.Model):
                     vals[leaf[0]] = leaf[2]
             
             self.create(vals)
+            """
+            return False
             
         return True
