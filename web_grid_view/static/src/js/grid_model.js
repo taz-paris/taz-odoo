@@ -117,10 +117,16 @@ export class GridModel {
             await this.orm.call(resModel, adjustName, [
                 rowDomain,
                 this.metaData.colField,
-                colDomain[0][2],
+                colDomain,
                 fieldName,
                 value
-            ], { context });
+            ], {
+                context: {
+                    ...context,
+                    grid_step: this.metaData.range.step,
+                    grid_span: this.metaData.range.span,
+                }
+            });
         } else {
             console.warn("No adjustment method defined.");
         }
