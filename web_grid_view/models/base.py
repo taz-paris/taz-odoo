@@ -294,7 +294,10 @@ class Base(models.AbstractModel):
                 period_end = next_date - datetime.timedelta(days=1)
                 col_start = max(current_date, start_date)
                 col_end = min(period_end, end_date)
-                label = format_date(self.env, current_date, date_format='MMMM yyyy')
+                if col_start != current_date or col_end != period_end:
+                    label = f"{format_date(self.env, col_start)} - {format_date(self.env, col_end)}"
+                else:
+                    label = format_date(self.env, current_date, date_format='MMMM yyyy')
                 columns.append({
                     'values': {name: date_str},
                     'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
@@ -307,7 +310,10 @@ class Base(models.AbstractModel):
                 period_end = next_date - datetime.timedelta(days=1)
                 col_start = max(current_date, start_date)
                 col_end = min(period_end, end_date)
-                label = f"Q{(current_date.month - 1) // 3 + 1} {current_date.year}"
+                if col_start != current_date or col_end != period_end:
+                    label = f"{format_date(self.env, col_start)} - {format_date(self.env, col_end)}"
+                else:
+                    label = f"Q{(current_date.month - 1) // 3 + 1} {current_date.year}"
                 columns.append({
                     'values': {name: date_str},
                     'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
@@ -320,7 +326,10 @@ class Base(models.AbstractModel):
                 period_end = next_date - datetime.timedelta(days=1)
                 col_start = max(current_date, start_date)
                 col_end = min(period_end, end_date)
-                label = str(current_date.year)
+                if col_start != current_date or col_end != period_end:
+                    label = f"{format_date(self.env, col_start)} - {format_date(self.env, col_end)}"
+                else:
+                    label = str(current_date.year)
                 columns.append({
                     'values': {name: date_str},
                     'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
@@ -338,16 +347,16 @@ class Base(models.AbstractModel):
                 current_date += datetime.timedelta(days=1)
 
         prev_date = start_date - datetime.timedelta(days=1)
-        if step == 'week': prev_date = start_date - datetime.timedelta(days=7)
-        elif step == 'month': prev_date = start_date - relativedelta(months=1)
-        elif step == 'quarter': prev_date = start_date - relativedelta(months=3)
-        elif step == 'year': prev_date = start_date - relativedelta(years=1)
+        if span == 'week': prev_date = start_date - datetime.timedelta(days=7)
+        elif span == 'month': prev_date = start_date - relativedelta(months=1)
+        elif span == 'quarter': prev_date = start_date - relativedelta(months=3)
+        elif span == 'year': prev_date = start_date - relativedelta(years=1)
         
         next_date = end_date + datetime.timedelta(days=1)
-        if step == 'week': next_date = end_date + datetime.timedelta(days=7)
-        elif step == 'month': next_date = end_date + relativedelta(months=1)
-        elif step == 'quarter': next_date = end_date + relativedelta(months=3)
-        elif step == 'year': next_date = end_date + relativedelta(years=1)
+        if span == 'week': next_date = start_date + datetime.timedelta(days=7)
+        elif span == 'month': next_date = start_date + relativedelta(months=1)
+        elif span == 'quarter': next_date = start_date + relativedelta(months=3)
+        elif span == 'year': next_date = start_date + relativedelta(years=1)
         
         return {
             'values': columns,
