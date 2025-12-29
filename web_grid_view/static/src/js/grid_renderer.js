@@ -144,6 +144,7 @@ export class GridRenderer extends Component {
                     const deco = attr.replace("decoration-", "");
                     if (["info", "success", "danger", "warning", "muted", "primary"].includes(deco)) {
                         classes.push(`text-${deco}`);
+                        classes.push(`o_grid_deco_${deco}`);
                     } else if (deco === "bf") {
                         classes.push("fw-bold");
                     } else if (deco === "it") {
