@@ -46,6 +46,7 @@
         <field name="view_mode">grid,form,kanban,list</field>
         <field name="search_view_id" ref="hr_timesheet.hr_timesheet_line_search"/>
         <field name="context">{'grid_step': 'step_month'}</field>
+        <field name="domain">["|", "&amp;", ("employee_id", "!=", False), ("employee_id.user_id", "=", uid), "&amp;", ("employee_id", "=", False), ("user_id", "=", uid)]</field>
     </record>
 
     <record id="record_id_view_grid" model="ir.actions.act_window.view">
