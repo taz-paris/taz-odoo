@@ -53,7 +53,12 @@ export class GridArchParser {
                 const string = node.getAttribute("string");
 
                 if (type === "row") {
-                    const rowField = { name, string: _t(string), stepDecorators: [] };
+                    const rowField = {
+                        name,
+                        string: _t(string),
+                        readonly: node.getAttribute("readonly"), // Store raw expression
+                        stepDecorators: []
+                    };
                     for (const child of node.children) {
                         if (child.tagName === "step_decorator") {
                             rowField.stepDecorators.push(parseStepDecorator(child));
@@ -61,7 +66,12 @@ export class GridArchParser {
                     }
                     archInfo.rowFields.push(rowField);
                 } else if (type === "col") {
-                    const colField = { name, string: _t(string), decorations: parseDecorations(node) };
+                    const colField = {
+                        name,
+                        string: _t(string),
+                        readonly: node.getAttribute("readonly"), // Store raw expression
+                        decorations: parseDecorations(node)
+                    };
                     archInfo.colFields.push(colField);
                     // Parse ranges and steps
                     for (const child of node.children) {

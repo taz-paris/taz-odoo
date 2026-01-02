@@ -21,7 +21,7 @@
                            decoration-danger="unit_amount &gt; 20"/>
                 </field>
                 <field name="project_id" type="row"/>
-                <field name="date" type="col"
+                <field name="date" type="col" 
                        decoration-muted="unit_amount == 0">
                     <!-- SPAN -->
                     <range name="span_week" string="Week" span="week"/>
@@ -36,7 +36,7 @@
                     <step name="step_quarter" string="Quarter" step="quarter"/>
                     <step name="step_year" string="Year" step="year"/>
                 </field>
-                <field name="category" type="col"/>
+                <field name="category" type="col" readonly="category == 'project_forecast'"/>
                 <field name="unit_amount" type="measure"/>
             </grid>
         </field>

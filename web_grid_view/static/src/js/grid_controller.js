@@ -142,6 +142,7 @@ export class GridController extends Component {
                     name: fieldName,
                     string: fields[name] ? fields[name].string : fieldName,
                     stepDecorators: archRowField.stepDecorators || [],
+                    readonly: archRowField.readonly,
                 };
             });
         }
@@ -179,6 +180,10 @@ export class GridController extends Component {
             adjustment: archInfo.adjustment,
             adjustName: archInfo.adjustName,
             sort: this.state.sort,
+            readonlyFieldExprs: {
+                ...Object.fromEntries(rowFields.filter(f => f.readonly).map(f => [f.name, f.readonly])),
+                ...Object.fromEntries(archInfo.colFields.filter(f => f.readonly).map(f => [f.name, f.readonly]))
+            },
         });
 
         this.render();

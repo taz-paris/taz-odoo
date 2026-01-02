@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import models, api, fields, _
 from odoo.tools import format_date
+from odoo.tools.safe_eval import safe_eval
 from odoo.osv import expression
 from dateutil.relativedelta import relativedelta
 import datetime
@@ -20,10 +21,7 @@ class Base(models.AbstractModel):
         if isinstance(col_fields, str):
             col_fields = [col_fields]
             
-        _logger.info(f"READ_GRID called with col_fields: {col_fields} and range: {grid_range}")
         domain = domain or []
-        
-        # Debug Log File
 
         
         # Security: Filter out Falsey values and ensure Strings
@@ -47,7 +45,6 @@ class Base(models.AbstractModel):
         try:
             range_field_name = next((f for f in col_fields if f in fields_data and fields_data[f]['type'] in ['date', 'datetime']), col_fields[0])
         except (IndexError, StopIteration):
-             _logger.warning("No valid column fields found or fields_get returned empty.")
              range_field_name = None
         
         column_info_map = {} # To store next/prev context from the Range field
@@ -220,12 +217,52 @@ class Base(models.AbstractModel):
                     grid = []
                     row_domain = [(f, '=', key_elements[idx]) for idx, f in enumerate(current_row_fields)]
                     
+                    # Evaluate ROW field readonly expressions
+                    readonly_exprs = kwargs.get('readonly_field_exprs', {})
+                    is_row_readonly = False
+                    
+                    # Context for safe_eval: Use the group data 'g' which has values like {category: 'project_forecast'}
+                    # We might need to handle tuple values (many2one) by providing both id and name?
+                    # For now, simple values from 'g' usually sufficient.
+                    eval_context = {k: (v[0] if isinstance(v, tuple) else v) for k, v in g.items()}
+                    
+                    for f in current_row_fields:
+                        expr = readonly_exprs.get(f)
+                        if expr:
+                            try:
+                                # Check for simple true/1 boolean flags (legacy/static support)
+                                if str(expr).lower() in ['1', 'true']:
+                                    is_row_readonly = True
+                                else:
+                                    if safe_eval(expr, eval_context):
+                                        is_row_readonly = True
+                            except:
+                                # On error, assume not readonly or log warning?
+                                pass
+
                     for col in leaf_columns:
                          # Combine domains
                          full_domain = expression.AND([domain, row_domain, col['domain']])
+                         
+                         is_col_readonly = False
+                         for f in col['values'].keys():
+                             expr = readonly_exprs.get(f)
+                             if expr:
+                                 # We need to update context with COLUMN values for this specific column
+                                 col_context = eval_context.copy()
+                                 col_context.update(col['values'])
+                                 
+                                 try:
+                                     if str(expr).lower() in ['1', 'true']:
+                                          is_col_readonly = True
+                                     elif safe_eval(expr, col_context):
+                                          is_col_readonly = True
+                                 except:
+                                     pass
+                         
                          grid.append({
                              'value': 0, 
-                             'readonly': i < len(row_fields), 
+                             'readonly': (i < len(row_fields)) or is_row_readonly or is_col_readonly, 
                              'domain': full_domain
                          })
 

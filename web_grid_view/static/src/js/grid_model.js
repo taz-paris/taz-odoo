@@ -12,7 +12,7 @@ export class GridModel {
     }
 
     async load(params) {
-        const { resModel, rowFields, colFields, cellField, domain, range, context, adjustment, adjustName } = params;
+        const { resModel, rowFields, colFields, cellField, domain, range, context, adjustment, adjustName, readonlyFieldExprs } = params;
         this.metaData = {
             resModel,
             rowFields,
@@ -24,12 +24,13 @@ export class GridModel {
             adjustment,
             adjustName,
             sort: params.sort || { field: 'group', order: null },
+            readonlyFieldExprs: readonlyFieldExprs || {},
         };
         return this.fetchData();
     }
 
     async fetchData() {
-        const { resModel, rowFields, colFields, cellField, domain, range, context, sort } = this.metaData;
+        const { resModel, rowFields, colFields, cellField, domain, range, context, sort, readonlyFieldExprs } = this.metaData;
 
         let orderby = null;
         if (sort && sort.order) {
@@ -50,6 +51,7 @@ export class GridModel {
             grid_range: range,
             orderby: orderby,
             context,
+            readonly_field_exprs: readonlyFieldExprs, // Pass expression map
         });
 
         this.data = data;
