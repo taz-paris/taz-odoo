@@ -15,7 +15,8 @@
                     </button>
                     <div class="dropdown me-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <t t-esc="'Période : ' + currentSpanLabel"/>
+                            <span class="me-1">Period:</span>
+                            <t t-esc="currentSpanLabel"/>
                         </button>
                         <ul class="dropdown-menu">
                             <t t-foreach="availableSpans" t-as="span" t-key="span.name">
@@ -31,7 +32,8 @@
                     </div>
                     <div class="dropdown me-2">
                         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <t t-esc="'Regrouper par : ' + currentStepLabel"/>
+                            <span class="me-1">Group by:</span>
+                            <t t-esc="currentStepLabel"/>
                         </button>
                         <ul class="dropdown-menu">
                             <t t-foreach="availableSteps" t-as="step" t-key="step.name">

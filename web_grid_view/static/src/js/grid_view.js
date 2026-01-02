@@ -1,12 +1,13 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
+import { _t } from "@web/core/l10n/translation";
 import { GridController } from "./grid_controller";
 import { GridArchParser } from "./grid_arch_parser";
 
 export const gridView = {
     type: "grid",
-    display_name: "Grid",
+    display_name: _t("Grid"),
     icon: "fa fa-th",
     multiRecord: true,
     searchMenuTypes: ["filter", "groupBy", "favorite"],

@@ -59,6 +59,18 @@ Decorations can be defined at multiple levels (Field, Range, Step, Row). The eng
   ```
   This rule will reference the global `step` with the name "step_day" but only color rows grouped by "Employee".
 
+### 7. Readonly & Dynamic Expressions
+Support for the `readonly` attribute on `<field type="col" />` or `<field type="row" />`.
+It accepts a Python expression evaluated against the current cell context (row values + column values):
+```xml
+<field name="category" type="col" readonly="category == 'validated' and value > 0"/>
+```
+Legacy boolean strings ("1", "true") are also supported.
+
+### 8. Hierarchical Columns
+The view supports N-levels of column grouping. You can place multiple `<field type="col"/>` tags. The system will build a hierarchical header.
+If a column has a specific domain (implicit via `read_group` or explicit via `domain`), creating a new record in that column will automatically apply these values (e.g. creating a cell in a "Validated" column sets `state='validated'`).
+
 ### 6. Action Context
 You can pre-configure the grid view from an action context using:
 - `grid_range`: The name of a `<range/>` tag.

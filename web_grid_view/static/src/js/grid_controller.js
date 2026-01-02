@@ -18,11 +18,15 @@ class GridFormViewDialog extends Component {
             </div>
             <t t-set-slot="footer">
                 <!-- Buttons are handled by the FormView inside View -->
-                <button class="btn btn-secondary" t-on-click="props.close">Close</button>
+                <button class="btn btn-secondary" t-on-click="props.close"><t t-esc="closeLabel"/></button>
             </t>
         </Dialog>
     `;
     static components = { Dialog, View };
+
+    setup() {
+        this.closeLabel = _t("Close");
+    }
 
     get viewProps() {
         return {
