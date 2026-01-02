@@ -13,222 +13,333 @@ class Base(models.AbstractModel):
     _inherit = 'base'
 
     @api.model
-    def read_grid(self, row_fields, col_field, cell_field, domain=None, grid_range=None, readonly_field=None, orderby=None):
-        _logger.info(f"READ_GRID called with range: {grid_range}")
+    def read_grid(self, row_fields, col_fields, cell_field, domain=None, grid_range=None, readonly_field=None, orderby=None, **kwargs):
+        # Support legacy argument 'col_field'
+        if 'col_field' in kwargs and not col_fields:
+            col_fields = [kwargs['col_field']]
+        if isinstance(col_fields, str):
+            col_fields = [col_fields]
+            
+        _logger.info(f"READ_GRID called with col_fields: {col_fields} and range: {grid_range}")
         domain = domain or []
         
-        # 1. Column Grouping
-        column_info = self._grid_column_info(col_field, grid_range)
-        columns = column_info['values']
-        
-        # 2. Fetch Data for all levels
-        grid_domain = expression.AND([domain, column_info['domain']])
-        
-        all_groups = []
-        for i in range(1, len(row_fields) + 1):
-            current_row_fields = row_fields[:i]
-            # Use the format specified in column_info
-            groupby = current_row_fields + [f"{col_field}:{column_info['format']}"]
-            
-            current_orderby = None
-            if orderby:
-                sort_field = orderby.split(' ')[0]
-                sort_order = orderby.split(' ')[1] if ' ' in orderby else 'asc'
-                if sort_field in current_row_fields:
-                    current_orderby = f"{sort_field} {sort_order}"
+        # Debug Log File
 
-            groups = self.read_group(grid_domain, [cell_field], groupby, lazy=False, orderby=current_orderby)
-            
-            # DEBUG: Log groups to a specific file to be sure we see them
-            try:
-                with open('/tmp/grid_debug.log', 'a') as f:
-                    f.write(f"\n--- Level {i} Groupby {groupby} ---\n")
-                    for g in groups:
-                        # Serialize safely
-                        clean_g = {k: str(v) for k, v in g.items() if k != '__domain'}
-                        f.write(f"Group: {clean_g} | Domain: {g.get('__domain')}\n")
-            except:
-                pass
-
-            for g in groups:
-                g['__level'] = i
-            all_groups.extend(groups)
-            
-        # 3. Process Groups into a flat list of rows with their grid data
-        rows_data = {}
         
+        # Security: Filter out Falsey values and ensure Strings
+        if not col_fields:
+             col_fields = []
+        col_fields = [f for f in col_fields if f and isinstance(f, str)]
+
+        if not col_fields:
+            # Fallback if no columns defined? Should error or return empty?
+            # Let's handle it gracefully 
+            return {'rows': [], 'cols': [], 'cols_tree': [], 'col_totals': [], 'grand_total': 0, 'prev': None, 'next': None}
+
+        # 1. Generate Column Levels (Cartesian Product Preparation)
+        # We will generate a list of lists: [ [ColLevel1_Values], [ColLevel2_Values] ]
+        levels = []
+        all_fields_to_fetch = list(set(col_fields + row_fields))
+        fields_data = self.fields_get(all_fields_to_fetch, ['type', 'selection'])
+        
+        # Identify which field is the "Range/Step" field (usually the first Date/Datetime one)
+        # We assume the grid_range config applies to the first Date field found, or defaults to the first field if none.
+        try:
+            range_field_name = next((f for f in col_fields if f in fields_data and fields_data[f]['type'] in ['date', 'datetime']), col_fields[0])
+        except (IndexError, StopIteration):
+             _logger.warning("No valid column fields found or fields_get returned empty.")
+             range_field_name = None
+        
+        column_info_map = {} # To store next/prev context from the Range field
+        
+        # Pre-calculate Range Info to apply time constraints to other columns
+        if range_field_name and grid_range:
+             column_info_map = self._grid_column_info(range_field_name, grid_range)
+
+        # Prepare Discovery Domain (View Domain + Time Range)
+        discovery_domain = domain
+        if column_info_map.get('domain'):
+             discovery_domain = expression.AND([domain, column_info_map['domain']])
+
+        for field_name in col_fields:
+            if field_name == range_field_name and grid_range:
+                # Use the pre-calculated time-range values
+                levels.append(column_info_map['values'])
+            else:
+                # For other fields, fetch distinct values present in the DISCOVERY domain
+                # We interpret them as simple categorical columns
+                groups = self.read_group(discovery_domain, [field_name], [field_name], lazy=False)
+                
+                level_cols = []
+                seen = set()
+                for g in groups:
+                    val = g[field_name]
+                    # val can be (id, name) for many2one, or raw value
+                    raw_val = val[0] if isinstance(val, tuple) else val
+                    label_val = val[1] if isinstance(val, tuple) else str(val)
+                    
+                    if field_name in fields_data and fields_data[field_name]['type'] == 'selection':
+                        sel = fields_data[field_name].get('selection')
+                        if sel and isinstance(sel, list):
+                             for k, v in sel:
+                                 if k == raw_val:
+                                     label_val = v
+                                     break
+                    
+                    if raw_val not in seen:
+                        seen.add(raw_val)
+                        level_cols.append({
+                            'values': {field_name: raw_val},
+                            'domain': [(field_name, '=', raw_val)],
+                            'label': label_val,
+                            'is_current': False
+                        })
+                # If no data found for this category, maybe we shouldn't show it? 
+                # Or should we show an "Undefined" column? 
+                # For now let's rely on read_group.
+                levels.append(level_cols)
+
+        # 2. Build Cartesian Product of Columns (Tree & Leaves)
+        # We need a recursive function to build the tree
+        def build_tree(depth, current_values, current_domain, current_labels):
+            if depth == len(levels):
+                return [], [{
+                    'values': current_values,
+                    'domain': expression.AND(current_domain),
+                    'labels': current_labels
+                }]
+
+            current_level_cols = levels[depth]
+            nodes = []
+            leaves = []
+            
+            for col in current_level_cols:
+                # Merge values
+                new_values = {**current_values, **col['values']}
+                new_domain = current_domain + [col['domain']]
+                new_labels = current_labels + [col['label']]
+                
+                children_nodes, children_leaves = build_tree(depth + 1, new_values, new_domain, new_labels)
+                
+                start_node = {
+                    'label': col['label'],
+                    'values': col['values'],
+                    'domain': col['domain'],
+                    'is_current': col.get('is_current', False),
+                    'children': children_nodes
+                }
+                nodes.append(start_node)
+                leaves.extend(children_leaves)
+                
+            return nodes, leaves
+
+        root_nodes, leaf_columns = build_tree(0, {}, [domain], [])
+
+        # 3. Fetch Data
+        groupby = []
+        for f in row_fields:
+            groupby.append(f)
+
+        # Determine temporal format if applicable
+        temporal_format = None
+        if range_field_name and 'format' in column_info_map:
+            temporal_format = column_info_map['format']
+
+        # Track Group Keys map
+        col_group_keys = {}
+        for f in col_fields:
+            if f == range_field_name and temporal_format:
+                key = f"{f}:{temporal_format}"
+                groupby.append(key)
+                col_group_keys[f] = key
+            else:
+                groupby.append(f)
+                col_group_keys[f] = f
+
+        fetch_domain = domain
+        if 'domain' in column_info_map:
+            # Safely merge domains
+            if fetch_domain and column_info_map['domain']:
+                fetch_domain = expression.AND([fetch_domain, column_info_map['domain']])
+            elif column_info_map['domain']:
+                fetch_domain = column_info_map['domain']
+
+        current_orderby = None
+        if orderby:
+            parts = orderby.split(' ')
+            sort_field = parts[0]
+            sort_order = parts[1] if len(parts) > 1 else 'asc'
+            if sort_field in row_fields:
+                current_orderby = f"{sort_field} {sort_order}"
+
+        # 4. Process Groups into Rows Data
+        row_levels_data = {}
+
         def normalize_date(v):
             if isinstance(v, (datetime.date, datetime.datetime)):
                 return fields.Date.to_string(v)
             if isinstance(v, str) and len(v) >= 10 and v[4] == '-' and v[7] == '-':
                 return v[:10]
             return v
+        
 
-        for g in all_groups:
-            level = g['__level']
-            row_key_list = []
-            row_values = {}
-            for f in row_fields[:level]:
-                val = g[f]
-                if isinstance(val, tuple):
-                    row_key_list.append(val[0])
-                    row_values[f] = val[1]
+
+        # Single Pass Loop over Row Levels
+        for i in range(1, len(row_fields) + 1):
+            current_row_fields = row_fields[:i]
+            level_groupby = current_row_fields + groupby[len(row_fields):]
+            
+            level_groups = self.read_group(fetch_domain, [cell_field], level_groupby, lazy=False, orderby=current_orderby)
+            
+            for g in level_groups:
+                # Construct Row Key
+                key_elements = []
+                r_values_map = {}
+                for f in current_row_fields:
+                     val = g[f]
+                     if isinstance(val, tuple):
+                         key_elements.append(val[0])
+                         r_values_map[f] = val[1]
+                     else:
+                         key_elements.append(val)
+                         # Try to resolve selection label
+                         label = val
+                         if f in fields_data and fields_data[f]['type'] == 'selection':
+                             sel = fields_data[f].get('selection')
+                             if sel and isinstance(sel, list):
+                                 for k, v in sel:
+                                     if k == val:
+                                         label = v
+                                         break
+                         r_values_map[f] = label
+                r_key = tuple(key_elements)
+                
+                # Init Row if needed
+                if (i, r_key) not in row_levels_data:
+                    # Init Grid
+                    grid = []
+                    row_domain = [(f, '=', key_elements[idx]) for idx, f in enumerate(current_row_fields)]
+                    
+                    for col in leaf_columns:
+                         # Combine domains
+                         full_domain = expression.AND([domain, row_domain, col['domain']])
+                         grid.append({
+                             'value': 0, 
+                             'readonly': i < len(row_fields), 
+                             'domain': full_domain
+                         })
+
+                    row_levels_data[(i, r_key)] = {
+                        'level': i,
+                        'values': r_values_map,
+                        'full_key': list(r_key),
+                        'grid': grid,
+                        'row_total': 0,
+                        'is_leaf': i == len(row_fields),
+                        'domain': row_domain,
+                    }
+
+                # Find Col Index
+                col_idx = -1
+                for idx, col in enumerate(leaf_columns):
+                    match = True
+                    for field in col_fields:
+                        # Use correct group key
+                        group_key = col_group_keys.get(field, field)
+                        g_val = g.get(group_key)
+                        
+                        if isinstance(g_val, tuple): g_val = g_val[0]
+                        c_val = col['values'].get(field)
+                        
+                        is_date = field in fields_data and fields_data[field]['type'] in ['date', 'datetime']
+                        
+                        if is_date:
+                             g_val_norm = normalize_date(g_val)
+                             # 1. Exact Value Match (Normalized)
+                             if g_val_norm == c_val:
+                                  continue
+                             
+                             # 2. Label Match
+                             if str(g_val) == col.get('label'):
+                                  continue 
+
+                             # 3. Explicit Range Meta Check (Robust)
+                             # Compare Group Start Date (from __domain) with Column Range
+                             col_range = col['values'].get(f"{field}__range")
+                             if col_range:
+                                 # We have an explicit range for the column
+                                 c_start_iso, c_end_iso = col_range
+                                 
+                                 # We need the Group Start date
+                                 g_domain = g.get('__domain', [])
+                                 g_start_iso = None
+                                 
+                                 # Extract Start Date from Group Domain
+                                 for leaf in g_domain:
+                                     if isinstance(leaf, (list, tuple)) and len(leaf) == 3 and leaf[0] == field:
+                                         if leaf[1] in ['>=', '=']:
+                                              g_start_iso = leaf[2]
+                                              break
+                                 
+                                 # If we didn't find it in domain (e.g. format='day' often returns exact val),
+                                 # try the normalized value if it looks like ISO
+                                 if not g_start_iso and isinstance(g_val_norm, str) and len(g_val_norm) == 10 and g_val_norm[4] == '-':
+                                      g_start_iso = g_val_norm
+
+                                 if g_start_iso and c_start_iso and c_end_iso:
+                                      if c_start_iso <= g_start_iso <= c_end_iso:
+                                           continue
+                                           
+                             # 4. Range Check on Normalized Value (Legacy Fallback)
+                             is_match_range = False
+                             c_end = None
+                             for leaf in col['domain']:
+                                 if isinstance(leaf, (list, tuple)) and leaf[0] == field:
+                                     if leaf[1] == '<=': c_end = leaf[2]
+                                     elif leaf[1] == '=': c_end = leaf[2]
+                             
+                             is_valid_date_str = isinstance(g_val_norm, str) and len(g_val_norm) >= 10 and g_val_norm[4] == '-'
+                             
+                             if is_valid_date_str and c_start and c_end and c_start <= g_val_norm <= c_end:
+                                  is_match_range = True
+                             
+                             if not is_match_range:
+                                  # log_debug(f"MISMATCH: F={field} G={g_val} GValNorm={g_val_norm} CRange={col_range}")
+                                  match = False; break
+                        else:
+                            if g_val != c_val:
+                                match = False; break
+                    
+                    if match:
+                        col_idx = idx
+                        break
+                
+                if col_idx >= 0:
+                     val = g.get(cell_field, 0)
+                     if col_idx < len(row_levels_data[(i, r_key)]['grid']):
+                         row_levels_data[(i, r_key)]['grid'][col_idx]['value'] += val
+                         row_levels_data[(i, r_key)]['row_total'] += val
                 else:
-                    row_key_list.append(val)
-                    row_values[f] = val
-            
-            row_key = (level, tuple(row_key_list))
-            
-            if row_key not in rows_data:
-                grid = []
-                row_domain = []
-                for f_idx, f in enumerate(row_fields[:level]):
-                    row_domain.append((f, '=', row_key_list[f_idx]))
-                
-                for col in columns:
-                    grid.append({
-                        'value': 0,
-                        'domain': expression.AND([domain, row_domain, col['domain']]),
-                        'readonly': level < len(row_fields)
-                    })
+                     pass
 
-                rows_data[row_key] = {
-                    'level': level,
-                    'values': row_values,
-                    'full_key': row_key_list,
-                    'domain': row_domain,
-                    'grid': grid,
-                    'row_total': 0,
-                    'is_leaf': level == len(row_fields)
-                }
-            
-            # Match group to column
-            # Prioritize Domain or __range for raw date
-            c_val = None
-            
-            # 1. Check __range if it exists
-            if '__range' in g:
-                rng = g['__range']
-                if isinstance(rng, str):
-                    try: rng = json.loads(rng.replace("'", '"'))
-                    except: rng = {}
-                
-                # Try all possible formats of the key
-                for key in [col_field, f"{col_field}:{column_info['format']}"]:
-                    if key in rng:
-                        c_val = rng[key].get('from')
-                        break
-
-            # 2. Fallback: scan domain
-            if not c_val:
-                g_domain = g.get('__domain', [])
-                for leaf in g_domain:
-                    if isinstance(leaf, (list, tuple)) and len(leaf) == 3 and leaf[0] == col_field:
-                        if leaf[1] in ('>=', '=', '>'):
-                            c_val = leaf[2]
-                            break
-            
-            if c_val:
-                c_val_norm = normalize_date(c_val)
-                matched = False
-                for col_idx, col in enumerate(columns):
-                    col_val_norm = normalize_date(col['values'][col_field])
-                    if col_val_norm == c_val_norm:
-                        val = g.get(cell_field, 0)
-                        rows_data[row_key]['grid'][col_idx]['value'] = val
-                        rows_data[row_key]['row_total'] += val
-                        matched = True
-                        break
-                
-                # Special case for step='week'/'month' etc where c_val might fall BETWEEN start and end
-                if not matched and column_info['format'] != 'day':
-                    # If it's a date, check if it fits in any column range
-                    try:
-                        c_date = fields.Date.from_string(c_val_norm)
-                        for col_idx, col in enumerate(columns):
-                            # Columns for ranges have domains like [('date', '>=', '...'), ('date', '<=', '...')]
-                            # We can extract the start and end from col['domain']
-                            c_start = None
-                            c_end = None
-                            for leaf in col['domain']:
-                                if leaf[0] == col_field:
-                                    if leaf[1] == '>=': c_start = fields.Date.from_string(leaf[2])
-                                    if leaf[1] == '<=': c_end = fields.Date.from_string(leaf[2])
-                            
-                            if c_start and c_end and c_start <= c_date <= c_end:
-                                val = g.get(cell_field, 0)
-                                rows_data[row_key]['grid'][col_idx]['value'] = val
-                                rows_data[row_key]['row_total'] += val
-                                matched = True
-                                break
-                    except:
-                        pass
-
-        # 4. Totals Calculation
-        col_totals = [0] * len(columns)
-        grand_total = 0
-        level_1_rows = [r for r in rows_data.values() if r['level'] == 1]
-        for r in level_1_rows:
-            for i, cell in enumerate(r['grid']):
-                col_totals[i] += cell['value']
-            grand_total += r['row_total']
-
-        # Rounding
-        for r in rows_data.values():
-            r['row_total'] = round(r['row_total'], 10)
-            for cell in r['grid']:
-                cell['value'] = round(cell['value'], 10)
-        col_totals = [round(v, 10) for v in col_totals]
-        grand_total = round(grand_total, 10)
-
-        # 5. Sorting
-        rows_by_parent = {}
-        for row in rows_data.values():
-            parent_key = tuple(row['full_key'][:-1]) if row['level'] > 1 else ()
-            if parent_key not in rows_by_parent:
-                rows_by_parent[parent_key] = []
-            rows_by_parent[parent_key].append(row)
+        # 5. Sorting & Finalizing
+        final_rows = list(row_levels_data.values())
         
-        # Sort key logic
-        sort_col_idx = None
-        sort_order = 'asc'
-        if orderby:
-            parts = orderby.split(' ')
-            sort_field = parts[0]
-            sort_order = parts[1].lower() if len(parts) > 1 else 'asc'
-            if ':' in sort_field:
-                col_name, col_val = sort_field.split(':')
-                for idx, col in enumerate(columns):
-                    if col['values'].get(col_name) == col_val:
-                        sort_col_idx = idx
-                        break
-
-        def sort_key(row):
-            if sort_col_idx is not None:
-                return row['grid'][sort_col_idx]['value']
-            val = row['full_key'][row['level']-1]
-            return val[1] if isinstance(val, tuple) else val
-            
-        reverse = (sort_order == 'desc')
-        for p_key in rows_by_parent:
-            rows_by_parent[p_key].sort(key=sort_key, reverse=reverse)
-            
-        sorted_rows = []
-        def add_descendants(p_key):
-            if p_key in rows_by_parent:
-                for row in rows_by_parent[p_key]:
-                    sorted_rows.append(row)
-                    add_descendants(tuple(row['full_key']))
-        
-        add_descendants(())
+        # Calculate Column Totals
+        col_totals = [0] * len(leaf_columns)
+        for r in final_rows:
+            if r['level'] == 1:
+                for i, cell in enumerate(r['grid']):
+                    col_totals[i] += cell['value']
 
         return {
-            'rows': sorted_rows,
-            'cols': columns,
+            'rows': final_rows,
+            'cols': leaf_columns, 
+            'cols_tree': root_nodes, 
             'col_totals': col_totals,
-            'grand_total': grand_total,
-            'prev': column_info.get('prev'),
-            'next': column_info.get('next'),
+            'grand_total': sum(col_totals),
+            'prev': column_info_map.get('prev'),
+            'next': column_info_map.get('next'),
         }
 
     @api.model
@@ -275,6 +386,9 @@ class Base(models.AbstractModel):
 
         while current_date <= end_date:
             date_str = fields.Date.to_string(current_date)
+            label = ""
+            col_start = current_date
+            col_end = current_date
             
             if step == 'week':
                 next_date = current_date + datetime.timedelta(days=7)
@@ -282,12 +396,6 @@ class Base(models.AbstractModel):
                 col_start = max(current_date, start_date)
                 col_end = min(period_end, end_date)
                 label = f"{format_date(self.env, col_start)} - {format_date(self.env, col_end)}"
-                columns.append({
-                    'values': {name: date_str},
-                    'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
-                    'is_current': today >= current_date and today <= period_end,
-                    'label': label
-                })
                 current_date = next_date
             elif step == 'month':
                 next_date = current_date + relativedelta(months=1)
@@ -298,12 +406,6 @@ class Base(models.AbstractModel):
                     label = f"{format_date(self.env, col_start)} - {format_date(self.env, col_end)}"
                 else:
                     label = format_date(self.env, current_date, date_format='MMMM yyyy')
-                columns.append({
-                    'values': {name: date_str},
-                    'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
-                    'is_current': today.month == current_date.month and today.year == current_date.year,
-                    'label': label
-                })
                 current_date = next_date
             elif step == 'quarter':
                 next_date = current_date + relativedelta(months=3)
@@ -314,12 +416,6 @@ class Base(models.AbstractModel):
                     label = f"{format_date(self.env, col_start)} - {format_date(self.env, col_end)}"
                 else:
                     label = f"Q{(current_date.month - 1) // 3 + 1} {current_date.year}"
-                columns.append({
-                    'values': {name: date_str},
-                    'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
-                    'is_current': today >= current_date and today <= period_end,
-                    'label': label
-                })
                 current_date = next_date
             elif step == 'year':
                 next_date = current_date + relativedelta(years=1)
@@ -330,21 +426,23 @@ class Base(models.AbstractModel):
                     label = f"{format_date(self.env, col_start)} - {format_date(self.env, col_end)}"
                 else:
                     label = str(current_date.year)
-                columns.append({
-                    'values': {name: date_str},
-                    'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
-                    'is_current': today.year == current_date.year,
-                    'label': label
-                })
                 current_date = next_date
             else:
-                columns.append({
-                    'values': {name: date_str},
-                    'domain': [(name, '=', date_str)],
-                    'is_current': current_date == today,
-                    'label': format_date(self.env, current_date)
-                })
+                # Day step
+                col_start = current_date
+                col_end = current_date
+                label = format_date(self.env, current_date)
                 current_date += datetime.timedelta(days=1)
+            
+            columns.append({
+                'values': {
+                    name: date_str,
+                    f"{name}__range": (fields.Date.to_string(col_start), fields.Date.to_string(col_end))
+                },
+                'domain': [(name, '>=', fields.Date.to_string(col_start)), (name, '<=', fields.Date.to_string(col_end))],
+                'is_current': today >= col_start and today <= col_end,
+                'label': label
+            })
 
         prev_date = start_date - datetime.timedelta(days=1)
         if span == 'week': prev_date = start_date - datetime.timedelta(days=7)
@@ -361,7 +459,7 @@ class Base(models.AbstractModel):
         return {
             'values': columns,
             'domain': [(name, '>=', fields.Date.to_string(start_date)), (name, '<=', fields.Date.to_string(end_date))],
-            'format': step if step in ['day', 'week', 'month', 'quarter', 'year'] else 'day',
+            'format': 'day', # Force daily granularity for robust matching
             'prev': {'grid_anchor': fields.Date.to_string(prev_date)},
             'next': {'grid_anchor': fields.Date.to_string(next_date)}
         }

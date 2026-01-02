@@ -36,6 +36,7 @@
                     <step name="step_quarter" string="Quarter" step="quarter"/>
                     <step name="step_year" string="Year" step="year"/>
                 </field>
+                <field name="category" type="col"/>
                 <field name="unit_amount" type="measure"/>
             </grid>
         </field>

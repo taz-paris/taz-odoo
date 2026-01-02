@@ -165,7 +165,8 @@ export class GridController extends Component {
         await this.model.load({
             resModel,
             rowFields: rowFields.map(f => f.name),
-            colField: archInfo.colField.name,
+            colFields: archInfo.colFields.map(f => f.name), // Use colFields
+            colField: archInfo.colFields[0].name, // Legacy colField for backend compatibility if blindly used
             cellField: archInfo.cellField.name,
             domain,
             range: {
@@ -271,7 +272,7 @@ export class GridController extends Component {
 
         // 2. Identify fields to show and which should be readonly
         const rowFields = archInfo.rowFields.map(f => f.name);
-        const colField = archInfo.colField.name;
+        const colField = archInfo.colFields.length > 0 ? archInfo.colFields[0].name : 'date'; // Default to first col field or date
         const cellField = archInfo.cellField.name;
 
         const gridFields = new Set([colField, ...rowFields]);

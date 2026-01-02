@@ -1,6 +1,7 @@
 from odoo import models, api, fields, _
 from odoo.exceptions import UserError
 import logging
+from odoo.osv import expression
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 _logger = logging.getLogger(__name__)
@@ -44,10 +45,8 @@ class AccountAnalyticLine(models.Model):
         end_date = fields.Date.from_string(end_date_str) if end_date_str else start_date
 
         # 3. Find and Update records
-        domain = row_domain + [
-            (column_field, '>=', start_date_str),
-            (column_field, '<=', end_date_str)
-        ]
+        # Use intersection of row and col domains to respect all criteria (Date, Category, etc.)
+        domain = expression.AND([row_domain, col_domain])
         records = self.search(domain)
         
         if records:

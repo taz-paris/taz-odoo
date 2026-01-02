@@ -7,7 +7,7 @@ export class GridArchParser {
     parse(arch) {
         const archInfo = {
             rowFields: [],
-            colField: null,
+            colFields: [],
             cellField: null,
             ranges: [],
             steps: [],
@@ -61,7 +61,8 @@ export class GridArchParser {
                     }
                     archInfo.rowFields.push(rowField);
                 } else if (type === "col") {
-                    archInfo.colField = { name, string: _t(string), decorations: parseDecorations(node) };
+                    const colField = { name, string: _t(string), decorations: parseDecorations(node) };
+                    archInfo.colFields.push(colField);
                     // Parse ranges and steps
                     for (const child of node.children) {
                         if (child.tagName === "range") {
@@ -94,10 +95,10 @@ export class GridArchParser {
         });
 
         // Default range/step if none defined
-        if (archInfo.ranges.length === 0 && archInfo.colField) {
+        if (archInfo.ranges.length === 0 && archInfo.colFields.length > 0) {
             archInfo.ranges.push({ name: "month", string: _t("Month"), span: "month", decorations: {} });
         }
-        if (archInfo.steps.length === 0 && archInfo.colField) {
+        if (archInfo.steps.length === 0 && archInfo.colFields.length > 0) {
             archInfo.steps.push({ name: "day", string: _t("Day"), step: "day", decorations: {} });
         }
 

@@ -12,11 +12,11 @@ export class GridModel {
     }
 
     async load(params) {
-        const { resModel, rowFields, colField, cellField, domain, range, context, adjustment, adjustName } = params;
+        const { resModel, rowFields, colFields, cellField, domain, range, context, adjustment, adjustName } = params;
         this.metaData = {
             resModel,
             rowFields,
-            colField,
+            colFields,
             cellField,
             domain,
             range,
@@ -29,7 +29,7 @@ export class GridModel {
     }
 
     async fetchData() {
-        const { resModel, rowFields, colField, cellField, domain, range, context, sort } = this.metaData;
+        const { resModel, rowFields, colFields, cellField, domain, range, context, sort } = this.metaData;
 
         let orderby = null;
         if (sort && sort.order) {
@@ -37,13 +37,14 @@ export class GridModel {
                 orderby = `${rowFields[0]} ${sort.order}`;
             } else {
                 // sort.field is the date value, e.g. "2025-10-23"
-                orderby = `${colField}:${sort.field} ${sort.order}`;
+                // For now, we only support sorting by the primary column (Date)
+                orderby = `${colFields[0].name}:${sort.field} ${sort.order}`;
             }
         }
 
         const data = await this.orm.call(resModel, "read_grid", [], {
             row_fields: rowFields,
-            col_field: colField,
+            col_fields: colFields,
             cell_field: cellField,
             domain,
             grid_range: range,
@@ -116,7 +117,7 @@ export class GridModel {
         if (adjustment === 'object' && adjustName) {
             await this.orm.call(resModel, adjustName, [
                 rowDomain,
-                this.metaData.colField,
+                this.metaData.colFields[0], // Pass the first column field name
                 colDomain,
                 fieldName,
                 value

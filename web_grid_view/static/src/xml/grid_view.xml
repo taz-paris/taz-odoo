@@ -97,8 +97,11 @@
             <div class="o_grid_scrollable">
                 <table class="table table-bordered table-sm o_grid_table">
                     <thead>
-                        <tr>
-                            <th class="o_grid_header o_grid_sortable_header" t-on-click="() => props.onSort('group')">
+                        <tr t-foreach="headerRows" t-as="hRow" t-key="hRow_index">
+                            <th t-if="hRow_index === 0" 
+                                class="o_grid_header o_grid_sortable_header" 
+                                t-att-rowspan="headerRows.length"
+                                t-on-click="() => props.onSort('group')">
                                 <span>Grouped by:</span>
                                 <t t-esc="props.rowFields.map(f => f.string).join(', ')"/>
                                 <i t-att-class="{
@@ -107,19 +110,21 @@
                                     'fa fa-sort-desc ms-1': props.sort.field === 'group' &amp;&amp; props.sort.order === 'desc'
                                 }"/>
                             </th>
-                            <th t-foreach="cols" t-as="col" t-key="col.values[props.archInfo.colField.name]" 
-                                class="o_grid_header o_grid_sortable_header"
-                                t-on-click="() => props.onSort(col.values[props.archInfo.colField.name])">
+                            
+                            <th t-foreach="hRow" t-as="col" t-key="col_index" 
+                                class="o_grid_header"
+                                t-att-colspan="col.colspan">
+                                <!-- Sorting disabled for now on multi-level columns -->
                                 <div t-att-class="{ 'text-primary fw-bold': col.is_current }">
                                     <t t-esc="col.label"/>
-                                    <i t-att-class="{
-                                        'fa fa-sort ms-1 opacity-25': props.sort.field !== col.values[props.archInfo.colField.name] || !props.sort.order,
-                                        'fa fa-sort-asc ms-1': props.sort.field === col.values[props.archInfo.colField.name] &amp;&amp; props.sort.order === 'asc',
-                                        'fa fa-sort-desc ms-1': props.sort.field === col.values[props.archInfo.colField.name] &amp;&amp; props.sort.order === 'desc'
-                                    }"/>
                                 </div>
                             </th>
-                            <th class="o_grid_total fw-bold o_grid_header">Total</th>
+                            
+                            <th t-if="hRow_index === 0" 
+                                class="o_grid_total fw-bold o_grid_header" 
+                                t-att-rowspan="headerRows.length">
+                                Total
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,13 +141,13 @@
                                     <t t-esc="row.label || row.values[props.rowFields[0].name]"/>
                                 </span>
                             </td>
-                            <td t-foreach="getRowGrid(row)" t-as="cell" t-key="cell_index" class="o_grid_cell" t-att-class="getCellClass(cell, row)">
+                            <td t-foreach="getRowGrid(row)" t-as="cell" t-key="cell_index" class="o_grid_cell" t-att-class="getCellClass(cell, row, cell_index)">
                                 <input t-if="!row.readonly &amp;&amp; !cell.readonly &amp;&amp; row.isLeaf"
                                        type="text" 
                                        class="o_grid_input form-control form-control-sm text-end" 
                                        t-att-value="formatValue(cell.value)"
                                        t-on-change="(ev) => this.onCellChange(rows.indexOf(row), cell_index, ev)"
-                                       t-att-class="getCellClass(cell, row)"
+                                       t-att-class="getCellClass(cell, row, cell_index)"
                                 />
                                 <span t-else="" class="d-block text-end pe-2">
                                     <t t-esc="formatValue(cell.value)"/>

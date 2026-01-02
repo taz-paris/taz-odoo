@@ -45,6 +45,48 @@ export class GridRenderer extends Component {
         return this.props.model.data ? this.props.model.data.cols : [];
     }
 
+    get headerRows() {
+        if (!this.props.model.data || !this.props.model.data.cols_tree) return [];
+
+        const tree = this.props.model.data.cols_tree;
+        const rows = [];
+
+        // Helper to compute colspan
+        const getColspan = (node) => {
+            if (!node.children || node.children.length === 0) return 1;
+            return node.children.reduce((acc, child) => acc + getColspan(child), 0);
+        };
+
+        // BFS/DFS to build rows
+        const traverse = (nodes, depth) => {
+            if (!nodes || nodes.length === 0) return;
+            if (!rows[depth]) rows[depth] = [];
+
+            for (const node of nodes) {
+                const colspan = getColspan(node);
+                rows[depth].push({
+                    label: node.label,
+                    colspan: colspan,
+                    is_current: node.is_current,
+                    // Sort metadata (only for leaves or handled differently?)
+                    // Sorting by group is tricky with multiple headers. 
+                    // Let's attach sort handler only if it corresponds to a column?
+                    // For now, simpler: only leaves are sortable?
+                    // Actually, if we sort by "Jan", what does it mean? Sort by Total of Jan?
+                    // Previous logic allowed sorting by specific column.
+                    // We can retain sorting on Leaf Columns.
+                    hasSort: !node.children || node.children.length === 0,
+                    colValue: node.values // We might need to pass specific ID
+                });
+
+                traverse(node.children, depth + 1);
+            }
+        };
+
+        traverse(tree, 0);
+        return rows;
+    }
+
     getRowGrid(row) {
         return row.grid || [];
     }
@@ -72,7 +114,7 @@ export class GridRenderer extends Component {
         return formatFloat(value || 0, options);
     }
 
-    getCellClass(cell, row) {
+    getCellClass(cell, row, colIndex) {
         // Use the active step name to find the appropriate decorations
         const activeStepName = this.props.range.stepName;
         let decorations = null;
@@ -108,9 +150,15 @@ export class GridRenderer extends Component {
             }
         }
 
-        // 4. Fallback to colField decorations if none found
+        // 4. Fallback to colFields decorations if none found
         if (!decorations || Object.keys(decorations).length === 0) {
-            decorations = this.props.archInfo.colField.decorations;
+            // Use decorations from the primary column field or merge all?
+            // Let's use the first one for now as it usually holds the main logic
+            if (this.props.archInfo.colFields && this.props.archInfo.colFields.length > 0) {
+                decorations = this.props.archInfo.colFields[0].decorations;
+            } else if (this.props.archInfo.colField) { // Legacy fallback
+                decorations = this.props.archInfo.colField.decorations;
+            }
         }
 
         if (!decorations || Object.keys(decorations).length === 0) return "";
@@ -132,6 +180,16 @@ export class GridRenderer extends Component {
                 if (Array.isArray(val) && val.length === 2) {
                     context[key] = val[0];
                 } else {
+                    context[key] = val;
+                }
+            }
+        }
+
+        // Add column field values to context
+        if (colIndex !== undefined && this.cols[colIndex]) {
+            const col = this.cols[colIndex];
+            if (col.values) {
+                for (const [key, val] of Object.entries(col.values)) {
                     context[key] = val;
                 }
             }
