@@ -210,7 +210,7 @@
                                 <field name="company_id" invisible="1"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                                 <field name="partner_id" required="1" options="{'no_quick_create': True}" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
-                    		        <field name="source_id" required="stage_id in [1, 7, 6]"/>
+                    		<field name="source_id" groups="project.group_project_stages" required="stage_id in [1, 7, 6]"/>
                                 <field name="stage_id" required="1"/>
                                 <field name="state_last_change_date" invisible="1" readonly="1"/>
                                 <field name="date_win_loose" invisible="0"/>
@@ -234,7 +234,7 @@
                             </group>
                         </group>
                         <notebook>
-                            <page name="presale" string="Avant-vente" invisible="stage_id not in [False, 1, 7]">
+                            <page name="presale" string="Avant-vente" groups="project.group_project_stages" invisible="stage_id not in [False, 1, 7]">
                                 <group>
 					<group>
 						<field name="expected_revenue"/>
@@ -456,7 +456,7 @@
 					    <group>
 						<field name="past_internal_revenue"/>
 						<field name="futur_internal_revenue"/>
-						<field name="futur_internal_revenue_current_year" string="... à venir &lt;= 31/12/N" readonly="(futur_internal_revenue_current_year == 0) and (stage_id not in [6, 2, 9])"/>
+						<field name="futur_internal_revenue_current_year" string="... à venir &lt;= 31/12/N" groups="project.group_project_stages" readonly="(futur_internal_revenue_current_year == 0) and (stage_id not in [6, 2, 9])"/>
 						<field name="futur_internal_revenue_next_year" string="... à venir &gt; 31/12/N"/>
 						<field name="date_last_update_futur_internal_revenue_current_year"/>
 					    </group>
@@ -643,7 +643,7 @@
                     <progressbar field="last_update_status" colors="{&quot;on_track&quot;: &quot;success&quot;, &quot;at_risk&quot;: &quot;warning&quot;, &quot;off_track&quot;: &quot;danger&quot;, &quot;on_hold&quot;: &quot;info&quot;}"/>
                     <field name="sequence" widget="handle"/>
                     <templates>
-                        <t t-name="kanban-box">
+                        <t t-name="card">
                             <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon oe_kanban_content oe_kanban_card">
                                 <div class="o_project_kanban_main ">
                                     <div class="o_kanban_card_content mw-100">

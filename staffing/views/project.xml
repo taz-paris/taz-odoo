@@ -59,7 +59,7 @@
                     <field name="date"/>
                     <field name="project_id"/>
                     <filter string="Date" name="week" date="date"/>
-                    <filter name="mine" string="My Timesheets" domain="[('user_id', '=', uid)]"/>
+                    <filter name="mine" string="Mes pointages" domain="[('user_id', '=', uid)]"/>
                     <filter name="history_3months" string="Hstorique de 3 mois" domain="[('date','&gt;=', ((context_today()-datetime.timedelta(days=91)).strftime('%%Y-%%m-%%d')))]"/>
                     <group string="Group By..." expand="0" name="groupby">
                         <filter string="Category" name="group_category" context="{'group_by': 'category'}"/>

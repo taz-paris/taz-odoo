@@ -821,6 +821,7 @@ class naptaAnalyticLine(models.Model):
                     'napta_id' : napta_id,
                     'category' : 'project_employee_validated',
                     'employee_id' : {'napta_id' : timesheet['attributes']['user_id']},
+                    'user_id' : {'napta_id' : timesheet['attributes']['user_id']},
                     'project_id' : {'napta_id' : napta_project_id},
                     'date' : target_date,
                     'unit_amount' : timesheet_period['attributes']['worked_days'],
@@ -1142,9 +1143,9 @@ class naptaHrLeave(models.Model):
             # TODO : pour être propre, number_of_days ne devrait pas être fourni. Ces instructions de calcul devraient être dans une surcharge de _get_duration 
             start_date = datetime.datetime.strptime(user_holiday['attributes']['start_date'], "%Y-%m-%d").date()
             end_date = datetime.datetime.strptime(user_holiday['attributes']['end_date'], "%Y-%m-%d").date()
-            odoo_user = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
-            company_id = odoo_user.company_id.id
-            numberOfDays = odoo_user.number_work_days_period(start_date, end_date)
+            odoo_employee = self.env['hr.employee'].search([('napta_id','=', user_holiday['attributes']['user_id']), ('active', 'in', [True, False])])
+            company_id = odoo_employee.company_id.id
+            numberOfDays = odoo_employee.number_work_days_period(start_date, end_date)
             request_date_from_period = 'am'
             if user_holiday['attributes']['start_date_from_morning'] == False :
                 request_date_from_period = 'pm'

@@ -1517,7 +1517,7 @@ class projectAccountProject(models.Model):
 
     # LEAD
     expected_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', tracking=True, default=0.0)
-    probability = fields.Float('Probablité (de 0 à 100)', tracking=True, default=0.0, group_operator=False, help="Probabilité de conclure l'affaire")
+    probability = fields.Float('Probablité (de 0 à 100)', tracking=True, default=0.0, aggregator=False, help="Probabilité de conclure l'affaire")
     prorated_revenue = fields.Monetary('Espérance de PDC pondérée (hors S/T)', store=True, compute="_compute_prorated_revenue")
     date_last_update_prorated_revenue = fields.Datetime("Date MAJ espérance CA", readonly=True, help="Date de dernière MAJ de l'espérence de prise de commande pondérée, induite par l'évolution de l'espérance de prise de commande, ou de la probabilité de conclure l'affaire.")
 

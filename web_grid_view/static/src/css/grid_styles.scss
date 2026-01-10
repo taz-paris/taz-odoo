@@ -1,0 +1,269 @@
+.o_grid_view {
+    // Standard Odoo view container inside .o_content
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    background-color: $o-view-background-color;
+
+    .o_grid_control_panel {
+        flex: 0 0 auto !important;
+        background-color: $o-view-background-color;
+        border-bottom: 1px solid $border-color;
+        z-index: 15;
+    }
+
+    .o_grid_renderer {
+        flex: 1 1 0% !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        background-color: $o-view-background-color;
+        overflow: hidden !important;
+
+        &.o_grid_range_month .o_grid_table {
+            min-width: 3000px !important;
+        }
+
+        &.o_grid_range_quarter .o_grid_table {
+            min-width: 9000px !important;
+        }
+
+        &.o_grid_range_year .o_grid_table {
+            min-width: 35000px !important;
+        }
+
+        .o_grid_scrollable {
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: auto !important;
+            background-color: $o-view-background-color;
+
+            .o_grid_table {
+                display: table !important;
+                width: max-content !important;
+                min-width: 100% !important;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin-bottom: 0;
+                table-layout: auto !important;
+
+                thead {
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+
+                    th {
+                        background-color: $o-gray-100 !important;
+                        text-align: center !important;
+                        vertical-align: middle !important;
+                        border-top: none;
+                        box-shadow: inset 0 -1px 0 $border-color;
+                        white-space: normal !important;
+                        max-width: 100px;
+                        word-wrap: break-word;
+                        padding: 0.4rem;
+                        font-size: 0.85rem;
+                        font-weight: bold !important;
+                        min-width: 50px;
+
+                        &.o_grid_sortable_header {
+                            cursor: pointer;
+
+                            &:hover {
+                                background-color: $o-gray-200 !important;
+                            }
+                        }
+
+                        &.o_grid_header:first-child {
+                            position: sticky;
+                            left: 0;
+                            z-index: 20;
+                            background-color: $o-gray-100 !important;
+                            box-shadow: inset 0 -1px 0 $border-color, inset -1px 0 0 $border-color;
+                            min-width: 250px;
+                        }
+                    }
+                }
+
+                tbody {
+                    tr:last-child td {
+                        border-bottom: 1px solid $border-color;
+                    }
+
+                    td {
+                        vertical-align: middle;
+                        padding: 0.25rem;
+                        border-bottom: 1px solid $o-gray-200;
+
+                        &.o_grid_row_header:first-child {
+                            position: sticky;
+                            left: 0;
+                            z-index: 5;
+                            background-color: $o-gray-100 !important;
+                            box-shadow: inset -1px 0 0 $border-color;
+                            white-space: nowrap !important;
+                            font-size: 0.85rem;
+                            font-weight: bold !important;
+                            min-width: 250px;
+                        }
+                    }
+                }
+
+                tfoot {
+                    tr.o_grid_total_row {
+                        font-weight: bold !important;
+                        font-size: 0.85rem;
+
+                        td {
+                            background-color: $o-gray-100 !important;
+                            border-top: 2px solid $border-color;
+                            white-space: nowrap !important;
+                            padding: 0.4rem;
+
+                            &:first-child {
+                                position: sticky;
+                                left: 0;
+                                z-index: 5;
+                                background-color: $o-gray-100 !important;
+                                box-shadow: inset -1px 0 0 $border-color;
+                            }
+                        }
+                    }
+                }
+
+                .o_grid_row_header {
+                    background-color: $o-gray-100 !important;
+                    min-width: 250px;
+                    max-width: 400px;
+                    padding: 0.4rem;
+                    font-weight: bold !important;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+
+                    .o_grid_clickable_label {
+                        cursor: pointer;
+                        color: $o-brand-primary;
+
+                        &:hover {
+                            text-decoration: underline;
+                        }
+                    }
+                }
+
+                .o_grid_add_line_row {
+                    .o_grid_row_header {
+                        padding: 0 !important;
+
+                        .o_grid_add_line {
+                            width: 100%;
+                            text-align: left;
+                            padding: 8px 15px;
+                            text-decoration: none;
+                            color: $o-brand-primary;
+                            font-weight: 500;
+                            border: none;
+                            background: transparent;
+
+                            &:hover {
+                                background-color: $o-gray-200;
+                            }
+                        }
+                    }
+                }
+
+                .o_grid_row_total,
+                .o_grid_total {
+                    font-weight: bold !important;
+                    background-color: $o-gray-100 !important;
+                }
+
+                .o_grid_cell {
+                    min-width: 50px;
+                    white-space: nowrap !important;
+
+                    &.o_grid_deco_info {
+                        background-color: rgba($info, 0.15) !important;
+
+                        .o_grid_input {
+                            color: darken($info, 15%) !important;
+                            font-weight: 500;
+                        }
+                    }
+
+                    &.o_grid_deco_success {
+                        background-color: rgba($success, 0.15) !important;
+
+                        .o_grid_input {
+                            color: darken($success, 15%) !important;
+                            font-weight: 500;
+                        }
+                    }
+
+                    &.o_grid_deco_danger {
+                        background-color: rgba($danger, 0.15) !important;
+
+                        .o_grid_input {
+                            color: darken($danger, 15%) !important;
+                            font-weight: 500;
+                        }
+                    }
+
+                    &.o_grid_deco_warning {
+                        background-color: rgba($warning, 0.15) !important;
+
+                        .o_grid_input {
+                            color: darken($warning, 15%) !important;
+                            font-weight: 500;
+                        }
+                    }
+
+                    &.o_grid_deco_primary {
+                        background-color: rgba($o-brand-primary, 0.1) !important;
+
+                        .o_grid_input {
+                            color: $o-brand-primary !important;
+                            font-weight: 500;
+                        }
+                    }
+
+                    &.o_grid_deco_muted {
+                        background-color: rgba($o-gray-400, 0.05) !important;
+
+                        .o_grid_input {
+                            color: $o-gray-600 !important;
+                        }
+                    }
+
+                    .o_grid_input {
+                        border: none;
+                        background: transparent;
+                        width: 100%;
+                        text-align: right;
+                        padding: 2px 4px;
+                        font-size: 0.9rem;
+
+                        &:focus {
+                            background: $o-view-background-color;
+                            outline: 1px solid $o-brand-primary;
+                        }
+                    }
+                }
+            }
+
+            // Margin to ensure scrollbar doesn't cover total row
+            &::after {
+                content: "";
+                display: block;
+                height: 60px;
+                width: 1px;
+            }
+        }
+    }
+}

@@ -236,9 +236,9 @@ class HrEmployeeStaffingReport(models.Model):
                     real_end_date = rec.employee_id.departure_date
                 
                 timesheet_grouped_raw = rec.env['account.analytic.line'].get_timesheet_grouped_raw(pivot_date, date_start=real_start_date, date_end=real_end_date, filters=dic)
-                    #On appelle get_timesheet_grouped_raw et non pas get_timesheet_grouped_raw car pour les periodicité mensuelle car on veut borner strictement aux paramètres passés en paramètres
+                    #On appelle get_timesheet_grouped_raw et non pas get_timesheet_grouped_raw car pour les périodicités mensuelles, on veut borner strictement aux paramètres passés en paramètres
                         #on ne veut pas intégrer les prévisionnels qui ont commencés le lundi 27 novembre pour le rapport du mois de déccembre
-                        #... oui mais dans ce cas est-ce qu'il manquera le prédisionnel pour le vendredi 1er décembre ==> normalement non car les périodes prévisionnels sont générées par Napta (SAUF FORÇAGE) par semaine et bout de semaine en cas de semaines à cheval sur deux mois ==> à vérifier #TODO
+                        #... oui mais dans ce cas est-ce qu'il manquera le prévisionnel pour le vendredi 1er décembre ==> normalement non car les périodes prévisionnelles sont générées par Napta (SAUF FORÇAGE) par semaine et bout de semaine en cas de semaines à cheval sur deux mois ==> à vérifier #TODO
                 lines = timesheet_grouped_raw['aggreation_by_project_type']
 
                 analytic_lines_list_ids = []

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_my_grid" model="ir.ui.view">
+        <field name="name">My Grid View</field>
+        <field name="model">account.analytic.line</field>
+        <field name="arch" type="xml">
+            <grid string="Timesheets" create_inline="false" adjustment="object" adjust_name="adjust_grid">
+                <field name="employee_id" type="row">
+                    <!-- Ces décorations ne s'appliquent qu'au niveau Employee -->
+                    <step_decorator step="step_day"
+                           decoration-info="unit_amount &gt; 0"
+                           decoration-success="unit_amount &gt; 0.5"
+                           decoration-danger="unit_amount &gt; 1"/>
+                    <step_decorator step="step_week"
+                           decoration-info="unit_amount &gt; 2.5"
+                           decoration-success="unit_amount &gt; 4"
+                           decoration-danger="unit_amount &gt; 5"/>
+                    <step_decorator step="step_month"
+                           decoration-info="unit_amount &gt; 5"
+                           decoration-success="unit_amount &gt; 15"
+                           decoration-danger="unit_amount &gt; 20"/>
+                </field>
+                <field name="project_id" type="row"/>
+                <field name="date" type="col" 
+                       decoration-muted="unit_amount == 0">
+                    <!-- SPAN -->
+                    <range name="span_week" string="Week" span="week"/>
+                    <range name="span_month" string="Month" span="month"/>
+                    <range name="span_quarter" string="Quarter" span="quarter"/>
+                    <range name="span_year" string="Year" span="year"/>
+
+                    <!-- STEP (Définit les regroupements disponibles) -->
+                    <step name="step_day" string="Day" step="day"/>
+                    <step name="step_week" string="Week" step="week"/>
+                    <step name="step_month" string="Month" step="month"/>
+                    <step name="step_quarter" string="Quarter" step="quarter"/>
+                    <step name="step_year" string="Year" step="year"/>
+                </field>
+                <field name="category" type="col" readonly="category == 'project_forecast'"/>
+                <field name="unit_amount" type="measure"/>
+            </grid>
+        </field>
+    </record>
+
+    <record id="hr_timesheet.act_hr_timesheet_line" model="ir.actions.act_window">
+        <field name="view_mode">grid,form,kanban,list</field>
+        <field name="search_view_id" ref="hr_timesheet.hr_timesheet_line_search"/>
+        <field name="context">{'grid_step': 'step_month'}</field>
+        <field name="domain">["|", "&amp;", ("employee_id", "!=", False), ("employee_id.user_id", "=", uid), "&amp;", ("employee_id", "=", False), ("user_id", "=", uid)]</field>
+    </record>
+
+    <record id="record_id_view_grid" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">grid</field>
+        <field name="view_id" ref="view_my_grid"/>
+        <field name="act_window_id" ref="hr_timesheet.act_hr_timesheet_line"/>
+    </record>
+</odoo>

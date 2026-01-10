@@ -131,7 +131,7 @@
                     <field name="parent_partner_id"/>
                     <field name="parent_partner_industry_id"/>
                     <templates>
-                        <t t-name="kanban-box">
+                        <t t-name="card">
                             <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_res_partner_kanban">
                                 <div class="oe_kanban_details d-flex flex-column justify-content-between">
                                     <div>

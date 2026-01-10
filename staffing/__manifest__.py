@@ -17,7 +17,7 @@
     'version': "18.0.1.0.0",
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'hr_contract', 'project_timesheet_holidays', 'hr_skills', 'taz-common', 'project_accounting', 'web_widget_bokeh_chart'],
+    'depends': ['base', 'project', 'hr', 'hr_holidays', 'hr_timesheet', 'hr_contract', 'project_timesheet_holidays', 'hr_skills', 'taz-common', 'project_accounting', 'web_widget_bokeh_chart', 'web_grid_view'],
 
     # always loaded
     'data': [
@@ -32,6 +32,7 @@
         'views/timesheets.xml',
         'views/hr_contract.xml',
         'views/employee_staffing_report.xml',
+        'views/timesheet_grid.xml',
     ],
 
 }

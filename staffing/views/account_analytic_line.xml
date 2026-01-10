@@ -27,6 +27,9 @@
             <field name="model">account.analytic.line</field>
             <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
             <field name="arch" type="xml">
+                <filter name="mine" position="attributes">
+                    <attribute name="domain">["|", "&amp;", ("employee_id", "!=", False), ("employee_id.user_id", "=", uid), "&amp;", ("employee_id", "=", False), ("user_id", "=", uid)]</attribute>
+                </filter>
                 <field name="manager_id" position="after">
                     <separator/>
                     <filter name="category_project_forecast" string="Catégorie = Prévisionnel" domain="[('category', '=', 'project_forecast')]"/>
