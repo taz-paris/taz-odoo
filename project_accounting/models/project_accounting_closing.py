@@ -120,9 +120,22 @@ class projectAccountingClosing(models.Model):
                 rec.production_previous_balance = rec.previous_closing.production_balance
                 rec.production_external_previous_balance = rec.previous_closing.production_external_balance
 
-            rec.invoice_period_amount = rec.get_invoice_period(proj_id, previous_closing_date_filter, rec.closing_date)[0]
-            purchase_period_subtotal, purchase_period_total, purchase_periode_paid, purchase_periode_line_ids = rec.get_purchase_period(proj_id, previous_closing_date_filter, rec.closing_date)
-            rec.purchase_period_amount = -1 * purchase_period_subtotal
+            # Chez Tasmane, le mois de juillet 2023 est le mois de reprise des données
+            #   La première cloture sur TazForce a été réalisée fin août 2023.
+            #   Il est nécessaire de forcer à 0.0€ les attributs invoice_period_amount,
+            #       purchase_period_amount, production_period_amount pour les clotures du 31/07/2025
+            if rec.closing_date and (rec.closing_date == datetime.date(2023,7,31)) :
+                rec.invoice_period_amount = 0.0
+                rec.purchase_period_amount = 0.0
+                rec.production_period_amount = 0.0
+            else :
+                rec.invoice_period_amount = rec.get_invoice_period(proj_id, previous_closing_date_filter, rec.closing_date)[0]
+                purchase_period_subtotal, purchase_period_total, purchase_periode_paid, purchase_periode_line_ids = rec.get_purchase_period(proj_id, previous_closing_date_filter, rec.closing_date)
+                rec.purchase_period_amount = -1 * purchase_period_subtotal
+                production_period_amount, analytic_lines = rec.get_production_period(proj_id, previous_closing_date_filter, rec.closing_date, force_recompute_amount=False)
+                rec.production_period_amount = -1 * production_period_amount
+
+
 
             purchase_outsourcing_period_amount = 0.0
             if rec.closing_date and (rec.closing_date > datetime.date(2025,9,30)) : # Les champs propres au stock externes ont été ajoutés en octobre 2025. Avant cette date, la production externe était gérée comme des achats "autres" (gestion avec des provisions et non suivant la logique de rpoduction / stock / destockage).
@@ -139,9 +152,6 @@ class projectAccountingClosing(models.Model):
             rec.fnp_balance = rec.fnp_previous_balance + rec.fnp_period_amount
             rec.provision_previous_balance_sum = rec.pca_previous_balance + rec.fae_previous_balance + rec.cca_previous_balance + rec.fnp_previous_balance
             rec.provision_balance_sum = rec.pca_balance + rec.fae_balance + rec.cca_balance + rec.fnp_balance
-
-            production_period_amount, analytic_lines = rec.get_production_period(proj_id, previous_closing_date_filter, rec.closing_date, force_recompute_amount=False)
-            rec.production_period_amount = -1 * production_period_amount
 
             rec.production_external_period_amount = rec.purchase_outsourcing_period_amount
 
@@ -165,6 +175,10 @@ class projectAccountingClosing(models.Model):
                 rec.internal_margin_rate = rec.internal_margin_amount / rec.internal_revenue * 100
 
             rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
+
+            next_closing = self.env['project.accounting_closing'].search([('previous_closing', '=', rec.id)], limit=1)
+            if next_closing :
+                next_closing.compute()
 
 
     def get_invoice_period(self, proj_id, previous_closing_date_filter, closing_date):
@@ -241,7 +255,10 @@ class projectAccountingClosing(models.Model):
         return action
 
     def action_open_analytic_lines(self):
-        production_period_amount, analytic_lines = self.get_production_period(self.project_id, [('date', '>', self.previous_closing.closing_date)], self.closing_date, force_recompute_amount=False)
+        previous_closing_date_filter = []
+        if self.previous_closing :
+            previous_closing_date_filter = [('date', '>', self.previous_closing.closing_date)]
+        production_period_amount, analytic_lines = self.get_production_period(self.project_id, previous_closing_date_filter, self.closing_date, force_recompute_amount=False)
         view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
         return {
                 'type': 'ir.actions.act_window',
