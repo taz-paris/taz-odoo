@@ -244,7 +244,7 @@ class projectAccountingClosing(models.Model):
         previous_closing_date_filter = []
         if self.previous_closing :
             previous_closing_date_filter = [('date', '>', self.previous_closing.closing_date)]
-        production_period_amount, analytic_lines = self.get_production_period(self.project_id, [('date', '>', previous_closing_date_filter, self.closing_date, force_recompute_amount=False)
+        production_period_amount, analytic_lines = self.get_production_period(self.project_id, previous_closing_date_filter, self.closing_date, force_recompute_amount=False)
         view_id = self.env.ref("hr_timesheet.timesheet_view_tree_user")
         return {
                 'type': 'ir.actions.act_window',
