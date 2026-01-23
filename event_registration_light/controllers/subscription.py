@@ -56,7 +56,7 @@ class EventRegistrationLightController(http.Controller):
             if not partner :
                 partner = request.env['res.partner'].sudo().search([('former_email_address', 'ilike', email), ('active', '=', True)])
             if len(partner) >= 1 :
-                partner_id = partner[0].id
+                partner = partner[0]
             else :
                 partner = request.env['res.partner'].sudo().create({'first_name' : first_name, 'name' : name, 'email' : email, 'type' : 'contact'})
                 # TODO : est-ce qu'on le crée avec un user dédié et/ou on le top "créé suite à inscription event" ==> si un rebot nous pollue àa permettrait de les repérer
