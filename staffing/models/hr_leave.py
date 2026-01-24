@@ -27,6 +27,10 @@ class staffingLeave(models.Model):
             #https://github.com/odoo/odoo/blob/fa58938b3e2477f0db22cc31d4f5e6b5024f478b/addons/hr_holidays/models/hr_leave.py#L1359
 
 
+    def _check_missing_global_leave_timesheets(self):
+        #OVERRIDE : prevent creation of account.analytic.line of "other" category (ie. leave timesheet) for global leave (jours fériés) ==> our Odoo module already count those global leaves (avoid to count twice the gloabl leave on staffing.report)
+        return
+
     def write(self_list, vals):
         old_values = {}
         for self in self_list :
