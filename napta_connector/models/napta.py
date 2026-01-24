@@ -1172,7 +1172,7 @@ class naptaHrLeave(models.Model):
                 }
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True, 'do_not_update_staffing_report' : True, 'do_not_update_project' : True}, company_id=company_id)
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
-        self.detect_leave_timesheet_inconsistancy() #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
+        self.detect_leave_timesheet_inconsistancy(True) #A utiliser ponctuellement dans les prochains mois pour vérifier que les corrictions sont bien faites au fil de l'eau => cette fonctionne ne devrait provoquer aucun recalcul
 
 
     def detect_leave_timesheet_inconsistancy(self, auto_correct=False):
@@ -1208,9 +1208,9 @@ class naptaHrLeave(models.Model):
             self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
             self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()
 
-            if len(incorrect_leave_ids) > 0 :
+            #if len(incorrect_leave_ids) > 0 :
                 # il est parfois nécessaire de boucler plusieurs fois jusqu'à ce qu'il n'y ait plus d'erreurs (notamment dans des cas impliquant des demi-journées en // d'une journée pleine)
-                self.detect_leave_timesheet_inconsistancy(auto_correct=True)
+                # self.detect_leave_timesheet_inconsistancy(auto_correct=True)
 
         self.env.cr.commit()
 
