@@ -343,7 +343,7 @@
                             <page name="customer_invoicing" string="Facturation client">
                                 <group>
                                     <group>
-                                        <field name="partner_secondary_ids" widget="many2many_tags"/>
+                                        <field name="partner_secondary_ids" widget="many2many_tags" options="{'no_quick_create': True}" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}" domain="[('is_company', '=', True), ('type', '=', 'contact')]"/>
                                         <button type="object" colspan="2" name="action_open_out_account_move_lines" string="Voir les lignes de facture/avoir"/>
                                     </group>
                                     <group>
