@@ -30,7 +30,7 @@ class eventRegistration(models.Model):
             self.mail_auto = False
         last_office365_mail_draft = False
 
-
+    company_id = fields.Many2one('res.company', string='Company', related='event_id.company_id', store=True, readonly=True)
     mail_auto = fields.Boolean(string="Mail auto", default=True)
     contact_user_link_id = fields.Many2one("taz.contact_user_link", "Responsable de l'invitation", domain="[('partner_id', '=', partner_id)]")
     registration_user_id = fields.Many2one("res.users", "User", related="contact_user_link_id.user_id", store=True)
