@@ -12,7 +12,7 @@ class tazCustomerBookGoal(models.Model):
     _description = "Customer book goal"
     _order = "reference_period desc, industry_id"
     _sql_constraints = [
-        ('partner_year_company_unicity', 'UNIQUE (industry_id, reference_period, company_id)',  "Impossible d'avoir deux objectifs différents pour le même compte, la même année et la même société.")
+        ('partner_year_company_unicity', 'UNIQUE (industry_id, reference_period, company_id)',  "Impossible d'avoir deux ambitions différentes pour le même compte, la même année et la même société.")
     ]
 
     @api.model
@@ -160,17 +160,17 @@ class tazCustomerBookGoal(models.Model):
     company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des objectifs")
+    book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des ambitions")
 
-    period_goal = fields.Monetary("Objectif annuel")
+    period_goal = fields.Monetary("Ambition annuelle")
 
     period_book = fields.Monetary("Commande à date", compute=compute)
-    period_delta = fields.Monetary("Delta objectif", compute=compute)
-    period_ratio = fields.Float("Ratio objectif", compute=compute)
+    period_delta = fields.Monetary("Delta ambition", compute=compute)
+    period_ratio = fields.Float("Ratio ambition", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
     business_action_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
-    business_action_goal = fields.Integer("Objectif de RDV")
+    business_action_goal = fields.Integer("Ambition de RDV")
     expected_prorated_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', compute=compute)
     comment = fields.Text("Commentaire pour cette année")
 
@@ -180,7 +180,7 @@ class tazCustomerBookFollowup(models.Model):
     _description = "Customer book evolution"
     _order = "date_update desc"
     _sql_constraints = [
-        ('book_date_company_uniq', 'UNIQUE (customer_book_goal_id, date_update, company_id)',  "Impossible d'avoir des suivis d'objectifs différents pour le même jour et la même société.")
+        ('book_date_company_uniq', 'UNIQUE (customer_book_goal_id, date_update, company_id)',  "Impossible d'avoir des suivis d'ambitions différentes pour le même jour et la même société.")
     ]
     _check_company_auto = True
 
@@ -229,8 +229,8 @@ class tazCustomerBookFollowup(models.Model):
     company_id = fields.Many2one('res.company', related="customer_book_goal_id.company_id", store=True)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=False, ondelete='restrict', check_company=False)
-    period_goal = fields.Monetary("Montant obj", related="customer_book_goal_id.period_goal", store=True)
+    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Ambition annuelle", required=True, readonly=False, ondelete='restrict', check_company=False)
+    period_goal = fields.Monetary("Montant ambition", related="customer_book_goal_id.period_goal", store=True)
     industry_id = fields.Many2one(related="customer_book_goal_id.industry_id", store=True)
     rel_business_priority = fields.Selection(related='industry_id.business_priority', store=True)
 
@@ -239,6 +239,6 @@ class tazCustomerBookFollowup(models.Model):
     period_futur_book = fields.Monetary("Intime conviction", help="Montant HT que l'on estime pouvoir prendre en commande en plus d'ici la fin de l'année.")
 
     period_landing = fields.Monetary("Atterissage annuel", compute=landing, store=True)
-    period_delta = fields.Monetary("Delta aterrissage vs objectif", compute=landing, store=True)
-    period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing, store=True)
+    period_delta = fields.Monetary("Delta aterrissage vs ambition", compute=landing, store=True)
+    period_ratio = fields.Float("Ratio aterrissage vs ambition", compute=landing, store=True)
     comment = fields.Text("Commentaire")

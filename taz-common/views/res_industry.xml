@@ -29,9 +29,9 @@
                             </group>
                         </group>
                         <notebook>
-                            <page string="Objectifs commerciaux">
-                                <label for="customer_book_goal_ids" string="Objectifs annuels"/>
-                                <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_industry_id': id}">
+                            <page string="Ambitions commerciales">
+                                <label for="customer_book_goal_ids" string="Ambitions annuelles"/>
+                                <field name="customer_book_goal_ids" string="Ambitions annuelles" context="{'default_industry_id': id}">
                                     <list editable="top">
                                         <field name="currency_id" column_invisible="1"/>
                                         <field name="company_id" optional="show"/>
@@ -47,12 +47,12 @@
                                         <field name="number_of_opportunities" optional="show" sum="Total"/>
                                         <field name="expected_prorated_revenue" optional="show" sum="Total"/>
                                         <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
-                                        <field name="business_action_goal" optional="show" string="Obj RDV" sum="Total"/>
+                                        <field name="business_action_goal" optional="show" string="Amb. RDV" sum="Total"/>
                                         <field name="business_action_count" optional="show" string="RDV faits" sum="Total"/>
                                         <button type="object" name="action_open_business_actions" icon="fa-eye" title="Ouvrir les actions commerciales"/>
                                     </list>
                                 </field>
-                                <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>
+                                <label for="customer_book_followup_ids" string="Photos des ambitions annuelles"/>
                                 <field name="customer_book_followup_ids" context="{'default_industry_id': id, 'active_id': id}">
                                     <list editable="top" create="true">
                                         <field name="currency_id" column_invisible="1"/>

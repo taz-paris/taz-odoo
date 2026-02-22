@@ -221,12 +221,12 @@
         },
         "D17": {
           "style": 8,
-          "content": "Cliquez sur les cellules bleues pour voir le détail des objectifs par Compte, et sur les cellules vertes pour voir le détail des projets (au statut 3-Accord client ou plus) comptabilisés",
+          "content": "Cliquez sur les cellules bleues pour voir le détail des ambitions par Compte, et sur les cellules vertes pour voir le détail des projets (au statut 3-Accord client ou plus) comptabilisés",
           "border": 1
         },
         "D18": {
           "style": 6,
-          "content": "Répartition de l'objectif de prise de commande",
+          "content": "Répartition de l'ambition de prise de commande",
           "border": 9
         },
         "D19": {
@@ -414,7 +414,7 @@
         },
         "G18": {
           "style": 6,
-          "content": "% atteinte de l'objectif",
+          "content": "% atteinte de l'ambition",
           "border": 5
         },
         "G19": {
@@ -483,7 +483,7 @@
         },
         "H18": {
           "style": 6,
-          "content": "Poids de la prise de commande dans l'objectif global",
+          "content": "Poids de la prise de commande dans l'ambition globale",
           "border": 9
         },
         "H19": {
