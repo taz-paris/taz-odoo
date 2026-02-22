@@ -4,6 +4,7 @@ from odoo.exceptions import AccessDenied, UserError, ValidationError
 from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
+from dateutil.relativedelta import relativedelta
 
 import json
 
@@ -175,6 +176,29 @@ class tazBusinessAction(models.Model):
     is_rdv_to_be_taken_by_assistant = fields.Boolean("RDV à planifier par notre assistant commercial externe")
     is_rdv_taken_by_assistant = fields.Boolean("RDV planifié par notre assistant commercial externe")
     business_priority = fields.Selection(string='Niveau de priorité', related='parent_partner_id.business_priority', store=True)
+
+    parent_action_id = fields.Many2one('taz.business_action', string="Action origine", ondelete='set null')
+    followup_action_ids = fields.One2many('taz.business_action', 'parent_action_id', string="Actions de suite")
+
+    def action_create_followup(self):
+        self.ensure_one()
+        new_action = self.copy({
+            'name': _("Suite de : %s", self.name),
+            'parent_action_id': self.id,
+            'state': 'todo',
+            'conclusion': False,
+            'report_url': False,
+            'date_deadline': False,
+            'note': _("Action de suite pour : %s", self.name),
+        })
+        return {
+            'name': _('Action commerciale de suite'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'taz.business_action',
+            'res_id': new_action.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
 
     def open_record(self):
         # first you need to get the id of your record
