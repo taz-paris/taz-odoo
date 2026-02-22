@@ -41,7 +41,6 @@
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', '=', 'not_tracked')]"/>
-                    <filter name="inditto" string="Comptes Inditto" domain="[('rel_business_priority', '=', 'inditto')]"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
@@ -126,7 +125,6 @@
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', '=', 'not_tracked')]"/>
-                    <filter name="inditto" string="Comptes Inditto" domain="[('rel_business_priority', '=', 'inditto')]"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>

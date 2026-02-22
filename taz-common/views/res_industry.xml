@@ -123,7 +123,6 @@
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
-                    <filter name="inditto" string="Comptes Inditto" domain="[('business_priority', '=', 'inditto')]"/>
                     <separator/>
                     <filter name="no_account_plan_url" string="Sans plan de compte" domain="[('account_plan_url', '=', False)]"/>
                     <filter name="with_account_plan_url" string="Avec plan de compte" domain="[('account_plan_url', '!=', False)]"/>
