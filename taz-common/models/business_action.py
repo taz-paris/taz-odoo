@@ -4,6 +4,7 @@ from odoo.exceptions import AccessDenied, UserError, ValidationError
 from odoo import _
 import logging
 _logger = logging.getLogger(__name__)
+from dateutil.relativedelta import relativedelta
 
 import json
 
@@ -162,18 +163,42 @@ class tazBusinessAction(models.Model):
         ('noting', 'Aucune suite à donner')
         ], "Conclusion")
     action_type = fields.Selection([
-        ('regular_news', 'Intimité réseau'),
+        ('regular_news', 'RDV Intimité réseau'),
         ('commercial_interview', 'RDV commercial avec DM / en délégation'),
         ('propale', 'Contribution à une proposition commerciale'),
-        ('first_meeting', 'Prise de connaissance/Découverte'),
-        ('deepening', 'Approfondissement')
-        ], "Type")
+        ('first_meeting', 'RDV Prise de connaissance/Découverte'),
+        ('deepening', 'RDV Approfondissement'),
+        ('other', 'Autre action commerciale (non RDV)'),
+        ], "Type", required=True)
     report_url = fields.Char("URL vers le CR OneNote")
 
     ms_planner_task_data = fields.Char("Data de la tâche M$ Planner")
     is_rdv_to_be_taken_by_assistant = fields.Boolean("RDV à planifier par notre assistant commercial externe")
     is_rdv_taken_by_assistant = fields.Boolean("RDV planifié par notre assistant commercial externe")
     business_priority = fields.Selection(string='Niveau de priorité', related='parent_partner_id.business_priority', store=True)
+
+    parent_action_id = fields.Many2one('taz.business_action', string="Action origine", ondelete='set null')
+    followup_action_ids = fields.One2many('taz.business_action', 'parent_action_id', string="Actions de suite")
+
+    def action_create_followup(self):
+        self.ensure_one()
+        new_action = self.copy({
+            'name': _("Suite de : %s", self.name),
+            'parent_action_id': self.id,
+            'state': 'todo',
+            'conclusion': False,
+            'report_url': False,
+            'date_deadline': False,
+            'note': _("Action de suite pour : %s", self.name),
+        })
+        return {
+            'name': _('Action commerciale de suite'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'taz.business_action',
+            'res_id': new_action.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
 
     def open_record(self):
         # first you need to get the id of your record
@@ -196,3 +221,33 @@ class tazBusinessAction(models.Model):
                 'flags': {'initial_mode': 'edit'},
                 'target': 'current',
             }
+
+    @api.model
+    def _cron_send_weekly_digest(self):
+        today = fields.Date.context_today(self)
+        date_from_done = today - relativedelta(days=7)
+        date_to_coming = today + relativedelta(days=14)
+
+        actions_done = self.search([
+            ('state', '=', 'done'),
+            ('date_deadline', '>=', date_from_done),
+            ('date_deadline', '<', today)
+        ], order='date_deadline desc')
+
+        actions_coming = self.search([
+            ('state', 'not in', ['done', 'cancelled']),
+            ('date_deadline', '>=', today),
+            ('date_deadline', '<=', date_to_coming)
+        ], order='date_deadline asc')
+
+        if not actions_done and not actions_coming:
+            _logger.info("No business actions to digest this week.")
+            return
+
+        template = self.env.ref('taz-common.business_action_digest_template', raise_if_not_found=False)
+        if template:
+            # Send to the specified address
+            template.with_context(
+                actions_done=actions_done,
+                actions_coming=actions_coming
+            ).send_mail(self.env.user.id, force_send=True)

@@ -9,10 +9,11 @@ from dateutil.relativedelta import relativedelta
 
 class tazCustomerBookGoal(models.Model):
     _name = "taz.customer_book_goal"
+    _inherit = ['mail.thread']
     _description = "Customer book goal"
     _order = "reference_period desc, industry_id"
     _sql_constraints = [
-        ('partner_year_company_unicity', 'UNIQUE (industry_id, reference_period, company_id)',  "Impossible d'avoir deux objectifs différents pour le même compte, la même année et la même société.")
+        ('partner_year_company_unicity', 'UNIQUE (industry_id, reference_period, company_id)',  "Impossible d'avoir deux ambitions différentes pour le même compte, la même année et la même société.")
     ]
 
     @api.model
@@ -49,13 +50,20 @@ class tazCustomerBookGoal(models.Model):
             else :
                 record.period_ratio = 0.0
             record.book_last_month, last_month_project_ids = record.industry_id.get_book_delta(begin_year, end_year, record.company_id)
-            record.expected_prorated_revenue, record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_opportunities(record.company_id)
+
+            if record.reference_period == str(datetime.date.today().year):
+                record.expected_prorated_revenue, record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_opportunities(record.company_id)
+            else:
+                record.expected_prorated_revenue = 0.0
+                record.number_of_opportunities = 0
+            
+            record.business_action_count, business_action_ids = record.industry_id.get_business_action_by_periode(begin_year, end_year)
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
-        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities']
+        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities', 'business_action_count', 'business_action_goal']
         for data in res:
             if '__domain' not in data.keys():
                 continue
@@ -73,9 +81,29 @@ class tazCustomerBookGoal(models.Model):
             
         return res
 
+    def action_open_business_actions(self):
+        begin_year = datetime.datetime(int(self.reference_period), 1, 1)
+        end_year = datetime.datetime(int(self.reference_period), 12, 31)
+        count, business_action_ids = self.industry_id.get_business_action_by_periode(begin_year, end_year)
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Actions commerciales du compte %s' % (self.industry_id.name),
+                'res_model': 'taz.business_action',
+                'view_mode': 'list,form',
+                'target': 'current',
+                'domain': [('id', 'in', business_action_ids.ids)],
+                'context' : {'no_create' : True},
+            }
+
     def action_open_project_opportunities(self):
-        expected_prorated_revenue, number_of_opportunities, opportunities_project_ids = self.industry_id.get_opportunities(self.company_id)
-        view_id = self.env.ref("project_accounting.project_tree")
+        if self.reference_period == str(datetime.date.today().year):
+            expected_prorated_revenue, number_of_opportunities, opportunities_project_ids = self.industry_id.get_opportunities(self.company_id)
+        else:
+            expected_prorated_revenue = 0.0
+            number_of_opportunities = 0
+            opportunities_project_ids = []
+
+        view_id = self.env.ref("project_accounting.project_opportunity_tree")
         return {
                 'type': 'ir.actions.act_window',
                 'name': 'Avant-ventes du compte %s' % (self.industry_id.name),
@@ -133,17 +161,19 @@ class tazCustomerBookGoal(models.Model):
     company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des objectifs")
+    book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des ambitions")
 
-    period_goal = fields.Monetary("Objectif annuel")
+    period_goal = fields.Monetary("Ambition annuelle", tracking=True)
 
     period_book = fields.Monetary("Commande à date", compute=compute)
-    period_delta = fields.Monetary("Delta objectif", compute=compute)
-    period_ratio = fields.Float("Ratio objectif", compute=compute)
+    period_delta = fields.Monetary("Delta ambition", compute=compute)
+    period_ratio = fields.Float("Ratio ambition", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
+    business_action_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
+    business_action_goal = fields.Integer("Ambition de RDV", tracking=True)
     expected_prorated_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', compute=compute)
-    comment = fields.Text("Commentaire pour cette année")
+    comment = fields.Text("Commentaire pour cette année", tracking=True)
 
 
 class tazCustomerBookFollowup(models.Model):
@@ -151,7 +181,7 @@ class tazCustomerBookFollowup(models.Model):
     _description = "Customer book evolution"
     _order = "date_update desc"
     _sql_constraints = [
-        ('book_date_company_uniq', 'UNIQUE (customer_book_goal_id, date_update, company_id)',  "Impossible d'avoir des suivis d'objectifs différents pour le même jour et la même société.")
+        ('book_date_company_uniq', 'UNIQUE (customer_book_goal_id, date_update, company_id)',  "Impossible d'avoir des suivis d'ambitions différentes pour le même jour et la même société.")
     ]
     _check_company_auto = True
 
@@ -200,8 +230,8 @@ class tazCustomerBookFollowup(models.Model):
     company_id = fields.Many2one('res.company', related="customer_book_goal_id.company_id", store=True)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
-    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Objectif annuel", required=True, readonly=False, ondelete='restrict', check_company=False)
-    period_goal = fields.Monetary("Montant obj", related="customer_book_goal_id.period_goal", store=True)
+    customer_book_goal_id = fields.Many2one('taz.customer_book_goal', string="Ambition annuelle", required=True, readonly=False, ondelete='restrict', check_company=False)
+    period_goal = fields.Monetary("Montant ambition", related="customer_book_goal_id.period_goal", store=True)
     industry_id = fields.Many2one(related="customer_book_goal_id.industry_id", store=True)
     rel_business_priority = fields.Selection(related='industry_id.business_priority', store=True)
 
@@ -210,6 +240,6 @@ class tazCustomerBookFollowup(models.Model):
     period_futur_book = fields.Monetary("Intime conviction", help="Montant HT que l'on estime pouvoir prendre en commande en plus d'ici la fin de l'année.")
 
     period_landing = fields.Monetary("Atterissage annuel", compute=landing, store=True)
-    period_delta = fields.Monetary("Delta aterrissage vs objectif", compute=landing, store=True)
-    period_ratio = fields.Float("Ratio aterrissage vs objectif", compute=landing, store=True)
+    period_delta = fields.Monetary("Delta aterrissage vs ambition", compute=landing, store=True)
+    period_ratio = fields.Float("Ratio aterrissage vs ambition", compute=landing, store=True)
     comment = fields.Text("Commentaire")

@@ -8,6 +8,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//sheet" position="replace">
                     <sheet>
+                        <div class="oe_button_box" name="button_box">
+                        </div>
                         <group>
                             <group>
                                 <field name="name"/>
@@ -17,21 +19,22 @@
                                 <field name="pillar_id"/>
                                 <field name="partner_ids" widget="many2many_tags" required="1" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
                                 <button type="object" name="action_open_contacts" string="Voir les contacts"/>
-                                <button type="object" name="action_open_business_actions" string="Voir les actions commerciales"/>
+                                <button type="object" name="action_open_business_actions" string="Voir les actions commerciales à faire"/>
                             </group>
                             <group>
                                 <field name="user_id" options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="challenger_id" options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="contributor_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="business_partner_company_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
+                                <field name="external_contributor_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="account_plan_url" widget="url"/>
                                 <field name="ms_planner_plan_id" groups="taz-common.taz-admin"/>
                             </group>
                         </group>
                         <notebook>
-                            <page string="Objectifs commerciaux">
-                                <label for="customer_book_goal_ids" string="Objectifs annuels"/>
-                                <field name="customer_book_goal_ids" string="Objectifs annuels" context="{'default_industry_id': id}">
+                            <page string="Ambitions commerciales">
+                                <label for="customer_book_goal_ids" string="Ambitions annuelles"/>
+                                <field name="customer_book_goal_ids" string="Ambitions annuelles" context="{'default_industry_id': id}">
                                     <list editable="top">
                                         <field name="currency_id" column_invisible="1"/>
                                         <field name="company_id" optional="show"/>
@@ -47,9 +50,12 @@
                                         <field name="number_of_opportunities" optional="show" sum="Total"/>
                                         <field name="expected_prorated_revenue" optional="show" sum="Total"/>
                                         <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
+                                        <field name="business_action_goal" optional="show" string="Amb. RDV" sum="Total"/>
+                                        <field name="business_action_count" optional="show" string="RDV faits" sum="Total"/>
+                                        <button type="object" name="action_open_business_actions" icon="fa-eye" title="Ouvrir les actions commerciales"/>
                                     </list>
                                 </field>
-                                <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>
+                                <label for="customer_book_followup_ids" string="Photos des ambitions annuelles"/>
                                 <field name="customer_book_followup_ids" context="{'default_industry_id': id, 'active_id': id}">
                                     <list editable="top" create="true">
                                         <field name="currency_id" column_invisible="1"/>
@@ -69,9 +75,7 @@
                             </page>
                         </notebook>
                     </sheet>
-                    <!--
-			<chatter/>
-			-->
+			        <chatter/>
                 </xpath>
             </field>
         </record>
@@ -94,6 +98,7 @@
                     <field name="user_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
                     <field name="challenger_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
                     <field name="contributor_ids" optional="show" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
+                    <field name="external_contributor_ids" optional="show" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
                     <field name="business_priority" optional="hide"/>
                     <field name="account_plan_url" widget="url" optional="hide"/>
                     <field name="partner_ids" optional="show" widget="many2many_tags"/>
@@ -113,6 +118,7 @@
                     <field name="challenger_id" string="Compte challenger (nom de famille)"/>
                     <field name="contributor_ids" string="Contributeurs (nom de famille)"/>
                     <field name="business_partner_company_ids"/>
+                    <field name="external_contributor_ids" string="Contributeurs externes"/>
                     <field name="partner_ids"/>
                     <separator/>
                     <filter name="filter_my_industries" string="Comptes (ex BD) auxquels je suis affecté" domain="['|', '|', ('contributor_ids', 'in', uid), ('user_id', '=', uid), ('challenger_id', '=', uid)]"/>
@@ -120,7 +126,6 @@
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
-                    <filter name="inditto" string="Comptes Inditto" domain="[('business_priority', '=', 'inditto')]"/>
                     <separator/>
                     <filter name="no_account_plan_url" string="Sans plan de compte" domain="[('account_plan_url', '=', False)]"/>
                     <filter name="with_account_plan_url" string="Avec plan de compte" domain="[('account_plan_url', '!=', False)]"/>

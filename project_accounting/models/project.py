@@ -824,52 +824,15 @@ class projectAccountProject(models.Model):
     
     def get_sale_order_line_ids(self, filter_list=[]):
         #_logger.info('-- project sale.order.lines computation')
-        query = self.env['sale.order.line']._search(filter_list)
-        #_logger.info(query)
-        if query == []:
-            return []
-        query.add_where(
-            SQL(
-                "%s && %s",
-                [str(self.account_id.id)],
-                self.env['sale.order.line']._query_analytic_accounts(),
-            )
-        )
-        query.order = None
-        query_string, query_param = query.select('sale_order_line.*') #important car Odoo fait un LEFT join obligatoire, donc si on fait SELECT * on a plusieurs colonne ID dans le résultat
-        #_logger.info(query_string)
-        #_logger.info(query_param)
-        self._cr.execute(query_string, query_param)
-        dic =  self._cr.dictfetchall()
-        line_ids = [line.get('id') for line in dic]
-        #_logger.info(line_ids)
-        return line_ids
+        domain = filter_list + [('analytic_distribution', 'in', [str(self.account_id.id)])]
+        return self.env['sale.order.line'].search(domain).ids
 
 
 
     def get_account_move_line_ids(self, filter_list=[]):
         #_logger.info('--get_account_move_line_ids')
-        query = self.env['account.move.line']._search(filter_list)
-        #_logger.info(query)
-        if query == []:
-            return []
-        query.add_where(
-            SQL(
-                "%s && %s",
-                [str(self.account_id.id)],
-                self.env['account.move.line']._query_analytic_accounts(),
-            )
-        )
-        query.order = None
-        query_string, query_param = query.select('account_move_line.*')
-        #_logger.info(query_string)
-        #_logger.info(query_param)
-        self._cr.execute(query_string, query_param)
-        dic =  self._cr.dictfetchall()
-        line_ids = [line.get('id') for line in dic]
-        #_logger.info(line_ids)
-
-        return line_ids
+        domain = filter_list + [('analytic_distribution', 'in', [str(self.account_id.id)])]
+        return self.env['account.move.line'].search(domain).ids
 
 
     def get_all_customer_ids(self):
@@ -1086,6 +1049,9 @@ class projectAccountProject(models.Model):
                 #TODO : réduire au client final ?
 
             purchase_order_line_ids = self.env['project.outsourcing.link'].get_purchase_order_line_ids(filter_list=[('partner_id', 'not in', all_supplier)], analytic_account_ids=[str(rec.account_id.id)]) 
+            #_logger.info(self.env['purchase.order.line'].browse(purchase_order_line_ids[0]).read())
+            #_logger.info(all_supplier)
+            #_logger.info(rec.account_id.id)
             if len(purchase_order_line_ids) :
                 raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)." % (rec.number, rec.name)))
 

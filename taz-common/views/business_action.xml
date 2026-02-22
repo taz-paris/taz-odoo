@@ -20,6 +20,7 @@
                     <field name="report_url" widget="url" optional="show"/>
                     <field name="parent_partner_id" optional="hide"/>
                     <field name="parent_partner_industry_id" optional="hide"/>
+                    <button name="action_create_followup" string="Suite" type="object" icon="fa-rocket" invisible="state != 'done'" help="Créer l action de suite" class="text-success"/>
                     <button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
                 </list>
             </field>
@@ -29,30 +30,53 @@
             <field name="model">taz.business_action</field>
             <field name="arch" type="xml">
                 <form>
-                    <group>
+                    <header>
+                        <button name="action_create_followup" string="🚀 Créer une action de suite" type="object" invisible="state != 'done'" class="oe_highlight"/>
+                        <field name="state" widget="statusbar" statusbar_visible="todo,planned,done,cancelled" options="{'clickable': '1'}"/>
+                    </header>
+                    <div class="alert alert-warning text-center o_form_header" role="status" invisible="state != 'done' or followup_action_ids">
+                        <div class="o_form_header_content">
+                            <strong>Pensez à saisir l'action de suite !</strong> Une action au statut "Fait" doit généralement déclencher une nouvelle action commerciale pour maintenir la dynamique.
+                        </div>
+                    </div>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box"/>
                         <group>
-                            <field name="name" widget="text"/>
-                            <field name="partner_id" options="{'no_quick_create': True}" required="True" context="{'list_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
-                            <field name="parent_partner_id"/>
-                            <field name="parent_partner_industry_id"/>
-                            <field name="state"/>
-                            <field name="owner_id"/>
-                            <field name="user_ids" widget="many2many_avatar_user"/>
-                            <field name="date_deadline"/>
+                            <group>
+                                <field name="name" widget="text"/>
+                                <field name="partner_id" options="{'no_quick_create': True}" required="True" context="{'list_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+                                <field name="parent_partner_id"/>
+                                <field name="parent_partner_industry_id"/>
+                                <field name="parent_action_id"/>
+                                <field name="owner_id"/>
+                                <field name="user_ids" widget="many2many_avatar_user"/>
+                                <field name="date_deadline"/>
+                            </group>
+                            <group>
+                                <!--
+                                <field name="is_rdv_to_be_taken_by_assistant"/>
+                                <field name="is_rdv_taken_by_assistant"/>
+                                -->
+                                <field name="business_priority"/>
+                                <field name="action_type"/>
+                                <field name="conclusion"/>
+                                <field name="report_url" widget="url"/>
+                                <field name="ms_planner_task_data" groups="base.group_system"/>
+                            </group>
                         </group>
-                        <group>
-                            <field name="is_rdv_to_be_taken_by_assistant"/>
-                            <field name="is_rdv_taken_by_assistant"/>
-                            <field name="business_priority"/>
-                            <field name="action_type"/>
-                            <field name="conclusion"/>
-                            <field name="report_url" widget="url"/>
-                            <field name="note"/>
-                            <field name="ms_planner_task_data" groups="base.group_system"/>
-                        </group>
-                    </group>
-                </form>
-            </field>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Détails de l'action..."/>
+                        </page>
+                        <page string="Actions de suite" name="followup">
+                            <group>
+                                <field name="followup_action_ids"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
         </record>
         <record model="ir.ui.view" id="taz-common.business_action_calendar">
             <field name="name">Actions commerciales</field>
@@ -99,11 +123,11 @@
                     <filter name="filter_deadline_date" date="date_deadline"/>
                     <separator/>
                     <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
+                    <filter name="no_followup" string="Action sans suite" domain="[('state', '=', 'done'), ('followup_action_ids', '=', False)]"/>
                     <separator/>
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
-                    <filter name="inditto" string="Comptes Inditto" domain="[('business_priority', '=', 'inditto')]"/>
                     <separator/>
                     <filter name="state_not_done_not_cancelled" string="Non terminées ni annulées" domain="[('state', '!=', 'done'), ('state', '!=', 'cancelled')]"/>
                     <group expand="0" string="Group By">

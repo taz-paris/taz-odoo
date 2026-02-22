@@ -30,8 +30,7 @@
                     <separator/>
                     <filter string="Projets de comptes prioritaires" name="priority_target" domain="[('rel_industry_business_priority', '=', 'priority_target')]"/>
                     <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>
-                    <filter string="Projets de comptes à opportunités" name="not_tracked" domain="[('rel_industry_business_priority', '=', ['inditto'])]"/>
-                    <filter string="Projets de comptes Inditto" name="inditto" domain="[('rel_industry_business_priority', '=', 'inditto')]"/>
+                    <filter string="Projets de comptes à opportunités" name="not_tracked" domain="[('rel_industry_business_priority', '=', 'not_tracked')]"/>
                     <separator/>
                     <filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', [False, 'to_be_capitalized','not_specified']),('deliverable_indexation', 'in', [False, 'to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', [False, 'yes_success_story','not_specified']),('commercial_reference_indexation', 'in', [False, 'yes_commercial_reference','not_specified'])]"/>
                     <separator/>
@@ -108,6 +107,30 @@
                     <field name="futur_internal_revenue_next_year" optional="hide"/>
                     <field name="date_last_update_futur_internal_revenue_current_year" optional="hide"/>
                 </list>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="project_accounting.project_opportunity_tree">
+            <field name="name">Project Opportunity</field>
+            <field name="model">project.project</field>
+            <field name="priority">20</field>
+            <field name="inherit_id" ref="project_accounting.project_tree"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='reporting_sum_company_outsource_code3_code_4']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='reporting_sum_company_outsource_code3_code_4_delta']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='probability']" position="attributes">
+                    <attribute name="optional">show</attribute>
+                </xpath>
+                <xpath expr="//field[@name='prorated_revenue']" position="attributes">
+                    <attribute name="optional">show</attribute>
+                </xpath>
+                <xpath expr="//field[@name='expected_revenue']" position="attributes">
+                    <attribute name="optional">show</attribute>
+                </xpath>
             </field>
         </record>
         <record model="ir.ui.view" id="project_accounting.project_form">

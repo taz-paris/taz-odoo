@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record model="ir.ui.view" id="taz-common.customer_book_goal_tree">
-            <field name="name">Objectif de book</field>
+            <field name="name">Ambition de book</field>
             <field name="model">taz.customer_book_goal</field>
             <field name="arch" type="xml">
                 <list editable="top" expand="1">
@@ -20,25 +20,94 @@
                     <field name="number_of_opportunities" optional="show" string="Nb AVT" sum="Total"/>
                     <field name="expected_prorated_revenue" optional="show" string="PDC espérée" sum="Total"/>
                     <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
+                    <field name="business_action_goal" optional="show" string="Amb. RDV" sum="Total"/>
+                    <field name="business_action_count" optional="show" string="RDV faits" sum="Total"/>
+                    <button type="object" name="action_open_business_actions" icon="fa-eye" title="Ouvrir les actions commerciales"/>
                     <field name="comment" optional="show" widget="text"/>
                 </list>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="taz-common.customer_book_goal_form">
+            <field name="name">Ambition de book</field>
+            <field name="model">taz.customer_book_goal</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="industry_id" required="1" options="{'no_create': True, 'no_create_edit':True}"/>
+                                <field name="reference_period"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="period_goal"/>
+                                <field name="business_action_goal"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Indicateurs de performance" name="indicators">
+                                <group>
+                                    <group string="Prise de commande">
+                                        <label for="period_book"/>
+                                        <div class="o_row">
+                                            <field name="period_book" readonly="1"/>
+                                            <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="Voir les projets de l'année"/>
+                                        </div>
+                                        <field name="period_delta" readonly="1"/>
+                                        <field name="period_ratio" widget="progressbar" readonly="1"/>
+                                        <label for="book_last_month"/>
+                                        <div class="o_row">
+                                            <field name="book_last_month" readonly="1"/>
+                                            <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="Voir les projets J-31"/>
+                                        </div>
+                                    </group>
+                                    <group string="Pipeline et Actions">
+                                        <label for="number_of_opportunities"/>
+                                        <div class="o_row">
+                                            <field name="number_of_opportunities" readonly="1"/>
+                                            <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="Voir les opportunités"/>
+                                        </div>
+                                        <field name="expected_prorated_revenue" readonly="1"/>
+                                        <label for="business_action_count"/>
+                                        <div class="o_row">
+                                            <field name="business_action_count" readonly="1"/>
+                                            <button type="object" name="action_open_business_actions" icon="fa-eye" title="Voir les actions commerciales"/>
+                                        </div>
+                                    </group>
+                                </group>
+                                <group string="Commentaire">
+                                    <field name="comment" placeholder="Ajouter un commentaire..."/>
+                                </group>
+                            </page>
+                            <page string="Suivi des ambitions" name="followup">
+                                <field name="book_followup_ids"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
             </field>
         </record>
         <record model="ir.ui.view" id="taz-common.customer_book_goal_search">
             <field name="name">taz.customer_book_goal.search</field>
             <field name="model">taz.customer_book_goal</field>
             <field name="arch" type="xml">
-                <search string="Objectif de book">
+                <search string="Ambition de book">
                     <field name="industry_id" string="Compte (ex BD)"/>
                     <separator/>
-                    <filter name="filter_this_year" string="Objectifs de l'année en cours" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
+                    <filter name="filter_this_year" string="Ambitions de l'année en cours" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
                     <separator/>
-                    <filter name="filter_my_customer_book_goal" string="Objectifs de mes comptes" domain="['|', '|', ('industry_id.contributor_ids', 'in', uid), ('industry_id.user_id', '=', uid), ('industry_id.challenger_id', '=', uid)]"/>
+                    <filter name="filter_my_customer_book_goal" string="Ambitions de mes comptes" domain="['|', '|', ('industry_id.contributor_ids', 'in', uid), ('industry_id.user_id', '=', uid), ('industry_id.challenger_id', '=', uid)]"/>
                     <separator/>
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', '=', 'not_tracked')]"/>
-                    <filter name="inditto" string="Comptes Inditto" domain="[('rel_business_priority', '=', 'inditto')]"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
@@ -50,7 +119,7 @@
             </field>
         </record>
         <record model="ir.ui.view" id="taz-common.customer_book_goal_pivot">
-            <field name="name">Objectif de book</field>
+            <field name="name">Ambition de book</field>
             <field name="model">taz.customer_book_goal</field>
             <field name="arch" type="xml">
                 <pivot string="Suivi du book">
@@ -118,12 +187,11 @@
                 <search string="Suivi du book">
                     <field name="industry_id" string="Compte (ex BD)"/>
                     <separator/>
-                    <filter name="filter_this_year" string="Objectifs de l'année en cours" domain="[('date_update', '&gt;=', time.strftime('%%Y-01-01')), ('date_update', '&lt;=', time.strftime('%%Y-12-31'))]"/>
+                    <filter name="filter_this_year" string="Ambitions de l'année en cours" domain="[('date_update', '&gt;=', time.strftime('%%Y-01-01')), ('date_update', '&lt;=', time.strftime('%%Y-12-31'))]"/>
                     <separator/>
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('rel_business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('rel_business_priority', '=', 'active')]"/>
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('rel_business_priority', '=', 'not_tracked')]"/>
-                    <filter name="inditto" string="Comptes Inditto" domain="[('rel_business_priority', '=', 'inditto')]"/>
                     <separator/>
                     <group expand="0" string="Group By">
                         <filter string="Société" name="group_company_id" context="{'group_by': 'company_id'}"/>
@@ -135,26 +203,26 @@
             </field>
         </record>
         <record id="taz-common.customer_book_goal_action" model="ir.actions.act_window">
-            <field name="name">Objectifs commerciaux annuels</field>
+            <field name="name">Ambitions commerciales annuelles</field>
             <field name="res_model">taz.customer_book_goal</field>
-            <field name="view_mode">list,pivot,graph</field>
+            <field name="view_mode">list,form,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}</field>
         </record>
         <record id="taz-common.my_customer_book_goal_action" model="ir.actions.act_window">
-            <field name="name">Mes objectifs commerciaux annuels</field>
+            <field name="name">Mes ambitions commerciales annuelles</field>
             <field name="res_model">taz.customer_book_goal</field>
-            <field name="view_mode">list,pivot,graph</field>
+            <field name="view_mode">list,form,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True, 'search_default_filter_my_customer_book_goal' : True}</field>
         </record>
         <record id="taz-common.customer_book_followup_action" model="ir.actions.act_window">
-            <field name="name">Photos des objectifs commerciaux</field>
+            <field name="name">Photos des ambitions commerciales</field>
             <field name="res_model">taz.customer_book_followup</field>
             <field name="view_mode">list,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True}</field>
         </record>
-        <menuitem name="Comptes / Objectifs" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
-        <menuitem name="Photo des objectifs commerciaux" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
-        <menuitem name="Objectifs commerciaux annuels" sequence="20" id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
+        <menuitem name="Comptes / Ambitions" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
+        <menuitem name="Photo des ambitions commerciales" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
+        <menuitem name="Ambitions commerciales annuelles" sequence="20" id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
         <menuitem id="taz-common.res_partner_industry_menu" name="Comptes (ex BD)" action="base.res_partner_industry_action" parent="taz-common.customer_book" sequence="10"/>
     </data>
 </odoo>

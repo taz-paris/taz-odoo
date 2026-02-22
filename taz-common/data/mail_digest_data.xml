@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Email Template for Weekly Digest -->
+        <record id="business_action_digest_template" model="mail.template">
+            <field name="name">Digest actions commerciales</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="subject">Digest des actions commerciales passées et à venir</field>
+            <field name="email_from">admin-tazforce@tasmane.com</field>
+            <field name="email_to">tazforce.digest_business_actions@tasmane.com</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 20px; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; background-color: #f8f9fa;">
+    <div style="max-width: 900px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <header style="margin-bottom: 30px; text-align: center; border-bottom: 2px solid #6a1b9a; padding-bottom: 20px;">
+            <h1 style="color: #6a1b9a; margin: 0; font-size: 24px;">Digest hebdomadaire des actions commerciales</h1>
+            <p style="color: #666; margin-top: 5px;">Rapport généré le <t t-esc="datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')"/></p>
+        </header>
+
+        <section style="margin-bottom: 40px;">
+            <h2 style="color: #2e7d32; font-size: 18px; border-left: 4px solid #2e7d32; padding-left: 10px; margin-bottom: 15px;">✅ Actions réalisées (7 derniers jours)</h2>
+            <t t-if="ctx.get('actions_done')">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                        <thead>
+                            <tr style="background-color: #f1f8e9; color: #1b5e20;">
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Échéance</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Titre</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Contact</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Collaborateur</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Type</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Lien OneNote</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="ctx.get('actions_done')" t-as="action">
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0; white-space: nowrap;"><t t-esc="action.date_deadline.strftime('%d/%m/%Y') if action.date_deadline else '-'"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0; font-weight: bold; color: #333;"><t t-esc="action.name"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0;"><t t-esc="action.partner_id.display_name or '-'"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0;"><t t-esc="action.owner_id.display_name"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0; font-size: 12px;"><t t-esc="dict(action._fields['action_type']._description_selection(action.env)).get(action.action_type, '-')"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0; text-align: center;">
+                                        <t t-if="action.report_url">
+                                            <a t-att-href="action.report_url" style="color: #6a1b9a; text-decoration: underline; font-weight: bold;">Lire le CR</a>
+                                        </t>
+                                        <t t-else="">-</t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+            <t t-else="">
+                <p style="padding: 15px; background: #fff3e0; color: #e65100; border-radius: 4px; font-style: italic;">Aucune action réalisée enregistrée sur cette période.</p>
+            </t>
+        </section>
+
+        <section style="margin-bottom: 20px;">
+            <h2 style="color: #1565c0; font-size: 18px; border-left: 4px solid #1565c0; padding-left: 10px; margin-bottom: 15px;">🚀 Actions à venir (14 prochains jours)</h2>
+            <t t-if="ctx.get('actions_coming')">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                        <thead>
+                            <tr style="background-color: #e3f2fd; color: #0d47a1;">
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Échéance</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Titre</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Contact</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Collaborateur</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="ctx.get('actions_coming')" t-as="action">
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0; white-space: nowrap;"><t t-esc="action.date_deadline.strftime('%d/%m/%Y') if action.date_deadline else '-'"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0; font-weight: bold; color: #333;"><t t-esc="action.name"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0;"><t t-esc="action.partner_id.display_name or '-'"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0;"><t t-esc="action.owner_id.display_name"/></td>
+                                    <td style="padding: 10px; border: 1px solid #e0e0e0;">
+                                        <span style="padding: 2px 6px; border-radius: 3px; font-size: 11px; background: #e0e0e0;">
+                                            <t t-esc="dict(action._fields['state']._description_selection(action.env)).get(action.state, '-')"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+            <t t-else="">
+                <p style="padding: 15px; background: #e8f5e9; color: #2e7d32; border-radius: 4px; font-style: italic;">Aucune action planifiée sur la période à venir.</p>
+            </t>
+        </section>
+
+        <footer style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #999; font-size: 12px;">
+            <p>Cet email a été envoyé automatiquement par le Cockpit TazForce.</p>
+            <p>© Tasmane - Tous droits réservés</p>
+        </footer>
+    </div>
+</div>
+            </field>
+        </record>
+
+
+    </data>
+
+
+    <data noupdate="1">
+        <!-- Cron Task for Weekly Digest -->
+        <record id="ir_cron_weekly_digest" model="ir.cron">
+            <field name="name">Digest hebdomadaire actions commerciales</field>
+            <field name="model_id" ref="taz-common.model_taz_business_action"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_weekly_digest()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            <!-- Nextcall on next Monday at 7:00 UTC (8:00 Local) -->
+            <field name="nextcall" eval="(datetime.now() + relativedelta(weekday=0, hour=7, minute=0, second=0)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

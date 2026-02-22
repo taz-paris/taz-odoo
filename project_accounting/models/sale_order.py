@@ -197,23 +197,17 @@ class projectAccountingSaleOrderLine(models.Model):
                     line_ids = []
 
                 else :    
-                    #TODO : ajouter une condition dans le filtre : le PO n'est pas annulé ni terminée et la POL n'est pas déjà facturée
-                    query = self.env['purchase.order.line']._search([])
-                    query.add_where('("purchase_order_line"."company_id" IS NULL  OR ("purchase_order_line"."company_id" = %s))', [self.company_id.id])
-                    query.add_where('("purchase_order_line"."id" not in (SELECT "direct_payment_purchase_order_line_id" FROM "sale_order_line" WHERE "direct_payment_purchase_order_line_id" IS NOT NULL))')
-                    query.add_where('"purchase_order_line"."price_subtotal" = %s', [self.price_subtotal])
-                    query.add_where(
-                        SQL(
-                            "%s && %s",
-                            [str(analytic_account_ids[0])],
-                            self.env['purchase.order.line']._query_analytic_accounts(),
-                        )
-                    )
-                    query.order = None
-                    query_string, query_param = query.select('purchase_order_line.*') #important car Odoo fait un LEFT join obligatoire, donc si on fait SELECT * on a plusieurs colonne ID dans le résultat
-                    self._cr.execute(query_string, query_param)
-                    line_ids = [line.get('id') for line in self._cr.dictfetchall()]
-                    #_logger.info(line_ids)
+                    # Odoo 18 ORM nativesly supports searching on analytic_distribution (JSONB)
+                    domain = [
+                        ('company_id', 'in', [self.company_id.id, False]),
+                        ('price_subtotal', '=', self.price_subtotal),
+                        ('analytic_distribution', 'in', [str(analytic_account_ids[0])]),
+                    ]
+                    # Also need to exclude lines already linked to a sale_order_line
+                    # In Odoo, searching for Many2one link from the other side:
+                    domain.append(('direct_payment_sale_order_line_id', '=', False))
+                    
+                    line_ids = self.env['purchase.order.line'].search(domain).ids
         
 
             #_logger.info(line_ids)

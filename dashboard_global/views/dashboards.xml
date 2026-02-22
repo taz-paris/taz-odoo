@@ -15,6 +15,7 @@
                         <column>
                             <action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j30' : 1}"/>
                             <action string="Mes objectifs de book annuels personnels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
+                            <action string="Mes objectifs de RDV annuels personnels" name="%(taz-common.employee_business_action_goal_action)d" context="{'search_default_my_goals' : 1, 'search_default_group_year' : 1}"/>
                             <action string="Les objectifs de prise de commande des comptes auxquels je contribue" name="%(taz-common.customer_book_goal_action)d" context="{'search_default_filter_my_customer_book_goal' : 1, 'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}"/>
                         </column>
                     </board>
@@ -103,13 +104,13 @@ action = {
         <menuitem name="Créer une action commerciale" id="new_business_action" parent="dashboard_global.sales" action="open_view_business_action_new_form" sequence="20"/>
         <menuitem name="Mes actions commerciales" id="all_business_actions" parent="dashboard_global.sales" action="taz-common.business_action_action" sequence="25"/>
         <menuitem name="Comptes (ex BD) auxquels je suis affecté" id="res_industry" parent="dashboard_global.sales" action="taz-common.my_industries_action" sequence="30"/>
-        <menuitem name="Objectifs commerciaux annuels de mes comptes" id="all_customer_book_goal" parent="dashboard_global.sales" action="taz-common.my_customer_book_goal_action" sequence="35"/>
+        <menuitem name="Ambitions commerciales annuelles de mes comptes" id="all_customer_book_goal" parent="dashboard_global.sales" action="taz-common.my_customer_book_goal_action" sequence="35"/>
         <menuitem name="&gt;&gt;&gt; Redirection vers le module Commerce" id="business_module" parent="dashboard_global.sales" action="taz-common_redirect" sequence="50"/>
         <menuitem name="Pilotage" id="statistics_report_menu" parent="spreadsheet_dashboard.spreadsheet_dashboard_menu_root" sequence="10"/>
         <menuitem name="Escale &gt; Projet créés/ayant changé de statut sur les 7 derniers jours" id="project_recent_change_action_menu" parent="statistics_report_menu" action="project_recent_change_action" sequence="5"/>
         <menuitem name="Stats commerciales" id="business_report_menu" parent="statistics_report_menu" sequence="20"/>
         <menuitem name="Graphique de prise de commande N/N-1 par trimestre" id="project_win_loose" parent="dashboard_global.business_report_menu" action="open_view_project_win_loose_action" sequence="10"/>
-        <menuitem name="Objectifs commerciaux annuels par compte" id="customer_book_goal" parent="dashboard_global.business_report_menu" action="taz-common.customer_book_goal_action" sequence="20"/>
+        <menuitem name="Ambitions commerciales annuelles par compte" id="customer_book_goal" parent="dashboard_global.business_report_menu" action="taz-common.customer_book_goal_action" sequence="20"/>
         <menuitem name="Liste des comptes" id="res_partner_industry_menu" parent="dashboard_global.business_report_menu" action="base.res_partner_industry_action" sequence="21"/>
         <menuitem name="Actions commerciales des 6 derniers mois" id="history_business_action_action" parent="dashboard_global.business_report_menu" action="taz-common.history_business_action_action" sequence="30"/>
         <menuitem name="Stats de staffing" id="employee_staffing_report_menu" parent="statistics_report_menu" sequence="30"/>

@@ -10,26 +10,37 @@ _logger = logging.getLogger(__name__)
 
 
 class tazResIndustry(models.Model):
-    #_inherit = ['res.partner.industry', 'mail.thread']
-    _inherit = 'res.partner.industry'
+    _name = 'res.partner.industry'
+    _inherit = ['res.partner.industry', 'mail.thread']
+    _description = "Compte (ex BD)"
 
     ms_planner_plan_id = fields.Char("M$ planner plan ID", help="Id of the Microsoft Planner plan where tasks should be created for business action of that industry")
     pillar_id = fields.Many2one('res.partner.industry.pillar', string = "Pillier")
-    user_id = fields.Many2one('res.users', string='Responsable du compte')#, tracking=True)
-    challenger_id = fields.Many2one('res.users', string='Compte challenger')#, tracking=True)
-    contributor_ids = fields.Many2many('res.users', string='Contributeurs')#, tracking=True)
+    user_id = fields.Many2one('res.users', string='Responsable du compte', tracking=True)
+    challenger_id = fields.Many2one('res.users', string='Compte challenger', tracking=True)
+    contributor_ids = fields.Many2many('res.users', string='Contributeurs', tracking=True)
+    external_contributor_ids = fields.Many2many(
+        'res.partner', 
+        'res_industry_external_contributor_rel',
+        'industry_id',
+        'partner_id',
+        string='Contributeurs externes', 
+        domain="[('is_company', '=', False), ('type', '=', 'contact'), ('parent_id', 'in', business_partner_company_ids)]",
+        help="Sélectionnez des contacts externes. Seuls les contacts dont l'entreprise parente appartient à la Galaxie de ce compte sont proposés.",
+        tracking=True
+    )
     partner_ids = fields.One2many('res.partner', 'industry_id', string="Entreprises", domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
     account_plan_url = fields.Char("Lien vers le dossier du plan de compte")
     business_priority = fields.Selection([
          ('active', '1-Compte actif'),
          ('priority_target', '2-Compte prioritaire'),
          ('not_tracked', '3-Opportunités'),
-         ('inditto', '4-Contribution Inditto'),
-    ], "Niveau de priorité", default='not_tracked')#, tracking=True)
+    ], "Niveau de priorité", default='not_tracked', tracking=True)
 
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
     business_partner_company_ids = fields.Many2many('res.partner', domain=[('ref_company_ids', '!=', False)], string="Galaxie")
+
 
 
     def get_book_by_period(self, begin_date, end_date, company_id):
@@ -115,6 +126,17 @@ class tazResIndustry(models.Model):
         }
 
         return action
+
+    def get_business_action_by_periode(self, begin_date, end_date):
+        domain = [
+            ('parent_partner_industry_id', '=', self.id),
+            ('state', '=', 'done'),
+            ('date_deadline', '>=', begin_date),
+            ('date_deadline', '<=', end_date),
+            ('action_type', 'in', ['regular_news', 'commercial_interview', 'first_meeting', 'deepening']),
+        ]
+        business_actions = self.env['taz.business_action'].search(domain)
+        return len(business_actions), business_actions
 
     def action_open_business_actions(self):
         business_action_ids = self.env['taz.business_action'].search([('parent_partner_industry_id', '=', self.id)])

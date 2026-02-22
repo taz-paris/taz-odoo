@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="employee_business_action_goal_view_tree">
+            <field name="name">taz.employee_business_action_goal.tree</field>
+            <field name="model">taz.employee_business_action_goal</field>
+            <field name="arch" type="xml">
+                <list editable="top">
+                    <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                    <field name="user_id"/>
+                    <field name="reference_period"/>
+                    <field name="type"/>
+                    <field name="period_goal" sum="Total"/>
+                    <field name="period_action_count" sum="Total"/>
+                    <button type="object" name="action_view_details" icon="fa-eye" title="Détails des actions"/>
+                    <field name="period_rate" widget="progressbar"/>
+                    <field name="note" optional="hide"/>
+                </list>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="employee_business_action_goal_view_form">
+            <field name="name">taz.employee_business_action_goal.form</field>
+            <field name="model">taz.employee_business_action_goal</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="user_id"/>
+                                <field name="reference_period"/>
+                                <field name="type"/>
+                            </group>
+                            <group>
+                                <field name="period_goal"/>
+                                <field name="period_action_count"/>
+                                <field name="period_rate" widget="progressbar"/>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                            </group>
+                        </group>
+                        <group name="note_group" string="Commentaires">
+                            <field name="note" nolabel="1" placeholder="Ajoutez un commentaire ici..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="employee_business_action_goal_view_search">
+            <field name="name">taz.employee_business_action_goal.search</field>
+            <field name="model">taz.employee_business_action_goal</field>
+            <field name="arch" type="xml">
+                <search string="Objectifs de RDV">
+                    <field name="user_id"/>
+                    <field name="reference_period"/>
+                    <field name="type"/>
+                    <field name="note"/>
+                    <filter string="Mes objectifs" name="my_goals" domain="[('user_id', '=', uid)]"/>
+                    <separator/>
+                    <filter string="Cette année" name="this_year" domain="[('reference_period', '=', context_today().strftime('%Y'))]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Utilisateur" name="group_user" context="{'group_by': 'user_id'}"/>
+                        <filter string="Année" name="group_year" context="{'group_by': 'reference_period'}"/>
+                        <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="employee_business_action_goal_action" model="ir.actions.act_window">
+            <field name="name">Objectifs de RDV par collaborateur</field>
+            <field name="res_model">taz.employee_business_action_goal</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="employee_business_action_goal_view_search"/>
+            <field name="context">{'search_default_this_year': 1, 'search_default_group_user': 1}</field>
+        </record>
+
+        <menuitem name="Objectifs RDV par collaborateur" 
+                  id="menu_employee_business_action_goal" 
+                  parent="taz-common.business_action" 
+                  action="employee_business_action_goal_action" 
+                  sequence="30"/>
+    </data>
+</odoo>

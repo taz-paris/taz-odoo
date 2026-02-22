@@ -66,31 +66,17 @@ class projectOutsourcingLink(models.Model):
         return action
 
     def get_purchase_order_line_ids(self, filter_list=None, analytic_account_ids=None):
-        #_logger.info('--get_purchase_order_line_ids')
-        if filter_list == None :
+        _logger.info('--get_purchase_order_line_ids')
+        if filter_list is None :
             filter_list = [('partner_id', '=', self.partner_id.id)]
-        if analytic_account_ids == None:
-            analytic_account_ids=[str(self.project_id.account_id.id)]
+        if analytic_account_ids is None:
+            analytic_account_ids = [str(self.project_id.account_id.id)]
 
-        query = self.env['purchase.order.line']._search(filter_list)
-        #_logger.info(query)
-        if query == []:
-            return []
-        query.add_where(
-            SQL(
-                "%s && %s",
-                analytic_account_ids,
-                self.env['purchase.order.line']._query_analytic_accounts(),
-            )
-        )
-        query.order = None
-        query_string, query_param = query.select('purchase_order_line.*')
-        #_logger.info(query_string)
-        #_logger.info(query_param)
-        self._cr.execute(query_string, query_param)
-        dic =  self._cr.dictfetchall()
-        line_ids = [line.get('id') for line in dic]
+        # Odoo 18 ORM natively supports searching on analytic_distribution (JSONB)
+        domain = filter_list + [('analytic_distribution', 'in', analytic_account_ids)]
+        line_ids = self.env['purchase.order.line'].search(domain).ids
 
+        _logger.info('--END OF get_purchase_order_line_ids')
         return line_ids
         
 
