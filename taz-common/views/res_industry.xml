@@ -26,6 +26,7 @@
                                 <field name="challenger_id" options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="contributor_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="business_partner_company_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
+                                <field name="external_contributor_ids" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="account_plan_url" widget="url"/>
                                 <field name="ms_planner_plan_id" groups="taz-common.taz-admin"/>
                             </group>
@@ -97,6 +98,7 @@
                     <field name="user_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
                     <field name="challenger_id" optional="show" options="{'no_create': True, 'no_create_edit':True}"/>
                     <field name="contributor_ids" optional="show" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
+                    <field name="external_contributor_ids" optional="show" widget="many2many_tags" options="{'no_create': True, 'no_create_edit':True}"/>
                     <field name="business_priority" optional="hide"/>
                     <field name="account_plan_url" widget="url" optional="hide"/>
                     <field name="partner_ids" optional="show" widget="many2many_tags"/>
@@ -116,6 +118,7 @@
                     <field name="challenger_id" string="Compte challenger (nom de famille)"/>
                     <field name="contributor_ids" string="Contributeurs (nom de famille)"/>
                     <field name="business_partner_company_ids"/>
+                    <field name="external_contributor_ids" string="Contributeurs externes"/>
                     <field name="partner_ids"/>
                     <separator/>
                     <filter name="filter_my_industries" string="Comptes (ex BD) auxquels je suis affecté" domain="['|', '|', ('contributor_ids', 'in', uid), ('user_id', '=', uid), ('challenger_id', '=', uid)]"/>
