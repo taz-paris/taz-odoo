@@ -824,6 +824,10 @@ class projectAccountProject(models.Model):
     
     def get_sale_order_line_ids(self, filter_list=[]):
         #_logger.info('-- project sale.order.lines computation')
+
+        # Ensure that the fields used in the SQL query are flushed to the database
+        self.env['sale.order.line'].flush_model(['order_partner_id', 'analytic_distribution', 'company_id'])
+        
         query = self.env['sale.order.line']._search(filter_list)
         #_logger.info(query)
         if query == []:
@@ -849,6 +853,10 @@ class projectAccountProject(models.Model):
 
     def get_account_move_line_ids(self, filter_list=[]):
         #_logger.info('--get_account_move_line_ids')
+
+        # Ensure that the fields used in the SQL query are flushed to the database
+        self.env['account.move.line'].flush_model(['partner_id', 'analytic_distribution', 'company_id', 'move_type', 'parent_state', 'display_type'])
+        
         query = self.env['account.move.line']._search(filter_list)
         #_logger.info(query)
         if query == []:
@@ -1086,6 +1094,9 @@ class projectAccountProject(models.Model):
                 #TODO : réduire au client final ?
 
             purchase_order_line_ids = self.env['project.outsourcing.link'].get_purchase_order_line_ids(filter_list=[('partner_id', 'not in', all_supplier)], analytic_account_ids=[str(rec.account_id.id)]) 
+            #_logger.info(self.env['purchase.order.line'].browse(purchase_order_line_ids[0]).read())
+            #_logger.info(all_supplier)
+            #_logger.info(rec.account_id.id)
             if len(purchase_order_line_ids) :
                 raise ValidationError(_("Enregistrement impossible pour le projet %s - %s : les bons de commande fournisseurs liés à un projet doivent obligatoirement concerner l'un des fournisseurs liés au projet (onglet Achat)." % (rec.number, rec.name)))
 

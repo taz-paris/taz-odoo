@@ -66,14 +66,18 @@ class projectOutsourcingLink(models.Model):
         return action
 
     def get_purchase_order_line_ids(self, filter_list=None, analytic_account_ids=None):
-        #_logger.info('--get_purchase_order_line_ids')
+        _logger.info('--get_purchase_order_line_ids')
+
+        # Ensure that the fields used in the SQL query are flushed to the database
+        self.env['purchase.order.line'].flush_model(['partner_id', 'analytic_distribution', 'company_id'])
+
         if filter_list == None :
             filter_list = [('partner_id', '=', self.partner_id.id)]
         if analytic_account_ids == None:
             analytic_account_ids=[str(self.project_id.account_id.id)]
 
         query = self.env['purchase.order.line']._search(filter_list)
-        #_logger.info(query)
+        _logger.info(query)
         if query == []:
             return []
         query.add_where(
@@ -85,12 +89,13 @@ class projectOutsourcingLink(models.Model):
         )
         query.order = None
         query_string, query_param = query.select('purchase_order_line.*')
-        #_logger.info(query_string)
-        #_logger.info(query_param)
+        _logger.info(query_string)
+        _logger.info(query_param)
         self._cr.execute(query_string, query_param)
         dic =  self._cr.dictfetchall()
+        _logger.info(dic)
         line_ids = [line.get('id') for line in dic]
-
+        _logger.info('--END OF get_purchase_order_line_ids')
         return line_ids
         
 

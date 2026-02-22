@@ -197,6 +197,10 @@ class projectAccountingSaleOrderLine(models.Model):
                     line_ids = []
 
                 else :    
+                    # Ensure fields are flushed before raw SQL
+                    self.env['purchase.order.line'].flush_model(['company_id', 'price_subtotal', 'analytic_distribution'])
+                    self.env['sale.order.line'].flush_model(['direct_payment_purchase_order_line_id'])
+
                     #TODO : ajouter une condition dans le filtre : le PO n'est pas annulé ni terminée et la POL n'est pas déjà facturée
                     query = self.env['purchase.order.line']._search([])
                     query.add_where('("purchase_order_line"."company_id" IS NULL  OR ("purchase_order_line"."company_id" = %s))', [self.company_id.id])
