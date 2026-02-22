@@ -14,9 +14,10 @@
                     <field name="reference_period" optional="show"/>
                     <field name="period_goal" optional="show" sum="Total"/>
                     <field name="period_book" optional="show" sum="Total"/>
-                    <field name="period_rate" optional="show" widget="progressbar"/>
+                    <!--
                     <button type="object" name="action_open_employee_book_distribution" icon="fa-eye" title="Détail du book"/>
-                </list>
+                    -->
+                    <field name="period_rate" optional="show" widget="progressbar"/>                </list>
             </field>
         </record>
         <record id="employee_book_goal_action" model="ir.actions.act_window">

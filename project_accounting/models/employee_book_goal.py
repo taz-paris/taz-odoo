@@ -65,7 +65,7 @@ class employeeBookGoal(models.Model):
     rel_job_id = fields.Many2one(related='employee_id.job_id', string="Grade", store=True, check_company=True)
     reference_period = fields.Selection(
         year_selection,
-        string="Année de référence",
+        string="Année",
         default=year_default, # as a default value it would be 2019
         )
     name = fields.Char("Libellé", compute=_compute_name)
