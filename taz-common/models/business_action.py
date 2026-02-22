@@ -221,3 +221,33 @@ class tazBusinessAction(models.Model):
                 'flags': {'initial_mode': 'edit'},
                 'target': 'current',
             }
+
+    @api.model
+    def _cron_send_weekly_digest(self):
+        today = fields.Date.context_today(self)
+        date_from_done = today - relativedelta(days=7)
+        date_to_coming = today + relativedelta(days=14)
+
+        actions_done = self.search([
+            ('state', '=', 'done'),
+            ('date_deadline', '>=', date_from_done),
+            ('date_deadline', '<', today)
+        ], order='date_deadline desc')
+
+        actions_coming = self.search([
+            ('state', 'not in', ['done', 'cancelled']),
+            ('date_deadline', '>=', today),
+            ('date_deadline', '<=', date_to_coming)
+        ], order='date_deadline asc')
+
+        if not actions_done and not actions_coming:
+            _logger.info("No business actions to digest this week.")
+            return
+
+        template = self.env.ref('taz-common.business_action_digest_template', raise_if_not_found=False)
+        if template:
+            # Send to the specified address
+            template.with_context(
+                actions_done=actions_done,
+                actions_coming=actions_coming
+            ).send_mail(self.env.user.id, force_send=True)

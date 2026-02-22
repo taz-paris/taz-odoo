@@ -22,6 +22,7 @@
     # always loaded
     'data': [
         'security/security.xml',
+        'data/mail_digest_data.xml',
         'views/menu_common.xml',
         'views/res_partner.xml',
         'views/business_action.xml',
