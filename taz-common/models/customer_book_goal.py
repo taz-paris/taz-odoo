@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 
 class tazCustomerBookGoal(models.Model):
     _name = "taz.customer_book_goal"
+    _inherit = ['mail.thread']
     _description = "Customer book goal"
     _order = "reference_period desc, industry_id"
     _sql_constraints = [
@@ -162,7 +163,7 @@ class tazCustomerBookGoal(models.Model):
 
     book_followup_ids = fields.One2many('taz.customer_book_followup', 'customer_book_goal_id', string="Suivi des ambitions")
 
-    period_goal = fields.Monetary("Ambition annuelle")
+    period_goal = fields.Monetary("Ambition annuelle", tracking=True)
 
     period_book = fields.Monetary("Commande à date", compute=compute)
     period_delta = fields.Monetary("Delta ambition", compute=compute)
@@ -170,9 +171,9 @@ class tazCustomerBookGoal(models.Model):
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
     business_action_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
-    business_action_goal = fields.Integer("Ambition de RDV")
+    business_action_goal = fields.Integer("Ambition de RDV", tracking=True)
     expected_prorated_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', compute=compute)
-    comment = fields.Text("Commentaire pour cette année")
+    comment = fields.Text("Commentaire pour cette année", tracking=True)
 
 
 class tazCustomerBookFollowup(models.Model):
