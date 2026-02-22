@@ -47,6 +47,20 @@ class employeeBookGoal(models.Model):
             else :
                 rec.period_rate = rec.period_book / rec.period_goal * 100.0
 
+    def action_open_employee_book_distribution(self):
+        self.ensure_one()
+        view_id = self.env.ref("project_accounting.book_employee_distribution_period_tree")
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Détail du book de %s en %s' % (self.employee_id.name, self.reference_period),
+            'res_model': 'project.book_employee_distribution_period',
+            'view_mode': 'list',
+            'view_id': view_id.id,
+            'target': 'current',
+            'domain': [('employee_id', '=', self.employee_id.id), ('reference_period', '=', self.reference_period)],
+            'context': {'no_create': True},
+        }
+
     employee_id = fields.Many2one('hr.employee', string="Collaborateur", ondelete='restrict', required=True, check_company=True)
     rel_job_id = fields.Many2one(related='employee_id.job_id', string="Grade", store=True, check_company=True)
     reference_period = fields.Selection(

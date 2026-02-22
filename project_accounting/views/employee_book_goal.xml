@@ -15,6 +15,7 @@
                     <field name="period_goal" optional="show" sum="Total"/>
                     <field name="period_book" optional="show" sum="Total"/>
                     <field name="period_rate" optional="show" widget="progressbar"/>
+                    <button type="object" name="action_open_employee_book_distribution" icon="fa-eye" title="Détail du book"/>
                 </list>
             </field>
         </record>
