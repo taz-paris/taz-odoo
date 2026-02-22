@@ -33,6 +33,7 @@
         'views/contact_user_link.xml',
         'views/wizard_partner_category.xml',
         'views/wizard_partner_contact_user_link.xml',
+        'views/employee_business_action_goal_views.xml',
         'security/ir.model.access.csv',
     ],
 }
