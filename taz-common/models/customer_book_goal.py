@@ -49,7 +49,12 @@ class tazCustomerBookGoal(models.Model):
             else :
                 record.period_ratio = 0.0
             record.book_last_month, last_month_project_ids = record.industry_id.get_book_delta(begin_year, end_year, record.company_id)
-            record.expected_prorated_revenue, record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_opportunities(record.company_id)
+
+            if record.reference_period == str(datetime.date.today().year):
+                record.expected_prorated_revenue, record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_opportunities(record.company_id)
+            else:
+                record.expected_prorated_revenue = 0.0
+                record.number_of_opportunities = 0
             
             record.business_action_count, business_action_ids = record.industry_id.get_business_action_by_periode(begin_year, end_year)
 
@@ -90,7 +95,13 @@ class tazCustomerBookGoal(models.Model):
             }
 
     def action_open_project_opportunities(self):
-        expected_prorated_revenue, number_of_opportunities, opportunities_project_ids = self.industry_id.get_opportunities(self.company_id)
+        if self.reference_period == str(datetime.date.today().year):
+            expected_prorated_revenue, number_of_opportunities, opportunities_project_ids = self.industry_id.get_opportunities(self.company_id)
+        else:
+            expected_prorated_revenue = 0.0
+            number_of_opportunities = 0
+            opportunities_project_ids = []
+
         view_id = self.env.ref("project_accounting.project_opportunity_tree")
         return {
                 'type': 'ir.actions.act_window',
