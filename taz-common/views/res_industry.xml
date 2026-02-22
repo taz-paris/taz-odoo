@@ -8,6 +8,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//sheet" position="replace">
                     <sheet>
+                        <div class="oe_button_box" name="button_box">
+                        </div>
                         <group>
                             <group>
                                 <field name="name"/>
@@ -72,9 +74,7 @@
                             </page>
                         </notebook>
                     </sheet>
-                    <!--
-			<chatter/>
-			-->
+			        <chatter/>
                 </xpath>
             </field>
         </record>

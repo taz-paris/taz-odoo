@@ -116,7 +116,7 @@ class tazResPartner(models.Model):
      long_company_name = fields.Char(string="Libellé long de société")
      type = fields.Selection(string="Type de fiche partenaire")
 
-     industry_id = fields.Many2one(string='Compte (ex BD)')
+     industry_id = fields.Many2one('res.partner.industry', string='Compte (ex BD)')
      sector_id = fields.Many2one('res.partner.sector', string='Secteur')
      business_priority = fields.Selection(related='industry_id.business_priority', store=True, string='Niveau de priorité du compte')
      parent_industry_id = fields.Many2one('res.partner.industry', string='Compte du parent', related='parent_id.industry_id', store=True)

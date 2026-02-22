@@ -18,7 +18,8 @@
         "views/agreement.xml",
         "views/agreement_procedure.xml",
         "views/agreement_type.xml",
-        "views/agreement_subcontractor.xml"
+        "views/agreement_subcontractor.xml",
+        "views/res_industry_views.xml"
     ],
     "development_status": "Beta",
     "maintainers": [
