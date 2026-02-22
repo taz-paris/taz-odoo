@@ -91,7 +91,7 @@ class tazCustomerBookGoal(models.Model):
 
     def action_open_project_opportunities(self):
         expected_prorated_revenue, number_of_opportunities, opportunities_project_ids = self.industry_id.get_opportunities(self.company_id)
-        view_id = self.env.ref("project_accounting.project_tree")
+        view_id = self.env.ref("project_accounting.project_opportunity_tree")
         return {
                 'type': 'ir.actions.act_window',
                 'name': 'Avant-ventes du compte %s' % (self.industry_id.name),
