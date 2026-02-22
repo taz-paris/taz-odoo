@@ -116,6 +116,17 @@ class tazResIndustry(models.Model):
 
         return action
 
+    def get_business_action_by_periode(self, begin_date, end_date):
+        domain = [
+            ('parent_partner_industry_id', '=', self.id),
+            ('state', '=', 'done'),
+            ('date_deadline', '>=', begin_date),
+            ('date_deadline', '<=', end_date),
+            ('action_type', 'in', ['regular_news', 'commercial_interview', 'first_meeting', 'deepening']),
+        ]
+        business_actions = self.env['taz.business_action'].search(domain)
+        return len(business_actions), business_actions
+
     def action_open_business_actions(self):
         business_action_ids = self.env['taz.business_action'].search([('parent_partner_industry_id', '=', self.id)])
 

@@ -17,7 +17,7 @@
                                 <field name="pillar_id"/>
                                 <field name="partner_ids" widget="many2many_tags" required="1" options="{'no_create_edit': True, 'no_create': True}" context="{'default_is_company': True, 'list_view_ref':'taz-common.company_tree', 'form_view_ref':'taz-common.company_form'}"/>
                                 <button type="object" name="action_open_contacts" string="Voir les contacts"/>
-                                <button type="object" name="action_open_business_actions" string="Voir les actions commerciales"/>
+                                <button type="object" name="action_open_business_actions" string="Voir les actions commerciales à faire"/>
                             </group>
                             <group>
                                 <field name="user_id" options="{'no_create': True, 'no_create_edit':True}"/>
@@ -47,6 +47,9 @@
                                         <field name="number_of_opportunities" optional="show" sum="Total"/>
                                         <field name="expected_prorated_revenue" optional="show" sum="Total"/>
                                         <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
+                                        <field name="business_action_goal" optional="show" string="Obj RDV" sum="Total"/>
+                                        <field name="business_action_count" optional="show" string="RDV faits" sum="Total"/>
+                                        <button type="object" name="action_open_business_actions" icon="fa-eye" title="Ouvrir les actions commerciales"/>
                                     </list>
                                 </field>
                                 <label for="customer_book_followup_ids" string="Photos des objectifs annuels"/>

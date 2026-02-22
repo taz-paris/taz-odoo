@@ -20,6 +20,9 @@
                     <field name="number_of_opportunities" optional="show" string="Nb AVT" sum="Total"/>
                     <field name="expected_prorated_revenue" optional="show" string="PDC espérée" sum="Total"/>
                     <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
+                    <field name="business_action_goal" optional="show" string="Obj RDV" sum="Total"/>
+                    <field name="business_action_count" optional="show" string="RDV faits" sum="Total"/>
+                    <button type="object" name="action_open_business_actions" icon="fa-eye" title="Ouvrir les actions commerciales"/>
                     <field name="comment" optional="show" widget="text"/>
                 </list>
             </field>

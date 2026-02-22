@@ -50,12 +50,14 @@ class tazCustomerBookGoal(models.Model):
                 record.period_ratio = 0.0
             record.book_last_month, last_month_project_ids = record.industry_id.get_book_delta(begin_year, end_year, record.company_id)
             record.expected_prorated_revenue, record.number_of_opportunities, opportunities_project_ids = record.industry_id.get_opportunities(record.company_id)
+            
+            record.business_action_count, business_action_ids = record.industry_id.get_business_action_by_periode(begin_year, end_year)
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
-        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities']
+        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities', 'business_action_count', 'business_action_goal']
         for data in res:
             if '__domain' not in data.keys():
                 continue
@@ -72,6 +74,20 @@ class tazCustomerBookGoal(models.Model):
                 data['period_ratio'] = data['period_book']/data['period_goal'] * 100
             
         return res
+
+    def action_open_business_actions(self):
+        begin_year = datetime.datetime(int(self.reference_period), 1, 1)
+        end_year = datetime.datetime(int(self.reference_period), 12, 31)
+        count, business_action_ids = self.industry_id.get_business_action_by_periode(begin_year, end_year)
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Actions commerciales du compte %s' % (self.industry_id.name),
+                'res_model': 'taz.business_action',
+                'view_mode': 'list,form',
+                'target': 'current',
+                'domain': [('id', 'in', business_action_ids.ids)],
+                'context' : {'no_create' : True},
+            }
 
     def action_open_project_opportunities(self):
         expected_prorated_revenue, number_of_opportunities, opportunities_project_ids = self.industry_id.get_opportunities(self.company_id)
@@ -142,6 +158,8 @@ class tazCustomerBookGoal(models.Model):
     period_ratio = fields.Float("Ratio objectif", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
+    business_action_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
+    business_action_goal = fields.Integer("Objectif de RDV")
     expected_prorated_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', compute=compute)
     comment = fields.Text("Commentaire pour cette année")
 

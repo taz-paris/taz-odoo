@@ -162,12 +162,13 @@ class tazBusinessAction(models.Model):
         ('noting', 'Aucune suite à donner')
         ], "Conclusion")
     action_type = fields.Selection([
-        ('regular_news', 'Intimité réseau'),
+        ('regular_news', 'RDV Intimité réseau'),
         ('commercial_interview', 'RDV commercial avec DM / en délégation'),
         ('propale', 'Contribution à une proposition commerciale'),
-        ('first_meeting', 'Prise de connaissance/Découverte'),
-        ('deepening', 'Approfondissement')
-        ], "Type")
+        ('first_meeting', 'RDV Prise de connaissance/Découverte'),
+        ('deepening', 'RDV Approfondissement'),
+        ('other', 'Autre action commerciale (non RDV)'),
+        ], "Type", required=True)
     report_url = fields.Char("URL vers le CR OneNote")
 
     ms_planner_task_data = fields.Char("Data de la tâche M$ Planner")
