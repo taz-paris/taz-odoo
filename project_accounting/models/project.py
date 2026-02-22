@@ -824,60 +824,15 @@ class projectAccountProject(models.Model):
     
     def get_sale_order_line_ids(self, filter_list=[]):
         #_logger.info('-- project sale.order.lines computation')
-
-        # Ensure that the fields used in the SQL query are flushed to the database
-        self.env['sale.order.line'].flush_model(['order_partner_id', 'analytic_distribution', 'company_id'])
-        
-        query = self.env['sale.order.line']._search(filter_list)
-        #_logger.info(query)
-        if query == []:
-            return []
-        query.add_where(
-            SQL(
-                "%s && %s",
-                [str(self.account_id.id)],
-                self.env['sale.order.line']._query_analytic_accounts(),
-            )
-        )
-        query.order = None
-        query_string, query_param = query.select('sale_order_line.*') #important car Odoo fait un LEFT join obligatoire, donc si on fait SELECT * on a plusieurs colonne ID dans le résultat
-        #_logger.info(query_string)
-        #_logger.info(query_param)
-        self._cr.execute(query_string, query_param)
-        dic =  self._cr.dictfetchall()
-        line_ids = [line.get('id') for line in dic]
-        #_logger.info(line_ids)
-        return line_ids
+        domain = filter_list + [('analytic_distribution', 'in', [str(self.account_id.id)])]
+        return self.env['sale.order.line'].search(domain).ids
 
 
 
     def get_account_move_line_ids(self, filter_list=[]):
         #_logger.info('--get_account_move_line_ids')
-
-        # Ensure that the fields used in the SQL query are flushed to the database
-        self.env['account.move.line'].flush_model(['partner_id', 'analytic_distribution', 'company_id', 'move_type', 'parent_state', 'display_type'])
-        
-        query = self.env['account.move.line']._search(filter_list)
-        #_logger.info(query)
-        if query == []:
-            return []
-        query.add_where(
-            SQL(
-                "%s && %s",
-                [str(self.account_id.id)],
-                self.env['account.move.line']._query_analytic_accounts(),
-            )
-        )
-        query.order = None
-        query_string, query_param = query.select('account_move_line.*')
-        #_logger.info(query_string)
-        #_logger.info(query_param)
-        self._cr.execute(query_string, query_param)
-        dic =  self._cr.dictfetchall()
-        line_ids = [line.get('id') for line in dic]
-        #_logger.info(line_ids)
-
-        return line_ids
+        domain = filter_list + [('analytic_distribution', 'in', [str(self.account_id.id)])]
+        return self.env['account.move.line'].search(domain).ids
 
 
     def get_all_customer_ids(self):
