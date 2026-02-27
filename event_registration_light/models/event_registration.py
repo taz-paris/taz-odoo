@@ -43,7 +43,7 @@ class eventRegistration(models.Model):
             ('open', 'Confirmé'),
             ('done', 'Présent')
             ], default='identified')
-    last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365")
+    last_office365_mail_draft = fields.Text("Structure JSON de la réponse Office365", copy=False)
     comment = fields.Text("Commentaire", help="Ce commentaire est propre à l'inscription de ce contact pour cet évènement.")
     rel_partner_id_user_id = fields.Many2one(related='partner_id.user_id', store=True)
     rel_partner_parent_id = fields.Many2one(related='partner_id.parent_id', store=True)
