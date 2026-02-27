@@ -220,9 +220,9 @@
             <field name="view_mode">list,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True}</field>
         </record>
-        <menuitem name="Comptes / Ambitions" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
-        <menuitem name="Photo des ambitions commerciales" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
-        <menuitem name="Ambitions commerciales annuelles" sequence="20" id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
+        <menuitem name="Comptes / Ambitions" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-basic"/>
+        <menuitem name="Photo des ambitions commerciales" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-basic"/>
+        <menuitem name="Ambitions commerciales annuelles" sequence="20" id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-basic"/>
         <menuitem id="taz-common.res_partner_industry_menu" name="Comptes (ex BD)" action="base.res_partner_industry_action" parent="taz-common.customer_book" sequence="10"/>
     </data>
 </odoo>

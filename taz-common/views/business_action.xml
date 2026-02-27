@@ -123,7 +123,7 @@
                     <filter name="filter_deadline_date" date="date_deadline"/>
                     <separator/>
                     <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
-                    <filter name="no_followup" string="Action sans suite" domain="[('state', '=', 'done'), ('followup_action_ids', '=', False)]"/>
+                    <filter name="no_followup" string="Action au statut FAIT mais sans suite" domain="[('state', '=', 'done'), ('followup_action_ids', '=', False)]"/>
                     <separator/>
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>

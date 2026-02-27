@@ -35,6 +35,7 @@ class event(models.Model):
     invitation_cc_address = fields.Char('Adresse en CC')
     event_registrations_open = fields.Boolean(store=True)
     company_id = fields.Many2one(default=False)
+    registration_ids = fields.One2many(copy=True)
 
 
 class EventType(models.Model):
