@@ -28,8 +28,8 @@ class Agreement(models.Model):
             else:
                 rec.sold_rate = sold / rec.max_amount * 100
 
-    total_order_amount = fields.Monetary("Montant commandé Galaxie", compute=compute, compute_sudo=True)
-    other_contractors_total_sale_order = fields.Monetary("Montant commandé hors Galaxie", help="Montants commandés auprès des autres co-traitants.")
+    total_order_amount = fields.Monetary("Montant commandé TF", compute=compute, compute_sudo=True)
+    other_contractors_total_sale_order = fields.Monetary("Montant commandé hors TF", help="Montants commandés auprès des autres co-traitants.")
     available_amount = fields.Monetary("Montant restant engageable", compute=compute, compute_sudo=True)
     sold_rate = fields.Float("%age déjà engagé (€)", compute=compute, compute_sudo=True)
 

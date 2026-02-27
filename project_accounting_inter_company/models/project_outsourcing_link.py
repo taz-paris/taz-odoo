@@ -51,7 +51,7 @@ class projectOutsourcingLink(models.Model):
             return self.inter_company_mirror_project
 
         if not self.is_partner_id_res_company :
-            raise ValidationError(_("Le partenaire lié n'est pas lié à une société de la galaxie."))
+            raise ValidationError(_("Le partenaire lié n'est pas lié à une société de l'Alliance."))
         
         partner_secondary_ids  = []
         if self.project_id.partner_id.id != self.company_id.partner_id.id :

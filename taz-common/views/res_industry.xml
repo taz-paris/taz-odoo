@@ -40,7 +40,7 @@
                                         <field name="company_id" optional="show"/>
                                         <field name="industry_id" optional="hide" options="{'no_create': True, 'no_create_edit':True}"/>
                                         <field name="period_goal" optional="show" sum="Total"/>
-                                        <field name="reference_period" optional="show"/>
+                                        <field name="referencef_period" optional="show"/>
                                         <field name="period_book" optional="show" sum="Total"/>
                                         <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="open_project_booked_this_year"/>
                                         <field name="period_delta" optional="hide" sum="Total"/>

@@ -26,7 +26,7 @@ class tazResIndustry(models.Model):
         'partner_id',
         string='Contributeurs externes', 
         domain="[('is_company', '=', False), ('type', '=', 'contact'), ('parent_id', 'in', business_partner_company_ids)]",
-        help="Sélectionnez des contacts externes. Seuls les contacts dont l'entreprise parente appartient à la Galaxie de ce compte sont proposés.",
+        help="Sélectionnez des contacts externes. Seuls les contacts dont l'entreprise parente appartient à l'Alliance sont proposés.",
         tracking=True
     )
     partner_ids = fields.One2many('res.partner', 'industry_id', string="Entreprises", domain=[('active', '=', True), ('is_company', '=', True), ('type', '=', 'contact')])
@@ -39,7 +39,7 @@ class tazResIndustry(models.Model):
 
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
-    business_partner_company_ids = fields.Many2many('res.partner', domain=[('ref_company_ids', '!=', False)], string="Galaxie")
+    business_partner_company_ids = fields.Many2many('res.partner', domain=[('ref_company_ids', '!=', False)], string="Alliance")
 
 
 

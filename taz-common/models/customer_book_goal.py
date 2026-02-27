@@ -172,7 +172,7 @@ class tazCustomerBookGoal(models.Model):
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
     business_action_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
     business_action_goal = fields.Integer("Ambition de RDV", tracking=True)
-    expected_prorated_revenue = fields.Monetary('Espérance de prise de commande (hors S/T)', compute=compute)
+    expected_prorated_revenue = fields.Monetary('Espérance de PDC pondérée (hors S/T)', compute=compute)
     comment = fields.Text("Commentaire pour cette année", tracking=True)
 
 

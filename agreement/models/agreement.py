@@ -51,7 +51,7 @@ class Agreement(models.Model):
     official_name = fields.Char(required=True, tracking=True, string="Libellé officiel")
 
     state = fields.Selection([('new', "DCE publié"),
-                              ('nogo', "NoGo galaxie"),
+                              ('nogo', "NoGo"),
                               ('work_on_anwser', "Go - Réponse en cours"),
                               ('lost', "Marché perdu"),
                               ('won', "Marché en cours"),
@@ -136,7 +136,7 @@ class Agreement(models.Model):
     social_clause = fields.Html("Clause d'insertion / pénalités", help="Décrire ici les clauses d'insertion à respecter et les pénalités en cas de non-respect, le cas échéant")
 
     comments = fields.Html('Commentaires')
-    referent = fields.Many2one("res.users", string="Référent Galaxie")
+    referent = fields.Many2one("res.users", string="Référent Alliance")
     teams_link = fields.Char("Lien dossier réponse")
 
 
@@ -148,7 +148,7 @@ class Agreement(models.Model):
     )
     max_amount = fields.Monetary("Montant maximum", store=True)
 
-    is_galaxy_agreement = fields.Boolean("Marché de la galaxie", compute=compute, help="Une entreprise de la galaxie est titulaire ou bien co-traitante de ce marché.")
+    is_galaxy_agreement = fields.Boolean("Marché de l'Alliance", compute=compute, help="Une entreprise de l'Alliance est titulaire ou bien co-traitante de ce marché.")
 
     @api.model
     def _domain_selection(self):

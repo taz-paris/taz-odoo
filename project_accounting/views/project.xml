@@ -131,16 +131,17 @@
                 <xpath expr="//field[@name='book_employee_distribution_ids']" position="attributes">
                     <attribute name="optional">hide</attribute>
                 </xpath>
+                <xpath expr="//field[@name='expected_revenue']" position="attributes">
+                    <attribute name="optional">show</attribute>
+                </xpath>
                 <xpath expr="//field[@name='probability']" position="attributes">
                     <attribute name="optional">show</attribute>
                 </xpath>
                 <xpath expr="//field[@name='prorated_revenue']" position="attributes">
                     <attribute name="optional">show</attribute>
                 </xpath>
-                <xpath expr="//field[@name='expected_revenue']" position="attributes">
-                    <attribute name="optional">show</attribute>
-                </xpath>
-                <xpath expr="//field[@name='expected_revenue']" position="after">
+                <xpath expr="//field[@name='prorated_revenue']" position="after">
+                    <field name="date_last_update_prorated_revenue" optional="show"/>
                     <field name="business_action_ids" optional="show"/>
                 </xpath>
             </field>
