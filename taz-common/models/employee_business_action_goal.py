@@ -80,11 +80,8 @@ class employeeBusinessActionGoal(models.Model):
     user_id = fields.Many2one('res.users', string="Utilisateur", required=True, ondelete='restrict')
     reference_period = fields.Selection(year_selection, string="Année", default=year_default, required=True)
     type = fields.Selection([
-        ('regular_news', 'RDV Intimité réseau'),
-        ('commercial_interview', 'RDV commercial avec DM / en délégation'),
-        ('propale', 'Contribution à une proposition commerciale'),
-        ('first_meeting', 'RDV Prise de connaissance/Découverte'),
-        ('deepening', 'RDV Approfondissement'),
+        ('commercial_interview', 'RDV commercial'),
+        ('propale', "Envoi d'une proposition commerciale"),
         ('other', 'Autre action commerciale (non RDV)'),
     ], string="Type d'action", required=True)
     

@@ -133,7 +133,7 @@ class tazResIndustry(models.Model):
             ('state', '=', 'done'),
             ('date_deadline', '>=', begin_date),
             ('date_deadline', '<=', end_date),
-            ('action_type', 'in', ['regular_news', 'commercial_interview', 'first_meeting', 'deepening']),
+            ('action_type', 'in', ['commercial_interview']),
         ]
         business_actions = self.env['taz.business_action'].search(domain)
         return len(business_actions), business_actions
