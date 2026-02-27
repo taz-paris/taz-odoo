@@ -175,6 +175,7 @@ class tazBusinessAction(models.Model):
     business_priority = fields.Selection(string='Niveau de priorité', related='parent_partner_id.business_priority', store=True)
 
     parent_action_id = fields.Many2one('taz.business_action', string="Action origine", ondelete='set null')
+    project_id = fields.Many2one('project.project', string="Opportunité (projet)", domain=[('state', '=', 'before_launch'), ('date_win_loose', '=', False)])
     followup_action_ids = fields.One2many('taz.business_action', 'parent_action_id', string="Actions de suite")
 
     def action_create_followup(self):
@@ -186,6 +187,7 @@ class tazBusinessAction(models.Model):
             'conclusion': False,
             'report_url': False,
             'date_deadline': False,
+            'project_id': self.project_id.id,
             'note': _("Action de suite pour : %s", self.name),
         })
         return {

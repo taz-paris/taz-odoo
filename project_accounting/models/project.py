@@ -374,6 +374,7 @@ class projectAccountProject(models.Model):
     project_director_employee_id = fields.Many2one('hr.employee', "Directeur de mission", required=False, check_company=False) #Si required=True ça bloque la création de nouvelle company 
     #TODO : synchroniser cette valeur avec user_id avec un oneChange
     project_manager = fields.Many2one('hr.employee', "Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", check_company=False)
+    business_action_ids = fields.One2many('taz.business_action', 'project_id', string="Actions commerciales")
 
     # Champs relatifs à la capitalisation des projets
     sales_proposal_indexation = fields.Selection([
