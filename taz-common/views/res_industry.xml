@@ -43,7 +43,7 @@
                                         <field name="reference_period" optional="show"/>
                                         <field name="period_book" optional="show" sum="Total"/>
                                         <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="open_project_booked_this_year"/>
-                                        <field name="period_delta" optional="show" sum="Total"/>
+                                        <field name="period_delta" optional="hide" sum="Total"/>
                                         <field name="period_ratio" optional="show" widget="progressbar"/>
                                         <field name="book_last_month" optional="show" string="Prise commande J-31" sum="Total"/>
                                         <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
@@ -67,7 +67,7 @@
                                         <field name="period_futur_book" optional="show" widget="monetary"/>
                                         <field name="period_landing" optional="show" widget="monetary"/>
                                         <field name="period_goal" optional="show"/>
-                                        <field name="period_delta" optional="show" widget="monetary"/>
+                                        <field name="period_delta" optional="hide" widget="monetary"/>
                                         <field name="period_ratio" optional="show" widget="progressbar"/>
                                         <field name="comment" optional="hide"/>
                                     </list>

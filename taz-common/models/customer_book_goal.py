@@ -63,7 +63,7 @@ class tazCustomerBookGoal(models.Model):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
-        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities', 'business_action_count', 'business_action_goal']
+        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities', 'business_action_count', 'business_action_goal', 'expected_prorated_revenue']
         for data in res:
             if '__domain' not in data.keys():
                 continue
@@ -165,7 +165,7 @@ class tazCustomerBookGoal(models.Model):
 
     period_goal = fields.Monetary("Ambition annuelle", tracking=True)
 
-    period_book = fields.Monetary("Commande à date", compute=compute)
+    period_book = fields.Monetary("Prise de commande à date", compute=compute)
     period_delta = fields.Monetary("Delta ambition", compute=compute)
     period_ratio = fields.Float("Ratio ambition", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
