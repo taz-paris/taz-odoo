@@ -137,7 +137,7 @@ class tazBusinessAction(models.Model):
     name = fields.Char('Titre', required=True)
     note = fields.Text('Note')
     date_deadline = fields.Date('Échéance', index=True, required=False, default=fields.Date.context_today)
-    owner_id = fields.Many2one('res.users', string='Affecté à', default=lambda self: self.env.user)
+    owner_id = fields.Many2one('res.users', string='Affectée à', default=lambda self: self.env.user)
     user_ids = fields.Many2many(
         'res.users',
         'business_action_user_rel',
