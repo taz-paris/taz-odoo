@@ -4,22 +4,25 @@
         <field name="name">project.progress.list</field>
         <field name="model">project.progress</field>
         <field name="arch" type="xml">
-            <list string="Avancements" editable="bottom">
+            <list string="Avancements" editable="top" expand="1">
                 <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                 <field name="rel_project_id"/>
                 <field name="accounting_closing_id" optional="hide"/>
                 <field name="rel_closing_date"/>
+                <field name="rel_outsourcing_partner_id" optional="show"/>
                 <field name="type"/>
-                <field name="outsourcing_link_id" readonly="1"/>
+                <field name="outsourcing_link_id" readonly="1" optional="hide"/>
                 <field name="previous_progress_id" optional="hide"/>
                 <field name="rel_previous_progress_rate" optional="show" widget="percentage"/>
                 <field name="rel_previous_progress_cost_amount" optional="hide"/>
                 <field name="rel_previous_progress_revenue_amount" optional="hide"/>
-                <field name="progress_rate" widget="percentage"/>
-                <field name="target_project_cost" optional="show"/>
-                <field name="target_project_revenue" optional="show"/>
+                <field name="progress_rate"/>
+                <field name="target_project_cost" optional="show" sum="Total Cost"/>
+                <field name="target_project_revenue" optional="show" sum="Total Revenue"/>
                 <field name="progress_cost_amount" optional="show" sum="Total Cost"/>
                 <field name="progress_revenue_amount" optional="show" sum="Total Revenue"/>
+                <field name="progress_cost_amount_period" optional="show" sum="Total Cost Period"/>
+                <field name="progress_revenue_amount_period" optional="show" sum="Total Revenue Period"/>
                 <field name="is_validated" widget="boolean_toggle"/>
                 <field name="currency_id" column_invisible="True"/>
             </list>
@@ -52,6 +55,7 @@
                         <group name="responsibles" string="Responsables &amp; Société">
                             <field name="rel_project_user_id"/>
                             <field name="rel_project_manager_user_id"/>
+                            <field name="rel_outsourcing_partner_id" invisible="type == 'internal_production'"/>
                             <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="1"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
@@ -65,6 +69,8 @@
                         <group name="valuation" string="Valorisation">
                             <field name="progress_cost_amount"/>
                             <field name="progress_revenue_amount"/>
+                            <field name="progress_cost_amount_period"/>
+                            <field name="progress_revenue_amount_period"/>
                         </group>
                         <group name="previous_data" string="Données précédentes">
                             <field name="previous_progress_id"/>
@@ -89,9 +95,10 @@
                 <filter string="Date de clôture" name="closing_date_filter" date="rel_closing_date"/>
                 <separator/>
                 <filter string="Mes avancements" name="my_progress" domain="['|', ('rel_project_user_id', '=', uid), ('rel_project_manager_user_id', '=', uid)]"/>
+                <separator/>
                 <filter string="Avancement du mois M-1" name="prev_month" 
-                        domain="[('rel_closing_date', '&gt;=', (context_today() - datetime.timedelta(days=context_today().day)).replace(day=1).strftime('%Y-%m-%d')), 
-                                 ('rel_closing_date', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d'))]"/>
+                        domain="[('rel_closing_date', '&gt;=', (context_today() - relativedelta(months=1)).strftime('%Y-%m-01')), 
+                                 ('rel_closing_date', '&lt;', context_today().strftime('%Y-%m-01'))]"/>
                 <separator/>
                 <filter string="Validé" name="validated" domain="[('is_validated', '=', True)]"/>
                 <filter string="Non validé" name="not_validated" domain="[('is_validated', '=', False)]"/>
@@ -102,6 +109,7 @@
                     <filter string="Projet" name="group_by_project" context="{'group_by': 'rel_project_id'}"/>
                     <filter string="Clôture" name="group_by_closing" context="{'group_by': 'accounting_closing_id'}"/>
                     <filter string="Type" name="group_by_type" context="{'group_by': 'type'}"/>
+                    <filter string="Fournisseur" name="group_by_partner" context="{'group_by': 'rel_outsourcing_partner_id'}"/>
                 </group>
             </search>
         </field>
@@ -112,7 +120,7 @@
         <field name="res_model">project.progress</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_project_progress_search"/>
-        <field name="context">{'search_default_my_progress': 1, 'search_default_prev_month': 1}</field>
+        <field name="context">{'search_default_my_progress': 1, 'search_default_prev_month': 1, 'group_by': 'rel_project_id'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créez un nouvel avancement.

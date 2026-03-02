@@ -19,6 +19,7 @@ class ProjectProgress(models.Model):
     rel_project_id = fields.Many2one('project.project', related='accounting_closing_id.project_id', string="Projet", store=True)
     rel_project_user_id = fields.Many2one(related='rel_project_id.user_id', string="Directeur de mission", store=True)
     rel_project_manager_user_id = fields.Many2one(related='rel_project_id.project_manager.user_id', string="Partner ou manager en appui", store=True)
+    rel_outsourcing_partner_id = fields.Many2one(related='outsourcing_link_id.partner_id', string="Fournisseur", store=True)
     
     company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Devise", readonly=True)
@@ -37,12 +38,17 @@ class ProjectProgress(models.Model):
     target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='compute', store=True)
     target_project_revenue = fields.Monetary(string="Prix de vente de revient total projeté", compute='compute', store=True)
 
-    progress_rate = fields.Float(string="Part des livrables terminés")
+    progress_rate = fields.Float(string="Taux d'avancement actualisé")
 
     progress_cost_amount = fields.Monetary(string="Valorisation de l’avancement en coût de revient", 
                                           compute='compute', store=True)
     progress_revenue_amount = fields.Monetary(string="Valorisation de l’avancement en prix de vente", 
                                              compute='compute', store=True)
+
+    progress_cost_amount_period = fields.Monetary(string="Variation de l’avancement en coût de revient", 
+                                                 compute='compute', store=True)
+    progress_revenue_amount_period = fields.Monetary(string="Variation de l’avancement en prix de vente", 
+                                                    compute='compute', store=True)
 
     is_validated = fields.Boolean(string="Validé", tracking=True)
 
@@ -69,7 +75,16 @@ class ProjectProgress(models.Model):
                 for val_key in vals.keys():
                     if val_key not in ['is_validated', 'message_follower_ids', 'message_ids', 'activity_ids', 'message_attachment_ids', 'message_main_attachment_id']:
                         raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est validé.\n\nTentative de modification de l'attribut : %s") % val_key)
-        return super().write(vals)
+        
+        res = super().write(vals)
+        
+        # Si on dévalide un avancement, on dévalide automatiquement la clôture liée
+        if 'is_validated' in vals and not vals.get('is_validated'):
+            for rec in self:
+                if rec.accounting_closing_id.is_validated:
+                    rec.accounting_closing_id.is_validated = False
+        
+        return res
 
     def unlink(self):
         for rec in self:
@@ -119,7 +134,11 @@ class ProjectProgress(models.Model):
                 rec.progress_cost_amount = (rec.target_project_cost or 0.0) * (rec.progress_rate or 0.0)
             rec.progress_revenue_amount = (rec.target_project_revenue or 0.0) * (rec.progress_rate or 0.0)
 
-            # 5. Next Progress logic (inspired by project.accounting_closing)
+            # 5. Period amounts (Current - Previous)
+            rec.progress_cost_amount_period = rec.progress_cost_amount - (rec.rel_previous_progress_cost_amount or 0.0)
+            rec.progress_revenue_amount_period = rec.progress_revenue_amount - (rec.rel_previous_progress_revenue_amount or 0.0)
+
+            # 6. Next Progress logic (inspired by project.accounting_closing)
             next_progress = self.env['project.progress'].search([('previous_progress_id', '=', rec.id)], limit=1)
             rec.next_progress = next_progress
             if next_progress:
@@ -128,5 +147,9 @@ class ProjectProgress(models.Model):
     @api.constrains('outsourcing_link_id', 'accounting_closing_id')
     def _check_project_consistency(self):
         for rec in self:
-            if rec.outsourcing_link_id and rec.outsourcing_link_id.project_id != rec.rel_project_id.id:
-                raise ValidationError("Le lien de sous-traitance doit appartenir au même projet que la clôture.")
+            if rec.outsourcing_link_id and rec.accounting_closing_id:
+                # On compare les IDs pour éviter les problèmes de recordset vide
+                link_project_id = rec.outsourcing_link_id.project_id.id
+                closing_project_id = rec.accounting_closing_id.project_id.id
+                if link_project_id and closing_project_id and link_project_id != closing_project_id:
+                    raise ValidationError(_("Le lien de sous-traitance (%s) doit appartenir au même projet que la clôture (%s).") % (rec.outsourcing_link_id.project_id.name, rec.accounting_closing_id.project_id.name))

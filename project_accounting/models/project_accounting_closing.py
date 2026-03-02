@@ -70,6 +70,13 @@ class projectAccountingClosing(models.Model):
                     if val_key not in ['is_validated', 'rel_project_stage_id', 'rel_project_user_id', 'rel_project_manager_user_id', 'name']:
                     #il faut pouvoir écrire s'il on dévalide et lorsque le projet change de statut (rel_project_stage_id est stocké pour permettre de grouper sur cet attribut)
                         raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s).\n\nTentative de modification des attributs suivants, dont au moins un n'est pas modifiable une fois la clôture validée : %s." % (rec.name, rec.id, ', '.join(vals.keys()))))
+            
+            # Nouvelle contrainte : on ne peut pas valider la clôture si des avancements ne sont pas validés
+            if vals.get('is_validated'):
+                not_validated_progress = rec.object_progress_ids.filtered(lambda p: not p.is_validated)
+                if not_validated_progress:
+                    progress_names = ", ".join(not_validated_progress.mapped('display_name'))
+                    raise ValidationError(_("Impossible de valider la clôture car les avancements suivants ne sont pas validés : %s") % progress_names)
         super().write(vals)
 
 
@@ -101,6 +108,9 @@ class projectAccountingClosing(models.Model):
 
             # Auto-creation of project.progress records
             if rec.closing_date and rec.closing_date > datetime.date(2026, 1, 31):
+                rec.valuation_from_progress = True
+
+            if rec.valuation_from_progress:
                 # 1. For each outsourcing link
                 for link in proj_id.project_outsourcing_link_ids:
                     progress = self.env['project.progress'].search([
@@ -174,6 +184,37 @@ class projectAccountingClosing(models.Model):
             rec.purchase_outsourcing_period_amount = -1 * purchase_outsourcing_period_amount
             rec.purchase_other_period_amount = rec.purchase_period_amount - rec.purchase_outsourcing_period_amount
 
+            if rec.valuation_from_progress:
+                pass
+                """
+                # 1. Totals from progress objects (Theoretical Recognition)
+                total_adv_revenue = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
+                total_adv_cost_internal = sum(rec.object_progress_ids.filtered(lambda p: p.type == 'internal_production').mapped('progress_cost_amount'))
+                total_adv_cost_external = sum(rec.object_progress_ids.filtered(lambda p: p.type != 'internal_production').mapped('progress_cost_amount'))
+                
+                # 2. Cumulative Accounting Data (Historical validated + Current period)
+                history = self.env['project.accounting_closing'].search([
+                    ('project_id', '=', proj_id.id),
+                    ('closing_date', '<', rec.closing_date),
+                    ('is_validated', '=', True)
+                ])
+                cumul_invoiced = sum(history.mapped('invoice_period_amount')) + (rec.invoice_period_amount or 0.0)
+                
+                # 3. Revenue Smoothing (FAE / PCA)
+                revenue_gap = total_adv_revenue - cumul_invoiced
+                if revenue_gap > 0:
+                    rec.fae_period_amount = revenue_gap - rec.fae_previous_balance
+                    rec.pca_period_amount = -rec.pca_previous_balance
+                else:
+                    rec.pca_period_amount = abs(revenue_gap) - rec.pca_previous_balance
+                    rec.fae_period_amount = -rec.fae_previous_balance
+                
+                # 4. Cost Smoothing (Destocking)
+                # Production destocking should represent the portion of stock to be recognized in P&L
+                rec.production_destocking = sum(rec.object_progress_ids.filtered(lambda p: p.type == 'internal_production').mapped('progress_cost_amount_period'))
+                rec.production_external_destocking = sum(rec.object_progress_ids.filtered(lambda p: p.type != 'internal_production').mapped('progress_cost_amount_period'))
+                """
+            
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
             rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
             rec.cca_balance = rec.cca_previous_balance + rec.cca_period_amount
@@ -312,6 +353,7 @@ class projectAccountingClosing(models.Model):
 
     name = fields.Char('Libellé', compute=compute, store=True)
     is_validated = fields.Boolean('Validée', tracking=True)
+    valuation_from_progress = fields.Boolean('Valorisation par l’avancement', help="Si coché, les provisions et les déstockages sont calculés automatiquement à partir des objets d’avancement.")
     comment = fields.Text("Commentaire")
     comment_previous = fields.Text("Commentaire clôture précédente", related='previous_closing.comment')
     project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')

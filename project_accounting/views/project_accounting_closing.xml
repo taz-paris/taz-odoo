@@ -16,6 +16,7 @@
                     <field name="previous_closing" optional="hide"/>
                     <!-- Validation -->
                     <field name="is_validated" optional="show"/>
+                    <field name="valuation_from_progress" optional="hide"/>
                     <field name="comment" optional="hide" widget="text"/>
                     <field name="comment_previous" optional="hide" widget="text"/>
                     <!-- Facturation -->
@@ -97,7 +98,8 @@
                         <group string="Clôture en cours">
                             <field name="closing_date" required="1"/>
                             <field name="original_stage_id"/>
-                            <field name="is_validated"/>
+                            <field name="is_validated" widget="boolean_toggle"/>
+                            <field name="valuation_from_progress" widget="boolean_toggle"/>
                             <field name="comment" widget="text"/>
                         </group>
                     </group>
@@ -122,22 +124,22 @@
                             <group col="4">
                                 <group name="pca" string="PCA">
                                     <field name="pca_previous_balance"/>
-                                    <field name="pca_period_amount" readonly="is_validated"/>
+                                    <field name="pca_period_amount" readonly="is_validated or valuation_from_progress"/>
                                     <field name="pca_balance"/>
                                 </group>
                                 <group name="fae" string="FAE">
                                     <field name="fae_previous_balance"/>
-                                    <field name="fae_period_amount" readonly="is_validated"/>
+                                    <field name="fae_period_amount" readonly="is_validated or valuation_from_progress"/>
                                     <field name="fae_balance"/>
                                 </group>
                                 <group name="cca" string="CCA">
                                     <field name="cca_previous_balance"/>
-                                    <field name="cca_period_amount" readonly="is_validated"/>
+                                    <field name="cca_period_amount" readonly="is_validated or valuation_from_progress"/>
                                     <field name="cca_balance"/>
                                 </group>
                                 <group name="fnp" string="FNP">
                                     <field name="fnp_previous_balance"/>
-                                    <field name="fnp_period_amount" readonly="is_validated"/>
+                                    <field name="fnp_period_amount" readonly="is_validated or valuation_from_progress"/>
                                     <field name="fnp_balance"/>
                                 </group>
                             </group>
@@ -149,7 +151,7 @@
                                         <field name="production_stock"/>
                                     </group>
                                     <group>
-                                        <field name="production_destocking" readonly="is_validated"/>
+                                        <field name="production_destocking" readonly="is_validated or valuation_from_progress"/>
                                         <field name="production_balance"/>
                                         <button type="object" name="action_open_analytic_lines" colspan="2" string="Voir les lignes de pointage"/>
                                     </group>
@@ -161,7 +163,7 @@
                                         <field name="production_external_stock"/>
                                     </group>
                                     <group>
-                                        <field name="production_external_destocking" readonly="is_validated"/>
+                                        <field name="production_external_destocking" readonly="is_validated or valuation_from_progress"/>
                                         <field name="production_external_balance"/>
                                     </group>
                                 </group>
