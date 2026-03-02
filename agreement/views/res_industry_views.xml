@@ -11,7 +11,7 @@
                 </button>
             </xpath>
             <xpath expr="//notebook" position="inside">
-                <page string="Accords" name="agreements">
+                <page string="Marchés / Vecteurs contractuels" name="agreements">
                     <field name="agreement_ids" readonly="1"/>
                 </page>
             </xpath>

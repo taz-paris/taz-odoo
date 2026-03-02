@@ -20,6 +20,7 @@
                     <field name="report_url" widget="url" optional="show"/>
                     <field name="parent_partner_id" optional="hide"/>
                     <field name="parent_partner_industry_id" optional="hide"/>
+                    <field name="project_id" optional="show"/>
                     <button name="action_create_followup" string="Suite" type="object" icon="fa-rocket" invisible="state != 'done'" help="Créer l action de suite" class="text-success"/>
                     <button icon="fa-eye" title="Voir" name="open_record" type="object" class="oe_highlight"/>
                 </list>
@@ -47,6 +48,7 @@
                                 <field name="partner_id" options="{'no_quick_create': True}" required="True" context="{'list_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
                                 <field name="parent_partner_id"/>
                                 <field name="parent_partner_industry_id"/>
+                                <field name="project_id" options="{'no_quick_create': True}"/>
                                 <field name="parent_action_id"/>
                                 <field name="owner_id"/>
                                 <field name="user_ids" widget="many2many_avatar_user"/>
@@ -123,7 +125,7 @@
                     <filter name="filter_deadline_date" date="date_deadline"/>
                     <separator/>
                     <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
-                    <filter name="no_followup" string="Action sans suite" domain="[('state', '=', 'done'), ('followup_action_ids', '=', False)]"/>
+                    <filter name="no_followup" string="Action au statut FAIT mais sans suite" domain="[('state', '=', 'done'), ('followup_action_ids', '=', False)]"/>
                     <separator/>
                     <filter name="priority_target" string="Comptes prioritaires" domain="[('business_priority', '=', 'priority_target')]"/>
                     <filter name="priority_active" string="Comptes actifs" domain="[('business_priority', '=', 'active')]"/>

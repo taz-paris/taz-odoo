@@ -13,7 +13,7 @@
                     <field name="period_goal" optional="show" sum="Total"/>
                     <field name="period_book" optional="show" sum="Total"/>
                     <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="open_project_booked_this_year"/>
-                    <field name="period_delta" optional="show" sum="Total"/>
+                    <field name="period_delta" optional="hide" sum="Total"/>
                     <field name="period_ratio" optional="show" widget="progressbar"/>
                     <field name="book_last_month" optional="show" string="Commande J-31" sum="Total"/>
                     <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
@@ -144,7 +144,7 @@
                     <field name="period_futur_book" optional="show"/>
                     <field name="period_landing" optional="show"/>
                     <field name="period_goal" optional="show"/>
-                    <field name="period_delta" optional="show"/>
+                    <field name="period_delta" optional="hide"/>
                     <field name="period_ratio" optional="show" widget="progressbar"/>
                     <field name="comment" optional="hide"/>
                 </list>
@@ -220,9 +220,9 @@
             <field name="view_mode">list,pivot,graph</field>
             <field name="context">{'search_default_filter_this_year' : True}</field>
         </record>
-        <menuitem name="Comptes / Ambitions" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-management"/>
-        <menuitem name="Photo des ambitions commerciales" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-management"/>
-        <menuitem name="Ambitions commerciales annuelles" sequence="20" id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-management"/>
+        <menuitem name="Comptes / Ambitions" sequence="50" id="taz-common.customer_book" parent="taz-common.commerce" groups="taz-common.taz-basic"/>
+        <menuitem name="Photo des ambitions commerciales" sequence="30" id="taz-common.customer_book_followup" parent="taz-common.customer_book" action="taz-common.customer_book_followup_action" groups="taz-common.taz-basic"/>
+        <menuitem name="Ambitions commerciales annuelles" sequence="20" id="taz-common.customer_book_goal" parent="taz-common.customer_book" action="taz-common.customer_book_goal_action" groups="taz-common.taz-basic"/>
         <menuitem id="taz-common.res_partner_industry_menu" name="Comptes (ex BD)" action="base.res_partner_industry_action" parent="taz-common.customer_book" sequence="10"/>
     </data>
 </odoo>

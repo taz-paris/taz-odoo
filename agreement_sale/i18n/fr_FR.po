@@ -73,12 +73,12 @@ msgstr ""
 
 #. module: agreement_sale
 #: model:ir.model.fields,field_description:agreement_sale.field_agreement__total_order_amount
-msgid "Montant commandé Galaxie"
+msgid "Montant commandé TF"
 msgstr ""
 
 #. module: agreement_sale
 #: model:ir.model.fields,field_description:agreement_sale.field_agreement__other_contractors_total_sale_order
-msgid "Montant commandé hors Galaxie"
+msgid "Montant commandé hors TF"
 msgstr ""
 
 #. module: agreement_sale

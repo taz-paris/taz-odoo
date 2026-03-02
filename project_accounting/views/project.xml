@@ -32,6 +32,8 @@
                     <filter string="Projets de comptes actifs" name="active" domain="[('rel_industry_business_priority', '=', 'active')]"/>
                     <filter string="Projets de comptes à opportunités" name="not_tracked" domain="[('rel_industry_business_priority', '=', 'not_tracked')]"/>
                     <separator/>
+                    <filter string="Opportunités sans action commerciale" name="no_business_action" domain="[('state', '=', 'before_launch'), ('stage_is_part_of_booking', '=', False), ('business_action_ids', '=', False)]"/>
+                    <separator/>
                     <filter string="Projet avec au moins un élément à capitaliser ou non renseigné" name="project_to_be_capitalized" domain="['|','|','|',('sales_proposal_indexation', 'in', [False, 'to_be_capitalized','not_specified']),('deliverable_indexation', 'in', [False, 'to_be_capitalized_without_anonymization','to_be_capitalized_with_anonymization','not_specified']),('success_story_indexation', 'in', [False, 'yes_success_story','not_specified']),('commercial_reference_indexation', 'in', [False, 'yes_commercial_reference','not_specified'])]"/>
                     <separator/>
                     <filter string="Projet avec au moins un des 3 attributs RSE non renseigné" name="project_csr" domain="['|','|',('csr_project_initiative', 'in', [False,'not_specified']),('csr_project_environmental_level', 'in', [False, 'not_specified']), ('csr_project_social_level', 'in', [False,'not_specified'])]"/>
@@ -59,6 +61,7 @@
                 <list decoration-success="color_rel == 'decoration-success'" decoration-info="color_rel == 'decoration-info'" decoration-warning="color_rel == 'decoration-warning'" decoration-danger="color_rel == 'decoration-danger'" decoration-muted="color_rel == 'decoration-muted'" decoration-primary="color_rel == 'decoration-primary'">
                     <field name="id" widget="open_tab"/>
                     <field name="number"/>
+                    <field name="currency_id" column_invisible="1"/>
                     <field name="is_review_needed" column_invisible="1"/>
                     <button name="warning_is_review_needed" title="warning_is_review_needed" icon="fa-exclamation-triangle" invisible="not is_review_needed"/>
                     <!-- Ce panneau attetion n'est pas compatible avec le module web_remember_tree_column_width => celà conduit à des colonnes trop larges -->
@@ -99,9 +102,9 @@
                     <field name="outsource_part_marging_amount_initial" optional="hide"/>
                     <field name="cosource_part_marging_amount_initial" optional="hide"/>
                     <field name="other_part_marging_amount_initial" optional="hide"/>
-                    <field name="expected_revenue" optional="hide"/>
+                    <field name="expected_revenue" optional="hide" sum="Total"/>
                     <field name="probability" optional="hide" widget="progressbar"/>
-                    <field name="prorated_revenue" optional="hide"/>
+                    <field name="prorated_revenue" optional="hide" sum="Total"/>
                     <field name="date_last_update_prorated_revenue" optional="hide"/>
                     <field name="futur_internal_revenue_current_year" optional="hide"/>
                     <field name="futur_internal_revenue_next_year" optional="hide"/>
@@ -122,14 +125,24 @@
                 <xpath expr="//field[@name='reporting_sum_company_outsource_code3_code_4_delta']" position="attributes">
                     <attribute name="optional">hide</attribute>
                 </xpath>
+                <xpath expr="//field[@name='invoicing_comment']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='book_employee_distribution_ids']" position="attributes">
+                    <attribute name="optional">hide</attribute>
+                </xpath>
+                <xpath expr="//field[@name='expected_revenue']" position="attributes">
+                    <attribute name="optional">show</attribute>
+                </xpath>
                 <xpath expr="//field[@name='probability']" position="attributes">
                     <attribute name="optional">show</attribute>
                 </xpath>
                 <xpath expr="//field[@name='prorated_revenue']" position="attributes">
                     <attribute name="optional">show</attribute>
                 </xpath>
-                <xpath expr="//field[@name='expected_revenue']" position="attributes">
-                    <attribute name="optional">show</attribute>
+                <xpath expr="//field[@name='prorated_revenue']" position="after">
+                    <field name="date_last_update_prorated_revenue" optional="show"/>
+                    <field name="business_action_ids" optional="show"/>
                 </xpath>
             </field>
         </record>
@@ -258,15 +271,18 @@
                         </group>
                         <notebook>
                             <page name="presale" string="Avant-vente" groups="project.group_project_stages" invisible="stage_id not in [False, 1, 7]">
-                                <group>
-					<group>
-						<field name="expected_revenue"/>
-						<field name="probability"/>
-						<field name="prorated_revenue"/>
-						<field name="date_last_update_prorated_revenue"/>
-					</group>
-				</group>
-			    </page>
+                                <group col="4">
+                                    <group string="Espérance de prise de commande" colspan="1">
+                                        <field name="expected_revenue"/>
+                                        <field name="probability"/>
+                                        <field name="prorated_revenue"/>
+                                        <field name="date_last_update_prorated_revenue"/>
+                                    </group>
+                                    <group string="Actions commerciales" colspan="3">
+                                        <field name="business_action_ids" nolabel="1" context="{'default_project_id': id, 'default_partner_id': partner_id}"/>
+                                    </group>
+                                </group>
+                            </page>
                             <page name="dashboard" string="Synthèse à date">
                                 <group col="3">
                                     <group string="Commandes du client">

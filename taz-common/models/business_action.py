@@ -137,7 +137,7 @@ class tazBusinessAction(models.Model):
     name = fields.Char('Titre', required=True)
     note = fields.Text('Note')
     date_deadline = fields.Date('Échéance', index=True, required=False, default=fields.Date.context_today)
-    owner_id = fields.Many2one('res.users', string='Affecté à', default=lambda self: self.env.user)
+    owner_id = fields.Many2one('res.users', string='Affectée à', default=lambda self: self.env.user)
     user_ids = fields.Many2many(
         'res.users',
         'business_action_user_rel',
@@ -163,11 +163,8 @@ class tazBusinessAction(models.Model):
         ('noting', 'Aucune suite à donner')
         ], "Conclusion")
     action_type = fields.Selection([
-        ('regular_news', 'RDV Intimité réseau'),
-        ('commercial_interview', 'RDV commercial avec DM / en délégation'),
-        ('propale', 'Contribution à une proposition commerciale'),
-        ('first_meeting', 'RDV Prise de connaissance/Découverte'),
-        ('deepening', 'RDV Approfondissement'),
+        ('commercial_interview', 'RDV commercial'),
+        ('propale', "Envoi d'une proposition commerciale"),
         ('other', 'Autre action commerciale (non RDV)'),
         ], "Type", required=True)
     report_url = fields.Char("URL vers le CR OneNote")
@@ -178,6 +175,7 @@ class tazBusinessAction(models.Model):
     business_priority = fields.Selection(string='Niveau de priorité', related='parent_partner_id.business_priority', store=True)
 
     parent_action_id = fields.Many2one('taz.business_action', string="Action origine", ondelete='set null')
+    project_id = fields.Many2one('project.project', string="Opportunité (projet)", domain=[('state', '=', 'before_launch'), ('date_win_loose', '=', False)])
     followup_action_ids = fields.One2many('taz.business_action', 'parent_action_id', string="Actions de suite")
 
     def action_create_followup(self):
@@ -189,6 +187,7 @@ class tazBusinessAction(models.Model):
             'conclusion': False,
             'report_url': False,
             'date_deadline': False,
+            'project_id': self.project_id.id,
             'note': _("Action de suite pour : %s", self.name),
         })
         return {

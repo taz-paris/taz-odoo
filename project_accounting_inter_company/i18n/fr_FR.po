@@ -49,7 +49,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/project_accounting_inter_company/models/project_outsourcing_link.py:0
 #, python-format
-msgid "Le partenaire lié n'est pas lié à une société de la galaxie."
+msgid "Le partenaire lié n'est pas lié à une société de l'Alliance."
 msgstr ""
 
 #. module: project_accounting_inter_company
