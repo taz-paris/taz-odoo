@@ -16,3 +16,6 @@
 "project_employee_book_goal_readonly","project_employee_book_goal_readonly","project_accounting.model_project_employee_book_goal","taz-common.taz-basic","True","False","False","False"
 "agreement_admin","agreement_admin","agreement.model_agreement","taz-common.taz-management","True","True","True","True"
 "agreement_type_admin","agreement_type_admin","agreement.model_agreement_type","taz-common.taz-management","True","True","True","True"
+"project_progress_basic","project_progress_basic","project_accounting.model_project_progress","taz-common.taz-basic","True","False","False","False"
+"project_progress_manager","project_progress_manager","project_accounting.model_project_progress","taz-common.taz-management","True","True","True","False"
+"project_progress_adv","project_progress_adv","project_accounting.model_project_progress","taz-common.taz-adv","True","True","True","True"

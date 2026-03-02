@@ -35,6 +35,7 @@
         'views/res_company.xml',
         'views/purchase_order.xml',
         'views/project_accounting_closing.xml',
+        'views/project_progress.xml',
         'views/payment.xml',
         'views/account_move.xml',
         'views/wizard_accounting_closing_mass_creation.xml',

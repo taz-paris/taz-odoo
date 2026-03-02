@@ -15,4 +15,5 @@ from . import analytic_mixin
 from . import employee_book_goal
 from . import account_analytic_line
 from . import agreement
+from . import project_progress
 from . import product_template
