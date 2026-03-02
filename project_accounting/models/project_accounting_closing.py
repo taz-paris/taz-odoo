@@ -87,7 +87,6 @@ class projectAccountingClosing(models.Model):
     def compute(self):
         _logger.info('-- compute project_accounting_closing')
         for rec in self :
-
             #if rec.is_validated :
             #    continue
                 #Désactivé car celà empéchait certains recalcul quand l'utilisateur cochait la case de validation et saisissait des données en même temps
@@ -99,6 +98,35 @@ class projectAccountingClosing(models.Model):
                 proj_ids = rec.env['project.project'].search([('id', '=', rec._get_default_project_id())])
                 if len(proj_ids) :
                     proj_id = proj_ids[0]
+
+            # Auto-creation of project.progress records
+            if rec.closing_date and rec.closing_date > datetime.date(2026, 1, 31):
+                # 1. For each outsourcing link
+                for link in proj_id.project_outsourcing_link_ids:
+                    progress = self.env['project.progress'].search([
+                        ('accounting_closing_id', '=', rec.id),
+                        ('outsourcing_link_id', '=', link.id)
+                    ], limit=1)
+                    if not progress:
+                        self.env['project.progress'].create({
+                            'accounting_closing_id': rec.id,
+                            'outsourcing_link_id': link.id,
+                        })
+                
+                # 2. For internal production
+                if rec.project_id.napta_id:
+                    internal_progress = self.env['project.progress'].search([
+                        ('accounting_closing_id', '=', rec.id),
+                        ('outsourcing_link_id', '=', False),
+                        ('type', '=', 'internal_production')
+                    ], limit=1)
+                    if not internal_progress:
+                        self.env['project.progress'].create({
+                            'accounting_closing_id': rec.id,
+                            'outsourcing_link_id': False,
+                        })
+            rec.object_progress_ids.compute()
+
 
             previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
             previous_closing = None
@@ -179,6 +207,7 @@ class projectAccountingClosing(models.Model):
             next_closing = self.env['project.accounting_closing'].search([('previous_closing', '=', rec.id)], limit=1)
             if next_closing :
                 next_closing.compute()
+
 
 
     def get_invoice_period(self, proj_id, previous_closing_date_filter, closing_date):
@@ -298,6 +327,7 @@ class projectAccountingClosing(models.Model):
     closing_date = fields.Date("Date de clôture", required=False, default=_get_default_closing_date)
     previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)
     next_closing = fields.One2many('project.accounting_closing', 'previous_closing', string="Clôture suivante", readonly=True)
+    object_progress_ids = fields.One2many('project.progress', 'accounting_closing_id', string="Avancements")
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)

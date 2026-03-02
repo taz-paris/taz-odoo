@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="project_progess_list" model="ir.ui.view">
+        <field name="name">project.progress.list</field>
+        <field name="model">project.progress</field>
+        <field name="arch" type="xml">
+            <list string="Avancements" editable="bottom">
+                <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
+                <field name="rel_project_id"/>
+                <field name="accounting_closing_id" optional="hide"/>
+                <field name="rel_closing_date"/>
+                <field name="type"/>
+                <field name="outsourcing_link_id" readonly="1"/>
+                <field name="previous_progress_id" optional="hide"/>
+                <field name="rel_previous_progress_rate" optional="show" widget="percentage"/>
+                <field name="rel_previous_progress_cost_amount" optional="hide"/>
+                <field name="rel_previous_progress_revenue_amount" optional="hide"/>
+                <field name="progress_rate" widget="percentage"/>
+                <field name="target_project_cost" optional="show"/>
+                <field name="target_project_revenue" optional="show"/>
+                <field name="progress_cost_amount" optional="show" sum="Total Cost"/>
+                <field name="progress_revenue_amount" optional="show" sum="Total Revenue"/>
+                <field name="is_validated" widget="boolean_toggle"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_project_progress_form" model="ir.ui.view">
+        <field name="name">project.progress.form</field>
+        <field name="model">project.progress</field>
+        <field name="arch" type="xml">
+            <form string="Avancement">
+                <header>
+                    <field name="is_validated" widget="boolean_toggle"/>
+                    <button name="compute" string="Recalculer" type="object" invisible="is_validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="info_base" string="Informations de base">
+                            <field name="rel_project_id"/>
+                            <field name="accounting_closing_id" readonly="1"/>
+                            <field name="rel_closing_date"/>
+                            <field name="type"/>
+                            <field name="outsourcing_link_id" readonly="1" invisible="not outsourcing_link_id"/>
+                        </group>
+                        <group name="responsibles" string="Responsables &amp; Société">
+                            <field name="rel_project_user_id"/>
+                            <field name="rel_project_manager_user_id"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group name="progress_valuation" string="Suivi d'avancement et Valorisation" col="3">
+                        <group name="calculation" string="Saisie de l'avancement">
+                            <field name="progress_rate" widget="percentage" readonly="is_validated"/>
+                            <field name="target_project_cost"/>
+                            <field name="target_project_revenue"/>
+                        </group>
+                        <group name="valuation" string="Valorisation">
+                            <field name="progress_cost_amount"/>
+                            <field name="progress_revenue_amount"/>
+                        </group>
+                        <group name="previous_data" string="Données précédentes">
+                            <field name="previous_progress_id"/>
+                            <field name="rel_previous_progress_rate" widget="percentage"/>
+                            <field name="rel_previous_progress_cost_amount"/>
+                            <field name="rel_previous_progress_revenue_amount"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_project_progress_search" model="ir.ui.view">
+        <field name="name">project.progress.search</field>
+        <field name="model">project.progress</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Avancements">
+                <field name="rel_project_id"/>
+                <separator/>
+                <filter string="Date de clôture" name="closing_date_filter" date="rel_closing_date"/>
+                <separator/>
+                <filter string="Mes avancements" name="my_progress" domain="['|', ('rel_project_user_id', '=', uid), ('rel_project_manager_user_id', '=', uid)]"/>
+                <filter string="Avancement du mois M-1" name="prev_month" 
+                        domain="[('rel_closing_date', '&gt;=', (context_today() - datetime.timedelta(days=context_today().day)).replace(day=1).strftime('%Y-%m-%d')), 
+                                 ('rel_closing_date', '&lt;', context_today().replace(day=1).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Validé" name="validated" domain="[('is_validated', '=', True)]"/>
+                <filter string="Non validé" name="not_validated" domain="[('is_validated', '=', False)]"/>
+                <separator/>
+                <filter string="Production interne" name="internal" domain="[('type', '=', 'internal_production')]"/>
+                <filter string="Sous-traitance" name="outsourcing" domain="[('type', 'in', ('outsourcing', 'cosourcing'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Projet" name="group_by_project" context="{'group_by': 'rel_project_id'}"/>
+                    <filter string="Clôture" name="group_by_closing" context="{'group_by': 'accounting_closing_id'}"/>
+                    <filter string="Type" name="group_by_type" context="{'group_by': 'type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="project_progress_action" model="ir.actions.act_window">
+        <field name="name">Mes avancements M-1</field>
+        <field name="res_model">project.progress</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_project_progress_search"/>
+        <field name="context">{'search_default_my_progress': 1, 'search_default_prev_month': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez un nouvel avancement.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="project_progress_menu" 
+              name="Avancements mensuels" 
+              parent="project_accounting.project_accounting_closing_menu_root" 
+              action="project_progress_action" 
+              sequence="20"/>
+
+    <record id="action_recompute_progress" model="ir.actions.server">
+        <field name="name">Recalculer les données de cet avancement</field>
+        <field name="model_id" ref="model_project_progress"/>
+        <field name="binding_model_id" ref="model_project_progress"/>
+        <field name="state">code</field>
+        <field name="code">for rec in records:
+    rec.compute()</field>
+        <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
+    </record>
+</odoo>
