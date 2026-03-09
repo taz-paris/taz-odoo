@@ -231,7 +231,7 @@ class tazBusinessAction(models.Model):
             ('state', '=', 'done'),
             ('date_deadline', '>=', date_from_done),
             ('date_deadline', '<', today)
-        ], order='date_deadline desc')
+        ], order='date_deadline asc')
 
         actions_coming = self.search([
             ('state', 'not in', ['done', 'cancelled']),

@@ -1165,7 +1165,6 @@ class naptaHrLeave(models.Model):
                     'date_to' : user_holiday['attributes']['end_date'] + "T21:59:59.000",#TODO : corriger l'heure
                     'request_date_to_period' : request_date_to_period,
                     'holiday_status_id' : {'napta_id' : user_holiday['attributes']['user_holiday_category_id']},
-                    'active' : True,
                     'number_of_days' : max(0, numberOfDays),
                         # max => évite d'avoir un nombre de jours de congés négatif (ce qui est interdit techniquement) dans le cas où un congés d'une demie-journée posée dans Napta sur un jour non-ouvré
                         # TODO : doit-on obligatoirement envoyer cet attribut à Odoo... qui doit le reclaculer de son côté...
@@ -1294,7 +1293,7 @@ def get_napta_key_domain_search(odoo_model_name, dic):
             raise ValidationError(_("values of the key attributes %s shouldn't be null/false/none %s for the odoo_model_name=%s" % (key_attribute, str(dic[key_attribute]), odoo_model_name)))
         key_domain_search.append((key_attribute, '=', dic[key_attribute]))
 
-    if odoo_model_name in ['hr.employee', 'res.users', 'hr.leave']:
+    if odoo_model_name in ['hr.employee', 'res.users']:
         tup = ('active', 'in', [True, False])
         key_domain_search.append(tup)
 
