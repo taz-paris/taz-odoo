@@ -107,6 +107,7 @@ class projectAccountingClosing(models.Model):
                     proj_id = proj_ids[0]
 
             # Auto-creation of project.progress records
+            """
             if rec.closing_date and rec.closing_date > datetime.date(2026, 1, 31):
                 rec.valuation_from_progress = True
 
@@ -136,7 +137,7 @@ class projectAccountingClosing(models.Model):
                             'outsourcing_link_id': False,
                         })
             rec.object_progress_ids.compute()
-
+            """
 
             previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
             previous_closing = None
