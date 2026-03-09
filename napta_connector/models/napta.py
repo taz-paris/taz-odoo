@@ -1202,8 +1202,7 @@ class naptaHrLeave(models.Model):
             for incorrect_leave in incorrect_leave_ids :
                 #incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).number_of_days = incorrect_leave.number_of_days
                 incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).action_refuse()
-                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).action_draft()
-                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).action_confirm()
+                incorrect_leave.with_context(do_not_update_staffing_report=True, do_not_update_project=True, tz='UTC', from_cancel_wizard=True, leave_skip_state_check=True, leave_skip_date_check=True).action_reset_confirm()
 
             self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
             self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()
