@@ -46,8 +46,7 @@ class staffingLeave(models.Model):
                 if any(x in ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to', 'date_from', 'date_to', 'number_of_days', 'request_date_from_period', 'request_date_to_period', 'state'] for x in vals.keys()):
                     _logger.info("Changement sur le congés conduisant à supprimer et recréer les timesheets liées. %s" % str(vals))
                     holidays = self.filtered(
-                        lambda l: l.holiday_type == 'employee' and
-                        l.holiday_status_id.timesheet_project_id and
+                        lambda l: l.holiday_status_id.timesheet_project_id and
                         l.holiday_status_id.timesheet_task_id and
                         l.holiday_status_id.timesheet_project_id.sudo().company_id == (l.holiday_status_id.company_id or self.env.company))
 
@@ -117,7 +116,7 @@ class staffingLeave(models.Model):
 
     #override to deal with uom in days and request_date_to_period
     # https://github.com/odoo/odoo/blob/b274b305edd9e70aed0e26237395d9b9d0d45305/addons/project_timesheet_holidays/models/hr_holidays.py#L62C1-L103C67
-    def _generate_timesheets(self):
+    def _generate_timesheets(self, ignored_resource_calendar_leaves=None):
         """ Timesheet will be generated only if timesheet_generate is True
             If company is set, timesheet_project_id and timesheet_task_id from leave type are
             used as project_id and task_id.
@@ -129,7 +128,7 @@ class staffingLeave(models.Model):
         calendar_leaves_data = self.env['resource.calendar.leaves']._read_group([('holiday_id', 'in', self.ids)], ['holiday_id'], ['id:array_agg'])
         mapped_calendar_leaves = {leave: calendar_leave_ids[0] for leave, calendar_leave_ids in calendar_leaves_data}
         for leave in self:
-            if leave.holiday_type != 'employee' or not leave.holiday_status_id.timesheet_generate:
+            if not leave.holiday_status_id.timesheet_generate:
                 continue
 
             if leave.holiday_status_id.company_id:
