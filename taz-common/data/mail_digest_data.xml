@@ -26,7 +26,7 @@
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Échéance</th>
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Titre</th>
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Contact</th>
-                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Collaborateur</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Affectée à</th>
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Type</th>
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Lien OneNote</th>
                             </tr>
@@ -66,7 +66,7 @@
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Échéance</th>
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Titre</th>
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Contact</th>
-                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Collaborateur</th>
+                                <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Affectée à</th>
                                 <th style="padding: 12px; border: 1px solid #e0e0e0; text-align: left;">Statut</th>
                             </tr>
                         </thead>
@@ -94,7 +94,7 @@
         </section>
 
         <footer style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #999; font-size: 12px;">
-            <p>Cet email a été envoyé automatiquement par le Cockpit TazForce.</p>
+            <p>Cet email a été envoyé automatiquement par TazForce.</p>
         </footer>
     </div>
 </div>
