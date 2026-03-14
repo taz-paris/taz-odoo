@@ -9,24 +9,27 @@ import { stringToOrderBy } from "@web/search/utils/order_by";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { Component, xml } from "@odoo/owl";
 import { Field } from "@web/views/fields/field";
+import { Notebook } from "@web/core/notebook/notebook";
 
+// Composant récursif universel pour le rendu des nœuds (Form-like)
 class MultiLineNode extends Component {
     static template = "web_list_multi_line.Node";
-    static components = { MultiLineNode, Field };
+    static components = { MultiLineNode, Field, Notebook };
 
     get column() {
         return this.props.archInfo.fieldNodes[this.props.node.fieldId];
     }
 
     get isVisible() {
-        if (this.props.node.type !== 'field') return true;
-        const col = this.column;
-        if (!col) return false;
-        return !this.props.renderer.evalInvisible(col.invisible, this.props.record);
+        if (this.props.node.type === 'field') {
+            const col = this.column;
+            if (!col) return false;
+            return !this.props.renderer.evalInvisible(col.invisible, this.props.record);
+        }
+        return true;
     }
 
     get colClass() {
-        // Si le parent a défini un nombre de colonnes (ex: col="3"), on divise 12 par ce nombre
         const parentCol = this.props.parentCol || 1;
         const colSpan = Math.max(1, Math.floor(12 / parentCol));
         return `col-lg-${colSpan}`;
@@ -44,7 +47,9 @@ export class ListMultiLineArchParser extends ListArchParser {
             }
         });
 
+        // On utilise le parseur de liste pour les colonnes et métadonnées
         const archInfo = super.parse(xmlDoc, models, modelName);
+        
         if (isMultiLine) {
             archInfo.activeActions = {
                 ...getActiveActions(originalXmlDoc),
@@ -55,37 +60,36 @@ export class ListMultiLineArchParser extends ListArchParser {
             archInfo.noOpen = exprToBoolean(originalXmlDoc.getAttribute("no_open") || "false");
             archInfo.defaultOrder = stringToOrderBy(originalXmlDoc.getAttribute("default_order") || null) || archInfo.defaultOrder;
         }
-        archInfo.multiLineLayout = this.parseLayout(originalXmlDoc, true);
+
+        // On génère un layout universel récursif (supportant notebook, page, etc)
+        archInfo.multiLineLayout = this.parseUniversalLayout(originalXmlDoc, true);
         archInfo.openFormView = exprToBoolean(originalXmlDoc.getAttribute("open_form_view") || "false");
         return archInfo;
     }
 
-    parseLayout(node, isRoot = false) {
+    parseUniversalLayout(node, isRoot = false) {
         const layout = [];
         for (const child of node.children) {
-            if (child.tagName === "field") {
-                layout.push({ 
-                    type: "field", 
-                    fieldId: child.getAttribute("field_id"),
-                    name: child.getAttribute("name"),
-                    nolabel: child.getAttribute("nolabel") === "1",
-                    class: child.getAttribute("class") || "",
-                });
-            } else if (child.tagName === "group" || child.tagName === "div") {
-                // Un groupe est "outer" s'il contient d'autres groupes
-                const isOuter = isRoot || (child.tagName === "group" && Array.from(child.children).some(c => c.tagName === "group"));
-                layout.push({
-                    type: child.tagName,
-                    isOuter: isOuter,
-                    children: this.parseLayout(child, false),
-                    string: child.getAttribute("string"),
-                    class: child.getAttribute("class") || "",
-                    style: child.getAttribute("style") || "",
-                    col: parseInt(child.getAttribute("col") || (isOuter ? "2" : "1"), 10),
-                });
-            } else if (child.tagName === "newline") {
-                layout.push({ type: "newline" });
+            const tagName = child.tagName.toLowerCase();
+            if (["header", "control"].includes(tagName) && isRoot) continue;
+
+            const item = {
+                type: tagName,
+                string: child.getAttribute("string"),
+                class: child.getAttribute("class") || "",
+                style: child.getAttribute("style") || "",
+                fieldId: child.getAttribute("field_id"),
+                name: child.getAttribute("name"),
+                nolabel: child.getAttribute("nolabel") === "1",
+                col: parseInt(child.getAttribute("col") || (tagName === "group" && isRoot ? "2" : "1"), 10),
+                children: child.children.length ? this.parseUniversalLayout(child, false) : [],
+            };
+
+            if (tagName === "group") {
+                item.isOuter = isRoot || Array.from(child.children).some(c => c.tagName === "group");
             }
+            
+            layout.push(item);
         }
         return layout;
     }

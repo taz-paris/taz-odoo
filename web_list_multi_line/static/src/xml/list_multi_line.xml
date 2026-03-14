@@ -21,13 +21,11 @@
              t-att-class="getRowClass(record)"
              t-att-data-id="record.id"
              t-on-click="(ev) => this.onCellClicked(record, null, ev)">
-            
             <div t-if="props.archInfo.openFormView" class="position-absolute top-0 end-0 p-2 z-index-1">
                 <button class="btn btn-link btn-sm text-secondary" t-on-click.stop="(ev) => this.onOpenFormViewClicked(record, ev)">
                     <i class="fa fa-expand"/>
                 </button>
             </div>
-
             <div class="o_form_view o_form_readonly">
                 <t t-foreach="props.archInfo.multiLineLayout" t-as="node" t-key="node_index">
                     <MultiLineNode node="node" record="record" archInfo="props.archInfo" renderer="this" parentCol="1"/>
@@ -38,36 +36,41 @@
 
     <t t-name="web_list_multi_line.Node">
         <t t-if="isVisible">
-            <!-- Rendu d'un Groupe -->
+            
+            <!-- 1. RENDU DES GROUPES -->
             <t t-if="props.node.type === 'group'">
-                <!-- Groupe Extérieur (Row Conteneur) -->
-                <t t-if="props.node.isOuter">
-                    <div class="o_group row align-items-start" t-att-class="props.node.class">
-                        <div t-if="props.node.string" class="col-12">
-                            <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
-                        </div>
-                        <t t-foreach="props.node.children" t-as="child" t-key="child_index">
-                            <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="props.node.col"/>
-                        </t>
+                <div t-att-class="props.node.isOuter ? 'o_group row align-items-start' : 'o_inner_group grid col-lg-' + (12/(props.parentCol || 1)) + ' ' + props.node.class">
+                    <div t-if="props.node.string" t-att-class="props.node.isOuter ? 'col-12' : 'g-col-sm-2'">
+                        <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
                     </div>
-                </t>
-                <!-- Groupe Intérieur (Grille de champs) -->
-                <t t-else="">
-                    <div class="o_inner_group grid" t-attf-class="{{ colClass }} {{ props.node.class || '' }}">
-                        <div t-if="props.node.string" class="g-col-sm-2">
-                            <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
-                        </div>
-                        <t t-foreach="props.node.children" t-as="child" t-key="child_index">
-                            <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="1"/>
-                        </t>
-                    </div>
-                </t>
+                    <t t-foreach="props.node.children" t-as="child" t-key="child_index">
+                        <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="props.node.col"/>
+                    </t>
+                </div>
             </t>
 
-            <!-- Rendu d'un Champ -->
+            <!-- 2. RENDU DES NOTEBOOKS (ONGLETS) -->
+            <t t-if="props.node.type === 'notebook'">
+                <div class="o_notebook mt-4">
+                    <Notebook>
+                        <t t-foreach="props.node.children" t-as="page" t-key="page_index">
+                            <t t-if="page.type === 'page'">
+                                <t t-set-slot="page_{{page_index}}" t-slot-scope="notebook" title="page.string" isVisible="true">
+                                    <div class="p-3 border-top border-start border-end rounded-bottom bg-white shadow-sm">
+                                        <t t-foreach="page.children" t-as="child" t-key="child_index">
+                                            <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="1"/>
+                                        </t>
+                                    </div>
+                                </t>
+                            </t>
+                        </t>
+                    </Notebook>
+                </div>
+            </t>
+
+            <!-- 3. RENDU DES CHAMPS -->
             <t t-if="props.node.type === 'field'">
-                <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0" 
-                     t-on-click.stop="(ev) => props.renderer.onCellClicked(props.record, column, ev)">
+                <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0" t-on-click.stop="(ev) => props.renderer.onCellClicked(props.record, column, ev)">
                     <div t-if="!props.node.nolabel" class="o_cell o_wrap_label text-break text-900">
                         <label class="o_form_label" t-esc="column.string || column.label"/>
                     </div>
@@ -76,19 +79,14 @@
                             <t t-if="props.renderer.canUseFormatter(column, props.record)">
                                 <span class="o_field_content text-break" t-out="props.renderer.getFormattedValue(column, props.record)"/>
                             </t>
-                            <Field t-if="!props.renderer.canUseFormatter(column, props.record)" 
-                                   name="column.name" 
-                                   record="props.record" 
-                                   type="column.widget" 
-                                   fieldInfo="column" 
-                                   t-props="props.renderer.getFieldProps(props.record, column)"/>
+                            <Field t-if="!props.renderer.canUseFormatter(column, props.record)" name="column.name" record="props.record" type="column.widget" fieldInfo="column" t-props="props.renderer.getFieldProps(props.record, column)"/>
                         </div>
                     </div>
                 </div>
             </t>
 
-            <!-- Rendu d'une Div -->
-            <t t-if="props.node.type === 'div'">
+            <!-- 4. RENDU DES DIVS ET AUTRES BALISES GÉNÉRIQUES -->
+            <t t-if="props.node.type === 'div' or props.node.type === 'header' or props.node.type === 'sheet'">
                 <div t-att-class="props.node.class" t-att-style="props.node.style">
                     <t t-foreach="props.node.children" t-as="child" t-key="child_index">
                         <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="props.parentCol"/>
