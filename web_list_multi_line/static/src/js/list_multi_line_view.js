@@ -97,7 +97,9 @@ export class ListMultiLineArchParser extends ListArchParser {
 
 export class ListMultiLineRenderer extends ListRenderer {
     static template = "web_list_multi_line.Renderer";
+    static rowsTemplate = "web_list_multi_line.Rows";
     static recordRowTemplate = "web_list_multi_line.RecordRow";
+    static groupRowTemplate = "web_list_multi_line.GroupRow";
     static components = { ...ListRenderer.components, Field, MultiLineNode };
     
     setup() {
@@ -105,6 +107,10 @@ export class ListMultiLineRenderer extends ListRenderer {
         for (const col of Object.values(this.props.archInfo.fieldNodes || {})) {
             if (!col.options) col.options = {};
         }
+    }
+
+    get aggregateColumns() {
+        return this.props.archInfo.columns.filter(c => c.type === 'field' && this.aggregates[c.name]);
     }
 
     onCellClicked(record, column, ev) {

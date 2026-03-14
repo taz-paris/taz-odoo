@@ -2,22 +2,79 @@
 <templates xml:space="preserve">
 
     <t t-name="web_list_multi_line.Renderer">
-        <div class="o_list_renderer o_list_multi_line_renderer o_renderer" tabindex="-1" t-ref="root">
+        <div class="o_list_renderer o_list_multi_line_renderer o_renderer" tabindex="-1" t-ref="root" style="background-color: #f8f9fa; min-height: 100vh;">
             <div class="o_list_multi_line_container container-fluid p-0">
                 <table class="d-none" t-ref="table"><tbody></tbody></table>
-                <t t-if="props.list.records.length">
-                    <t t-foreach="props.list.records" t-as="record" t-key="record.id">
-                        <t t-call="web_list_multi_line.RecordRow">
-                            <t t-set="record" t-value="record"/>
-                        </t>
+                
+                <t t-call="{{ constructor.rowsTemplate }}">
+                    <t t-set="list" t-value="props.list"/>
+                </t>
+
+                <t t-if="!props.list.records.length and !props.list.isGrouped">
+                    <div class="p-5 text-center text-muted">Aucun enregistrement trouvé.</div>
+                </t>
+
+                <!-- PIED DE PAGE AVEC CUMULS (DANS LE FLUX) -->
+                <t t-if="aggregateColumns.length">
+                    <div class="o_list_footer border-top bg-white p-4 mt-4 shadow-sm mx-2 mb-4 rounded">
+                        <div class="row g-4 justify-content-end">
+                            <t t-foreach="aggregateColumns" t-as="column" t-key="column.id">
+                                <div class="col-auto">
+                                    <div class="d-flex flex-column border-start ps-4">
+                                        <span class="text-uppercase text-muted small fw-bold mb-1" style="font-size: 0.75rem;" t-esc="column.label"/>
+                                        <span class="fs-4 fw-bolder text-dark" t-esc="aggregates[column.name].value"/>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="web_list_multi_line.Rows">
+        <t t-if="!list.isGrouped">
+            <t t-foreach="list.records" t-as="record" t-key="record.id">
+                <t t-call="web_list_multi_line.RecordRow">
+                    <t t-set="record" t-value="record"/>
+                </t>
+            </t>
+        </t>
+        <t t-else="">
+            <t t-foreach="list.groups" t-as="group" t-key="group.id">
+                <t t-call="web_list_multi_line.GroupRow"/>
+                <t t-if="!group.isFolded">
+                    <t t-call="web_list_multi_line.Rows">
+                        <t t-set="list" t-value="group.list"/>
                     </t>
+                </t>
+            </t>
+        </t>
+    </t>
+
+    <t t-name="web_list_multi_line.GroupRow">
+        <div class="o_group_header o_list_multi_line_group_header p-3 bg-light border-bottom border-top cursor-pointer d-flex align-items-center mb-2 shadow-sm rounded mx-2"
+             t-on-click="(ev) => this.onGroupHeaderClicked(ev, group)"
+             t-attf-style="margin-left: {{ (getGroupLevel(group) * 1.5) + 0.5 }}rem !important;">
+            <span t-attf-class="o_group_caret fa fa-fw {{group.isFolded ? 'fa-caret-right' : 'fa-caret-down' }} me-2 text-primary"/>
+            <div class="flex-grow-1">
+                <span class="fw-bold fs-6" t-esc="getGroupDisplayName(group)"/>
+                <span class="badge rounded-pill bg-secondary ms-2" t-esc="group.count"/>
+            </div>
+            <div class="d-flex gap-4">
+                <t t-foreach="aggregateColumns" t-as="column" t-key="column.id">
+                    <div class="text-end border-start ps-3">
+                        <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem;" t-esc="column.label"/>
+                        <span class="fw-bold text-dark" t-esc="formatAggregateValue(group, column)"/>
+                    </div>
                 </t>
             </div>
         </div>
     </t>
 
     <t t-name="web_list_multi_line.RecordRow">
-        <div class="o_data_row o_list_multi_line_record o_form_sheet position-relative mb-4 shadow-sm p-4 bg-white"
+        <div class="o_data_row o_list_multi_line_record o_form_sheet position-relative mb-4 shadow-sm p-4 bg-white mx-2"
              t-att-class="getRowClass(record)"
              t-att-data-id="record.id"
              t-on-click="(ev) => this.onCellClicked(record, null, ev)">
@@ -36,8 +93,6 @@
 
     <t t-name="web_list_multi_line.Node">
         <t t-if="isVisible">
-            
-            <!-- 1. RENDU DES GROUPES -->
             <t t-if="props.node.type === 'group'">
                 <div t-att-class="props.node.isOuter ? 'o_group row align-items-start' : 'o_inner_group grid col-lg-' + (12/(props.parentCol || 1)) + ' ' + props.node.class">
                     <div t-if="props.node.string" t-att-class="props.node.isOuter ? 'col-12' : 'g-col-sm-2'">
@@ -48,8 +103,6 @@
                     </t>
                 </div>
             </t>
-
-            <!-- 2. RENDU DES NOTEBOOKS (ONGLETS) -->
             <t t-if="props.node.type === 'notebook'">
                 <div class="o_notebook mt-4">
                     <Notebook>
@@ -67,8 +120,6 @@
                     </Notebook>
                 </div>
             </t>
-
-            <!-- 3. RENDU DES CHAMPS -->
             <t t-if="props.node.type === 'field'">
                 <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0" t-on-click.stop="(ev) => props.renderer.onCellClicked(props.record, column, ev)">
                     <div t-if="!props.node.nolabel" class="o_cell o_wrap_label text-break text-900">
@@ -84,8 +135,6 @@
                     </div>
                 </div>
             </t>
-
-            <!-- 4. RENDU DES DIVS ET AUTRES BALISES GÉNÉRIQUES -->
             <t t-if="props.node.type === 'div' or props.node.type === 'header' or props.node.type === 'sheet'">
                 <div t-att-class="props.node.class" t-att-style="props.node.style">
                     <t t-foreach="props.node.children" t-as="child" t-key="child_index">
@@ -93,7 +142,6 @@
                     </t>
                 </div>
             </t>
-
             <t t-if="props.node.type === 'newline'">
                 <div class="w-100 d-none d-md-block"/>
             </t>
