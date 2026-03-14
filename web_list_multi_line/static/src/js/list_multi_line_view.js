@@ -4,33 +4,47 @@ import { ListArchParser } from "@web/views/list/list_arch_parser";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { listView } from "@web/views/list/list_view";
 import { registry } from "@web/core/registry";
-import { getActiveActions, getDecoration } from "@web/views/utils";
+import { getActiveActions } from "@web/views/utils";
 import { stringToOrderBy } from "@web/search/utils/order_by";
 import { exprToBoolean } from "@web/core/utils/strings";
-import { Component, xml, useSubEnv } from "@odoo/owl";
+import { Component, xml } from "@odoo/owl";
 import { Field } from "@web/views/fields/field";
+
+class MultiLineNode extends Component {
+    static template = "web_list_multi_line.Node";
+    static components = { MultiLineNode, Field };
+
+    get column() {
+        return this.props.archInfo.fieldNodes[this.props.node.fieldId];
+    }
+
+    get isVisible() {
+        if (this.props.node.type !== 'field') return true;
+        const col = this.column;
+        if (!col) return false;
+        return !this.props.renderer.evalInvisible(col.invisible, this.props.record);
+    }
+
+    get colClass() {
+        // Si le parent a défini un nombre de colonnes (ex: col="3"), on divise 12 par ce nombre
+        const parentCol = this.props.parentCol || 1;
+        const colSpan = Math.max(1, Math.floor(12 / parentCol));
+        return `col-lg-${colSpan}`;
+    }
+}
 
 export class ListMultiLineArchParser extends ListArchParser {
     parse(originalXmlDoc, models, modelName) {
-        const isMultiLine = originalXmlDoc.tagName === "list_multi_line";
-        // Create a Proxy to trick super.parse into thinking it's a <list> tag.
-        // This avoids read-only property errors on tagName and correctly initializes defaults.
+        const isMultiLine = originalXmlDoc.tagName.toUpperCase() === "LIST_MULTI_LINE";
         const xmlDoc = new Proxy(originalXmlDoc, {
             get(target, prop) {
-                if (prop === "tagName") {
-                    return "list";
-                }
+                if (prop === "tagName" || prop === "nodeName") return "list";
                 const value = target[prop];
-                if (typeof value === "function") {
-                    return value.bind(target);
-                }
-                return value;
+                return typeof value === "function" ? value.bind(target) : value;
             }
         });
 
         const archInfo = super.parse(xmlDoc, models, modelName);
-        
-        // Ensure standard attributes are correctly captured if super.parse logic was partial
         if (isMultiLine) {
             archInfo.activeActions = {
                 ...getActiveActions(originalXmlDoc),
@@ -41,12 +55,12 @@ export class ListMultiLineArchParser extends ListArchParser {
             archInfo.noOpen = exprToBoolean(originalXmlDoc.getAttribute("no_open") || "false");
             archInfo.defaultOrder = stringToOrderBy(originalXmlDoc.getAttribute("default_order") || null) || archInfo.defaultOrder;
         }
-        
-        archInfo.multiLineLayout = this.parseLayout(originalXmlDoc);
+        archInfo.multiLineLayout = this.parseLayout(originalXmlDoc, true);
+        archInfo.openFormView = exprToBoolean(originalXmlDoc.getAttribute("open_form_view") || "false");
         return archInfo;
     }
 
-    parseLayout(node) {
+    parseLayout(node, isRoot = false) {
         const layout = [];
         for (const child of node.children) {
             if (child.tagName === "field") {
@@ -55,26 +69,22 @@ export class ListMultiLineArchParser extends ListArchParser {
                     fieldId: child.getAttribute("field_id"),
                     name: child.getAttribute("name"),
                     nolabel: child.getAttribute("nolabel") === "1",
-                    col: child.getAttribute("col"),
+                    class: child.getAttribute("class") || "",
                 });
-            } else if (child.tagName === "group") {
+            } else if (child.tagName === "group" || child.tagName === "div") {
+                // Un groupe est "outer" s'il contient d'autres groupes
+                const isOuter = isRoot || (child.tagName === "group" && Array.from(child.children).some(c => c.tagName === "group"));
                 layout.push({
-                    type: "group",
-                    children: this.parseLayout(child),
+                    type: child.tagName,
+                    isOuter: isOuter,
+                    children: this.parseLayout(child, false),
                     string: child.getAttribute("string"),
-                    class: child.getAttribute("class"),
-                    col: child.getAttribute("col"),
-                    childrenCol: child.getAttribute("col") || 2,
+                    class: child.getAttribute("class") || "",
+                    style: child.getAttribute("style") || "",
+                    col: parseInt(child.getAttribute("col") || (isOuter ? "2" : "1"), 10),
                 });
             } else if (child.tagName === "newline") {
                 layout.push({ type: "newline" });
-            } else if (child.tagName === "div") {
-                 layout.push({
-                    type: "div",
-                    children: this.parseLayout(child),
-                    class: child.getAttribute("class"),
-                    style: child.getAttribute("style"),
-                });
             }
         }
         return layout;
@@ -84,37 +94,26 @@ export class ListMultiLineArchParser extends ListArchParser {
 export class ListMultiLineRenderer extends ListRenderer {
     static template = "web_list_multi_line.Renderer";
     static recordRowTemplate = "web_list_multi_line.RecordRow";
-
+    static components = { ...ListRenderer.components, Field, MultiLineNode };
+    
     setup() {
         super.setup();
+        for (const col of Object.values(this.props.archInfo.fieldNodes || {})) {
+            if (!col.options) col.options = {};
+        }
     }
 
     onCellClicked(record, column, ev) {
         if (this.props.list.model.useSampleModel) return;
-        
-        // Empêcher la propagation si on clique sur un input déjà actif ou un lien/bouton
         if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'SELECT' || ev.target.tagName === 'TEXTAREA' || ev.target.closest('button') || ev.target.closest('a')) {
             return;
         }
-
-        // Si la liste est non-éditable MAIS qu'on a l'option open_form_view="1", on ouvre le form
-        // Sinon (éditable = top/bottom), un clic même hors du champ déclenche le mode édition de ligne
-        if (!column && this.props.archInfo.openFormView && !this.props.archInfo.noOpen && !this.isInlineEditable(record)) {
-            this.props.openRecord(record);
-            return;
-        }
-
         this.props.list.enterEditMode(record);
-        if (column) {
-            // On attend que Owl ait rendu le champ editable avant de focus
-            setTimeout(() => this.focusCell(column), 0);
-        }
+        if (column) setTimeout(() => this.focusCell(column), 0);
     }
 
     onOpenFormViewClicked(record, ev) {
-        if (!this.props.archInfo.noOpen) {
-            this.props.openRecord(record);
-        }
+        this.props.openRecord(record);
     }
 
     focusCell(column) {

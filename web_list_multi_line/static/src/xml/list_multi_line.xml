@@ -3,161 +3,103 @@
 
     <t t-name="web_list_multi_line.Renderer">
         <div class="o_list_renderer o_list_multi_line_renderer o_renderer" tabindex="-1" t-ref="root">
-            <t t-if="showNoContentHelper" t-call="web.ActionHelper">
-                <t t-set="noContentHelp" t-value="props.noContentHelp"/>
-            </t>
-            
-            <div class="o_list_multi_line_container container-fluid p-0" t-ref="table">
-                <!-- Dummy table to prevent Odoo's ListRenderer from crashing on querySelector("tbody") -->
-                <table class="d-none"><tbody></tbody></table>
-
-                <t t-if="!props.list.isGrouped">
+            <div class="o_list_multi_line_container container-fluid p-0">
+                <table class="d-none" t-ref="table"><tbody></tbody></table>
+                <t t-if="props.list.records.length">
                     <t t-foreach="props.list.records" t-as="record" t-key="record.id">
                         <t t-call="web_list_multi_line.RecordRow">
                             <t t-set="record" t-value="record"/>
                         </t>
                     </t>
                 </t>
-                <t t-else="">
-                    <t t-foreach="props.list.groups" t-as="group" t-key="group.id">
-                         <div class="o_group_header bg-light p-2 border-bottom" t-on-click="(ev) => this.onGroupHeaderClicked(ev, group)">
-                            <span t-attf-class="o_group_caret fa fa-fw {{group.isFolded ? 'fa-caret-right' : 'fa-caret-down' }} me-1"/>
-                            <t t-esc="getGroupDisplayName(group)"/> (<t t-esc="group.count"/>)
-                         </div>
-                         <t t-if="!group.isFolded">
-                            <t t-foreach="group.list.records" t-as="record" t-key="record.id">
-                                <t t-call="web_list_multi_line.RecordRow">
-                                    <t t-set="record" t-value="record"/>
-                                </t>
-                            </t>
-                         </t>
-                    </t>
-                </t>
-            </div>
-
-            <div t-if="Object.keys(aggregates).length > 0" class="o_list_multi_line_footer bg-light p-2 border-top d-flex gap-3">
-                <t t-foreach="allColumns" t-as="column" t-key="column.id">
-                    <t t-set="aggregate" t-value="aggregates[column.name]"/>
-                    <div t-if="aggregate" class="o_aggregate">
-                        <strong t-esc="column.label"/>: <span t-esc="aggregate.value"/>
-                    </div>
-                </t>
-            </div>
-            
-            <div t-if="displayRowCreates" class="p-2">
-                 <t t-foreach="creates" t-as="create" t-key="create_index">
-                    <a t-if="create.type === 'create'" href="#" role="button" class="btn btn-secondary btn-sm me-2" t-on-click.stop.prevent="() => this.add({ context: create.context })">
-                        <i class="fa fa-plus me-1"/> <t t-esc="create.string"/>
-                    </a>
-                </t>
             </div>
         </div>
     </t>
 
     <t t-name="web_list_multi_line.RecordRow">
-        <div class="o_data_row o_list_multi_line_record border-bottom p-3 cursor-pointer position-relative"
+        <div class="o_data_row o_list_multi_line_record o_form_sheet position-relative mb-4 shadow-sm p-4 bg-white"
              t-att-class="getRowClass(record)"
              t-att-data-id="record.id"
              t-on-click="(ev) => this.onCellClicked(record, null, ev)">
             
-            <t t-if="hasOpenFormViewColumn">
-                <button class="btn btn-sm btn-link position-absolute top-0 end-0 mt-2 me-2"
-                        title="Ouvrir la vue formulaire"
-                        t-on-click.stop="(ev) => this.onOpenFormViewClicked(record, ev)">
-                    <i class="fa fa-arrows-alt"/>
+            <div t-if="props.archInfo.openFormView" class="position-absolute top-0 end-0 p-2 z-index-1">
+                <button class="btn btn-link btn-sm text-secondary" t-on-click.stop="(ev) => this.onOpenFormViewClicked(record, ev)">
+                    <i class="fa fa-expand"/>
                 </button>
-            </t>
+            </div>
 
-            <div class="o_list_multi_line_layout o_form_view" 
-                 t-att-class="{
-                    'o_form_editable': record.isInEdition,
-                    'o_form_readonly': !record.isInEdition
-                 }" 
-                 style="min-height: auto; width: 100%;">
-                <t t-call="web_list_multi_line.Layout">
-                    <t t-set="nodes" t-value="props.archInfo.multiLineLayout"/>
-                    <t t-set="archInfo" t-value="props.archInfo"/>
-                    <t t-set="record" t-value="record"/>
+            <div class="o_form_view o_form_readonly">
+                <t t-foreach="props.archInfo.multiLineLayout" t-as="node" t-key="node_index">
+                    <MultiLineNode node="node" record="record" archInfo="props.archInfo" renderer="this" parentCol="1"/>
                 </t>
             </div>
         </div>
     </t>
 
-    <t t-name="web_list_multi_line.Layout">
-        <t t-foreach="nodes" t-as="node" t-key="node.fieldId or node_index">
-            <t t-if="node.type === 'field'">
-                <t t-set="column" t-value="archInfo.fieldNodes[node.fieldId]"/>
-                <t t-set="isInvisible" t-value="evalInvisible(column.invisible, record) or !(column.name in record.data)"/>
-                
-                <t t-if="!isInvisible">
-                    <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0"
-                         t-att-name="column.name" t-att-data-name="column.name"
-                         t-on-click.stop="(ev) => this.onCellClicked(record, column, ev)">
-                        
-                        <div class="o_cell o_wrap_label text-break text-900" 
-                             t-att-class="node.nolabel ? 'd-none' : ''">
-                            <label class="o_form_label" t-esc="column.string || column.label"/>
+    <t t-name="web_list_multi_line.Node">
+        <t t-if="isVisible">
+            <!-- Rendu d'un Groupe -->
+            <t t-if="props.node.type === 'group'">
+                <!-- Groupe Extérieur (Row Conteneur) -->
+                <t t-if="props.node.isOuter">
+                    <div class="o_group row align-items-start" t-att-class="props.node.class">
+                        <div t-if="props.node.string" class="col-12">
+                            <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
                         </div>
-                        
-                        <div class="o_cell o_wrap_input text-break"
-                             t-attf-style="{{ node.nolabel ? 'grid-column: span 2;' : '' }}">
-                            <!-- En mode édition on utilise Field, en mode vue on utilise le formateur s'il n'y a pas de widget spécifique -->
-                            <t t-if="canUseFormatter(column, record)">
-                                <span class="o_field_content o_field_widget" t-out="getFormattedValue(column, record)"/>
-                            </t>
-                            <Field t-else="" name="column.name" record="record" type="column.widget" fieldInfo="column" t-props="getFieldProps(record, column)"/>
-                        </div>
-                    </div>
-                </t>
-            </t>
-            
-            <t t-if="node.type === 'group'">
-                <t t-set="isOuter" t-value="node.children and node.children.length and node.children[0].type === 'group'"/>
-                <t t-if="isOuter">
-                    <div class="o_group row align-items-start" t-att-class="node.class">
-                        <t t-if="node.string">
-                            <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="node.string"/>
-                        </t>
-                        <t t-foreach="node.children" t-as="subNode" t-key="subNode_index">
-                            <t t-call="web_list_multi_line.Layout">
-                                <t t-set="nodes" t-value="[subNode]"/>
-                                <t t-set="archInfo" t-value="archInfo"/>
-                                <t t-set="record" t-value="record"/>
-                                <t t-set="parentOuterCol" t-value="node.col || 2"/>
-                            </t>
+                        <t t-foreach="props.node.children" t-as="child" t-key="child_index">
+                            <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="props.node.col"/>
                         </t>
                     </div>
                 </t>
+                <!-- Groupe Intérieur (Grille de champs) -->
                 <t t-else="">
-                    <t t-set="colClass" t-value="parentOuterCol ? 'col-lg-' + (12/parentOuterCol) : ''"/>
-                    <div class="o_inner_group grid" t-attf-class="{{ colClass }} {{ node.class || '' }}">
-                        <t t-if="node.string">
-                            <div t-attf-class="g-col-sm-{{ node.col || 2 }}">
-                                <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="node.string"/>
-                            </div>
-                        </t>
-                        <t t-call="web_list_multi_line.Layout">
-                            <t t-set="nodes" t-value="node.children"/>
-                            <t t-set="archInfo" t-value="archInfo"/>
-                            <t t-set="record" t-value="record"/>
+                    <div class="o_inner_group grid" t-attf-class="{{ colClass }} {{ props.node.class || '' }}">
+                        <div t-if="props.node.string" class="g-col-sm-2">
+                            <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
+                        </div>
+                        <t t-foreach="props.node.children" t-as="child" t-key="child_index">
+                            <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="1"/>
                         </t>
                     </div>
                 </t>
             </t>
 
-            <t t-if="node.type === 'div'">
-                <div t-att-class="node.class" t-att-style="node.style">
-                    <t t-call="web_list_multi_line.Layout">
-                        <t t-set="nodes" t-value="node.children"/>
-                        <t t-set="archInfo" t-value="archInfo"/>
-                        <t t-set="record" t-value="record"/>
+            <!-- Rendu d'un Champ -->
+            <t t-if="props.node.type === 'field'">
+                <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0" 
+                     t-on-click.stop="(ev) => props.renderer.onCellClicked(props.record, column, ev)">
+                    <div t-if="!props.node.nolabel" class="o_cell o_wrap_label text-break text-900">
+                        <label class="o_form_label" t-esc="column.string || column.label"/>
+                    </div>
+                    <div class="o_cell o_wrap_input text-break" t-att-style="props.node.nolabel ? 'grid-column: span 2;' : ''">
+                        <div t-att-name="column.name" class="o_field_widget" t-att-class="column.class">
+                            <t t-if="props.renderer.canUseFormatter(column, props.record)">
+                                <span class="o_field_content text-break" t-out="props.renderer.getFormattedValue(column, props.record)"/>
+                            </t>
+                            <Field t-if="!props.renderer.canUseFormatter(column, props.record)" 
+                                   name="column.name" 
+                                   record="props.record" 
+                                   type="column.widget" 
+                                   fieldInfo="column" 
+                                   t-props="props.renderer.getFieldProps(props.record, column)"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Rendu d'une Div -->
+            <t t-if="props.node.type === 'div'">
+                <div t-att-class="props.node.class" t-att-style="props.node.style">
+                    <t t-foreach="props.node.children" t-as="child" t-key="child_index">
+                        <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="props.parentCol"/>
                     </t>
                 </div>
             </t>
 
-            <t t-if="node.type === 'newline'">
-                <div class="w-100"/>
+            <t t-if="props.node.type === 'newline'">
+                <div class="w-100 d-none d-md-block"/>
             </t>
         </t>
     </t>
+
 </templates>
