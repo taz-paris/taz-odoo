@@ -11,6 +11,8 @@ import { Component, xml } from "@odoo/owl";
 import { Field } from "@web/views/fields/field";
 import { Notebook } from "@web/core/notebook/notebook";
 import { CheckBox } from "@web/core/checkbox/checkbox";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 // Composant récursif universel pour le rendu des nœuds (Form-like)
 class MultiLineNode extends Component {
@@ -101,13 +103,40 @@ export class ListMultiLineRenderer extends ListRenderer {
     static rowsTemplate = "web_list_multi_line.Rows";
     static recordRowTemplate = "web_list_multi_line.RecordRow";
     static groupRowTemplate = "web_list_multi_line.GroupRow";
-    static components = { ...ListRenderer.components, Field, MultiLineNode, CheckBox };
+    static components = { ...ListRenderer.components, Field, MultiLineNode, CheckBox, Dropdown, DropdownItem };
     
     setup() {
         super.setup();
         for (const col of Object.values(this.props.archInfo.fieldNodes || {})) {
             if (!col.options) col.options = {};
         }
+    }
+
+    get sortableColumns() {
+        return this.props.archInfo.columns.filter(c => c.type === 'field' && !c.noSort);
+    }
+
+    get activeSorts() {
+        return this.props.list.orderBy.map(sort => {
+            const col = this.props.archInfo.columns.find(c => c.name === sort.name);
+            return {
+                ...sort,
+                label: col ? col.label : sort.name
+            };
+        });
+    }
+
+    onSort(columnName) {
+        this.props.list.sortBy(columnName);
+    }
+
+    removeSort(columnName) {
+        const newOrderBy = this.props.list.orderBy.filter(s => s.name !== columnName);
+        this.props.list.load({ orderBy: newOrderBy });
+    }
+
+    removeAllSorts() {
+        this.props.list.load({ orderBy: [] });
     }
 
     get aggregateColumns() {

@@ -6,10 +6,54 @@
             <div class="o_list_multi_line_container container-fluid p-0">
                 <table class="d-none" t-ref="table"><tbody></tbody></table>
 
-                <!-- BARRE DE SÉLECTION GLOBALE -->
-                <div t-if="hasSelectors" class="o_list_selection_header sticky-top bg-white border-bottom p-3 mb-3 d-flex align-items-center shadow-sm mx-2 rounded-bottom">
-                    <CheckBox value="selectAll" className="'d-flex m-0 pe-2'" onChange.bind="toggleSelection"/>
-                    <span class="fw-bold text-muted small text-uppercase">Tout sélectionner</span>
+                <!-- BARRE DE SÉLECTION GLOBALE ET TRI -->
+                <div class="o_list_selection_header sticky-top bg-white border-bottom p-2 mb-3 d-flex align-items-center shadow-sm mx-2 rounded-bottom">
+                    <div t-if="hasSelectors" class="d-flex align-items-center border-end pe-3 me-3">
+                        <CheckBox value="selectAll" className="'d-flex m-0 pe-2'" onChange.bind="toggleSelection"/>
+                        <span class="fw-bold text-muted small text-uppercase d-none d-md-inline">Tout sélectionner</span>
+                    </div>
+
+                    <!-- SYSTÈME DE TRI PAR TUILES -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1 overflow-hidden">
+                        
+                        <Dropdown position="'bottom-start'" className="'o_sort_dropdown'">
+                            <button class="btn btn-sm btn-light border-dashed d-flex align-items-center gap-1 text-muted">
+                                <i class="fa fa-plus-circle opacity-50"/>
+                                <span class="small fw-bold">Ajouter un critère de tri</span>
+                            </button>
+                            <t t-set-slot="content">
+                                <t t-foreach="sortableColumns" t-as="col" t-key="col.id">
+                                    <DropdownItem onSelected="() => this.onSort(col.name)">
+                                        <div class="d-flex justify-content-between align-items-center w-100 py-1">
+                                            <span t-esc="col.label"/>
+                                            <i class="fa fa-check text-primary ms-3" t-if="props.list.orderBy.some(s => s.name === col.name)"/>
+                                        </div>
+                                    </DropdownItem>
+                                </t>
+                            </t>
+                        </Dropdown>
+
+                        <div class="d-flex align-items-center gap-2 overflow-auto no-scrollbar py-1">
+                            <t t-foreach="activeSorts" t-as="sort" t-key="sort.name">
+                                <div class="badge d-flex align-items-center gap-2 p-2 bg-primary-light border border-primary text-primary cursor-pointer hover-opacity shadow-sm"
+                                     t-on-click="() => this.onSort(sort.name)"
+                                     style="border-radius: 6px; font-weight: 500;">
+                                    <span t-esc="sort.label"/>
+                                    <i t-attf-class="oi {{ sort.asc ? 'oi-arrow-up' : 'oi-arrow-down' }} small opacity-75"/>
+                                    <i class="fa fa-times ms-1 text-muted hover-text-danger" 
+                                       t-on-click.stop="() => this.removeSort(sort.name)"
+                                       title="Supprimer ce tri"/>
+                                </div>
+                            </t>
+                            <button t-if="activeSorts.length > 1" 
+                                    class="btn btn-sm btn-link text-danger p-0 ms-2 text-decoration-none" 
+                                    t-on-click="() => this.removeAllSorts()"
+                                    title="Réinitialiser le tri">
+                                <i class="fa fa-trash-o me-1"/>
+                                <small class="fw-bold text-uppercase">Effacer tous les tris</small>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
                 <t t-call="{{ constructor.rowsTemplate }}">
