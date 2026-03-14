@@ -10,6 +10,7 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { Component, xml } from "@odoo/owl";
 import { Field } from "@web/views/fields/field";
 import { Notebook } from "@web/core/notebook/notebook";
+import { CheckBox } from "@web/core/checkbox/checkbox";
 
 // Composant récursif universel pour le rendu des nœuds (Form-like)
 class MultiLineNode extends Component {
@@ -100,7 +101,7 @@ export class ListMultiLineRenderer extends ListRenderer {
     static rowsTemplate = "web_list_multi_line.Rows";
     static recordRowTemplate = "web_list_multi_line.RecordRow";
     static groupRowTemplate = "web_list_multi_line.GroupRow";
-    static components = { ...ListRenderer.components, Field, MultiLineNode };
+    static components = { ...ListRenderer.components, Field, MultiLineNode, CheckBox };
     
     setup() {
         super.setup();

@@ -5,6 +5,12 @@
         <div class="o_list_renderer o_list_multi_line_renderer o_renderer" tabindex="-1" t-ref="root" style="background-color: #f8f9fa; min-height: 100vh;">
             <div class="o_list_multi_line_container container-fluid p-0">
                 <table class="d-none" t-ref="table"><tbody></tbody></table>
+
+                <!-- BARRE DE SÉLECTION GLOBALE -->
+                <div t-if="hasSelectors" class="o_list_selection_header sticky-top bg-white border-bottom p-3 mb-3 d-flex align-items-center shadow-sm mx-2 rounded-bottom">
+                    <CheckBox value="selectAll" className="'d-flex m-0 pe-2'" onChange.bind="toggleSelection"/>
+                    <span class="fw-bold text-muted small text-uppercase">Tout sélectionner</span>
+                </div>
                 
                 <t t-call="{{ constructor.rowsTemplate }}">
                     <t t-set="list" t-value="props.list"/>
@@ -75,14 +81,21 @@
 
     <t t-name="web_list_multi_line.RecordRow">
         <div class="o_data_row o_list_multi_line_record o_form_sheet position-relative mb-4 shadow-sm p-4 bg-white mx-2"
-             t-att-class="getRowClass(record)"
+             t-att-class="getRowClass(record) + (record.selected ? ' border-primary border-2' : '')"
              t-att-data-id="record.id"
              t-on-click="(ev) => this.onCellClicked(record, null, ev)">
-            <div t-if="props.archInfo.openFormView" class="position-absolute top-0 end-0 p-2 z-index-1">
-                <button class="btn btn-link btn-sm text-secondary" t-on-click.stop="(ev) => this.onOpenFormViewClicked(record, ev)">
-                    <i class="fa fa-expand"/>
-                </button>
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div t-if="hasSelectors" class="o_list_record_selector" t-on-click.stop="">
+                    <CheckBox value="record.selected" onChange.alike="() => this.toggleRecordSelection(record)" />
+                </div>
+                <div t-if="props.archInfo.openFormView" class="z-index-1">
+                    <button class="btn btn-link btn-sm text-secondary p-0" t-on-click.stop="(ev) => this.onOpenFormViewClicked(record, ev)">
+                        <i class="fa fa-expand"/>
+                    </button>
+                </div>
             </div>
+
             <div class="o_form_view o_form_readonly">
                 <t t-foreach="props.archInfo.multiLineLayout" t-as="node" t-key="node_index">
                     <MultiLineNode node="node" record="record" archInfo="props.archInfo" renderer="this" parentCol="1"/>
