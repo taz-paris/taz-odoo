@@ -17,7 +17,7 @@
     'version': "18.0.1.0.0",
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement'],
+    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement', 'web_list_multi_line'],
 
     # always loaded
     'data': [
@@ -36,6 +36,7 @@
         'views/purchase_order.xml',
         'views/project_accounting_closing.xml',
         'views/project_progress.xml',
+        'views/project_progress_multi_line.xml',
         'views/payment.xml',
         'views/account_move.xml',
         'views/wizard_accounting_closing_mass_creation.xml',

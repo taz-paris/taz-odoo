@@ -1,0 +1,82 @@
+
+.o_list_multi_line_renderer {
+    background-color: #f9f9f9;
+    padding: 10px;
+}
+
+.o_list_multi_line_record {
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.o_list_multi_line_record:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.o_list_multi_line_record.o_selected_row {
+    border: 1px solid var(--o-brand-primary, #017e84);
+    box-shadow: 0 0 0 2px rgba(var(--o-brand-primary-rgb, 1, 126, 132), 0.25);
+    background-color: white !important;
+}
+
+.o_list_group {
+    padding: 10px 15px;
+}
+
+.o_group_title {
+    font-size: 1.1rem;
+    color: var(--o-brand-primary, #017e84);
+    text-transform: none;
+    font-weight: 500;
+    letter-spacing: normal;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 5px;
+}
+
+.o_field_wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    min-width: 150px;
+}
+
+.o_field_wrapper label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--o-main-text-color, #333);
+    width: 40%;
+    margin-bottom: 0;
+    margin-right: 10px;
+    text-align: right; /* Often form labels are right-aligned or left-aligned, left is fine too */
+    padding-right: 10px;
+}
+
+.o_field_wrapper > .o_field_content,
+.o_field_wrapper > .o_field_widget {
+    flex-grow: 1;
+    width: 60%;
+    font-size: 0.95rem;
+}
+
+/* Handle groups in multi-line */
+.o_list_multi_line_renderer .o_group_header {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--o-main-text-color);
+}
+
+.o_list_multi_line_footer {
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+.o_aggregate {
+    font-size: 0.9rem;
+}
