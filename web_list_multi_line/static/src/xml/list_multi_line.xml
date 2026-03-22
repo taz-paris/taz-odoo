@@ -16,8 +16,8 @@
                     <!-- SYSTÈME DE TRI PAR TUILES -->
                     <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1 overflow-hidden">
                         
-                        <Dropdown position="'bottom-start'" className="'o_sort_dropdown'">
-                            <button class="btn btn-sm btn-light border-dashed d-flex align-items-center gap-1 text-muted">
+                        <Dropdown position="'bottom-start'">
+                            <button class="o_sort_dropdown btn btn-sm btn-light border-dashed d-flex align-items-center gap-1 text-muted">
                                 <i class="fa fa-plus-circle opacity-50"/>
                                 <span class="small fw-bold">Ajouter un critère de tri</span>
                             </button>
@@ -180,7 +180,13 @@
             <t t-if="props.node.type === 'field'">
                 <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0" t-on-click.stop="(ev) => props.renderer.onCellClicked(props.record, column, ev)">
                     <div t-if="!props.node.nolabel" class="o_cell o_wrap_label text-break text-900">
-                        <label class="o_form_label" t-esc="column.string || column.label"/>
+                        <FormLabel 
+                            fieldInfo="column" 
+                            record="props.record" 
+                            fieldName="column.name" 
+                            string="column.string || column.label"
+                            id="column.name"
+                        />
                     </div>
                     <div class="o_cell o_wrap_input text-break" t-att-style="props.node.nolabel ? 'grid-column: span 2;' : ''">
                         <div t-att-name="column.name" class="o_field_widget" t-att-class="column.class">

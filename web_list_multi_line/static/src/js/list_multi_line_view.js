@@ -13,11 +13,12 @@ import { Notebook } from "@web/core/notebook/notebook";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { FormLabel } from "@web/views/form/form_label";
 
 // Composant récursif universel pour le rendu des nœuds (Form-like)
 class MultiLineNode extends Component {
     static template = "web_list_multi_line.Node";
-    static components = { MultiLineNode, Field, Notebook };
+    static components = { MultiLineNode, Field, Notebook, FormLabel };
 
     get column() {
         return this.props.archInfo.fieldNodes[this.props.node.fieldId];
