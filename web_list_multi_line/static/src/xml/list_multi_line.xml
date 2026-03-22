@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web_list_multi_line.Renderer">
+        <div class="o_list_renderer o_list_multi_line_renderer o_renderer" tabindex="-1" t-ref="root" style="background-color: #f8f9fa; min-height: 100vh; padding: 0 !important;">
+            <div class="o_list_multi_line_container container-fluid p-0" style="padding: 0 !important;"> 
+                <table class="d-none" t-ref="table"><tbody></tbody></table>
+
+                <!-- BARRE DE SÉLECTION GLOBALE ET TRI -->
+                <div class="o_list_selection_header sticky-top bg-white border-bottom p-2 mb-3 d-flex align-items-center shadow-sm mx-2 rounded-bottom" style="margin : 0 !important; padding-left:12px !important">
+                    <div t-if="hasSelectors" class="d-flex align-items-center border-end pe-3 me-3">
+                        <CheckBox value="selectAll" className="'d-flex m-0 pe-2'" onChange.bind="toggleSelection"/>
+                        <span class="fw-bold text-muted small text-uppercase d-none d-md-inline">Tout sélectionner</span>
+                    </div>
+
+                    <!-- SYSTÈME DE TRI PAR TUILES -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1 overflow-hidden">
+                        
+                        <Dropdown position="'bottom-start'">
+                            <button class="o_sort_dropdown btn btn-sm btn-light border-dashed d-flex align-items-center gap-1 text-muted">
+                                <i class="fa fa-plus-circle opacity-50"/>
+                                <span class="small fw-bold">Ajouter un critère de tri</span>
+                            </button>
+                            <t t-set-slot="content">
+                                <t t-foreach="sortableColumns" t-as="col" t-key="col.id">
+                                    <DropdownItem onSelected="() => this.onSort(col.name)">
+                                        <div class="d-flex justify-content-between align-items-center w-100 py-1">
+                                            <span t-esc="col.label"/>
+                                            <i class="fa fa-check text-primary ms-3" t-if="props.list.orderBy.some(s => s.name === col.name)"/>
+                                        </div>
+                                    </DropdownItem>
+                                </t>
+                            </t>
+                        </Dropdown>
+
+                        <div class="d-flex align-items-center gap-2 overflow-auto no-scrollbar py-1">
+                            <t t-foreach="activeSorts" t-as="sort" t-key="sort.name">
+                                <div class="badge d-flex align-items-center gap-2 p-2 bg-primary-light border border-primary text-primary cursor-pointer hover-opacity shadow-sm"
+                                     t-on-click="() => this.onSort(sort.name)"
+                                     style="border-radius: 6px; font-weight: 500;">
+                                    <span t-esc="sort.label"/>
+                                    <i t-attf-class="oi {{ sort.asc ? 'oi-arrow-up' : 'oi-arrow-down' }} small opacity-75"/>
+                                    <i class="fa fa-times ms-1 text-muted hover-text-danger" 
+                                       t-on-click.stop="() => this.removeSort(sort.name)"
+                                       title="Supprimer ce tri"/>
+                                </div>
+                            </t>
+                            <button t-if="activeSorts.length > 1" 
+                                    class="btn btn-sm btn-link text-danger p-0 ms-2 text-decoration-none" 
+                                    t-on-click="() => this.removeAllSorts()"
+                                    title="Réinitialiser le tri">
+                                <i class="fa fa-trash-o me-1"/>
+                                <small class="fw-bold text-uppercase">Effacer tous les tris</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <t t-call="{{ constructor.rowsTemplate }}">
+                    <t t-set="list" t-value="props.list"/>
+                </t>
+
+                <t t-if="!props.list.records.length and !props.list.isGrouped">
+                    <div class="p-5 text-center text-muted">Aucun enregistrement trouvé.</div>
+                </t>
+
+                <!-- PIED DE PAGE AVEC CUMULS (DANS LE FLUX) -->
+                <t t-if="aggregateColumns.length">
+                    <div class="o_list_footer border-top bg-white p-3 mt-4 shadow-sm mx-2 mb-4 rounded" style="margin-left: 0 !important; margin-right: 0 !important;">
+                        <div class="d-flex gap-4 justify-content-end">
+                            <t t-foreach="aggregateColumns" t-as="column" t-key="column.id">
+                                <div class="text-end border-start ps-3">
+                                    <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem;" t-esc="column.label"/>
+                                    <span class="fw-bold text-dark" t-esc="aggregates[column.name].value"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="web_list_multi_line.Rows">
+        <t t-if="!list.isGrouped">
+            <t t-foreach="list.records" t-as="record" t-key="record.id">
+                <t t-call="web_list_multi_line.RecordRow">
+                    <t t-set="record" t-value="record"/>
+                </t>
+            </t>
+        </t>
+        <t t-else="">
+            <t t-foreach="list.groups" t-as="group" t-key="group.id">
+                <t t-call="web_list_multi_line.GroupRow"/>
+                <t t-if="!group.isFolded">
+                    <t t-call="web_list_multi_line.Rows">
+                        <t t-set="list" t-value="group.list"/>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </t>
+
+    <t t-name="web_list_multi_line.GroupRow">
+        <div class="o_group_header o_list_multi_line_group_header p-3 bg-light border-bottom border-top cursor-pointer d-flex align-items-center mb-2 shadow-sm rounded mx-2"  
+             t-on-click="(ev) => this.onGroupHeaderClicked(ev, group)"
+             t-attf-style="margin-left: {{ (getGroupLevel(group) * 1.5) }}rem !important; margin-right: 0 !important;">
+            <span t-attf-class="o_group_caret fa fa-fw {{group.isFolded ? 'fa-caret-right' : 'fa-caret-down' }} me-2 text-primary"/>
+            <div class="flex-grow-1">
+                <span class="fw-bold fs-6" t-esc="getGroupDisplayName(group)"/>
+                <span class="badge rounded-pill bg-secondary ms-2" t-esc="group.count"/>
+            </div>
+            <div class="d-flex gap-4">
+                <t t-foreach="aggregateColumns" t-as="column" t-key="column.id">
+                    <div class="text-end border-start ps-3">
+                        <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem;" t-esc="column.label"/>
+                        <span class="fw-bold text-dark" t-esc="formatAggregateValue(group, column)"/>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="web_list_multi_line.RecordRow">
+        <div class="o_data_row o_list_multi_line_record o_form_sheet position-relative mb-4 shadow-sm p-4 bg-white mx-2" style="margin-left : 0 !important; margin-right : 0 !important; padding-left:12px !important"
+             t-att-class="getRowClass(record) + (record.selected ? ' border-primary border-2' : '')"
+             t-att-data-id="record.id"
+             t-on-click="(ev) => this.onCellClicked(record, null, ev)">
+            
+            <div class="d-flex justify-content-between align-items-center mb-0">
+                <div t-if="hasSelectors" class="o_list_record_selector" t-on-click.stop="">
+                    <CheckBox value="record.selected" onChange.alike="() => this.toggleRecordSelection(record)" />
+                </div>
+                <div t-if="props.archInfo.openFormView" class="z-index-1">
+                    <button class="btn btn-link btn-sm text-secondary p-0" t-on-click.stop="(ev) => this.onOpenFormViewClicked(record, ev)">
+                        <i class="fa fa-expand"/>
+                    </button>
+                </div>
+            </div>
+
+            <div class="o_form_view o_form_readonly">
+                <t t-foreach="props.archInfo.multiLineLayout" t-as="node" t-key="node_index">
+                    <MultiLineNode node="node" record="record" archInfo="props.archInfo" renderer="this" parentCol="1"/>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="web_list_multi_line.Node">
+        <t t-if="isVisible">
+            <t t-if="props.node.type === 'group'">
+                <div t-att-class="props.node.isOuter ? 'o_group row align-items-start' : 'o_inner_group grid col-lg-' + (12/(props.parentCol || 1)) + ' ' + props.node.class">
+                    <div t-if="props.node.string" t-att-class="props.node.isOuter ? 'col-12' : 'g-col-sm-2'">
+                        <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
+                    </div>
+                    <t t-foreach="props.node.children" t-as="child" t-key="child_index">
+                        <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="props.node.col"/>
+                    </t>
+                </div>
+            </t>
+            <t t-if="props.node.type === 'notebook'">
+                <div class="o_notebook mt-4">
+                    <Notebook>
+                        <t t-foreach="props.node.children" t-as="page" t-key="page_index">
+                            <t t-if="page.type === 'page'">
+                                <t t-set-slot="page_{{page_index}}" t-slot-scope="notebook" title="page.string" isVisible="true">
+                                    <div class="p-3 border-top border-start border-end rounded-bottom bg-white shadow-sm">
+                                        <t t-foreach="page.children" t-as="child" t-key="child_index">
+                                            <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="1"/>
+                                        </t>
+                                    </div>
+                                </t>
+                            </t>
+                        </t>
+                    </Notebook>
+                </div>
+            </t>
+            <t t-if="props.node.type === 'field'">
+                <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0" t-on-click.stop="(ev) => props.renderer.onCellClicked(props.record, column, ev)">
+                    <div t-if="!props.node.nolabel" class="o_cell o_wrap_label text-break text-900">
+                        <FormLabel 
+                            fieldInfo="column" 
+                            record="props.record" 
+                            fieldName="column.name" 
+                            string="column.string || column.label"
+                            id="column.name"
+                        />
+                    </div>
+                    <div class="o_cell o_wrap_input text-break" t-att-style="props.node.nolabel ? 'grid-column: span 2;' : ''">
+                        <div t-att-name="column.name" class="o_field_widget" t-att-class="column.class">
+                            <t t-if="props.renderer.canUseFormatter(column, props.record)">
+                                <span class="o_field_content text-break" t-out="props.renderer.getFormattedValue(column, props.record)"/>
+                            </t>
+                            <Field t-if="!props.renderer.canUseFormatter(column, props.record)" name="column.name" record="props.record" type="column.widget" fieldInfo="column" t-props="props.renderer.getFieldProps(props.record, column)"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+            <t t-if="props.node.type === 'div' or props.node.type === 'header' or props.node.type === 'sheet'">
+                <div t-att-class="props.node.class" t-att-style="props.node.style">
+                    <t t-foreach="props.node.children" t-as="child" t-key="child_index">
+                        <MultiLineNode node="child" record="props.record" archInfo="props.archInfo" renderer="props.renderer" parentCol="props.parentCol"/>
+                    </t>
+                </div>
+            </t>
+            <t t-if="props.node.type === 'button'">
+                <button
+                    t-att-class="'btn btn-sm ' + (props.node.class || 'btn-secondary')"
+                    t-att-title="props.node.string"
+                    t-on-click.stop="() => props.renderer.onButtonClicked(props.node, props.record)">
+                    <i t-if="props.node.icon" t-att-class="'fa ' + props.node.icon + ' me-1'"/>
+                    <t t-esc="props.node.string"/>
+                </button>
+            </t>
+            <t t-if="props.node.type === 'newline'">
+                <div class="w-100 d-none d-md-block"/>
+            </t>
+        </t>
+    </t>
+
+</templates>
