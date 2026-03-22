@@ -66,14 +66,12 @@
 
                 <!-- PIED DE PAGE AVEC CUMULS (DANS LE FLUX) -->
                 <t t-if="aggregateColumns.length">
-                    <div class="o_list_footer border-top bg-white p-4 mt-4 shadow-sm mx-2 mb-4 rounded" style="margin-left: 0 !important; margin-right: 0 !important;">
-                        <div class="row g-4 justify-content-end">
+                    <div class="o_list_footer border-top bg-white p-3 mt-4 shadow-sm mx-2 mb-4 rounded" style="margin-left: 0 !important; margin-right: 0 !important;">
+                        <div class="d-flex gap-4 justify-content-end">
                             <t t-foreach="aggregateColumns" t-as="column" t-key="column.id">
-                                <div class="col-auto">
-                                    <div class="d-flex flex-column border-start ps-4">
-                                        <span class="text-uppercase text-muted small fw-bold mb-1" style="font-size: 0.75rem;" t-esc="column.label"/>
-                                        <span class="fs-4 fw-bolder text-dark" t-esc="aggregates[column.name].value"/>
-                                    </div>
+                                <div class="text-end border-start ps-3">
+                                    <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem;" t-esc="column.label"/>
+                                    <span class="fw-bold text-dark" t-esc="aggregates[column.name].value"/>
                                 </div>
                             </t>
                         </div>
