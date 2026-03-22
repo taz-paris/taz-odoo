@@ -205,6 +205,15 @@
                     </t>
                 </div>
             </t>
+            <t t-if="props.node.type === 'button'">
+                <button
+                    t-att-class="'btn btn-sm ' + (props.node.class || 'btn-secondary')"
+                    t-att-title="props.node.string"
+                    t-on-click.stop="() => props.renderer.onButtonClicked(props.node, props.record)">
+                    <i t-if="props.node.icon" t-att-class="'fa ' + props.node.icon + ' me-1'"/>
+                    <t t-esc="props.node.string"/>
+                </button>
+            </t>
             <t t-if="props.node.type === 'newline'">
                 <div class="w-100 d-none d-md-block"/>
             </t>

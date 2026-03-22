@@ -98,7 +98,7 @@ class ProjectProgress(models.Model):
         return super().unlink()
 
     @api.depends('accounting_closing_id', 'accounting_closing_id.previous_closing', 'outsourcing_link_id', 
-                 'progress_rate', 'is_validated', 'accounting_closing_id.production_period_amount',
+                 'progress_rate', 'accounting_closing_id.production_period_amount',
                  'rel_project_id.company_part_cost_current', 'rel_project_id.company_part_cost_futur', 
                  'rel_project_id.company_part_amount_current', 'outsourcing_product_qty')
     def compute(self):
@@ -208,6 +208,22 @@ class ProjectProgress(models.Model):
                     rec.progress_rate = rate
                 elif rec.target_project_outsourcing_product_qty:
                     rec.outsourcing_product_qty = rate * rec.target_project_outsourcing_product_qty
+
+    def goto_napta(self):
+        self.ensure_one()
+        return self.accounting_closing_id.goto_napta()
+
+    def action_open_analytic_lines(self):
+        self.ensure_one()
+        return self.accounting_closing_id.action_open_analytic_lines()
+
+    def action_validate(self):
+        self.ensure_one()
+        self.write({'is_validated': True})
+
+    def action_invalidate(self):
+        self.ensure_one()
+        self.write({'is_validated': False})
 
     @api.constrains('outsourcing_link_id', 'accounting_closing_id')
     def _check_project_consistency(self):

@@ -4,6 +4,7 @@ import { ListArchParser } from "@web/views/list/list_arch_parser";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { listView } from "@web/views/list/list_view";
 import { registry } from "@web/core/registry";
+import { rpc } from "@web/core/network/rpc";
 import { getActiveActions } from "@web/views/utils";
 import { stringToOrderBy } from "@web/search/utils/order_by";
 import { exprToBoolean } from "@web/core/utils/strings";
@@ -29,6 +30,11 @@ class MultiLineNode extends Component {
             const col = this.column;
             if (!col) return false;
             return !this.props.renderer.evalInvisible(col.invisible, this.props.record);
+        }
+        if (this.props.node.type === 'button') {
+            const invisible = this.props.node.invisible;
+            if (!invisible) return true;
+            return !this.props.renderer.evalInvisible(invisible, this.props.record);
         }
         return true;
     }
@@ -84,6 +90,9 @@ export class ListMultiLineArchParser extends ListArchParser {
                 style: child.getAttribute("style") || "",
                 fieldId: child.getAttribute("field_id"),
                 name: child.getAttribute("name"),
+                icon: child.getAttribute("icon") || "",
+                invisible: child.getAttribute("invisible") || "",
+                confirm: child.getAttribute("confirm") || "",
                 nolabel: child.getAttribute("nolabel") === "1",
                 col: parseInt(child.getAttribute("col") || (tagName === "group" && isRoot ? "2" : "1"), 10),
                 children: child.children.length ? this.parseUniversalLayout(child, false) : [],
@@ -155,6 +164,28 @@ export class ListMultiLineRenderer extends ListRenderer {
 
     onOpenFormViewClicked(record, ev) {
         this.props.openRecord(record);
+    }
+
+    async onButtonClicked(node, record) {
+        await record.save();
+        // On utilise /web/dataset/call_button (et non orm.call) pour reproduire
+        // exactement le comportement natif d'Odoo : normalisation automatique
+        // de l'action retournée (views, res_id, target, etc.) côté serveur.
+        const action = await rpc("/web/dataset/call_button", {
+            model: record.resModel,
+            method: node.name,
+            args: [[record.resId]],
+            kwargs: { context: record.context },
+        });
+        if (action && typeof action === "object") {
+            // L'action peut naviguer vers une autre vue (target: 'current')
+            // et détruire ce composant → on ne recharge PAS le record après
+            await this.env.services.action.doAction(action);
+        } else {
+            // Pas d'action retournée (ex: action_validate, action_invalidate)
+            // → simple rechargement du record pour refléter les changements
+            await record.load();
+        }
     }
 
     focusCell(column) {
