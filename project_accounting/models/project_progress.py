@@ -6,7 +6,7 @@ class ProjectProgress(models.Model):
     _name = 'project.progress'
     _description = 'Avancement Projet'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'rel_closing_date desc, id desc'
+    _order = 'rel_closing_date desc, type asc, id asc'
 
     _sql_constraints = [
         ('unique_closing_link', 'UNIQUE(accounting_closing_id, outsourcing_link_id)', 
