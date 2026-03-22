@@ -44,7 +44,7 @@
                             <field name="display_name" readonly="1"/>
                         </h1>
                     </div>
-                    <group>
+                    <group col="3">
                         <group name="info_base" string="Informations de base">
                             <field name="rel_project_id"/>
                             <field name="accounting_closing_id" readonly="1"/>
@@ -59,24 +59,33 @@
                             <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="1"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
-                    </group>
-                    <group name="progress_valuation" string="Suivi d'avancement et Valorisation" col="3">
-                        <group name="calculation" string="Saisie de l'avancement">
-                            <field name="progress_rate" widget="percentage" readonly="is_validated"/>
-                            <field name="target_project_cost"/>
-                            <field name="target_project_revenue"/>
-                        </group>
-                        <group name="valuation" string="Valorisation">
-                            <field name="progress_cost_amount"/>
-                            <field name="progress_revenue_amount"/>
-                            <field name="progress_cost_amount_period"/>
-                            <field name="progress_revenue_amount_period"/>
-                        </group>
-                        <group name="previous_data" string="Données précédentes">
+                        <group>
                             <field name="previous_progress_id"/>
+                        </group>
+                    </group>
+                    <group col="4">
+                        <group name="previous_data" string="Rappel données précédente clôture">
                             <field name="rel_previous_progress_rate" widget="percentage"/>
                             <field name="rel_previous_progress_cost_amount"/>
                             <field name="rel_previous_progress_revenue_amount"/>
+                        </group>
+                        <group name="valuation" string="Valorisation totale à date de clôture">
+                            <field name="outsourcing_product_qty" invisible="type == 'internal_production'" sum="Total product qty"/>
+                            <field name="progress_rate" widget="percentage" readonly="is_validated"/>
+                            <field name="progress_cost_amount" sum="Total Cost"/>
+                            <field name="progress_revenue_amount" sum="Total Revenue"/>
+                        </group>
+                        <group name="valuation_period" string="Valorisation de la période">
+                            <field name="outsourcing_product_qty_period" invisible="type == 'internal_production'" sum="Total product qty"/>
+                            <field name="progress_rate_period" widget="percentage"/>
+                            <field name="progress_cost_amount_period" sum="Total Cost"/>
+                            <field name="progress_revenue_amount_period" sum="Total Revenue"/>
+                        </group>
+                        <group name="target" string="Projection à terminaison">
+                            <newline/><newline/>
+                            <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'" sum="Total product qty"/>
+                            <field name="target_project_cost" sum="Total Cost"/>
+                            <field name="target_project_revenue" sum="Total Revenue"/>
                         </group>
                     </group>
                 </sheet>
