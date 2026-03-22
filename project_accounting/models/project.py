@@ -488,7 +488,7 @@ class projectAccountProject(models.Model):
             other_part_cost_futur = 0.0
             for link in rec.project_outsourcing_link_ids:
                 link.compute()
-                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_purchase_order=True)
+                outsourcing_link_purchase_order_with_draft += link.compute_purchase_order_total(with_direct_payment=True, with_draft_purchase_order=True)[0]
                 if link.link_type == 'outsourcing' :
                     outsource_part_amount_current += link.outsource_part_amount_current
                     outsource_part_cost_current += link.sum_account_move_lines + link.order_direct_payment_done

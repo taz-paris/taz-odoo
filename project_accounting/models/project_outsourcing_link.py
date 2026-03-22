@@ -31,6 +31,7 @@ class projectOutsourcingLink(models.Model):
         for rec in self:
             line_ids = rec.get_purchase_order_line_ids()
             total = 0.0
+            total_product_qty = 0.0
             for line_id in line_ids:
                 line = self.env['purchase.order.line'].browse(line_id)
                 if line.direct_payment_sale_order_line_id and with_direct_payment==False:
@@ -39,7 +40,8 @@ class projectOutsourcingLink(models.Model):
                     continue
                 if str(rec.project_id.account_id.id) in line.analytic_distribution.keys():
                     total += line.product_qty * line.price_unit * line.analytic_distribution[str(rec.project_id.account_id.id)]/100.0
-            return total
+                    total_product_qty += line.product_qty
+            return total, total_product_qty
 
     def action_open_purchase_order_lines(self):
         line_ids = self.get_purchase_order_line_ids()
@@ -156,7 +158,7 @@ class projectOutsourcingLink(models.Model):
                     rec.order_direct_payment_done += purchase_line.order_direct_payment_validated_amount
                     rec.order_direct_payment_done_detail += "%s \n" % (purchase_line.order_direct_payment_validated_detail or "")
 
-            rec.order_sum_purchase_order_lines = rec.compute_purchase_order_total()
+            rec.order_sum_purchase_order_lines, rec.order_sum_purchase_order_product_qty = rec.compute_purchase_order_total()
             rec.order_company_payment_amount = rec.order_sum_purchase_order_lines - rec.order_direct_payment_amount
 
             rec.marging_amount_current =  rec.outsource_part_amount_current - rec.order_sum_purchase_order_lines
@@ -202,6 +204,7 @@ class projectOutsourcingLink(models.Model):
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Currency", readonly=True)
 
     order_sum_purchase_order_lines = fields.Monetary('Total HT des commandes enregistrées', compute=compute, store=True)
+    order_sum_purchase_order_product_qty = fields.Float('Total des quantités commandées', compute=compute, store=True)
     order_direct_payment_amount = fields.Monetary('Montant HT paiement direct', compute=compute, store=True, help="Montant payé directement par le client final au sous-traitant")
     order_company_payment_amount = fields.Monetary('Montant HT à payer à ce sous-traitant', help="Différence entre le total des commandes à ce sous-traitant pour ce projet, et le montant que le sous-traitant a prévu de facturer directement au client", compute=compute, store=True)
 

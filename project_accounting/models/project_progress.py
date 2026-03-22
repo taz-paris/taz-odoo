@@ -38,16 +38,20 @@ class ProjectProgress(models.Model):
     target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='compute', store=True)
     target_project_revenue = fields.Monetary(string="Prix de vente de revient total projeté", compute='compute', store=True)
 
-    progress_rate = fields.Float(string="Taux d'avancement actualisé")
+    target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées S/T", compute='compute', store=True)
+    outsourcing_product_qty = fields.Float(string="Nb unités produites S/T", compute='compute', store=True)
+    outsourcing_product_qty_period = fields.Float(string="Nb unités produites S/T période")
+
+    progress_rate = fields.Float(string="Avancement à date de la clôture")
 
     progress_cost_amount = fields.Monetary(string="Valorisation de l’avancement en coût de revient", 
                                           compute='compute', store=True)
     progress_revenue_amount = fields.Monetary(string="Valorisation de l’avancement en prix de vente", 
                                              compute='compute', store=True)
-
-    progress_cost_amount_period = fields.Monetary(string="Variation de l’avancement en coût de revient", 
+    progress_rate_period = fields.Float(string="Avancement sur la période (en points)", compute='compute', store=True)
+    progress_cost_amount_period = fields.Monetary(string="Variation de l’avancement en coût de revient sur la période", 
                                                  compute='compute', store=True)
-    progress_revenue_amount_period = fields.Monetary(string="Variation de l’avancement en prix de vente", 
+    progress_revenue_amount_period = fields.Monetary(string="Variation de l’avancement en prix de vente sur la période", 
                                                     compute='compute', store=True)
 
     is_validated = fields.Boolean(string="Validé", tracking=True)
@@ -116,27 +120,45 @@ class ProjectProgress(models.Model):
             else:
                 rec.previous_progress_id = False
 
-            # 3. Target amounts
+
             if rec.type == 'internal_production':
                 rec.target_project_cost = (rec.rel_project_id.company_part_cost_current or 0.0) + (rec.rel_project_id.company_part_cost_futur or 0.0)
                 rec.target_project_revenue = rec.rel_project_id.company_part_amount_current or 0.0
+                rec.progress_cost_amount = rec.accounting_closing_id.production_period_amount or 0.0
+                if rec.target_project_cost :
+                    rec.progress_rate = rec.progress_cost_amount / rec.target_project_cost
+                else:
+                    rec.progress_rate = 0.0
+
             elif rec.outsourcing_link_id:
-                rec.target_project_cost = rec.outsourcing_link_id.order_sum_purchase_order_lines or 0.0
-                rec.target_project_revenue = rec.outsourcing_link_id.outsource_part_amount_current or 0.0
+                # Le coût total à terminaison est la somme des lignes de commmande en paiement indirect (via Tasmane) pour ce sous-traitant
+                rec.target_project_cost = rec.outsourcing_link_id.order_company_payment_amount or 0.0
+                # Le CA Tasmane à terminaison pour ce sous-traitant est la somme du prix de revente X ratio de paiement indirect
+                #   -> En effet, dans les BCF, le prix de revente est parfois indiqué sur une seule ligne, donc on proratise
+                if rec.outsourcing_link_id.order_sum_purchase_order_lines :
+                    indirect_payment_ratio = rec.outsourcing_link_id.order_company_payment_amount / rec.outsourcing_link_id.order_sum_purchase_order_lines
+                else:
+                    indirect_payment_ratio = 1.0
+                rec.target_project_revenue = (rec.outsourcing_link_id.outsource_part_amount_current or 0.0) * indirect_payment_ratio
+
+                rec.outsourcing_product_qty = rec.outsourcing_product_qty_period + rec.previous_progress_id.outsourcing_product_qty
+                rec.target_project_outsourcing_product_qty = rec.outsourcing_link_id.order_sum_purchase_order_product_qty
+                if rec.target_project_outsourcing_product_qty :
+                    rec.progress_rate = rec.outsourcing_product_qty / rec.target_project_outsourcing_product_qty
+                else :
+                    rec.progress_rate = 0.0
+                
+                rec.progress_cost_amount = (rec.target_project_cost or 0.0) * (rec.progress_rate or 0.0)
+
             else:
                 rec.target_project_cost = 0.0
                 rec.target_project_revenue = 0.0
 
-            # 4. Progress amounts
-            if rec.type == 'internal_production':
-                rec.progress_cost_amount = rec.accounting_closing_id.production_period_amount or 0.0
-            else:
-                rec.progress_cost_amount = (rec.target_project_cost or 0.0) * (rec.progress_rate or 0.0)
-            rec.progress_revenue_amount = (rec.target_project_revenue or 0.0) * (rec.progress_rate or 0.0)
 
-            # 5. Period amounts (Current - Previous)
-            rec.progress_cost_amount_period = rec.progress_cost_amount - (rec.rel_previous_progress_cost_amount or 0.0)
+            rec.progress_revenue_amount = (rec.target_project_revenue or 0.0) * (rec.progress_rate or 0.0)
             rec.progress_revenue_amount_period = rec.progress_revenue_amount - (rec.rel_previous_progress_revenue_amount or 0.0)
+            rec.progress_cost_amount_period = rec.progress_cost_amount - (rec.rel_previous_progress_cost_amount or 0.0)
+            rec.progress_rate_period = rec.progress_rate - (rec.rel_previous_progress_rate or 0.0)
 
             # 6. Next Progress logic (inspired by project.accounting_closing)
             next_progress = self.env['project.progress'].search([('previous_progress_id', '=', rec.id)], limit=1)
