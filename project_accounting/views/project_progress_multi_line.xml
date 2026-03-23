@@ -8,7 +8,7 @@
             <list js_class="list_multi_line" editable="top" expand="1" open_form_view="1" limit="100" groups_limit="100">
                 <field name="company_id" invisible="1" groups="base.group_multi_company" options="{'no_create': True}" readonly="1"/>
                 <field name="currency_id" invisible="1"/>
-                <group col="4">
+                <group col="5">
                     <group>
                         <field name="rel_project_id" readonly="1"/>
                     </group>
@@ -17,6 +17,9 @@
                     </group>
                     <group>
                         <field name="type" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="rel_outsourcing_partner_id" invisible="type == 'internal_production'"/>
                     </group>
                     <group>
                         <!-- On utilise un bouton Valider/Dévalider au lieu du widget boolean_toggle 

@@ -149,7 +149,7 @@
     <t t-name="web_list_multi_line.Node">
         <t t-if="isVisible">
             <t t-if="props.node.type === 'group'">
-                <div t-att-class="props.node.isOuter ? 'o_group row align-items-start' : 'o_inner_group grid col-lg-' + (12/(props.parentCol || 1)) + ' ' + props.node.class">
+                <div t-att-class="props.node.isOuter ? 'o_group row align-items-start' : 'o_inner_group grid col-lg-' + Math.floor(12/(props.parentCol || 1)) + ' ' + props.node.class">
                     <div t-if="props.node.string" t-att-class="props.node.isOuter ? 'col-12' : 'g-col-sm-2'">
                         <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
                     </div>
