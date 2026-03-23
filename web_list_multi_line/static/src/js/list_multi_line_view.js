@@ -9,6 +9,7 @@ import { getActiveActions } from "@web/views/utils";
 import { stringToOrderBy } from "@web/search/utils/order_by";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { Component, xml } from "@odoo/owl";
+import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { Field } from "@web/views/fields/field";
 import { Notebook } from "@web/core/notebook/notebook";
 import { CheckBox } from "@web/core/checkbox/checkbox";
@@ -59,7 +60,7 @@ export class ListMultiLineArchParser extends ListArchParser {
 
         // On utilise le parseur de liste pour les colonnes et métadonnées
         const archInfo = super.parse(xmlDoc, models, modelName);
-        
+
         if (isMultiLine) {
             archInfo.activeActions = {
                 ...getActiveActions(originalXmlDoc),
@@ -67,6 +68,13 @@ export class ListMultiLineArchParser extends ListArchParser {
             };
             archInfo.editable = originalXmlDoc.getAttribute("editable") || archInfo.editable;
             archInfo.limit = parseInt(originalXmlDoc.getAttribute("limit") || "80", 10);
+            // Lecture explicite de groups_limit depuis le XML.
+            // Nécessaire car le parser parent ne lit pas toujours cet attribut
+            // correctement à travers notre Proxy (tagName remapped).
+            const groupsLimitAttr = originalXmlDoc.getAttribute("groups_limit");
+            if (groupsLimitAttr) {
+                archInfo.groupsLimit = parseInt(groupsLimitAttr, 10);
+            }
             archInfo.noOpen = exprToBoolean(originalXmlDoc.getAttribute("no_open") || "false");
             archInfo.defaultOrder = stringToOrderBy(originalXmlDoc.getAttribute("default_order") || null) || archInfo.defaultOrder;
         }
@@ -101,7 +109,7 @@ export class ListMultiLineArchParser extends ListArchParser {
             if (tagName === "group") {
                 item.isOuter = isRoot || Array.from(child.children).some(c => c.tagName === "group");
             }
-            
+
             layout.push(item);
         }
         return layout;
@@ -114,7 +122,7 @@ export class ListMultiLineRenderer extends ListRenderer {
     static recordRowTemplate = "web_list_multi_line.RecordRow";
     static groupRowTemplate = "web_list_multi_line.GroupRow";
     static components = { ...ListRenderer.components, Field, MultiLineNode, CheckBox, Dropdown, DropdownItem };
-    
+
     setup() {
         super.setup();
         for (const col of Object.values(this.props.archInfo.fieldNodes || {})) {
@@ -198,10 +206,27 @@ export class ListMultiLineRenderer extends ListRenderer {
     }
 }
 
+// Odoo limite expand='1' à 10 groupes par défaut (DEFAULT_OPEN_GROUP_LIMIT = 10).
+// On surcharge cette constante pour permettre d'afficher tous les groupes dépliés.
+class ListMultiLineModel extends RelationalModel {
+    // Odoo limite le nombre de groupes simultanément dépliés à 10 (MAX_NUMBER_OPENED_GROUPS).
+    // Dans notre vue multi-ligne, on veut que tous les groupes chargés soient dépliés.
+    // La limite du nombre de groupes chargés est déjà gérée par groups_limit dans le XML.
+    static MAX_NUMBER_OPENED_GROUPS = Infinity;
+
+    async _loadGroupedList(config) {
+        if (!config.limit && this.initialGroupsLimit) {
+            config.limit = this.initialGroupsLimit;
+        }
+        return super._loadGroupedList(config);
+    }
+}
+
 export const ListMultiLineView = {
     ...listView,
     ArchParser: ListMultiLineArchParser,
     Renderer: ListMultiLineRenderer,
+    Model: ListMultiLineModel,
 };
 
 registry.category("views").add("list_multi_line", ListMultiLineView);
