@@ -4,7 +4,7 @@
         <field name="name">project.progress.list</field>
         <field name="model">project.progress</field>
         <field name="arch" type="xml">
-            <list string="Avancements" editable="top" expand="1">
+            <list string="Avancements" expand="1">
                 <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                 <field name="rel_project_id"/>
                 <field name="accounting_closing_id" optional="hide"/>
@@ -71,22 +71,28 @@
                             <field name="rel_previous_progress_revenue_amount"/>
                         </group>
                         <group name="valuation" string="Valorisation totale à date de clôture">
-                            <field name="outsourcing_product_qty" invisible="type == 'internal_production'" sum="Total product qty" readonly="is_validated"/>
+                            <field name="outsourcing_product_qty" invisible="type == 'internal_production'" readonly="is_validated or type=='other'"/>
                             <field name="progress_rate" widget="percentage" readonly="is_validated"/>
-                            <field name="progress_cost_amount" sum="Total Cost" readonly="is_validated"/>
+                            <field name="progress_cost_amount" sum="Total Cost"/>
                             <field name="progress_revenue_amount" sum="Total Revenue" readonly="is_validated"/>
                         </group>
                         <group name="valuation_period" string="Valorisation de la période">
-                            <field name="outsourcing_product_qty_period" invisible="type == 'internal_production'" sum="Total product qty" readonly="is_validated"/>
-                            <field name="progress_rate_period" widget="percentage" readonly="is_validated"/>
-                            <field name="progress_cost_amount_period" sum="Total Cost" readonly="is_validated"/>
-                            <field name="progress_revenue_amount_period" sum="Total Revenue" readonly="is_validated"/>
+                            <field name="outsourcing_product_qty_period" invisible="type == 'internal_production'" readonly="is_validated or type=='other'"/>
+                            <field name="progress_rate_period" widget="percentage" readonly="is_validated  or type=='other'"/>
+                            <field name="progress_cost_amount_period" sum="Total Cost"/>
+                            <field name="progress_revenue_amount_period" sum="Total Revenue" readonly="is_validated or type=='other'"/>
+                            <button type="object" name="goto_napta" string="Voir sur Napta"
+                                class="btn btn-sm btn-outline-primary" icon="fa-external-link"
+                                invisible="type != 'internal_production'"/>
+                            <button type="object" name="action_open_analytic_lines" string="Voir les lignes de pointage"
+                                class="btn btn-sm btn-outline-secondary" icon="fa-clock-o"
+                                invisible="type != 'internal_production'"/>
                         </group>
                         <group name="target" string="Projection à terminaison">
                             <newline/><newline/>
-                            <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'" sum="Total product qty" readonly="is_validated"/>
-                            <field name="target_project_cost" sum="Total Cost" readonly="is_validated"/>
-                            <field name="target_project_revenue" sum="Total Revenue" readonly="is_validated"/>
+                            <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
+                            <field name="target_project_cost" sum="Total Cost"/>
+                            <field name="target_project_revenue" sum="Total Revenue"/>
                         </group>
                     </group>
                 </sheet>
