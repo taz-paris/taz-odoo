@@ -1,9 +1,8 @@
 /** @odoo-module **/
 
 import { AnalyticDistribution } from '@analytic/components/analytic_distribution/analytic_distribution';
-import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
-
 import { patch } from "@web/core/utils/patch";
+import { stateToUrl } from "@web/core/browser/router";
 
 const components = { AnalyticDistribution };
 
@@ -37,17 +36,16 @@ patch(components.AnalyticDistribution.prototype, {
 			if (typeof target_project_id === 'undefined'){
 				alert("Le compte analytique n'est rattaché à aucun projet.");
 			} else {
-				var searchParams = new URLSearchParams();
-				searchParams.set("view_type", "form");
-				searchParams.set("model", "project.project");
-				searchParams.set("id", target_project_id);
-				searchParams.set("menu_id", this.env.services.router.current.hash.menu_id);
-				var url = window.location.href;
-				var new_url = url.split("#")[0] + "#" + searchParams.toString();
+				// En Odoo 18, on utilise stateToUrl pour construire l'URL au format /odoo/{model}/{resId}
+				const state = {
+					model: "project.project",
+					resId: target_project_id,
+					view_type: "form",
+				};
+				const new_url = window.location.origin + stateToUrl(state);
 				window.open(new_url, "_blank");
 			}
 		}
 	},
         
 });
-
