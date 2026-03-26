@@ -468,7 +468,7 @@ class TestAccountInvoiceInterCompany(TestAccountInvoiceInterCompanyBase):
 
 
     def test02_create_so_on_po_validation(self):
-        self.assertEqual(self.project_b_po_line_ids[0].intercompany_sale_line_id.distribution_analytic_account_ids[0].id, self.project_link_b.inter_company_mirror_project.analytic_account_id.id)
+        self.assertEqual(self.project_b_po_line_ids[0].intercompany_sale_line_id.distribution_analytic_account_ids[0].id, self.project_link_b.inter_company_mirror_project.account_id.id)
         self.assertEqual(self.project_b_po.id, self.project_b_po_line_ids[0].intercompany_sale_line_id.order_id.auto_purchase_order_id.id)
 
 
@@ -487,7 +487,7 @@ class TestAccountInvoiceInterCompany(TestAccountInvoiceInterCompanyBase):
         mirror_invoice_line = self.project_b_po_line_ids[0].intercompany_sale_line_id.invoice_lines[0]
         self.assertNotEqual(mirror_invoice_line.id, False)
 
-        self.assertEqual(mirror_invoice_line.distribution_analytic_account_ids[0].id, self.project_link_b.inter_company_mirror_project.analytic_account_id.id)
+        self.assertEqual(mirror_invoice_line.distribution_analytic_account_ids[0].id, self.project_link_b.inter_company_mirror_project.account_id.id)
 
         self.assertEqual(mirror_invoice_line.price_unit, invoice_line.price_unit)
         self.assertEqual(mirror_invoice_line.product_id, invoice_line.product_id)
