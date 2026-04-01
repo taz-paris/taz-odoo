@@ -27,14 +27,15 @@ class MultiLineNode extends Component {
     }
 
     get isVisible() {
+        // Pour les champs, on récupère l'info d'invisibilité depuis la colonne générée par le parser standard d'Odoo
         if (this.props.node.type === 'field') {
             const col = this.column;
             if (!col) return false;
             return !this.props.renderer.evalInvisible(col.invisible, this.props.record);
         }
-        if (this.props.node.type === 'button') {
-            const invisible = this.props.node.invisible;
-            if (!invisible) return true;
+        // Pour tous les autres types de nœuds (group, button, div, notebook...), on évalue l'attribut invisible du nœud
+        const invisible = this.props.node.invisible;
+        if (invisible) {
             return !this.props.renderer.evalInvisible(invisible, this.props.record);
         }
         return true;
@@ -131,7 +132,13 @@ export class ListMultiLineRenderer extends ListRenderer {
     }
 
     get sortableColumns() {
-        return this.props.archInfo.columns.filter(c => c.type === 'field' && !c.noSort);
+        const columns = this.props.archInfo.columns.filter(c => c.type === 'field' && !c.noSort);
+        const seen = new Set();
+        return columns.filter(c => {
+            if (seen.has(c.name)) return false;
+            seen.add(c.name);
+            return true;
+        });
     }
 
     get activeSorts() {
@@ -158,7 +165,13 @@ export class ListMultiLineRenderer extends ListRenderer {
     }
 
     get aggregateColumns() {
-        return this.props.archInfo.columns.filter(c => c.type === 'field' && this.aggregates[c.name]);
+        const columns = this.props.archInfo.columns.filter(c => c.type === 'field' && this.aggregates[c.name]);
+        const seen = new Set();
+        return columns.filter(c => {
+            if (seen.has(c.name)) return false;
+            seen.add(c.name);
+            return true;
+        });
     }
 
     onCellClicked(record, column, ev) {

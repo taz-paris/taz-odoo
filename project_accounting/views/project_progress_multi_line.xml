@@ -8,7 +8,7 @@
             <list js_class="list_multi_line" editable="top" expand="1" open_form_view="1" limit="100" groups_limit="100">
                 <field name="company_id" invisible="1" groups="base.group_multi_company" options="{'no_create': True}" readonly="1"/>
                 <field name="currency_id" invisible="1"/>
-                <group col="5">
+                <group col="6">
                     <group>
                         <field name="rel_project_id" readonly="1"/>
                     </group>
@@ -16,51 +16,76 @@
                         <field name="rel_closing_date" readonly="1"/>
                     </group>
                     <group>
+                        <field name="rel_original_stage_id" readonly="1"/>
+                    </group>
+                    <group>
                         <field name="type" readonly="1"/>
                     </group>
                     <group>
                         <field name="rel_outsourcing_partner_id" invisible="type == 'internal_production'"/>
+                        <button type="object" name="goto_napta" string="Voir sur Napta"
+                                class="btn btn-sm btn-outline-secondary" icon="fa-external-link"
+                                invisible="type != 'internal_production'"/>
                     </group>
                     <group>
-                        <!-- On utilise un bouton Valider/Dévalider au lieu du widget boolean_toggle 
-                        car ce dernier ne permet pas de prendre en compte la modification d'un champ (exemple : progress_rate) 
-                        si l'utilisateur clique sur le toogle is_validated immédiatement (sans quitter le focus du champ progress_rate)-->
-                        <field name="is_validated" invisible="1"/>
-                        <button name="action_validate" string="Valider" type="object" invisible="is_validated" class="btn btn-sm btn-outline-secondary" icon="fa-check"/>
-                        <button name="action_invalidate" string="Dévalider" type="object" invisible="not is_validated" class="btn btn-sm btn-outline-secondary" icon="fa-uncheck"/>
+                            <!-- On utilise un bouton Valider/Dévalider au lieu du widget boolean_toggle 
+                            car ce dernier ne permet pas de prendre en compte la modification d'un champ (exemple : progress_rate) 
+                            si l'utilisateur clique sur le toogle is_validated immédiatement (sans quitter le focus du champ progress_rate)-->
+                            <field name="is_validated" invisible="1"/>
+                            <button name="action_validate" string="Valider" type="object" invisible="is_validated" class="btn btn-sm btn-outline-primary" icon="fa-check"/>
+                            <button name="action_invalidate" string="Dévalider" type="object" invisible="not is_validated" class="btn btn-sm btn-outline-primary" icon="fa-uncheck"/>
+                    </group>              
+                </group>
+                <group col="4">
+                    <group name="previous_data" string="Rappel données fin de période précédente">
+                        <field name="rel_previous_progress_cost_amount"/>
+                        <field name="rel_previous_progress_revenue_rate" widget="percentage"/>
+                        <field name="rel_previous_progress_revenue_amount"/>
+                    </group>
+                    <!-- Bloc pour la production interne (avec style bleu) -->
+                    <group name="valuation_internal" string="Valorisation totale fin de période" 
+                            style="background-color:#abdbff;" 
+                            invisible="type != 'internal_production'">
+                        <field name="progress_cost_amount"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="is_validated"/>
+                        <field name="progress_revenue_amount" readonly="is_validated"/>
+                    </group>
+                    <!-- Bloc pour les autres types (sans style) -->
+                    <group name="valuation_other" string="Valorisation totale fin de période"
+                    style="background-color:none;"
+                            invisible="type == 'internal_production'">
+                        <field name="outsourcing_product_qty" readonly="1"/>
+                        <field name="progress_cost_amount"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="1"/>
+                        <field name="progress_revenue_amount" readonly="1"/>
+                    </group>
+                    <!-- Bloc Période pour la production interne (avec style bleu) -->
+                    <group name="valuation_period_internal" string="Valorisation de la période" 
+                            style="background-color:none;"
+                            invisible="type != 'internal_production'">
+                        <field name="progress_cost_amount_period"/>
+                        <field name="progress_revenue_rate_period" widget="percentage" readonly="1"/>
+                        <field name="progress_revenue_amount_period" readonly="1"/>
+                    </group>
+                    <!-- Bloc Période pour les autres types (sans style) -->
+                    <group name="valuation_period_other" string="Valorisation de la période" 
+                            style="background-color:#abdbff;" 
+                            invisible="type == 'internal_production'">
+                        <field name="outsourcing_product_qty_period" readonly="is_validated"/>
+                        <field name="progress_cost_amount_period"/>
+                        <field name="progress_revenue_rate_period" widget="percentage" readonly="is_validated"/>
+                        <field name="progress_revenue_amount_period" sum="Total Revenue Period" readonly="1"/>
+                    </group>
+                    <group name="target" string="Projection à terminaison">
+                        <newline/><newline/>
+                        <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
+                        <field name="target_project_cost"/>
+                        <field name="future_staffing_days" invisible="type != 'internal_production'"/>
+                        <field name="price_unit" invisible="type in ['internal_production', 'other']"/>
+                        <field name="target_project_revenue"/>
+                        <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
                     </group>
                 </group>
-                    <group col="4">
-                        <group name="previous_data" string="Rappel données précédente clôture">
-                            <field name="rel_previous_progress_rate" widget="percentage"/>
-                            <field name="rel_previous_progress_cost_amount"/>
-                            <field name="rel_previous_progress_revenue_amount"/>
-                        </group>
-                        <group name="valuation" string="Valorisation totale à date de clôture">
-                            <field name="outsourcing_product_qty" invisible="type == 'internal_production'" readonly="is_validated or type=='other'"/>
-                            <field name="progress_rate" widget="percentage" readonly="is_validated"/>
-                            <field name="progress_cost_amount" sum="Total Cost"/>
-                            <field name="progress_revenue_amount" sum="Total Revenue" readonly="is_validated"/>
-                        </group>
-                        <group name="valuation_period" string="Valorisation de la période">
-                            <field name="outsourcing_product_qty_period" invisible="type == 'internal_production'" readonly="is_validated or type=='other'"/>
-                            <field name="progress_rate_period" widget="percentage" readonly="is_validated  or type=='other'"/>
-                            <field name="progress_cost_amount_period" sum="Total Cost"/>
-                            <field name="progress_revenue_amount_period" sum="Total Revenue" readonly="is_validated or type=='other'"/>
-                            <button type="object" name="goto_napta" string="Voir sur Napta"
-                                class="btn btn-sm btn-outline-primary" icon="fa-external-link"
-                                invisible="type != 'internal_production'"/>
-                            <button type="object" name="action_open_analytic_lines" string="Voir les lignes de pointage"
-                                class="btn btn-sm btn-outline-secondary" icon="fa-clock-o"
-                                invisible="type != 'internal_production'"/>
-                        </group>
-                        <group name="target" string="Projection à terminaison">
-                            <newline/><newline/>
-                            <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
-                            <field name="target_project_cost" sum="Total Cost"/>
-                            <field name="target_project_revenue" sum="Total Revenue"/>
-                        </group>
-                    </group>
             </list>
         </field>
     </record>
