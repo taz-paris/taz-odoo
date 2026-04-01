@@ -41,7 +41,7 @@ class ProjectProgress(models.Model):
 
     target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées S/T", compute='compute', store=True)
     outsourcing_product_qty = fields.Float(string="Nb unités produites S/T", store=True, readonly=False)
-    outsourcing_product_qty_period = fields.Float(string="Nb unités produites S/T période", compute='compute', inverse='_inverse_qty_period', store=True, readonly=False)
+    outsourcing_product_qty_period = fields.Float(string="Nb unités produites S/T période", compute='_compute_qty_period', inverse='_inverse_qty_period', store=True, readonly=False)
 
     progress_revenue_rate = fields.Float(string="Avancement en prix de vente", compute='compute', inverse='_inverse_progress_revenue_rate', store=True, readonly=False)
 
@@ -102,17 +102,31 @@ class ProjectProgress(models.Model):
                 raise ValidationError(_("Il n'est pas possible de supprimer cet avancement car il est validé."))
         return super().unlink()
 
-    @api.depends('accounting_closing_id', 'accounting_closing_id.previous_closing', 'outsourcing_link_id', 
-                 'progress_revenue_rate', 'accounting_closing_id.production_period_amount',
-                 'rel_project_id.company_part_cost_current', 'rel_project_id.company_part_cost_futur', 
-                 'rel_project_id.company_part_amount_current', 'outsourcing_product_qty', 'target_project_cost')
+    @api.depends(
+        'accounting_closing_id',
+        'accounting_closing_id.previous_closing',
+        'outsourcing_link_id',
+        'outsourcing_link_id.link_type',
+        'outsourcing_link_id.order_company_payment_amount',
+        'outsourcing_link_id.order_sum_purchase_order_lines',
+        'outsourcing_link_id.outsource_part_amount_current',
+        'outsourcing_link_id.order_sum_purchase_order_product_qty',
+        'rel_project_id.company_part_cost_current',
+        'rel_project_id.company_part_cost_futur',
+        'rel_project_id.company_part_amount_current',
+        'outsourcing_product_qty',
+        'target_project_cost',
+        'previous_progress_id.outsourcing_product_qty',
+        'rel_previous_progress_revenue_amount',
+        'rel_previous_progress_cost_amount',
+        'rel_previous_progress_revenue_rate',
+    )
     def compute(self):
         for rec in self:
             # Initialisations par défaut obligatoires pour éviter l'erreur "failed to assign"
             rec.future_staffing_days = 0.0
             rec.price_unit = 0.0
             rec.reselling_price_unit = 0.0
-            rec.outsourcing_product_qty_period = 0.0
             rec.target_project_outsourcing_product_qty = 0.0
             
             # 1. Type
@@ -160,7 +174,6 @@ class ProjectProgress(models.Model):
                     indirect_payment_ratio = 1.0
                 rec.target_project_revenue = (rec.outsourcing_link_id.outsource_part_amount_current or 0.0) * indirect_payment_ratio
 
-                rec.outsourcing_product_qty_period = rec.outsourcing_product_qty - (rec.previous_progress_id.outsourcing_product_qty or 0.0)
                 rec.target_project_outsourcing_product_qty = rec.outsourcing_link_id.order_sum_purchase_order_product_qty
                 if rec.target_project_outsourcing_product_qty :
                     rec.progress_revenue_rate = rec.outsourcing_product_qty / rec.target_project_outsourcing_product_qty
@@ -189,6 +202,18 @@ class ProjectProgress(models.Model):
             rec.next_progress = next_progress
             if next_progress:
                 next_progress.compute()
+
+    # --- COMPUTE DÉDIÉ pour outsourcing_product_qty_period ---
+    # Séparé du compute principal pour éviter que l'ORM le déclenche avant l'inverse
+    # lorsque l'utilisateur saisit la période manuellement.
+    @api.depends('outsourcing_product_qty', 'previous_progress_id.outsourcing_product_qty')
+    def _compute_qty_period(self):
+        for rec in self:
+            rec.outsourcing_product_qty_period = rec.outsourcing_product_qty - (rec.previous_progress_id.outsourcing_product_qty or 0.0)
+
+    def _inverse_qty_period(self):
+        for rec in self:
+            rec.outsourcing_product_qty = (rec.previous_progress_id.outsourcing_product_qty or 0.0) + (rec.outsourcing_product_qty_period or 0.0)
 
     # --- MÉTHODES INVERSE (Cartographie vers l'entrée Maître : Taux pour Interne / Quantité pour S/T) ---
     def _inverse_progress_revenue_rate(self):
