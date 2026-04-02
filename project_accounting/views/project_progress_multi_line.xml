@@ -34,14 +34,20 @@
                             <field name="is_validated" invisible="1"/>
                             <button name="action_validate" string="Valider l'avancement" type="object" invisible="is_validated" class="btn btn-primary" icon="fa-check"/>
                             <button name="action_invalidate" string="Dévalider l'avancement" type="object" invisible="not is_validated" class="btn btn-outline-danger" icon="fa-times"/>
+                            <button name="force_refresh" type="object" invisible="is_validated" class="btn btn-outline-secondary" icon="fa-refresh" string="" help="Rafraîchir les données après modification des données de la fiche projet TazForce. Ce bouton ne permet pas de rafraîchir les données de staffing Napta."/>
                     </group>
-              
+                </group>
+                <group>
+                    <group colspan="2">
+                        <field name="comment"/>
+                    </group>
                 </group>
                 <group col="4">
                     <group name="previous_data" string="Rappel données fin de période précédente">
                         <field name="rel_previous_progress_cost_amount"/>
                         <field name="rel_previous_progress_revenue_rate" widget="percentage"/>
                         <field name="rel_previous_progress_revenue_amount"/>
+                        <field name="rel_previous_progress_comment"/>
                     </group>
                     <!-- Bloc pour la production interne (avec style bleu) -->
                     <group name="valuation_internal" string="Valorisation totale fin de période" 
@@ -50,15 +56,19 @@
                         <field name="progress_cost_amount"/>
                         <field name="progress_revenue_rate" widget="percentage" readonly="is_validated"/>
                         <field name="progress_revenue_amount" readonly="is_validated"/>
+                        <field name="progress_revenue_margin" decoration-danger="progress_revenue_margin &lt; 0"/>
+                        <field name="progress_revenue_margin_rate" widget="percentage" decoration-danger="progress_revenue_margin_rate &lt; 0"/>
                     </group>
                     <!-- Bloc pour les autres types (sans style) -->
                     <group name="valuation_other" string="Valorisation totale fin de période"
-                    style="background-color:none;"
+                            style="background-color:none;"
                             invisible="type == 'internal_production'">
                         <field name="outsourcing_product_qty" readonly="1"/>
                         <field name="progress_cost_amount"/>
                         <field name="progress_revenue_rate" widget="percentage" readonly="1"/>
                         <field name="progress_revenue_amount" readonly="1"/>
+                        <field name="progress_revenue_margin" decoration-danger="progress_revenue_margin &lt; 0"/>
+                        <field name="progress_revenue_margin_rate" widget="percentage" decoration-danger="progress_revenue_margin_rate &lt; 0"/>
                     </group>
                     <!-- Bloc Période pour la production interne (avec style bleu) -->
                     <group name="valuation_period_internal" string="Valorisation de la période" 
@@ -73,7 +83,7 @@
                             style="background-color:#abdbff;" 
                             invisible="type == 'internal_production'">
                         <field name="outsourcing_product_qty_period" readonly="is_validated or type == 'other'"/>
-                        <field name="progress_cost_amount_period"/>
+                        <field name="progress_cost_amount_period" sum="Total Cost Period"/>
                         <field name="progress_revenue_rate_period" widget="percentage" readonly="is_validated or type == 'other'"/>
                         <field name="progress_revenue_amount_period" sum="Total Revenue Period"/>
                     </group>

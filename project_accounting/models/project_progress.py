@@ -6,7 +6,7 @@ class ProjectProgress(models.Model):
     _name = 'project.progress'
     _description = 'Avancement Projet'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'rel_closing_date desc, type asc, id asc'
+    _order = 'rel_closing_date desc, type desc, id asc'
 
     _sql_constraints = [
         ('unique_closing_link', 'UNIQUE(accounting_closing_id, outsourcing_link_id)', 
@@ -36,38 +36,43 @@ class ProjectProgress(models.Model):
     next_progress = fields.Many2one('project.progress', string="Avancement suivant", compute='_compute_next_progress')
 
     # --- Related précédent ---
-    rel_previous_progress_revenue_rate = fields.Float(related='previous_progress_id.progress_revenue_rate', string="Avancement en prix de vente précédent")
-    rel_previous_progress_cost_amount = fields.Monetary(related='previous_progress_id.progress_cost_amount', string="Valorisation de l'avancement en coût de revient précédent")
-    rel_previous_progress_revenue_amount = fields.Monetary(related='previous_progress_id.progress_revenue_amount', string="Valorisation de l'avancement en prix de vente précédent")
+    rel_previous_progress_cost_amount = fields.Monetary(related='previous_progress_id.progress_cost_amount', string="Coût de revient cumulé précédent")
+    rel_previous_progress_revenue_rate = fields.Float(related='previous_progress_id.progress_revenue_rate', string="CA cumulé en % précédent")
+    rel_previous_progress_revenue_amount = fields.Monetary(related='previous_progress_id.progress_revenue_amount', string="CA cumulé en € précédent")
 
     # --- Projections à terminaison ---
     target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='_compute_target_project_cost', inverse='_inverse_target_project_cost', store=True, readonly=False)
-    target_project_revenue = fields.Monetary(string="Prix de vente total projeté", compute='_compute_target_project_revenue', store=True)
+    target_project_revenue = fields.Monetary(string="CA total projeté", compute='_compute_target_project_revenue', store=True)
 
     # --- Quantités S/T ---
-    target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées S/T", compute='_compute_target_project_outsourcing_product_qty', store=True)
-    outsourcing_product_qty = fields.Float(string="Nb unités produites S/T", store=True, readonly=False)
-    outsourcing_product_qty_period = fields.Float(string="Nb unités produites S/T période", compute='_compute_qty_period', inverse='_inverse_qty_period', store=True, readonly=False)
+    target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées", compute='_compute_target_project_outsourcing_product_qty', store=True)
+    outsourcing_product_qty = fields.Float(string="Nb unités produites", store=True, readonly=False)
+    outsourcing_product_qty_period = fields.Float(string="Nb unités produites période", compute='_compute_qty_period', inverse='_inverse_qty_period', store=True, readonly=False)
 
     # --- Avancement cumulé ---
-    progress_cost_amount = fields.Monetary(string="Valorisation de l'avancement en coût de revient", compute='_compute_progress_cost_amount', store=True)
-    progress_revenue_rate = fields.Float(string="Avancement en prix de vente", compute='_compute_progress_revenue_rate', inverse='_inverse_progress_revenue_rate', store=True, readonly=False)
-    progress_revenue_amount = fields.Monetary(string="Valorisation de l'avancement en prix de vente", 
+    progress_cost_amount = fields.Monetary(string="Coût de revient", compute='_compute_progress_cost_amount', store=True)
+    progress_revenue_rate = fields.Float(string="CA cumulé en %", compute='_compute_progress_revenue_rate', inverse='_inverse_progress_revenue_rate', store=True, readonly=False)
+    progress_revenue_amount = fields.Monetary(string="CA cumulé en €", 
                                              compute='_compute_progress_revenue_amount', inverse='_inverse_revenue', store=True, readonly=False)
-
+    progress_revenue_margin = fields.Monetary(string="Marge en €", 
+                                             compute='_compute_progress_revenue_margin', store=True)
+    progress_revenue_margin_rate = fields.Float(string="Marge en %", 
+                                             compute='_compute_progress_revenue_margin_rate', store=True)
     # --- Avancement période ---
-    progress_revenue_rate_period = fields.Float(string="Avancement sur la période en prix de vente(en points)", compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False)
-    progress_cost_amount_period = fields.Monetary(string="Variation de l'avancement en coût de revient sur la période", 
+    progress_cost_amount_period = fields.Monetary(string="Coût de revient période", 
                                                  compute='_compute_progress_cost_amount_period', store=True)
-    progress_revenue_amount_period = fields.Monetary(string="Variation de l'avancement en prix de vente sur la période", 
+    progress_revenue_rate_period = fields.Float(string="CA période en /% du prix de vente", compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False)
+    progress_revenue_amount_period = fields.Monetary(string="CA période en €", 
                                                     compute='_compute_progress_revenue_amount_period', store=True)
 
     # --- Autres calculs ---
-    future_staffing_days = fields.Float(string="Jours staffés > date de clôture (tous grades confondus)", compute='_compute_future_staffing_days', store=True)
+    future_staffing_days = fields.Float(string="Jours restant à produire", help="Somme des jours staffés dans Napta (tous grades confondus) pour les périodes de staffing qui commencent après la date de clôture. Valeur telle que disponible dans TazForce à date du dernier rafraichissement forcé.", compute='_compute_future_staffing_days', store=True)
     price_unit = fields.Monetary(string="TJM sous-traitance", compute='_compute_price_unit', store=True)
     reselling_price_unit = fields.Monetary(string="TJM revente sous-traitant", compute='_compute_reselling_price_unit', store=True)
 
     is_validated = fields.Boolean(string="Validé", tracking=True)
+    comment = fields.Html("Commentaire")
+    rel_previous_progress_comment = fields.Html("Commentaire période précédente", related='previous_progress_id.comment')
 
     # ===================================================================
     # DISPLAY NAME
@@ -246,6 +251,21 @@ class ProjectProgress(models.Model):
             else:
                 rec.outsourcing_product_qty = rate * rec.target_project_outsourcing_product_qty
 
+    # --- progress_revenue_margin ---
+    @api.depends('progress_revenue_amount', 'progress_cost_amount')
+    def _compute_progress_revenue_margin(self):
+        for rec in self:
+            rec.progress_revenue_margin = (rec.progress_revenue_amount or 0.0) - (rec.progress_cost_amount or 0.0)    
+    
+    # --- progress_revenue_margin_rate ---
+    @api.depends('progress_revenue_margin', 'progress_revenue_amount')
+    def _compute_progress_revenue_margin_rate(self):
+        for rec in self:
+            if rec.progress_revenue_amount:
+                rec.progress_revenue_margin_rate = (rec.progress_revenue_margin or 0.0) / rec.progress_revenue_amount
+            else:
+                rec.progress_revenue_margin_rate = 0.0
+    
     # --- progress_revenue_rate_period ---
     @api.depends('progress_revenue_rate', 'rel_previous_progress_revenue_rate')
     def _compute_progress_revenue_rate_period(self):

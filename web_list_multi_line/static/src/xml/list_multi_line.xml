@@ -188,7 +188,7 @@
                         />
                     </div>
                     <div class="o_cell o_wrap_input text-break" t-att-style="props.node.nolabel ? 'grid-column: span 2;' : ''">
-                        <div t-att-name="column.name" class="o_field_widget" t-att-class="column.class">
+                        <div t-att-name="column.name" class="o_field_widget" t-att-class="props.renderer.getCellClass(column, props.record)">
                             <t t-if="props.renderer.canUseFormatter(column, props.record)">
                                 <span class="o_field_content text-break" t-out="props.renderer.getFormattedValue(column, props.record)"/>
                             </t>
