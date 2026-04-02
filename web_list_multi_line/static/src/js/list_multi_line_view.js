@@ -7,6 +7,7 @@ import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { getActiveActions } from "@web/views/utils";
 import { stringToOrderBy } from "@web/search/utils/order_by";
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { Component, xml } from "@odoo/owl";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
@@ -45,6 +46,17 @@ class MultiLineNode extends Component {
         const parentCol = this.props.parentCol || 1;
         const colSpan = Math.max(1, Math.floor(12 / parentCol));
         return `col-lg-${colSpan}`;
+    }
+
+    get decorationClass() {
+        const classNames = [];
+        const decorations = this.props.node.decorations || [];
+        for (const deco of decorations) {
+            if (evaluateBooleanExpr(deco.condition, this.props.record.evalContextWithVirtualIds)) {
+                classNames.push(deco.class);
+            }
+        }
+        return classNames.join(" ");
     }
 }
 
@@ -104,6 +116,12 @@ export class ListMultiLineArchParser extends ListArchParser {
                 confirm: child.getAttribute("confirm") || "",
                 nolabel: child.getAttribute("nolabel") === "1",
                 col: parseInt(child.getAttribute("col") || (tagName === "group" && isRoot ? "2" : "1"), 10),
+                decorations: Array.from(child.getAttributeNames())
+                    .filter(name => name.startsWith("decoration-"))
+                    .map(name => ({
+                        class: `text-${name.replace("decoration-", "")}`,
+                        condition: child.getAttribute(name),
+                    })),
                 children: child.children.length ? this.parseUniversalLayout(child, false) : [],
             };
 
