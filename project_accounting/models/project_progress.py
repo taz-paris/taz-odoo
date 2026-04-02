@@ -13,6 +13,7 @@ class ProjectProgress(models.Model):
          'Il ne peut y avoir qu\'un seul avancement par couple clôture / lien de sous-traitance.')
     ]
 
+    # --- Champs relationnels ---
     accounting_closing_id = fields.Many2one('project.accounting_closing', string="Clôture comptable", required=True, ondelete='restrict')
     rel_closing_date = fields.Date(related='accounting_closing_id.closing_date', string="Date de clôture", store=True)
     outsourcing_link_id = fields.Many2one('project.outsourcing.link', string="Lien projet / fournisseur", store=True)
@@ -25,56 +26,68 @@ class ProjectProgress(models.Model):
     company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Devise", readonly=True)
 
+    # --- Classification ---
     type = fields.Selection([('internal_production', 'Production interne')] + OUTSOURCING_LINK_TYPES, 
-                            string="Type", compute='compute', store=True)
+                            string="Type", compute='_compute_type', store=True)
 
+    # --- Navigation ---
     previous_progress_id = fields.Many2one('project.progress', string="Avancement précédent", 
-                                          compute='compute', store=True)
-    next_progress = fields.Many2one('project.progress', string="Avancement suivant", compute='compute', store=True)
+                                          compute='_compute_previous_progress_id', store=True)
+    next_progress = fields.Many2one('project.progress', string="Avancement suivant", compute='_compute_next_progress')
 
+    # --- Related précédent ---
     rel_previous_progress_revenue_rate = fields.Float(related='previous_progress_id.progress_revenue_rate', string="Avancement en prix de vente précédent")
     rel_previous_progress_cost_amount = fields.Monetary(related='previous_progress_id.progress_cost_amount', string="Valorisation de l'avancement en coût de revient précédent")
     rel_previous_progress_revenue_amount = fields.Monetary(related='previous_progress_id.progress_revenue_amount', string="Valorisation de l'avancement en prix de vente précédent")
 
-    target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='compute', inverse='_inverse_target_project_cost', store=True)
-    target_project_revenue = fields.Monetary(string="Prix de vente total projeté", compute='compute', store=True)
+    # --- Projections à terminaison ---
+    target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='_compute_target_project_cost', inverse='_inverse_target_project_cost', store=True, readonly=False)
+    target_project_revenue = fields.Monetary(string="Prix de vente total projeté", compute='_compute_target_project_revenue', store=True)
 
-    target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées S/T", compute='compute', store=True)
+    # --- Quantités S/T ---
+    target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées S/T", compute='_compute_target_project_outsourcing_product_qty', store=True)
     outsourcing_product_qty = fields.Float(string="Nb unités produites S/T", store=True, readonly=False)
     outsourcing_product_qty_period = fields.Float(string="Nb unités produites S/T période", compute='_compute_qty_period', inverse='_inverse_qty_period', store=True, readonly=False)
 
-    progress_revenue_rate = fields.Float(string="Avancement en prix de vente", compute='compute', inverse='_inverse_progress_revenue_rate', store=True, readonly=False)
+    # --- Avancement cumulé ---
+    progress_cost_amount = fields.Monetary(string="Valorisation de l'avancement en coût de revient", compute='_compute_progress_cost_amount', store=True)
+    progress_revenue_rate = fields.Float(string="Avancement en prix de vente", compute='_compute_progress_revenue_rate', inverse='_inverse_progress_revenue_rate', store=True, readonly=False)
+    progress_revenue_amount = fields.Monetary(string="Valorisation de l'avancement en prix de vente", 
+                                             compute='_compute_progress_revenue_amount', inverse='_inverse_revenue', store=True, readonly=False)
 
-    progress_cost_amount = fields.Monetary(string="Valorisation de l’avancement en coût de revient", compute='compute', store=True)
-    progress_revenue_amount = fields.Monetary(string="Valorisation de l’avancement en prix de vente", 
-                                             compute='compute', inverse='_inverse_revenue', store=True, readonly=False)
-    progress_revenue_rate_period = fields.Float(string="Avancement sur la période en prix de vente(en points)", compute='compute', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False)
-    progress_cost_amount_period = fields.Monetary(string="Variation de l’avancement en coût de revient sur la période", 
-                                                 compute='compute', store=True)
-    progress_revenue_amount_period = fields.Monetary(string="Variation de l’avancement en prix de vente sur la période", 
-                                                    compute='compute', inverse='_inverse_revenue_period', store=True, readonly=False)
-    future_staffing_days = fields.Float(string="Jours staffés > date de clôture (tous grades confondus)", compute='compute', store=True)
+    # --- Avancement période ---
+    progress_revenue_rate_period = fields.Float(string="Avancement sur la période en prix de vente(en points)", compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False)
+    progress_cost_amount_period = fields.Monetary(string="Variation de l'avancement en coût de revient sur la période", 
+                                                 compute='_compute_progress_cost_amount_period', store=True)
+    progress_revenue_amount_period = fields.Monetary(string="Variation de l'avancement en prix de vente sur la période", 
+                                                    compute='_compute_progress_revenue_amount_period', store=True)
 
-    price_unit = fields.Monetary(string="TJM sous-traitance", compute='compute', store=True)
-    reselling_price_unit = fields.Monetary(string="TJM revente sous-traitant", compute='compute', store=True)
+    # --- Autres calculs ---
+    future_staffing_days = fields.Float(string="Jours staffés > date de clôture (tous grades confondus)", compute='_compute_future_staffing_days', store=True)
+    price_unit = fields.Monetary(string="TJM sous-traitance", compute='_compute_price_unit', store=True)
+    reselling_price_unit = fields.Monetary(string="TJM revente sous-traitant", compute='_compute_reselling_price_unit', store=True)
 
     is_validated = fields.Boolean(string="Validé", tracking=True)
 
+    # ===================================================================
+    # DISPLAY NAME
+    # ===================================================================
     @api.depends('rel_project_id.name', 'rel_closing_date', 'type', 'outsourcing_link_id.display_name')
     def _compute_display_name(self):
         for rec in self:
             date_str = rec.rel_closing_date.strftime('%m/%Y') if rec.rel_closing_date else _('N/A')
             project_label = rec.rel_project_id.name or _('N/A')
-            
             if rec.type == 'internal_production':
                 origin = _("Prod. Interne")
             elif rec.outsourcing_link_id:
                 origin = rec.outsourcing_link_id.display_name
             else:
                 origin = " "
-            
             rec.display_name = f"{project_label} ({date_str}) - {origin}"
 
+    # ===================================================================
+    # WRITE / UNLINK
+    # ===================================================================
     def write(self, vals):
         for rec in self:
             if rec.next_progress:
@@ -102,40 +115,20 @@ class ProjectProgress(models.Model):
                 raise ValidationError(_("Il n'est pas possible de supprimer cet avancement car il est validé."))
         return super().unlink()
 
-    @api.depends(
-        'accounting_closing_id',
-        'accounting_closing_id.previous_closing',
-        'outsourcing_link_id',
-        'outsourcing_link_id.link_type',
-        'outsourcing_link_id.order_company_payment_amount',
-        'outsourcing_link_id.order_sum_purchase_order_lines',
-        'outsourcing_link_id.outsource_part_amount_current',
-        'outsourcing_link_id.order_sum_purchase_order_product_qty',
-        'rel_project_id.company_part_cost_current',
-        'rel_project_id.company_part_cost_futur',
-        'rel_project_id.company_part_amount_current',
-        'outsourcing_product_qty',
-        'target_project_cost',
-        'previous_progress_id.outsourcing_product_qty',
-        'rel_previous_progress_revenue_amount',
-        'rel_previous_progress_cost_amount',
-        'rel_previous_progress_revenue_rate',
-    )
-    def compute(self):
-        for rec in self:
-            # Initialisations par défaut obligatoires pour éviter l'erreur "failed to assign"
-            rec.future_staffing_days = 0.0
-            rec.price_unit = 0.0
-            rec.reselling_price_unit = 0.0
-            rec.target_project_outsourcing_product_qty = 0.0
-            
-            # 1. Type
-            if rec.outsourcing_link_id:
-                rec.type = rec.outsourcing_link_id.link_type
-            else:
-                rec.type = 'internal_production'
+    # ===================================================================
+    # COMPUTE / INVERSE — un couple par champ calculé
+    # ===================================================================
 
-            # 2. Historique
+    # --- type ---
+    @api.depends('outsourcing_link_id', 'outsourcing_link_id.link_type')
+    def _compute_type(self):
+        for rec in self:
+            rec.type = rec.outsourcing_link_id.link_type if rec.outsourcing_link_id else 'internal_production'
+
+    # --- previous_progress_id ---
+    @api.depends('accounting_closing_id', 'accounting_closing_id.previous_closing', 'outsourcing_link_id')
+    def _compute_previous_progress_id(self):
+        for rec in self:
             previous_closing = rec.accounting_closing_id.previous_closing
             if previous_closing:
                 rec.previous_progress_id = self.env['project.progress'].search([
@@ -145,121 +138,188 @@ class ProjectProgress(models.Model):
             else:
                 rec.previous_progress_id = False
 
-            # 3. Calculs selon le type
-            if rec.type == 'internal_production':
-                if not rec.target_project_cost:
-                    rec.target_project_cost = (rec.rel_project_id.company_part_cost_current or 0.0) + (rec.rel_project_id.company_part_cost_futur or 0.0)
-                rec.target_project_revenue = rec.rel_project_id.company_part_amount_current or 0.0
-                rec.progress_cost_amount = -rec.rel_project_id.get_production_cost([('date', '<=', rec.rel_closing_date), ('category', '=', 'project_employee_validated')], force_recompute_amount=False)[0]
-                if rec.target_project_cost:# and not rec.progress_revenue_rate:
-                    rec.progress_revenue_rate = rec.progress_cost_amount / rec.target_project_cost
-                
-                # Comptage du reste à produire sur le dispositif interne > date de clôture
-                    #ATTENTION : sur Napta, les période de forecast découpées à la semaine, sauf pour les fin de mois. 
-                    #Donc si le jour de clôture est en cours de mois ET en cours de semaine, alors il manquera des jours !
-                lines_future_days = rec.rel_project_id.get_production_cost([('date', '>', rec.rel_closing_date), ('category', '=', 'project_forecast')], force_recompute_amount=False)[1]
-                count_future_days = 0
-                for line in lines_future_days:
-                    count_future_days += line['unit_amount']
-                rec.future_staffing_days = count_future_days
+    # --- next_progress (non stocké, recalculé à chaque accès) ---
+    def _compute_next_progress(self):
+        for rec in self:
+            rec.next_progress = self.env['project.progress'].search([('previous_progress_id', '=', rec.id)], limit=1)
 
+    # --- target_project_cost ---
+    # Dépend uniquement de type et outsourcing_link_id (positionnés à la création).
+    # Pas de dépendance sur rel_project_id.company_part_* pour éviter l'écrasement
+    # des valeurs lorsque les données du projet changent a posteriori.
+    @api.depends('type', 'outsourcing_link_id')
+    def _compute_target_project_cost(self):
+        for rec in self:
+            if rec.type == 'internal_production':
+                rec.target_project_cost = (rec.rel_project_id.company_part_cost_current or 0.0) + (rec.rel_project_id.company_part_cost_futur or 0.0)
             elif rec.outsourcing_link_id:
-                # Le coût total à terminaison est la somme des lignes de commmande en paiement indirect (via Tasmane) pour ce sous-traitant
                 rec.target_project_cost = rec.outsourcing_link_id.order_company_payment_amount or 0.0
-                # Le CA Tasmane à terminaison pour ce sous-traitant est la somme du prix de revente X ratio de paiement indirect
-                #   -> En effet, dans les BCF, le prix de revente est parfois indiqué sur une seule ligne, donc on proratise
-                if rec.outsourcing_link_id.order_sum_purchase_order_lines :
+            else:
+                rec.target_project_cost = 0.0
+
+    def _inverse_target_project_cost(self):
+        pass  # Accepte la valeur saisie manuellement
+
+    # --- target_project_revenue ---
+    # Dépend uniquement de type et outsourcing_link_id (positionnés à la création).
+    # Pas de dépendance sur rel_project_id.company_part_* pour éviter l'écrasement
+    # des valeurs lorsque les données du projet changent a posteriori.
+    @api.depends('type', 'outsourcing_link_id')
+    def _compute_target_project_revenue(self):
+        for rec in self:
+            if rec.type == 'internal_production':
+                rec.target_project_revenue = rec.rel_project_id.company_part_amount_current or 0.0
+            elif rec.outsourcing_link_id:
+                if rec.outsourcing_link_id.order_sum_purchase_order_lines:
                     indirect_payment_ratio = rec.outsourcing_link_id.order_company_payment_amount / rec.outsourcing_link_id.order_sum_purchase_order_lines
                 else:
                     indirect_payment_ratio = 1.0
                 rec.target_project_revenue = (rec.outsourcing_link_id.outsource_part_amount_current or 0.0) * indirect_payment_ratio
-
-                rec.target_project_outsourcing_product_qty = rec.outsourcing_link_id.order_sum_purchase_order_product_qty
-                if rec.target_project_outsourcing_product_qty :
-                    rec.progress_revenue_rate = rec.outsourcing_product_qty / rec.target_project_outsourcing_product_qty
-                else :
-                    rec.progress_revenue_rate = 0.0
-                
-                rec.progress_cost_amount = (rec.target_project_cost or 0.0) * (rec.progress_revenue_rate or 0.0)
-
-                if rec.target_project_outsourcing_product_qty :
-                    rec.price_unit = (rec.target_project_cost or 0.0) / rec.target_project_outsourcing_product_qty
-                    rec.reselling_price_unit = (rec.target_project_revenue or 0.0) / rec.target_project_outsourcing_product_qty
+            else:
+                rec.target_project_revenue = 0.0
 
 
-            rec.progress_revenue_amount = (rec.target_project_revenue or 0.0) * (rec.progress_revenue_rate or 0.0)
-            
-            # 5. Calcul des variations de la période (Cumulé - Précédent)
-            rec.progress_revenue_amount_period = rec.progress_revenue_amount - (rec.rel_previous_progress_revenue_amount or 0.0)
-            rec.progress_cost_amount_period = rec.progress_cost_amount - (rec.rel_previous_progress_cost_amount or 0.0)
-            rec.progress_revenue_rate_period = rec.progress_revenue_rate - (rec.rel_previous_progress_revenue_rate or 0.0)
-            
-            # 6. Next Progress logic (inspired by project.accounting_closing)
-            if not rec.progress_revenue_rate:
-                rec.progress_revenue_rate = 0.0
-                
-            next_progress = self.env['project.progress'].search([('previous_progress_id', '=', rec.id)], limit=1)
-            rec.next_progress = next_progress
-            if next_progress:
-                next_progress.compute()
+    # --- target_project_outsourcing_product_qty ---
+    @api.depends('outsourcing_link_id.order_sum_purchase_order_product_qty')
+    def _compute_target_project_outsourcing_product_qty(self):
+        for rec in self:
+            rec.target_project_outsourcing_product_qty = rec.outsourcing_link_id.order_sum_purchase_order_product_qty if rec.outsourcing_link_id else 0.0
 
-    # --- COMPUTE DÉDIÉ pour outsourcing_product_qty_period ---
-    # Séparé du compute principal pour éviter que l'ORM le déclenche avant l'inverse
-    # lorsque l'utilisateur saisit la période manuellement.
+    # --- outsourcing_product_qty_period ---
     @api.depends('outsourcing_product_qty', 'previous_progress_id.outsourcing_product_qty')
     def _compute_qty_period(self):
         for rec in self:
-            rec.outsourcing_product_qty_period = rec.outsourcing_product_qty - (rec.previous_progress_id.outsourcing_product_qty or 0.0)
+            rec.outsourcing_product_qty_period = (rec.outsourcing_product_qty or 0.0) - (rec.previous_progress_id.outsourcing_product_qty or 0.0)
 
     def _inverse_qty_period(self):
         for rec in self:
             rec.outsourcing_product_qty = (rec.previous_progress_id.outsourcing_product_qty or 0.0) + (rec.outsourcing_product_qty_period or 0.0)
 
-    # --- MÉTHODES INVERSE (Cartographie vers l'entrée Maître : Taux pour Interne / Quantité pour S/T) ---
-    def _inverse_progress_revenue_rate(self):
-        """Si on saisit le taux, on mappe vers le champ source approprié"""
+    # --- progress_cost_amount ---
+    # Pour outsourcing : formule directe (cost * qty/target_qty) au lieu de cost * rate
+    # afin d'éviter une dépendance circulaire avec progress_revenue_rate
+    @api.depends('type', 'rel_project_id', 'rel_closing_date',
+                 'target_project_cost', 'outsourcing_product_qty', 'target_project_outsourcing_product_qty')
+    def _compute_progress_cost_amount(self):
         for rec in self:
             if rec.type == 'internal_production':
-                pass # Le champ lui-même est mis à jour, compute respectera la valeur (Approche B)
+                rec.progress_cost_amount = -rec.rel_project_id.get_production_cost(
+                    [('date', '<=', rec.rel_closing_date), ('category', '=', 'project_employee_validated')],
+                    force_recompute_amount=False)[0]
+            elif rec.outsourcing_link_id:
+                target_qty = rec.target_project_outsourcing_product_qty or 0.0
+                rate = (rec.outsourcing_product_qty / target_qty) if target_qty else 0.0
+                rec.progress_cost_amount = (rec.target_project_cost or 0.0) * rate
+            else:
+                rec.progress_cost_amount = 0.0
+
+    # --- progress_revenue_rate ---
+    @api.depends('progress_cost_amount', 'target_project_cost')
+    def _compute_progress_revenue_rate(self):
+        for rec in self:
+            rec.progress_revenue_rate = (rec.progress_cost_amount / rec.target_project_cost) if rec.target_project_cost else 0.0
+
+    def _inverse_progress_revenue_rate(self):
+        for rec in self:
+            if not rec.progress_revenue_rate:
+                continue
+            if rec.type == 'internal_production':
+                pass  # Asymétrie : ne pas remonter vers le target_project_cost
             elif rec.target_project_outsourcing_product_qty:
                 rec.outsourcing_product_qty = rec.progress_revenue_rate * rec.target_project_outsourcing_product_qty
+
+    # --- progress_revenue_amount ---
+    @api.depends('target_project_revenue', 'progress_revenue_rate')
+    def _compute_progress_revenue_amount(self):
+        for rec in self:
+            rec.progress_revenue_amount = (rec.target_project_revenue or 0.0) * (rec.progress_revenue_rate or 0.0)
+
+    def _inverse_revenue(self):
+        for rec in self:
+            rate = (rec.progress_revenue_amount / rec.target_project_revenue) if rec.target_project_revenue else 0.0
+            if rec.type == 'internal_production':
+                rec.progress_revenue_rate = rate
+            else:
+                rec.outsourcing_product_qty = rate * rec.target_project_outsourcing_product_qty
+
+    # --- progress_revenue_rate_period ---
+    @api.depends('progress_revenue_rate', 'rel_previous_progress_revenue_rate')
+    def _compute_progress_revenue_rate_period(self):
+        for rec in self:
+            rec.progress_revenue_rate_period = (rec.progress_revenue_rate or 0.0) - (rec.rel_previous_progress_revenue_rate or 0.0)
 
     def _inverse_progress_revenue_rate_period(self):
         for rec in self:
             new_rate = (rec.rel_previous_progress_revenue_rate or 0.0) + (rec.progress_revenue_rate_period or 0.0)
             if rec.type == 'internal_production':
                 rec.progress_revenue_rate = new_rate
-            elif rec.target_project_outsourcing_product_qty:
+            else:
                 rec.outsourcing_product_qty = new_rate * rec.target_project_outsourcing_product_qty
 
-    def _inverse_qty_period(self):
+    # --- progress_cost_amount_period ---
+    @api.depends('progress_cost_amount', 'rel_previous_progress_cost_amount')
+    def _compute_progress_cost_amount_period(self):
         for rec in self:
-            rec.outsourcing_product_qty = (rec.previous_progress_id.outsourcing_product_qty or 0.0) + (rec.outsourcing_product_qty_period or 0.0)
+            rec.progress_cost_amount_period = (rec.progress_cost_amount or 0.0) - (rec.rel_previous_progress_cost_amount or 0.0)
 
-    def _inverse_revenue_period(self):
+    # --- progress_revenue_amount_period ---
+    @api.depends('progress_revenue_amount', 'rel_previous_progress_revenue_amount')
+    def _compute_progress_revenue_amount_period(self):
         for rec in self:
-            if rec.target_project_revenue:
-                new_rev = (rec.rel_previous_progress_revenue_amount or 0.0) + (rec.progress_revenue_amount_period or 0.0)
-                rate = new_rev / rec.target_project_revenue
-                if rec.type == 'internal_production':
-                    rec.progress_revenue_rate = rate
-                elif rec.target_project_outsourcing_product_qty:
-                    rec.outsourcing_product_qty = rate * rec.target_project_outsourcing_product_qty
+            rec.progress_revenue_amount_period = (rec.progress_revenue_amount or 0.0) - (rec.rel_previous_progress_revenue_amount or 0.0)
 
-    def _inverse_revenue(self):
+    # --- future_staffing_days ---
+    @api.depends('type', 'rel_project_id', 'rel_closing_date')
+    def _compute_future_staffing_days(self):
         for rec in self:
-            rate = 0.0
-            if rec.target_project_revenue:
-                rate = rec.progress_revenue_amount / rec.target_project_revenue
-            
-            if rec.type == 'internal_production':
-                rec.progress_revenue_rate = rate
-            elif rec.target_project_outsourcing_product_qty:
-                rec.outsourcing_product_qty = rate * rec.target_project_outsourcing_product_qty
+            if rec.type == 'internal_production' and rec.rel_project_id and rec.rel_closing_date:
+                # TODO : sur Napta, les périodes de forecast sont découpées à la semaine, sauf pour les fin de mois.
+                # Donc si le jour de clôture est en cours de semaine, alors il manquera des jours !
+                lines = rec.rel_project_id.get_production_cost(
+                    [('date', '>', rec.rel_closing_date), ('category', '=', 'project_forecast')],
+                    force_recompute_amount=False)[1]
+                rec.future_staffing_days = sum(line['unit_amount'] for line in lines)
+            else:
+                rec.future_staffing_days = 0.0
 
-    def _inverse_target_project_cost(self):
-        pass
+    # --- price_unit ---
+    @api.depends('target_project_cost', 'target_project_outsourcing_product_qty')
+    def _compute_price_unit(self):
+        for rec in self:
+            rec.price_unit = ((rec.target_project_cost or 0.0) / rec.target_project_outsourcing_product_qty) if rec.target_project_outsourcing_product_qty else 0.0
 
+    # --- reselling_price_unit ---
+    @api.depends('target_project_revenue', 'target_project_outsourcing_product_qty')
+    def _compute_reselling_price_unit(self):
+        for rec in self:
+            rec.reselling_price_unit = ((rec.target_project_revenue or 0.0) / rec.target_project_outsourcing_product_qty) if rec.target_project_outsourcing_product_qty else 0.0
+
+    # ===================================================================
+    # ONCHANGE (Ponts de réactivité IHM)
+    # Les inverses ne tournant qu'au save, ces onchanges permettent de 
+    # synchroniser l'IHM en temps réel pendant la saisie (lorsque l'usager tabule, 
+    # il voit le résultat sans attendre de sortir de la carte pour déclencher 
+    # l'auto-save ou de cliquer surle bouton enregistrer)
+    # ===================================================================
+    @api.onchange('progress_revenue_rate')
+    def _onchange_progress_revenue_rate(self):
+        self._inverse_progress_revenue_rate()
+
+    @api.onchange('outsourcing_product_qty_period')
+    def _onchange_qty_period(self):
+        self._inverse_qty_period()
+
+    @api.onchange('progress_revenue_rate_period')
+    def _onchange_progress_revenue_rate_period(self):
+        self._inverse_progress_revenue_rate_period()
+
+    @api.onchange('progress_revenue_amount')
+    def _onchange_progress_revenue_amount(self):
+        self._inverse_revenue()
+
+    # ===================================================================
+    # ACTIONS
+    # ===================================================================
     def goto_napta(self):
         self.ensure_one()
         return self.accounting_closing_id.goto_napta()
@@ -272,6 +332,33 @@ class ProjectProgress(models.Model):
         self.ensure_one()
         self.write({'is_validated': False})
 
+    def force_refresh(self):
+        """Force le recalcul de toutes les données (écrase les saisies manuelles)."""
+        for rec in self:
+            rec.target_project_cost = 0.0
+            rec.target_project_revenue = 0.0
+
+        self._compute_type()
+        self._compute_previous_progress_id()
+        self._compute_next_progress()
+        self._compute_target_project_cost()
+        self._compute_target_project_revenue()
+        self._compute_target_project_outsourcing_product_qty()
+        self._compute_qty_period()
+        self._compute_progress_cost_amount()
+        self._compute_progress_revenue_rate()
+        self._compute_progress_revenue_amount()
+        self._compute_progress_revenue_rate_period()
+        self._compute_progress_cost_amount_period()
+        self._compute_progress_revenue_amount_period()
+        self._compute_future_staffing_days()
+        self._compute_price_unit()
+        self._compute_reselling_price_unit()
+
+
+    # ===================================================================
+    # CONTRAINTES
+    # ===================================================================
     @api.constrains('progress_revenue_amount', 'target_project_revenue')
     def _check_progress_revenue_amount(self):
         for rec in self:
@@ -287,7 +374,6 @@ class ProjectProgress(models.Model):
     def _check_project_consistency(self):
         for rec in self:
             if rec.outsourcing_link_id and rec.accounting_closing_id:
-                # On compare les IDs pour éviter les problèmes de recordset vide
                 link_project_id = rec.outsourcing_link_id.project_id.id
                 closing_project_id = rec.accounting_closing_id.project_id.id
                 if link_project_id and closing_project_id and link_project_id != closing_project_id:

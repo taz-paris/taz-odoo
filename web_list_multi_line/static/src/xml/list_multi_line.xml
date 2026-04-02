@@ -64,9 +64,9 @@
                     <div class="p-5 text-center text-muted">Aucun enregistrement trouvé.</div>
                 </t>
 
-                <!-- PIED DE PAGE AVEC CUMULS (DANS LE FLUX) -->
+                <!-- PIED DE PAGE AVEC CUMULS (STICKY BOTTOM) -->
                 <t t-if="aggregateColumns.length">
-                    <div class="o_list_footer border-top bg-white p-3 mt-4 shadow-sm mx-2 mb-4 rounded" style="margin-left: 0 !important; margin-right: 0 !important;">
+                    <div class="o_list_multi_line_footer border-top bg-white p-3 shadow-sm mx-2 mb-4 rounded" style="margin-left: 0 !important; margin-right: 0 !important;">
                         <div class="d-flex gap-4 justify-content-end">
                             <t t-foreach="aggregateColumns" t-as="column" t-key="column.id">
                                 <div class="text-end border-start ps-3">

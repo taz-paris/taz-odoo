@@ -37,8 +37,8 @@
             <form string="Avancement">
                 <header>
                     <field name="is_validated" invisible="1"/>
-                    <button name="action_validate" string="✓ Valider" type="object" invisible="is_validated"/>
-                    <button name="action_invalidate" string="Dévalider" type="object" invisible="not is_validated"/>
+                    <button name="action_validate" string="✓ Valider" type="object" invisible="is_validated" class="btn-primary"/>
+                    <button name="action_invalidate" string="Dévalider" type="object" invisible="not is_validated" class="btn-outline-danger"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -66,56 +66,56 @@
                             <field name="previous_progress_id" readonly="is_validated"/>
                         </group>
                     </group>
-                    <group col="4">
-                        <group name="previous_data" string="Rappel données fin de période précédente">
-                            <field name="rel_previous_progress_cost_amount"/>
-                            <field name="rel_previous_progress_revenue_rate" widget="percentage"/>
-                            <field name="rel_previous_progress_revenue_amount"/>
-                        </group>
-                        <!-- Bloc pour la production interne (avec style bleu) -->
-                        <group name="valuation_internal" string="Valorisation totale fin de période" 
-                                style="background-color:#abdbff;" 
-                                invisible="type != 'internal_production'">
-                            <field name="progress_cost_amount"/>
-                            <field name="progress_revenue_rate" widget="percentage" readonly="is_validated"/>
-                            <field name="progress_revenue_amount" readonly="is_validated"/>
-                        </group>
-                        <!-- Bloc pour les autres types (sans style) -->
-                        <group name="valuation_other" string="Valorisation totale fin de période"
-                        style="background-color:none;"
-                                invisible="type == 'internal_production'">
-                            <field name="outsourcing_product_qty" readonly="1"/>
-                            <field name="progress_cost_amount"/>
-                            <field name="progress_revenue_rate" widget="percentage" readonly="1"/>
-                            <field name="progress_revenue_amount" readonly="1"/>
-                        </group>
-                        <!-- Bloc Période pour la production interne (avec style bleu) -->
-                        <group name="valuation_period_internal" string="Valorisation de la période" 
-                                style="background-color:none;"
-                                invisible="type != 'internal_production'">
-                            <field name="progress_cost_amount_period"/>
-                            <field name="progress_revenue_rate_period" widget="percentage" readonly="1"/>
-                            <field name="progress_revenue_amount_period" readonly="1"/>
-                        </group>
-                        <!-- Bloc Période pour les autres types (sans style) -->
-                        <group name="valuation_period_other" string="Valorisation de la période" 
-                                style="background-color:#abdbff;" 
-                                invisible="type == 'internal_production'">
-                            <field name="outsourcing_product_qty_period" readonly="is_validated"/>
-                            <field name="progress_cost_amount_period"/>
-                            <field name="progress_revenue_rate_period" widget="percentage" readonly="is_validated"/>
-                            <field name="progress_revenue_amount_period" sum="Total Revenue Period" readonly="1"/>
-                        </group>
-                        <group name="target" string="Projection à terminaison">
-                            <newline/><newline/>
-                            <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
-                            <field name="target_project_cost"/>
-                            <field name="future_staffing_days" invisible="type != 'internal_production'"/>
-                            <field name="price_unit" invisible="type in ['internal_production', 'other']"/>
-                            <field name="target_project_revenue"/>
-                            <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
-                        </group>
+               <group col="4">
+                    <group name="previous_data" string="Rappel données fin de période précédente">
+                        <field name="rel_previous_progress_cost_amount"/>
+                        <field name="rel_previous_progress_revenue_rate" widget="percentage"/>
+                        <field name="rel_previous_progress_revenue_amount"/>
                     </group>
+                    <!-- Bloc pour la production interne (avec style bleu) -->
+                    <group name="valuation_internal" string="Valorisation totale fin de période" 
+                            style="background-color:#abdbff;" 
+                            invisible="type != 'internal_production'">
+                        <field name="progress_cost_amount"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="is_validated"/>
+                        <field name="progress_revenue_amount" readonly="is_validated"/>
+                    </group>
+                    <!-- Bloc pour les autres types (sans style) -->
+                    <group name="valuation_other" string="Valorisation totale fin de période"
+                    style="background-color:none;"
+                            invisible="type == 'internal_production'">
+                        <field name="outsourcing_product_qty" readonly="1"/>
+                        <field name="progress_cost_amount"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="1"/>
+                        <field name="progress_revenue_amount" readonly="1"/>
+                    </group>
+                    <!-- Bloc Période pour la production interne (avec style bleu) -->
+                    <group name="valuation_period_internal" string="Valorisation de la période" 
+                            style="background-color:none;"
+                            invisible="type != 'internal_production'">
+                        <field name="progress_cost_amount_period"/>
+                        <field name="progress_revenue_rate_period" widget="percentage" readonly="1"/>
+                        <field name="progress_revenue_amount_period"/>
+                    </group>
+                    <!-- Bloc Période pour les autres types (sans style) -->
+                    <group name="valuation_period_other" string="Valorisation de la période" 
+                            style="background-color:#abdbff;" 
+                            invisible="type == 'internal_production'">
+                        <field name="outsourcing_product_qty_period" readonly="is_validated"/>
+                        <field name="progress_cost_amount_period"/>
+                        <field name="progress_revenue_rate_period" widget="percentage" readonly="is_validated"/>
+                        <field name="progress_revenue_amount_period" sum="Total Revenue Period"/>
+                    </group>
+                    <group name="target" string="Projection à terminaison">
+                        <newline/><newline/>
+                        <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
+                        <field name="target_project_cost" readonly="type != 'internal_production'"/>
+                        <field name="future_staffing_days" invisible="type != 'internal_production'"/>
+                        <field name="price_unit" invisible="type in ['internal_production', 'other']"/>
+                        <field name="target_project_revenue" />
+                        <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
+                    </group>
+                </group>
                 </sheet>
                 <chatter/>
             </form>
@@ -159,6 +159,7 @@
         <field name="name">Mes avancements M-1</field>
         <field name="res_model">project.progress</field>
         <field name="view_mode">list,form</field>
+        <field name="view_id" ref="project_progess_list_multi_line"/>
         <field name="search_view_id" ref="view_project_progress_search"/>
         <field name="context">{'search_default_my_progress': 1, 'search_default_prev_month': 1, 'search_default_launched_projects': 1, 'search_default_group_by_project': 1}</field>
         <field name="help" type="html">
@@ -180,7 +181,7 @@
         <field name="binding_model_id" ref="model_project_progress"/>
         <field name="state">code</field>
         <field name="code">for rec in records:
-    rec.compute()</field>
+    rec.force_refresh()</field>
         <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
     </record>
 </odoo>
