@@ -34,7 +34,7 @@
         <field name="name">project.progress.form</field>
         <field name="model">project.progress</field>
         <field name="arch" type="xml">
-            <form string="Avancement">
+            <form string="Avancement" readonly="is_validated or type == 'other'">
                 <header>
                     <field name="is_validated" invisible="1"/>
                     <button name="action_validate" string="✓ Valider" type="object" invisible="is_validated" class="btn-primary"/>

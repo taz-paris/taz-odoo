@@ -207,9 +207,13 @@ class ProjectProgress(models.Model):
                     [('date', '<=', rec.rel_closing_date), ('category', '=', 'project_employee_validated')],
                     force_recompute_amount=False)[0]
             elif rec.outsourcing_link_id:
-                target_qty = rec.target_project_outsourcing_product_qty or 0.0
-                rate = (rec.outsourcing_product_qty / target_qty) if target_qty else 0.0
-                rec.progress_cost_amount = (rec.target_project_cost or 0.0) * rate
+                if rec.type == 'other':
+                    purchase_period_subtotal, purchase_period_total, purchase_period_paid, purchase_period_line_ids = rec.rel_project_id.compute_account_move_total_all_partners([('partner_id', '=', rec.outsourcing_link_id.partner_id.id), ('date', '<=', rec.rel_closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])
+                    rec.progress_cost_amount = -1 * purchase_period_subtotal
+                else :
+                    target_qty = rec.target_project_outsourcing_product_qty or 0.0
+                    rate = (rec.outsourcing_product_qty / target_qty) if target_qty else 0.0
+                    rec.progress_cost_amount = (rec.target_project_cost or 0.0) * rate
             else:
                 rec.progress_cost_amount = 0.0
 
