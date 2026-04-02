@@ -7,6 +7,7 @@ import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { getActiveActions } from "@web/views/utils";
 import { stringToOrderBy } from "@web/search/utils/order_by";
+import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { Component, xml } from "@odoo/owl";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
@@ -27,14 +28,15 @@ class MultiLineNode extends Component {
     }
 
     get isVisible() {
+        // Pour les champs, on récupère l'info d'invisibilité depuis la colonne générée par le parser standard d'Odoo
         if (this.props.node.type === 'field') {
             const col = this.column;
             if (!col) return false;
             return !this.props.renderer.evalInvisible(col.invisible, this.props.record);
         }
-        if (this.props.node.type === 'button') {
-            const invisible = this.props.node.invisible;
-            if (!invisible) return true;
+        // Pour tous les autres types de nœuds (group, button, div, notebook...), on évalue l'attribut invisible du nœud
+        const invisible = this.props.node.invisible;
+        if (invisible) {
             return !this.props.renderer.evalInvisible(invisible, this.props.record);
         }
         return true;
@@ -42,8 +44,20 @@ class MultiLineNode extends Component {
 
     get colClass() {
         const parentCol = this.props.parentCol || 1;
-        const colSpan = Math.max(1, Math.floor(12 / parentCol));
-        return `col-lg-${colSpan}`;
+        const colspan = this.props.node.colspan || 1;
+        const colSize = Math.max(1, Math.min(12, Math.floor((colspan / parentCol) * 12)));
+        return `col-lg-${colSize} col-12`;
+    }
+
+    get decorationClass() {
+        const classNames = [];
+        const decorations = this.props.node.decorations || [];
+        for (const deco of decorations) {
+            if (evaluateBooleanExpr(deco.condition, this.props.record.evalContextWithVirtualIds)) {
+                classNames.push(deco.class);
+            }
+        }
+        return classNames.join(" ");
     }
 }
 
@@ -103,6 +117,13 @@ export class ListMultiLineArchParser extends ListArchParser {
                 confirm: child.getAttribute("confirm") || "",
                 nolabel: child.getAttribute("nolabel") === "1",
                 col: parseInt(child.getAttribute("col") || (tagName === "group" && isRoot ? "2" : "1"), 10),
+                colspan: parseInt(child.getAttribute("colspan") || "1", 10),
+                decorations: Array.from(child.getAttributeNames())
+                    .filter(name => name.startsWith("decoration-"))
+                    .map(name => ({
+                        class: `text-${name.replace("decoration-", "")}`,
+                        condition: child.getAttribute(name),
+                    })),
                 children: child.children.length ? this.parseUniversalLayout(child, false) : [],
             };
 
@@ -131,7 +152,13 @@ export class ListMultiLineRenderer extends ListRenderer {
     }
 
     get sortableColumns() {
-        return this.props.archInfo.columns.filter(c => c.type === 'field' && !c.noSort);
+        const columns = this.props.archInfo.columns.filter(c => c.type === 'field' && !c.noSort);
+        const seen = new Set();
+        return columns.filter(c => {
+            if (seen.has(c.name)) return false;
+            seen.add(c.name);
+            return true;
+        });
     }
 
     get activeSorts() {
@@ -158,7 +185,13 @@ export class ListMultiLineRenderer extends ListRenderer {
     }
 
     get aggregateColumns() {
-        return this.props.archInfo.columns.filter(c => c.type === 'field' && this.aggregates[c.name]);
+        const columns = this.props.archInfo.columns.filter(c => c.type === 'field' && this.aggregates[c.name]);
+        const seen = new Set();
+        return columns.filter(c => {
+            if (seen.has(c.name)) return false;
+            seen.add(c.name);
+            return true;
+        });
     }
 
     onCellClicked(record, column, ev) {

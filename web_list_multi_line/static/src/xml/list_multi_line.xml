@@ -64,9 +64,9 @@
                     <div class="p-5 text-center text-muted">Aucun enregistrement trouvé.</div>
                 </t>
 
-                <!-- PIED DE PAGE AVEC CUMULS (DANS LE FLUX) -->
+                <!-- PIED DE PAGE AVEC CUMULS (STICKY BOTTOM) -->
                 <t t-if="aggregateColumns.length">
-                    <div class="o_list_footer border-top bg-white p-3 mt-4 shadow-sm mx-2 mb-4 rounded" style="margin-left: 0 !important; margin-right: 0 !important;">
+                    <div class="o_list_multi_line_footer border-top bg-white p-3 shadow-sm mx-2 mb-4 rounded" style="margin-left: 0 !important; margin-right: 0 !important;">
                         <div class="d-flex gap-4 justify-content-end">
                             <t t-foreach="aggregateColumns" t-as="column" t-key="column.id">
                                 <div class="text-end border-start ps-3">
@@ -149,7 +149,8 @@
     <t t-name="web_list_multi_line.Node">
         <t t-if="isVisible">
             <t t-if="props.node.type === 'group'">
-                <div t-att-class="props.node.isOuter ? 'o_group row align-items-start' : 'o_inner_group grid col-lg-' + Math.floor(12/(props.parentCol || 1)) + ' ' + props.node.class">
+                <div t-att-class="props.node.isOuter ? 'o_group row align-items-start' : 'o_inner_group grid ' + colClass + ' ' + props.node.class"
+                     t-att-style="props.node.style">
                     <div t-if="props.node.string" t-att-class="props.node.isOuter ? 'col-12' : 'g-col-sm-2'">
                         <div class="o_horizontal_separator mt-4 mb-3 text-uppercase fw-bolder small" t-esc="props.node.string"/>
                     </div>
@@ -187,7 +188,7 @@
                         />
                     </div>
                     <div class="o_cell o_wrap_input text-break" t-att-style="props.node.nolabel ? 'grid-column: span 2;' : ''">
-                        <div t-att-name="column.name" class="o_field_widget" t-att-class="column.class">
+                        <div t-att-name="column.name" class="o_field_widget" t-att-class="props.renderer.getCellClass(column, props.record) + ' ' + decorationClass">
                             <t t-if="props.renderer.canUseFormatter(column, props.record)">
                                 <span class="o_field_content text-break" t-out="props.renderer.getFormattedValue(column, props.record)"/>
                             </t>

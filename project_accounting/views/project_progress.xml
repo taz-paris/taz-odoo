@@ -9,14 +9,15 @@
                 <field name="rel_project_id"/>
                 <field name="accounting_closing_id" optional="hide"/>
                 <field name="rel_closing_date"/>
+                <field name="rel_original_stage_id" optional="show"/>
                 <field name="rel_outsourcing_partner_id" optional="show"/>
                 <field name="type"/>
                 <field name="outsourcing_link_id" readonly="1" optional="hide"/>
                 <field name="previous_progress_id" optional="hide"/>
-                <field name="rel_previous_progress_rate" optional="show" widget="percentage"/>
+                <field name="rel_previous_progress_revenue_rate" optional="show" widget="percentage"/>
                 <field name="rel_previous_progress_cost_amount" optional="hide"/>
                 <field name="rel_previous_progress_revenue_amount" optional="hide"/>
-                <field name="progress_rate"/>
+                <field name="progress_revenue_rate"/>
                 <field name="target_project_cost" optional="show" sum="Total Cost"/>
                 <field name="target_project_revenue" optional="show" sum="Total Revenue"/>
                 <field name="progress_cost_amount" optional="show" sum="Total Cost"/>
@@ -33,11 +34,11 @@
         <field name="name">project.progress.form</field>
         <field name="model">project.progress</field>
         <field name="arch" type="xml">
-            <form string="Avancement">
+            <form string="Avancement" readonly="is_validated or type == 'other'">
                 <header>
                     <field name="is_validated" invisible="1"/>
-                    <button name="action_validate" string="✓ Valider" type="object" invisible="is_validated"/>
-                    <button name="action_invalidate" string="Dévalider" type="object" invisible="not is_validated"/>
+                    <button name="action_validate" string="✓ Valider" type="object" invisible="is_validated" class="btn-primary"/>
+                    <button name="action_invalidate" string="Dévalider" type="object" invisible="not is_validated" class="btn-outline-danger"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -50,6 +51,7 @@
                             <field name="rel_project_id" readonly="1"/>
                             <field name="accounting_closing_id" readonly="1"/>
                             <field name="rel_closing_date" readonly="1"/>
+                            <field name="rel_original_stage_id" readonly="1"/>
                             <field name="type" readonly="1"/>
                             <field name="outsourcing_link_id" readonly="1" invisible="not outsourcing_link_id"/>
                         </group>
@@ -64,37 +66,56 @@
                             <field name="previous_progress_id" readonly="is_validated"/>
                         </group>
                     </group>
-                    <group col="4">
-                        <group name="previous_data" string="Rappel données précédente clôture">
-                            <field name="rel_previous_progress_rate" widget="percentage"/>
-                            <field name="rel_previous_progress_cost_amount"/>
-                            <field name="rel_previous_progress_revenue_amount"/>
-                        </group>
-                        <group name="valuation" string="Valorisation totale à date de clôture">
-                            <field name="outsourcing_product_qty" invisible="type == 'internal_production'" readonly="is_validated or type=='other'"/>
-                            <field name="progress_rate" widget="percentage" readonly="is_validated"/>
-                            <field name="progress_cost_amount" sum="Total Cost"/>
-                            <field name="progress_revenue_amount" sum="Total Revenue" readonly="is_validated"/>
-                        </group>
-                        <group name="valuation_period" string="Valorisation de la période">
-                            <field name="outsourcing_product_qty_period" invisible="type == 'internal_production'" readonly="is_validated or type=='other'"/>
-                            <field name="progress_rate_period" widget="percentage" readonly="is_validated  or type=='other'"/>
-                            <field name="progress_cost_amount_period" sum="Total Cost"/>
-                            <field name="progress_revenue_amount_period" sum="Total Revenue" readonly="is_validated or type=='other'"/>
-                            <button type="object" name="goto_napta" string="Voir sur Napta"
-                                class="btn btn-sm btn-outline-primary" icon="fa-external-link"
-                                invisible="type != 'internal_production'"/>
-                            <button type="object" name="action_open_analytic_lines" string="Voir les lignes de pointage"
-                                class="btn btn-sm btn-outline-secondary" icon="fa-clock-o"
-                                invisible="type != 'internal_production'"/>
-                        </group>
-                        <group name="target" string="Projection à terminaison">
-                            <newline/><newline/>
-                            <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
-                            <field name="target_project_cost" sum="Total Cost"/>
-                            <field name="target_project_revenue" sum="Total Revenue"/>
-                        </group>
+               <group col="4">
+                    <group name="previous_data" string="Rappel données fin de période précédente">
+                        <field name="rel_previous_progress_cost_amount"/>
+                        <field name="rel_previous_progress_revenue_rate" widget="percentage"/>
+                        <field name="rel_previous_progress_revenue_amount"/>
                     </group>
+                    <!-- Bloc pour la production interne (avec style bleu) -->
+                    <group name="valuation_internal" string="Valorisation totale fin de période" 
+                            style="background-color:#abdbff;" 
+                            invisible="type != 'internal_production'">
+                        <field name="progress_cost_amount"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="is_validated"/>
+                        <field name="progress_revenue_amount" readonly="is_validated"/>
+                    </group>
+                    <!-- Bloc pour les autres types (sans style) -->
+                    <group name="valuation_other" string="Valorisation totale fin de période"
+                    style="background-color:none;"
+                            invisible="type == 'internal_production'">
+                        <field name="outsourcing_product_qty" readonly="1"/>
+                        <field name="progress_cost_amount"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="1"/>
+                        <field name="progress_revenue_amount" readonly="1"/>
+                    </group>
+                    <!-- Bloc Période pour la production interne (avec style bleu) -->
+                    <group name="valuation_period_internal" string="Valorisation de la période" 
+                            style="background-color:none;"
+                            invisible="type != 'internal_production'">
+                        <field name="progress_cost_amount_period"/>
+                        <field name="progress_revenue_rate_period" widget="percentage" readonly="1"/>
+                        <field name="progress_revenue_amount_period"/>
+                    </group>
+                    <!-- Bloc Période pour les autres types (sans style) -->
+                    <group name="valuation_period_other" string="Valorisation de la période" 
+                            style="background-color:#abdbff;" 
+                            invisible="type == 'internal_production'">
+                        <field name="outsourcing_product_qty_period" readonly="is_validated"/>
+                        <field name="progress_cost_amount_period"/>
+                        <field name="progress_revenue_rate_period" widget="percentage" readonly="is_validated"/>
+                        <field name="progress_revenue_amount_period" sum="Total Revenue Period"/>
+                    </group>
+                    <group name="target" string="Projection à terminaison">
+                        <newline/><newline/>
+                        <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
+                        <field name="target_project_cost" readonly="type != 'internal_production'"/>
+                        <field name="future_staffing_days" invisible="type != 'internal_production'"/>
+                        <field name="price_unit" invisible="type in ['internal_production', 'other']"/>
+                        <field name="target_project_revenue" />
+                        <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
+                    </group>
+                </group>
                 </sheet>
                 <chatter/>
             </form>
@@ -116,6 +137,8 @@
                         domain="[('rel_closing_date', '&gt;=', (context_today() - relativedelta(months=1)).strftime('%Y-%m-01')), 
                                  ('rel_closing_date', '&lt;', context_today().strftime('%Y-%m-01'))]"/>
                 <separator/>
+                <filter string="Projet en cours" name="launched_projects" domain="[('rel_original_stage_id.state', '=', 'launched')]"/>
+                <separator/>
                 <filter string="Validé" name="validated" domain="[('is_validated', '=', True)]"/>
                 <filter string="Non validé" name="not_validated" domain="[('is_validated', '=', False)]"/>
                 <separator/>
@@ -123,6 +146,7 @@
                 <filter string="Sous-traitance" name="outsourcing" domain="[('type', 'in', ('outsourcing', 'cosourcing'))]"/>
                 <group expand="0" string="Regrouper par">
                     <filter string="Projet" name="group_by_project" context="{'group_by': 'rel_project_id'}"/>
+                    <filter string="Statut début clôture" name="group_by_stage" context="{'group_by': 'rel_original_stage_id'}"/>
                     <filter string="Clôture" name="group_by_closing" context="{'group_by': 'accounting_closing_id'}"/>
                     <filter string="Type" name="group_by_type" context="{'group_by': 'type'}"/>
                     <filter string="Fournisseur" name="group_by_partner" context="{'group_by': 'rel_outsourcing_partner_id'}"/>
@@ -135,8 +159,9 @@
         <field name="name">Mes avancements M-1</field>
         <field name="res_model">project.progress</field>
         <field name="view_mode">list,form</field>
+        <field name="view_id" ref="project_progess_list_multi_line"/>
         <field name="search_view_id" ref="view_project_progress_search"/>
-        <field name="context">{'search_default_my_progress': 1, 'search_default_prev_month': 1, 'search_default_group_by_project': 1}</field>
+        <field name="context">{'search_default_my_progress': 1, 'search_default_prev_month': 1, 'search_default_launched_projects': 1, 'search_default_group_by_project': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créez un nouvel avancement.
@@ -145,7 +170,7 @@
     </record>
 
     <menuitem id="project_progress_menu" 
-              name="Avancements mensuels" 
+              name="Avancements de la production" 
               parent="project_accounting.project_accounting_closing_menu_root" 
               action="project_progress_action" 
               sequence="20"/>
@@ -156,7 +181,7 @@
         <field name="binding_model_id" ref="model_project_progress"/>
         <field name="state">code</field>
         <field name="code">for rec in records:
-    rec.compute()</field>
+    rec.force_refresh()</field>
         <field name="groups_id" eval="[(4, ref('account.group_account_user'))]"/>
     </record>
 </odoo>
