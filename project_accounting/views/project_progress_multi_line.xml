@@ -8,7 +8,7 @@
             <list js_class="list_multi_line" editable="top" expand="1" open_form_view="1" limit="100" groups_limit="100" readonly="is_validated or type == 'other'">
                 <field name="company_id" invisible="1" groups="base.group_multi_company" options="{'no_create': True}" readonly="1"/>
                 <field name="currency_id" invisible="1"/>
-                <group col="6">
+                <group col="4">
                     <group>
                         <field name="rel_project_id" readonly="1"/>
                     </group>
@@ -16,16 +16,7 @@
                         <field name="rel_closing_date" readonly="1"/>
                     </group>
                     <group>
-                        <field name="rel_original_stage_id" readonly="1"/>
-                    </group>
-                    <group>
                         <field name="type" readonly="1"/>
-                    </group>
-                    <group>
-                        <field name="rel_outsourcing_partner_id" invisible="type == 'internal_production'"/>
-                        <button type="object" name="goto_napta" string="Voir sur Napta"
-                                class="btn btn-outline-secondary" icon="fa-external-link"
-                                invisible="type != 'internal_production'"/>
                     </group>
                     <group>
                             <!-- On utilise un bouton Valider/Dévalider au lieu du widget boolean_toggle 
@@ -37,7 +28,16 @@
                             <button name="force_refresh" type="object" invisible="is_validated" class="btn btn-outline-secondary" icon="fa-refresh" string="" help="Rafraîchir les données après modification des données de la fiche projet TazForce. Ce bouton ne permet pas de rafraîchir les données de staffing Napta."/>
                     </group>
                 </group>
-                <group>
+                <group col="4">
+                    <group colspan="1">
+                        <field name="rel_original_stage_id" readonly="1"/>
+                    </group>
+                    <group colspan="1">
+                        <field name="rel_outsourcing_partner_id" invisible="type == 'internal_production'"/>
+                        <button type="object" name="goto_napta" string="Voir sur Napta"
+                                class="btn btn-outline-secondary" icon="fa-external-link"
+                                invisible="type != 'internal_production'"/>
+                    </group>
                     <group colspan="2">
                         <field name="comment"/>
                     </group>

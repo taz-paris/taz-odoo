@@ -44,8 +44,9 @@ class MultiLineNode extends Component {
 
     get colClass() {
         const parentCol = this.props.parentCol || 1;
-        const colSpan = Math.max(1, Math.floor(12 / parentCol));
-        return `col-lg-${colSpan}`;
+        const colspan = this.props.node.colspan || 1;
+        const colSize = Math.max(1, Math.min(12, Math.floor((colspan / parentCol) * 12)));
+        return `col-lg-${colSize} col-12`;
     }
 
     get decorationClass() {
@@ -116,6 +117,7 @@ export class ListMultiLineArchParser extends ListArchParser {
                 confirm: child.getAttribute("confirm") || "",
                 nolabel: child.getAttribute("nolabel") === "1",
                 col: parseInt(child.getAttribute("col") || (tagName === "group" && isRoot ? "2" : "1"), 10),
+                colspan: parseInt(child.getAttribute("colspan") || "1", 10),
                 decorations: Array.from(child.getAttributeNames())
                     .filter(name => name.startsWith("decoration-"))
                     .map(name => ({
