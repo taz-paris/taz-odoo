@@ -95,6 +95,8 @@ class ProjectProgress(models.Model):
     # ===================================================================
     def write(self, vals):
         for rec in self:
+            if rec.accounting_closing_id.is_validated:
+                raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est lié à une clôture validée."))
             if rec.next_progress:
                 raise ValidationError(_("Il n'est pas possible de modifier cet avancement car un avancement postérieur existe."))
             if rec.is_validated:
@@ -103,13 +105,7 @@ class ProjectProgress(models.Model):
                         raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est validé.\n\nTentative de modification de l'attribut : %s") % val_key)
         
         res = super().write(vals)
-        
-        # Si on dévalide un avancement, on dévalide automatiquement la clôture liée
-        if 'is_validated' in vals and not vals.get('is_validated'):
-            for rec in self:
-                if rec.accounting_closing_id.is_validated:
-                    rec.accounting_closing_id.is_validated = False
-        
+
         return res
 
     def unlink(self):
