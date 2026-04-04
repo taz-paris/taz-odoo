@@ -152,6 +152,7 @@ class tazCustomerBookGoal(models.Model):
 
     industry_id = fields.Many2one('res.partner.industry', string="Compte", ondelete='restrict') #, required=True
     rel_business_priority = fields.Selection(related='industry_id.business_priority', store=True)
+    rel_user_id = fields.Many2one('res.users', related='industry_id.user_id', store=True)
     reference_period = fields.Selection(
         year_selection,
         string="Année",

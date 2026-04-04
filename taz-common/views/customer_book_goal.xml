@@ -8,6 +8,7 @@
                 <list editable="top" expand="1">
                     <field name="currency_id" column_invisible="1"/>
                     <field name="industry_id" required="1" optional="show" options="{'no_create': True, 'no_create_edit':True}" readonly="id"/>
+                    <field name="rel_user_id" optional="hide"/>
                     <field name="company_id" optional="show"/>
                     <field name="reference_period" optional="hide"/>
                     <field name="period_goal" optional="show" sum="Total"/>
@@ -24,6 +25,8 @@
                     <field name="business_action_count" optional="show" string="RDV faits" sum="Total"/>
                     <button type="object" name="action_open_business_actions" icon="fa-eye" title="Ouvrir les actions commerciales"/>
                     <field name="comment" optional="show" widget="text"/>
+                    <field name="create_date" optional="hide"/>
+                    <field name="write_date" optional="hide"/>
                 </list>
             </field>
         </record>
@@ -48,6 +51,7 @@
                             <group>
                                 <field name="period_goal"/>
                                 <field name="business_action_goal"/>
+                                <field name="rel_user_id"/>
                             </group>
                         </group>
                         <notebook>

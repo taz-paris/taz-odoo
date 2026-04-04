@@ -376,6 +376,20 @@ class projectAccountProject(models.Model):
     project_manager = fields.Many2one('hr.employee', "Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", check_company=False)
     business_action_ids = fields.One2many('taz.business_action', 'project_id', string="Actions commerciales")
 
+    def action_create_business_action(self):
+        self.ensure_one()
+        return {
+            'name': _("Nouvelle action commerciale"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'taz.business_action',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_project_id': self.id,
+                'dialog_size': 'extra-large',
+            }
+        }
+
     # Champs relatifs à la capitalisation des projets
     sales_proposal_indexation = fields.Selection([
         ('to_be_capitalized', 'À capitaliser'),

@@ -143,6 +143,7 @@
                 <xpath expr="//field[@name='prorated_revenue']" position="after">
                     <field name="date_last_update_prorated_revenue" optional="show"/>
                     <field name="business_action_ids" optional="show"/>
+                    <button name="action_create_business_action" type="object" string="Action" icon="fa-plus" title="Créer une action commerciale"/>
                 </xpath>
             </field>
         </record>
