@@ -136,7 +136,7 @@ class projectAccountingClosing(models.Model):
                             'accounting_closing_id': rec.id,
                             'outsourcing_link_id': False,
                         })
-            rec.object_progress_ids.compute()
+            rec.object_progress_ids._force_refresh()
             
 
             previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")

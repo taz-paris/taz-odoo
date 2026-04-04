@@ -180,3 +180,4 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+.agents/workflow_cm_diff.patch

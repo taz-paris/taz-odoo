@@ -1,7 +1,6 @@
 "id","name","model_id/id","group_id/id","perm_read","perm_write","perm_create","perm_unlink"
 "__export__.ir_model_access_976_fd5cd51b","taz.business_action.all","taz-common.model_taz_business_action","base.group_user","True","True","True","True"
 "__export__.ir_model_access_976_fd5cd51c","taz.office365_import_people.all","taz-common.model_taz_office_people","base.group_user","True","True","True","True"
-"__export__.ir_model_access_976_fd5cd51d","taz.customer_book_goal.all","taz-common.model_taz_customer_book_goal","base.group_user","True","True","True","True"
 "__export__.ir_model_access_976_fd5cd51e","taz.customer_book_followup.all","taz-common.model_taz_customer_book_followup","base.group_user","True","True","True","True"
 "__export__.ir_model_access_976_fd5cd51f","res_partner_industry_pillar.all","taz-common.model_res_partner_industry_pillar","base.group_user","True","True","True","True"
 "taz_basic_res_partner","taz_basic_res_partner","base.model_res_partner","taz-basic","True","True","True","False"
@@ -18,3 +17,5 @@
 "taz_basic_res_sector","taz_management_res_partner_sector","taz-common.model_res_partner_sector","taz-common.taz-basic","True","False","False","False"
 "taz_employee_business_action_goal_management","taz_employee_business_action_goal_management","taz-common.model_taz_employee_business_action_goal","taz-common.taz-management","True","True","True","True"
 "taz_employee_business_action_goal_basic","taz_employee_business_action_goal_basic","taz-common.model_taz_employee_business_action_goal","taz-common.taz-basic","True","False","False","False"
+"taz_admin_customer_book_goal","taz_admin_customer_book_goal","taz-common.model_taz_customer_book_goal","taz-common.taz-admin","True","True","True","True"
+"taz_basic_customer_book_goal","taz_basic_customer_book_goal","taz-common.model_taz_customer_book_goal","taz-common.taz-basic","True","True","True","False"
