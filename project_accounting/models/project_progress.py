@@ -1084,7 +1084,8 @@ class ProjectProgress(models.Model):
         """Force le recalcul de toutes les données (écrase les saisies manuelles)."""
         _logger.info("================= force_refresh")
         for rec in self:
-            pass
+            #mise à jour manuelle du CA cible, notamment lorsque Margaux/le DM crée les BCC après la génération initiale de l'avancement
+            rec._compute_target_project_revenue()
             """
             rec.target_project_cost = 0.0
             rec.target_project_revenue = 0.0
@@ -1093,7 +1094,6 @@ class ProjectProgress(models.Model):
             #rec._compute_next_progress()
 
             rec._compute_progress_cost_amount()
-            rec._compute_target_project_revenue()
             rec._compute_target_project_cost()
             rec._compute_target_project_outsourcing_product_qty()
             rec._compute_qty_period()

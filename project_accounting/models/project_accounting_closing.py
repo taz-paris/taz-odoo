@@ -111,7 +111,7 @@ class projectAccountingClosing(models.Model):
             if rec.closing_date and rec.closing_date >= datetime.date(2026, 3, 1):
                 rec.valuation_from_progress = True
 
-            if rec.valuation_from_progress:
+            if rec.valuation_from_progress and not(isinstance(rec.id, models.NewId)):
                 # 1. For each outsourcing link
                 for link in proj_id.project_outsourcing_link_ids:
                     progress = self.env['project.progress'].search([
@@ -119,10 +119,12 @@ class projectAccountingClosing(models.Model):
                         ('outsourcing_link_id', '=', link.id)
                     ], limit=1)
                     if not progress:
-                        self.env['project.progress'].create({
+                        outsourcing_progress_dic = {
                             'accounting_closing_id': rec.id,
                             'outsourcing_link_id': link.id,
-                        })
+                        }
+                        _logger.info("Creating project progress : %s " % str(outsourcing_progress_dic))
+                        self.env['project.progress'].create(outsourcing_progress_dic)
                 
                 # 2. For internal production
                 if rec.project_id.napta_id or rec.project_id.company_part_amount_current != 0.0:
@@ -132,10 +134,12 @@ class projectAccountingClosing(models.Model):
                         ('type', '=', 'internal_production')
                     ], limit=1)
                     if not internal_progress:
-                        self.env['project.progress'].create({
+                        internal_progress_dic = {
                             'accounting_closing_id': rec.id,
                             'outsourcing_link_id': False,
-                        })
+                        }
+                        _logger.info("Creating project progress : %s " % str(internal_progress_dic))
+                        self.env['project.progress'].create(internal_progress_dic)
 
             previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
             previous_closing = None
