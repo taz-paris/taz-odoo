@@ -125,7 +125,7 @@ class projectAccountingClosing(models.Model):
                         })
                 
                 # 2. For internal production
-                if rec.project_id.napta_id:
+                if rec.project_id.napta_id or rec.project_id.company_part_amount_current != 0.0:
                     internal_progress = self.env['project.progress'].search([
                         ('accounting_closing_id', '=', rec.id),
                         ('outsourcing_link_id', '=', False),
@@ -136,8 +136,6 @@ class projectAccountingClosing(models.Model):
                             'accounting_closing_id': rec.id,
                             'outsourcing_link_id': False,
                         })
-            rec.object_progress_ids._force_refresh()
-            
 
             previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
             previous_closing = None
