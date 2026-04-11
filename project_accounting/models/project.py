@@ -375,6 +375,7 @@ class projectAccountProject(models.Model):
     #TODO : synchroniser cette valeur avec user_id avec un oneChange
     project_manager = fields.Many2one('hr.employee', "Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", check_company=False)
     business_action_ids = fields.One2many('taz.business_action', 'project_id', string="Actions commerciales")
+    object_progress_ids = fields.One2many('project.progress', 'rel_project_id', string="Avancements périodiques", readonly=True)
 
     def action_create_business_action(self):
         self.ensure_one()

@@ -507,6 +507,21 @@
 				    </group>
                                 </group>
                             </page>
+                            <page name="progress" string="Avancements périodiques">
+                                <field name="object_progress_ids">
+                                    <list string="Avancements">
+                                        <field name="accounting_closing_id" optional="hide"/>
+                                        <field name="rel_closing_date" string="Date"/>
+                                        <field name="type"/>
+                                        <field name="rel_outsourcing_partner_id" string="Sous-traitant"/>
+                                        <field name="progress_revenue_rate" widget="percentage" string="Avancement %"/>
+                                        <field name="progress_revenue_amount_period" sum="Total CA Période" string="CA Période"/>
+                                        <field name="progress_cost_amount_period" sum="Total Coût Période" string="Coût Période"/>
+                                        <field name="progress_revenue_margin" sum="Total Marge" string="Marge"/>
+                                        <field name="is_validated" widget="boolean_toggle"/>
+                                    </list>
+                                </field>
+                            </page>
                             <page name="account_closing" string="Clôtures comptables">
                                 <group>
                                     <group>

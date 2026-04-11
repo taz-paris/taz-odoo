@@ -7,7 +7,7 @@
                 <table class="d-none" t-ref="table"><tbody></tbody></table>
 
                 <!-- BARRE DE SÉLECTION GLOBALE ET TRI -->
-                <div class="o_list_selection_header sticky-top bg-white border-bottom p-2 mb-3 d-flex align-items-center shadow-sm mx-2 rounded-bottom" style="margin : 0 !important; padding-left:12px !important">
+                <div class="o_list_selection_header bg-white border-bottom p-2 mb-3 d-flex align-items-center shadow-sm mx-2 rounded-bottom" style="margin : 0 !important; padding-left:12px !important">
                     <div t-if="hasSelectors" class="d-flex align-items-center border-end pe-3 me-3">
                         <CheckBox value="selectAll" className="'d-flex m-0 pe-2'" onChange.bind="toggleSelection"/>
                         <span class="fw-bold text-muted small text-uppercase d-none d-md-inline">Tout sélectionner</span>
