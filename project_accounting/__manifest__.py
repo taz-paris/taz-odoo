@@ -22,6 +22,7 @@
     # always loaded
     'data': [
         'security/security.xml',
+        'data/ir_cron.xml',
         'security/ir.model.access.csv',
         'views/project_stage.xml',
         'views/project_group.xml',

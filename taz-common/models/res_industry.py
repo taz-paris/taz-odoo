@@ -40,6 +40,7 @@ class tazResIndustry(models.Model):
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
     business_partner_company_ids = fields.Many2many('res.partner', domain=[('ref_company_ids', '!=', False)], string="Alliance")
+    business_action_ids = fields.One2many('taz.business_action', 'parent_partner_industry_id', string="Actions Commerciales")
 
 
 

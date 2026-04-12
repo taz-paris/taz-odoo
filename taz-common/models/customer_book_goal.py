@@ -37,9 +37,35 @@ class tazCustomerBookGoal(models.Model):
         for rec in self :
             rec.name =  "%s - %s (%s)" % (rec.reference_period or "", rec.industry_id.name or "", rec.company_id.name) 
 
-    @api.model
-    def compute(self):
+    # =========================================================================================
+    # ATTENTION MAINTENANCE : 
+    # Ces fonctions gèrent l'algorithme brut des calculs des ambitions.
+    # Cependant, les décorateurs @api.depends() qui rendent ces champs persistants (store=True) 
+    # et réactifs se trouvent de force dans le module aval : project_accounting.
+    # -> SI VOUS AJOUTEZ UN NOUVEAU PÉRIMÈTRE DE RECHERCHE ICI (ex: un nouveau champ de res.partner), 
+    # n'oubliez pas d'enrichir le @api.depends() correspondant dans project_accounting/models/customer_book_goal.py
+    # =========================================================================================
+
+    def _compute_commercial_actions(self):
         for record in self:
+            begin_year = datetime.datetime(int(record.reference_period), 1, 1) if record.reference_period else datetime.date.today()
+            end_year = datetime.datetime(int(record.reference_period), 12, 31) if record.reference_period else datetime.date.today()
+            
+            record.done_commercial_interview_count, _ = record.industry_id.get_done_commercial_interviews(begin_year, end_year)
+            record.inprogress_commercial_interview_count, _ = record.industry_id.get_inprogress_commercial_interviews()
+            record.inprogress_other_business_action_count, _ = record.industry_id.get_inprogress_other_business_actions()
+
+    def _compute_financial_aggregates(self):
+        for record in self:
+            if not record.reference_period:
+                record.period_book = 0.0
+                record.period_delta = 0.0
+                record.period_ratio = 0.0
+                record.book_last_month = 0.0
+                record.expected_prorated_revenue = 0.0
+                record.number_of_opportunities = 0
+                continue
+
             begin_year = datetime.datetime(int(record.reference_period), 1, 1) 
             end_year = datetime.datetime(int(record.reference_period), 12, 31)
             record.period_book, period_project_ids = record.industry_id.get_book_by_period(begin_year, end_year, record.company_id)
@@ -56,10 +82,6 @@ class tazCustomerBookGoal(models.Model):
             else:
                 record.expected_prorated_revenue = 0.0
                 record.number_of_opportunities = 0
-            
-            record.done_commercial_interview_count, _ = record.industry_id.get_done_commercial_interviews(begin_year, end_year)
-            record.inprogress_commercial_interview_count, _ = record.industry_id.get_inprogress_commercial_interviews()
-            record.inprogress_other_business_action_count, _ = record.industry_id.get_inprogress_other_business_actions()
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -192,16 +214,16 @@ class tazCustomerBookGoal(models.Model):
 
     period_goal = fields.Monetary("Ambition annuelle", tracking=True)
 
-    period_book = fields.Monetary("Prise de commande à date", compute=compute)
-    period_delta = fields.Monetary("Delta ambition", compute=compute)
-    period_ratio = fields.Float("Ratio ambition", compute=compute)
-    book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
-    number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
-    done_commercial_interview_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
-    inprogress_commercial_interview_count = fields.Integer("RDV futurs", compute=compute)
-    inprogress_other_business_action_count = fields.Integer("Actions futures (hors RDV)", compute=compute)
+    period_book = fields.Monetary("Prise de commande à date", compute=_compute_financial_aggregates)
+    period_delta = fields.Monetary("Delta ambition", compute=_compute_financial_aggregates)
+    period_ratio = fields.Float("Ratio ambition", compute=_compute_financial_aggregates)
+    book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=_compute_financial_aggregates)
+    number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=_compute_financial_aggregates)
+    done_commercial_interview_count = fields.Integer("Nombre de RDV réalisés", compute=_compute_commercial_actions)
+    inprogress_commercial_interview_count = fields.Integer("RDV futurs", compute=_compute_commercial_actions)
+    inprogress_other_business_action_count = fields.Integer("Actions futures (hors RDV)", compute=_compute_commercial_actions)
     business_action_goal = fields.Integer("Ambition de RDV", tracking=True)
-    expected_prorated_revenue = fields.Monetary('Espérance de PDC pondérée (hors S/T)', compute=compute)
+    expected_prorated_revenue = fields.Monetary('Espérance de PDC pondérée (hors S/T)', compute=_compute_financial_aggregates)
     comment = fields.Text("Commentaire pour cette année", tracking=True)
 
 
