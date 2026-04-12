@@ -6,8 +6,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo.exceptions import UserError
-from odoo.tests import tagged
-from odoo.tests.common import Form, TransactionCase
+from odoo.tests import Form, TransactionCase, tagged
 from unittest.mock import patch
 from datetime import datetime
 

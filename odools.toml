@@ -1,0 +1,40 @@
+# Fichier de configuration pour Odoo Language Server
+
+[[config]]
+name = "Taz Config"
+# Chemin vers les sources Odoo pour l'autocomplétion
+odoo_path = "/home/ubuntu/odoo18"
+
+# Liste des dossiers dont on veut les Erreurs/Diagnostics
+addons_paths = [
+  "/home/ubuntu/taz-odoo18"
+]
+
+# On écrase l'auto-détection pour ne pas analyser le dossier odoo18
+addons_merge = "override"
+
+# Pour ne plus avoir d'alertes sur les bibliothèques Python externes manquantes
+diag_missing_imports = "only_odoo"
+
+# Filtre : on bloque TOUS les diagnostics sur les fichiers hors de taz-odoo18
+[[config.diagnostic_filters]]
+codes = ["OLS.*"]
+paths = [
+  "/home/ubuntu/taz-odoo18/agreement/**",
+  "/home/ubuntu/taz-odoo18/agreement_sale/**",
+  "/home/ubuntu/taz-odoo18/backport_v19/**",
+  "/home/ubuntu/taz-odoo18/dashboard_global/**",
+  "/home/ubuntu/taz-odoo18/event_registration_light/**",
+  "/home/ubuntu/taz-odoo18/many2many_tags_link_sit/**",
+  "/home/ubuntu/taz-odoo18/napta_connector/**",
+  "/home/ubuntu/taz-odoo18/project_accounting/**",
+  "/home/ubuntu/taz-odoo18/project_accounting_inter_company/**",
+  "/home/ubuntu/taz-odoo18/spreadsheet_dashboard_transverse/**",
+  "/home/ubuntu/taz-odoo18/spreadsheet_filters/**",
+  "/home/ubuntu/taz-odoo18/staffing/**",
+  "/home/ubuntu/taz-odoo18/taz-common/**",
+  "/home/ubuntu/taz-odoo18/taz-package/**",
+  "/home/ubuntu/taz-odoo18/web_grid_view/**",
+  "/home/ubuntu/taz-odoo18/web_list_multi_line/**",
+]
+path_type = "notin"

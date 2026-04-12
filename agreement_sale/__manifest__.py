@@ -6,7 +6,7 @@
     "summary": "Agreement on sales",
     "version": "18.0.1.0.0",
     "category": "Contract",
-    "author": "Akretion, " "Odoo Community Association (OCA)",
+    "author": "Akretion, " "Odoo Community Association (OCA), Aurélien Dumaine",
     "website": "https://github.com/OCA/contract",
     "license": "AGPL-3",
     "depends": ["sale_management", "agreement"],
