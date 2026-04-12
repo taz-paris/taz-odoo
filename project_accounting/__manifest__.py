@@ -17,7 +17,7 @@
     'version': "18.0.1.0.0",
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement', 'web_list_multi_line', 'hr', 'hr_timesheet'],
+    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement', 'web_list_multi_line', 'hr_timesheet'],
 
     # always loaded
     'data': [

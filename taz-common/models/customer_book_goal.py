@@ -57,13 +57,15 @@ class tazCustomerBookGoal(models.Model):
                 record.expected_prorated_revenue = 0.0
                 record.number_of_opportunities = 0
             
-            record.business_action_count, business_action_ids = record.industry_id.get_business_action_by_periode(begin_year, end_year)
+            record.done_commercial_interview_count, _ = record.industry_id.get_done_commercial_interviews(begin_year, end_year)
+            record.inprogress_commercial_interview_count, _ = record.industry_id.get_inprogress_commercial_interviews()
+            record.inprogress_other_business_action_count, _ = record.industry_id.get_inprogress_other_business_actions()
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
-        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities', 'business_action_count', 'business_action_goal', 'expected_prorated_revenue']
+        COMPUTED_FIELD_LIST = ['period_goal', 'period_book', 'period_ratio', 'period_delta', 'book_last_month', 'number_of_opportunities', 'done_commercial_interview_count', 'inprogress_commercial_interview_count', 'business_action_goal', 'expected_prorated_revenue', 'inprogress_other_business_action_count']
         for data in res:
             if '__domain' not in data.keys():
                 continue
@@ -81,13 +83,37 @@ class tazCustomerBookGoal(models.Model):
             
         return res
 
-    def action_open_business_actions(self):
+    def action_open_done_commercial_interviews(self):
         begin_year = datetime.datetime(int(self.reference_period), 1, 1)
         end_year = datetime.datetime(int(self.reference_period), 12, 31)
-        count, business_action_ids = self.industry_id.get_business_action_by_periode(begin_year, end_year)
+        count, business_action_ids = self.industry_id.get_done_commercial_interviews(begin_year, end_year)
         return {
                 'type': 'ir.actions.act_window',
-                'name': 'Actions commerciales du compte %s' % (self.industry_id.name),
+                'name': 'RDV faits du compte %s' % (self.industry_id.name),
+                'res_model': 'taz.business_action',
+                'view_mode': 'list,form',
+                'target': 'current',
+                'domain': [('id', 'in', business_action_ids.ids)],
+                'context' : {'no_create' : True},
+            }
+
+    def action_open_inprogress_commercial_interviews(self):
+        count, business_action_ids = self.industry_id.get_inprogress_commercial_interviews()
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'RDV en cours du compte %s' % (self.industry_id.name),
+                'res_model': 'taz.business_action',
+                'view_mode': 'list,form',
+                'target': 'current',
+                'domain': [('id', 'in', business_action_ids.ids)],
+                'context' : {'no_create' : True},
+            }
+
+    def action_open_inprogress_other_business_actions(self):
+        count, business_action_ids = self.industry_id.get_inprogress_other_business_actions()
+        return {
+                'type': 'ir.actions.act_window',
+                'name': 'Actions en cours (hors RDV) du compte %s' % (self.industry_id.name),
                 'res_model': 'taz.business_action',
                 'view_mode': 'list,form',
                 'target': 'current',
@@ -171,7 +197,9 @@ class tazCustomerBookGoal(models.Model):
     period_ratio = fields.Float("Ratio ambition", compute=compute)
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=compute)
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=compute)
-    business_action_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
+    done_commercial_interview_count = fields.Integer("Nombre de RDV réalisés", compute=compute)
+    inprogress_commercial_interview_count = fields.Integer("RDV futurs", compute=compute)
+    inprogress_other_business_action_count = fields.Integer("Actions futures (hors RDV)", compute=compute)
     business_action_goal = fields.Integer("Ambition de RDV", tracking=True)
     expected_prorated_revenue = fields.Monetary('Espérance de PDC pondérée (hors S/T)', compute=compute)
     comment = fields.Text("Commentaire pour cette année", tracking=True)
