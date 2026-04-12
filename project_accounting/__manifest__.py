@@ -17,11 +17,12 @@
     'version': "18.0.1.0.0",
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement', 'web_list_multi_line'],
+    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement', 'web_list_multi_line', 'hr_timesheet'],
 
     # always loaded
     'data': [
         'security/security.xml',
+        'data/ir_cron.xml',
         'security/ir.model.access.csv',
         'views/project_stage.xml',
         'views/project_group.xml',

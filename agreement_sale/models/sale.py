@@ -27,8 +27,3 @@ class SaleOrder(models.Model):
         copy=True,
     )
 
-    sale_order_ids = fields.One2many(
-        comodel_name="sale.order",
-        inverse_name="agreement_id",
-        string="Bons de commande",
-    )

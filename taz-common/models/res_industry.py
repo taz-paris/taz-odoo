@@ -40,6 +40,7 @@ class tazResIndustry(models.Model):
     customer_book_goal_ids = fields.One2many('taz.customer_book_goal', 'industry_id')  
     customer_book_followup_ids = fields.One2many('taz.customer_book_followup', 'industry_id')  
     business_partner_company_ids = fields.Many2many('res.partner', domain=[('ref_company_ids', '!=', False)], string="Alliance")
+    business_action_ids = fields.One2many('taz.business_action', 'parent_partner_industry_id', string="Actions Commerciales")
 
 
 
@@ -127,13 +128,33 @@ class tazResIndustry(models.Model):
 
         return action
 
-    def get_business_action_by_periode(self, begin_date, end_date):
+    def get_done_commercial_interviews(self, begin_date, end_date):
         domain = [
             ('parent_partner_industry_id', '=', self.id),
             ('state', '=', 'done'),
             ('date_deadline', '>=', begin_date),
             ('date_deadline', '<=', end_date),
             ('action_type', 'in', ['commercial_interview']),
+        ]
+        business_actions = self.env['taz.business_action'].search(domain)
+        return len(business_actions), business_actions
+
+    def get_inprogress_commercial_interviews(self):
+        domain = [
+            ('parent_partner_industry_id', '=', self.id),
+            ('state', 'not in', ['done', 'cancelled']),
+            ('date_deadline', '>=', fields.Date.context_today(self)),
+            ('action_type', '=', 'commercial_interview'),
+        ]
+        business_actions = self.env['taz.business_action'].search(domain)
+        return len(business_actions), business_actions
+
+    def get_inprogress_other_business_actions(self):
+        domain = [
+            ('parent_partner_industry_id', '=', self.id),
+            ('state', 'not in', ['done', 'cancelled']),
+            ('date_deadline', '>=', fields.Date.context_today(self)),
+            ('action_type', '!=', 'commercial_interview'),
         ]
         business_actions = self.env['taz.business_action'].search(domain)
         return len(business_actions), business_actions

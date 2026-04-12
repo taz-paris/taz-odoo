@@ -192,7 +192,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page name="progress" string="Avancements mensuels">
+                        <page name="progress" string="Avancements périodiques">
                             <field name="object_progress_ids"/>
                         </page>
                         <page name="history_data" string="Historique des clôtures du projet">

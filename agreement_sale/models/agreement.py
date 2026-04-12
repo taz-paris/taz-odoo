@@ -5,23 +5,20 @@ _logger = logging.getLogger(__name__)
 class Agreement(models.Model):
     _inherit = "agreement"
 
+    def _get_total_order_amount(self):
+        """Retourne le montant total commandé sur cet accord.
+        Surchargé par agreement_purchase pour le domaine 'purchase'."""
+        self.ensure_one()
+        if self.domain == 'sale':
+            orders = self.env['sale.order'].sudo().search([('agreement_id', '=', self.id)])
+            return sum(o.amount_untaxed for o in orders)
+        return 0.0
+
     @api.depends('max_amount')
     def compute(self):
         for rec in self:
-            # This is computed with sudo to include all orders of all companies, wathever companies are currently selected
-            if rec.domain == 'sale':
-                order_ids = self.env['sale.order'].sudo().search([('agreement_id', '=', rec.id)])
-            elif rec.domain == 'purchase':
-                order_ids = self.env['purchase.order'].sudo().search([('agreement_id', '=', rec.id)])
-            else :
-                raise ValidationError("Domaine de marché non géré : %s" % rec.domain)
-
-            total_orders = 0
-            for order in order_ids:
-               total_orders += order.amount_untaxed
-            rec.total_order_amount = total_orders
-
-            sold = rec.total_order_amount + rec.other_contractors_total_sale_order 
+            rec.total_order_amount = rec._get_total_order_amount()
+            sold = rec.total_order_amount + rec.other_contractors_total_sale_order
             rec.available_amount = rec.max_amount - sold
             if rec.max_amount == 0.0:
                 rec.sold_rate = 0.0

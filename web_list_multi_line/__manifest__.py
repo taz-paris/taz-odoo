@@ -3,7 +3,7 @@
     'version': '18.0.1.0.0',
     'category': 'Web',
     'summary': 'A list view where records are displayed as multi-line rows (form-like structure).',
-    'author': 'Antigravity',
+    'author': 'Aurélien Dumaine',
     'license': 'LGPL-3',
     'depends': ['web'],
     'data': [],

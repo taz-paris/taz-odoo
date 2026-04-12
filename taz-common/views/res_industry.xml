@@ -42,17 +42,21 @@
                                         <field name="period_goal" optional="show" sum="Total"/>
                                         <field name="reference_period" optional="show"/>
                                         <field name="period_book" optional="show" sum="Total"/>
-                                        <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="open_project_booked_this_year"/>
+                                        <button type="object" name="action_open_project_booked_this_year" icon="fa-eye" title="Voir les projets de l'année" width="0.1"/>
                                         <field name="period_delta" optional="hide" sum="Total"/>
                                         <field name="period_ratio" optional="show" widget="progressbar"/>
                                         <field name="book_last_month" optional="show" string="Prise commande J-31" sum="Total"/>
-                                        <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="open_project_booked_last_month"/>
+                                        <button type="object" name="action_open_project_booked_last_month" icon="fa-eye" title="Voir les projets J-31" width="0.1"/>
                                         <field name="number_of_opportunities" optional="show" sum="Total"/>
                                         <field name="expected_prorated_revenue" optional="show" sum="Total"/>
-                                        <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="open_project_opportunitie"/>
+                                        <button type="object" name="action_open_project_opportunities" icon="fa-eye" title="Voir les opportunités" width="0.1"/>
                                         <field name="business_action_goal" optional="show" string="Amb. RDV" sum="Total"/>
-                                        <field name="business_action_count" optional="show" string="RDV faits" sum="Total"/>
-                                        <button type="object" name="action_open_business_actions" icon="fa-eye" title="Ouvrir les actions commerciales"/>
+                                        <field name="done_commercial_interview_count" optional="show" string="RDV faits" sum="Total"/>
+                                        <button type="object" name="action_open_done_commercial_interviews" icon="fa-eye" title="Ouvrir les RDV faits" width="0.1"/>
+                                        <field name="inprogress_commercial_interview_count" optional="show" string="RDV en cours" sum="Total"/>
+                                        <button type="object" name="action_open_inprogress_commercial_interviews" icon="fa-eye" title="Ouvrir les RDV en cours" width="0.1"/>
+                                        <field name="inprogress_other_business_action_count" optional="show" string="Actions en cours" sum="Total"/>
+                                        <button type="object" name="action_open_inprogress_other_business_actions" icon="fa-eye" title="Ouvrir les actions en cours" width="0.1"/>
                                     </list>
                                 </field>
                                 <label for="customer_book_followup_ids" string="Photos des ambitions annuelles"/>

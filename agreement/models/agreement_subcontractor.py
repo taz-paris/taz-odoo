@@ -96,18 +96,11 @@ class AgreementSubcontractor(models.Model):
                 rec.is_partner_id_res_company = False
 
     def get_orders(self):
+        """Méthode de base : retour vide.
+        Surchargée par agreement_purchase (branche purchase.order)
+        et agreement_sale (branche sale.order)."""
         self.ensure_one()
-        if self.is_partner_id_res_company :#and not self.agreement_id.is_galaxy_agreement :
-            order_ids = self.env['sale.order'].search([('state', '=', 'sale'), ('agreement_id', '=', self.agreement_id.id), ('company_id', 'in', [self.sudo().partner_id.ref_company_ids.id])])
-            order_type = 'sale.order'
-        else :
-            order_ids = self.env['purchase.order'].search([('state', '=', 'purchase'), ('agreement_id', '=', self.agreement_id.id), ('partner_id', 'in', [self.partner_id.id])])
-            order_type = 'purchase.order'
-            #TODO : il faudrait également regarder tous les partner_id de la descendances du partner_id du DC4
-
-        _logger.info(order_type)
-        _logger.info(order_ids)
-        return order_type, order_ids
+        return 'purchase.order', self.env['purchase.order'].browse()
 
 
     """

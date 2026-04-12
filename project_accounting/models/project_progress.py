@@ -43,7 +43,7 @@ class ProjectProgress(models.Model):
 
     # --- Related précédent ---
     rel_previous_progress_cost_amount = fields.Monetary(related='previous_progress_id.progress_cost_amount', string="Coût de revient cumulé précédent")
-    rel_previous_progress_revenue_rate = fields.Float(related='previous_progress_id.progress_revenue_rate', string="CA cumulé en % précédent")
+    rel_previous_progress_revenue_rate = fields.Float(related='previous_progress_id.progress_revenue_rate', aggregator=False, string="CA cumulé en % précédent")
     rel_previous_progress_revenue_amount = fields.Monetary(related='previous_progress_id.progress_revenue_amount', string="CA cumulé en € précédent")
 
     # --- Projections à terminaison ---
@@ -57,17 +57,17 @@ class ProjectProgress(models.Model):
 
     # --- Avancement cumulé ---
     progress_cost_amount = fields.Monetary(string="Coût de revient", compute='_compute_progress_cost_amount', store=True)
-    progress_revenue_rate = fields.Float(string="CA cumulé en %", compute='_compute_progress_revenue_rate', inverse='_inverse_progress_revenue_rate', store=True, readonly=False)
+    progress_revenue_rate = fields.Float(string="CA cumulé en %", aggregator=False, compute='_compute_progress_revenue_rate', inverse='_inverse_progress_revenue_rate', store=True, readonly=False)
     progress_revenue_amount = fields.Monetary(string="CA cumulé en €", 
                                              compute='_compute_progress_revenue_amount', inverse='_inverse_revenue', store=True, readonly=False)
     progress_revenue_margin = fields.Monetary(string="Marge en €", 
                                              compute='_compute_progress_revenue_margin', store=True)
-    progress_revenue_margin_rate = fields.Float(string="Marge en %", 
+    progress_revenue_margin_rate = fields.Float(string="Marge en %", aggregator=False,
                                              compute='_compute_progress_revenue_margin_rate', store=True)
     # --- Avancement période ---
     progress_cost_amount_period = fields.Monetary(string="Coût de revient période", 
                                                  compute='_compute_progress_cost_amount_period', store=True)
-    progress_revenue_rate_period = fields.Float(string="CA période en /% du prix de vente", compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False)
+    progress_revenue_rate_period = fields.Float(string="CA période en % du prix de vente", aggregator=False, compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False)
     progress_revenue_amount_period = fields.Monetary(string="CA période en €", 
                                                     compute='_compute_progress_revenue_amount_period', store=True)
 

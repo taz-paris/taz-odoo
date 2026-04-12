@@ -8,7 +8,8 @@
     "category": "Contract",
     "author": "Akretion, "
     "Yves Goldberg (Ygol Internetwork), "
-    "Odoo Community Association (OCA)",
+    "Odoo Community Association (OCA), "
+    "Aurélien Dumaine",
     "website": "https://github.com/OCA/contract",
     "license": "AGPL-3",
     "depends": ["mail", "taz-common"],
