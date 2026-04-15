@@ -7,7 +7,7 @@ import datetime
 class employeeBusinessActionGoal(models.Model):
     _name = "taz.employee_business_action_goal"
     _description = "Employee Business Action Goal"
-    _order = "reference_period desc"
+    _order = "reference_period desc, user_id"
     _sql_constraints = [
         ('user_year_type_uniq', 'UNIQUE (user_id, reference_period, type)', 
          "Impossible d'avoir deux objectifs pour le même utilisateur, la même année et le même type d'action.")
@@ -101,7 +101,7 @@ class employeeBusinessActionGoal(models.Model):
 
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Détail des actions prévues de %s pour l\'année %s' % (self.user_id.name, self.reference_period)),
+            'name': _('Détail des actions futures prévues de %s pour l\'année %s' % (self.user_id.name, self.reference_period)),
             'res_model': 'taz.business_action',
             'view_mode': 'list,form',
             'target': 'current',
@@ -120,7 +120,7 @@ class employeeBusinessActionGoal(models.Model):
     period_goal = fields.Integer("Objectif annuel")
     period_action_count = fields.Integer("Réalisé à date", compute='compute')
     period_pending_action_count = fields.Integer("Prévu (futur)", compute='compute')
-    period_rate = fields.Float("Ratio atteint/objectif (%)", compute='compute')
+    period_rate = fields.Float("Ratio réalisé/objectif (%)", compute='compute')
     
     company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)
     name = fields.Char("Libellé", compute='_compute_name', store=True)
