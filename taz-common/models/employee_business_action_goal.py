@@ -48,14 +48,31 @@ class employeeBusinessActionGoal(models.Model):
         period_action_count = len(action_list)
         return action_list, period_action_count
 
+    def _get_period_pending_action(self):
+        self.ensure_one()
+        today = fields.Date.context_today(self)
+        end_date = datetime.date(int(self.reference_period), 12, 31)
+        
+        domain = [
+            ('date_deadline', '>=', today),
+            ('date_deadline', '<=', end_date),
+            ('action_type', '=', self.type),
+            ('user_ids', 'in', [self.user_id.id]),
+            ('state', 'not in', ['done', 'cancelled'])
+        ]
+        action_list = self.env['taz.business_action'].search(domain)
+        return action_list, len(action_list)
+
     def compute(self):
         for rec in self:
             if not rec.user_id or not rec.reference_period or not rec.type:
                 rec.period_action_count = 0
+                rec.period_pending_action_count = 0
                 rec.period_rate = 0
                 continue
             
             action_list, rec.period_action_count = rec._get_period_action()
+            pending_list, rec.period_pending_action_count = rec._get_period_pending_action()
             
             if rec.period_goal > 0:
                 rec.period_rate = (rec.period_action_count / rec.period_goal) * 100.0
@@ -69,7 +86,22 @@ class employeeBusinessActionGoal(models.Model):
 
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Détail des actions de %s pour l\'année %s' % (self.user_id.name, self.reference_period)),
+            'name': _('Détail des actions réalisées par %s pour l\'année %s' % (self.user_id.name, self.reference_period)),
+            'res_model': 'taz.business_action',
+            'view_mode': 'list,form',
+            'target': 'current',
+            'domain': domain,
+            'context': {'create': False},
+        }
+
+    def action_view_pending_details(self):
+        self.ensure_one()
+        action_list, period_action_count = self._get_period_pending_action()
+        domain = [('id', 'in', action_list.ids)]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Détail des actions prévues de %s pour l\'année %s' % (self.user_id.name, self.reference_period)),
             'res_model': 'taz.business_action',
             'view_mode': 'list,form',
             'target': 'current',
@@ -87,6 +119,7 @@ class employeeBusinessActionGoal(models.Model):
     
     period_goal = fields.Integer("Objectif annuel")
     period_action_count = fields.Integer("Réalisé à date", compute='compute')
+    period_pending_action_count = fields.Integer("Prévu (futur)", compute='compute')
     period_rate = fields.Float("Ratio atteint/objectif (%)", compute='compute')
     
     company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)

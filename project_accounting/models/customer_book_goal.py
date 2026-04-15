@@ -6,13 +6,12 @@ class CustomerBookGoal(models.Model):
     """
     DOCUMENTATION ARCHITECTURALE :
     -----------------------------
-    Pourquoi surcharger ce modèle dans 'project_accounting' plutôt que dans 'taz-common' ?
 
     1. Rendre les colonnes triables (Odoo limitation) :
        Pour qu'une colonne calculée (compute) soit cliquable et triable dans une vue liste (tree),
        Odoo exige obligatoirement qu'elle soit stockée en base de données ('store=True').
 
-    2. La dépendance aux Projets (Le piège de taz-common) :
+    2. Pourquoi surcharger ce modèle dans 'project_accounting' plutôt que dans 'taz-common' ?
        Si l'on passe 'store=True' dans taz-common, Odoo va évaluer les champs au démarrage et 
        requérir l'accès à tous les champs mentionnés dans le @api.depends() pour construire ses abonnements.
        Or, de nombreux champs financiers cruciaux (stage_is_part_of_booking, prorated_revenue, etc.)
