@@ -15,7 +15,7 @@
                         <column>
                             <action string="Mes actions commerciales ouvertes avec une échéance sous 30 jours" name="%(taz-common.business_action_action)d" context="{'search_default_assigned_to_me' : 1, 'search_default_state_not_done_not_cancelled' : 1, 'search_default_j30' : 1}"/>
                             <action string="Mes objectifs de book annuels personnels" name="%(project_accounting.employee_book_goal_action)d" context="{'search_default_assigned_to_me' : 1}"/>
-                            <action string="Mes objectifs de RDV annuels personnels" name="%(taz-common.employee_business_action_goal_action)d" context="{'search_default_my_goals' : 1, 'search_default_group_year' : 1}"/>
+                            <action string="Mes objectifs de RDV annuels personnels" name="%(taz-common.employee_business_action_goal_action)d" context="{'search_default_my_goals' : 1, 'search_default_group_year' : 0}"/>
                             <action string="Les objectifs de prise de commande des comptes auxquels je contribue" name="%(taz-common.customer_book_goal_action)d" context="{'search_default_filter_my_customer_book_goal' : 1, 'search_default_filter_this_year' : True, 'search_default_group_rel_business_priority' : True}"/>
                         </column>
                     </board>

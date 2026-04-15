@@ -104,10 +104,10 @@ class tazResPartner(models.Model):
      @api.depends('business_action_ids.date_deadline', 'business_action_ids.state')
      def _compute_date_last_business_action(self_list):
          for self in self_list :
-             res = None
+             res = False
              for action in self.business_action_ids:
-                 if action.state == 'done' :
-                     if res == None or action.date_deadline > res:
+                 if action.state == 'done' and action.date_deadline:
+                     if not res or action.date_deadline > res:
                          res = action.date_deadline
              self.date_last_business_action = res
 

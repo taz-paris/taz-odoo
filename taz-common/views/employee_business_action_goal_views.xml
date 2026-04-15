@@ -10,10 +10,12 @@
                     <field name="user_id"/>
                     <field name="reference_period"/>
                     <field name="type"/>
-                    <field name="period_goal" sum="Total"/>
-                    <field name="period_action_count" sum="Total"/>
-                    <button type="object" name="action_view_details" icon="fa-eye" title="Détails des actions"/>
+                    <field name="period_goal" sum="Total" width="150px"/>
+                    <field name="period_action_count" sum="Total" width="150px"/>
+                    <button type="object" name="action_view_details" icon="fa-eye" title="Détails des actions réalisées"/>
                     <field name="period_rate" widget="progressbar"/>
+                    <field name="period_pending_action_count" sum="Total" width="150px"/>
+                    <button type="object" name="action_view_pending_details" icon="fa-eye" title="Détails des actions prévues"/>
                     <field name="note" optional="hide"/>
                 </list>
             </field>
@@ -35,6 +37,7 @@
                                 <field name="period_goal"/>
                                 <field name="period_action_count"/>
                                 <field name="period_rate" widget="progressbar"/>
+                                <field name="period_pending_action_count"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                         </group>
@@ -68,14 +71,14 @@
         </record>
 
         <record id="employee_business_action_goal_action" model="ir.actions.act_window">
-            <field name="name">Objectifs de RDV par collaborateur</field>
+            <field name="name">Objectifs d'actions commerciales par collaborateur</field>
             <field name="res_model">taz.employee_business_action_goal</field>
             <field name="view_mode">list,form</field>
             <field name="search_view_id" ref="employee_business_action_goal_view_search"/>
-            <field name="context">{'search_default_this_year': 1, 'search_default_group_user': 1}</field>
+            <field name="context">{'search_default_this_year': 1, 'search_default_group_user': 0}</field>
         </record>
 
-        <menuitem name="Objectifs RDV par collaborateur" 
+        <menuitem name="Objectifs d'actions commerciales par collaborateur" 
                   id="menu_employee_business_action_goal" 
                   parent="taz-common.business_action" 
                   action="employee_business_action_goal_action" 

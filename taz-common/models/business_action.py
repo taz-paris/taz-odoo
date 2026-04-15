@@ -136,7 +136,7 @@ class tazBusinessAction(models.Model):
 
     name = fields.Char('Titre', required=True)
     note = fields.Text('Note')
-    date_deadline = fields.Date('Échéance', index=True, required=False, default=fields.Date.context_today)
+    date_deadline = fields.Date('Échéance', index=True, required=True, default=fields.Date.context_today)
     owner_id = fields.Many2one('res.users', string='Affectée à', default=lambda self: self.env.user)
     user_ids = fields.Many2many(
         'res.users',
@@ -180,23 +180,25 @@ class tazBusinessAction(models.Model):
 
     def action_create_followup(self):
         self.ensure_one()
-        new_action = self.copy({
-            'name': _("Suite de : %s", self.name),
-            'parent_action_id': self.id,
-            'state': 'todo',
-            'conclusion': False,
-            'report_url': False,
-            'date_deadline': False,
-            'project_id': self.project_id.id,
-            'note': _("Action de suite pour : %s", self.name),
+        context = dict(self.env.context)
+        context.update({
+            'default_name': _("Suite de : %s", self.name),
+            'default_parent_action_id': self.id,
+            'default_state': 'todo',
+            'default_project_id': self.project_id.id if self.project_id else False,
+            'default_partner_id': self.partner_id.id if self.partner_id else False,
+            'default_owner_id': self.owner_id.id if self.owner_id else False,
+            'default_user_ids': [(6, 0, self.user_ids.ids)] if self.user_ids else False,
+            'default_is_rdv_to_be_taken_by_assistant': self.is_rdv_to_be_taken_by_assistant,
         })
+        
         return {
             'name': _('Action commerciale de suite'),
             'type': 'ir.actions.act_window',
             'res_model': 'taz.business_action',
-            'res_id': new_action.id,
             'view_mode': 'form',
             'target': 'current',
+            'context': context,
         }
 
     def open_record(self):
