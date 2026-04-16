@@ -11,7 +11,7 @@
                     <field name="reference_period"/>
                     <field name="type"/>
                     <field name="period_goal" sum="Total" width="150px"/>
-                    <field name="period_action_count" sum="Total" width="150px"/>
+                    <field name="period_action_count" sum="Total" width="200px"/>
                     <button type="object" name="action_view_details" icon="fa-eye" title="Détails des actions réalisées"/>
                     <field name="period_rate" widget="progressbar"/>
                     <field name="period_pending_action_count" sum="Total" width="150px"/>

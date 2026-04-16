@@ -42,7 +42,10 @@ class employeeBusinessActionGoal(models.Model):
             ('date_deadline', '<=', end_date),
             ('action_type', '=', self.type),
             ('user_ids', 'in', [self.user_id.id]),
-            ('state', '=', 'done')
+            ('state', '=', 'done'),
+            '|',
+                ('action_type', '!=', 'commercial_interview'),
+                ('report_url', '!=', False),
         ]
         action_list = self.env['taz.business_action'].search(domain)
         period_action_count = len(action_list)
@@ -118,7 +121,7 @@ class employeeBusinessActionGoal(models.Model):
     ], string="Type d'action", required=True)
     
     period_goal = fields.Integer("Objectif annuel")
-    period_action_count = fields.Integer("Réalisé à date", compute='compute')
+    period_action_count = fields.Integer("Réalisé à date (avec CR)", compute='compute')
     period_pending_action_count = fields.Integer("Planifié (futur)", compute='compute')
     period_rate = fields.Float("Ratio réalisé/objectif (%)", compute='compute')
     
