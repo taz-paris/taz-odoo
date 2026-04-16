@@ -220,7 +220,7 @@ class tazCustomerBookGoal(models.Model):
     book_last_month = fields.Monetary("Prise de commandes 31 derniers jours", compute=_compute_financial_aggregates)
     number_of_opportunities = fields.Integer("Nombre d'avant-ventes", compute=_compute_financial_aggregates)
     done_commercial_interview_count = fields.Integer("Nombre de RDV réalisés", compute=_compute_commercial_actions)
-    inprogress_commercial_interview_count = fields.Integer("RDV futurs", compute=_compute_commercial_actions)
+    inprogress_commercial_interview_count = fields.Integer("RDV futurs planifiés", compute=_compute_commercial_actions)
     inprogress_other_business_action_count = fields.Integer("Actions futures (hors RDV)", compute=_compute_commercial_actions)
     business_action_goal = fields.Integer("Ambition de RDV", tracking=True)
     expected_prorated_revenue = fields.Monetary('Espérance de PDC pondérée (hors S/T)', compute=_compute_financial_aggregates)

@@ -142,7 +142,7 @@ class tazResIndustry(models.Model):
     def get_inprogress_commercial_interviews(self):
         domain = [
             ('parent_partner_industry_id', '=', self.id),
-            ('state', 'not in', ['done', 'cancelled']),
+            ('state', 'in', ['planned']),
             ('date_deadline', '>=', fields.Date.context_today(self)),
             ('action_type', '=', 'commercial_interview'),
         ]

@@ -58,7 +58,7 @@ class employeeBusinessActionGoal(models.Model):
             ('date_deadline', '<=', end_date),
             ('action_type', '=', self.type),
             ('user_ids', 'in', [self.user_id.id]),
-            ('state', 'not in', ['done', 'cancelled'])
+            ('state', 'in', ['planned'])
         ]
         action_list = self.env['taz.business_action'].search(domain)
         return action_list, len(action_list)
@@ -86,7 +86,7 @@ class employeeBusinessActionGoal(models.Model):
 
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Détail des actions réalisées par %s pour l\'année %s' % (self.user_id.name, self.reference_period)),
+            'name': _('Actions réalisées (%s) par %s pour %s' % (dict(self._fields['type'].selection).get(self.type), self.user_id.name, self.reference_period)),
             'res_model': 'taz.business_action',
             'view_mode': 'list,form',
             'target': 'current',
@@ -101,7 +101,7 @@ class employeeBusinessActionGoal(models.Model):
 
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Détail des actions futures prévues de %s pour l\'année %s' % (self.user_id.name, self.reference_period)),
+            'name': _('Actions futures (%s) planifiées de %s pour %s' % (dict(self._fields['type'].selection).get(self.type), self.user_id.name, self.reference_period)),
             'res_model': 'taz.business_action',
             'view_mode': 'list,form',
             'target': 'current',
@@ -119,7 +119,7 @@ class employeeBusinessActionGoal(models.Model):
     
     period_goal = fields.Integer("Objectif annuel")
     period_action_count = fields.Integer("Réalisé à date", compute='compute')
-    period_pending_action_count = fields.Integer("Prévu (futur)", compute='compute')
+    period_pending_action_count = fields.Integer("Planifié (futur)", compute='compute')
     period_rate = fields.Float("Ratio réalisé/objectif (%)", compute='compute')
     
     company_id = fields.Many2one('res.company', string='Société', required=True, default=lambda self: self.env.company)

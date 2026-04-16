@@ -1114,6 +1114,7 @@ class ProjectProgress(models.Model):
     # ===================================================================
     # CONTRAINTES
     # ===================================================================
+    """
     @api.constrains('progress_revenue_amount', 'target_project_revenue')
     def _check_progress_revenue_amount(self):
         for rec in self:
@@ -1126,6 +1127,7 @@ class ProjectProgress(models.Model):
                     project=rec.rel_project_id.number,
                     type=rec.type
                 ))
+    """
 
     @api.constrains('outsourcing_link_id', 'accounting_closing_id')
     def _check_project_consistency(self):
