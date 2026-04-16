@@ -17,7 +17,7 @@
                     <field name="conclusion" optional="hide"/>
                     <field name="is_rdv_to_be_taken_by_assistant" optional="hide"/>
                     <field name="is_rdv_taken_by_assistant" optional="hide"/>
-                    <field name="report_url" widget="url" optional="show"/>
+                    <field name="report_url" widget="url" optional="show" width="150px"/>
                     <field name="parent_partner_id" optional="hide"/>
                     <field name="parent_partner_industry_id" optional="hide"/>
                     <field name="project_id" optional="show"/>
