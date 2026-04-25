@@ -88,10 +88,16 @@ class staffingEmployee(models.Model):
             send_mail.send()
 
 
-    @api.depends('contract_id', 'contract_id.job_id')
-    def compute_employee_job_id(self):
+    @api.depends('contract_id', 'contract_id.job_id', 'contract_id.department_id', 'contract_id.work_location_id')
+    def _compute_employee_contract_fields(self):
         for rec in self:
-            rec.job_id = rec.contract_id.job_id
+            if rec.contract_id:
+                if rec.contract_id.job_id:
+                    rec.job_id = rec.contract_id.job_id
+                if rec.contract_id.department_id:
+                    rec.department_id = rec.contract_id.department_id
+                if rec.contract_id.work_location_id:
+                    rec.work_location_id = rec.contract_id.work_location_id
 
     first_name = fields.Char(string="Prénom")
     staffing_wishes = fields.Html("Souhaits de staffing COD")
@@ -106,7 +112,9 @@ class staffingEmployee(models.Model):
     annual_evaluator_id = fields.Many2one('res.partner', string="En charge de l'EA")
     cv_link = fields.Char('Lien CV')
     vcard_link = fields.Char('Lien VCard') #TODO : générer la VCARD depuis les données Odoo
-    job_id = fields.Many2one(check_company=False, store=True, compute='compute_employee_job_id')
+    job_id = fields.Many2one(check_company=False, compute='_compute_employee_contract_fields', store=True)
+    department_id = fields.Many2one(compute='_compute_employee_contract_fields', store=True)
+    work_location_id = fields.Many2one(compute='_compute_employee_contract_fields', store=True)
     rel_is_project_director = fields.Boolean(related="job_id.is_project_director", store=True)
 
     #most_recent_contract = fields.Many2one('hr.contract', 'employee_id', string="Contract le plus récent (ou à venir)", compute=most_recent_contract)
