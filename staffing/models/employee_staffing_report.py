@@ -162,14 +162,6 @@ class HrEmployeeStaffingReport(models.Model):
         ('id_uniq', 'UNIQUE (employee_id, periodicity, start_date)',  "Impossible d'enregistrer deux objets avec le même {employé, périodicité, date de début}.")
     ]
 
-    @api.constrains('hollidays', 'workdays')
-    def _check_hollidays(self):
-        for rec in self:
-            if round(rec.hollidays or 0.0, 2) > round(rec.workdays or 0.0, 2):
-                raise ValidationError(_("L'employé %s a plus de congés (%.2f jours) que de jours ouvrés (%.2f jours) sur la période du %s.") % (
-                    rec.employee_id.name, rec.hollidays, rec.workdays, rec.start_date
-                ))
-
     @api.constrains('project_days', 'learning_internal_days', 'sales_internal_days', 'other_internal_days', 'activity_days')
     def _check_activity_days(self):
         for rec in self:
@@ -271,7 +263,7 @@ class HrEmployeeStaffingReport(models.Model):
      
                 #_logger.info(rec.employee_id.number_work_days_period_including_productive_share(real_start_date, real_end_date))
                 rec.workdays = rec.employee_id.number_work_days_period_including_productive_share(real_start_date, real_end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
-                rec.hollidays = lines['holidays']['other']['sum_period_unit_amount']
+                rec.hollidays = min(rec.workdays, lines['holidays']['other']['sum_period_unit_amount']) # Nécessaire en cas de part productive < 100 % (alors que les congés sont à 100 %)
                 rec.activity_days = rec.workdays - rec.hollidays
                 rec.project_days = lines['mission']['project_employee_validated']['sum_period_unit_amount']
                 rec.learning_internal_days = lines['training']['project_employee_validated']['sum_period_unit_amount']
