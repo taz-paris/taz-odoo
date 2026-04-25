@@ -180,6 +180,7 @@ class staffingAnalyticLine(models.Model):
                 ('project_id', '!=', False),
                 ('category', 'in', ['project_forecast', 'project_employee_validated', 'other']),
                 ('rel_project_staffing_aggregation', '!=', False),
+                ('global_leave_id', '=', False), # Nécessaire pour ne pas compter deux fois les jours fériés comme des congés
               ]
 
         if date_end :
