@@ -209,21 +209,19 @@ class staffingEmployee(models.Model):
         self.ensure_one()
         if date_start > date_end :
             raise ValidationError(_("Start date should be <= end date"))
-        res = self.number_work_days_period(date_start, date_end) - self.number_not_available_period(date_start, date_end)
-        #_logger.info('Availability : %s' % str(res))
-        return res
-
-    def number_not_available_period(self, date_start, date_end):
-        #_logger.info("number_not_available_period")
-        self.ensure_one()
-        if date_start > date_end :
-            raise ValidationError(_("Start date should be <= end date"))
-        dic = [('employee_id', '=', self.id)]
-        pivot_date = datetime.today()
-        lines = self.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_start=date_start, date_end=date_end, filters=dic)['aggreation_by_project_type']
-        c = lines['mission']['project_employee_validated']['sum_period_unit_amount'] + lines['mission']['project_forecast']['sum_period_unit_amount'] + lines['holidays']['other']['sum_period_unit_amount']
-        #_logger.info("       > %s" % str(c))
-        return c
+        list_work_days_period = self.list_work_days_period(date_start, date_end)
+        count=0.0
+        for day in list_work_days_period:
+            # ATTENTION : on ne doit appliquer la productive share qu'une fois les congés déduits !
+            lines = self.env['account.analytic.line'].get_timesheet_grouped(datetime.today(), date_start=day, date_end=day, filters=[('employee_id', '=', self.id)])['aggreation_by_project_type']
+            holidays_qty = lines['holidays']['other']['sum_period_unit_amount']
+            unavailability_qty = lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
+            available_base = max(0,(1.0 - holidays_qty - unavailability_qty)) * (self._get_contract(day).productive_share/100.0)
+            # ... et seulement une fois que l'on connait le nombre de jours facturables, on déduit ce qui est pointé / prévu en mission
+            # ... on ne déduit pas ce qui est staffé en formation (K4M), avant-ventee, ni autres activités internes car on ne veut pas brider le staffing pour ça
+            # Il est normel que count soit négatif si le consultant a plus de jours prévus/pointés que de jours disponibles
+            count += available_base - lines['mission']['project_employee_validated']['sum_period_unit_amount'] - lines['mission']['project_forecast']['sum_period_unit_amount']
+        return count
 
     def number_work_days_period(self, date_start, date_end):
         #_logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))

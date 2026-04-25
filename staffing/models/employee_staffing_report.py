@@ -411,7 +411,7 @@ class HrEmployeeStaffingReport(models.Model):
     has_to_be_recomputed = fields.Boolean('A recalculer', default=True)
     analytic_lines = fields.Many2many('account.analytic.line', string='Lignes')
 
-    workdays = fields.Float("J. ouvrés", help="nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.", store=True)
+    workdays = fields.Float("J. ouvrés", help="Somme des jours ouvrés sur la période qui sont couverts par un contrat de travail, sur lesquels on a appliqué la part productive.", store=True)
     hollidays = fields.Float("Congés", help="Jours de congés sur la période", store=True)
     activity_days = fields.Float("J. facturables", help="Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés", store=True)
     learning_internal_days = fields.Float("J. formations", help="Nombre de jours de formation du consultant (et non les actions écoles) sur la période", store=True)
