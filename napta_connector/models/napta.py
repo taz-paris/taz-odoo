@@ -1159,10 +1159,8 @@ class naptaHrLeave(models.Model):
                     'napta_id' : napta_id,
                     'employee_id' : {'napta_id' : user_holiday['attributes']['user_id']},
                     'request_date_from' : start_date, 
-                    'date_from' : user_holiday['attributes']['start_date'] + "T00:03:00.000",#TODO : corriger l'heure
                     'request_date_from_period' : request_date_from_period,
                     'request_date_to' : end_date, 
-                    'date_to' : user_holiday['attributes']['end_date'] + "T21:59:59.000",#TODO : corriger l'heure
                     'request_date_to_period' : request_date_to_period,
                     'holiday_status_id' : {'napta_id' : user_holiday['attributes']['user_holiday_category_id']},
                     'number_of_days' : max(0, numberOfDays),

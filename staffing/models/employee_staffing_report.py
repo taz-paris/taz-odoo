@@ -205,8 +205,9 @@ class HrEmployeeStaffingReport(models.Model):
 
     @api.depends('periodicity', 'start_date', 'end_date', 'employee_id')
     def availability(self):
+        _logger.info('--- Compute availability Staffing report')
         for rec in self :
-            _logger.info('--- Compute availability Staffing report %s' % rec.id)
+            #_logger.info('      > report_id = %s' % rec.id)
             dic = [('employee_id', '=', rec.employee_id.id)]
             pivot_date = datetime.today()
 
@@ -278,8 +279,6 @@ class HrEmployeeStaffingReport(models.Model):
 
             if rec.has_to_be_recomputed :
                 rec.has_to_be_recomputed = False
-
-            _logger.info('--- Fin Compute availability Staffing report %s' % rec.id)
 
 
     def action_open_analytic_lines(self):
