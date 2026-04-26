@@ -15,7 +15,7 @@
         </record>
         <record id="project_accounting.project_project_stage_9" model="project.project.stage">
             <field name="napta_id">12</field>
-            <field name="transmit_to_napta">True</field>
+            <field name="transmit_to_napta">False</field>
         </record>
         <record id="project.project_project_stage_1" model="project.project.stage">
             <field name="napta_id">6</field>

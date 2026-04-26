@@ -638,7 +638,7 @@ class naptaProjectStage(models.Model):
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID", copy=False)
-    transmit_to_napta = fields.Boolean("Transmettre à Napta", default=True, help="Si cette case est décochée, les projets qui sont dans ce statut ne seront pas transmis à Napta, sauf s'ils ont déjà été transmis au paravant (c'est à dire s'ils ont déjà un napta_id de défini).")
+    transmit_to_napta = fields.Boolean("Créer sur Napta", default=True, help="Si cette case est décochée, les projets qui sont dans ce statut ne seront pas transmis à Napta, sauf s'ils ont déjà été transmis auparavant (c'est à dire s'ils ont déjà un napta_id de défini).")
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project stage')
