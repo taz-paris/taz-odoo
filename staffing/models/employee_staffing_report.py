@@ -196,17 +196,6 @@ class HrEmployeeStaffingReport(models.Model):
         _logger.info('--- END reset_all_reports')
 
 
-    # s'il on vient de supprimer de la base de donnée la dernière analytic line pour la la période/employé => supprimer le rapport (plutôt que le garder à 0 ?)
-    #       Est-ce pertinement sur le plan métier ? Ne vaut-il mieux pas laisser une ligne à 0 ?
-    # TODO : tester un cas concret pour vérifier que ça ne bug pas de supprimer l'objet modifié avant de le renvoyer
-    """
-    def write(self, vals):
-        res = super().write(vals)
-        for rec in res :
-            if len(rec.analytic_lines) == 0:
-                res.unlink() 
-        return res
-    """
 
 
     @api.depends('periodicity', 'start_date')
@@ -373,6 +362,16 @@ class HrEmployeeStaffingReport(models.Model):
         _logger.info('Nombre de rapports de staffing à recalculer : %s' % str(len(reports)))
         _logger.info(reports)
         reports.availability()
+
+        # Nettoyage automatique des rapports devenus inutiles (aucun jour ouvré et aucune feuille de temps)
+        useless_reports = self.env['hr.employee_staffing_report'].search([
+            ('workdays', '=', 0.0),
+            ('analytic_lines', '=', False),
+            ('contract_id', '=', False)
+        ])
+        if useless_reports:
+            _logger.info('Nettoyage : Suppression de %s rapports de staffing vides/inutiles', len(useless_reports))
+            useless_reports.unlink()
 
     @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.state', 'start_date', 'end_date')
     def compute_contract(self):

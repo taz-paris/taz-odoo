@@ -8,6 +8,7 @@
                 <list create="false">
                     <field name="employee_id" optional="show"/>
                     <field name="rel_job_id" optional="show"/>
+                    <field name="contract_id" optional="hide"/>
                     <field name="company_id" optional="hide"/>
                     <field name="periodicity" optional="hide"/>
                     <field name="rel_work_location_id" optional="hide"/>
