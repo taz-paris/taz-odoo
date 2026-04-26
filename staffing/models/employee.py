@@ -172,37 +172,6 @@ class staffingEmployee(models.Model):
                 res = contract
         return res
 
-    def _get_work_location_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.work_location_id
-        return False
-
-    def _get_department_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.department_id
-        return False
-
-    def _get_company_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.company_id
-        return False
-
-    def _get_productive_share(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.productive_share
-        return 100.0
-
-    def _get_job_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.job_id
-        #_logger.info('Pas de contrat pour ce consultant à cette date')
-        return False
-
     def _get_daily_cost(self, date):
         contract = self._get_contract(date)
         cost = False

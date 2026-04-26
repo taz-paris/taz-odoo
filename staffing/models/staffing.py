@@ -141,7 +141,7 @@ class staffingNeed(models.Model):
                 continue
             if not employee.company_id.id == self.company_id.id:
                 continue
-            employee_job = employee._get_job_id(self.begin_date)
+            employee_job = employee._get_contract(self.begin_date).job_id
             if not employee_job:
                 continue
             #_logger.info("generate_staffing_proposal %s" % employee.name)
