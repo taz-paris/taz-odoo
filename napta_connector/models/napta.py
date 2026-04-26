@@ -30,8 +30,8 @@ API_URL_BUSINESS_ENDPOINT = "https://app.napta.io/api/v1/"
 cache_duration_in_minutes = 60 * 12 +15
 cache_folder = '/tmp/napta'
 
-EXCLUDED_USERLIST = ['1', '67', '68']
-        #'admin@napta.io' => 1, 'adminapi@tasmane-napta.com' => 67, 'consultant@tasmane-napta.com' => 68
+EXCLUDED_USERLIST = ['1', '67', '68', '198']
+        #'admin@napta.io' => 1, 'adminapi@tasmane-napta.com' => 67, 'consultant@tasmane-napta.com' => 68, 'import@napta.tech' => 198
 
 
 TASMANE_ODOO_COMPANY_ID = 1
