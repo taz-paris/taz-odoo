@@ -463,6 +463,9 @@ class naptaProject(models.Model):
         if len(analytic_lines) > 0:
             raise ValidationError(_("Impossible de supprimer ce projet sur Napta car il est lié à des lignes de prévisionnel ou de pointage (sur TazForce) qui ont été transmises par Napta."))
 
+        if self.staffing_need_ids:
+            raise ValidationError(_("Impossible de supprimer ce projet sur Napta car il contient des demandes de staffing."))
+
         _logger.info('Projet à supprimer de napta %s %s (ID ODOO = %s / NaptaID = %s)' % (self.number, self.name, str(self.id), self.napta_id))
 
         client = ClientRestNapta(self.env)
