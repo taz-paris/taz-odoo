@@ -31,5 +31,79 @@
             <field name="interval_type">months</field>
             <field name="nextcall" eval="datetime.now().replace(year=datetime.now().year+1, month=1, day=1, hour=4, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')"/>
         </record>
+        <record id="project.project_project_stage_0" model="project.project.stage">
+            <field name="name">1-Avant-vente froid (non transmises à Napta)</field>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+            <field name="fold" eval="False"/>
+            <field name="is_part_of_booking" eval="False"/>
+            <field name="state">before_launch</field>
+            <field name="color">decoration-info</field>
+            <field name="allowed_next_stage_ids" eval="[(6, 0, [ref('project.project_project_stage_3'), ref('project_project_stage_6'), ref('project_project_stage_7'), ref('project_project_stage_8')])]"/>
+        </record>
+        <record id="project_project_stage_7" model="project.project.stage">
+            <field name="name">2-Avant-vente chaud</field>
+            <field name="sequence">11</field>
+            <field name="active">True</field>
+            <field name="fold" eval="False"/>
+            <field name="is_part_of_booking" eval="False"/>
+            <field name="state">before_launch</field>
+            <field name="color">decoration-info</field>
+            <field name="allowed_next_stage_ids" eval="[(6, 0, [ref('project.project_project_stage_0'), ref('project.project_project_stage_3'), ref('project_project_stage_8'), ref('project_project_stage_6')])]"/>
+        </record>
+        <record id="project_project_stage_6" model="project.project.stage">
+            <field name="name">3-Accord client</field>
+            <field name="sequence">13</field>
+            <field name="active">True</field>
+            <field name="fold" eval="False"/>
+            <field name="is_part_of_booking" eval="True"/>
+            <field name="state">before_launch</field>
+            <field name="color">decoration-warning</field>
+        </record>
+        <record id="project.project_project_stage_1" model="project.project.stage">
+            <field name="name">4-Commandé</field>
+            <field name="sequence">15</field>
+            <field name="active">True</field>
+            <field name="fold" eval="False"/>
+            <field name="is_part_of_booking" eval="True"/>
+            <field name="state">launched</field>
+            <field name="color">decoration-success</field>
+        </record>
+        <record id="project_project_stage_9" model="project.project.stage">
+            <field name="name">5-Production terminée</field>
+            <field name="sequence">15</field>
+            <field name="active">True</field>
+            <field name="fold" eval="False"/>
+            <field name="is_part_of_booking" eval="True"/>
+            <field name="state">launched</field>
+            <field name="color">decoration-primary</field>
+        </record>
+        <record id="project_project_stage_8" model="project.project.stage">
+            <field name="name">Perdu</field>
+            <field name="sequence">17</field>
+            <field name="active">True</field>
+            <field name="fold" eval="True"/>
+            <field name="is_part_of_booking" eval="False"/>
+            <field name="state">closed</field>
+            <field name="color">decoration-danger</field>
+        </record>
+        <record id="project.project_project_stage_2" model="project.project.stage">
+            <field name="name">6-Clos comptablement</field>
+            <field name="sequence">20</field>
+            <field name="active">True</field>
+            <field name="fold" eval="True"/>
+            <field name="is_part_of_booking" eval="True"/>
+            <field name="state">closed</field>
+            <field name="color">decoration-muted</field>
+        </record>
+        <record id="project.project_project_stage_3" model="project.project.stage">
+            <field name="name">Annulé</field>
+            <field name="sequence">25</field>
+            <field name="active">True</field>
+            <field name="fold" eval="True"/>
+            <field name="is_part_of_booking" eval="False"/>
+            <field name="state">closed</field>
+            <field name="color">decoration-danger</field>
+        </record>
     </data>
 </odoo>
