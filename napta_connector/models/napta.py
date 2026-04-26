@@ -402,6 +402,9 @@ class naptaProject(models.Model):
         projects = super().create(vals)
         for rec in projects:
             if not rec.is_prevent_napta_creation:
+                stage_froid = self.env.ref('project.project_project_stage_0', raise_if_not_found=False)
+                if not rec.napta_id and stage_froid and rec.stage_id == stage_froid:
+                    continue
                 rec.napta_to_sync = True
                 try : 
                     rec.create_update_napta()
@@ -433,6 +436,9 @@ class naptaProject(models.Model):
             if any(field in ODOO_TO_NAPTA_PROJECT_FIELD_LIST for field in vals.keys()):
                 _logger.info("==== Champs de l'objet project.project modifiés : %s" % str(vals.keys()))
                 if not rec.is_prevent_napta_creation and not self.env.context.get('ignore_napta_write') and rec.partner_id :
+                    stage_froid = self.env.ref('project.project_project_stage_0', raise_if_not_found=False)
+                    if not rec.napta_id and stage_froid and rec.stage_id == stage_froid:
+                        continue
                     rec.with_context(ignore_napta_write=True).napta_to_sync = True
                     try:
                         rec.create_update_napta()
