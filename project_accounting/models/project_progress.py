@@ -70,6 +70,8 @@ class ProjectProgress(models.Model):
     progress_revenue_rate_period = fields.Float(string="CA période en % du prix de vente", aggregator=False, compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False)
     progress_revenue_amount_period = fields.Monetary(string="CA période en €", 
                                                     compute='_compute_progress_revenue_amount_period', store=True)
+    progress_revenue_margin_period = fields.Monetary(string="Marge période en €", 
+                                                    compute='_compute_progress_revenue_margin_period', store=True)
 
     # --- Autres calculs ---
     future_staffing_days = fields.Float(string="Jours restant à produire", help="Somme des jours staffés dans Napta (tous grades confondus) pour les périodes de staffing qui commencent après la date de clôture. Valeur telle que disponible dans TazForce à date du dernier rafraichissement forcé.", compute='_compute_future_staffing_days', store=True)
@@ -294,6 +296,11 @@ class ProjectProgress(models.Model):
     def _compute_progress_revenue_amount_period(self):
         for rec in self:
             rec.progress_revenue_amount_period = (rec.progress_revenue_amount or 0.0) - (rec.rel_previous_progress_revenue_amount or 0.0)
+
+    @api.depends('progress_revenue_amount_period', 'progress_cost_amount_period')
+    def _compute_progress_revenue_margin_period(self):
+        for rec in self:
+            rec.progress_revenue_margin_period = (rec.progress_revenue_amount_period or 0.0) - (rec.progress_cost_amount_period or 0.0)
 
     # --- future_staffing_days ---
     @api.depends('type', 'rel_project_id', 'rel_closing_date')
