@@ -402,8 +402,7 @@ class naptaProject(models.Model):
         projects = super().create(vals)
         for rec in projects:
             if not rec.is_prevent_napta_creation:
-                stage_froid = self.env.ref('project.project_project_stage_0', raise_if_not_found=False)
-                if not rec.napta_id and stage_froid and rec.stage_id == stage_froid:
+                if not rec.napta_id and not rec.stage_id.transmit_to_napta:
                     continue
                 rec.napta_to_sync = True
                 try : 
@@ -436,8 +435,7 @@ class naptaProject(models.Model):
             if any(field in ODOO_TO_NAPTA_PROJECT_FIELD_LIST for field in vals.keys()):
                 _logger.info("==== Champs de l'objet project.project modifiés : %s" % str(vals.keys()))
                 if not rec.is_prevent_napta_creation and not self.env.context.get('ignore_napta_write') and rec.partner_id :
-                    stage_froid = self.env.ref('project.project_project_stage_0', raise_if_not_found=False)
-                    if not rec.napta_id and stage_froid and rec.stage_id == stage_froid:
+                    if not rec.napta_id and not rec.stage_id.transmit_to_napta:
                         continue
                     rec.with_context(ignore_napta_write=True).napta_to_sync = True
                     try:
@@ -640,6 +638,7 @@ class naptaProjectStage(models.Model):
         ('napta_id__uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objects avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID", copy=False)
+    transmit_to_napta = fields.Boolean("Transmettre à Napta", default=True, help="Si cette case est décochée, les projets qui sont dans ce statut ne seront pas transmis à Napta, sauf s'ils ont déjà été transmis au paravant (c'est à dire s'ils ont déjà un napta_id de défini).")
 
     def create_update_napta(self):
         #_logger.info('---- Create or update Napta project stage')

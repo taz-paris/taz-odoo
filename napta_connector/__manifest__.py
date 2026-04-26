@@ -18,6 +18,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/cron_sync.xml',
+        'data/project_stage_data.xml',
         'views/napta.xml',
         'views/project.xml',
         'views/wizard_timesheet_mass_validation.xml',
