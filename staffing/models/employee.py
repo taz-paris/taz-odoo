@@ -88,10 +88,16 @@ class staffingEmployee(models.Model):
             send_mail.send()
 
 
-    @api.depends('contract_id', 'contract_id.job_id')
-    def compute_employee_job_id(self):
+    @api.depends('contract_id', 'contract_id.job_id', 'contract_id.department_id', 'contract_id.work_location_id')
+    def _compute_employee_contract_fields(self):
         for rec in self:
-            rec.job_id = rec.contract_id.job_id
+            if rec.contract_id:
+                if rec.contract_id.job_id:
+                    rec.job_id = rec.contract_id.job_id
+                if rec.contract_id.department_id:
+                    rec.department_id = rec.contract_id.department_id
+                if rec.contract_id.work_location_id:
+                    rec.work_location_id = rec.contract_id.work_location_id
 
     first_name = fields.Char(string="Prénom")
     staffing_wishes = fields.Html("Souhaits de staffing COD")
@@ -106,7 +112,9 @@ class staffingEmployee(models.Model):
     annual_evaluator_id = fields.Many2one('res.partner', string="En charge de l'EA")
     cv_link = fields.Char('Lien CV')
     vcard_link = fields.Char('Lien VCard') #TODO : générer la VCARD depuis les données Odoo
-    job_id = fields.Many2one(check_company=False, store=True, compute='compute_employee_job_id')
+    job_id = fields.Many2one(check_company=False, compute='_compute_employee_contract_fields', store=True)
+    department_id = fields.Many2one(compute='_compute_employee_contract_fields', store=True)
+    work_location_id = fields.Many2one(compute='_compute_employee_contract_fields', store=True)
     rel_is_project_director = fields.Boolean(related="job_id.is_project_director", store=True)
 
     #most_recent_contract = fields.Many2one('hr.contract', 'employee_id', string="Contract le plus récent (ou à venir)", compute=most_recent_contract)
@@ -164,37 +172,6 @@ class staffingEmployee(models.Model):
                 res = contract
         return res
 
-    def _get_work_location_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.work_location_id
-        return False
-
-    def _get_department_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.department_id
-        return False
-
-    def _get_company_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.company_id
-        return False
-
-    def _get_productive_share(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.productive_share
-        return 100.0
-
-    def _get_job_id(self, date):
-        contract = self._get_contract(date)
-        if contract :
-            return contract.job_id
-        #_logger.info('Pas de contrat pour ce consultant à cette date')
-        return False
-
     def _get_daily_cost(self, date):
         contract = self._get_contract(date)
         cost = False
@@ -209,21 +186,19 @@ class staffingEmployee(models.Model):
         self.ensure_one()
         if date_start > date_end :
             raise ValidationError(_("Start date should be <= end date"))
-        res = self.number_work_days_period(date_start, date_end) - self.number_not_available_period(date_start, date_end)
-        #_logger.info('Availability : %s' % str(res))
-        return res
-
-    def number_not_available_period(self, date_start, date_end):
-        #_logger.info("number_not_available_period")
-        self.ensure_one()
-        if date_start > date_end :
-            raise ValidationError(_("Start date should be <= end date"))
-        dic = [('employee_id', '=', self.id)]
-        pivot_date = datetime.today()
-        lines = self.env['account.analytic.line'].get_timesheet_grouped(pivot_date, date_start=date_start, date_end=date_end, filters=dic)['aggreation_by_project_type']
-        c = lines['mission']['project_employee_validated']['sum_period_unit_amount'] + lines['mission']['project_forecast']['sum_period_unit_amount'] + lines['holidays']['other']['sum_period_unit_amount']
-        #_logger.info("       > %s" % str(c))
-        return c
+        list_work_days_period = self.list_work_days_period(date_start, date_end)
+        count=0.0
+        for day in list_work_days_period:
+            # ATTENTION : on ne doit appliquer la productive share qu'une fois les congés déduits !
+            lines = self.env['account.analytic.line'].get_timesheet_grouped(datetime.today(), date_start=day, date_end=day, filters=[('employee_id', '=', self.id)])['aggreation_by_project_type']
+            holidays_qty = lines['holidays']['other']['sum_period_unit_amount']
+            unavailability_qty = lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
+            available_base = max(0,(1.0 - holidays_qty - unavailability_qty)) * (self._get_contract(day).productive_share/100.0)
+            # ... et seulement une fois que l'on connait le nombre de jours facturables, on déduit ce qui est pointé / prévu en mission
+            # ... on ne déduit pas ce qui est staffé en formation (K4M), avant-ventee, ni autres activités internes car on ne veut pas brider le staffing pour ça
+            # Il est normel que count soit négatif si le consultant a plus de jours prévus/pointés que de jours disponibles
+            count += available_base - lines['mission']['project_employee_validated']['sum_period_unit_amount'] - lines['mission']['project_forecast']['sum_period_unit_amount']
+        return count
 
     def number_work_days_period(self, date_start, date_end):
         #_logger.info('numbers_work_days_period %s du %s au %s' % (self.name, str(date_start), str(date_end)))

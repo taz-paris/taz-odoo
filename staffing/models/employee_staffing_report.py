@@ -216,8 +216,8 @@ class HrEmployeeStaffingReport(models.Model):
 
     @api.depends('periodicity', 'start_date', 'end_date', 'employee_id')
     def availability(self):
-        _logger.info('--- Compute availability Staffing report')
         for rec in self :
+            _logger.info('--- Compute availability Staffing report %s' % rec.id)
             dic = [('employee_id', '=', rec.employee_id.id)]
             pivot_date = datetime.today()
 
@@ -289,6 +289,8 @@ class HrEmployeeStaffingReport(models.Model):
 
             if rec.has_to_be_recomputed :
                 rec.has_to_be_recomputed = False
+
+            _logger.info('--- Fin Compute availability Staffing report %s' % rec.id)
 
 
     def action_open_analytic_lines(self):
@@ -372,25 +374,18 @@ class HrEmployeeStaffingReport(models.Model):
         _logger.info(reports)
         reports.availability()
 
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.job_id', 'start_date')
-    def compute_job(self):
+    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.state', 'start_date', 'end_date')
+    def compute_contract(self):
         for rec in self:
-            rec.rel_job_id = rec.employee_id._get_job_id(rec.start_date)
-
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.work_location_id', 'start_date')
-    def compute_work_location(self):
-        for rec in self:
-            rec.rel_work_location_id = rec.employee_id._get_work_location_id(rec.start_date)
-
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.department_id', 'start_date')
-    def compute_department(self):
-        for rec in self:
-            rec.rel_department_id = rec.employee_id._get_department_id(rec.start_date)
-
-    @api.depends('employee_id', 'employee_id.contract_ids', 'employee_id.contract_ids.date_start', 'employee_id.contract_ids.date_end', 'employee_id.contract_ids.company_id', 'start_date')
-    def compute_company(self):
-        for rec in self:
-            rec.company_id = rec.employee_id._get_company_id(rec.start_date)
+            contract = rec.employee_id._get_contract(rec.start_date)
+            if not contract:
+                # Cherche le premier contrat qui démarre pendant la période
+                contracts_in_period = rec.employee_id.contract_ids.filtered(
+                    lambda c: c.date_start and rec.start_date <= c.date_start <= rec.end_date
+                )
+                if contracts_in_period:
+                    contract = contracts_in_period.sorted(key=lambda c: c.date_start)[0]
+            rec.contract_id = contract.id if contract else False
 
     periodicity = fields.Selection([
             ('week', 'Semaine'),
@@ -400,10 +395,11 @@ class HrEmployeeStaffingReport(models.Model):
             ('year', 'Année'),
         ], string="Périodicité", default='week')
     employee_id = fields.Many2one('hr.employee', string="Consultant", required=True)
-    rel_job_id = fields.Many2one('hr.job', string='Grade', compute=compute_job, store=True, help="Grade du consultant au début de la période")
-    rel_work_location_id = fields.Many2one('hr.work.location', compute=compute_work_location, store=True, help="Bureau du consultant au début de la période")
-    rel_department_id = fields.Many2one('hr.department', compute=compute_department, store=True, help="Département du consultant au début de la période")
-    company_id = fields.Many2one('res.company', string='Société', compute=compute_company, store=True, help="Société du consultant")
+    contract_id = fields.Many2one('hr.contract', string="Contrat", compute=compute_contract, store=True)
+    rel_job_id = fields.Many2one('hr.job', string='Grade', related="contract_id.job_id", store=True)
+    rel_work_location_id = fields.Many2one('hr.work.location', string='Bureau', related="contract_id.work_location_id", store=True)
+    rel_department_id = fields.Many2one('hr.department', string='Département', related="contract_id.department_id", store=True)
+    company_id = fields.Many2one('res.company', string='Société', related="contract_id.company_id", store=True)
 
     start_date = fields.Date('Date de début', required=True)
     end_date = fields.Date('Date de fin', compute=compute_end_date, store=True)
@@ -411,7 +407,7 @@ class HrEmployeeStaffingReport(models.Model):
     has_to_be_recomputed = fields.Boolean('A recalculer', default=True)
     analytic_lines = fields.Many2many('account.analytic.line', string='Lignes')
 
-    workdays = fields.Float("J. ouvrés", help="nombre de jours ouvrés sur la période qui sont couverts par un contrat de travail.", store=True)
+    workdays = fields.Float("J. ouvrés", help="Somme des jours ouvrés sur la période qui sont couverts par un contrat de travail, sur lesquels on a appliqué la part productive.", store=True)
     hollidays = fields.Float("Congés", help="Jours de congés sur la période", store=True)
     activity_days = fields.Float("J. facturables", help="Nombre de jours facturables sur la période = nb jours ouvrés - nb jours congés", store=True)
     learning_internal_days = fields.Float("J. formations", help="Nombre de jours de formation du consultant (et non les actions écoles) sur la période", store=True)

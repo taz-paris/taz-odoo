@@ -88,7 +88,7 @@ class HrCost(models.Model):
         _logger.info(len(lines))
         #TODO on pourrait borner la période de recherche dans le futur : bigin_date du hr.cost qui suit la date la plus récente entre l'ancienne et la nouvelle mais gain limité dans la plupart des cas
         for line in lines:
-            job = line.employee_id._get_job_id(line.date)
+            job = line.employee_id._get_contract(line.date).job_id
             if not job:
                 continue
             if job.id == self.job_id.id:
