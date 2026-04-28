@@ -49,6 +49,8 @@ class ProjectProgress(models.Model):
     # --- Projections à terminaison ---
     target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='_compute_target_project_cost', inverse='_inverse_target_project_cost', store=True, readonly=False)
     target_project_revenue = fields.Monetary(string="CA total projeté", compute='_compute_target_project_revenue', store=True)
+    target_project_margin = fields.Monetary(string="Marge projetée en €", compute='_compute_target_project_margin', store=True)
+    target_project_margin_rate = fields.Float(string="Marge projetée en %", aggregator=False, compute='_compute_target_project_margin_rate', store=True)
 
     # --- Quantités S/T ---
     target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées", compute='_compute_target_project_outsourcing_product_qty', store=True)
@@ -72,6 +74,8 @@ class ProjectProgress(models.Model):
                                                     compute='_compute_progress_revenue_amount_period', store=True)
     progress_revenue_margin_period = fields.Monetary(string="Marge période en €", 
                                                     compute='_compute_progress_revenue_margin_period', store=True)
+    progress_revenue_margin_rate_period = fields.Float(string="Marge période en %", aggregator=False,
+                                                    compute='_compute_progress_revenue_margin_rate_period', store=True)
 
     # --- Autres calculs ---
     future_staffing_days = fields.Float(string="Jours restant à produire", help="Somme des jours staffés dans Napta (tous grades confondus) pour les périodes de staffing qui commencent après la date de clôture. Valeur telle que disponible dans TazForce à date du dernier rafraichissement forcé.", compute='_compute_future_staffing_days', store=True)
@@ -188,6 +192,21 @@ class ProjectProgress(models.Model):
                 rec.target_project_revenue = 0.0
 
 
+    # --- target_project_margin ---
+    @api.depends('target_project_revenue', 'target_project_cost')
+    def _compute_target_project_margin(self):
+        for rec in self:
+            rec.target_project_margin = (rec.target_project_revenue or 0.0) - (rec.target_project_cost or 0.0)
+
+    # --- target_project_margin_rate ---
+    @api.depends('target_project_margin', 'target_project_revenue')
+    def _compute_target_project_margin_rate(self):
+        for rec in self:
+            if rec.target_project_revenue:
+                rec.target_project_margin_rate = (rec.target_project_margin or 0.0) / rec.target_project_revenue
+            else:
+                rec.target_project_margin_rate = 0.0
+
     # --- target_project_outsourcing_product_qty ---
     @api.depends('outsourcing_link_id.order_sum_purchase_order_product_qty')
     def _compute_target_project_outsourcing_product_qty(self):
@@ -301,6 +320,15 @@ class ProjectProgress(models.Model):
     def _compute_progress_revenue_margin_period(self):
         for rec in self:
             rec.progress_revenue_margin_period = (rec.progress_revenue_amount_period or 0.0) - (rec.progress_cost_amount_period or 0.0)
+
+    # --- progress_revenue_margin_rate_period ---
+    @api.depends('progress_revenue_margin_period', 'progress_revenue_amount_period')
+    def _compute_progress_revenue_margin_rate_period(self):
+        for rec in self:
+            if rec.progress_revenue_amount_period:
+                rec.progress_revenue_margin_rate_period = (rec.progress_revenue_margin_period or 0.0) / rec.progress_revenue_amount_period
+            else:
+                rec.progress_revenue_margin_rate_period = 0.0
 
     # --- future_staffing_days ---
     @api.depends('type', 'rel_project_id', 'rel_closing_date')
