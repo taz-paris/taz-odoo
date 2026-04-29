@@ -108,7 +108,7 @@ class projectAccountingClosing(models.Model):
 
             # Auto-creation of project.progress records
             
-            if rec.closing_date and rec.closing_date >= datetime.date(2026, 3, 1):
+            if rec.closing_date and rec.closing_date >= datetime.date(2026, 3, 1) and not rec.is_validated:
                 rec.valuation_from_progress = True
 
             if rec.valuation_from_progress and not(isinstance(rec.id, models.NewId)):
