@@ -124,14 +124,18 @@ class projectAccountingClosing(models.Model):
                             'outsourcing_link_id': link.id,
                         }
                         _logger.info("Creating project progress : %s " % str(outsourcing_progress_dic))
-                        self.env['project.progress'].create(outsourcing_progress_dic)
+                        new_progress_outsourcing = self.env['project.progress'].create(outsourcing_progress_dic)
+                        # Après le create, previous_progress_id est résolu.
+                        # L'écriture à 0 déclenche _inverse_qty_period qui positionne
+                        # outsourcing_product_qty = previous.outsourcing_product_qty + 0
+                        # => données de période initialisées à 0 sur cette nouvelle clôture de S/T
+                        new_progress_outsourcing.outsourcing_product_qty_period = 0.0
                 
                 # 2. For internal production
                 if rec.project_id.napta_id or rec.project_id.company_part_amount_current != 0.0:
                     internal_progress = self.env['project.progress'].search([
                         ('accounting_closing_id', '=', rec.id),
-                        ('outsourcing_link_id', '=', False),
-                        ('type', '=', 'internal_production')
+                        ('outsourcing_link_id', '=', False)
                     ], limit=1)
                     if not internal_progress:
                         internal_progress_dic = {
