@@ -7,6 +7,7 @@
             <field name="arch" type="xml">
                 <list editable="top" decoration-info="state == 'wait'" decoration-success="state == 'done'" decoration-muted="state == 'cancelled'" decoration-danger="state == 'todo' and today &gt; date_deadline">
                     <field name="partner_id" options="{'no_quick_create':True}" required="True" context="{'list_view_ref':'taz-common.contact_tree', 'form_view_ref':'taz-common.contact_form'}"/>
+                    <field name="partner_function" optional="show"/>
                     <field name="name" widget="text"/>
                     <field name="state"/>
                     <field name="owner_id"/>

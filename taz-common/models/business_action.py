@@ -133,6 +133,7 @@ class tazBusinessAction(models.Model):
     partner_id = fields.Many2one('res.partner', string="Contact", domain="[('is_company', '!=', True)]", ondelete='restrict') #, required=True  
     parent_partner_id = fields.Many2one('res.partner', string="Entreprise", related='partner_id.parent_id', store=True)
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Compte du parent', related='partner_id.parent_industry_id', store=True)
+    partner_function = fields.Char(string='Poste', related='partner_id.function', store=True)
 
     name = fields.Char('Titre', required=True)
     note = fields.Text('Note')
