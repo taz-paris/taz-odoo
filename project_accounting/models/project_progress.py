@@ -54,7 +54,7 @@ class ProjectProgress(models.Model):
 
     # --- Quantités S/T ---
     target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées", compute='_compute_target_project_outsourcing_product_qty', store=True)
-    outsourcing_product_qty = fields.Float(string="Nb unités produites", store=True, readonly=False)
+    outsourcing_product_qty = fields.Float(string="Nb unités produites", compute='_compute_outsourcing_product_qty', inverse='_inverse_outsourcing_product_qty', store=True, readonly=False)
     outsourcing_product_qty_period = fields.Float(string="Nb unités produites période", compute='_compute_qty_period', inverse='_inverse_qty_period', store=True, readonly=False)
 
     # --- Avancement cumulé ---
@@ -214,6 +214,17 @@ class ProjectProgress(models.Model):
         for rec in self:
             rec.target_project_outsourcing_product_qty = rec.outsourcing_link_id.order_sum_purchase_order_product_qty if rec.outsourcing_link_id else 0.0
 
+    # --- Quantités S/T ---
+    @api.depends('progress_revenue_rate', 'target_project_outsourcing_product_qty')
+    def _compute_outsourcing_product_qty(self):
+        for rec in self:
+            rec.outsourcing_product_qty = (rec.progress_revenue_rate or 0.0) * (rec.target_project_outsourcing_product_qty or 0.0)
+
+    def _inverse_outsourcing_product_qty(self):
+        for rec in self:
+            target_qty = rec.target_project_outsourcing_product_qty or 0.0
+            rec.progress_revenue_rate = (rec.outsourcing_product_qty / target_qty) if target_qty else 0.0
+
     # --- outsourcing_product_qty_period ---
     @api.depends('outsourcing_product_qty', 'previous_progress_id.outsourcing_product_qty')
     def _compute_qty_period(self):
@@ -222,13 +233,13 @@ class ProjectProgress(models.Model):
 
     def _inverse_qty_period(self):
         for rec in self:
-            rec.outsourcing_product_qty = (rec.previous_progress_id.outsourcing_product_qty or 0.0) + (rec.outsourcing_product_qty_period or 0.0)
+            new_qty = (rec.previous_progress_id.outsourcing_product_qty or 0.0) + (rec.outsourcing_product_qty_period or 0.0)
+            target_qty = rec.target_project_outsourcing_product_qty or 0.0
+            rec.progress_revenue_rate = (new_qty / target_qty) if target_qty else 0.0
 
     # --- progress_cost_amount ---
-    # Pour outsourcing : formule directe (cost * qty/target_qty) au lieu de cost * rate
-    # afin d'éviter une dépendance circulaire avec progress_revenue_rate
     @api.depends('type', 'rel_project_id', 'rel_closing_date',
-                 'target_project_cost', 'outsourcing_product_qty', 'target_project_outsourcing_product_qty')
+                 'target_project_cost', 'progress_revenue_rate', 'outsourcing_product_qty', 'target_project_outsourcing_product_qty')
     def _compute_progress_cost_amount(self):
         for rec in self:
             if rec.type == 'internal_production':
@@ -240,26 +251,19 @@ class ProjectProgress(models.Model):
                     purchase_period_subtotal, purchase_period_total, purchase_period_paid, purchase_period_line_ids = rec.rel_project_id.compute_account_move_total_all_partners([('partner_id', '=', rec.outsourcing_link_id.partner_id.id), ('date', '<=', rec.rel_closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])
                     rec.progress_cost_amount = -1 * purchase_period_subtotal
                 else :
-                    target_qty = rec.target_project_outsourcing_product_qty or 0.0
-                    rate = (rec.outsourcing_product_qty / target_qty) if target_qty else 0.0
-                    rec.progress_cost_amount = (rec.target_project_cost or 0.0) * rate
+                    rec.progress_cost_amount = (rec.target_project_cost or 0.0) * (rec.progress_revenue_rate or 0.0)
             else:
                 rec.progress_cost_amount = 0.0
 
     # --- progress_revenue_rate ---
-    @api.depends('progress_cost_amount', 'target_project_cost')
+    @api.depends('type', 'progress_cost_amount', 'target_project_cost')
     def _compute_progress_revenue_rate(self):
         for rec in self:
-            rec.progress_revenue_rate = (rec.progress_cost_amount / rec.target_project_cost) if rec.target_project_cost else 0.0
+            if rec.type == 'internal_production':
+                rec.progress_revenue_rate = (rec.progress_cost_amount / rec.target_project_cost) if rec.target_project_cost else 0.0
 
     def _inverse_progress_revenue_rate(self):
-        for rec in self:
-            if not rec.progress_revenue_rate:
-                continue
-            if rec.type == 'internal_production':
-                pass  # Asymétrie : ne pas remonter vers le target_project_cost
-            elif rec.target_project_outsourcing_product_qty:
-                rec.outsourcing_product_qty = rec.progress_revenue_rate * rec.target_project_outsourcing_product_qty
+        pass # Le taux est stocké, les autres champs en dépendent.
 
     # --- progress_revenue_amount ---
     @api.depends('target_project_revenue', 'progress_revenue_rate')
@@ -269,11 +273,7 @@ class ProjectProgress(models.Model):
 
     def _inverse_revenue(self):
         for rec in self:
-            rate = (rec.progress_revenue_amount / rec.target_project_revenue) if rec.target_project_revenue else 0.0
-            if rec.type == 'internal_production':
-                rec.progress_revenue_rate = rate
-            else:
-                rec.outsourcing_product_qty = rate * rec.target_project_outsourcing_product_qty
+            rec.progress_revenue_rate = (rec.progress_revenue_amount / rec.target_project_revenue) if rec.target_project_revenue else 0.0
 
     # --- progress_revenue_margin ---
     @api.depends('progress_revenue_amount', 'progress_cost_amount')
@@ -298,11 +298,7 @@ class ProjectProgress(models.Model):
 
     def _inverse_progress_revenue_rate_period(self):
         for rec in self:
-            new_rate = (rec.rel_previous_progress_revenue_rate or 0.0) + (rec.progress_revenue_rate_period or 0.0)
-            if rec.type == 'internal_production':
-                rec.progress_revenue_rate = new_rate
-            else:
-                rec.outsourcing_product_qty = new_rate * rec.target_project_outsourcing_product_qty
+            rec.progress_revenue_rate = (rec.rel_previous_progress_revenue_rate or 0.0) + (rec.progress_revenue_rate_period or 0.0)
 
     # --- progress_cost_amount_period ---
     @api.depends('progress_cost_amount', 'rel_previous_progress_cost_amount')
@@ -378,6 +374,10 @@ class ProjectProgress(models.Model):
     @api.onchange('progress_revenue_amount')
     def _onchange_progress_revenue_amount(self):
         self._inverse_revenue()
+
+    @api.onchange('outsourcing_product_qty')
+    def _onchange_outsourcing_product_qty(self):
+        self._inverse_outsourcing_product_qty()
 
     # ===================================================================
     # ACTIONS
