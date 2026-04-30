@@ -13,6 +13,8 @@
                 -->
                 <field name="progress_revenue_amount_period" type="measure"/>
                 <field name="progress_cost_amount_period" type="measure"/>
+                <field name="target_project_margin" type="measure"/>
+                <field name="target_project_margin_rate" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -39,10 +41,14 @@
                 <field name="progress_revenue_rate" optional="hide" widget="percentage"/>
                 <field name="target_project_cost" optional="hide" sum="Total Cost"/>
                 <field name="target_project_revenue" optional="hide" sum="Total Revenue"/>
+                <field name="target_project_margin" optional="hide" sum="Total Margin"/>
+                <field name="target_project_margin_rate" optional="hide" widget="percentage"/>
                 <field name="progress_cost_amount" optional="show" sum="Total Cost"/>
                 <field name="progress_revenue_amount" optional="show" sum="Total Revenue"/>
                 <field name="progress_cost_amount_period" optional="show" sum="Total Cost Period"/>
                 <field name="progress_revenue_amount_period" optional="show" sum="Total Revenue Period"/>
+                <field name="progress_revenue_margin_period" optional="show" sum="Total Margin Period"/>
+                <field name="progress_revenue_margin_rate_period" optional="show" widget="percentage"/>
                 <field name="is_validated" widget="boolean_toggle" optional="hide"/>
                 <field name="comment" optional="show"/>
                 <field name="currency_id" column_invisible="True"/>
@@ -136,6 +142,8 @@
                             <field name="progress_cost_amount_period"/>
                             <field name="progress_revenue_rate_period" widget="percentage" readonly="1"/>
                             <field name="progress_revenue_amount_period"/>
+                            <field name="progress_revenue_margin_period" decoration-danger="progress_revenue_margin_period &lt; 0"/>
+                            <field name="progress_revenue_margin_rate_period" widget="percentage" decoration-danger="progress_revenue_margin_rate_period &lt; 0"/>
                         </group>
                         <!-- Bloc Période pour les autres types (sans style) -->
                         <group name="valuation_period_other" string="Valorisation de la période" 
@@ -145,6 +153,8 @@
                             <field name="progress_cost_amount_period" sum="Total Cost Period"/>
                             <field name="progress_revenue_rate_period" widget="percentage" readonly="is_validated or type == 'other'"/>
                             <field name="progress_revenue_amount_period" sum="Total Revenue Period"/>
+                            <field name="progress_revenue_margin_period" sum="Total Margin Period" decoration-danger="progress_revenue_margin_period &lt; 0"/>
+                            <field name="progress_revenue_margin_rate_period" widget="percentage" decoration-danger="progress_revenue_margin_rate_period &lt; 0"/>
                         </group>
                         <group name="target" string="Projection à terminaison">
                             <newline/><newline/>
@@ -153,6 +163,8 @@
                             <field name="future_staffing_days" invisible="type != 'internal_production'"/>
                             <field name="price_unit" invisible="type in ['internal_production', 'other']"/>
                             <field name="target_project_revenue" />
+                            <field name="target_project_margin" decoration-danger="target_project_margin &lt; 0"/>
+                            <field name="target_project_margin_rate" widget="percentage" decoration-danger="target_project_margin_rate &lt; 0"/>
                             <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
                         </group>
                     </group>
