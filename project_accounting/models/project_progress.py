@@ -77,6 +77,17 @@ class ProjectProgress(models.Model):
     progress_revenue_margin_rate_period = fields.Float(string="Marge période en %", aggregator=False,
                                                     compute='_compute_progress_revenue_margin_rate_period', store=True, digits=(16, 6))
 
+    # --- Provisions ---
+    purchase_period_amount = fields.Monetary('Achats HT sur la periode', compute='_compute_purchase_period_amount', store=True)
+
+    cca_previous_balance = fields.Monetary('Précédent solde CCA', compute='_compute_cca_previous_balance', aggregator='sum', store=True)
+    cca_period_amount = fields.Monetary('CCA(+)', compute='_compute_cca_period_amount', store=True)
+    cca_balance = fields.Monetary('Solde CCA', compute='_compute_provisions_balances', store=True, aggregator='sum')
+
+    fnp_previous_balance = fields.Monetary('Précédent solde FNP', compute='_compute_fnp_previous_balance', aggregator='sum', store=True)
+    fnp_period_amount = fields.Monetary('FNP(-)', compute='_compute_fnp_period_amount', store=True)
+    fnp_balance = fields.Monetary('Solde FNP', compute='_compute_provisions_balances', store=True, aggregator='sum')
+
     # --- Autres calculs ---
     future_staffing_days = fields.Float(string="Jours restant à produire", help="Somme des jours staffés dans Napta (tous grades confondus) pour les périodes de staffing qui commencent après la date de clôture. Valeur telle que disponible dans TazForce à date du dernier rafraichissement forcé.", compute='_compute_future_staffing_days', store=True)
     price_unit = fields.Monetary(string="TJM sous-traitance", compute='_compute_price_unit', store=True)
@@ -351,6 +362,74 @@ class ProjectProgress(models.Model):
     def _compute_reselling_price_unit(self):
         for rec in self:
             rec.reselling_price_unit = ((rec.target_project_revenue or 0.0) / rec.target_project_outsourcing_product_qty) if rec.target_project_outsourcing_product_qty else 0.0
+
+    # --- purchase_period_amount ---
+    @api.depends('outsourcing_link_id', 'rel_project_id', 'rel_closing_date', 'accounting_closing_id.previous_closing')
+    def _compute_purchase_period_amount(self):
+        for rec in self:
+            if not rec.outsourcing_link_id:
+                rec.purchase_period_amount = 0.0
+                continue
+            
+            previous_closing = rec.accounting_closing_id.previous_closing
+            domain = [
+                ('partner_id', '=', rec.outsourcing_link_id.partner_id.id),
+                ('date', '<=', rec.rel_closing_date),
+                ('parent_state', 'in', ['posted']),
+                ('move_type', 'in', ['in_refund', 'in_invoice'])
+            ]
+            if previous_closing:
+                domain.append(('date', '>', previous_closing.closing_date))
+            
+            subtotal, total, paid, line_ids = rec.rel_project_id.compute_account_move_total_all_partners(domain)
+            rec.purchase_period_amount = -1 * subtotal
+
+    # --- Provisions (CCA / FNP) ---
+    @api.depends('previous_progress_id.cca_balance')
+    def _compute_cca_previous_balance(self):
+        for rec in self:
+            rec.cca_previous_balance = rec.previous_progress_id.cca_balance if rec.previous_progress_id else 0.0
+
+    @api.depends('previous_progress_id.fnp_balance')
+    def _compute_fnp_previous_balance(self):
+        for rec in self:
+            rec.fnp_previous_balance = rec.previous_progress_id.fnp_balance if rec.previous_progress_id else 0.0
+
+    @api.depends('progress_cost_amount', 'rel_closing_date', 'outsourcing_link_id')
+    def _compute_provisions_balances(self):
+        for rec in self:
+            if not rec.outsourcing_link_id:
+                rec.cca_balance = 0.0
+                rec.fnp_balance = 0.0
+                continue
+            
+            domain = [
+                ('partner_id', '=', rec.outsourcing_link_id.partner_id.id),
+                ('date', '<=', rec.rel_closing_date),
+                ('parent_state', 'in', ['posted']),
+                ('move_type', 'in', ['in_refund', 'in_invoice'])
+            ]
+            subtotal, total, paid, line_ids = rec.rel_project_id.compute_account_move_total_all_partners(domain)
+            cumul_real = -1 * subtotal
+            
+            gap = rec.progress_cost_amount - cumul_real
+            
+            if gap < 0:
+                rec.cca_balance = gap
+                rec.fnp_balance = 0.0
+            else:
+                rec.cca_balance = 0.0
+                rec.fnp_balance = gap
+
+    @api.depends('cca_balance', 'cca_previous_balance')
+    def _compute_cca_period_amount(self):
+        for rec in self:
+            rec.cca_period_amount = rec.cca_balance - rec.cca_previous_balance
+
+    @api.depends('fnp_balance', 'fnp_previous_balance')
+    def _compute_fnp_period_amount(self):
+        for rec in self:
+            rec.fnp_period_amount = rec.fnp_balance - rec.fnp_previous_balance
 
     # ===================================================================
     # ONCHANGE (Ponts de réactivité IHM)

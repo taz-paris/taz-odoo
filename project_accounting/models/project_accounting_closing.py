@@ -107,7 +107,6 @@ class projectAccountingClosing(models.Model):
                     proj_id = proj_ids[0]
 
             # Auto-creation of project.progress records
-            
             if rec.closing_date and rec.closing_date >= datetime.date(2026, 3, 1) and not rec.is_validated:
                 rec.valuation_from_progress = True
 
@@ -193,34 +192,6 @@ class projectAccountingClosing(models.Model):
 
             if rec.valuation_from_progress:
                 pass
-                """
-                # 1. Totals from progress objects (Theoretical Recognition)
-                total_adv_revenue = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
-                total_adv_cost_internal = sum(rec.object_progress_ids.filtered(lambda p: p.type == 'internal_production').mapped('progress_cost_amount'))
-                total_adv_cost_external = sum(rec.object_progress_ids.filtered(lambda p: p.type != 'internal_production').mapped('progress_cost_amount'))
-                
-                # 2. Cumulative Accounting Data (Historical validated + Current period)
-                history = self.env['project.accounting_closing'].search([
-                    ('project_id', '=', proj_id.id),
-                    ('closing_date', '<', rec.closing_date),
-                    ('is_validated', '=', True)
-                ])
-                cumul_invoiced = sum(history.mapped('invoice_period_amount')) + (rec.invoice_period_amount or 0.0)
-                
-                # 3. Revenue Smoothing (FAE / PCA)
-                revenue_gap = total_adv_revenue - cumul_invoiced
-                if revenue_gap > 0:
-                    rec.fae_period_amount = revenue_gap - rec.fae_previous_balance
-                    rec.pca_period_amount = -rec.pca_previous_balance
-                else:
-                    rec.pca_period_amount = abs(revenue_gap) - rec.pca_previous_balance
-                    rec.fae_period_amount = -rec.fae_previous_balance
-                
-                # 4. Cost Smoothing (Destocking)
-                # Production destocking should represent the portion of stock to be recognized in P&L
-                rec.production_destocking = sum(rec.object_progress_ids.filtered(lambda p: p.type == 'internal_production').mapped('progress_cost_amount_period'))
-                rec.production_external_destocking = sum(rec.object_progress_ids.filtered(lambda p: p.type != 'internal_production').mapped('progress_cost_amount_period'))
-                """
             
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
             rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
