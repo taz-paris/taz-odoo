@@ -36,12 +36,28 @@ class projectAccountingClosing(models.Model):
         # sinon, c'est le dernier jour du mois suivant celui de la dernière cloture
         return (last_closing_date + relativedelta(months=2)).replace(day=1) - datetime.timedelta(1)
 
-    @api.constrains('closing_date')
+    @api.constrains('closing_date', 'company_id', 'is_validated')
     def _check_closing_date(self):
         for rec in self:
             accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id)], order="closing_date desc")
             if accounting_closing_ids[0].id != rec.id:
                 raise ValidationError(_("Il n'est pas possible de saisir une date de clôture antérieure à la dernière cloture enregistrée pour ce projet."))
+
+            # Vérification des dates de verrouillage comptable
+            if rec.closing_date:
+                company = rec.company_id
+                lock_dates = {
+                    'vente': company.sale_lock_date,
+                    'achat': company.purchase_lock_date,
+                    'fiscale': company.fiscalyear_lock_date,
+                    'taxe': company.tax_lock_date,
+                }
+                for lock_type, lock_date in lock_dates.items():
+                    if lock_date and lock_date < rec.closing_date:
+                        raise ValidationError(_(
+                            "La date de verrouillage %s de la société (%s) est antérieure à la date de clôture (%s). "
+                            "Le verrouillage comptable doit être effectué avant la clôture du projet."
+                        ) % (lock_type, lock_date, rec.closing_date))
 
     @api.model_create_multi
     def create(self, vals):
@@ -73,6 +89,11 @@ class projectAccountingClosing(models.Model):
             
             # Nouvelle contrainte : on ne peut pas valider la clôture si des avancements ne sont pas validés
             if vals.get('is_validated'):
+                if len(vals) > 1:
+                    raise ValidationError(_("Il n'est pas possible de valider la clôture et de modifier d'autres champs en même temps. Veuillez d'abord enregistrer vos modifications, puis valider la clôture."))
+                if rec.purchase_period_mismatch:
+                    raise ValidationError(_("Impossible de valider la clôture car le montant des achats de la période ne correspond pas à la somme des achats des lignes d'avancement."))
+                
                 not_validated_progress = rec.object_progress_ids.filtered(lambda p: not p.is_validated)
                 if not_validated_progress:
                     progress_names = ", ".join(not_validated_progress.mapped('display_name'))
@@ -88,15 +109,34 @@ class projectAccountingClosing(models.Model):
                 raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car elle est validée."))
         super().unlink()
 
+    #TODO : à réactiver une fois la base debuguée
+    """
+    @api.constrains('fae_balance', 'pca_balance', 'cca_balance', 'fnp_balance')
+    def _check_balances_signs(self):
+        for rec in self:
+            if rec.is_validated : #dans la base de données, on a 7 FAE négative et 4 FNP positive
+                continue
+            if rec.fae_balance < 0:
+                raise ValidationError(_("Clôture %s : le solde FAE ne peut pas être négatif (%s).") % (rec.name, rec.fae_balance))
+            if rec.pca_balance > 0:
+                raise ValidationError(_("Clôture %s : le solde PCA ne peut pas être positif (%s).") % (rec.name, rec.pca_balance))
+            if rec.cca_balance < 0:
+                raise ValidationError(_("Clôture %s : le solde CCA ne peut pas être négatif (%s).") % (rec.name, rec.cca_balance))
+            if rec.fnp_balance > 0:
+                raise ValidationError(_("Clôture %s : le solde FNP ne peut pas être positif (%s).") % (rec.name, rec.fnp_balance))
+    """
 
 
-    @api.depends('project_id', 'project_id.name', 'is_validated', 'closing_date', 'pca_period_amount', 'fae_period_amount', 'cca_period_amount', 'fnp_period_amount', 'production_destocking', 'production_external_destocking')
+    @api.depends('project_id', 'project_id.name', 'is_validated', 'closing_date', 'valuation_from_progress', 
+                 'object_progress_ids.progress_revenue_amount_period', 'object_progress_ids.purchase_period_amount', 
+                 'object_progress_ids.cca_period_amount', 'object_progress_ids.fnp_period_amount')
     def compute(self):
         _logger.info('-- compute project_accounting_closing')
         for rec in self :
-            #if rec.is_validated :
-            #    continue
-                #Désactivé car celà empéchait certains recalcul quand l'utilisateur cochait la case de validation et saisissait des données en même temps
+            if rec.is_validated: 
+                # TODO : protection contre les modification du passé lors de l'initialisation des nouveaux calculs par l'ORM (qui ne passe pas par le write surarché ci-desus)
+                # A retirer une fois que l'ORM aura initialisé les nouveaux champs
+                continue
 
             proj_id = rec.project_id #quand on applique la fonction WRITE
             if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)
@@ -131,7 +171,8 @@ class projectAccountingClosing(models.Model):
                         new_progress_outsourcing.outsourcing_product_qty_period = 0.0
                 
                 # 2. For internal production
-                if rec.project_id.napta_id or rec.project_id.company_part_amount_current != 0.0:
+                napta_id = getattr(rec.project_id, 'napta_id', False)
+                if napta_id or rec.project_id.company_part_amount_current != 0.0:
                     internal_progress = self.env['project.progress'].search([
                         ('accounting_closing_id', '=', rec.id),
                         ('outsourcing_link_id', '=', False)
@@ -191,8 +232,37 @@ class projectAccountingClosing(models.Model):
             rec.purchase_other_period_amount = rec.purchase_period_amount - rec.purchase_outsourcing_period_amount
 
             if rec.valuation_from_progress:
-                pass
-            
+                # 1. CA Brut (Somme des variations de revenus)
+                rec.gross_revenue = sum(rec.object_progress_ids.mapped('progress_revenue_amount_period'))
+                
+                # 2. FAE / PCA (Logique d'écart cumulé)
+                total_adv_revenue = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
+                cumul_invoiced = rec.get_invoice_period(proj_id, [], rec.closing_date)[0]
+                
+                revenue_gap = total_adv_revenue - cumul_invoiced
+                if revenue_gap > 0:
+                    rec.fae_period_amount = revenue_gap - rec.fae_previous_balance
+                    rec.pca_period_amount = -rec.pca_previous_balance
+                else:
+                    # TODO : à vérifier avec Denis
+                    rec.pca_period_amount = revenue_gap - rec.pca_previous_balance
+                    rec.fae_period_amount = -rec.fae_previous_balance
+                
+                # 3. CCA / FNP (Somme des provisions des lignes)
+                rec.cca_period_amount = sum(rec.object_progress_ids.mapped('cca_period_amount'))
+                rec.fnp_period_amount = sum(rec.object_progress_ids.mapped('fnp_period_amount'))
+
+                # 4. Déstockage total au fur et à mesure
+                rec.production_destocking = rec.production_previous_balance + rec.production_period_amount
+                rec.production_external_destocking = rec.production_external_previous_balance + rec.purchase_outsourcing_period_amount
+                
+                # Contrôle de cohérence sur les achats (uniquement si valorisé par l'avancement)
+                total_progress_purchase = sum(rec.object_progress_ids.mapped('purchase_period_amount'))
+                rec.purchase_period_mismatch = abs(rec.purchase_period_amount - total_progress_purchase) > 0.01
+            else:
+                rec.gross_revenue = rec.invoice_period_amount + rec.pca_period_amount + rec.fae_period_amount
+                rec.purchase_period_mismatch = False
+
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
             rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
             rec.cca_balance = rec.cca_previous_balance + rec.cca_period_amount
@@ -214,7 +284,6 @@ class projectAccountingClosing(models.Model):
             rec.production_total_destocking = rec.production_destocking + rec.production_external_destocking
             rec.production_total_balance = rec.production_balance + rec.production_external_balance
 
-            rec.gross_revenue = rec.invoice_period_amount + rec.pca_period_amount + rec.fae_period_amount
             rec.internal_revenue = rec.gross_revenue - rec.purchase_other_period_amount + rec.cca_period_amount + rec.fnp_period_amount
             rec.internal_margin_amount = rec.internal_revenue - rec.production_destocking - rec.production_external_destocking
             rec.internal_margin_rate = 0.0
@@ -264,11 +333,6 @@ class projectAccountingClosing(models.Model):
                 'search_default_group_by_move' : 1,
             }
         }
-        
-        #if len(invoice_ids) == 1:
-        #    action['views'] = [[False, 'form']]
-        #    action['res_id'] = invoice_ids[0]
-        
         return action
 
     def action_open_in_account_move_lines(self):
@@ -295,11 +359,6 @@ class projectAccountingClosing(models.Model):
                 'search_default_group_by_move' : 1,
             }
         }
-
-        #if len(invoice_ids) == 1:
-        #    action['views'] = [[False, 'form']]
-        #    action['res_id'] = invoice_ids[0]
-
         return action
 
     def action_open_analytic_lines(self):
@@ -320,10 +379,11 @@ class projectAccountingClosing(models.Model):
             }
 
     def goto_napta(self):
-        if self.project_id.napta_id:
+        napta_id = getattr(self.project_id, 'napta_id', False)
+        if napta_id:
             return {
                 'type': 'ir.actions.act_url',
-                'url': 'https://app.napta.io/projects/%s?view=financial' % (self.project_id.napta_id),
+                'url': 'https://app.napta.io/projects/%s?view=financial' % (napta_id),
                 'target': 'new',
             }
         else : 
@@ -358,20 +418,22 @@ class projectAccountingClosing(models.Model):
     purchase_other_period_amount = fields.Monetary('Autres achats HT sur la periode', compute=compute, store=True, help="Autres achats = Achats - Achats de S/T")
     
     pca_previous_balance = fields.Monetary('Précédent solde PCA', compute=compute, aggregator='sum', store=True)
-    pca_period_amount = fields.Monetary('PCA(-)')
+    pca_period_amount = fields.Monetary('PCA(-)', compute=compute, store=True)
     pca_balance = fields.Monetary('Solde PCA', compute=compute, store=True, aggregator='sum')
     
     fae_previous_balance = fields.Monetary('Précédent solde FAE', compute=compute, aggregator='sum', store=True)
-    fae_period_amount = fields.Monetary('FAE(+)')
+    fae_period_amount = fields.Monetary('FAE(+)', compute=compute, store=True)
     fae_balance = fields.Monetary('Solde FAE', compute=compute, store=True, aggregator='sum')
     
     cca_previous_balance = fields.Monetary('Précédent solde CCA', compute=compute, aggregator='sum', store=True)
-    cca_period_amount = fields.Monetary('CCA(+)')
+    cca_period_amount = fields.Monetary('CCA(+)', compute=compute, store=True)
     cca_balance = fields.Monetary('Solde CCA', compute=compute, store=True, aggregator='sum')
     
     fnp_previous_balance = fields.Monetary('Précédent solde FNP', compute=compute, aggregator='sum', store=True)
-    fnp_period_amount = fields.Monetary('FNP(-)')
+    fnp_period_amount = fields.Monetary('FNP(-)', compute=compute, store=True)
     fnp_balance = fields.Monetary('Solde FNP', compute=compute, store=True, aggregator='sum')
+
+    purchase_period_mismatch = fields.Boolean('Écart sur les achats', compute=compute, store=True, help="Indique s'il y a un écart entre le montant des achats de la période et la somme des achats des lignes d'avancement")
 
     provision_previous_balance_sum = fields.Monetary('Somme reprise prov.', compute=compute, store=True, aggregator=False)
     provision_balance_sum = fields.Monetary('Somme solde prov.', compute=compute, store=True, aggregator=False)
@@ -379,13 +441,13 @@ class projectAccountingClosing(models.Model):
     production_previous_balance = fields.Monetary('Précédent stock interne', compute=compute, aggregator='sum', store=True)
     production_period_amount = fields.Monetary('Production interne sur la période', compute=compute, store=True, help="Somme des pointages internes de la période, valorisés au coût de revient")
     production_stock = fields.Monetary('Stock interne', compute=compute, store=True, aggregator='sum')
-    production_destocking = fields.Monetary('Destockage interne')
+    production_destocking = fields.Monetary('Destockage interne', compute=compute, store=True)
     production_balance = fields.Monetary('Solde prod interne après destockage', compute=compute, store=True, aggregator='sum')
     
     production_external_previous_balance = fields.Monetary('Précédent stock externe', compute=compute, aggregator='sum', store=True)
     production_external_period_amount = fields.Monetary('Production externe sur la période', compute=compute, store=True, help="Somme du prix d'achat HT des lignes de factures/avoirs fournisseurs de la période lorsque l'article est configuré pour générer de la production externe - coche sur l'onglet Achat de la fiche produit")
     production_external_stock = fields.Monetary('Stock externe', compute=compute, store=True, aggregator='sum')
-    production_external_destocking = fields.Monetary('Destockage externe')
+    production_external_destocking = fields.Monetary('Destockage externe', compute=compute, store=True)
     production_external_balance = fields.Monetary('Solde externe prod après destockage', compute=compute, store=True, aggregator='sum')
     
     production_total_previous_balance = fields.Monetary('Précédent stock total', compute=compute, aggregator='sum', store=True)

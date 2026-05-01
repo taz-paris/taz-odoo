@@ -412,14 +412,15 @@ class ProjectProgress(models.Model):
             subtotal, total, paid, line_ids = rec.rel_project_id.compute_account_move_total_all_partners(domain)
             cumul_real = -1 * subtotal
             
-            gap = rec.progress_cost_amount - cumul_real
+            cost_gap = rec.progress_cost_amount - cumul_real
             
-            if gap < 0:
-                rec.cca_balance = gap
+            # TODO : à vérifier avec Denis
+            if cost_gap < 0:
+                rec.cca_balance = cost_gap
                 rec.fnp_balance = 0.0
             else:
                 rec.cca_balance = 0.0
-                rec.fnp_balance = gap
+                rec.fnp_balance = cost_gap
 
     @api.depends('cca_balance', 'cca_previous_balance')
     def _compute_cca_period_amount(self):
