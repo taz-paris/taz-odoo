@@ -146,10 +146,14 @@ class projectAccountingClosing(models.Model):
                 if len(proj_ids) :
                     proj_id = proj_ids[0]
 
-            # Auto-creation of project.progress records
+            # Chez Tasmane, l'entrée dans l'alliance a conduit à basculer à une reconnaissance du CA à l'avancement
+            #   - pour les mois de janvier / février / mars 2026, Denis à fait les clotures habituelles mais a desocké tout le stock chaque mois
+            #   - fin mars 2026, on a créé l'objet project.progress et on l'a instancié pour le T1 2026. Un script a été xecuté pour retomber sur le CA déclaré
+            #   - à partir de la clôture du 31/03/2026, on a mis valuation_from_progress=True et on calcule automatiquement les provisions à parir des project.progress
             if rec.closing_date and rec.closing_date >= datetime.date(2026, 3, 1) and not rec.is_validated:
                 rec.valuation_from_progress = True
-
+            
+            # Auto-creation of project.progress records
             if rec.valuation_from_progress and not(isinstance(rec.id, models.NewId)):
                 # 1. For each outsourcing link
                 for link in proj_id.project_outsourcing_link_ids:
@@ -244,7 +248,6 @@ class projectAccountingClosing(models.Model):
                     rec.fae_period_amount = revenue_gap - rec.fae_previous_balance
                     rec.pca_period_amount = -rec.pca_previous_balance
                 else:
-                    # TODO : à vérifier avec Denis
                     rec.pca_period_amount = revenue_gap - rec.pca_previous_balance
                     rec.fae_period_amount = -rec.fae_previous_balance
                 

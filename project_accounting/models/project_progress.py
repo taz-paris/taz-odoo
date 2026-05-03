@@ -414,13 +414,12 @@ class ProjectProgress(models.Model):
             
             cost_gap = rec.progress_cost_amount - cumul_real
             
-            # TODO : à vérifier avec Denis
             if cost_gap < 0:
-                rec.cca_balance = cost_gap
+                rec.cca_balance = -cost_gap
                 rec.fnp_balance = 0.0
             else:
                 rec.cca_balance = 0.0
-                rec.fnp_balance = cost_gap
+                rec.fnp_balance = -cost_gap
 
     @api.depends('cca_balance', 'cca_previous_balance')
     def _compute_cca_period_amount(self):
@@ -481,6 +480,7 @@ class ProjectProgress(models.Model):
         for rec in self:
             #mise à jour manuelle du CA cible, notamment lorsque Margaux/le DM crée les BCC après la génération initiale de l'avancement
             rec._compute_target_project_revenue()
+            #rec._compute_provisions_balances()
             """
             rec.target_project_cost = 0.0
             rec.target_project_revenue = 0.0
