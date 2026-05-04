@@ -75,6 +75,12 @@
             <field name="model">project.accounting_closing</field>
             <field name="arch" type="xml">
                 <form>
+                    <header>
+                        <div class="alert alert-danger text-center o_form_header" role="alert" invisible="not purchase_period_mismatch">
+                            <field name="purchase_period_mismatch" invisible="1"/>
+                            <strong>Attention :</strong> le montant des achats de la période ne correspond pas à la somme des achats des lignes d'avancement.
+                        </div>
+                    </header>
                     <group name="general" col="3">
                         <group string="Projet">
                             <field name="company_id" invisible="1"/>
@@ -112,8 +118,8 @@
                                 </group>
                                 <group name="purchase" string="Facturation fournisseurs">
                                     <field name="purchase_period_amount"/>
-				    <field name="purchase_outsourcing_period_amount" string="... dont S/T générant de la prod externe"/>
-                                    <field name="purchase_other_period_amount" string="... dont autres achats"/>
+				    <field name="purchase_outsourcing_period_amount" string="... dont S/T générant de la prod externe" invisible="valuation_from_progress"/>
+                                    <field name="purchase_other_period_amount" string="... dont autres achats" invisible="valuation_from_progress"/>
                                     <button type="object" name="action_open_in_account_move_lines" colspan="2" string="Voir les lignes de facturation fournisseur"/>
                                 </group>
                                 <group name="prov" string="Total provisions">
@@ -144,7 +150,7 @@
                                 </group>
                             </group>
                             <group>
-                                <group name="internal_prod" string="Production interne">
+                                <group name="internal_prod" string="Production interne"  invisible="valuation_from_progress">
                                     <group>
                                         <field name="production_previous_balance"/>
                                         <field name="production_period_amount"/>
@@ -156,7 +162,7 @@
                                         <button type="object" name="action_open_analytic_lines" colspan="2" string="Voir les lignes de pointage"/>
                                     </group>
                                 </group>
-                                <group name="external_prod" string="Production externe">
+                                <group name="external_prod" string="Production externe"  invisible="valuation_from_progress">
                                     <group>
                                         <field name="production_external_previous_balance"/>
                                         <field name="production_external_period_amount"/>
@@ -169,7 +175,7 @@
                                 </group>
                             </group>
                             <group>
-                                <group name="total_prod" string="Production totale (interne + externe)">
+                                <group name="total_prod" string="Production totale (interne + externe)" invisible="valuation_from_progress">
                                     <group>
                                         <field name="production_total_previous_balance"/>
                                         <field name="production_total_period_amount"/>
@@ -183,9 +189,9 @@
                                 <group name="revenue" string="Chiffre d'affaire">
                                     <group>
                                         <field name="gross_revenue"/>
-                                        <field name="internal_revenue"/>
+                                        <field name="internal_revenue" invisible="valuation_from_progress"/>
                                     </group>
-                                    <group>
+                                    <group invisible="valuation_from_progress">
                                         <field name="internal_margin_amount"/>
                                         <field name="internal_margin_rate" widget="progressbar"/>
                                     </group>
