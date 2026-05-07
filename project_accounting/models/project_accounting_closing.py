@@ -146,6 +146,17 @@ class projectAccountingClosing(models.Model):
                 if len(proj_ids) :
                     proj_id = proj_ids[0]
 
+            # Il est important que la détermination de previous_closing soit fait avant la génération des Avancements
+            previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
+            previous_closing = None
+            previous_closing_date_filter = []
+
+            if len(previous_accounting_closing_ids) > 0 :
+                previous_closing = previous_accounting_closing_ids[0]
+                previous_closing_date_filter.append(('date', '>', previous_closing.closing_date))
+            rec.previous_closing = previous_closing
+
+
             # Chez Tasmane, l'entrée dans l'alliance a conduit à basculer à une reconnaissance du CA à l'avancement
             #   - pour les mois de janvier / février / mars 2026, Denis à fait les clotures habituelles mais a desocké tout le stock chaque mois
             #   - fin mars 2026, on a créé l'objet project.progress et on l'a instancié pour le T1 2026. Un script a été xecuté pour retomber sur le CA déclaré
@@ -169,10 +180,12 @@ class projectAccountingClosing(models.Model):
                         _logger.info("Creating project progress : %s " % str(outsourcing_progress_dic))
                         new_progress_outsourcing = self.env['project.progress'].create(outsourcing_progress_dic)
                         # Après le create, previous_progress_id est résolu.
-                        # L'écriture à 0 déclenche _inverse_qty_period qui positionne
+                        # Pour le type 'autre', l'écriture à 0 déclenche _inverse_qty_period qui positionne
                         # outsourcing_product_qty = previous.outsourcing_product_qty + 0
-                        # => données de période initialisées à 0 sur cette nouvelle clôture de S/T
-                        new_progress_outsourcing.outsourcing_product_qty_period = 0.0
+                        # => l'avancement cumulé est repris de la période précédente.
+                        # Pour le type S/T, on laisse à 0 par défaut pour forcer la saisie du nouvel avancement.
+                        if link.link_type == 'outsourcing':
+                            new_progress_outsourcing.outsourcing_product_qty_period = 0.0
                 
                 # 2. For internal production
                 napta_id = getattr(rec.project_id, 'napta_id', False)
@@ -189,14 +202,6 @@ class projectAccountingClosing(models.Model):
                         _logger.info("Creating project progress : %s " % str(internal_progress_dic))
                         self.env['project.progress'].create(internal_progress_dic)
 
-            previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
-            previous_closing = None
-            previous_closing_date_filter = []
-
-            if len(previous_accounting_closing_ids) > 0 :
-                previous_closing = previous_accounting_closing_ids[0]
-                previous_closing_date_filter.append(('date', '>', previous_closing.closing_date))
-            rec.previous_closing = previous_closing
 
 
             #Ces champs ne peuvent pas être de type related stored car les related stored ne sont calculés qu'après l'execution de cette fonction lors de la creation
