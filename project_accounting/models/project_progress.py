@@ -270,7 +270,7 @@ class ProjectProgress(models.Model):
     @api.depends('type', 'progress_cost_amount', 'target_project_cost')
     def _compute_progress_revenue_rate(self):
         for rec in self:
-            if rec.type == 'internal_production':
+            if rec.type in ['internal_production', 'other']:
                 rec.progress_revenue_rate = (rec.progress_cost_amount / rec.target_project_cost) if rec.target_project_cost else 0.0
 
     def _inverse_progress_revenue_rate(self):
@@ -480,30 +480,23 @@ class ProjectProgress(models.Model):
         for rec in self:
             #mise à jour manuelle du CA cible, notamment lorsque Margaux/le DM crée les BCC après la génération initiale de l'avancement
             rec._compute_target_project_revenue()
-            #rec._compute_provisions_balances()
-            """
-            rec.target_project_cost = 0.0
-            rec.target_project_revenue = 0.0
-            #rec._compute_type()
-            #rec._compute_previous_progress_id()
-            #rec._compute_next_progress()
 
-            rec._compute_progress_cost_amount()
-            rec._compute_target_project_cost()
-            rec._compute_target_project_outsourcing_product_qty()
-            rec._compute_qty_period()
-            rec._compute_progress_cost_amount()
-            rec._compute_progress_revenue_rate()
-            rec._compute_progress_revenue_amount()
-            rec._compute_progress_revenue_rate_period()
-            rec._compute_progress_cost_amount_period()
-            rec._compute_progress_revenue_amount_period()
-            rec._compute_future_staffing_days()
-            rec._compute_price_unit()
-            rec._compute_reselling_price_unit()
+            if rec.type == 'other':
+                rec._compute_progress_cost_amount()
+                rec._compute_target_project_cost()
+                rec._compute_target_project_outsourcing_product_qty()
+                rec._compute_outsourcing_product_qty()
+                rec._compute_qty_period()
+                rec._compute_progress_cost_amount()
+                rec._compute_progress_revenue_rate()
+                rec._compute_progress_revenue_amount()
+                rec._compute_progress_revenue_rate_period()
+                rec._compute_progress_cost_amount_period()
+                rec._compute_progress_revenue_amount_period()
+                rec._compute_future_staffing_days()
+                rec._compute_price_unit()
+                rec._compute_reselling_price_unit()
 
-            rec.data_init_2026()
-            """
 
 
     # ===================================================================
