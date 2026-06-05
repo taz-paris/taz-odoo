@@ -14,7 +14,6 @@
                 <field name="progress_revenue_amount_period" type="measure"/>
                 <field name="progress_cost_amount_period" type="measure"/>
                 <field name="target_project_margin" type="measure"/>
-                <field name="target_project_margin_rate" type="measure"/>
             </pivot>
         </field>
     </record>

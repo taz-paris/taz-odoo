@@ -50,7 +50,7 @@ class ProjectProgress(models.Model):
     target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='_compute_target_project_cost', inverse='_inverse_target_project_cost', store=True, readonly=False)
     target_project_revenue = fields.Monetary(string="CA total projeté", compute='_compute_target_project_revenue', store=True)
     target_project_margin = fields.Monetary(string="Marge projetée en €", compute='_compute_target_project_margin', store=True)
-    target_project_margin_rate = fields.Float(string="Marge projetée en %", aggregator=False, compute='_compute_target_project_margin_rate', store=True, digits=(16, 6))
+    target_project_margin_rate = fields.Float(string="Marge projetée en %", aggregator=None, compute='_compute_target_project_margin_rate', store=True, digits=(16, 6))
 
     # --- Quantités S/T ---
     target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées", compute='_compute_target_project_outsourcing_product_qty', store=True, digits=(16, 4))
