@@ -111,11 +111,20 @@ class tazResPartner(models.Model):
                          res = action.date_deadline
              self.date_last_business_action = res
 
+     @api.depends('ref_company_ids')
+     def _compute_is_alliance_partner(self):
+         for rec in self:
+             if rec.sudo().ref_company_ids :
+                 rec.is_alliance_partner = True
+             else :
+                 rec.is_alliance_partner = False
+
 
      first_name = fields.Char(string="Prénom")
      long_company_name = fields.Char(string="Libellé long de société")
      type = fields.Selection(string="Type de fiche partenaire")
 
+     is_alliance_partner = fields.Boolean(compute=_compute_is_alliance_partner, string="Membre de l'alliance", store=True)
      industry_id = fields.Many2one('res.partner.industry', string='Compte (ex BD)')
      sector_id = fields.Many2one('res.partner.sector', string='Secteur')
      business_priority = fields.Selection(related='industry_id.business_priority', store=True, string='Niveau de priorité du compte')

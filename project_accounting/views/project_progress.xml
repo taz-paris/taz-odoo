@@ -4,16 +4,14 @@
         <field name="name">project.progress.pivot</field>
         <field name="model">project.progress</field>
         <field name="arch" type="xml">
-            <pivot string="Analyse des avancements" sample="1">
+            <pivot string="Analyse des avancements">
                 <field name="rel_closing_date" interval="month" type="col"/>
                 <field name="type" type="row"/>
+                <field name="rel_is_alliance_partner" type="row"/>
                 <field name="rel_outsourcing_partner_id" type="row"/>
-                <!--
-                <field name="rel_project_id" type="row"/>
-                -->
                 <field name="progress_revenue_amount_period" type="measure"/>
                 <field name="progress_cost_amount_period" type="measure"/>
-                <field name="target_project_margin" type="measure"/>
+                <field name="progress_revenue_margin_period" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -205,6 +203,10 @@
                         domain="[('rel_closing_date', '&gt;=', (context_today() - relativedelta(months=1)).strftime('%Y-%m-01')), 
                                  ('rel_closing_date', '&lt;', context_today().strftime('%Y-%m-01'))]"/>
                 <separator/>
+                <filter string="Avancement de cette année" name="current_year" 
+			domain="[('rel_closing_date', '&gt;=', context_today().strftime('%Y-01-01')), 
+				 ('rel_closing_date', '&lt;=', context_today().strftime('%Y-12-31'))]"/>
+                <separator/>
                 <filter string="Projet en cours" name="launched_projects" domain="[('rel_original_stage_id.state', '=', 'launched')]"/>
                 <separator/>
                 <filter string="Validé" name="validated" domain="[('is_validated', '=', True)]"/>
@@ -262,11 +264,31 @@
         </field>
     </record>
 
+    <record id="project_progress_list_current_year_action" model="ir.actions.act_window">
+        <field name="name">Tous les avancements de cette année</field>
+        <field name="res_model">project.progress</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="view_id" ref="project_progess_list"/>
+        <field name="search_view_id" ref="view_project_progress_search"/>
+        <field name="context">{'search_default_my_progress': 0, 'search_default_current_year': 1, 'search_default_launched_projects': 0, 'search_default_group_by_project': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez un nouvel avancement.
+            </p>
+        </field>
+    </record>
+
     <menuitem id="project_progress_list_menu" 
               name="Mes avancements de production (vue liste)" 
               parent="project_accounting.project_accounting_closing_menu_root" 
               action="project_progress_list_action" 
               sequence="25"/>
+
+    <menuitem id="project_progress_list_current_year_menu" 
+              name="Tous les avancements de cette année (vue liste)" 
+              parent="project_accounting.project_accounting_closing_menu_root" 
+              action="project_progress_list_current_year_action" 
+              sequence="30"/>
 
     <record id="action_recompute_progress" model="ir.actions.server">
         <field name="name">Recalculer les données de cet avancement</field>

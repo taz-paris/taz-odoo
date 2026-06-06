@@ -28,6 +28,7 @@ class ProjectProgress(models.Model):
     rel_project_manager_user_id = fields.Many2one(related='rel_project_id.project_manager.user_id', string="Partner ou manager en appui", store=True)
     rel_original_stage_id = fields.Many2one(related='accounting_closing_id.original_stage_id', string="Statut début clôture", store=True)
     rel_outsourcing_partner_id = fields.Many2one(related='outsourcing_link_id.partner_id', string="Fournisseur", store=True)
+    rel_is_alliance_partner = fields.Boolean(related='rel_outsourcing_partner_id.is_alliance_partner', store=True)
     
     company_id = fields.Many2one('res.company', string='Société', required=True, related="accounting_closing_id.company_id")
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Devise", readonly=True)
