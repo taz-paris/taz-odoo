@@ -81,6 +81,7 @@
                             <strong>Attention :</strong> le montant des achats de la période ne correspond pas à la somme des achats des lignes d'avancement.
                         </div>
                     </header>
+                    <sheet string="Project">
                     <group name="general" col="3">
                         <group string="Projet">
                             <field name="company_id" invisible="1"/>
@@ -205,6 +206,8 @@
                             <field name="rel_project_accounting_closing_ids"/>
                         </page>
                     </notebook>
+                </sheet>
+                <chatter/>
                 </form>
             </field>
         </record>

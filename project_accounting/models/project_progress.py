@@ -119,18 +119,25 @@ class ProjectProgress(models.Model):
     # ===================================================================
     def write(self, vals):
         for rec in self:
-            if rec.accounting_closing_id.is_validated:
-                raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est lié à une clôture validée."))
-            if rec.next_progress:
-                raise ValidationError(_("Il n'est pas possible de modifier cet avancement car un avancement postérieur existe."))
-            if rec.is_validated:
+            rec._check_can_write(vals)
+        res = super().write(vals)
+        return res
+
+    def _check_can_write(self, vals=None):
+        # On est obligé d'appeler cette fonction dans chaque fonction @depends car elles bypass write()
+        #       Avant on ne contrôlait que dans write() et certaines valeur on été réécrites alors quel l'objet était déjà validé
+        self.ensure_one()
+        if self.accounting_closing_id.is_validated:
+            raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est lié à une clôture validée."))
+        if self.next_progress:
+            raise ValidationError(_("Il n'est pas possible de modifier cet avancement car un avancement postérieur existe."))
+        if self.is_validated:
+            if vals is None:
+                raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est validé."))
+            else:
                 for val_key in vals.keys():
                     if val_key not in ['is_validated', 'message_follower_ids', 'message_ids', 'activity_ids', 'message_attachment_ids', 'message_main_attachment_id']:
                         raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est validé.\n\nTentative de modification de l'attribut : %s") % val_key)
-        
-        res = super().write(vals)
-
-        return res
 
     def unlink(self):
         for rec in self:
@@ -148,12 +155,14 @@ class ProjectProgress(models.Model):
     @api.depends('outsourcing_link_id', 'outsourcing_link_id.link_type')
     def _compute_type(self):
         for rec in self:
+            rec._check_can_write()
             rec.type = rec.outsourcing_link_id.link_type if rec.outsourcing_link_id else 'internal_production'
 
     # --- previous_progress_id ---
     @api.depends('accounting_closing_id', 'accounting_closing_id.previous_closing', 'outsourcing_link_id')
     def _compute_previous_progress_id(self):
         for rec in self:
+            rec._check_can_write()
             previous_closing = rec.accounting_closing_id.previous_closing
             if previous_closing:
                 rec.previous_progress_id = self.env['project.progress'].search([
@@ -166,6 +175,7 @@ class ProjectProgress(models.Model):
     # --- next_progress (non stocké, recalculé à chaque accès) ---
     def _compute_next_progress(self):
         for rec in self:
+            rec._check_can_write()
             rec.next_progress = self.env['project.progress'].search([('previous_progress_id', '=', rec.id)], limit=1)
 
     # --- target_project_cost ---
@@ -175,6 +185,7 @@ class ProjectProgress(models.Model):
     @api.depends('type', 'outsourcing_link_id')
     def _compute_target_project_cost(self):
         for rec in self:
+            rec._check_can_write()
             if rec.type == 'internal_production':
                 rec.target_project_cost = (rec.rel_project_id.company_part_cost_current or 0.0) + (rec.rel_project_id.company_part_cost_futur or 0.0)
             elif rec.outsourcing_link_id:
@@ -192,6 +203,7 @@ class ProjectProgress(models.Model):
     @api.depends('type', 'outsourcing_link_id')
     def _compute_target_project_revenue(self):
         for rec in self:
+            rec._check_can_write()
             if rec.type == 'internal_production':
                 rec.target_project_revenue = rec.rel_project_id.company_part_amount_current or 0.0
             elif rec.outsourcing_link_id:
@@ -208,32 +220,38 @@ class ProjectProgress(models.Model):
     @api.depends('target_project_revenue', 'target_project_cost')
     def _compute_target_project_margin(self):
         for rec in self:
+            rec._check_can_write()
             rec.target_project_margin = (rec.target_project_revenue or 0.0) - (rec.target_project_cost or 0.0)
 
     # --- target_project_margin_rate ---
     @api.depends('target_project_margin', 'target_project_revenue')
     def _compute_target_project_margin_rate(self):
         for rec in self:
+            rec._check_can_write()
             if rec.target_project_revenue:
                 rec.target_project_margin_rate = (rec.target_project_margin or 0.0) / rec.target_project_revenue
             else:
                 rec.target_project_margin_rate = 0.0
 
     # --- target_project_outsourcing_product_qty ---
-    @api.depends('outsourcing_link_id.order_sum_purchase_order_product_qty')
+    # Cette fonction est executée une seule fois à la création.
+    # Pas de dépendance sur outsourcing_link_id.order_sum_purchase_order_product_qty pour éviter l'écrasement
+    # des valeurs lorsque les données du BCF changent a posteriori.
     def _compute_target_project_outsourcing_product_qty(self):
-        #TODO : attention, cette zone va etre recalculée lorsque l'on change la qté sur le BCF => ça va bloquer margaux car ça sera interdit post validation
         for rec in self:
+            rec._check_can_write()
             rec.target_project_outsourcing_product_qty = rec.outsourcing_link_id.order_sum_purchase_order_product_qty if rec.outsourcing_link_id else 0.0
 
     # --- Quantités S/T ---
     @api.depends('progress_revenue_rate', 'target_project_outsourcing_product_qty')
     def _compute_outsourcing_product_qty(self):
         for rec in self:
+            rec._check_can_write()
             rec.outsourcing_product_qty = (rec.progress_revenue_rate or 0.0) * (rec.target_project_outsourcing_product_qty or 0.0)
 
     def _inverse_outsourcing_product_qty(self):
         for rec in self:
+            rec._check_can_write()
             target_qty = rec.target_project_outsourcing_product_qty or 0.0
             rec.progress_revenue_rate = (rec.outsourcing_product_qty / target_qty) if target_qty else 0.0
 
@@ -241,10 +259,12 @@ class ProjectProgress(models.Model):
     @api.depends('outsourcing_product_qty', 'previous_progress_id.outsourcing_product_qty')
     def _compute_qty_period(self):
         for rec in self:
+            rec._check_can_write()
             rec.outsourcing_product_qty_period = (rec.outsourcing_product_qty or 0.0) - (rec.previous_progress_id.outsourcing_product_qty or 0.0)
 
     def _inverse_qty_period(self):
         for rec in self:
+            rec._check_can_write()
             new_qty = (rec.previous_progress_id.outsourcing_product_qty or 0.0) + (rec.outsourcing_product_qty_period or 0.0)
             target_qty = rec.target_project_outsourcing_product_qty or 0.0
             rec.progress_revenue_rate = (new_qty / target_qty) if target_qty else 0.0
@@ -254,14 +274,17 @@ class ProjectProgress(models.Model):
                  'target_project_cost', 'progress_revenue_rate', 'outsourcing_product_qty', 'target_project_outsourcing_product_qty')
     def _compute_progress_cost_amount(self):
         for rec in self:
+            rec._check_can_write()
             if rec.type == 'internal_production':
                 rec.progress_cost_amount = -rec.rel_project_id.get_production_cost(
                     [('date', '<=', rec.rel_closing_date), ('category', '=', 'project_employee_validated')],
                     force_recompute_amount=False)[0]
             elif rec.outsourcing_link_id:
                 if rec.type == 'other':
-                    purchase_period_subtotal, purchase_period_total, purchase_period_paid, purchase_period_line_ids = rec.rel_project_id.compute_account_move_total_all_partners([('partner_id', '=', rec.outsourcing_link_id.partner_id.id), ('date', '<=', rec.rel_closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])
-                    rec.progress_cost_amount = -1 * purchase_period_subtotal
+                    if rec.rel_closing_date >= datetime.date(2026, 1, 1): 
+                        # Les données saisies manuellement sur les avancements d'initialisation de décembre 2026 ne doivent pas bouger
+                        purchase_period_subtotal, purchase_period_total, purchase_period_paid, purchase_period_line_ids = rec.rel_project_id.compute_account_move_total_all_partners([('partner_id', '=', rec.outsourcing_link_id.partner_id.id), ('date', '<=', rec.rel_closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])
+                        rec.progress_cost_amount = -1 * purchase_period_subtotal
                 else :
                     rec.progress_cost_amount = (rec.target_project_cost or 0.0) * (rec.progress_revenue_rate or 0.0)
             else:
@@ -271,6 +294,7 @@ class ProjectProgress(models.Model):
     @api.depends('type', 'progress_cost_amount', 'target_project_cost')
     def _compute_progress_revenue_rate(self):
         for rec in self:
+            rec._check_can_write()
             if rec.type in ['internal_production', 'other']:
                 rec.progress_revenue_rate = (rec.progress_cost_amount / rec.target_project_cost) if rec.target_project_cost else 0.0
 
@@ -281,22 +305,26 @@ class ProjectProgress(models.Model):
     @api.depends('target_project_revenue', 'progress_revenue_rate')
     def _compute_progress_revenue_amount(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_revenue_amount = (rec.target_project_revenue or 0.0) * (rec.progress_revenue_rate or 0.0)
 
     def _inverse_revenue(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_revenue_rate = (rec.progress_revenue_amount / rec.target_project_revenue) if rec.target_project_revenue else 0.0
 
     # --- progress_revenue_margin ---
     @api.depends('progress_revenue_amount', 'progress_cost_amount')
     def _compute_progress_revenue_margin(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_revenue_margin = (rec.progress_revenue_amount or 0.0) - (rec.progress_cost_amount or 0.0)    
     
     # --- progress_revenue_margin_rate ---
     @api.depends('progress_revenue_margin', 'progress_revenue_amount')
     def _compute_progress_revenue_margin_rate(self):
         for rec in self:
+            rec._check_can_write()
             if rec.progress_revenue_amount:
                 rec.progress_revenue_margin_rate = (rec.progress_revenue_margin or 0.0) / rec.progress_revenue_amount
             else:
@@ -306,33 +334,39 @@ class ProjectProgress(models.Model):
     @api.depends('progress_revenue_rate', 'rel_previous_progress_revenue_rate')
     def _compute_progress_revenue_rate_period(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_revenue_rate_period = (rec.progress_revenue_rate or 0.0) - (rec.rel_previous_progress_revenue_rate or 0.0)
 
     def _inverse_progress_revenue_rate_period(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_revenue_rate = (rec.rel_previous_progress_revenue_rate or 0.0) + (rec.progress_revenue_rate_period or 0.0)
 
     # --- progress_cost_amount_period ---
     @api.depends('progress_cost_amount', 'rel_previous_progress_cost_amount')
     def _compute_progress_cost_amount_period(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_cost_amount_period = (rec.progress_cost_amount or 0.0) - (rec.rel_previous_progress_cost_amount or 0.0)
 
     # --- progress_revenue_amount_period ---
     @api.depends('progress_revenue_amount', 'rel_previous_progress_revenue_amount')
     def _compute_progress_revenue_amount_period(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_revenue_amount_period = (rec.progress_revenue_amount or 0.0) - (rec.rel_previous_progress_revenue_amount or 0.0)
 
     @api.depends('progress_revenue_amount_period', 'progress_cost_amount_period')
     def _compute_progress_revenue_margin_period(self):
         for rec in self:
+            rec._check_can_write()
             rec.progress_revenue_margin_period = (rec.progress_revenue_amount_period or 0.0) - (rec.progress_cost_amount_period or 0.0)
 
     # --- progress_revenue_margin_rate_period ---
     @api.depends('progress_revenue_margin_period', 'progress_revenue_amount_period')
     def _compute_progress_revenue_margin_rate_period(self):
         for rec in self:
+            rec._check_can_write()
             if rec.progress_revenue_amount_period:
                 rec.progress_revenue_margin_rate_period = (rec.progress_revenue_margin_period or 0.0) / rec.progress_revenue_amount_period
             else:
@@ -342,6 +376,7 @@ class ProjectProgress(models.Model):
     @api.depends('type', 'rel_project_id', 'rel_closing_date')
     def _compute_future_staffing_days(self):
         for rec in self:
+            rec._check_can_write()
             if rec.type == 'internal_production' and rec.rel_project_id and rec.rel_closing_date:
                 # TODO : sur Napta, les périodes de forecast sont découpées à la semaine, sauf pour les fin de mois.
                 # Donc si le jour de clôture est en cours de semaine, alors il manquera des jours !
@@ -356,18 +391,21 @@ class ProjectProgress(models.Model):
     @api.depends('target_project_cost', 'target_project_outsourcing_product_qty')
     def _compute_price_unit(self):
         for rec in self:
+            rec._check_can_write()
             rec.price_unit = ((rec.target_project_cost or 0.0) / rec.target_project_outsourcing_product_qty) if rec.target_project_outsourcing_product_qty else 0.0
 
     # --- reselling_price_unit ---
     @api.depends('target_project_revenue', 'target_project_outsourcing_product_qty')
     def _compute_reselling_price_unit(self):
         for rec in self:
+            rec._check_can_write()
             rec.reselling_price_unit = ((rec.target_project_revenue or 0.0) / rec.target_project_outsourcing_product_qty) if rec.target_project_outsourcing_product_qty else 0.0
 
     # --- purchase_period_amount ---
     @api.depends('outsourcing_link_id', 'rel_project_id', 'rel_closing_date', 'accounting_closing_id.previous_closing')
     def _compute_purchase_period_amount(self):
         for rec in self:
+            rec._check_can_write()
             if not rec.outsourcing_link_id:
                 rec.purchase_period_amount = 0.0
                 continue
@@ -389,16 +427,19 @@ class ProjectProgress(models.Model):
     @api.depends('previous_progress_id.cca_balance')
     def _compute_cca_previous_balance(self):
         for rec in self:
+            rec._check_can_write()
             rec.cca_previous_balance = rec.previous_progress_id.cca_balance if rec.previous_progress_id else 0.0
 
     @api.depends('previous_progress_id.fnp_balance')
     def _compute_fnp_previous_balance(self):
         for rec in self:
+            rec._check_can_write()
             rec.fnp_previous_balance = rec.previous_progress_id.fnp_balance if rec.previous_progress_id else 0.0
 
     @api.depends('progress_cost_amount', 'rel_closing_date', 'outsourcing_link_id')
     def _compute_provisions_balances(self):
         for rec in self:
+            rec._check_can_write()
             if not rec.outsourcing_link_id:
                 rec.cca_balance = 0.0
                 rec.fnp_balance = 0.0
@@ -425,11 +466,13 @@ class ProjectProgress(models.Model):
     @api.depends('cca_balance', 'cca_previous_balance')
     def _compute_cca_period_amount(self):
         for rec in self:
+            rec._check_can_write()
             rec.cca_period_amount = rec.cca_balance - rec.cca_previous_balance
 
     @api.depends('fnp_balance', 'fnp_previous_balance')
     def _compute_fnp_period_amount(self):
         for rec in self:
+            rec._check_can_write()
             rec.fnp_period_amount = rec.fnp_balance - rec.fnp_previous_balance
 
     # ===================================================================
