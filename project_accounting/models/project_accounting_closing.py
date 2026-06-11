@@ -1,3 +1,4 @@
+from dateutil import relativedelta
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 import logging
@@ -36,13 +37,16 @@ class projectAccountingClosing(models.Model):
         # sinon, c'est le dernier jour du mois suivant celui de la dernière cloture
         return (last_closing_date + relativedelta(months=2)).replace(day=1) - datetime.timedelta(1)
 
-    @api.constrains('closing_date', 'company_id', 'is_validated')
+    @api.constrains('closing_date', 'company_id')
     def _check_closing_date(self):
         for rec in self:
             accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id)], order="closing_date desc")
             if accounting_closing_ids[0].id != rec.id:
                 raise ValidationError(_("Il n'est pas possible de saisir une date de clôture antérieure à la dernière cloture enregistrée pour ce projet."))
-
+    
+    @api.constrains('closing_date', 'company_id', 'is_validated')
+    def _check_accounting_lock_dates(self):
+        for rec in self:
             # Vérification des dates de verrouillage comptable
             if rec.closing_date:
                 company = rec.company_id
@@ -73,21 +77,63 @@ class projectAccountingClosing(models.Model):
         for rec in closing:
             if rec.project_id:
                 rec.original_stage_id = rec.project_id.stage_id.id
+            
+            # Chez Tasmane, l'entrée dans l'alliance a conduit à basculer à une reconnaissance du CA à l'avancement
+            #   - pour les mois de janvier / février / mars 2026, Denis à fait les clotures habituelles mais a desocké tout le stock chaque mois
+            #   - fin mars 2026, on a créé l'objet project.progress et on l'a instancié pour le T1 2026. Un script a été xecuté pour retomber sur le CA déclaré
+            #   - à partir de la clôture du 31/03/2026, on a mis valuation_from_progress=True et on calcule automatiquement les provisions à parir des project.progress
+            if rec.closing_date and rec.closing_date >= datetime.date(2026, 3, 1) and not rec.is_validated:
+                rec.valuation_from_progress = True
+                ###### Auto-creation of project.progress records
+                rec.create_project_progress()
+
         return closing
 
 
+    def create_project_progress(self):
+                self.ensure_one()
+                # 1. For each outsourcing link
+                for link in self.project_id.project_outsourcing_link_ids:
+                    progress = self.env['project.progress'].search([
+                        ('accounting_closing_id', '=', self.id),
+                        ('outsourcing_link_id', '=', link.id)
+                    ], limit=1)
+                    if not progress:
+                        outsourcing_progress_dic = {
+                            'accounting_closing_id': self.id,
+                            'outsourcing_link_id': link.id,
+                        }
+                        _logger.info("Creating project progress : %s " % str(outsourcing_progress_dic))
+                        new_progress_outsourcing = self.env['project.progress'].create(outsourcing_progress_dic)
+                        # Après le create, previous_progress_id est résolu.
+                        # Pour le type 'autre', l'écriture à 0 déclenche _inverse_qty_period qui positionne
+                        # outsourcing_product_qty = previous.outsourcing_product_qty + 0
+                        # => l'avancement cumulé est repris de la période précédente.
+                        # Pour le type S/T, on laisse à 0 par défaut pour forcer la saisie du nouvel avancement.
+                        if link.link_type == 'outsourcing':
+                            new_progress_outsourcing.outsourcing_product_qty_period = 0.0
+                
+                # 2. For internal production
+                napta_id = getattr(self.project_id, 'napta_id', False)
+                if napta_id or self.project_id.company_part_amount_current != 0.0:
+                    _logger.info("XXXXXX Creating project progress for internal production napta_id=%s, company_part_amount_current=%s" % (napta_id, self.project_id.company_part_amount_current))
+                    internal_progress = self.env['project.progress'].search([
+                        ('accounting_closing_id', '=', self.id),
+                        ('outsourcing_link_id', '=', False)
+                    ], limit=1)
+                    if not internal_progress:
+                        internal_progress_dic = {
+                            'accounting_closing_id': self.id,
+                            'outsourcing_link_id': False,
+                        }
+                        _logger.info("Creating project progress : %s " % str(internal_progress_dic))
+                        self.env['project.progress'].create(internal_progress_dic)
+                        
 
     def write(self, vals):
+        self._check_can_write(vals)
         for rec in self :
-            if rec.next_closing :
-                raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
-            if rec.is_validated :
-                for val_key in vals.keys():
-                    if val_key not in ['is_validated', 'rel_project_stage_id', 'rel_project_user_id', 'rel_project_manager_user_id', 'name']:
-                    #il faut pouvoir écrire s'il on dévalide et lorsque le projet change de statut (rel_project_stage_id est stocké pour permettre de grouper sur cet attribut)
-                        raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s).\n\nTentative de modification des attributs suivants, dont au moins un n'est pas modifiable une fois la clôture validée : %s." % (rec.name, rec.id, ', '.join(vals.keys()))))
-            
-            # Nouvelle contrainte : on ne peut pas valider la clôture si des avancements ne sont pas validés
+            # On ne peut pas valider la clôture si des avancements ne sont pas validés
             if vals.get('is_validated'):
                 if len(vals) > 1:
                     raise ValidationError(_("Il n'est pas possible de valider la clôture et de modifier d'autres champs en même temps. Veuillez d'abord enregistrer vos modifications, puis valider la clôture."))
@@ -100,6 +146,20 @@ class projectAccountingClosing(models.Model):
                     raise ValidationError(_("Impossible de valider la clôture car les avancements suivants ne sont pas validés : %s") % progress_names)
         super().write(vals)
 
+
+    def _check_can_write(self, vals=None):
+        for rec in self :
+            if rec.next_closing :
+                raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
+            if rec.is_validated :
+                if vals is None:
+                    raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s)." % (rec.name, rec.id)))
+                else :
+                    for val_key in vals.keys():
+                        if val_key not in ['is_validated', 'rel_project_stage_id', 'rel_project_user_id', 'rel_project_manager_user_id', 'name']:
+                        #il faut pouvoir écrire s'il on dévalide et lorsque le projet change de statut (rel_project_stage_id est stocké pour permettre de grouper sur cet attribut)
+                            raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s).\n\nTentative de modification des attributs suivants, dont au moins un n'est pas modifiable une fois la clôture validée : %s." % (rec.name, rec.id, ', '.join(vals.keys()))))
+            
 
     def unlink(self):
         for rec in self:
@@ -126,17 +186,81 @@ class projectAccountingClosing(models.Model):
                 raise ValidationError(_("Clôture %s : le solde FNP ne peut pas être positif (%s).") % (rec.name, rec.fnp_balance))
     """
 
+    def check_provisions_consistency(self):
+        for rec in self :
+            if rec.object_progress_ids :
+                # 1. CA Brut (Somme des variations de revenus)
+                if rec.closing_date > datetime.date(2025, 12, 31):
+                    if abs(rec.gross_revenue - sum(rec.object_progress_ids.mapped('progress_revenue_amount_period'))) > 0.01 :
+                        _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts DE LA PÉRIODE des avancements n'est pas égale au CA brut de la cloture." % (rec.project_id.display_name, rec.closing_date))
+                
+                somme_ca_cumulés_adv = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
+                # Recherche de toutes les clôtures du même projet dont la date est <= à la clôture actuelle
+                all_previous_closings = self.env['project.accounting_closing'].search([
+                    ('project_id', '=', rec.project_id.id),
+                    ('closing_date', '<=', rec.closing_date)
+                ])
+                # Somme des CA bruts de ces clôtures
+                somme_ca_bruts_historiques = sum(all_previous_closings.mapped('gross_revenue'))
+                if abs(somme_ca_cumulés_adv - somme_ca_bruts_historiques) > 0.01 :
+                    _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts CUMULES des avancements n'est pas égale à la somme des CA bruts des clôtures antérieures ou égales à celle-ci.; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, somme_ca_cumulés_adv, somme_ca_bruts_historiques, somme_ca_cumulés_adv-somme_ca_bruts_historiques))
+
+                # 2. FAE / PCA (Logique d'écart cumulé)
+                total_adv_revenue = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
+                cumul_invoiced = rec.get_invoice_period(rec.project_id, [], rec.closing_date)[0]
+                
+                revenue_gap = total_adv_revenue - cumul_invoiced
+                if revenue_gap > 0:
+                    computed_fae_period_amount = revenue_gap - rec.fae_previous_balance
+                    computed_pca_period_amount = -rec.pca_previous_balance
+                else:
+                    computed_pca_period_amount = revenue_gap - rec.pca_previous_balance
+                    computed_fae_period_amount = -rec.fae_previous_balance
+                if rec.closing_date > datetime.date(2025, 12, 31):
+                    if abs(computed_fae_period_amount - rec.fae_period_amount) > 0.01 :
+                        _logger.info("; %s ; %s ; Le montant calculé de FAE est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+                    if abs(computed_pca_period_amount - rec.pca_period_amount) > 0.01 :
+                        _logger.info("; %s ; %s ; Le montant calculé de PCA est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+
+
+                # 3. CCA / FNP (Somme des provisions des lignes)
+                if rec.closing_date > datetime.date(2025, 12, 31):
+                    if abs(rec.cca_balance - sum(rec.object_progress_ids.mapped('cca_balance'))) > 0.01 :
+                        _logger.info("; %s ; %s ; ATTENTION La somme des soldes de CCA des avancements n'est pas égale au solde de CCA de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.cca_balance, sum(rec.object_progress_ids.mapped('cca_balance')), rec.cca_balance-sum(rec.object_progress_ids.mapped('cca_balance'))))
+                    if abs(rec.fnp_balance - sum(rec.object_progress_ids.mapped('fnp_balance'))) > 0.01 :
+                        _logger.info("; %s ; %s ; ATTENTION La somme des soldes de FNP des avancements n'est pas égale au solde de FNP de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance, sum(rec.object_progress_ids.mapped('fnp_balance')), rec.fnp_balance-sum(rec.object_progress_ids.mapped('fnp_balance'))))
+
+
+                # 4. Déstockage total au fur et à mesure
+                if rec.production_balance != 0 :
+                    _logger.info("; %s ; %s ; Le solde de production interne n'est pas nulle. L'algo le mettra à 0 automatiquement sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+                if rec.production_external_balance != 0 :
+                    _logger.info("; %s ; %s ; Le solde de production externe n'est pas nulle. L'algo le mettra à 0 automatiquement sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+                
+                # Contrôle de cohérence sur les achats (uniquement si valorisé par l'avancement)
+                total_progress_purchase = sum(rec.object_progress_ids.mapped('purchase_period_amount'))
+                if abs(rec.purchase_period_amount - total_progress_purchase) > 0.01 :
+                    _logger.info("; %s ; %s ; ATTENTION La somme des achats des avancements n'est pas égale aux achats de la cloture." % (rec.project_id.display_name, rec.closing_date))
+                
+                if rec.fae_balance < 0:
+                    _logger.info("; %s ; %s ; Le solde FAE ne peut pas être négatif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fae_balance))
+                if rec.pca_balance > 0:
+                    _logger.info("; %s ; %s ; Le solde PCA ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.pca_balance))
+                if rec.cca_balance < 0:
+                    _logger.info("; %s ; %s ; Le solde CCA ne peut pas être négatif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.cca_balance))
+                if rec.fnp_balance > 0:
+                    _logger.info("; %s ; %s ; Le solde FNP ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance))
+
 
     @api.depends('project_id', 'project_id.name', 'is_validated', 'closing_date', 'valuation_from_progress', 
                  'object_progress_ids.progress_revenue_amount_period', 'object_progress_ids.purchase_period_amount', 
                  'object_progress_ids.cca_period_amount', 'object_progress_ids.fnp_period_amount')
     def compute(self):
+        #self.check_provisions_consistency()
+        #return
         _logger.info('-- compute project_accounting_closing')
         for rec in self :
-            if rec.is_validated: 
-                # TODO : protection contre les modification du passé lors de l'initialisation des nouveaux calculs par l'ORM (qui ne passe pas par le write surarché ci-desus)
-                # A retirer une fois que l'ORM aura initialisé les nouveaux champs
-                continue
+            rec._check_can_write()
 
             proj_id = rec.project_id #quand on applique la fonction WRITE
             if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)
@@ -155,52 +279,6 @@ class projectAccountingClosing(models.Model):
                 previous_closing = previous_accounting_closing_ids[0]
                 previous_closing_date_filter.append(('date', '>', previous_closing.closing_date))
             rec.previous_closing = previous_closing
-
-
-            # Chez Tasmane, l'entrée dans l'alliance a conduit à basculer à une reconnaissance du CA à l'avancement
-            #   - pour les mois de janvier / février / mars 2026, Denis à fait les clotures habituelles mais a desocké tout le stock chaque mois
-            #   - fin mars 2026, on a créé l'objet project.progress et on l'a instancié pour le T1 2026. Un script a été xecuté pour retomber sur le CA déclaré
-            #   - à partir de la clôture du 31/03/2026, on a mis valuation_from_progress=True et on calcule automatiquement les provisions à parir des project.progress
-            if rec.closing_date and rec.closing_date >= datetime.date(2026, 3, 1) and not rec.is_validated:
-                rec.valuation_from_progress = True
-            
-            # Auto-creation of project.progress records
-            if rec.valuation_from_progress and not(isinstance(rec.id, models.NewId)):
-                # 1. For each outsourcing link
-                for link in proj_id.project_outsourcing_link_ids:
-                    progress = self.env['project.progress'].search([
-                        ('accounting_closing_id', '=', rec.id),
-                        ('outsourcing_link_id', '=', link.id)
-                    ], limit=1)
-                    if not progress:
-                        outsourcing_progress_dic = {
-                            'accounting_closing_id': rec.id,
-                            'outsourcing_link_id': link.id,
-                        }
-                        _logger.info("Creating project progress : %s " % str(outsourcing_progress_dic))
-                        new_progress_outsourcing = self.env['project.progress'].create(outsourcing_progress_dic)
-                        # Après le create, previous_progress_id est résolu.
-                        # Pour le type 'autre', l'écriture à 0 déclenche _inverse_qty_period qui positionne
-                        # outsourcing_product_qty = previous.outsourcing_product_qty + 0
-                        # => l'avancement cumulé est repris de la période précédente.
-                        # Pour le type S/T, on laisse à 0 par défaut pour forcer la saisie du nouvel avancement.
-                        if link.link_type == 'outsourcing':
-                            new_progress_outsourcing.outsourcing_product_qty_period = 0.0
-                
-                # 2. For internal production
-                napta_id = getattr(rec.project_id, 'napta_id', False)
-                if napta_id or rec.project_id.company_part_amount_current != 0.0:
-                    internal_progress = self.env['project.progress'].search([
-                        ('accounting_closing_id', '=', rec.id),
-                        ('outsourcing_link_id', '=', False)
-                    ], limit=1)
-                    if not internal_progress:
-                        internal_progress_dic = {
-                            'accounting_closing_id': rec.id,
-                            'outsourcing_link_id': False,
-                        }
-                        _logger.info("Creating project progress : %s " % str(internal_progress_dic))
-                        self.env['project.progress'].create(internal_progress_dic)
 
 
 
