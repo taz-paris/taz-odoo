@@ -132,6 +132,9 @@ class ProjectProgress(models.Model):
         if self.next_progress:
             raise ValidationError(_("Il n'est pas possible de modifier cet avancement car un avancement postérieur existe."))
         if self.is_validated:
+            #import traceback
+            #_logger.info("".join(traceback.format_stack()))
+            #_logger.info(vals)
             if vals is None:
                 raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est validé."))
             else:
@@ -175,7 +178,6 @@ class ProjectProgress(models.Model):
     # --- next_progress (non stocké, recalculé à chaque accès) ---
     def _compute_next_progress(self):
         for rec in self:
-            rec._check_can_write()
             rec.next_progress = self.env['project.progress'].search([('previous_progress_id', '=', rec.id)], limit=1)
 
     # --- target_project_cost ---

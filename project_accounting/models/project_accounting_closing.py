@@ -152,6 +152,9 @@ class projectAccountingClosing(models.Model):
             if rec.next_closing :
                 raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
             if rec.is_validated :
+                #import traceback
+                #_logger.info("".join(traceback.format_stack()))
+                #_logger.info(vals)
                 if vals is None:
                     raise ValidationError(_("Il n'est pas possible de modifier cette clôture car elle est validée %s (ID = %s)." % (rec.name, rec.id)))
                 else :
@@ -191,7 +194,7 @@ class projectAccountingClosing(models.Model):
             if rec.object_progress_ids :
                 # 1. CA Brut (Somme des variations de revenus)
                 if rec.closing_date > datetime.date(2025, 12, 31):
-                    if abs(rec.gross_revenue - sum(rec.object_progress_ids.mapped('progress_revenue_amount_period'))) > 0.01 :
+                    if abs(rec.gross_revenue - sum(rec.object_progress_ids.mapped('progress_revenue_amount_period'))) > 0.10 :
                         _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts DE LA PÉRIODE des avancements n'est pas égale au CA brut de la cloture." % (rec.project_id.display_name, rec.closing_date))
                 
                 somme_ca_cumulés_adv = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
@@ -202,7 +205,7 @@ class projectAccountingClosing(models.Model):
                 ])
                 # Somme des CA bruts de ces clôtures
                 somme_ca_bruts_historiques = sum(all_previous_closings.mapped('gross_revenue'))
-                if abs(somme_ca_cumulés_adv - somme_ca_bruts_historiques) > 0.01 :
+                if abs(somme_ca_cumulés_adv - somme_ca_bruts_historiques) > 0.10 :
                     _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts CUMULES des avancements n'est pas égale à la somme des CA bruts des clôtures antérieures ou égales à celle-ci.; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, somme_ca_cumulés_adv, somme_ca_bruts_historiques, somme_ca_cumulés_adv-somme_ca_bruts_historiques))
 
                 # 2. FAE / PCA (Logique d'écart cumulé)
@@ -252,13 +255,12 @@ class projectAccountingClosing(models.Model):
                     _logger.info("; %s ; %s ; Le solde FNP ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance))
 
 
-    @api.depends('project_id', 'project_id.name', 'is_validated', 'closing_date', 'valuation_from_progress', 
+    @api.depends('project_id', 'project_id.name', 'closing_date', 'valuation_from_progress', 
                  'object_progress_ids.progress_revenue_amount_period', 'object_progress_ids.purchase_period_amount', 
                  'object_progress_ids.cca_period_amount', 'object_progress_ids.fnp_period_amount')
     def compute(self):
-        #self.check_provisions_consistency()
-        #return
         _logger.info('-- compute project_accounting_closing')
+        self.check_provisions_consistency()
         for rec in self :
             rec._check_can_write()
 
