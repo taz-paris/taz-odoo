@@ -128,15 +128,18 @@ class ProjectProgress(models.Model):
         #       Avant on ne contrôlait que dans write() et certaines valeur on été réécrites alors quel l'objet était déjà validé
         self.ensure_one()
         if self.accounting_closing_id.is_validated:
-            raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est lié à une clôture validée."))
+            import traceback
+            _logger.info("".join(traceback.format_stack()))
+            _logger.info(vals)
+            raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est lié à une clôture validée. project_progress_id=%s" % self.id))
         if self.next_progress:
-            raise ValidationError(_("Il n'est pas possible de modifier cet avancement car un avancement postérieur existe."))
+            raise ValidationError(_("Il n'est pas possible de modifier cet avancement car un avancement postérieur existe. project_progress_id=%s" % self.id))
         if self.is_validated:
             #import traceback
             #_logger.info("".join(traceback.format_stack()))
             #_logger.info(vals)
             if vals is None:
-                raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est validé."))
+                raise ValidationError(_("Il n'est pas possible de modifier cet avancement car il est validé. project_progress_id=%s" % self.id))
             else:
                 for val_key in vals.keys():
                     if val_key not in ['is_validated', 'message_follower_ids', 'message_ids', 'activity_ids', 'message_attachment_ids', 'message_main_attachment_id']:

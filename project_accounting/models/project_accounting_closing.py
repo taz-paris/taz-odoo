@@ -259,8 +259,9 @@ class projectAccountingClosing(models.Model):
                  'object_progress_ids.progress_revenue_amount_period', 'object_progress_ids.purchase_period_amount', 
                  'object_progress_ids.cca_period_amount', 'object_progress_ids.fnp_period_amount')
     def compute(self):
+        #self.check_provisions_consistency()
+        #return
         _logger.info('-- compute project_accounting_closing')
-        self.check_provisions_consistency()
         for rec in self :
             rec._check_can_write()
 
@@ -280,7 +281,14 @@ class projectAccountingClosing(models.Model):
             if len(previous_accounting_closing_ids) > 0 :
                 previous_closing = previous_accounting_closing_ids[0]
                 previous_closing_date_filter.append(('date', '>', previous_closing.closing_date))
-            rec.previous_closing = previous_closing
+            if rec.previous_closing != previous_closing:
+                if previous_closing == None and rec.previous_closing.id == False :
+                    pass
+                else :
+                    _logger.info(rec.previous_closing)
+                    _logger.info(previous_closing)
+                    _logger.info("===== Nouvelle valeur poure previous_closing ID_closing=%s" % rec.id)
+                    rec.previous_closing = previous_closing
 
 
 
@@ -350,6 +358,7 @@ class projectAccountingClosing(models.Model):
             else:
                 rec.gross_revenue = rec.invoice_period_amount + rec.pca_period_amount + rec.fae_period_amount
                 rec.purchase_period_mismatch = False
+
 
             rec.pca_balance = rec.pca_previous_balance + rec.pca_period_amount
             rec.fae_balance = rec.fae_previous_balance + rec.fae_period_amount
