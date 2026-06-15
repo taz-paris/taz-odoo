@@ -127,6 +127,8 @@ class ProjectProgress(models.Model):
         # On est obligé d'appeler cette fonction dans chaque fonction @depends car elles bypass write()
         #       Avant on ne contrôlait que dans write() et certaines valeur on été réécrites alors quel l'objet était déjà validé
         self.ensure_one()
+        if hasattr(models, 'NewId') and isinstance(self.id, models.NewId):
+            return
         if self.accounting_closing_id.is_validated:
             import traceback
             _logger.info("".join(traceback.format_stack()))
@@ -181,7 +183,11 @@ class ProjectProgress(models.Model):
     # --- next_progress (non stocké, recalculé à chaque accès) ---
     def _compute_next_progress(self):
         for rec in self:
-            rec.next_progress = self.env['project.progress'].search([('previous_progress_id', '=', rec.id)], limit=1)
+            real_id = rec._origin.id if hasattr(rec, '_origin') and rec._origin else rec.id
+            if real_id and not isinstance(real_id, models.NewId):
+                rec.next_progress = self.env['project.progress'].search([('previous_progress_id', '=', real_id)], limit=1)
+            else:
+                rec.next_progress = False
 
     # --- target_project_cost ---
     # Dépend uniquement de type et outsourcing_link_id (positionnés à la création).
