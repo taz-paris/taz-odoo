@@ -1091,7 +1091,12 @@ class projectAccountProject(models.Model):
         #_logger.info('---- compute_margin_graph')
 
         for rec in self:
-            lines = self.env['account.analytic.line'].search([('project_id', '=', rec.id), '|', ('category', '=', 'project_employee_validated'), ('category', '=', 'project_forecast')], order="date asc, category")
+            from odoo import models
+            real_id = rec._origin.id if hasattr(rec, '_origin') and rec._origin else rec.id
+            if real_id and not isinstance(real_id, models.NewId):
+                lines = self.env['account.analytic.line'].search([('project_id', '=', real_id), '|', ('category', '=', 'project_employee_validated'), ('category', '=', 'project_forecast')], order="date asc, category")
+            else:
+                lines = self.env['account.analytic.line'].browse()
             real_lines_reversed = lines.filtered(lambda x: x.category == 'project_employee_validated').sorted(key=lambda r: r.date, reverse=True)
             if len(real_lines_reversed) > 0:
                 date_last_real = real_lines_reversed[0].date
