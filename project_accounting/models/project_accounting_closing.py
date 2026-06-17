@@ -29,7 +29,12 @@ class projectAccountingClosing(models.Model):
         if not project_id:
             project_id = self._get_default_project_id()
 
-        accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', project_id)], order="closing_date desc")
+        real_project_id = project_id._origin.id if hasattr(project_id, '_origin') and project_id._origin else getattr(project_id, 'id', project_id)
+        from odoo import models
+        if isinstance(real_project_id, models.NewId) or not real_project_id:
+            accounting_closing_ids = self.env['project.accounting_closing'].browse()
+        else:
+            accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', real_project_id)], order="closing_date desc")
         if len(accounting_closing_ids) == 0 : 
             # si c'est la première cloture du projet, on met sa date de cloture par défaut au dernier jour du mois précédent le mois courant
             return datetime.date.today().replace(day=1) - datetime.timedelta(1)
@@ -40,6 +45,9 @@ class projectAccountingClosing(models.Model):
     @api.constrains('closing_date', 'company_id')
     def _check_closing_date(self):
         for rec in self:
+            from odoo import models
+            if isinstance(rec.id, models.NewId) or (hasattr(rec.project_id, 'id') and isinstance(rec.project_id.id, models.NewId)):
+                continue
             accounting_closing_ids = self.env['project.accounting_closing'].search([('project_id', '=', rec.project_id.id)], order="closing_date desc")
             if accounting_closing_ids[0].id != rec.id:
                 raise ValidationError(_("Il n'est pas possible de saisir une date de clôture antérieure à la dernière cloture enregistrée pour ce projet."))
@@ -149,6 +157,9 @@ class projectAccountingClosing(models.Model):
 
     def _check_can_write(self, vals=None):
         for rec in self :
+            from odoo import models
+            if hasattr(models, 'NewId') and isinstance(rec.id, models.NewId):
+                continue
             if rec.next_closing :
                 raise ValidationError(_("Il n'est pas possible de modifier cette clôture car une clôture postérieure existe pour ce projet."))
             if rec.is_validated :
@@ -266,15 +277,19 @@ class projectAccountingClosing(models.Model):
             rec._check_can_write()
 
             proj_id = rec.project_id #quand on applique la fonction WRITE
-            if '<NewId origin=' in str(proj_id) : #pour avoir la cloture précédente et les valeur de facturation du mois lorsque l'on modifie n'importe quel attribut de la popup (c'est à dire quand on est en mon onchange)
-                proj_id = rec._origin.project_id
-            if not proj_id : #pour avoir les valeurs de facturation du mois dès l'ouverture de la popup de création d'une nouvelle cloture
+            from odoo import models
+            real_proj_id = proj_id._origin.id if hasattr(proj_id, '_origin') and proj_id._origin else proj_id.id
+            if not real_proj_id or isinstance(real_proj_id, models.NewId) : #pour avoir les valeurs de facturation du mois dès l'ouverture de la popup de création d'une nouvelle cloture
                 proj_ids = rec.env['project.project'].search([('id', '=', rec._get_default_project_id())])
                 if len(proj_ids) :
                     proj_id = proj_ids[0]
+                    real_proj_id = proj_id.id
 
             # Il est important que la détermination de previous_closing soit fait avant la génération des Avancements
-            previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', proj_id.id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
+            if real_proj_id and not isinstance(real_proj_id, models.NewId):
+                previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', real_proj_id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
+            else:
+                previous_accounting_closing_ids = rec.env['project.accounting_closing'].browse()
             previous_closing = None
             previous_closing_date_filter = []
 
@@ -389,8 +404,13 @@ class projectAccountingClosing(models.Model):
 
             rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
 
-            next_closing = self.env['project.accounting_closing'].search([('previous_closing', '=', rec.id)], limit=1)
-            if next_closing :
+            from odoo import models
+            real_id = rec._origin.id if hasattr(rec, '_origin') and rec._origin else rec.id
+            if real_id and not isinstance(real_id, models.NewId):
+                next_closing = self.env['project.accounting_closing'].search([('previous_closing', '=', real_id)], limit=1)
+            else:
+                next_closing = self.env['project.accounting_closing'].browse()
+            if next_closing and not isinstance(rec.id, models.NewId):
                 next_closing.compute()
 
 
