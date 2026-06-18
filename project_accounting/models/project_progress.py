@@ -248,6 +248,8 @@ class ProjectProgress(models.Model):
     # Cette fonction est executée une seule fois à la création.
     # Pas de dépendance sur outsourcing_link_id.order_sum_purchase_order_product_qty pour éviter l'écrasement
     # des valeurs lorsque les données du BCF changent a posteriori.
+    # En revanche il est indispensable de dépendre de outsourcing_link_id sinon la valeur n'est pas initialisée
+    @api.depends('type', 'outsourcing_link_id')
     def _compute_target_project_outsourcing_product_qty(self):
         for rec in self:
             rec._check_can_write()
