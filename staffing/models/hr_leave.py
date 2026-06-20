@@ -41,43 +41,33 @@ class staffingLeave(models.Model):
             if old_state == "validate":
                 #TODO : avec cette fonction on met bien à jour les timesheet, mais on ne corrige pas les 'resource.calendar.leaves' associés au congés
                 if any(x in ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to', 'date_from', 'date_to', 'number_of_days', 'request_date_from_period', 'request_date_to_period', 'state'] for x in vals.keys()):
-                    _logger.info("Changement sur le congés conduisant à supprimer et recréer les timesheets liées. %s" % str(vals))
-                    holidays = self.filtered(
-                        lambda l: l.holiday_status_id.timesheet_project_id and
-                        l.holiday_status_id.timesheet_task_id and
-                        l.holiday_status_id.timesheet_project_id.sudo().company_id == (l.holiday_status_id.company_id or self.env.company))
+                    _logger.info("Changement sur le congés (souvent issu du connecteur Napta) conduisant à supprimer et recréer les timesheets liées. %s" % str(vals))
+                    holidays = self.filtered(lambda l: l.holiday_status_id.timesheet_generate)
 
-                    # Unlink previous timesheets to avoid doublon
-                    _logger.info("====== Change on hr.leave : Unlink previous timesheets to avoid doublon")
-                    _logger.info(holidays)
-                    _logger.info(holidays.sudo().timesheet_ids)
-
-                    old_timesheets = holidays.sudo().timesheet_ids
-                    if old_timesheets:
-                        old_timesheets.holiday_id = False
-                        _logger.info("PREPARNG old timesheet to be unlinked %s" % str(old_timesheets.ids))
-                        old_timesheets.unlink()
-                        _logger.info("old timesheet unlinked %s" % str(old_timesheets.ids))
-
-                    # create the timesheet on the vacation project
-                    holidays._generate_timesheets()
+                    if holidays:
+                        _logger.info("====== Change on hr.leave : Regenerating timesheets")
+                        _logger.info(holidays)
+                        
+                        # Odoo's native _generate_timesheets already handles unlinking old timesheets
+                        holidays._generate_timesheets()
+                        
+                        # Ensure no holes are left if the duration was reduced over a public holiday
+                        holidays._check_missing_global_leave_timesheets()
 
                     # update timesheets of all overlapped leaves
-                    overlapped_leaves =  self.env['hr.leave'].search([
-                                                ('id', '!=', self.id),
-                                                ('employee_id', '=', self.employee_id.id),
-                                                ('state', '=', "validate"),
-                                                ('date_from', '<=', max(old_values[self.id]['date_to'], self.date_to)),
-                                                ('date_to', '>=', min(old_values[self.id]['date_from'], self.date_from)),
-                                                ], order="request_date_from asc")
-                    for ol in overlapped_leaves :
-                        _logger.info(self.env.context.get('overlapped_already_updated', ''))
-                        overlapped_already_updated_str = self.env.context.get('overlapped_already_updated', '')
-                        if not(overlapped_already_updated_str):
-                            overlapped_already_updated_str = ""
-                        if str(ol.id) not in overlapped_already_updated_str.split(',') :
-                            ol.with_context(overlapped_already_updated=overlapped_already_updated_str+str(self.id)+',').number_of_days = ol.number_of_days 
-
+                    overlapped_leaves = self.env['hr.leave'].search([
+                        ('id', '!=', self.id),
+                        ('employee_id', '=', self.employee_id.id),
+                        ('state', '=', "validate"),
+                        ('date_from', '<=', max(old_values[self.id]['date_to'], self.date_to)),
+                        ('date_to', '>=', min(old_values[self.id]['date_from'], self.date_from)),
+                    ])
+                    
+                    overlapped_timesheet_leaves = overlapped_leaves.filtered(lambda l: l.holiday_status_id.timesheet_generate)
+                    if overlapped_timesheet_leaves:
+                        _logger.info("====== Change on hr.leave : Regenerating timesheets for %s overlapped leaves", len(overlapped_timesheet_leaves))
+                        overlapped_timesheet_leaves._generate_timesheets()
+                        overlapped_timesheet_leaves._check_missing_global_leave_timesheets()
         return res
 
 
@@ -93,12 +83,11 @@ class staffingLeave(models.Model):
 
         res = super().unlink()
 
-        for ol in overlapped_leaves :
-            _logger.info(self.env.context.get('overlapped_already_updated', []))
-            current_context = self.env.context.get('overlapped_already_updated', []) or []
-            if ol.id not in current_context :
-                ol.with_context(overlapped_already_updated=current_context.append(self.id)).number_of_days = ol.number_of_days 
-
+        overlapped_timesheet_leaves = overlapped_leaves.filtered(lambda l: l.holiday_status_id.timesheet_generate)
+        if overlapped_timesheet_leaves:
+            _logger.info("====== Change on hr.leave : Regenerating timesheets for %s overlapped leaves after unlink", len(overlapped_timesheet_leaves))
+            overlapped_timesheet_leaves._generate_timesheets()
+            overlapped_timesheet_leaves._check_missing_global_leave_timesheets()
         return res
 
 
@@ -120,6 +109,12 @@ class staffingLeave(models.Model):
             Else, internal_project_id and leave_timesheet_task_id are used.
             The generated timesheet will be attached to this project/task.
         """
+        # Unlink previous timesheets to avoid doublon. Moved to the top so that get_leave_timesheets_by_day doesn't see them and computes the full vals_list properly.
+        old_timesheets = self.env["account.analytic.line"].sudo().search([('project_id', '!=', False), ('holiday_id', 'in', self.ids)])
+        if old_timesheets:
+            old_timesheets.holiday_id = False
+            old_timesheets.unlink()
+
         vals_list = []
         leave_ids = []
         calendar_leaves_data = self.env['resource.calendar.leaves']._read_group([('holiday_id', 'in', self.ids)], ['holiday_id'], ['id:array_agg'])
@@ -161,12 +156,6 @@ class staffingLeave(models.Model):
 
             else : 
                 raise ValidationError(_("Company timesheet encoding uom should be either Hours or Days."))
-
-        # Unlink previous timesheets to avoid doublon (shouldn't happen on the interface but meh). Necessary when the function is called to regenerate timesheets.
-        old_timesheets = self.env["account.analytic.line"].sudo().search([('project_id', '!=', False), ('holiday_id', 'in', leave_ids)])
-        if old_timesheets:
-            old_timesheets.holiday_id = False
-            old_timesheets.unlink()
 
         self.env['account.analytic.line'].sudo().create(vals_list)
 
