@@ -201,11 +201,12 @@ class projectAccountingClosing(models.Model):
     """
 
     def check_provisions_consistency(self):
+        #_logger.info('-- compute check provision consistency')
         for rec in self :
             if rec.object_progress_ids :
                 # 1. CA Brut (Somme des variations de revenus)
                 if rec.closing_date > datetime.date(2025, 12, 31):
-                    if abs(rec.gross_revenue - sum(rec.object_progress_ids.mapped('progress_revenue_amount_period'))) > 0.10 :
+                    if abs(rec.gross_revenue - sum(rec.object_progress_ids.mapped('progress_revenue_amount_period'))) >= 0.01 :
                         _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts DE LA PÉRIODE des avancements n'est pas égale au CA brut de la cloture." % (rec.project_id.display_name, rec.closing_date))
                 
                 somme_ca_cumulés_adv = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
@@ -216,7 +217,7 @@ class projectAccountingClosing(models.Model):
                 ])
                 # Somme des CA bruts de ces clôtures
                 somme_ca_bruts_historiques = sum(all_previous_closings.mapped('gross_revenue'))
-                if abs(somme_ca_cumulés_adv - somme_ca_bruts_historiques) > 0.10 :
+                if abs(somme_ca_cumulés_adv - somme_ca_bruts_historiques) >= 0.01 :
                     _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts CUMULES des avancements n'est pas égale à la somme des CA bruts des clôtures antérieures ou égales à celle-ci.; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, somme_ca_cumulés_adv, somme_ca_bruts_historiques, somme_ca_cumulés_adv-somme_ca_bruts_historiques))
 
                 # 2. FAE / PCA (Logique d'écart cumulé)
@@ -231,17 +232,17 @@ class projectAccountingClosing(models.Model):
                     computed_pca_period_amount = revenue_gap - rec.pca_previous_balance
                     computed_fae_period_amount = -rec.fae_previous_balance
                 if rec.closing_date > datetime.date(2025, 12, 31):
-                    if abs(computed_fae_period_amount - rec.fae_period_amount) > 0.01 :
+                    if abs(computed_fae_period_amount - rec.fae_period_amount) >= 0.01 :
                         _logger.info("; %s ; %s ; Le montant calculé de FAE est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
-                    if abs(computed_pca_period_amount - rec.pca_period_amount) > 0.01 :
+                    if abs(computed_pca_period_amount - rec.pca_period_amount) >= 0.01 :
                         _logger.info("; %s ; %s ; Le montant calculé de PCA est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
 
 
                 # 3. CCA / FNP (Somme des provisions des lignes)
                 if rec.closing_date > datetime.date(2025, 12, 31):
-                    if abs(rec.cca_balance - sum(rec.object_progress_ids.mapped('cca_balance'))) > 0.01 :
+                    if abs(rec.cca_balance - sum(rec.object_progress_ids.mapped('cca_balance'))) >= 0.01 :
                         _logger.info("; %s ; %s ; ATTENTION La somme des soldes de CCA des avancements n'est pas égale au solde de CCA de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.cca_balance, sum(rec.object_progress_ids.mapped('cca_balance')), rec.cca_balance-sum(rec.object_progress_ids.mapped('cca_balance'))))
-                    if abs(rec.fnp_balance - sum(rec.object_progress_ids.mapped('fnp_balance'))) > 0.01 :
+                    if abs(rec.fnp_balance - sum(rec.object_progress_ids.mapped('fnp_balance'))) >= 0.01 :
                         _logger.info("; %s ; %s ; ATTENTION La somme des soldes de FNP des avancements n'est pas égale au solde de FNP de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance, sum(rec.object_progress_ids.mapped('fnp_balance')), rec.fnp_balance-sum(rec.object_progress_ids.mapped('fnp_balance'))))
 
 
@@ -253,7 +254,7 @@ class projectAccountingClosing(models.Model):
                 
                 # Contrôle de cohérence sur les achats (uniquement si valorisé par l'avancement)
                 total_progress_purchase = sum(rec.object_progress_ids.mapped('purchase_period_amount'))
-                if abs(rec.purchase_period_amount - total_progress_purchase) > 0.01 :
+                if abs(rec.purchase_period_amount - total_progress_purchase) >= 0.01 :
                     _logger.info("; %s ; %s ; ATTENTION La somme des achats des avancements n'est pas égale aux achats de la cloture." % (rec.project_id.display_name, rec.closing_date))
                 
                 if rec.fae_balance < 0:
