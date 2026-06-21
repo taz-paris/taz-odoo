@@ -51,32 +51,32 @@ class ProjectProgress(models.Model):
     target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='_compute_target_project_cost', inverse='_inverse_target_project_cost', store=True, readonly=False)
     target_project_revenue = fields.Monetary(string="CA total projeté", compute='_compute_target_project_revenue', store=True)
     target_project_margin = fields.Monetary(string="Marge projetée en €", compute='_compute_target_project_margin', store=True)
-    target_project_margin_rate = fields.Float(string="Marge projetée en %", aggregator=None, compute='_compute_target_project_margin_rate', store=True, digits=(16, 6))
+    target_project_margin_rate = fields.Float(string="Marge projetée en %", aggregator=None, compute='_compute_target_project_margin_rate', store=True, digits=(16, 10))
 
     # --- Quantités S/T ---
-    target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées", compute='_compute_target_project_outsourcing_product_qty', store=True, digits=(16, 4))
-    outsourcing_product_qty = fields.Float(string="Nb unités produites", compute='_compute_outsourcing_product_qty', inverse='_inverse_outsourcing_product_qty', store=True, readonly=False, digits=(16, 4))
-    outsourcing_product_qty_period = fields.Float(string="Nb unités produites période", compute='_compute_qty_period', inverse='_inverse_qty_period', store=True, readonly=False, digits=(16, 4))
+    target_project_outsourcing_product_qty = fields.Float(string="Nb unités commandées", compute='_compute_target_project_outsourcing_product_qty', store=True, digits=(16, 10))
+    outsourcing_product_qty = fields.Float(string="Nb unités produites", compute='_compute_outsourcing_product_qty', inverse='_inverse_outsourcing_product_qty', store=True, readonly=False, digits=(16, 10))
+    outsourcing_product_qty_period = fields.Float(string="Nb unités produites période", compute='_compute_qty_period', inverse='_inverse_qty_period', store=True, readonly=False, digits=(16, 10))
 
     # --- Avancement cumulé ---
     progress_cost_amount = fields.Monetary(string="Coût de revient", compute='_compute_progress_cost_amount', store=True)
-    progress_revenue_rate = fields.Float(string="CA cumulé en %", aggregator=False, compute='_compute_progress_revenue_rate', inverse='_inverse_progress_revenue_rate', store=True, readonly=False, digits=(16, 6))
+    progress_revenue_rate = fields.Float(string="CA cumulé en %", aggregator=False, compute='_compute_progress_revenue_rate', inverse='_inverse_progress_revenue_rate', store=True, readonly=False, digits=(16, 10))
     progress_revenue_amount = fields.Monetary(string="CA cumulé en €", 
                                              compute='_compute_progress_revenue_amount', inverse='_inverse_revenue', store=True, readonly=False)
     progress_revenue_margin = fields.Monetary(string="Marge en €", 
                                              compute='_compute_progress_revenue_margin', store=True)
     progress_revenue_margin_rate = fields.Float(string="Marge en %", aggregator=False,
-                                             compute='_compute_progress_revenue_margin_rate', store=True, digits=(16, 6))
+                                             compute='_compute_progress_revenue_margin_rate', store=True, digits=(16, 10))
     # --- Avancement période ---
     progress_cost_amount_period = fields.Monetary(string="Coût de revient période", 
                                                  compute='_compute_progress_cost_amount_period', store=True)
-    progress_revenue_rate_period = fields.Float(string="CA période en % du prix de vente", aggregator=False, compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False, digits=(16, 6))
+    progress_revenue_rate_period = fields.Float(string="CA période en % du prix de vente", aggregator=False, compute='_compute_progress_revenue_rate_period', inverse='_inverse_progress_revenue_rate_period', store=True, readonly=False, digits=(16, 10))
     progress_revenue_amount_period = fields.Monetary(string="CA période en €", 
                                                     compute='_compute_progress_revenue_amount_period', store=True)
     progress_revenue_margin_period = fields.Monetary(string="Marge période en €", 
                                                     compute='_compute_progress_revenue_margin_period', store=True)
     progress_revenue_margin_rate_period = fields.Float(string="Marge période en %", aggregator=False,
-                                                    compute='_compute_progress_revenue_margin_rate_period', store=True, digits=(16, 6))
+                                                    compute='_compute_progress_revenue_margin_rate_period', store=True, digits=(16, 10))
 
     # --- Provisions ---
     purchase_period_amount = fields.Monetary('Achats HT sur la periode', compute='_compute_purchase_period_amount', store=True)
