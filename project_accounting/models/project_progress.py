@@ -15,7 +15,7 @@ class ProjectProgress(models.Model):
     _order = 'rel_closing_date desc, type desc, id asc'
 
     _sql_constraints = [
-        ('unique_closing_link', 'UNIQUE(accounting_closing_id, outsourcing_link_id)', 
+        ('unique_closing_link', 'UNIQUE NULLS NOT DISTINCT (accounting_closing_id, outsourcing_link_id)', 
          'Il ne peut y avoir qu\'un seul avancement par couple clôture / lien de sous-traitance.')
     ]
 
