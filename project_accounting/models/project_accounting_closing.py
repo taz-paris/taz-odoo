@@ -267,11 +267,11 @@ class projectAccountingClosing(models.Model):
                     _logger.info("; %s ; %s ; Le solde FNP ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance))
 
 
-    @api.depends('project_id', 'project_id.name', 'closing_date', 'valuation_from_progress', 
+    @api.depends('project_id', 'closing_date', 'valuation_from_progress', 
                  'object_progress_ids.progress_revenue_amount_period', 'object_progress_ids.purchase_period_amount', 
                  'object_progress_ids.cca_period_amount', 'object_progress_ids.fnp_period_amount')
     def compute(self):
-        #self.check_provisions_consistency()
+        self.check_provisions_consistency()
         #return
         _logger.info('-- compute project_accounting_closing')
         for rec in self :
@@ -403,8 +403,6 @@ class projectAccountingClosing(models.Model):
             if rec.internal_revenue :
                 rec.internal_margin_rate = rec.internal_margin_amount / rec.internal_revenue * 100
 
-            rec.name  = "%s - %s" % (proj_id.name, rec.closing_date)
-
             from odoo import models
             real_id = rec._origin.id if hasattr(rec, '_origin') and rec._origin else rec.id
             if real_id and not isinstance(real_id, models.NewId):
@@ -414,6 +412,11 @@ class projectAccountingClosing(models.Model):
             if next_closing and not isinstance(rec.id, models.NewId):
                 next_closing.compute()
 
+
+    @api.depends('project_id.name', 'closing_date')
+    def compute_name(self):
+        for rec in self :
+            rec.name  = "%s - %s" % (rec.project_id.name, rec.closing_date)
 
 
     def get_invoice_period(self, proj_id, previous_closing_date_filter, closing_date):
@@ -507,7 +510,7 @@ class projectAccountingClosing(models.Model):
         else : 
             raise ValidationError(_("Ce projet n'est lié à aucun identifiant Napta : impossible d'ouvrir sa page Napta."))
 
-    name = fields.Char('Libellé', compute=compute, store=True)
+    name = fields.Char('Libellé', compute=compute_name, store=True)
     is_validated = fields.Boolean('Validée', tracking=True)
     valuation_from_progress = fields.Boolean('Valorisation par l’avancement', help="Si coché, les provisions et les déstockages sont calculés automatiquement à partir des objets d’avancement.")
     comment = fields.Text("Commentaire")
