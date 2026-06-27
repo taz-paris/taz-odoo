@@ -269,18 +269,25 @@ class ProjectProgress(models.Model):
             rec.progress_revenue_rate = (rec.outsourcing_product_qty / target_qty) if target_qty else 0.0
 
     # --- outsourcing_product_qty_period ---
-    @api.depends('outsourcing_product_qty', 'previous_progress_id.outsourcing_product_qty')
+    @api.depends('progress_revenue_rate_period', 'target_project_outsourcing_product_qty')
     def _compute_qty_period(self):
         for rec in self:
             rec._check_can_write()
-            rec.outsourcing_product_qty_period = (rec.outsourcing_product_qty or 0.0) - (rec.previous_progress_id.outsourcing_product_qty or 0.0)
+            rec.outsourcing_product_qty_period = (rec.progress_revenue_rate_period or 0.0) * (rec.target_project_outsourcing_product_qty or 0.0)
 
     def _inverse_qty_period(self):
         for rec in self:
             rec._check_can_write()
-            new_qty = (rec.previous_progress_id.outsourcing_product_qty or 0.0) + (rec.outsourcing_product_qty_period or 0.0)
+            # 1. On déduit le taux d'avancement de la période par rapport au budget cible actuel (en Jours/Unités)
             target_qty = rec.target_project_outsourcing_product_qty or 0.0
-            rec.progress_revenue_rate = (new_qty / target_qty) if target_qty else 0.0
+            rate_period = (rec.outsourcing_product_qty_period / target_qty) if target_qty else 0.0
+            
+            # 2. On traduit ce taux en Euros produits sur la période
+            period_amount = (rec.target_project_revenue or 0.0) * rate_period
+            
+            # 3. On ajoute ce montant au cumul précédent
+            rec.progress_revenue_amount = (rec.rel_previous_progress_revenue_amount or 0.0) + period_amount
+            # La cascade Odoo prendra le relais pour mettre à jour progress_revenue_rate et outsourcing_product_qty
 
     # --- progress_cost_amount ---
     @api.depends('type', 'rel_project_id', 'rel_closing_date',
@@ -344,16 +351,24 @@ class ProjectProgress(models.Model):
                 rec.progress_revenue_margin_rate = 0.0
     
     # --- progress_revenue_rate_period ---
-    @api.depends('progress_revenue_rate', 'rel_previous_progress_revenue_rate')
+    @api.depends('progress_revenue_amount_period', 'target_project_revenue')
     def _compute_progress_revenue_rate_period(self):
         for rec in self:
             rec._check_can_write()
-            rec.progress_revenue_rate_period = (rec.progress_revenue_rate or 0.0) - (rec.rel_previous_progress_revenue_rate or 0.0)
+            if rec.target_project_revenue:
+                rec.progress_revenue_rate_period = (rec.progress_revenue_amount_period or 0.0) / rec.target_project_revenue
+            else:
+                rec.progress_revenue_rate_period = 0.0
 
     def _inverse_progress_revenue_rate_period(self):
         for rec in self:
             rec._check_can_write()
-            rec.progress_revenue_rate = (rec.rel_previous_progress_revenue_rate or 0.0) + (rec.progress_revenue_rate_period or 0.0)
+            # L'utilisateur indique avoir produit X% du budget sur cette période. 
+            # On le convertit en Euros, puis on l'ajoute au montant cumulé précédent.
+            period_amount = (rec.target_project_revenue or 0.0) * (rec.progress_revenue_rate_period or 0.0)
+            rec.progress_revenue_amount = (rec.rel_previous_progress_revenue_amount or 0.0) + period_amount
+            # En modifiant progress_revenue_amount, Odoo déclenchera tout seul '_inverse_revenue' 
+            # qui mettra à jour le taux d'avancement cumulé (progress_revenue_rate).
 
     # --- progress_cost_amount_period ---
     @api.depends('progress_cost_amount', 'rel_previous_progress_cost_amount')
