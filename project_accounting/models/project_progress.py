@@ -33,6 +33,8 @@ class ProjectProgress(models.Model):
     company_id = fields.Many2one('res.company', string='Société', required=True, related="accounting_closing_id.company_id")
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Devise", readonly=True)
 
+    auto_compute_provisions = fields.Boolean('Calcul FNP/CCA auto', default=True, help="Si coché, les CCA et FNP de cet avancement sont calculés automatiquement.")
+
     # --- Classification ---
     type = fields.Selection([('internal_production', 'Production interne')] + OUTSOURCING_LINK_TYPES, 
                             string="Type", compute='_compute_type', store=True)
@@ -464,9 +466,11 @@ class ProjectProgress(models.Model):
             rec._check_can_write()
             rec.fnp_previous_balance = rec.previous_progress_id.fnp_balance if rec.previous_progress_id else 0.0
 
-    @api.depends('progress_cost_amount', 'rel_closing_date', 'outsourcing_link_id')
+    @api.depends('progress_cost_amount', 'rel_closing_date', 'outsourcing_link_id', 'auto_compute_provisions')
     def _compute_provisions_balances(self):
         for rec in self:
+            if not rec.auto_compute_provisions:
+                return
             rec._check_can_write()
             if not rec.outsourcing_link_id:
                 rec.cca_balance = 0.0
@@ -551,23 +555,23 @@ class ProjectProgress(models.Model):
         _logger.info("================= force_refresh")
         for rec in self:
             #mise à jour manuelle du CA cible, notamment lorsque Margaux/le DM crée les BCC après la génération initiale de l'avancement
+            rec._compute_progress_cost_amount()
+            rec._compute_target_project_cost()
+            rec._compute_target_project_outsourcing_product_qty()
+            rec._compute_outsourcing_product_qty()
+            rec._compute_qty_period()
+            rec._compute_progress_cost_amount()
+            rec._compute_progress_revenue_rate()
+            rec._compute_progress_revenue_amount()
+            rec._compute_progress_revenue_rate()
+            rec._compute_progress_revenue_rate_period()
+            rec._compute_progress_cost_amount_period()
+            rec._compute_progress_revenue_amount_period()
+            rec._compute_future_staffing_days()
+            rec._compute_price_unit()
+            rec._compute_reselling_price_unit()
+            rec._compute_provisions_balances()
             rec._compute_target_project_revenue()
-
-            if rec.type == 'other':
-                rec._compute_progress_cost_amount()
-                rec._compute_target_project_cost()
-                rec._compute_target_project_outsourcing_product_qty()
-                rec._compute_outsourcing_product_qty()
-                rec._compute_qty_period()
-                rec._compute_progress_cost_amount()
-                rec._compute_progress_revenue_rate()
-                rec._compute_progress_revenue_amount()
-                rec._compute_progress_revenue_rate_period()
-                rec._compute_progress_cost_amount_period()
-                rec._compute_progress_revenue_amount_period()
-                rec._compute_future_staffing_days()
-                rec._compute_price_unit()
-                rec._compute_reselling_price_unit()
 
 
 

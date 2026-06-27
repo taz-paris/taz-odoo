@@ -152,6 +152,7 @@ class projectAccountingClosing(models.Model):
                 if not_validated_progress:
                     progress_names = ", ".join(not_validated_progress.mapped('display_name'))
                     raise ValidationError(_("Impossible de valider la clôture car les avancements suivants ne sont pas validés : %s") % progress_names)
+                rec.check_provisions_consistency()
         super().write(vals)
 
 
@@ -303,7 +304,7 @@ class projectAccountingClosing(models.Model):
                 else :
                     _logger.info(rec.previous_closing)
                     _logger.info(previous_closing)
-                    _logger.info("===== Nouvelle valeur poure previous_closing ID_closing=%s" % rec.id)
+                    _logger.info("===== Nouvelle valeur pour previous_closing ID_closing=%s" % rec.id)
                     rec.previous_closing = previous_closing
 
 

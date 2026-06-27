@@ -172,13 +172,14 @@
                             <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
                         </group>
                         <group name="provisions" string="Provisions (CCA / FNP)" invisible="not outsourcing_link_id">
+                            <field name="auto_compute_provisions" readonly="1"/>
                             <field name="purchase_period_amount"/>
                             <field name="cca_previous_balance"/>
                             <field name="cca_period_amount"/>
-                            <field name="cca_balance"/>
+                            <field name="cca_balance" readonly="auto_compute_provisions or is_validated"/>
                             <field name="fnp_previous_balance"/>
                             <field name="fnp_period_amount"/>
-                            <field name="fnp_balance"/>
+			    <field name="fnp_balance" readonly="auto_compute_provisions or is_validated"/>
                         </group>
                     </group>
                 </sheet>

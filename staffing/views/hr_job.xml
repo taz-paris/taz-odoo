@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="inside">
                     <page string="CJM">
+                        <field name="company_id"/>
                         <field name="cost_ids" context="{'default_job_id':id}">
                             <list editable="top">
                                 <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
