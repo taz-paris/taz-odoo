@@ -11,7 +11,7 @@ _logger = logging.getLogger(__name__)
 OUTSOURCING_LINK_TYPES = [
     ('outsourcing', 'Sous-traitance'),
     ('cosourcing', 'Co-traitance - Cas avec validation par interne des factures émises par le cotraitant vers le client'),
-    ('other', 'Autres achats')
+    ('other', 'Autres / Hors prestation intellectuelle')
 ]
 
 

@@ -184,31 +184,16 @@ class projectAccountingClosing(models.Model):
                 raise ValidationError(_("Il n'est pas possible de supprimer cette clôture car elle est validée."))
         super().unlink()
 
-    #TODO : à réactiver une fois la base debuguée
-    """
-    @api.constrains('fae_balance', 'pca_balance', 'cca_balance', 'fnp_balance')
-    def _check_balances_signs(self):
-        for rec in self:
-            if rec.is_validated : #dans la base de données, on a 7 FAE négative et 4 FNP positive
-                continue
-            if rec.fae_balance < 0:
-                raise ValidationError(_("Clôture %s : le solde FAE ne peut pas être négatif (%s).") % (rec.name, rec.fae_balance))
-            if rec.pca_balance > 0:
-                raise ValidationError(_("Clôture %s : le solde PCA ne peut pas être positif (%s).") % (rec.name, rec.pca_balance))
-            if rec.cca_balance < 0:
-                raise ValidationError(_("Clôture %s : le solde CCA ne peut pas être négatif (%s).") % (rec.name, rec.cca_balance))
-            if rec.fnp_balance > 0:
-                raise ValidationError(_("Clôture %s : le solde FNP ne peut pas être positif (%s).") % (rec.name, rec.fnp_balance))
-    """
 
     def check_provisions_consistency(self):
         #_logger.info('-- compute check provision consistency')
         for rec in self :
+            err_mgs_list = []
             if rec.object_progress_ids :
                 # 1. CA Brut (Somme des variations de revenus)
                 if rec.closing_date > datetime.date(2025, 12, 31):
                     if abs(rec.gross_revenue - sum(rec.object_progress_ids.mapped('progress_revenue_amount_period'))) >= 0.01 :
-                        _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts DE LA PÉRIODE des avancements n'est pas égale au CA brut de la cloture." % (rec.project_id.display_name, rec.closing_date))
+                        err_mgs_list.append("; %s ; %s ; ATTENTION La somme des CA bruts DE LA PÉRIODE des avancements n'est pas égale au CA brut de la cloture." % (rec.project_id.display_name, rec.closing_date))
                 
                 somme_ca_cumulés_adv = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
                 # Recherche de toutes les clôtures du même projet dont la date est <= à la clôture actuelle
@@ -219,7 +204,7 @@ class projectAccountingClosing(models.Model):
                 # Somme des CA bruts de ces clôtures
                 somme_ca_bruts_historiques = sum(all_previous_closings.mapped('gross_revenue'))
                 if abs(somme_ca_cumulés_adv - somme_ca_bruts_historiques) >= 0.01 :
-                    _logger.info("; %s ; %s ; ATTENTION La somme des CA bruts CUMULES des avancements n'est pas égale à la somme des CA bruts des clôtures antérieures ou égales à celle-ci.; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, somme_ca_cumulés_adv, somme_ca_bruts_historiques, somme_ca_cumulés_adv-somme_ca_bruts_historiques))
+                    err_mgs_list.append("; %s ; %s ; ATTENTION La somme des CA bruts CUMULES des avancements n'est pas égale à la somme des CA bruts des clôtures antérieures ou égales à celle-ci.; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, somme_ca_cumulés_adv, somme_ca_bruts_historiques, somme_ca_cumulés_adv-somme_ca_bruts_historiques))
 
                 # 2. FAE / PCA (Logique d'écart cumulé)
                 total_adv_revenue = sum(rec.object_progress_ids.mapped('progress_revenue_amount'))
@@ -234,46 +219,50 @@ class projectAccountingClosing(models.Model):
                     computed_fae_period_amount = -rec.fae_previous_balance
                 if rec.closing_date > datetime.date(2025, 12, 31):
                     if abs(computed_fae_period_amount - rec.fae_period_amount) >= 0.01 :
-                        _logger.info("; %s ; %s ; Le montant calculé de FAE est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+                        err_mgs_list.append("; %s ; %s ; Le montant calculé de FAE est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
                     if abs(computed_pca_period_amount - rec.pca_period_amount) >= 0.01 :
-                        _logger.info("; %s ; %s ; Le montant calculé de PCA est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+                        err_mgs_list.append("; %s ; %s ; Le montant calculé de PCA est différent de celui qui a été saisi sur la cloture. L'algo le redressera sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
 
 
                 # 3. CCA / FNP (Somme des provisions des lignes)
                 if rec.closing_date > datetime.date(2025, 12, 31):
                     if abs(rec.cca_balance - sum(rec.object_progress_ids.mapped('cca_balance'))) >= 0.01 :
-                        _logger.info("; %s ; %s ; ATTENTION La somme des soldes de CCA des avancements n'est pas égale au solde de CCA de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.cca_balance, sum(rec.object_progress_ids.mapped('cca_balance')), rec.cca_balance-sum(rec.object_progress_ids.mapped('cca_balance'))))
+                        err_mgs_list.append("; %s ; %s ; ATTENTION La somme des soldes de CCA des avancements n'est pas égale au solde de CCA de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.cca_balance, sum(rec.object_progress_ids.mapped('cca_balance')), rec.cca_balance-sum(rec.object_progress_ids.mapped('cca_balance'))))
                     if abs(rec.fnp_balance - sum(rec.object_progress_ids.mapped('fnp_balance'))) >= 0.01 :
-                        _logger.info("; %s ; %s ; ATTENTION La somme des soldes de FNP des avancements n'est pas égale au solde de FNP de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance, sum(rec.object_progress_ids.mapped('fnp_balance')), rec.fnp_balance-sum(rec.object_progress_ids.mapped('fnp_balance'))))
+                        err_mgs_list.append("; %s ; %s ; ATTENTION La somme des soldes de FNP des avancements n'est pas égale au solde de FNP de la cloture. ; %s ; %s ;  %s" % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance, sum(rec.object_progress_ids.mapped('fnp_balance')), rec.fnp_balance-sum(rec.object_progress_ids.mapped('fnp_balance'))))
 
 
                 # 4. Déstockage total au fur et à mesure
                 if rec.production_balance != 0 :
-                    _logger.info("; %s ; %s ; Le solde de production interne n'est pas nulle. L'algo le mettra à 0 automatiquement sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+                    err_mgs_list.append("; %s ; %s ; Le solde de production interne n'est pas nulle. L'algo le mettra à 0 automatiquement sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
                 if rec.production_external_balance != 0 :
-                    _logger.info("; %s ; %s ; Le solde de production externe n'est pas nulle. L'algo le mettra à 0 automatiquement sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
+                    err_mgs_list.append("; %s ; %s ; Le solde de production externe n'est pas nulle. L'algo le mettra à 0 automatiquement sur le premier mois calculé automatiquement." % (rec.project_id.display_name, rec.closing_date))
                 
                 # Contrôle de cohérence sur les achats (uniquement si valorisé par l'avancement)
                 total_progress_purchase = sum(rec.object_progress_ids.mapped('purchase_period_amount'))
                 if abs(rec.purchase_period_amount - total_progress_purchase) >= 0.01 :
-                    _logger.info("; %s ; %s ; ATTENTION La somme des achats des avancements n'est pas égale aux achats de la cloture." % (rec.project_id.display_name, rec.closing_date))
+                    err_mgs_list.append("; %s ; %s ; ATTENTION La somme des achats des avancements n'est pas égale aux achats de la cloture." % (rec.project_id.display_name, rec.closing_date))
                 
-                if rec.fae_balance < 0:
-                    _logger.info("; %s ; %s ; Le solde FAE ne peut pas être négatif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fae_balance))
-                if rec.pca_balance > 0:
-                    _logger.info("; %s ; %s ; Le solde PCA ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.pca_balance))
-                if rec.cca_balance < 0:
-                    _logger.info("; %s ; %s ; Le solde CCA ne peut pas être négatif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.cca_balance))
-                if rec.fnp_balance > 0:
-                    _logger.info("; %s ; %s ; Le solde FNP ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance))
+            if rec.fae_balance < 0:
+                err_mgs_list.append("; %s ; %s ; Le solde FAE ne peut pas être négatif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fae_balance))
+            if rec.pca_balance > 0:
+                err_mgs_list.append("; %s ; %s ; Le solde PCA ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.pca_balance))
+            if rec.cca_balance < 0:
+                err_mgs_list.append("; %s ; %s ; Le solde CCA ne peut pas être négatif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.cca_balance))
+            if rec.fnp_balance > 0:
+                err_mgs_list.append("; %s ; %s ; Le solde FNP ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance))
+
+            if len(err_mgs_list):
+                global_err_message = err_mgs_list.join('/n')
+                _logger.info(global_err_message)
+                raise ValidationError(global_err_message)
+
 
 
     @api.depends('project_id', 'closing_date', 'valuation_from_progress', 
                  'object_progress_ids.progress_revenue_amount_period', 'object_progress_ids.purchase_period_amount', 
                  'object_progress_ids.cca_period_amount', 'object_progress_ids.fnp_period_amount')
     def compute(self):
-        self.check_provisions_consistency()
-        #return
         _logger.info('-- compute project_accounting_closing')
         for rec in self :
             rec._check_can_write()
@@ -412,6 +401,7 @@ class projectAccountingClosing(models.Model):
                 next_closing = self.env['project.accounting_closing'].browse()
             if next_closing and not isinstance(rec.id, models.NewId):
                 next_closing.compute()
+            rec.project_id.compute_has_provision_running()
 
 
     @api.depends('project_id.name', 'closing_date')
