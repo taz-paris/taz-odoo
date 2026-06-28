@@ -503,7 +503,7 @@ class projectAccountingClosing(models.Model):
 
     name = fields.Char('Libellé', compute=compute_name, store=True)
     is_validated = fields.Boolean('Validée', tracking=True)
-    valuation_from_progress = fields.Boolean('Valorisation par l’avancement', help="Si coché, les provisions et les déstockages sont calculés automatiquement à partir des objets d’avancement.")
+    valuation_from_progress = fields.Boolean('Valorisation par l’avancement', readonly=True, help="Si coché, les provisions et les déstockages sont calculés automatiquement à partir des objets d’avancement.")
     comment = fields.Text("Commentaire")
     comment_previous = fields.Text("Commentaire clôture précédente", related='previous_closing.comment')
     project_id = fields.Many2one('project.project', string="Projet", required=True, check_company=True, default=_get_default_project_id, ondelete='restrict')

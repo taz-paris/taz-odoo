@@ -33,7 +33,7 @@ class ProjectProgress(models.Model):
     company_id = fields.Many2one('res.company', string='Société', required=True, related="accounting_closing_id.company_id")
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", string="Devise", readonly=True)
 
-    auto_compute_provisions = fields.Boolean('Calcul FNP/CCA auto', default=True, help="Si coché, les CCA et FNP de cet avancement sont calculés automatiquement.")
+    auto_compute_provisions = fields.Boolean('Calcul FNP/CCA auto', default=True, readonly=True, help="Si coché, les CCA et FNP de cet avancement sont calculés automatiquement.")
 
     # --- Classification ---
     type = fields.Selection([('internal_production', 'Production interne')] + OUTSOURCING_LINK_TYPES, 
