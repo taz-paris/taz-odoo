@@ -253,7 +253,7 @@ class projectAccountingClosing(models.Model):
                 err_mgs_list.append("; %s ; %s ; Le solde FNP ne peut pas être positif (%s)." % (rec.project_id.display_name, rec.closing_date, rec.fnp_balance))
 
             if len(err_mgs_list):
-                global_err_message = err_mgs_list.join('/n')
+                global_err_message = '\n'.join(err_mgs_list)
                 _logger.info(global_err_message)
                 raise ValidationError(global_err_message)
 
