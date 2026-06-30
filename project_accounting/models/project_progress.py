@@ -297,12 +297,13 @@ class ProjectProgress(models.Model):
     def _compute_progress_cost_amount(self):
         for rec in self:
             rec._check_can_write()
-            if rec.type == 'internal_production':
+            actual_type = rec.type or (rec.outsourcing_link_id.link_type if rec.outsourcing_link_id else 'internal_production')
+            if actual_type == 'internal_production':
                 rec.progress_cost_amount = -rec.rel_project_id.get_production_cost(
                     [('date', '<=', rec.rel_closing_date), ('category', '=', 'project_employee_validated')],
                     force_recompute_amount=False)[0]
             elif rec.outsourcing_link_id:
-                if rec.type == 'other':
+                if actual_type == 'other':
                     if rec.rel_closing_date >= datetime.date(2026, 1, 1): 
                         # Les données saisies manuellement sur les avancements d'initialisation de décembre 2026 ne doivent pas bouger
                         purchase_period_subtotal, purchase_period_total, purchase_period_paid, purchase_period_line_ids = rec.rel_project_id.compute_account_move_total_all_partners([('partner_id', '=', rec.outsourcing_link_id.partner_id.id), ('date', '<=', rec.rel_closing_date), ('parent_state', 'in', ['posted']), ('move_type', 'in', ['in_refund', 'in_invoice'])])
@@ -317,7 +318,8 @@ class ProjectProgress(models.Model):
     def _compute_progress_revenue_rate(self):
         for rec in self:
             rec._check_can_write()
-            if rec.type in ['internal_production', 'other']:
+            actual_type = rec.type or (rec.outsourcing_link_id.link_type if rec.outsourcing_link_id else 'internal_production')
+            if actual_type in ['internal_production', 'other']:
                 rec.progress_revenue_rate = (rec.progress_cost_amount / rec.target_project_cost) if rec.target_project_cost else 0.0
 
     def _inverse_progress_revenue_rate(self):
