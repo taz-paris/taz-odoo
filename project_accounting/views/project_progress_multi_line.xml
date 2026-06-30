@@ -5,7 +5,7 @@
         <field name="model">project.progress</field>
         <field name="type">list</field>
         <field name="arch" type="xml">
-            <list js_class="list_multi_line" editable="top" expand="1" open_form_view="1" limit="30" groups_limit="30" readonly="is_validated or type == 'other'">
+            <list js_class="list_multi_line" editable="top" expand="1" open_form_view="1" limit="30" groups_limit="30" readonly="is_validated">
                 <field name="company_id" invisible="1" groups="base.group_multi_company" options="{'no_create': True}" readonly="1"/>
                 <field name="currency_id" invisible="1"/>
                 <group col="4">
@@ -66,8 +66,10 @@
                             invisible="type == 'internal_production'">
                         <field name="outsourcing_product_qty" readonly="1"/>
                         <field name="progress_cost_amount"/>
-                        <field name="progress_revenue_rate" widget="percentage" readonly="1"/>
-                        <field name="progress_revenue_amount" readonly="1"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="1" groups="!account.group_account_user"/>
+                        <field name="progress_revenue_rate" widget="percentage" readonly="is_validated or type != 'other'" groups="account.group_account_user"/>
+                        <field name="progress_revenue_amount" readonly="1" groups="!account.group_account_user"/>
+                        <field name="progress_revenue_amount" readonly="is_validated or type != 'other'" groups="account.group_account_user"/>
                         <field name="progress_revenue_margin" decoration-danger="progress_revenue_margin &lt; 0"/>
                         <field name="progress_revenue_margin_rate" widget="percentage" decoration-danger="progress_revenue_margin_rate &lt; 0"/>
                     </group>
