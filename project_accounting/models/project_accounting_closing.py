@@ -111,15 +111,25 @@ class projectAccountingClosing(models.Model):
                             'accounting_closing_id': self.id,
                             'outsourcing_link_id': link.id,
                         }
+                        
+                        # Pour les avancements de type "outsourcing"
+                        # on veut initialiser qty_period / CA période / Cout de revuient période à 0€
+                        # pour obliger le DM à saisir la bonne valeur (qui reflète l'activité réelle sur S/T) 
+                        # Pour celà, on ne peut pas faire (à cause de l'ORM et des calculs dans tous les sens à la création):
+                        #          "new_progress_outsourcing.outsourcing_product_qty_period = 0.0"
+                        # Il faut chercher l'avancement précédent pour initialiser correctement le cumul.
+                        # Cela évite que les fonctions compute d'Odoo n'écrasent les valeurs à 0.0 à la création
+                        previous_progress = self.env['project.progress'].search([
+                            ('accounting_closing_id', '=', self.previous_closing.id),
+                            ('outsourcing_link_id', '=', link.id)
+                        ], limit=1) if self.previous_closing else False
+                        
+                        if previous_progress and link.link_type == 'outsourcing':
+                            # En reprenant le CA cumulé précédent, la variation de la période sera mathématiquement de 0.
+                            outsourcing_progress_dic['progress_revenue_amount'] = previous_progress.progress_revenue_amount
+
                         _logger.info("Creating project progress : %s " % str(outsourcing_progress_dic))
                         new_progress_outsourcing = self.env['project.progress'].create(outsourcing_progress_dic)
-                        # Après le create, previous_progress_id est résolu.
-                        # Pour le type 'autre', l'écriture à 0 déclenche _inverse_qty_period qui positionne
-                        # outsourcing_product_qty = previous.outsourcing_product_qty + 0
-                        # => l'avancement cumulé est repris de la période précédente.
-                        # Pour le type S/T, on laisse à 0 par défaut pour forcer la saisie du nouvel avancement.
-                        if link.link_type == 'outsourcing':
-                            new_progress_outsourcing.outsourcing_product_qty_period = 0.0
                 
                 # 2. For internal production
                 napta_id = getattr(self.project_id, 'napta_id', False)
