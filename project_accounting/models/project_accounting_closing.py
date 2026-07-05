@@ -269,6 +269,32 @@ class projectAccountingClosing(models.Model):
 
 
 
+    def _get_real_project_context(self):
+        """Helper pour obtenir le projet même lors de la création d'un enregistrement virtuel (NewId)."""
+        self.ensure_one()
+        proj_id = self.project_id
+        from odoo import models
+        real_proj_id = proj_id._origin.id if hasattr(proj_id, '_origin') and proj_id._origin else proj_id.id
+        if not real_proj_id or isinstance(real_proj_id, models.NewId):
+            proj_ids = self.env['project.project'].search([('id', '=', self._get_default_project_id())])
+            if len(proj_ids):
+                proj_id = proj_ids[0]
+        if isinstance(real_proj_id, models.NewId):
+            real_proj_id = False
+        return proj_id, real_proj_id
+
+    @api.depends('project_id', 'closing_date')
+    def _compute_previous_closing(self):
+        for rec in self:
+            proj_id, real_proj_id = rec._get_real_project_context()
+
+            previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', real_proj_id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
+            
+            previous_closing = None
+            if len(previous_accounting_closing_ids) > 0 :
+                previous_closing = previous_accounting_closing_ids[0]
+            rec.previous_closing = previous_closing
+
     @api.depends('project_id', 'closing_date', 'valuation_from_progress', 
                  'object_progress_ids.progress_revenue_amount_period', 'object_progress_ids.purchase_period_amount', 
                  'object_progress_ids.cca_period_amount', 'object_progress_ids.fnp_period_amount')
@@ -277,35 +303,11 @@ class projectAccountingClosing(models.Model):
         for rec in self :
             rec._check_can_write()
 
-            proj_id = rec.project_id #quand on applique la fonction WRITE
-            from odoo import models
-            real_proj_id = proj_id._origin.id if hasattr(proj_id, '_origin') and proj_id._origin else proj_id.id
-            if not real_proj_id or isinstance(real_proj_id, models.NewId) : #pour avoir les valeurs de facturation du mois dès l'ouverture de la popup de création d'une nouvelle cloture
-                proj_ids = rec.env['project.project'].search([('id', '=', rec._get_default_project_id())])
-                if len(proj_ids) :
-                    proj_id = proj_ids[0]
-                    real_proj_id = proj_id.id
+            proj_id, real_proj_id = rec._get_real_project_context()
 
-            # Il est important que la détermination de previous_closing soit fait avant la génération des Avancements
-            if real_proj_id and not isinstance(real_proj_id, models.NewId):
-                previous_accounting_closing_ids = rec.env['project.accounting_closing'].search([('project_id', '=', real_proj_id), ('closing_date', '<', rec.closing_date)], order="closing_date desc")
-            else:
-                previous_accounting_closing_ids = rec.env['project.accounting_closing'].browse()
-            previous_closing = None
             previous_closing_date_filter = []
-
-            if len(previous_accounting_closing_ids) > 0 :
-                previous_closing = previous_accounting_closing_ids[0]
-                previous_closing_date_filter.append(('date', '>', previous_closing.closing_date))
-            if rec.previous_closing != previous_closing:
-                if previous_closing == None and rec.previous_closing.id == False :
-                    pass
-                else :
-                    _logger.info(rec.previous_closing)
-                    _logger.info(previous_closing)
-                    _logger.info("===== Nouvelle valeur pour previous_closing ID_closing=%s" % rec.id)
-                    rec.previous_closing = previous_closing
-
+            if rec.previous_closing :
+                previous_closing_date_filter.append(('date', '>', rec.previous_closing.closing_date))
 
 
             #Ces champs ne peuvent pas être de type related stored car les related stored ne sont calculés qu'après l'execution de cette fonction lors de la creation
@@ -527,7 +529,7 @@ class projectAccountingClosing(models.Model):
     rel_project_manager_user_id = fields.Many2one(related='project_id.project_manager.user_id', string="Partner ou manager en appui de l'administration du projet", help="Personne à contacter par l'ADV, capable de répondre aux aspects économiques et contractuels du projet.", store=True)
     original_stage_id = fields.Many2one('project.project.stage', readonly=True, string='Statut début clôture', help='Statut du projet à la création de la clôture ("photo")')
     closing_date = fields.Date("Date de clôture", required=False, default=_get_default_closing_date)
-    previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute=compute, store=True)
+    previous_closing = fields.Many2one('project.accounting_closing', string="Clôture précédente", compute='_compute_previous_closing', store=True)
     next_closing = fields.One2many('project.accounting_closing', 'previous_closing', string="Clôture suivante", readonly=True)
     object_progress_ids = fields.One2many('project.progress', 'accounting_closing_id', string="Avancements")
 
