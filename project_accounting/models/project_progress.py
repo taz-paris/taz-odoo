@@ -220,11 +220,7 @@ class ProjectProgress(models.Model):
             if rec.type == 'internal_production':
                 rec.target_project_revenue = rec.rel_project_id.company_part_amount_current or 0.0
             elif rec.outsourcing_link_id:
-                if rec.outsourcing_link_id.order_sum_purchase_order_lines:
-                    indirect_payment_ratio = rec.outsourcing_link_id.order_company_payment_amount / rec.outsourcing_link_id.order_sum_purchase_order_lines
-                else:
-                    indirect_payment_ratio = 1.0
-                rec.target_project_revenue = (rec.outsourcing_link_id.outsource_part_amount_current or 0.0) * indirect_payment_ratio
+                rec.target_project_revenue = rec.outsourcing_link_id.outsource_part_amount_current - rec.outsourcing_link_id.order_direct_payment_amount
             else:
                 rec.target_project_revenue = 0.0
 
