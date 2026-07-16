@@ -24,9 +24,6 @@ import sys
 ##########                SET PARAMETERS                ##########
 ##################################################################
 
-API_URL_TOKEN_ENDPOINT = "https://pickyourskills.eu.auth0.com/oauth/token"
-API_URL_BUSINESS_ENDPOINT = "https://app.napta.io/api/v1/"
-
 cache_duration_in_minutes = 60 * 12 +15
 cache_folder = '/tmp/napta'
 
@@ -44,10 +41,10 @@ class ClientRestNapta:
         self.env = env
         self.CLIENT_ID = self.env['ir.config_parameter'].sudo().get_param("napta_client_id")
         self.CLIENT_SECRET = self.env['ir.config_parameter'].sudo().get_param("napta_client_secret")
-        if not(self.CLIENT_SECRET) or not (self.CLIENT_ID) :
-            raise ValidationError(_("Client API Napta inactif car les paramètres système Odoo napta_client_id et napta_client_secret ne sont pas tous les deux valorisés."))
-        self.API_URL_TOKEN_ENDPOINT = API_URL_TOKEN_ENDPOINT
-        self.API_URL_BUSINESS_ENDPOINT = API_URL_BUSINESS_ENDPOINT
+        self.API_URL_TOKEN_ENDPOINT = self.env['ir.config_parameter'].sudo().get_param("napta_api_url_token_endpoint")
+        self.API_URL_BUSINESS_ENDPOINT = self.env['ir.config_parameter'].sudo().get_param("napta_api_url_business_endpoint")
+        if not(self.CLIENT_SECRET) or not (self.CLIENT_ID) or not (self.API_URL_TOKEN_ENDPOINT) or not (self.API_URL_BUSINESS_ENDPOINT):
+            raise ValidationError(_("Client API Napta inactif car les paramètres système Odoo napta_client_id, napta_client_secret, napta_api_url_token_endpoint et napta_api_url_business_endpoint  ne sont pas tous valorisés."))
 
     def get_access_token(self):
         access_values = json.loads(self.env['ir.config_parameter'].sudo().get_param("napta_access_values"))
