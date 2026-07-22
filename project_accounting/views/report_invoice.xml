@@ -37,17 +37,5 @@
         <xpath expr="//div[@name='reference']/strong" position="replace">
             <strong>N° de bon de commande</strong>
         </xpath>
-        <xpath expr="//th[@name='th_quantity']" position="attributes">
-            <attribute name="t-if">display_quantity_price_unit</attribute>
-        </xpath>
-        <xpath expr="//th[@name='th_priceunit']" position="attributes">
-            <attribute name="t-if">display_quantity_price_unit</attribute>
-        </xpath>
-        <xpath expr="//span[@t-field='line.quantity']/.." position="attributes">
-            <attribute name="t-if">display_quantity_price_unit</attribute>
-        </xpath>
-        <xpath expr="//span[@t-field='line.price_unit']/.." position="attributes">
-            <attribute name="t-if">display_quantity_price_unit</attribute>
-        </xpath>
     </template>
 </odoo>
