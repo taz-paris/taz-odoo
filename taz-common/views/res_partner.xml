@@ -115,7 +115,7 @@
                                     <group name="misc" string="Identifiants">
                                         <field name="is_company" default="1" invisible="0"/>
                                         <field name="ref" string="Référence interne"/>
-                                        <field name="vat" placeholder="Num TVA intracom UE" readonly="parent_id"/>
+                                        <field name="vat" placeholder="Num TVA intracom UE"/>
                                         <field name="company_registry" on_change="1" invisible="1"/>
                                         <field name="siren" on_change="1"/>
                                         <field name="nic" on_change="1"/>
