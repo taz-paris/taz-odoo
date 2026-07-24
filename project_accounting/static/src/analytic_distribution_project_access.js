@@ -42,7 +42,7 @@ patch(components.AnalyticDistribution.prototype, {
 					resId: target_project_id,
 					view_type: "form",
 				};
-				const new_url = window.location.origin + stateToUrl(state);
+				const new_url = window.location + stateToUrl(state);
 				window.open(new_url, "_blank");
 			}
 		}
