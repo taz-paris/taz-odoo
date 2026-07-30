@@ -7,10 +7,10 @@
             <field name="inherit_id" ref="taz-common.contact_search"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='parent_industry_id']" position="after">
-                    <field name="event_registration_ids" string="Inscrit à l'évènement..." filter_domain="[('event_registration_ids.event_id', 'ilike', self)]"/>
-                    <!--
-			    <field name="event_registration_ids" string="NON inscrit à l'évènement..." filter_domain="[('event_registration_ids.event_id', 'not ilike', self)]" />
-			    -->
+                    <separator/>
+                    <field name="event_registration_ids" string="Inscrit à l'évènement..." filter_domain="[('event_registration_ids.event_id.name', 'ilike', self)]"/>
+                    <field name="event_registration_ids" string="NON inscrit à l'évènement..." filter_domain="['!', ('event_registration_ids.event_id.name', 'ilike', self)]"/>
+                    <separator/>
                 </xpath>
             </field>
         </record>
