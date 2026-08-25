@@ -81,6 +81,12 @@ class staffingLeave(models.Model):
                                     ('date_to', '>=', self.date_from),
                                     ], order="request_date_from asc")
 
+        # Unlink timesheets to avoid orphaned analytic lines when Napta deletes leaves directly
+        timesheets = self.sudo().mapped('timesheet_ids')
+        if timesheets:
+            timesheets.write({'holiday_id': False})
+            timesheets.unlink()
+
         res = super().unlink()
 
         overlapped_timesheet_leaves = overlapped_leaves.filtered(lambda l: l.holiday_status_id.timesheet_generate)
