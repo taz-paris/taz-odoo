@@ -109,6 +109,7 @@
                     <field name="futur_internal_revenue_current_year" optional="hide"/>
                     <field name="futur_internal_revenue_next_year" optional="hide"/>
                     <field name="date_last_update_futur_internal_revenue_current_year" optional="hide"/>
+		    <field name="state_last_change_date" optional="hide"/>
                 </list>
             </field>
         </record>
@@ -138,6 +139,9 @@
                     <attribute name="optional">show</attribute>
                 </xpath>
                 <xpath expr="//field[@name='prorated_revenue']" position="attributes">
+                    <attribute name="optional">show</attribute>
+                </xpath>
+                <xpath expr="//field[@name='state_last_change_date']" position="attributes">
                     <attribute name="optional">show</attribute>
                 </xpath>
                 <xpath expr="//field[@name='prorated_revenue']" position="after">
