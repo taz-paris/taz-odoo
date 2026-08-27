@@ -252,17 +252,27 @@ class HrEmployeeStaffingReport(models.Model):
                 #_logger.info(lines)
      
                 #_logger.info(rec.employee_id.number_work_days_period_including_productive_share(real_start_date, real_end_date))
-                rec.workdays = rec.employee_id.number_work_days_period_including_productive_share(real_start_date, real_end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
-                rec.hollidays = min(rec.workdays, lines['holidays']['other']['sum_period_unit_amount']) # Nécessaire en cas de part productive < 100 % (alors que les congés sont à 100 %)
-                rec.activity_days = rec.workdays - rec.hollidays
-                rec.project_days = lines['mission']['project_employee_validated']['sum_period_unit_amount']
-                rec.learning_internal_days = lines['training']['project_employee_validated']['sum_period_unit_amount']
-                rec.sales_internal_days = lines['sales']['project_employee_validated']['sum_period_unit_amount']
-                rec.other_internal_days = lines['other_internal']['project_employee_validated']['sum_period_unit_amount']
-                if rec.activity_days :
-                    rec.activity_rate = rec.project_days / rec.activity_days * 100
-                else : 
-                    rec.activity_rate = None
+                workdays = rec.employee_id.number_work_days_period_including_productive_share(real_start_date, real_end_date) - lines['unavailability']['project_employee_validated']['sum_period_unit_amount']
+                hollidays = min(workdays, lines['holidays']['other']['sum_period_unit_amount']) # Nécessaire en cas de part productive < 100 % (alors que les congés sont à 100 %)
+                activity_days = workdays - hollidays
+                project_days = lines['mission']['project_employee_validated']['sum_period_unit_amount']
+                
+                update_vals = {
+                    'workdays': workdays,
+                    'hollidays': hollidays,
+                    'activity_days': activity_days,
+                    'project_days': project_days,
+                    'learning_internal_days': lines['training']['project_employee_validated']['sum_period_unit_amount'],
+                    'sales_internal_days': lines['sales']['project_employee_validated']['sum_period_unit_amount'],
+                    'other_internal_days': lines['other_internal']['project_employee_validated']['sum_period_unit_amount'],
+                }
+                
+                if activity_days:
+                    update_vals['activity_rate'] = project_days / activity_days * 100
+                else:
+                    update_vals['activity_rate'] = None
+                    
+                rec.write(update_vals)
                 if rec.workdays :
                     rec.activity_rate_with_holidays = rec.project_days / rec.workdays * 100
                 else :
