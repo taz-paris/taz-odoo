@@ -51,6 +51,13 @@ class eventRegistration(models.Model):
     rel_partner_parent_industry_id_business_priority = fields.Selection(related='partner_id.parent_id.industry_id.business_priority', store=True)
     rel_partner_id_function = fields.Char(related='partner_id.function', store=True)
 
+    @api.model
+    def default_get(self, fields_list):
+        res = super(eventRegistration, self).default_get(fields_list)
+        if 'state' in fields_list :#and not res.get('state'):
+            res['state'] = 'identified'
+        return res
+
     def action_set_draft_step2(self):
         self.write({'state': 'draft_step2'})
 

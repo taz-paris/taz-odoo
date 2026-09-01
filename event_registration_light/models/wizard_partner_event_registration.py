@@ -60,7 +60,7 @@ class resPartnerMassEventRegistration(models.TransientModel):
                     _logger.info('>>> Ajout event.registration %s sur le partner %s' % (self.add_event_id.name, partner.name))
                     #create registration
                     registration_dict = {'event_id': self.add_event_id.id, 'partner_id': partner.id, 'email': partner.email,
-                     'name': partner.first_name + " " + partner.name}
+                     'name': partner.first_name + " " + partner.name, 'state': 'identified'}
                     if line.add_event_registration_owner:
                         registration_dict['mail_auto'] = False
                     registration_id = self.env['event.registration'].create(registration_dict)

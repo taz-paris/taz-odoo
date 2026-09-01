@@ -7,7 +7,7 @@
             <field name="arch" type="xml">
                 <form>
                     <group>
-                        <group>
+                        <group colspan="3">
                             <field name="partner_ids" colspan="3" readonly="1">
                                 <list>
                                     <field name="first_name"/>
