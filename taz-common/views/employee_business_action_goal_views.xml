@@ -8,13 +8,15 @@
                 <list editable="top">
                     <field name="company_id" optional="show" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                     <field name="user_id"/>
-                    <field name="reference_period"/>
-                    <field name="type"/>
-                    <field name="period_goal" sum="Total" width="150px"/>
-                    <field name="period_action_count" sum="Total" width="200px"/>
+                    <field name="reference_period" optional="show"/>
+                    <field name="type" optional="show"/>
+                    <field name="period_goal"  optional="show" sum="Total" width="150px"/>
+                    <field name="period_action_count"  optional="show" sum="Total" width="200px"/>
                     <button type="object" name="action_view_details" icon="fa-eye" title="Détails des actions réalisées"/>
-                    <field name="period_rate" widget="progressbar"/>
-                    <field name="period_pending_action_count" sum="Total" width="150px"/>
+                    <field name="period_rate"  optional="show" widget="progressbar"/>
+                    <field name="period_to_check_action_count"  optional="show" class="text-danger" sum="Total" width="150px"/>
+                    <button type="object" name="action_view_to_check_details" icon="fa-eye" title="Détails des actions passées sans CR ou non FAIT"/>
+                    <field name="period_pending_action_count"  optional="show" sum="Total" width="150px"/>
                     <button type="object" name="action_view_pending_details" icon="fa-eye" title="Détails des actions prévues"/>
                     <field name="note" optional="hide"/>
                 </list>

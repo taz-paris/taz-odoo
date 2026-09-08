@@ -129,7 +129,15 @@ class tazBusinessAction(models.Model):
     #def get_ms_planner_task_list(self):
     #    data = self.engtv.user._msgraph_get_planner_tasks(self.parent_partner_industry_id.ms_planner_plan_id)
 
-            
+    @api.depends('user_ids', 'owner_id')
+    def compute(self):
+        for rec in self:
+            user_ids_count = len(rec.user_ids)
+            if rec.owner_id not in rec.user_ids:
+                user_ids_count += 1
+            rec.user_ids_count = user_ids_count
+ 
+
     partner_id = fields.Many2one('res.partner', string="Contact", domain="[('is_company', '!=', True)]", ondelete='restrict') #, required=True  
     parent_partner_id = fields.Many2one('res.partner', string="Entreprise", related='partner_id.parent_id', store=True)
     parent_partner_industry_id = fields.Many2one('res.partner.industry', string='Compte du parent', related='partner_id.parent_industry_id', store=True)
@@ -150,6 +158,7 @@ class tazBusinessAction(models.Model):
         required=True,
         #domain=[('oauth_uid', '!=', False)]
         )
+    user_ids_count = fields.Integer("Nombre de participants", compute=compute, store=True)
     state = fields.Selection([
         ('todo', 'À faire'),
         ('planned', 'Planifié'),

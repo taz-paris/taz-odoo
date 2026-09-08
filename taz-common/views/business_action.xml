@@ -143,6 +143,7 @@
                         <filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
                         <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
                         <filter string="Compte (ex BD)" name="group_industry" context="{'group_by': 'parent_partner_industry_id'}"/>
+                        <filter string="Nombre de participants" name="group_user_ids_count" context="{'group_by': 'user_ids_count'}"/>
                     </group>
                 </search>
             </field>
