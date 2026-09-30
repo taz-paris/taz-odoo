@@ -165,13 +165,14 @@
                         <group name="target" string="Projection à terminaison">
                             <newline/><newline/>
                             <field name="target_project_outsourcing_product_qty" invisible="type == 'internal_production'"/>
-                            <field name="target_project_cost" readonly="type != 'internal_production'"/>
+                            <field name="target_project_cost" readonly="is_validated or (type != 'internal_production')"/>
                             <field name="future_staffing_days" invisible="type != 'internal_production'"/>
                             <field name="price_unit" invisible="type in ['internal_production', 'other']"/>
                             <field name="target_project_revenue" />
                             <field name="target_project_margin" decoration-danger="target_project_margin &lt; 0"/>
                             <field name="target_project_margin_rate" widget="percentage" decoration-danger="target_project_margin_rate &lt; 0"/>
                             <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
+			    <field name="future_revenue_next_year" invisible="type != 'internal_production'" readonly="is_validated"/>
                         </group>
                         <group name="provisions" string="Provisions (CCA / FNP)" invisible="not outsourcing_link_id">
                             <field name="auto_compute_provisions" readonly="1"/>

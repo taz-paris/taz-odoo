@@ -91,6 +91,15 @@ class ProjectProgress(models.Model):
     fnp_period_amount = fields.Monetary('FNP(-)', compute='_compute_fnp_period_amount', store=True)
     fnp_balance = fields.Monetary('Solde FNP', compute='_compute_provisions_balances', store=True, aggregator='sum')
 
+    # --- cut off fin d'année
+    @api.constrains('target_project_revenue', 'progress_revenue_amount')
+    def _check_future_revenue_next_year(self):
+        for rec in self:
+            if (rec.target_project_revenue - rec.progress_revenue_amount) < rec.future_revenue_next_year :
+                raise ValidationError("Le CA à venir > 31/12/N, c'est à dire le CA qui sera reconnu l'an prochain, ne peut être supérieur au CA qui reste à reconnaitre (CA total projecté - CA cumulé)")
+
+    future_revenue_next_year = fields.Monetary('CA à venir > 31/12/N', aggregator='sum')
+
     # --- Autres calculs ---
     future_staffing_days = fields.Float(string="Jours restant à produire", help="Somme des jours staffés dans Napta (tous grades confondus) pour les périodes de staffing qui commencent après la date de clôture. Valeur telle que disponible dans TazForce à date du dernier rafraichissement forcé.", compute='_compute_future_staffing_days', store=True)
     price_unit = fields.Monetary(string="TJM sous-traitance", compute='_compute_price_unit', store=True)
@@ -99,6 +108,7 @@ class ProjectProgress(models.Model):
     is_validated = fields.Boolean(string="Validé", tracking=True)
     comment = fields.Html("Commentaire")
     rel_previous_progress_comment = fields.Html("Commentaire période précédente", related='previous_progress_id.comment')
+
 
     # ===================================================================
     # DISPLAY NAME
