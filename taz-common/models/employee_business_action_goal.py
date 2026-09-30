@@ -62,10 +62,9 @@ class employeeBusinessActionGoal(models.Model):
             ('action_type', '=', self.type),
             ('user_ids', 'in', [self.user_id.id]),
             ('state', '!=', 'cancelled'),
-            '|','|',
-                '&', ('action_type', '=', 'commercial_interview'),('report_url', '=', False),
-                ('action_type', '!=', 'commercial_interview'),
-                ('state', '!=', 'done')
+            '|',
+                '&', ('action_type', '=', 'commercial_interview'), '|', ('report_url', '=', False), ('state', '!=', 'done'),
+                '&', ('action_type', '!=', 'commercial_interview'),('state', '!=', 'done'),
         ]
         action_list = self.env['taz.business_action'].search(domain)
         period_action_count = len(action_list)
