@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Copyright 2026 Akretion France (https://www.akretion.com/)
+  @author: Alexis de Lattre <alexis.delattre@akretion.com>
+  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="fr_einvoicing_flow_form" model="ir.ui.view">
+        <field name="model">fr.einvoicing.flow</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+                        name="generate_button"
+                        type="object"
+                        class="btn-primary"
+                        string="Generate File"
+                        invisible="direction != 'out' or state != 'created'"
+                        groups="account.group_account_invoice"
+                    />
+                    <button
+                        name="send_button"
+                        type="object"
+                        class="btn-primary"
+                        string="Send to AP"
+                        invisible="direction != 'out' or state != 'generated'"
+                        groups="account.group_account_invoice"
+                    />
+                    <button
+                        name="update_status_button"
+                        type="object"
+                        string="Update Status"
+                        invisible="direction != 'out' or state != 'sent'"
+                        groups="account.group_account_invoice"
+                        class="btn-primary"
+                    />
+                    <button
+                        name="download_button"
+                        type="object"
+                        string="Download"
+                        class="btn-primary"
+                        invisible="state != 'created' or direction != 'in'"
+                    />
+                    <button
+                        name="process_button"
+                        type="object"
+                        string="Import in Odoo"
+                        invisible="state != 'downloaded'"
+                        groups="account.group_account_invoice"
+                        class="btn-primary"
+                    />
+                    <button
+                        name="back2created_button"
+                        type="object"
+                        string="Back to Created"
+                        invisible="state not in ('error', 'cancel')"
+                        groups="account.group_account_invoice"
+                        confirm="Are you sure you want to go back to Created?"
+                    />
+                    <button
+                        name="%(fr_einvoicing_flow_cancel_action)d"
+                        type="action"
+                        string="Cancel"
+                        invisible="state not in ('error', 'created', 'generated', 'downloaded')"
+                        groups="account.group_account_manager"
+                    />
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="created,downloaded,done"
+                        invisible="direction != 'in'"
+                    />
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="created,generated,sent,done"
+                        invisible="direction != 'out'"
+                    />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            class="oe_stat_button"
+                            type="object"
+                            name="show_invoices_button"
+                            invisible="not move_ids"
+                            icon="fa-pencil-square-o"
+                            string="Invoice"
+                        />
+                    </div>
+                    <div class="oe_title">
+                        <label for="identifier" />
+                        <h1>
+                            <field name="identifier" />
+                        </h1>
+                    </div>
+                    <group name="main">
+                        <group name="main-left">
+                            <field
+                                name="direction"
+                                widget="badge"
+                                decoration-info="direction == 'in'"
+                                decoration-warning="direction == 'out'"
+                            />
+                            <field name="event_id" invisible="not event_id" />
+                            <field
+                                name="auto_internal_move_id"
+                                invisible="not auto_internal_move_id"
+                            />
+                            <field name="move_id" invisible="not move_id" />
+                            <field name="type" />
+                            <field name="syntax" />
+                            <field
+                                name="odoo_invoice_format"
+                                invisible="direction != 'out' or syntax not in ('UBL', 'CII', 'Factur-X')"
+                            />
+                            <field name="profile" />
+                            <field name="processing_rule" />
+                            <field
+                                name="company_id"
+                                groups="base.group_multi_company"
+                            />
+                        </group>
+                        <group name="main-right">
+                            <field name="file_bin" filename="filename" />
+                            <field name="filename" invisible="1" />
+                            <field name="submitted_at" invisible="direction == 'in'" />
+                            <field name="updated_at" />
+                            <field
+                                name="fr_directory_line_peppol_status"
+                                invisible="direction != 'out' or (not move_id and not event_id)"
+                                widget="badge"
+                                decoration-success="fr_directory_line_peppol_status == 'ok'"
+                                decoration-danger="fr_directory_line_peppol_status == 'not_present'"
+                                decoration-warning="fr_directory_line_peppol_status == 'query_failed'"
+                            />
+                            <field
+                                name="ap_error_details"
+                                invisible="not ap_error_details"
+                            />
+                            <field
+                                name="odoo_error_details"
+                                invisible="not odoo_error_details"
+                            />
+                            <field
+                                name="cancel_comment"
+                                invisible="state != 'cancel'"
+                            />
+                        </group>
+                    </group>
+                    <group
+                        name="moves"
+                        string="Invoices"
+                        invisible="not move_ids or move_id"
+                    >
+                        <field name="move_ids" nolabel="1" colspan="2" />
+                    </group>
+                    <group
+                        name="events"
+                        string="Events"
+                        invisible="not event_ids or event_id"
+                    >
+                        <field name="event_ids" nolabel="1" colspan="2" />
+                    </group>
+                    <group
+                        name="data_dict"
+                        string="Data Map for debug"
+                        groups="base.group_no_one"
+                        invisible="not data_dict"
+                    >
+                        <field
+                            name="data_dict_txt"
+                            nolabel="1"
+                            colspan="2"
+                            widget="code"
+                            options="{'mode': 'python'}"
+                        />
+                    </group>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record id="fr_einvoicing_flow_list" model="ir.ui.view">
+        <field name="model">fr.einvoicing.flow</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state in ('error', 'ap_unknown')">
+                <header>
+                    <button
+                        name="send_button"
+                        type="object"
+                        string="Send to AP"
+                        groups="account.group_account_invoice"
+                    />
+                    <button
+                        name="update_status_button"
+                        type="object"
+                        string="Update Status"
+                        groups="account.group_account_invoice"
+                    />
+                    <button
+                        name="download_button"
+                        type="object"
+                        string="Download"
+                        groups="account.group_account_invoice"
+                    />
+                    <button
+                        name="process_button"
+                        type="object"
+                        string="Process"
+                        groups="account.group_account_invoice"
+                    />
+                </header>
+                <field name="identifier" decoration-bf="1" />
+                <field
+                    name="direction"
+                    widget="badge"
+                    decoration-info="direction == 'in'"
+                    decoration-warning="direction == 'out'"
+                />
+                <field name="move_id" optional="show" />
+                <field name="event_id" optional="show" />
+                <field name="type" optional="show" />
+                <field name="syntax" optional="hide" />
+                <field name="profile" optional="hide" />
+                <field name="processing_rule" optional="hide" />
+                <field name="submitted_at" optional="hide" />
+                <field name="updated_at" optional="show" />
+                <field
+                    name="state"
+                    widget="badge"
+                    decoration-info="state == 'sent'"
+                    decoration-success="state == 'done'"
+                    decoration-warning="state in ('generated', 'downloaded')"
+                    decoration-danger="state in ('error', 'ap_unknown')"
+                />
+                <field
+                    name="company_id"
+                    groups="base.group_multi_company"
+                    optional="show"
+                />
+            </list>
+        </field>
+    </record>
+
+    <record id="fr_einvoicing_flow_search" model="ir.ui.view">
+        <field name="model">fr.einvoicing.flow</field>
+        <field name="arch" type="xml">
+            <search>
+                <field
+                    name="identifier"
+                    string="Identifier or Invoice"
+                    filter_domain="['|', '|', ('identifier', 'ilike', self), ('move_id', 'ilike', self), ('auto_internal_move_id', '=', self)]"
+                />
+                <separator />
+                <filter
+                    name="state_created"
+                    string="Created"
+                    domain="[('state', '=', 'created')]"
+                />
+                <filter
+                    name="state_generated"
+                    string="Generated"
+                    domain="[('state', '=', 'generated')]"
+                />
+                <filter
+                    name="state_sent"
+                    string="Sent, Waiting AP Processing"
+                    domain="[('state', '=', 'sent')]"
+                />
+                <filter
+                    name="state_downloaded"
+                    string="Downloaded"
+                    domain="[('state', '=', 'downloaded')]"
+                />
+                <filter
+                    name="state_done"
+                    string="Done"
+                    domain="[('state', '=', 'done')]"
+                />
+                <filter
+                    name="state_error"
+                    string="Error"
+                    domain="[('state', '=', 'error')]"
+                />
+                <filter
+                    name="state_ap_unknown"
+                    string="AP Unknown State"
+                    domain="[('state', '=', 'ap_unknown')]"
+                />
+                <separator />
+                <filter name="in" string="In" domain="[('direction', '=', 'in')]" />
+                <filter name="out" string="Out" domain="[('direction', '=', 'out')]" />
+                <separator />
+                <filter name="cii" string="CII" domain="[('syntax', '=', 'CII')]" />
+                <filter name="ubl" string="UBL" domain="[('syntax', '=', 'UBL')]" />
+                <filter
+                    name="facturx"
+                    string="Factur-X"
+                    domain="[('syntax', '=', 'Factur-X')]"
+                />
+                <filter name="cadr" string="CDAR" domain="[('syntax', '=', 'CDAR')]" />
+                <filter
+                    name="frr"
+                    string="eReporting"
+                    domain="[('syntax', '=', 'FRR')]"
+                />
+                <group name="groupby">
+                    <filter
+                        name="state_groupby"
+                        string="State"
+                        context="{'group_by': 'state'}"
+                    />
+                    <filter
+                        name="type_groupby"
+                        string="Type"
+                        context="{'group_by': 'type'}"
+                    />
+                    <filter
+                        name="syntax_groupby"
+                        string="Syntax"
+                        context="{'group_by': 'syntax'}"
+                    />
+                    <filter
+                        name="profile_groupby"
+                        string="Profile"
+                        context="{'group_by': 'profile'}"
+                    />
+                    <filter
+                        name="processing_rule_groupby"
+                        string="Processing Rule"
+                        context="{'group_by': 'processing_rule'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="fr_einvoicing_flow_graph" model="ir.ui.view">
+        <field name="model">fr.einvoicing.flow</field>
+        <field name="arch" type="xml">
+            <graph>
+                <field name="submitted_at" interval="month" />
+            </graph>
+        </field>
+    </record>
+
+    <record id="fr_einvoicing_flow_pivot" model="ir.ui.view">
+        <field name="model">fr.einvoicing.flow</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="submitted_at" interval="month" type="row" />
+                <field name="direction" type="col" />
+            </pivot>
+        </field>
+    </record>
+
+    <record id="fr_einvoicing_flow_action" model="ir.actions.act_window">
+        <field name="name">eInvoicing Flows</field>
+        <field name="res_model">fr.einvoicing.flow</field>
+        <field name="path">fr-einvoicing-flow</field>
+        <field name="view_mode">list,graph,pivot,form</field>
+    </record>
+
+    <menuitem
+        id="fr_einvoicing_flow_menu"
+        action="fr_einvoicing_flow_action"
+        sequence="50"
+        parent="fr_einvoicing_root"
+    />
+</odoo>

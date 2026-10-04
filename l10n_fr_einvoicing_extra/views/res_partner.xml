@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--
+      l10n_fr_einvoicing only looks at parent_id to decide whether to show
+      the full "eInvoicing for France" settings or the "managed on the
+      parent company" redirect. But a partner with a parent can still be
+      its own commercial entity (is_company=True with its own SIREN), in
+      which case commercial_partner_id == id and the redirect button
+      (open_commercial_entity) just reopens the same record in a loop.
+      We use commercial_partner_id vs id to detect that case instead.
+    -->
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="l10n_fr_einvoicing.view_partner_form" />
+        <field name="arch" type="xml">
+            <group name="fr_einvoicing" position="attributes">
+                <attribute
+                    name="invisible"
+                >not is_france_country or (parent_id and commercial_partner_id != id)</attribute>
+            </group>
+            <group name="fr_einvoicing_child" position="attributes">
+                <attribute
+                    name="invisible"
+                >not is_france_country or not parent_id or commercial_partner_id == id</attribute>
+            </group>
+        </field>
+    </record>
+</odoo>

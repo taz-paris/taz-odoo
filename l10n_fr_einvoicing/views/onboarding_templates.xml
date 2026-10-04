@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="onboarding_success" name="AP onboarding success">
+        <t t-call="web.layout">
+            <t t-set="title">Successful Accredited Platform Onboarding</t>
+            <div class="container mt-5">
+                <div class="card shadow-sm mx-auto">
+                    <div class="card-body text-center">
+                        <div class="text-center mb-3">
+                            <h1>✅ Successful Accredited Platform Onboarding</h1>
+                            <p class="card-text">You can now close this tab.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="onboarding_failure" name="AP onboarding failure">
+        <t t-call="web.layout">
+            <t t-set="title">Accredited Platform Onboarding Failed</t>
+            <div class="container mt-5">
+                <div class="card shadow-sm mx-auto">
+                    <div class="card-body text-center">
+                        <div class="text-center mb-3">
+                            <h1>❌ Accredited Platform Onboarding Failed</h1>
+                            <p
+                                class="card-text"
+                            >The exact reason has been written in the Odoo server logs. Contact support for technical investigation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

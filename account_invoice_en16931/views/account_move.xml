@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Copyright 2026 Akretion France (https://www.akretion.com/)
+  @author: Alexis de Lattre <alexis.delattre@akretion.com>
+  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="view_move_form" model="ir.ui.view">
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form" />
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page
+                    id="einvoicing"
+                    string="eInvoicing"
+                    invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')"
+                >
+                    <group id="einvoicing-main">
+                        <group id="einvoicing-left" string="eInvoice">
+                            <field
+                                name="invoice_type_code"
+                                invisible="not invoice_type_code"
+                            />
+                            <!-- business_process_type will be set visible by country-specific modules
+                                that use it -->
+                            <field
+                                name="business_process_type"
+                                readonly="state != 'draft'"
+                                invisible="1"
+                            />
+                            <field
+                                name="invoice_attachment_ids"
+                                widget="many2many_binary"
+                                nolabel="1"
+                                colspan="2"
+                                readonly="state != 'draft'"
+                                invisible="move_type not in ('out_invoice', 'out_refund')"
+                            />
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+            <!-- Should we add a direct access button to the wizard
+            or just use the entry in the Actions menu ? Maybe it's
+            "too much" to add a direct access button...
+            <field name="state" widget="statusbar" position="before">
+                <button
+                    name="%(account_invoice_en16931_action)s"
+                    string="Generate eInvoice"
+                    type="action"
+                    invisible="move_type not in ('out_invoice', 'out_refund') or state == 'cancel'"
+                />
+            </field>
+            -->
+        </field>
+    </record>
+</odoo>

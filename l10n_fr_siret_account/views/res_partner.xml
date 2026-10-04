@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Copyright 2024 Akretion France (https://www.akretion.com/)
+  @author: Alexis de Lattre <alexis.delattre@akretion.com>
+  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+    <record id="res_partner_form_l10n_fr" model="ir.ui.view">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="l10n_fr_account.res_partner_form_l10n_fr" />
+        <field name="arch" type="xml">
+            <!-- the invisible attribute has the same value as in l10n_fr_siret
+            But, as this attribute is defined in l10n_fr_account, we need to
+                over-write it here -->
+            <field name="siret" position="attributes">
+                <attribute
+                    name="invisible"
+                >(not is_company and not parent_is_company) or not is_france_country</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>
