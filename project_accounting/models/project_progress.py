@@ -92,11 +92,13 @@ class ProjectProgress(models.Model):
     fnp_balance = fields.Monetary('Solde FNP', compute='_compute_provisions_balances', store=True, aggregator='sum')
 
     # --- cut off fin d'année
+    """
     @api.constrains('target_project_revenue', 'progress_revenue_amount')
     def _check_future_revenue_next_year(self):
         for rec in self:
             if (rec.target_project_revenue - rec.progress_revenue_amount) < rec.future_revenue_next_year :
                 raise ValidationError("Le CA à venir > 31/12/N, c'est à dire le CA qui sera reconnu l'an prochain, ne peut être supérieur au CA qui reste à reconnaitre (CA total projecté - CA cumulé)")
+    """
 
     future_revenue_next_year = fields.Monetary('CA à venir > 31/12/N', aggregator='sum')
 
