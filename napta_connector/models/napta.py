@@ -259,7 +259,6 @@ class ClientRestNapta:
         self.delete_api_raw(napta_type, napta_id)
 
         odoo_object.napta_id = None
-        self.env.cr.commit
         self.delete_element_cache(napta_type, napta_id)
         return
 
@@ -414,7 +413,7 @@ class naptaProject(models.Model):
         res = super().write(vals)
         for rec in self:
             ODOO_TO_NAPTA_PROJECT_FIELD_LIST = [
-                'napat_id',
+                'napta_id',
                 'is_prevent_napta_creation',
                 'company_part_amount_current',
                 'company_part_amount_initial',
@@ -1125,10 +1124,11 @@ class naptaHrLeave(models.Model):
     ]
     napta_id = fields.Char("Napta ID", copy=False)
 
+    @api.ondelete(at_uninstall=False)
     def _unlink_if_correct_states(self):
         # Allow to delete leaves on Odoo that are not anymore on Napta, even if there state is 'validate' in Odoo
-        if self.context.get('leave_skip_state_check') == False:
-            super().leave_skip_date_check()
+        if not self.env.context.get('leave_skip_state_check'):
+            super()._unlink_if_correct_states()
 
     def unlink(self):
         """ Remove the timesheets linked to the refused holidays """
@@ -1439,18 +1439,14 @@ def prepare_update_from_napta_values(env, odoo_model_name, dic, odoo_object=Fals
                 odoo_value = []
                 for key_dic in napta_value:
                     key_domain_search = get_napta_key_domain_search(odoo_field.relation, key_dic)
-                    target_objects = env[odoogt_field.relation].search(key_domain_search)
+                    target_objects = env[odoo_field.relation].search(key_domain_search)
                     if len(target_objects) != 1 :
                         _logger.info("Aucun ou plusieurs objets Odoo %s ont le key_domain_search %s" % (odoo_field.relation, str(key_domain_search)))
                         continue
                     odoo_value.append(target_objects[0].id)
                     
                 if odoo_object :
-                    ids_odoo_object = []
-                    for o in odoo_object[odoo_field_name]:
-                        ids_odoo_object.append(o.id)
-
-                    if ids_odoo_object.sort() != odoo_value.sort():
+                    if set(odoo_object[odoo_field_name].ids) != set(odoo_value):
                         #_logger.info("      Ancienne valeur dans Odoo pour l'attribut %s de l'objet %s (Odoo ID = %s): %s" % (odoo_field_name, odoo_model_name, str(odoo_object['id']), odoo_object[odoo_field_name]))
                         #_logger.info("              > Nouvelle valeur : %s" % odoo_value)
                         old_odoo_value[odoo_field_name] = odoo_object[odoo_field_name]

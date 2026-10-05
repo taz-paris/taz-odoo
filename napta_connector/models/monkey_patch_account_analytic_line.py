@@ -1,4 +1,6 @@
 from odoo import models, fields, api
+from odoo import _
+from odoo.exceptions import ValidationError
 from odoo.addons.hr_timesheet.models.hr_timesheet import AccountAnalyticLine as AccountAnalyticLineInherit
 
 ############################################################################
