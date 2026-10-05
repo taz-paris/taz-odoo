@@ -191,3 +191,5 @@ class projectBookEmployeeDistributionPeriod(models.Model):
     rel_stage_id = fields.Many2one(related="project_id.stage_id", store=True)
     rel_book_validation_employee_id = fields.Many2one(related="project_id.book_validation_employee_id", store=True)
     rel_book_validation_datetime = fields.Datetime(related="project_id.book_validation_datetime", store=True)
+    rel_project_partner_id = fields.Many2one(related="project_id.partner_id", store=True)
+    rel_project_partner_instrustry_id = fields.Many2one(related="project_id.partner_id.industry_id", store=True)
