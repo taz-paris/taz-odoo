@@ -12,7 +12,16 @@
         "l10n_fr_siret",
         "l10n_fr_einvoicing_import",
     ],
-    "external_dependencies": {"python": ["pyfrctc>=0.22"]},
+    "external_dependencies": {
+        "python": [
+            # account_invoice_en16931 and l10n_fr_ereporting were updated
+            # (2026-09-29) to the data_dict format required by factur-x>=7.0
+            # (generate_cii_xml() expects pre-nested "BG-*" keys). Older
+            # factur-x/pyfrctc raise "KeyError: 'BG-4'" with this code.
+            "pyfrctc>=0.23",
+            "factur-x>=7.3",
+        ]
+    },
     "data": [
         "views/res_partner.xml",
     ],

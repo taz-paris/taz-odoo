@@ -33,7 +33,9 @@ class wizardTimesheetMassValidation(models.TransientModel):
         self.env['project.project'].sudo().synchAllNapta()
 
         client = ClientRestNapta(self.env)
-        timesheet_napta_ids = []
+        # On regroupe les lignes Odoo par timesheet Napta : une timesheet Napta porte plusieurs timesheet_period,
+        # et c'est la timesheet qui est cloturee => toutes ses lignes doivent etre marquees, pas seulement la derniere.
+        timesheet_periods_by_napta_timesheet = {}
 
         for timesheet_period in self.timesheet_period_ids:
             if timesheet_period.is_timesheet_closed_on_napta == True:
@@ -41,13 +43,14 @@ class wizardTimesheetMassValidation(models.TransientModel):
 
             timesheet_period_napta = client.read_cache('timesheet_period', timesheet_period.napta_id)
             timesheet_napta_id = timesheet_period_napta['attributes']['timesheet_id']
-            if timesheet_napta_id not in timesheet_napta_ids:
-                timesheet_napta_ids.append(timesheet_napta_id)
+            if timesheet_napta_id not in timesheet_periods_by_napta_timesheet:
+                timesheet_periods_by_napta_timesheet[timesheet_napta_id] = self.env['account.analytic.line']
+            timesheet_periods_by_napta_timesheet[timesheet_napta_id] |= timesheet_period
 
-        for timesheet_napta_id in timesheet_napta_ids:
+        for timesheet_napta_id, timesheet_periods in timesheet_periods_by_napta_timesheet.items():
             attributes = {
                 'closed' : True,
             }
             client.patch_api('timesheet', attributes, timesheet_napta_id)
-            timesheet_period.is_timesheet_closed_on_napta = True
+            timesheet_periods.is_timesheet_closed_on_napta = True
             self.env.cr.commit()

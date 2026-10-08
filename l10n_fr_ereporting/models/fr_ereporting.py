@@ -4,6 +4,7 @@
 
 import base64
 import logging
+import re
 from collections import defaultdict
 from datetime import timedelta
 from pprint import pformat
@@ -28,6 +29,12 @@ try:
 except (OSError, ImportError) as err:
     logger.debug("Cannot import pyfrctc")
     logger.debug(err)
+try:
+    from facturx import preprocess_data_dict
+except (OSError, ImportError) as err:
+    logger.debug("Cannot import facturx")
+    logger.debug(err)
+
 
 TRANSMISSION_TYPE_CODE = {
     "initial": "IN",
@@ -336,6 +343,7 @@ class FrEreporting(models.Model):
         last_vat_return = vat_return_obj.search(
             [("company_id", "=", company.id), ("state", "!=", "manual")],
             order="start_date desc",
+            limit=1,
         )
         if not last_vat_return:
             raise UserError(
@@ -1220,6 +1228,72 @@ class FrEreporting(models.Model):
                 )
         return data_dict
 
+    def _rule_g1_05(self, btx):
+        # rule G1.05
+        if btx and isinstance(btx, str):
+            btx = btx.strip()
+            btx = btx.replace("  ", " ")  # remove double spaces
+            btx = re.sub(r"[^a-zA-Z0-9 _+/-]", "", unidecode(btx))
+            if len(btx) > 35:
+                btx = btx[:35]
+        return btx or None
+
+    def _prepare_transaction_invoice_data_dict(self, move):
+        self.ensure_one()
+        move_speedy = move._prepare_en16931_speedy()
+        # this has already been checked by the inherit of _post()
+        # but the info may have been removed in the meantime
+        if move.fiscal_position_fr_vat_type == "intracom_b2b" and (
+            not move.commercial_partner_id.vat or move.commercial_partner_id.vat == "/"
+        ):
+            raise UserError(
+                self.env._(
+                    "VAT Number is not set on partner '%(partner)s' "
+                    "(invoice %(invoice)s).",
+                    partner=move.commercial_partner_id.display_name,
+                    invoice=move.display_name,
+                )
+            )
+        inv_dict = move.with_context(fr_ereporting=True)._prepare_en16931_dict(
+            move_speedy
+        )
+        inv_dict["BT-2"] = move.date  # instead of invoice_date
+        if self.type == "in_transaction":
+            # TODO factorize code below
+            # BT-47 and BT-47-1 must be OK because it has the company SIREN
+            if move.fiscal_position_fr_vat_type == "intracom_b2b":
+                inv_dict["BG-4"]["legal_identifier"] = inv_dict["BG-4"][
+                    "vat_identifier"
+                ]
+                inv_dict["BG-4"]["legal_identifier_schemeid"] = "0223"
+            elif move.fiscal_position_fr_vat_type == "extracom":
+                country_code = inv_dict["BG-4"]["country_code"]
+                seller_name_for_id = unidecode(
+                    "".join(x for x in inv_dict["BG-4"]["name"] if not x.isspace())
+                ).upper()
+                inv_dict["BG-4"]["legal_identifier"] = (
+                    f"{country_code}{seller_name_for_id[:16]}"
+                )
+                inv_dict["BG-4"]["legal_identifier_schemeid"] = "0227"
+            inv_dict["BT-1"] = self._rule_g1_05(inv_dict["BT-1"])
+        elif self.type == "out_transaction":
+            # BT-30 and BT-30-1 must be OK because it has the company SIREN
+            if move.fiscal_position_fr_vat_type == "intracom_b2b":
+                inv_dict["BG-7"]["legal_identifier"] = inv_dict["BG-7"][
+                    "vat_identifier"
+                ]
+                inv_dict["BG-7"]["legal_identifier_schemeid"] = "0223"
+            elif move.fiscal_position_fr_vat_type == "extracom":
+                country_code = inv_dict["BG-7"]["country_code"]
+                buyer_name_for_id = unidecode(
+                    "".join(x for x in inv_dict["BG-7"]["name"] if not x.isspace())
+                ).upper()
+                inv_dict["BG-7"]["legal_identifier"] = (
+                    f"{country_code}{buyer_name_for_id[:16]}"
+                )
+                inv_dict["BG-7"]["legal_identifier_schemeid"] = "0227"
+        return inv_dict
+
     def _prepare_transaction_data_dict(self, identifier):
         self.ensure_one()
         assert self.type in ("in_transaction", "out_transaction")
@@ -1235,47 +1309,10 @@ class FrEreporting(models.Model):
             }
         )
         for move in self.move_ids:
-            speedy = move._prepare_en16931_speedy()
-            # this has already been checked by the inherit of _post()
-            # but the info may have been removed in the meantime
-            if move.fiscal_position_fr_vat_type == "intracom_b2b" and (
-                not move.commercial_partner_id.vat
-                or move.commercial_partner_id.vat == "/"
-            ):
-                raise UserError(
-                    self.env._(
-                        "VAT Number is not set on partner '%(partner)s' "
-                        "(invoice %(invoice)s).",
-                        partner=move.commercial_partner_id.display_name,
-                        invoice=move.display_name,
-                    )
-                )
-            inv_dict = move._prepare_en16931_dict(speedy)
-            inv_dict["BT-2"] = move.date  # instead of invoice_date
-            if self.type == "in_transaction":
-                # BT-47 and BT-47-1 must be OK because it has the company SIREN
-                if move.fiscal_position_fr_vat_type == "intracom_b2b":
-                    inv_dict["BT-30"] = inv_dict["BT-31"]  # BT-31 = Seller VAT
-                    inv_dict["BT-30-1"] = "0223"
-                elif move.fiscal_position_fr_vat_type == "extracom":
-                    country_code = inv_dict["BT-40"]
-                    seller_name_for_id = unidecode(
-                        "".join(x for x in inv_dict["BT-27"] if not x.isspace())
-                    ).upper()
-                    inv_dict["BT-30"] = f"{country_code}{seller_name_for_id[:16]}"
-                    inv_dict["BT-30-1"] = "0227"
-            elif self.type == "out_transaction":
-                # BT-30 and BT-30-1 must be OK because it has the company SIREN
-                if move.fiscal_position_fr_vat_type == "intracom_b2b":
-                    inv_dict["BT-47"] = inv_dict["BT-48"]  # BT-48 = Buyer VAT
-                    inv_dict["BT-47-1"] = "0223"
-                elif move.fiscal_position_fr_vat_type == "extracom":
-                    country_code = inv_dict["BT-55"]
-                    buyer_name_for_id = unidecode(
-                        "".join(x for x in inv_dict["BT-44"] if not x.isspace())
-                    ).upper()
-                    inv_dict["BT-47"] = f"{country_code}{buyer_name_for_id[:16]}"
-                    inv_dict["BT-47-1"] = "0227"
+            inv_dict = self._prepare_transaction_invoice_data_dict(move)
+            # we can put any flavor in preprocess_data_dict(): we use it
+            # to convert float values to string
+            preprocess_data_dict(inv_dict, "factur-x", "en16931")
             if minimize:
                 self._minimize_en16931_dict(inv_dict)
             data_dict["TG-8"].append(inv_dict)
