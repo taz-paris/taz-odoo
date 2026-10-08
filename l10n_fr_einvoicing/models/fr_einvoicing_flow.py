@@ -3,7 +3,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import base64
-import json
 import logging
 import time
 from pprint import pformat
@@ -15,7 +14,6 @@ from stdnum.fr.siret import is_valid as siret_is_valid
 
 from odoo import Command, api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools import json_default
 
 from .res_partner import SUPERPDP_SANDBOX_SIREN
 
@@ -186,9 +184,6 @@ class FrEinvoicingFlow(models.Model):
         string="PEPPOL Status of Directory Line",
         help="PEPPOL status of directory line when flow is sent to the AP",
     )
-    data_dict = fields.Json(readonly=True, string="JSON Data Map")
-    # maybe we'll drop this field data_dict_txt once web_widget_json will be merged
-    # https://github.com/OCA/web/pull/3231
     data_dict_txt = fields.Text(readonly=True, string="Text Data Map")
     # state côté PA / côté Odoo ?
     # initial M2M
@@ -248,12 +243,9 @@ class FrEinvoicingFlow(models.Model):
                 # for txt, I used pformat() instead of json.dumps to have
                 # a nice display of accented chararacters
                 vals["data_dict_txt"] = pformat(vals["data_dict"])
-                vals["data_dict"] = json.loads(
-                    json.dumps(vals["data_dict"], default=json_default)
-                )
             else:
-                vals["data_dict"] = False
                 vals["data_dict_txt"] = False
+            vals.pop("data_dict")
 
     def generate_button(self):
         log_obj = self.env["fr.einvoicing.log"]
@@ -305,6 +297,7 @@ class FrEinvoicingFlow(models.Model):
             )
             log_obj._warning_log(result, msg)
             return
+        data_dict = None
         if self.event_ids:
             assert len(self.event_ids) == 1
             event = self.event_ids
@@ -666,7 +659,14 @@ class FrEinvoicingFlow(models.Model):
         if self.type == "SupplierInvoice":
             move_id = error = None
             try:
-                move_id = self._import_supplier_invoice(result)
+                # savepoint: on failure, we don't want to leave in the database a
+                # partial invoice. The creation can raise AFTER the INSERT (for example
+                # on the 'Incompatible companies on records' constraint) and, since the
+                # exception is catched here, the transaction is not rolled back.
+                # Don't replace it by a cr.rollback() in the except: that would rollback
+                # the whole transaction of the job
+                with self.env.cr.savepoint():
+                    move_id = self._import_supplier_invoice(result)
             except Exception as err:
                 error = str(err)
                 msg = (

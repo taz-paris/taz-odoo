@@ -4,7 +4,7 @@
 
 {
     "name": "France eReporting",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.0.1",
     "category": "Accounting",
     "license": "AGPL-3",
     "summary": "Community implementation of e-reporting for France",
@@ -15,7 +15,7 @@
         "l10n_fr_einvoicing",
         "l10n_fr_account_vat_return",
     ],
-    "external_dependencies": {"python": ["unidecode", "pyfrctc>=0.22"]},
+    "external_dependencies": {"python": ["unidecode", "pyfrctc>=0.23"]},
     "data": [
         "security/ir.model.access.csv",
         "security/ir_rule.xml",

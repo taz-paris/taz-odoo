@@ -629,12 +629,8 @@ class AccountMove(models.Model):
             )
         ):
             action = self.env["ir.actions.actions"]._for_xml_id(
-                "l10n_fr_einvoicing.fr_einvoicing_event_manual_action"
+                "l10n_fr_einvoicing.fr_einvoicing_account_move_cancel_action"
             )
-            action["context"] = {
-                "default_status_purchase": "refused",
-                "default_status_readonly": True,
-            }
             return action
         return super().button_cancel()
 
@@ -859,3 +855,59 @@ class AccountMove(models.Model):
             "raw": readable_file_bin,
         }
         return vals
+
+    def _en16931_prepare_partner_data(self, speedy):
+        self.ensure_one()
+        partner_vals = super()._en16931_prepare_partner_data(speedy)
+        if self.fr_directory_line_id:
+            partner_vals["einvoicing_addr"] = self.fr_directory_line_id.identifier
+            partner_vals["einvoicing_addr_schemeid"] = "0225"
+        if self.fr_directory_partner_entity_type == "public":
+            if self.fr_directory_line_id.type == "routing_code":
+                partner_vals["identifiers"]["0240"] = (
+                    self.fr_directory_line_id.routing_code
+                )
+                partner_vals["contacts"] = [
+                    {"name": self.fr_directory_line_id.routing_code_name}
+                ]
+            if self.env.context.get("chorus_old_xml_syntax"):
+                siret = self.commercial_partner_id._get_siret(raise_if_none=True)
+                partner_vals["legal_identifier"] = siret
+                partner_vals["legal_identifier_schemeid"] = "0009"
+        return partner_vals
+
+    def _en16931_prepare_company_data(self, speedy):
+        self.ensure_one()
+        company_vals = super()._en16931_prepare_company_data(speedy)
+        if self.company_fr_directory_line_id:
+            company_vals["einvoicing_addr"] = (
+                self.company_fr_directory_line_id.identifier
+            )
+            company_vals["einvoicing_addr_schemeid"] = "0225"
+        if self.fr_directory_partner_entity_type == "public" and self.env.context.get(
+            "chorus_old_xml_syntax"
+        ):
+            siret = self.company_id.partner_id._get_siret(raise_if_none=True)
+            company_vals["legal_identifier"] = siret
+            company_vals["legal_identifier_schemeid"] = "0009"
+        return company_vals
+
+    def _prepare_en16931_dict(self, speedy, pdf_invoice_bin=False):
+        data_dict = super()._prepare_en16931_dict(
+            speedy, pdf_invoice_bin=pdf_invoice_bin
+        )
+        if self.fr_directory_partner_entity_type == "public" and self.env.context.get(
+            "chorus_old_xml_syntax"
+        ):
+            data_dict["BT-10"] = self.fr_directory_line_id.routing_code
+            if self.payment_state == "paid":
+                data_dict["BT-23"] = "A2"
+            else:
+                data_dict["BT-23"] = "A1"
+        return data_dict
+
+    def _prepare_bg1(self, speedy):
+        res = super()._prepare_bg1(speedy)
+        if self.fr_directory_partner_entity_type == "public":
+            res.append({"BT-21": "ADN", "BT-22": "B2G"})
+        return res
