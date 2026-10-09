@@ -87,6 +87,7 @@
 				name="fr_directory_sync_button"
 				type="object"
 				string="Directory Sync"
+				groups="account.group_account_user"
 			    />
 			</group>
 			<group
