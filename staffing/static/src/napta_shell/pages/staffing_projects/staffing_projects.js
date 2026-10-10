@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component, useState } from "@odoo/owl";
+import { AssignmentDrawer } from "../../components/assignment_drawer/assignment_drawer";
 
 /**
  * Données factices LOCALES à cette page.
@@ -113,8 +114,11 @@ function buildDemandesList(project) {
         const pct = 25 + ((seed * 17) % 76);
         const hasPrebooked = seed % 2 === 0;
         list.push({
+            id: project.id + "-" + i,
             dateStart: "19 octobre 2026",
             dateEnd: "8 janvier 2027",
+            startDateFr: "19/10/2026",
+            endDateFr: "08/01/2027",
             durationDays: Math.round((days + pct / 100) * 10) / 10,
             durationPct: pct,
             department: DEMANDE_DEPARTMENTS[seed % DEMANDE_DEPARTMENTS.length],
@@ -327,6 +331,7 @@ function buildFinance(project) {
 export class StaffingProjectsPage extends Component {
     static template = "staffing.StaffingProjectsPage";
     static props = { page: Object };
+    static components = { AssignmentDrawer };
 
     setup() {
         this.columns = COLUMNS;
@@ -353,6 +358,8 @@ export class StaffingProjectsPage extends Component {
             // ---- Widgets Demandes / Staffings (vues Cartes et Tableau) ----
             demandesHover: null, // id de projet dont le widget Demandes est survolé
             staffingPopover: null, // "<simules|reels|combined>:<projectId>"
+            // ---- Tiroir d'édition d'une demande (components/assignment_drawer) ----
+            assignmentDrawer: null, // { mode: "edit", record } ou null
             // ---- Onglet "Suivi financier" ----
             financeMenuOpen: null, // "situation" | "columns" | "display" | null
             financeSituation: "current", // "current" | id d'une situation sauvegardée
@@ -585,6 +592,35 @@ export class StaffingProjectsPage extends Component {
         if (ev) ev.stopPropagation();
         this.state.demandesHover = null;
         this.openDetail(project, tab);
+    }
+
+    // ---- Tiroir d'édition d'une demande (icône crayon du widget Demandes) ----
+    openDemandeEdit(project, demande, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.demandesHover = null;
+        this.state.staffingPopover = null;
+        const record = {
+            id: demande.id,
+            project: project.title,
+            client: project.client,
+            businessUnits: [demande.department].filter(Boolean),
+            status: project.status,
+            soldDays: null,
+            startDate: demande.startDateFr,
+            endDate: demande.endDateFr,
+            workloadDays: demande.durationDays,
+            preBooked: [...demande.prebooked, ...demande.suggested].map((p) => p.name),
+        };
+        this.state.assignmentDrawer = { mode: "edit", record };
+    }
+
+    closeAssignmentDrawer() {
+        this.state.assignmentDrawer = null;
+    }
+
+    get assignmentDrawerKey() {
+        const d = this.state.assignmentDrawer;
+        return d ? d.mode + "-" + (d.record ? d.record.id : "new") : "";
     }
 
     toggleViews(ev) {

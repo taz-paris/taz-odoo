@@ -305,6 +305,16 @@
                 </div>
             </div>
 
+            <!-- Tiroir mutualisé de modification d'une demande
+                 (components/assignment_drawer), ouvert depuis l'icône crayon
+                 du widget Demandes. -->
+            <AssignmentDrawer t-if="state.assignmentDrawer"
+                               t-key="assignmentDrawerKey"
+                               kind="'request'"
+                               mode="state.assignmentDrawer.mode"
+                               record="state.assignmentDrawer.record"
+                               onClose.bind="closeAssignmentDrawer"/>
+
         </div>
     </t>
 
@@ -315,7 +325,7 @@
                 <span class="osp_dp_dates"><i class="fa fa-calendar"/> <t t-esc="d.dateStart"/> <i class="fa fa-angle-right"/> <t t-esc="d.dateEnd"/></span>
                 <span class="osp_dp_duration"><i class="fa fa-clock-o"/> <t t-esc="d.durationDays"/>j · <t t-esc="d.durationPct"/>%</span>
                 <i class="fa fa-pencil osp_dp_edit" data-tooltip="Modifier la demande"
-                   t-on-click="(ev) => this.openDetailFromCell(project, 'requests', ev)"/>
+                   t-on-click="(ev) => this.openDemandeEdit(project, d, ev)"/>
             </div>
             <div class="osp_dp_tags">
                 <span class="osp_dp_tag"><i class="fa fa-sitemap"/> <t t-esc="d.department"/></span>
