@@ -135,6 +135,25 @@ function buildStaffingsList(project, count, offset) {
     return pickPeople(project.id * 11 + offset, count || 0);
 }
 
+/** Construit, de façon déterministe, le staffing (réel ou simulé) à préremplir dans le tiroir d'édition. */
+function buildStaffingDetail(project, person, kind, index) {
+    const seed = project.id * 13 + index + (kind === "reels" ? 97 : 0);
+    const pct = 30 + ((seed * 11) % 71);
+    const days = Math.round((pct / 100) * 60 * 10) / 10;
+    return {
+        id: project.id + "-" + kind + "-" + index,
+        employee: person,
+        kind: kind === "reels" ? "real" : "simulated",
+        status: project.status,
+        period: "19/10/2026 → 08/01/2027",
+        rate: pct + "% (" + days + " jours)",
+        project: project.title,
+        subproject: "",
+        department: project.departments || project.category,
+        office: DEMANDE_OFFICES[seed % DEMANDE_OFFICES.length],
+    };
+}
+
 const FILTER_SECTIONS = [
     { title: "Projet", items: ["Catégorie de projet", "Chefs de projet", "Client", "Colonne (vue cartes)", "Département (Projet)", "Étiquette", "Mode de facturation", "Projet", "Statut de projet"] },
     { title: "Utilisateur", items: ["Bureau", "Compétence", "Département (Utilisateur)", "Poste", "Responsable hiérarchique", "Utilisateur"] },
@@ -611,7 +630,15 @@ export class StaffingProjectsPage extends Component {
             workloadDays: demande.durationDays,
             preBooked: [...demande.prebooked, ...demande.suggested].map((p) => p.name),
         };
-        this.state.assignmentDrawer = { mode: "edit", record };
+        this.state.assignmentDrawer = { mode: "edit", kind: "request", record };
+    }
+
+    // ---- Tiroir d'édition d'un staffing (icône crayon du widget Staffings) ----
+    openStaffingEdit(project, person, kind, index, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.staffingPopover = null;
+        const record = buildStaffingDetail(project, person, kind, index);
+        this.state.assignmentDrawer = { mode: "edit", kind: "staffing", record };
     }
 
     closeAssignmentDrawer() {

@@ -149,7 +149,8 @@
                                                     <div class="osp_sp_person_name" t-esc="person.name"/>
                                                     <div class="osp_sp_person_role" t-esc="person.role"/>
                                                 </div>
-                                                <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                                <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"
+                                                   t-on-click="(ev) => this.openStaffingEdit(card, person, 'reels', person_index, ev)"/>
                                             </div>
                                         </t>
                                         <t t-if="card.staffingsSimules">
@@ -160,7 +161,8 @@
                                                     <div class="osp_sp_person_name" t-esc="person.name"/>
                                                     <div class="osp_sp_person_role" t-esc="person.role"/>
                                                 </div>
-                                                <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                                <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"
+                                                   t-on-click="(ev) => this.openStaffingEdit(card, person, 'simules', person_index, ev)"/>
                                             </div>
                                         </t>
                                     </div>
@@ -238,7 +240,8 @@
                                             <div class="osp_sp_person_name" t-esc="person.name"/>
                                             <div class="osp_sp_person_role" t-esc="person.role"/>
                                         </div>
-                                        <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                        <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"
+                                           t-on-click="(ev) => this.openStaffingEdit(row, person, 'simules', person_index, ev)"/>
                                     </div>
                                 </div>
                             </div>
@@ -257,7 +260,8 @@
                                             <div class="osp_sp_person_name" t-esc="person.name"/>
                                             <div class="osp_sp_person_role" t-esc="person.role"/>
                                         </div>
-                                        <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                        <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"
+                                           t-on-click="(ev) => this.openStaffingEdit(row, person, 'reels', person_index, ev)"/>
                                     </div>
                                 </div>
                             </div>
@@ -305,12 +309,12 @@
                 </div>
             </div>
 
-            <!-- Tiroir mutualisé de modification d'une demande
-                 (components/assignment_drawer), ouvert depuis l'icône crayon
-                 du widget Demandes. -->
+            <!-- Tiroir mutualisé de modification d'une demande ou d'un
+                 staffing (components/assignment_drawer), ouvert depuis
+                 l'icône crayon des widgets Demandes / Staffings. -->
             <AssignmentDrawer t-if="state.assignmentDrawer"
                                t-key="assignmentDrawerKey"
-                               kind="'request'"
+                               kind="state.assignmentDrawer.kind"
                                mode="state.assignmentDrawer.mode"
                                record="state.assignmentDrawer.record"
                                onClose.bind="closeAssignmentDrawer"/>
