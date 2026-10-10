@@ -5,7 +5,7 @@
         <div class="o_napta_staffing_projects" t-on-click="closeMenus">
 
             <!-- Header -->
-            <div class="osp_header">
+            <div t-if="!state.detail" class="osp_header">
                 <h1>Projets</h1>
                 <div class="osp_view_switch">
                     <button type="button"
@@ -23,7 +23,7 @@
             </div>
 
             <!-- Toolbar -->
-            <div class="osp_toolbar">
+            <div t-if="!state.detail" class="osp_toolbar">
                 <div class="osp_toolbar_left">
                     <div class="osp_dropdown_wrap">
                         <button type="button" class="osp_toolbar_btn" t-on-click="toggleViews">
@@ -80,7 +80,7 @@
             </div>
 
             <!-- Bulk actions bar -->
-            <div t-if="selectedCount" class="osp_bulk_bar">
+            <div t-if="!state.detail and selectedCount" class="osp_bulk_bar">
                 <span class="osp_bulk_count" t-esc="selectedCount + ' éléments sélectionnés'"/>
                 <button type="button" class="osp_bulk_btn"><i class="fa fa-sign-in"/> Déplacer</button>
                 <button type="button" class="osp_bulk_btn"><i class="fa fa-archive"/> Archiver</button>
@@ -89,7 +89,7 @@
             </div>
 
             <!-- VUE CARTES -->
-            <div t-if="state.view === 'cards'" class="osp_board">
+            <div t-if="!state.detail and state.view === 'cards'" class="osp_board">
                 <div t-foreach="columns" t-as="column" t-key="column.key" class="osp_column">
                     <div class="osp_column_header">
                         <span class="osp_column_count" t-esc="cardsForColumn(column.key).length"/>
@@ -151,7 +151,7 @@
             </div>
 
             <!-- VUE TABLEAU -->
-            <table t-if="state.view === 'table'" class="osp_table">
+            <table t-if="!state.detail and state.view === 'table'" class="osp_table">
                 <thead>
                     <tr>
                         <th class="osp_th_checkbox"><i class="fa fa-square-o"/></th>
@@ -194,43 +194,365 @@
                 </tbody>
             </table>
 
-            <!-- Détail projet (onglets) -->
-            <div t-if="state.detail" class="osp_detail_overlay" t-on-click="closeDetail">
-                <div class="osp_detail_panel" t-on-click.stop="">
-                    <div class="osp_detail_header">
-                        <span t-attf-class="osp_dot osp_dot_{{state.detail.color}}"/>
-                        <h2 t-esc="state.detail.title"/>
-                        <i class="fa fa-times osp_detail_close" t-on-click="closeDetail"/>
+            <!-- Détail projet (occupe toute la largeur de la zone principale) -->
+            <div t-if="state.detail" class="osp_detail_page">
+                <div class="osp_detail_back" t-on-click="closeDetail">
+                    <i class="fa fa-arrow-left"/> Retour aux projets
+                </div>
+                <div class="osp_detail_header">
+                    <span t-attf-class="osp_dot osp_dot_{{state.detail.color}}"/>
+                    <h2 t-esc="state.detail.title"/>
+                    <span class="osp_detail_like"><i class="fa fa-heart-o"/> <t t-esc="state.detail.likes"/></span>
+                </div>
+                <div class="osp_detail_subtitle">
+                    <span t-esc="state.detail.client"/>
+                    <span t-if="state.detail.dateStart"> · <t t-esc="state.detail.dateStart"/> <i class="fa fa-angle-right"/> <t t-esc="state.detail.dateEnd"/></span>
+                </div>
+                <div class="osp_detail_tabs">
+                    <div t-foreach="detailTabs" t-as="tab" t-key="tab.key"
+                         t-att-class="{ osp_detail_tab: true, osp_detail_tab_active: state.detailTab === tab.key }"
+                         t-on-click="() => this.setDetailTab(tab.key)">
+                        <i t-attf-class="fa {{tab.icon}}"/>
+                        <span t-esc="tab.label"/>
                     </div>
-                    <div class="osp_detail_subtitle">
-                        <span t-esc="state.detail.client"/>
-                        <span t-if="state.detail.dateStart"> · <t t-esc="state.detail.dateStart"/> <i class="fa fa-angle-right"/> <t t-esc="state.detail.dateEnd"/></span>
+                </div>
+                <div class="osp_detail_body">
+                    <div t-if="state.detailTab === 'calendar'" class="osp_detail_placeholder">
+                        <p>Vue calendrier du projet : intervenants et périodes de staffing.</p>
+                        <button type="button" class="osp_toolbar_btn"><i class="fa fa-user-plus"/> Ajouter un staffing</button>
                     </div>
-                    <div class="osp_detail_tabs">
-                        <div t-foreach="detailTabs" t-as="tab" t-key="tab.key"
-                             t-att-class="{ osp_detail_tab: true, osp_detail_tab_active: state.detailTab === tab.key }"
-                             t-on-click="() => this.setDetailTab(tab.key)">
-                            <i t-attf-class="fa {{tab.icon}}"/>
-                            <span t-esc="tab.label"/>
+                    <div t-if="state.detailTab === 'requests'" class="osp_detail_placeholder">
+                        <p><strong>Demandes</strong> — liste des demandes de ressources existantes sur le projet.</p>
+                        <p><strong>Staffings</strong> — liste des staffings existants sur le projet.</p>
+                    </div>
+                    <div t-if="state.detailTab === 'subprojects'" class="osp_detail_placeholder">
+                        <p>Sous-projets rattachés à ce projet.</p>
+                        <button type="button" class="osp_toolbar_btn"><i class="fa fa-link"/> Connecter un sous-projet</button>
+                    </div>
+                    <t t-if="state.detailTab === 'finance'" t-call="staffing.StaffingProjectsPage.Finance"/>
+                </div>
+            </div>
+
+        </div>
+    </t>
+
+    <t t-name="staffing.StaffingProjectsPage.Finance">
+        <div class="osp_finance" t-on-click="closeFinanceMenus">
+
+            <div class="osp_finance_section_title">
+                <h3>Détail du suivi financier</h3>
+                <i class="fa fa-info-circle osp_finance_info" t-att-data-tooltip="financeInfoTooltip"/>
+            </div>
+
+            <div class="osp_finance_toolbar">
+                <button t-if="financeData.billingMode === 'forfait'" type="button" class="btn osp_finance_save_btn" t-on-click.stop="openFinanceSaveDrawer">
+                    <i class="fa fa-camera"/> Sauvegarder la donnée financière
+                </button>
+                <button type="button" class="osp_toolbar_btn"><i class="fa fa-filter"/> Filtrer</button>
+
+                <div class="osp_dropdown_wrap">
+                    <button type="button" class="osp_toolbar_btn" t-on-click="(ev) => this.toggleFinanceMenu('situation', ev)">
+                        Situation <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.financeMenuOpen === 'situation'" class="osp_dropdown osp_finance_dropdown" t-on-click.stop="">
+                        <div t-att-class="{ osp_finance_dropdown_item: true, osp_finance_dropdown_item_active: state.financeSituation === 'current' }"
+                             t-on-click="() => this.setFinanceSituation('current')">
+                            Situation en cours
+                        </div>
+                        <t t-foreach="financeSavedSituations" t-as="sit" t-key="sit.id">
+                            <div t-att-class="{ osp_finance_dropdown_item: true, osp_finance_dropdown_item_active: state.financeSituation === sit.id }"
+                                 t-on-click="() => this.setFinanceSituation(sit.id)">
+                                <span t-esc="sit.label"/>
+                                <span class="osp_finance_dropdown_sub" t-esc="sit.date"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="osp_dropdown_wrap">
+                    <button type="button" class="osp_toolbar_btn" t-on-click="(ev) => this.toggleFinanceMenu('columns', ev)">
+                        Colonnes <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.financeMenuOpen === 'columns'" class="osp_dropdown osp_finance_dropdown" t-on-click.stop="">
+                        <t t-foreach="financeColumnGroups" t-as="group" t-key="group.title">
+                            <div class="osp_finance_dropdown_title" t-esc="group.title"/>
+                            <div t-foreach="group.items" t-as="item" t-key="item.key" class="osp_finance_dropdown_check">
+                                <i class="fa fa-check-square"/> <span t-esc="item.label"/>
+                            </div>
+                        </t>
+                        <div class="osp_finance_dropdown_title">Lignes à afficher</div>
+                        <div t-foreach="financeRowsToDisplay" t-as="r" t-key="r" class="osp_finance_dropdown_check">
+                            <i class="fa fa-check-square"/> <span t-esc="r"/>
                         </div>
                     </div>
-                    <div class="osp_detail_body">
-                        <div t-if="state.detailTab === 'calendar'" class="osp_detail_placeholder">
-                            <p>Vue calendrier du projet : intervenants et périodes de staffing.</p>
-                            <button type="button" class="osp_toolbar_btn"><i class="fa fa-user-plus"/> Ajouter un staffing</button>
-                        </div>
-                        <div t-if="state.detailTab === 'requests'" class="osp_detail_placeholder">
-                            <p><strong>Demandes</strong> — liste des demandes de ressources existantes sur le projet.</p>
-                            <p><strong>Staffings</strong> — liste des staffings existants sur le projet.</p>
-                        </div>
-                        <div t-if="state.detailTab === 'subprojects'" class="osp_detail_placeholder">
-                            <p>Sous-projets rattachés à ce projet.</p>
-                            <button type="button" class="osp_toolbar_btn"><i class="fa fa-link"/> Connecter un sous-projet</button>
-                        </div>
-                        <div t-if="state.detailTab === 'finance'" class="osp_detail_placeholder">
-                            <p>Comparaison vendu / staffé / réalisé pour ce projet.</p>
-                        </div>
+                </div>
+
+                <div class="osp_dropdown_wrap">
+                    <button type="button" class="osp_toolbar_btn" t-on-click="(ev) => this.toggleFinanceMenu('display', ev)">
+                        Paramètres d'affichage <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.financeMenuOpen === 'display'" class="osp_dropdown osp_finance_dropdown" t-on-click.stop="">
+                        <div class="osp_finance_dropdown_title">Afficher en</div>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_unit" t-att-checked="state.displaySettings.unit === 'day'" t-on-change="() => this.setDisplaySetting('unit', 'day')"/> Jour</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_unit" t-att-checked="state.displaySettings.unit === 'hour'" t-on-change="() => this.setDisplaySetting('unit', 'hour')"/> Heure</label>
+                        <div class="osp_finance_dropdown_title">Grouper par</div>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_group" t-att-checked="state.displaySettings.groupBy === 'week'" t-on-change="() => this.setDisplaySetting('groupBy', 'week')"/> Semaine</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_group" t-att-checked="state.displaySettings.groupBy === 'month'" t-on-change="() => this.setDisplaySetting('groupBy', 'month')"/> Mois</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_group" t-att-checked="state.displaySettings.groupBy === 'year'" t-on-change="() => this.setDisplaySetting('groupBy', 'year')"/> Année</label>
+                        <div class="osp_finance_dropdown_title">Devise</div>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_currency" t-att-checked="state.displaySettings.currency === 'EUR'" t-on-change="() => this.setDisplaySetting('currency', 'EUR')"/> € Euro</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_currency" t-att-checked="state.displaySettings.currency === 'USD'" t-on-change="() => this.setDisplaySetting('currency', 'USD')"/> $ Dollar</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_currency" t-att-checked="state.displaySettings.currency === 'GBP'" t-on-change="() => this.setDisplaySetting('currency', 'GBP')"/> £ Livre</label>
                     </div>
+                </div>
+
+                <div class="osp_header_spacer"/>
+                <button type="button" class="osp_icon_btn" data-tooltip="Exporter (.xlsx ou .csv)"><i class="fa fa-download"/></button>
+                <button type="button" class="osp_toolbar_btn"><i class="fa fa-external-link"/> Voir le détail des calculs</button>
+            </div>
+
+            <div class="osp_finance_kpis">
+                <div class="osp_finance_kpi">
+                    <div class="osp_finance_kpi_row">
+                        <span>Budget vendu</span>
+                        <strong t-esc="formatFinanceValue(financeData.kpis.soldBudget, '€')"/>
+                    </div>
+                    <div class="osp_finance_kpi_row">
+                        <span>Enveloppe de jours hommes vendus</span>
+                        <strong t-esc="financeData.kpis.manDaysSold + ' JH'"/>
+                    </div>
+                </div>
+                <div class="osp_finance_kpi">
+                    <div class="osp_finance_kpi_row">
+                        <span>Avancement du projet à date</span>
+                        <span class="osp_finance_kpi_badge" t-esc="financeData.kpis.advancementToDate + ' %'"/>
+                    </div>
+                    <div class="osp_finance_progress">
+                        <div class="osp_finance_progress_bar" t-attf-style="width: {{ financeData.kpis.advancementToDate }}%"/>
+                    </div>
+                    <div class="osp_finance_kpi_row osp_finance_kpi_row_top">
+                        <span>Chiffre d'affaires produit à date</span>
+                        <strong t-esc="formatFinanceValue(financeData.kpis.turnoverToDate, '€')"/>
+                    </div>
+                </div>
+                <div t-if="financeData.billingMode === 'forfait'" class="osp_finance_kpi">
+                    <div class="osp_finance_kpi_row">
+                        <span>Taux de marge cible</span>
+                        <span class="osp_finance_kpi_badge" t-esc="financeData.kpis.targetMarginRate + ' %'"/>
+                    </div>
+                    <div class="osp_finance_kpi_row osp_finance_kpi_row_top">
+                        <span>Taux de marge projeté à terme</span>
+                        <span class="osp_finance_kpi_badge osp_finance_kpi_badge_orange">
+                            <i class="fa fa-arrow-down"/> <t t-esc="financeData.kpis.projectedMarginRateAtEnd + ' %'"/>
+                        </span>
+                    </div>
+                </div>
+                <div class="osp_finance_kpi">
+                    <div class="osp_finance_kpi_row">
+                        <span>Dérive à date <i class="fa fa-info-circle" title="Charge réelle à date - Charge prévue à date"/></span>
+                        <span t-attf-class="osp_finance_kpi_badge {{ financeData.kpis.driftToDate >= 0 ? 'osp_finance_kpi_badge_red' : 'osp_finance_kpi_badge_green' }}"
+                              t-esc="(financeData.kpis.driftToDate >= 0 ? '+' : '') + financeData.kpis.driftToDate + ' JH'"/>
+                    </div>
+                    <div class="osp_finance_kpi_row osp_finance_kpi_row_top">
+                        <span>Dérive projetée <i class="fa fa-info-circle" title="Charge projetée à terme - Enveloppe de jours hommes vendus"/></span>
+                        <span t-attf-class="osp_finance_kpi_badge {{ financeData.kpis.projectedDrift >= 0 ? 'osp_finance_kpi_badge_red' : 'osp_finance_kpi_badge_green' }}"
+                              t-esc="(financeData.kpis.projectedDrift >= 0 ? '+' : '') + financeData.kpis.projectedDrift + ' JH'"/>
+                    </div>
+                </div>
+            </div>
+
+            <table class="osp_finance_table">
+                <thead>
+                    <tr>
+                        <th class="osp_ft_label">
+                            <i class="fa fa-angle-down"/> Situation en cours
+                        </th>
+                        <th class="osp_ft_group" colspan="2">Total à date</th>
+                        <th class="osp_ft_group" colspan="2">Total à terme</th>
+                        <t t-foreach="financeData.weeks" t-as="week" t-key="week.key">
+                            <th class="osp_ft_week">
+                                <div t-esc="week.label"/>
+                                <div class="osp_ft_week_range" t-esc="week.range"/>
+                            </th>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="financeData.rows" t-as="row" t-key="row.key">
+                        <tr t-if="!row.forfaitOnly || financeData.billingMode === 'forfait'">
+                            <td class="osp_ft_label">
+                                <i t-if="row.expandable" t-attf-class="fa {{ state.financeExpandedRows[row.key] ? 'fa-angle-down' : 'fa-angle-right' }} osp_ft_chevron"
+                                   t-on-click="() => this.toggleFinanceRow(row.key)"/>
+                                <span t-esc="row.label"/>
+                            </td>
+                            <td class="osp_ft_val" t-esc="formatFinanceValue(row.totalToDate.planned, row.unit)"/>
+                            <td class="osp_ft_val osp_ft_real" t-esc="formatFinanceValue(row.totalToDate.real, row.unit)"/>
+                            <td class="osp_ft_val" t-esc="formatFinanceValue(row.totalAtEnd.planned, row.unit)"/>
+                            <td class="osp_ft_val osp_ft_projected" t-esc="formatFinanceValue(row.totalAtEnd.projected, row.unit)"/>
+                            <t t-foreach="row.weeks" t-as="wv" t-key="wv_index">
+                                <td class="osp_ft_val" t-esc="formatFinanceValue(wv, row.unit)"/>
+                            </t>
+                        </tr>
+                        <t t-if="row.expandable and state.financeExpandedRows[row.key]">
+                            <tr t-foreach="row.subRows" t-as="sub" t-key="sub.name" class="osp_ft_subrow">
+                                <td class="osp_ft_label osp_ft_sublabel">
+                                    <strong t-esc="sub.name"/>
+                                    <div class="osp_ft_subrole" t-esc="sub.role"/>
+                                </td>
+                                <td class="osp_ft_val" t-esc="formatFinanceValue(sub.totalToDate.planned, row.unit)"/>
+                                <td class="osp_ft_val osp_ft_real" t-esc="formatFinanceValue(sub.totalToDate.real, row.unit)"/>
+                                <td class="osp_ft_val" t-esc="formatFinanceValue(sub.totalAtEnd.planned, row.unit)"/>
+                                <td class="osp_ft_val osp_ft_projected" t-esc="formatFinanceValue(sub.totalAtEnd.projected, row.unit)"/>
+                                <t t-foreach="sub.weeks" t-as="wv" t-key="wv_index">
+                                    <td class="osp_ft_val" t-esc="formatFinanceValue(wv, row.unit)"/>
+                                </t>
+                            </tr>
+                        </t>
+                    </t>
+                </tbody>
+            </table>
+            <div class="osp_finance_legend">
+                <span><i class="fa fa-square osp_ft_dot_grey"/> Prévisionnel <i class="fa fa-info-circle" title="Données issues des staffings"/></span>
+                <span><i class="fa fa-square osp_ft_dot_green"/> Réel <i class="fa fa-info-circle" title="Données issues des feuilles de temps"/></span>
+                <span><i class="fa fa-square osp_ft_dot_purple"/> Projeté <i class="fa fa-info-circle" title="Somme des données réelles à date et des staffings futurs"/></span>
+            </div>
+
+            <!-- Suivi de la charge globale -->
+            <div class="osp_finance_section_title osp_finance_section_title_spaced">
+                <h3>Suivi de la charge globale</h3>
+            </div>
+            <div class="osp_finance_toolbar">
+                <button type="button" class="osp_toolbar_btn"><i class="fa fa-filter"/> Filtrer</button>
+                <div class="osp_header_spacer"/>
+                <div class="osp_dropdown_wrap">
+                    <button type="button" class="osp_toolbar_btn" t-on-click="(ev) => this.toggleFinanceMenu('chargeUnit', ev)">
+                        <t t-esc="state.chargeGlobaleUnit === 'days' ? 'Afficher en jours' : 'Afficher le chiffre d\'affaires (€)'"/> <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.financeMenuOpen === 'chargeUnit'" class="osp_dropdown osp_finance_dropdown" t-on-click.stop="">
+                        <label class="osp_finance_radio"><input type="radio" name="osp_cg_unit" t-att-checked="state.chargeGlobaleUnit === 'days'" t-on-change="(ev) => this.setChargeGlobaleUnit('days', ev)"/> Afficher la charge (jours)</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_cg_unit" t-att-checked="state.chargeGlobaleUnit === 'turnover_eur'" t-on-change="(ev) => this.setChargeGlobaleUnit('turnover_eur', ev)"/> Afficher le chiffre d'affaires (€)</label>
+                    </div>
+                </div>
+            </div>
+
+            <svg t-attf-viewBox="0 0 {{ chargeGlobaleChart.width }} {{ chargeGlobaleChart.height }}" class="osp_cg_chart">
+                <t t-foreach="chargeGlobaleChart.gridY" t-as="g" t-key="g.key">
+                    <line x1="54" t-att-y1="g.y" t-attf-x2="{{ chargeGlobaleChart.width - 10 }}" t-att-y2="g.y" class="osp_cg_gridline"/>
+                    <text x="2" t-att-y="g.y" class="osp_cg_axis_label" t-esc="g.label"/>
+                </t>
+                <line x1="54" t-att-y1="chargeGlobaleChart.budgetY" t-attf-x2="{{ chargeGlobaleChart.width - 10 }}" t-att-y2="chargeGlobaleChart.budgetY" class="osp_cg_budget_line"/>
+                <path t-att-d="chargeGlobaleChart.reelAreaPath" class="osp_cg_area"/>
+                <path t-att-d="chargeGlobaleChart.planifiePath" class="osp_cg_line_planned"/>
+                <path t-att-d="chargeGlobaleChart.reelPath" class="osp_cg_line_real"/>
+                <path t-att-d="chargeGlobaleChart.projetePath" class="osp_cg_line_projected"/>
+                <t t-foreach="chargeGlobaleChart.months" t-as="m" t-key="m.label">
+                    <text t-att-x="m.x" t-attf-y="{{ chargeGlobaleChart.height - 6 }}" class="osp_cg_month_label" t-esc="m.label"/>
+                </t>
+            </svg>
+
+            <div class="osp_finance_legend">
+                <span><i class="fa fa-minus osp_cg_dot_budget"/> Budget vendu</span>
+                <span><i class="fa fa-minus osp_cg_dot_planned"/> Planifié</span>
+                <span><i class="fa fa-minus osp_cg_dot_real"/> Réel</span>
+                <span><i class="fa fa-minus osp_cg_dot_projected"/> Projeté</span>
+            </div>
+
+            <!-- Suivi de la charge individuelle -->
+            <div class="osp_finance_section_title osp_finance_section_title_spaced">
+                <h3>Suivi de la charge individuelle</h3>
+            </div>
+            <div class="osp_finance_toolbar">
+                <button type="button" class="osp_toolbar_btn"><i class="fa fa-filter"/> Filtrer</button>
+                <div class="osp_header_spacer"/>
+                <div class="osp_dropdown_wrap">
+                    <button type="button" class="osp_toolbar_btn" t-on-click="(ev) => this.toggleFinanceMenu('individualDisplay', ev)">
+                        Paramètres d'affichage <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.financeMenuOpen === 'individualDisplay'" class="osp_dropdown osp_finance_dropdown" t-on-click.stop="">
+                        <div class="osp_finance_dropdown_title">Afficher en</div>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_ind_unit" t-att-checked="state.displaySettings.unit === 'day'" t-on-change="() => this.setDisplaySetting('unit', 'day')"/> Jour</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_ind_unit" t-att-checked="state.displaySettings.unit === 'hour'" t-on-change="() => this.setDisplaySetting('unit', 'hour')"/> Heure</label>
+                        <div class="osp_finance_dropdown_title">Grouper par</div>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_ind_group" t-att-checked="state.displaySettings.groupBy === 'month'" t-on-change="() => this.setDisplaySetting('groupBy', 'month')"/> Mois</label>
+                        <label class="osp_finance_radio"><input type="radio" name="osp_ind_group" t-att-checked="state.displaySettings.groupBy === 'week'" t-on-change="() => this.setDisplaySetting('groupBy', 'week')"/> Semaine</label>
+                    </div>
+                </div>
+                <button type="button" class="osp_icon_btn" data-tooltip="Exporter (.xlsx ou .csv)"><i class="fa fa-download"/></button>
+            </div>
+
+            <table class="osp_finance_table osp_fi_table">
+                <thead>
+                    <tr>
+                        <th class="osp_ft_label">Collaborateur / Projet</th>
+                        <t t-foreach="financeData.individualMonths" t-as="m" t-key="m.key">
+                            <th class="osp_ft_week" colspan="2">
+                                <div t-esc="m.label"/>
+                                <div class="osp_ft_week_range" t-esc="m.range"/>
+                            </th>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="financeData.individualRows" t-as="person" t-key="person.name">
+                        <tr>
+                            <td class="osp_ft_label osp_ft_sublabel">
+                                <strong t-esc="person.name"/>
+                                <div class="osp_ft_subrole" t-esc="person.role"/>
+                            </td>
+                            <t t-foreach="person.months" t-as="m" t-key="m_index">
+                                <td class="osp_ft_val" t-esc="m.forecast + ' h'"/>
+                                <td t-attf-class="osp_ft_val {{ m.real === m.forecast ? 'osp_fi_real_ok' : 'osp_fi_real_warn' }}" t-esc="m.real + ' h'"/>
+                            </t>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+            <div class="osp_finance_legend">
+                <span><i class="fa fa-square osp_ft_dot_grey"/> Forecast</span>
+                <span><i class="fa fa-square osp_fi_dot_real"/> Real <i class="fa fa-info-circle" title="Vert si la saisie du mois est complète, orange sinon"/></span>
+            </div>
+
+            <!-- Sauvegarder la donnée financière -->
+            <div t-if="state.financeSaveDrawerOpen" class="osp_save_overlay" t-on-click="closeFinanceSaveDrawer">
+                <div class="osp_save_drawer" t-on-click.stop="">
+                    <div class="osp_save_header">
+                        <h3>Historiser la donnée financière</h3>
+                        <i class="fa fa-times" t-on-click="closeFinanceSaveDrawer"/>
+                    </div>
+
+                    <label class="osp_save_field">
+                        <span>Nom <em>(obligatoire)</em></span>
+                        <input type="text" placeholder="Ex. Fin du 1er mois"/>
+                    </label>
+
+                    <div class="osp_save_section_title">Informations sur le projet à terme</div>
+                    <div class="osp_save_readonly"><span>Charge (jours)</span><strong t-esc="formatFinanceValue(financeData.rows[1].totalAtEnd.projected, 'JH')"/></div>
+                    <div class="osp_save_readonly"><span>Chiffre d'affaires</span><strong t-esc="formatFinanceValue(financeData.rows[3].totalAtEnd.projected, '€')"/></div>
+                    <div class="osp_save_readonly"><span>Coût</span><strong t-esc="formatFinanceValue(financeData.rows[4].totalAtEnd.projected, '€')"/></div>
+
+                    <div class="osp_save_readonly"><span>Dérive projetée en jours-hommes</span><strong t-esc="formatFinanceValue(financeData.kpis.projectedDrift, 'JH')"/></div>
+                    <div class="osp_save_readonly"><span>Dérive à date en jours-hommes</span><strong t-esc="formatFinanceValue(financeData.kpis.driftToDate, 'JH')"/></div>
+                    <div class="osp_save_readonly"><span>Taux de marge</span><strong t-esc="formatFinanceValue(financeData.rows[7].totalAtEnd.projected, '%')"/></div>
+
+                    <label class="osp_save_field">
+                        <span>Avancement global du projet <em>(obligatoire)</em></span>
+                        <input type="text" t-att-value="financeData.kpis.advancementToDate + ' %'"/>
+                    </label>
+
+                    <div class="osp_save_section_title">Description de la situation</div>
+                    <div class="osp_save_richtoolbar">
+                        <i class="fa fa-bold"/><i class="fa fa-italic"/><i class="fa fa-underline"/><i class="fa fa-list-ul"/><i class="fa fa-list-ol"/>
+                    </div>
+                    <textarea class="osp_save_textarea" rows="4"/>
+
+                    <label class="osp_save_field">
+                        <span>Date de la situation <em>(obligatoire)</em></span>
+                        <input type="text" value="09-10-23"/>
+                    </label>
+
+                    <button type="button" class="btn osp_finance_save_btn osp_save_submit" t-on-click="closeFinanceSaveDrawer">
+                        <i class="fa fa-camera"/> Sauvegarder la donnée financière
+                    </button>
                 </div>
             </div>
 

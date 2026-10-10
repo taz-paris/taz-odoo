@@ -95,6 +95,143 @@ const DETAIL_TABS = [
     { key: "finance", label: "Suivi financier", icon: "fa-line-chart" },
 ];
 
+/**
+ * Données factices pour l'onglet « Suivi financier » d'un projet.
+ * Reproduit fidèlement modules-napta/financier_suivi-financier-d-un-projet
+ * (images 01, 02, 04, 06, 07, 09, 12, 14) : le mode de facturation d'un
+ * projet (régie/forfait) est déduit de son id pour varier l'affichage, les
+ * valeurs du tableau "Situation en cours" sont reprises telles quelles de
+ * la capture image-12 (Consultant Senior), celles du graphique "Suivi de la
+ * charge globale" de la capture image-06, et celles du tableau "Suivi de la
+ * charge individuelle" de la capture image-07.
+ */
+const FINANCE_WEEKS = [
+    { key: "s37", label: "S37", range: "Du 11-09-23 au 17-09-23" },
+    { key: "s38", label: "S38", range: "Du 18-09-23 au 24-09-23" },
+    { key: "s39", label: "S39", range: "Du 25-09-23 au 01-10-23" },
+    { key: "s40", label: "S40", range: "Du 02-10-23 au 08-10-23" },
+];
+
+const FINANCE_ROWS = [
+    {
+        key: "advancement", label: "Taux d'avancement", unit: "%", forfaitOnly: true,
+        totalToDate: { planned: 13.12, real: 12.18 }, totalAtEnd: { planned: 100, projected: 100 },
+        weeks: [3.12, 3.13, 3.12, 3.13],
+    },
+    {
+        key: "charge", label: "Charge (jours)", unit: "JH", expandable: true,
+        totalToDate: { planned: 18.38, real: 17 }, totalAtEnd: { planned: 140, projected: 138.63 },
+        weeks: [4.38, 4.38, 4.38, 4.38],
+        subRows: [
+            { name: "Consultant Senior", role: "Rôle sur le projet", totalToDate: { planned: 0, real: 0 }, totalAtEnd: { planned: 40, projected: 40 }, weeks: [0, 0, 0, 0] },
+            { name: "BARTOLIE Aurore", role: "Consultant Senior", totalToDate: { planned: 0, real: 0 }, totalAtEnd: { planned: 30, projected: 30 }, weeks: [0, 0, 0, 0] },
+            { name: "CONSTABE Etienne", role: "Partner", totalToDate: { planned: 10.5, real: 9.5 }, totalAtEnd: { planned: 40, projected: 39 }, weeks: [2.5, 2.5, 2.5, 2.5] },
+            { name: "MEROT Isabelle", role: "Manager", totalToDate: { planned: 7.88, real: 7.5 }, totalAtEnd: { planned: 30, projected: 29.63 }, weeks: [1.88, 1.88, 1.88, 1.88] },
+        ],
+    },
+    {
+        key: "tjm", label: "TJM", unit: "€",
+        totalToDate: { planned: 1428.57, real: 1432.71 }, totalAtEnd: { planned: 1428.57, projected: 1442.74 },
+        weeks: [1428.57, 1429.33, 1428.57, 1429.33],
+    },
+    {
+        key: "ca", label: "Chiffre d'affaires", unit: "€",
+        totalToDate: { planned: 26250, real: 24356.06 }, totalAtEnd: { planned: 200000, projected: 200000 },
+        weeks: [6250, 6253.33, 6250, 6253.33],
+    },
+    {
+        key: "cost", label: "Coût", unit: "€",
+        totalToDate: { planned: 13857.38, real: 12791.5 }, totalAtEnd: { planned: 101790, projected: 100724.13 },
+        weeks: [3299.38, 3299.38, 3299.38, 3299.38],
+    },
+    {
+        key: "fees", label: "Frais", unit: "€",
+        totalToDate: { planned: null, real: null }, totalAtEnd: { planned: null, projected: null },
+        weeks: [null, null, null, null],
+    },
+    {
+        key: "margin", label: "Marge", unit: "€",
+        totalToDate: { planned: 12392.62, real: 11564.56 }, totalAtEnd: { planned: 98210, projected: 99275.87 },
+        weeks: [2950.62, 2953.96, 2950.62, 2953.96],
+    },
+    {
+        key: "marginRate", label: "Taux de marge", unit: "%",
+        totalToDate: { planned: 47.21, real: 47.48 }, totalAtEnd: { planned: 49.1, projected: 49.64 },
+        weeks: [47.21, 47.24, 47.21, 47.24],
+    },
+];
+
+const FINANCE_CHARGE_GLOBALE = {
+    days: {
+        months: ["avril", "mai", "juin", "juillet", "août", "septembre", "octobre"],
+        budgetVendu: 390,
+        planifie: [2, 28, 85, 168, 178, 222, 262],
+        reel: [2, 27, 83, 165, null, null, null],
+        projete: [null, null, null, null, 178, 222, 262],
+    },
+    turnover_eur: {
+        months: ["avril", "mai", "juin", "juillet", "août", "septembre", "octobre"],
+        budgetVendu: 225000,
+        planifie: [1200, 16000, 49000, 97000, 103000, 128000, 151000],
+        reel: [1200, 15500, 48000, 95000, null, null, null],
+        projete: [null, null, null, null, 103000, 128000, 151000],
+    },
+};
+
+const FINANCE_INDIVIDUAL_MONTHS = [
+    { key: "sept23", label: "SEPTEMBRE 2023", range: "DU 11-09-23 AU 30-09-23" },
+    { key: "oct23", label: "OCTOBRE 2023", range: "DU 01-10-23 AU 31-10-23" },
+    { key: "nov23", label: "NOVEMBRE 2023", range: "DU 01-11-23 AU 30-11-23" },
+    { key: "dec23", label: "DÉCEMBRE 2023", range: "DU 01-12-23 AU 29-12-23" },
+];
+
+const FINANCE_INDIVIDUAL_ROWS = [
+    {
+        name: "BARTOLIE Aurore", role: "Consultant Senior - Data & Analytics - Londres",
+        months: [{ forecast: 0, real: 0 }, { forecast: 80, real: 0 }, { forecast: 80, real: 0 }, { forecast: 80, real: 0 }],
+    },
+    {
+        name: "CONSTABE Etienne", role: "Partner - Management des organisations - Paris",
+        months: [{ forecast: 60, real: 60 }, { forecast: 88, real: 16 }, { forecast: 88, real: 0 }, { forecast: 84, real: 0 }],
+    },
+    {
+        name: "MEROT Isabelle", role: "Manager - Management des organisations - Londres",
+        months: [{ forecast: 45, real: 45 }, { forecast: 66, real: 15 }, { forecast: 66, real: 0 }, { forecast: 63, real: 0 }],
+    },
+];
+
+const FINANCE_COLUMN_GROUPS = [
+    { title: "Colonnes à afficher", items: [{ key: "totalToDate", label: "Total à date" }, { key: "totalAtEnd", label: "Total à terme" }] },
+    { title: "Colonnes détaillées", items: [{ key: "planned", label: "Prévisionnel" }, { key: "real", label: "Réel" }, { key: "projected", label: "Projeté" }] },
+];
+
+const FINANCE_ROWS_TO_DISPLAY = ["Charge (jours)", "TJM moyen", "Chiffre d'affaires", "Coût", "Frais", "Marge", "Taux de marge"];
+
+/** Construit le jeu de données financières d'un projet (déterministe à partir de son id). */
+function buildFinance(project) {
+    const billingMode = project.id % 3 === 0 ? "regie" : "forfait";
+    const scale = 0.7 + ((project.id * 37) % 10) * 0.12; // variété entre projets, sans casser la cohérence
+    const round2 = (v) => Math.round(v * 100) / 100;
+    return {
+        billingMode,
+        kpis: {
+            soldBudget: round2(225000 * scale),
+            manDaysSold: Math.round(180 * scale),
+            advancementToDate: 41.7,
+            turnoverToDate: round2(93814.24 * scale),
+            targetMarginRate: 50,
+            projectedMarginRateAtEnd: 41.91,
+            driftToDate: 26.6,
+            projectedDrift: -2.7,
+        },
+        rows: FINANCE_ROWS,
+        weeks: FINANCE_WEEKS,
+        chargeGlobale: FINANCE_CHARGE_GLOBALE,
+        individualMonths: FINANCE_INDIVIDUAL_MONTHS,
+        individualRows: FINANCE_INDIVIDUAL_ROWS,
+    };
+}
+
 export class StaffingProjectsPage extends Component {
     static template = "staffing.StaffingProjectsPage";
     static props = { page: Object };
@@ -105,6 +242,8 @@ export class StaffingProjectsPage extends Component {
         this.filterSections = FILTER_SECTIONS;
         this.cardMenuItems = CARD_MENU_ITEMS;
         this.detailTabs = DETAIL_TABS;
+        this.financeColumnGroups = FINANCE_COLUMN_GROUPS;
+        this.financeRowsToDisplay = FINANCE_ROWS_TO_DISPLAY;
 
         this.state = useState({
             view: "cards", // "cards" | "table"
@@ -119,9 +258,142 @@ export class StaffingProjectsPage extends Component {
             detail: null, // project object ou null
             detailTab: "calendar",
             collapsedColumns: {},
+            // ---- Onglet "Suivi financier" ----
+            financeMenuOpen: null, // "situation" | "columns" | "display" | null
+            financeSituation: "current", // "current" | id d'une situation sauvegardée
+            financeExpandedRows: {}, // row.key -> bool
+            financeSaveDrawerOpen: false,
+            chargeGlobaleUnit: "days", // "days" | "turnover_eur"
+            displaySettings: { unit: "day", groupBy: "week", currency: "EUR" },
         });
 
         this.exportTooltip = "Exporter les projets (.xlsx ou .csv)";
+        this.financeInfoTooltip =
+            "Le Détail du suivi financier, le Suivi de la charge globale et le rapport Suivi financier global " +
+            "ignorent les staffings et feuilles de temps en dehors des dates de contrat.";
+        this.financeSavedSituations = [
+            { id: "sit1", label: "Fin du 1er mois", date: "09-10-23" },
+        ];
+    }
+
+    // ---- Onglet "Suivi financier" ----
+    get financeData() {
+        return this.state.detail ? buildFinance(this.state.detail) : null;
+    }
+
+    toggleFinanceMenu(name, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.financeMenuOpen = this.state.financeMenuOpen === name ? null : name;
+    }
+
+    closeFinanceMenus() {
+        this.state.financeMenuOpen = null;
+    }
+
+    setFinanceSituation(id) {
+        this.state.financeSituation = id;
+        this.state.financeMenuOpen = null;
+    }
+
+    toggleFinanceRow(key) {
+        this.state.financeExpandedRows[key] = !this.state.financeExpandedRows[key];
+    }
+
+    setChargeGlobaleUnit(unit, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.chargeGlobaleUnit = unit;
+        this.state.financeMenuOpen = null;
+    }
+
+    get chargeGlobaleData() {
+        return this.financeData.chargeGlobale[this.state.chargeGlobaleUnit];
+    }
+
+    formatChargeGlobaleAxis(v) {
+        if (this.state.chargeGlobaleUnit === "days") {
+            return Math.round(v) + "D";
+        }
+        return Math.round(v).toLocaleString("fr-FR") + " €";
+    }
+
+    /** Calcule les coordonnées/chemins SVG du graphique "Suivi de la charge globale". */
+    get chargeGlobaleChart() {
+        const data = this.chargeGlobaleData;
+        const width = 640;
+        const height = 220;
+        const padLeft = 54;
+        const padRight = 10;
+        const padTop = 10;
+        const padBottom = 24;
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+        const maxValue = data.budgetVendu * 1.03;
+        const n = data.months.length;
+        const x = (i) => padLeft + (i / (n - 1)) * plotW;
+        const y = (v) => padTop + plotH - (v / maxValue) * plotH;
+
+        const toPath = (arr) => {
+            let d = "";
+            let started = false;
+            arr.forEach((v, i) => {
+                if (v === null || v === undefined) {
+                    started = false;
+                    return;
+                }
+                d += (started ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1) + " ";
+                started = true;
+            });
+            return d.trim();
+        };
+
+        const reelIdx = data.reel.map((v, i) => (v !== null ? i : null)).filter((i) => i !== null);
+        let reelAreaPath = "";
+        if (reelIdx.length) {
+            reelAreaPath = `M${x(reelIdx[0]).toFixed(1)},${y(0).toFixed(1)} `;
+            for (const i of reelIdx) {
+                reelAreaPath += `L${x(i).toFixed(1)},${y(data.reel[i]).toFixed(1)} `;
+            }
+            reelAreaPath += `L${x(reelIdx[reelIdx.length - 1]).toFixed(1)},${y(0).toFixed(1)} Z`;
+        }
+
+        return {
+            width,
+            height,
+            budgetY: y(data.budgetVendu).toFixed(1),
+            planifiePath: toPath(data.planifie),
+            reelPath: toPath(data.reel),
+            reelAreaPath,
+            projetePath: toPath(data.projete),
+            months: data.months.map((m, i) => ({ label: m, x: x(i).toFixed(1) })),
+            gridY: [0, 0.25, 0.5, 0.75, 1].map((f) => ({
+                key: f,
+                y: y(maxValue * f).toFixed(1),
+                label: this.formatChargeGlobaleAxis(maxValue * f),
+            })),
+        };
+    }
+
+    openFinanceSaveDrawer() {
+        this.state.financeSaveDrawerOpen = true;
+    }
+
+    closeFinanceSaveDrawer() {
+        this.state.financeSaveDrawerOpen = false;
+    }
+
+    setDisplaySetting(key, value) {
+        this.state.displaySettings[key] = value;
+    }
+
+    // ---- Formatage ----
+    formatFinanceValue(value, unit) {
+        if (value === null || value === undefined) {
+            return "-";
+        }
+        const formatted = value.toLocaleString("fr-FR", { minimumFractionDigits: unit === "JH" ? 2 : 2, maximumFractionDigits: 2 });
+        if (unit === "%") return formatted + " %";
+        if (unit === "JH") return formatted + " JH";
+        return formatted + " €";
     }
 
     // ---- Vue Cartes / Tableau ----
@@ -175,6 +447,7 @@ export class StaffingProjectsPage extends Component {
         this.state.showViews = false;
         this.state.showFilter = false;
         this.state.showColumns = false;
+        this.state.financeMenuOpen = null;
     }
 
     toggleViews(ev) {

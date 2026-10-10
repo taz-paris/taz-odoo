@@ -524,24 +524,21 @@
         .osp_td_project { font-weight: 700; }
     }
 
-    // ---------- Détail projet ----------
-    .osp_detail_overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(10, 20, 30, .35);
-        display: flex;
-        justify-content: flex-end;
-        z-index: 100;
+    // ---------- Détail projet (pleine largeur de la zone principale) ----------
+    .osp_detail_page {
+        width: 100%;
     }
 
-    .osp_detail_panel {
-        width: 560px;
-        max-width: 100%;
-        height: 100%;
-        background: #fff;
-        padding: 24px;
-        overflow-y: auto;
-        box-shadow: -8px 0 24px rgba(0, 0, 0, .12);
+    .osp_detail_back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: $napta-text-muted;
+        cursor: pointer;
+        margin-bottom: 16px;
+        font-size: 13px;
+
+        &:hover { color: $napta-accent; }
     }
 
     .osp_detail_header {
@@ -549,8 +546,14 @@
         align-items: center;
         gap: 10px;
 
-        h2 { font-size: 20px; margin: 0; flex: 1 1 auto; }
-        .osp_detail_close { cursor: pointer; color: $napta-text-muted; }
+        h2 { font-size: 24px; margin: 0; }
+        .osp_detail_like {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: $napta-text-muted;
+            font-size: 13px;
+        }
     }
 
     .osp_detail_subtitle {
@@ -587,5 +590,332 @@
         color: $napta-text;
 
         p { color: $napta-text-muted; margin-bottom: 10px; }
+    }
+
+    // ---------- Onglet "Suivi financier" ----------
+    .osp_finance {
+        .osp_finance_toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .osp_finance_save_btn {
+            background: #16232c;
+            color: #fff;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+
+            &:hover { background: #26343d; }
+        }
+
+        .osp_finance_dropdown {
+            width: 260px;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .osp_finance_dropdown_title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: $napta-text-muted;
+            font-weight: 700;
+            margin: 10px 4px 4px;
+
+            &:first-child { margin-top: 2px; }
+        }
+
+        .osp_finance_dropdown_item {
+            padding: 7px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+
+            &:hover { background: $napta-active-bg; }
+            &.osp_finance_dropdown_item_active { color: $napta-accent; font-weight: 600; }
+        }
+
+        .osp_finance_dropdown_sub { color: $napta-text-muted; font-weight: 400; font-size: 12px; }
+
+        .osp_finance_dropdown_check {
+            padding: 6px 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            i { color: $napta-accent; width: 14px; }
+        }
+
+        .osp_finance_radio {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 8px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+        .osp_finance_section_title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+
+            h3 { font-size: 18px; margin: 0; }
+            .osp_finance_info { color: $napta-text-muted; cursor: help; }
+        }
+
+        .osp_finance_kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1px;
+            background: $napta-border;
+            border: 1px solid $napta-border;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .osp_finance_kpi {
+            background: #fafafa;
+            padding: 14px 16px;
+        }
+
+        .osp_finance_kpi_row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+
+            span { color: $napta-text-muted; }
+            strong { color: $napta-text; font-weight: 700; }
+
+            &.osp_finance_kpi_row_top { margin-top: 10px; }
+        }
+
+        .osp_finance_kpi_badge {
+            background: $napta-active-bg;
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-weight: 700;
+            font-size: 12px;
+            white-space: nowrap;
+
+            &.osp_finance_kpi_badge_orange { background: #fdeee0; color: #b5651d; }
+            &.osp_finance_kpi_badge_red { background: #fdeaea; color: #c0392b; }
+            &.osp_finance_kpi_badge_green { background: $napta-accent-light; color: $napta-accent; }
+        }
+
+        .osp_finance_progress {
+            height: 6px;
+            border-radius: 3px;
+            background: $napta-active-bg;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+
+        .osp_finance_progress_bar {
+            height: 100%;
+            background: $napta-accent;
+        }
+
+        // ---- Tableau "Situation en cours" ----
+        .osp_finance_table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 10px;
+
+            th, td {
+                padding: 8px 10px;
+                border-bottom: 1px solid $napta-border;
+                white-space: nowrap;
+                text-align: right;
+            }
+
+            thead th {
+                color: $napta-text-muted;
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 10.5px;
+                background: #fafafa;
+            }
+        }
+
+        .osp_ft_label {
+            text-align: left;
+            font-weight: 600;
+            min-width: 180px;
+            white-space: normal;
+        }
+
+        .osp_ft_chevron {
+            cursor: pointer;
+            color: $napta-text-muted;
+            margin-right: 4px;
+        }
+
+        .osp_ft_group { background: #f2f2f2; }
+
+        .osp_ft_week {
+            font-weight: 700;
+
+            .osp_ft_week_range { font-weight: 400; text-transform: none; font-size: 10px; color: $napta-text-muted; }
+        }
+
+        .osp_ft_val { font-variant-numeric: tabular-nums; }
+        .osp_ft_real { background: $napta-accent-light; }
+        .osp_ft_projected { background: #efeafb; }
+
+        .osp_ft_subrow {
+            .osp_ft_sublabel { padding-left: 26px; font-weight: 400; }
+            strong { font-weight: 600; color: $napta-text; display: block; }
+            .osp_ft_subrole { color: $napta-text-muted; font-size: 11px; }
+            td { background: #fcfcfc; }
+        }
+
+        .osp_finance_legend {
+            display: flex;
+            gap: 20px;
+            color: $napta-text-muted;
+            font-size: 12px;
+            margin-bottom: 24px;
+
+            span { display: inline-flex; align-items: center; gap: 6px; }
+            i.fa-info-circle { cursor: help; font-size: 11px; }
+        }
+
+        .osp_ft_dot_grey { color: $napta-active-bg; }
+        .osp_ft_dot_green { color: $napta-accent-light; border: 1px solid $napta-accent; border-radius: 2px; }
+        .osp_ft_dot_purple { color: #efeafb; border: 1px solid #7b5fc4; border-radius: 2px; }
+
+        // ---- Tiroir "Sauvegarder la donnée financière" ----
+        .osp_save_overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 20, 30, .35);
+            display: flex;
+            justify-content: flex-end;
+            z-index: 200;
+        }
+
+        .osp_save_drawer {
+            width: 380px;
+            max-width: 100%;
+            height: 100%;
+            background: #fff;
+            padding: 22px;
+            overflow-y: auto;
+            box-shadow: -8px 0 24px rgba(0, 0, 0, .12);
+        }
+
+        .osp_save_header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+
+            h3 { margin: 0; font-size: 17px; }
+            i { cursor: pointer; color: $napta-text-muted; }
+        }
+
+        .osp_save_field {
+            display: block;
+            margin-bottom: 14px;
+
+            span { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+            em { color: #b5651d; font-style: normal; font-size: 11px; }
+
+            input {
+                width: 100%;
+                border: 1px solid $napta-border;
+                border-radius: 6px;
+                padding: 7px 10px;
+                font-size: 13px;
+                color: $napta-text;
+                background: #fff;
+            }
+        }
+
+        .osp_save_section_title {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: $napta-text-muted;
+            margin: 16px 0 8px;
+        }
+
+        .osp_save_readonly {
+            display: flex;
+            justify-content: space-between;
+            background: #fafafa;
+            border-radius: 6px;
+            padding: 7px 10px;
+            margin-bottom: 4px;
+            font-size: 12.5px;
+
+            span { color: $napta-text-muted; }
+        }
+
+        .osp_save_richtoolbar {
+            display: flex;
+            gap: 10px;
+            border: 1px solid $napta-border;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            padding: 8px 10px;
+            color: $napta-text-muted;
+        }
+
+        .osp_save_textarea {
+            width: 100%;
+            border: 1px solid $napta-border;
+            border-radius: 0 0 6px 6px;
+            padding: 8px 10px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        .osp_save_submit { width: 100%; justify-content: center; margin-top: 18px; }
+
+        // ---- Suivi de la charge globale ----
+        .osp_finance_section_title_spaced { margin-top: 32px; }
+
+        .osp_cg_chart {
+            width: 100%;
+            height: 220px;
+            margin-bottom: 4px;
+            overflow: visible;
+        }
+
+        .osp_cg_gridline { stroke: $napta-border; stroke-width: 1; }
+        .osp_cg_axis_label { font-size: 9px; fill: $napta-text-muted; dominant-baseline: middle; }
+        .osp_cg_month_label { font-size: 9px; fill: $napta-text-muted; text-anchor: middle; }
+
+        .osp_cg_budget_line { stroke: #e05a4e; stroke-width: 1.5; stroke-dasharray: 4 3; }
+        .osp_cg_area { fill: $napta-accent-light; opacity: .6; stroke: none; }
+        .osp_cg_line_planned { fill: none; stroke: #9aa2a8; stroke-width: 2; stroke-dasharray: 4 3; }
+        .osp_cg_line_real { fill: none; stroke: $napta-accent; stroke-width: 2; }
+        .osp_cg_line_projected { fill: none; stroke: #7b5fc4; stroke-width: 2; stroke-dasharray: 4 3; }
+
+        .osp_cg_dot_budget { color: #e05a4e; }
+        .osp_cg_dot_planned { color: #9aa2a8; }
+        .osp_cg_dot_real { color: $napta-accent; }
+        .osp_cg_dot_projected { color: #7b5fc4; }
+
+        // ---- Suivi de la charge individuelle ----
+        .osp_fi_table { margin-top: 4px; }
+        .osp_fi_real_ok { background: $napta-accent-light; color: $napta-accent; font-weight: 600; }
+        .osp_fi_real_warn { background: #fdeee0; color: #b5651d; font-weight: 600; }
+        .osp_fi_dot_real { color: $napta-accent-light; border: 1px solid $napta-accent; border-radius: 2px; }
     }
 }
