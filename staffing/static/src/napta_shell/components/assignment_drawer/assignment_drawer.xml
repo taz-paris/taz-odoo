@@ -143,8 +143,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <t t-foreach="finderPeople" t-as="person" t-key="person.id">
-                                <tr class="o_napta_adw_finder_row">
+                            <t t-foreach="sortedFinderPeople" t-as="person" t-key="person.id">
+                                <tr t-attf-class="o_napta_adw_finder_row {{ isFinderPersonAdded(person) ? 'o_napta_adw_finder_row_added' : '' }}">
                                     <td class="o_napta_adw_finder_col_check">
                                         <i t-attf-class="fa {{ isFinderSelected(person.id) ? 'fa-check-square' : 'fa-square-o' }} o_napta_adw_finder_checkbox"
                                            t-on-click="(ev) => this.toggleFinderSelect(person.id, ev)"/>
@@ -157,27 +157,25 @@
                                         t-on-mouseenter="(ev) => this.setFinderHover(person.id, ev)" t-on-mouseleave="(ev) => this.setFinderHover(null, ev)">
                                         <div class="o_napta_adw_finder_person_cell">
                                             <span class="o_napta_avatar" t-esc="person.initials"/>
-                                            <div class="o_napta_adw_finder_person_info">
-                                                <div class="o_napta_adw_finder_person_name" t-esc="person.name"/>
+                                            <div class="o_napta_adw_finder_person_name" t-esc="person.name"/>
 
-                                                <span t-if="finderPersonStatus(person) and !isFinderHovered(person.id)"
-                                                      t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[finderPersonStatus(person)] }}"
-                                                      t-esc="finderPersonStatus(person)"/>
+                                            <span t-if="finderPersonStatus(person) and !isFinderHovered(person.id)"
+                                                  t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[finderPersonStatus(person)] }}"
+                                                  t-esc="finderPersonStatus(person)"/>
 
-                                                <div t-if="isFinderHovered(person.id)" class="o_napta_adw_dropdown_wrap o_napta_adw_user_option_wrap">
-                                                    <button type="button"
-                                                            t-attf-class="o_napta_adw_user_option_btn o_napta_adw_user_option_btn_{{ userStaffingOptionSlugs[finderPersonStatus(person) || 'Réel'] }}"
-                                                            t-on-click="(ev) => this.toggleFinderStatusMenu(person.id, ev)">
-                                                        <span t-esc="finderPersonStatus(person) || 'Réel'"/>
-                                                        <i class="fa fa-chevron-down"/>
-                                                    </button>
-                                                    <div t-if="isFinderStatusMenuOpen(person.id)" class="o_napta_adw_dropdown_menu o_napta_adw_user_option_menu">
-                                                        <div t-foreach="userStaffingOptions" t-as="opt" t-key="opt"
-                                                             t-attf-class="o_napta_adw_dropdown_item o_napta_adw_user_option_item {{ finderPersonStatus(person) === opt ? 'o_napta_adw_user_option_item_active' : '' }}"
-                                                             t-on-click="(ev) => this.pickFinderStatus(person, opt, ev)">
-                                                            <i t-if="finderPersonStatus(person) === opt" class="fa fa-check"/>
-                                                            <span t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[opt] }}" t-esc="opt"/>
-                                                        </div>
+                                            <div t-if="isFinderHovered(person.id)" class="o_napta_adw_dropdown_wrap o_napta_adw_user_option_wrap">
+                                                <button type="button"
+                                                        t-attf-class="o_napta_adw_user_option_btn o_napta_adw_user_option_btn_{{ userStaffingOptionSlugs[finderPersonStatus(person) || 'Réel'] }}"
+                                                        t-on-click="(ev) => this.toggleFinderStatusMenu(person.id, ev)">
+                                                    <span t-esc="finderPersonStatus(person) || 'Réel'"/>
+                                                    <i class="fa fa-chevron-down"/>
+                                                </button>
+                                                <div t-if="isFinderStatusMenuOpen(person.id)" class="o_napta_adw_dropdown_menu o_napta_adw_user_option_menu">
+                                                    <div t-foreach="userStaffingOptions" t-as="opt" t-key="opt"
+                                                         t-attf-class="o_napta_adw_dropdown_item o_napta_adw_user_option_item {{ finderPersonStatus(person) === opt ? 'o_napta_adw_user_option_item_active' : '' }}"
+                                                         t-on-click="(ev) => this.pickFinderStatus(person, opt, ev)">
+                                                        <i t-if="finderPersonStatus(person) === opt" class="fa fa-check"/>
+                                                        <span t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[opt] }}" t-esc="opt"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -226,12 +224,11 @@
 
                 <div t-if="finderSelectedCount" class="o_napta_adw_finder_bulk_bar">
                     <span t-esc="finderSelectedCount + ' / ' + finderPeople.length + ' éléments sélectionnés'"/>
-                    <button type="button" class="btn o_napta_adw_finder_bulk_btn" t-on-click="(ev) => this.bulkAddFromFinder('Pré-positionner', ev)">
-                        <i class="fa fa-plus"/> Pré-positionner
-                    </button>
-                    <button type="button" class="btn o_napta_adw_finder_bulk_btn" t-on-click="(ev) => this.bulkAddFromFinder('Suggérer', ev)">
-                        <i class="fa fa-plus"/> Suggérer
-                    </button>
+                    <t t-foreach="userStaffingOptions" t-as="opt" t-key="opt">
+                        <button type="button" class="btn o_napta_adw_finder_bulk_btn" t-on-click="(ev) => this.bulkAddFromFinder(opt, ev)">
+                            <i class="fa fa-plus"/> <t t-esc="opt"/>
+                        </button>
+                    </t>
                 </div>
             </div>
 

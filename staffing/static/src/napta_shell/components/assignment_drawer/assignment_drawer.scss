@@ -972,7 +972,9 @@
 }
 
 .o_napta_adw_finder_col_people {
-    min-width: 190px;
+    // Assez large pour loger nom + pastille de statut (ou le menu
+    // déroulant au survol) sur une seule ligne, à droite du nom.
+    min-width: 300px;
     white-space: normal;
 }
 
@@ -993,18 +995,24 @@
     background: #fafbfb;
 }
 
+// Profils déjà liés à la demande/au staffing en cours : remontés en tête de
+// liste (cf. sortedFinderPeople) et mis en évidence en bleu clair, comme le
+// bandeau de rappel du tiroir.
+.o_napta_adw_finder_row_added {
+    background: #eef3fc;
+
+    &:hover { background: #e3ecfa; }
+}
+
 .o_napta_adw_finder_person_cell {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.o_napta_adw_finder_person_info {
-    min-width: 0;
-}
-
 .o_napta_adw_finder_person_name {
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .o_napta_adw_finder_cell {

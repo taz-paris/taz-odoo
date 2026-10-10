@@ -775,6 +775,17 @@ export class AssignmentDrawer extends Component {
         return this.state.userOptions[person.name] || null;
     }
 
+    // Les profils déjà liés à la demande/au staffing remontent en tête de
+    // liste (ordre d'origine conservé au sein de chaque groupe).
+    get sortedFinderPeople() {
+        const added = [];
+        const rest = [];
+        for (const person of this.finderPeople) {
+            (this.isFinderPersonAdded(person) ? added : rest).push(person);
+        }
+        return added.concat(rest);
+    }
+
     bulkAddFromFinder(option, ev) {
         if (ev) ev.stopPropagation();
         for (const person of this.finderPeople) {
