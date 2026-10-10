@@ -34,8 +34,12 @@
 // ---- Profile Finder (recherche de profils, icône loupe de la section
 // Utilisateurs) : volet large façon rapport "Planification individuelle". ----
 .o_napta_adw_finder_drawer {
-    width: 860px;
-    max-width: 80vw;
+    // Occupe toute la largeur disponible à gauche du tiroir principal
+    // (overlay en flex row, justify-content: flex-end).
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    min-width: 0;
     margin-right: 10px;
     padding: 18px;
 }
