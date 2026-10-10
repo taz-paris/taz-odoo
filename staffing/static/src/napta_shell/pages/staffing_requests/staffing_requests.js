@@ -3,9 +3,7 @@
 import { Component, useState } from "@odoo/owl";
 
 /**
- * Données factices LOCALES à cette page (volontairement non partagées avec
- * mock/mock_data.js pour éviter tout conflit avec d'autres pages en cours
- * de développement en parallèle).
+ * Données factices LOCALES à cette page.
  *
  * Reproduit la page Napta "Staffing > Demandes" telle que documentée dans
  * modules-napta/staffing_la-page-des-demandes.

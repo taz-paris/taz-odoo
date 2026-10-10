@@ -4,7 +4,6 @@ import { Component, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { router } from "@web/core/browser/router";
 import { NaptaSidebar } from "./napta_sidebar";
-import { PageSkeleton } from "./page_skeleton";
 import { buildPageIndex } from "./menu_config";
 import { PAGE_COMPONENTS } from "./pages/registry";
 
@@ -13,7 +12,7 @@ const DEFAULT_PAGE_KEY = "staffing.projects";
 export class NaptaShell extends Component {
     static template = "staffing.NaptaShell";
     static props = { "*": true };
-    static components = { NaptaSidebar, PageSkeleton };
+    static components = { NaptaSidebar };
 
     setup() {
         this.pageIndex = buildPageIndex();
@@ -27,10 +26,12 @@ export class NaptaShell extends Component {
         return this.pageIndex[this.state.activeKey];
     }
 
-    // Composant dédié pixel-perfect s'il existe pour cette page, sinon
-    // repli sur le squelette générique (PageSkeleton).
+    // Composant dédié pixel-perfect de la page active. Chaque entrée de
+    // menu_config.js DOIT avoir une entrée correspondante dans
+    // pages/registry.js — il n'y a plus de squelette générique de repli :
+    // toute nouvelle page de menu doit venir avec son propre composant.
     get activeComponent() {
-        return PAGE_COMPONENTS[this.state.activeKey] || PageSkeleton;
+        return PAGE_COMPONENTS[this.state.activeKey];
     }
 
     onSelect(key) {

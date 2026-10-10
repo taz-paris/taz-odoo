@@ -3,7 +3,7 @@
 import { Component, useState } from "@odoo/owl";
 
 /**
- * Données factices LOCALES à cette page (non partagées avec mock/mock_data.js).
+ * Données factices LOCALES à cette page.
  *
  * Reproduit la page Napta "Évaluations > Évaluations annuelles" telle que
  * documentée dans modules-napta/evaluations-et-templates_evaluations-annuelles

@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 // Registre central des composants de page dédiés (pixel-perfect), un par
-// entrée de menu de menu_config.js. Une entrée de menu_config SANS
-// correspondance ici retombe sur le composant générique PageSkeleton.
+// entrée de menu de menu_config.js. Toute nouvelle entrée de menu doit
+// avoir son composant ajouté ici (il n'y a plus de page générique de repli).
 
 import { StaffingProjectsPage } from "./staffing_projects/staffing_projects";
 import { StaffingRequestsPage } from "./staffing_requests/staffing_requests";

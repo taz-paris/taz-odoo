@@ -39,11 +39,8 @@
     'assets': {
         'web.assets_backend': [
             'staffing/static/src/napta_shell/menu_config.js',
-            'staffing/static/src/napta_shell/mock/mock_data.js',
             'staffing/static/src/napta_shell/napta_sidebar.js',
             'staffing/static/src/napta_shell/napta_sidebar.xml',
-            'staffing/static/src/napta_shell/page_skeleton.js',
-            'staffing/static/src/napta_shell/page_skeleton.xml',
             'staffing/static/src/napta_shell/pages/staffing_projects/staffing_projects.js',
             'staffing/static/src/napta_shell/pages/staffing_projects/staffing_projects.xml',
             'staffing/static/src/napta_shell/pages/staffing_requests/staffing_requests.js',
@@ -85,7 +82,6 @@
             'staffing/static/src/napta_shell/napta_shell.xml',
             'staffing/static/src/napta_shell/napta_shell.scss',
             'staffing/static/src/napta_shell/napta_sidebar.scss',
-            'staffing/static/src/napta_shell/page_skeleton.scss',
             'staffing/static/src/napta_shell/pages/staffing_projects/staffing_projects.scss',
             'staffing/static/src/napta_shell/pages/staffing_requests/staffing_requests.scss',
             'staffing/static/src/napta_shell/pages/staffing_modification_requests/staffing_modification_requests.scss',

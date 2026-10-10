@@ -8,7 +8,8 @@
  * Feuilles de temps, Évaluations, Carrière et Rapports sont actives.
  *
  * Pour ajouter une page : ajouter une ligne dans "items" du bon groupe,
- * puis une entrée correspondante dans mock/mock_data.js si besoin.
+ * puis construire son composant dédié dans pages/ et l'enregistrer dans
+ * pages/registry.js (il n'y a pas de page générique de repli).
  */
 export const NAPTA_MENU = [
     { key: "search", label: "Rechercher", icon: "fa-search", inert: true },
