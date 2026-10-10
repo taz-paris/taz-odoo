@@ -697,7 +697,13 @@ export class StaffingGlobalCalendarPage extends Component {
         ev.stopPropagation();
         const days = this.days;
         const originIndex = days.findIndex((d) => sameDay(d.date, segment.start));
-        this.state.drag = { kind: "move", personId: person.id, pool, segmentId: segment.id, originIndex, deltaDays: 0 };
+        // Bord gauche/droit (8px) de la barre : raccourcir/prolonger plutôt que déplacer.
+        const rect = ev.currentTarget.getBoundingClientRect();
+        const offsetX = ev.clientX - rect.left;
+        let kind = "move";
+        if (pool === "work" && offsetX <= 8) kind = "resize-left";
+        else if (pool === "work" && rect.width - offsetX <= 8) kind = "resize-right";
+        this.state.drag = { kind, personId: person.id, pool, segmentId: segment.id, originIndex, deltaDays: 0, edgeIndex: null };
         this._attachDragListeners();
     }
 
@@ -725,6 +731,8 @@ export class StaffingGlobalCalendarPage extends Component {
             drag.currentIndex = index;
         } else if (drag.kind === "move") {
             drag.deltaDays = index - drag.originIndex;
+        } else if (drag.kind === "resize-left" || drag.kind === "resize-right") {
+            drag.edgeIndex = index;
         }
     }
 
@@ -762,6 +770,14 @@ export class StaffingGlobalCalendarPage extends Component {
                 // Pas de déplacement : c'était un simple clic -> ouvre la pop-in d'informations.
                 this.state.openPeriod = { personId: person.id, pool: drag.pool, segmentId: seg.id };
             }
+        } else if (drag.kind === "resize-left" || drag.kind === "resize-right") {
+            const person = this.state.people.find((p) => p.id === drag.personId);
+            const seg = person && person[drag.pool].find((s) => s.id === drag.segmentId);
+            if (seg && drag.edgeIndex !== null) {
+                const target = days[drag.edgeIndex].date;
+                if (drag.kind === "resize-left" && target <= seg.end) seg.start = target;
+                else if (drag.kind === "resize-right" && target >= seg.start) seg.end = target;
+            }
         }
         this.state.drag = null;
     }
@@ -776,9 +792,7 @@ export class StaffingGlobalCalendarPage extends Component {
 
     moveDragStyle(segment, laneIndex) {
         const drag = this.state.drag;
-        if (!drag || drag.kind !== "move" || drag.segmentId !== segment.id) return null;
-        const base = this.segmentGridStyle(segment, laneIndex);
-        if (!base || !drag.deltaDays) return null;
+        if (!drag || drag.segmentId !== segment.id) return null;
         const days = this.days;
         let colStart = -1;
         let colEnd = -1;
@@ -789,8 +803,19 @@ export class StaffingGlobalCalendarPage extends Component {
             }
         }
         if (colStart === -1) return null;
-        const newStart = Math.max(0, Math.min(days.length - 1, colStart + drag.deltaDays));
-        const span = colEnd - colStart + 1;
-        return `grid-column: ${newStart + 1} / span ${span}; grid-row: ${laneIndex + 1};`;
+        if (drag.kind === "move") {
+            if (!drag.deltaDays) return null;
+            const newStart = Math.max(0, Math.min(days.length - 1, colStart + drag.deltaDays));
+            return `grid-column: ${newStart + 1} / span ${colEnd - colStart + 1}; grid-row: ${laneIndex + 1};`;
+        }
+        if (drag.kind === "resize-left" && drag.edgeIndex !== null) {
+            const newStart = Math.max(0, Math.min(colEnd, drag.edgeIndex));
+            return `grid-column: ${newStart + 1} / span ${colEnd - newStart + 1}; grid-row: ${laneIndex + 1};`;
+        }
+        if (drag.kind === "resize-right" && drag.edgeIndex !== null) {
+            const newEnd = Math.max(colStart, Math.min(days.length - 1, drag.edgeIndex));
+            return `grid-column: ${colStart + 1} / span ${newEnd - colStart + 1}; grid-row: ${laneIndex + 1};`;
+        }
+        return null;
     }
 }
