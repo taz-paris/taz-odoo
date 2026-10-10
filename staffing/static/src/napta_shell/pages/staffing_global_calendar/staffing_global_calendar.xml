@@ -188,7 +188,7 @@
                             <t t-foreach="days" t-as="day" t-key="day_index">
                                 <div t-attf-class="o_napta_gc_bg_cell {{ day.weekend ? 'o_napta_gc_bg_cell_weekend' : '' }} {{ day.isToday ? 'o_napta_gc_bg_cell_today' : '' }} {{ isDragPreviewCell(day_index) and state.drag.personId === person.id ? 'o_napta_gc_bg_cell_preview' : '' }}"
                                      t-attf-style="grid-column: {{ day_index + 1 }}; grid-row: 1 / -1;"
-                                     t-on-pointerdown="(ev) => this.startCreate(person, day_index, ev)"/>
+                                     t-on-pointerdown="(ev) => this.startCreate(person, day_index, ev)" t-on-click.stop=""/>
                             </t>
 
                             <t t-foreach="lanes.workLanes" t-as="lane" t-key="lane_index">
@@ -196,7 +196,7 @@
                                     <div t-if="segmentGridStyle(seg, lane_index)"
                                          t-attf-class="o_napta_gc_bar o_napta_gc_bar_{{ seg.conflict ? 'conflict' : seg.type }}"
                                          t-attf-style="{{ moveDragStyle(seg, lane_index) or segmentGridStyle(seg, lane_index) }}"
-                                         t-on-pointerdown="(ev) => this.startMove(person, 'work', seg, ev)">
+                                         t-on-pointerdown="(ev) => this.startMove(person, 'work', seg, ev)" t-on-click.stop="">
                                         <span class="o_napta_gc_bar_label" t-esc="seg.client + ' - ' + seg.project"/>
                                         <span class="o_napta_gc_bar_rate" t-esc="segmentLabel(seg)"/>
                                     </div>
@@ -212,7 +212,7 @@
                                     <div t-if="segmentGridStyle(seg, row_offset + lane_index)"
                                          t-attf-class="o_napta_gc_bar o_napta_gc_bar_{{ seg.type }}"
                                          t-attf-style="{{ segmentGridStyle(seg, row_offset + lane_index) }}"
-                                         t-on-pointerdown="(ev) => this.startMove(person, 'leave', seg, ev)">
+                                         t-on-pointerdown="(ev) => this.startMove(person, 'leave', seg, ev)" t-on-click.stop="">
                                         <span class="o_napta_gc_bar_label" t-esc="seg.label"/>
                                     </div>
                                 </t>
@@ -224,7 +224,7 @@
                             <!-- Pop-in d'une période -->
                             <t t-if="openPeriodCtx and openPeriodCtx.person.id === person.id">
                                 <t t-set="ctx" t-value="openPeriodCtx"/>
-                                <t t-set="laneIdx" t-value="ctx.pool === 'work' ? (lanes.workLanes.findIndex((l) => l.includes(ctx.segment))) : (Math.max(1, lanes.workLanes.length) + lanes.leaveLanes.findIndex((l) => l.includes(ctx.segment)))"/>
+                                <t t-set="laneIdx" t-value="periodLaneIndex(ctx, lanes)"/>
                                 <div t-if="laneIdx >= 0" class="o_napta_gc_period_popup" t-attf-style="{{ segmentGridStyle(ctx.segment, laneIdx) }}" t-on-click.stop="">
                                     <div class="o_napta_gc_popup_header">
                                         <strong t-esc="ctx.segment.client + ' - ' + ctx.segment.project"/>

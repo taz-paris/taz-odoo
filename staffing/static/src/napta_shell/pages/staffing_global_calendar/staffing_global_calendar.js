@@ -559,6 +559,14 @@ export class StaffingGlobalCalendarPage extends Component {
         this.state.repeatFormOpen = false;
     }
 
+    periodLaneIndex(ctx, lanes) {
+        if (ctx.pool === "work") {
+            return lanes.workLanes.findIndex((l) => l.includes(ctx.segment));
+        }
+        const idx = lanes.leaveLanes.findIndex((l) => l.includes(ctx.segment));
+        return idx === -1 ? -1 : Math.max(1, lanes.workLanes.length) + idx;
+    }
+
     get openPeriodCtx() {
         const o = this.state.openPeriod;
         if (!o) return null;
