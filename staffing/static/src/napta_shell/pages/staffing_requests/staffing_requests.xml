@@ -16,8 +16,6 @@
                 </div>
                 <div class="osr_header_spacer"/>
 
-                <i class="fa fa-smile-o osr_mood_icon" title="Donner votre avis sur cette page"/>
-
                 <div class="osr_dropdown_wrap">
                     <button type="button" class="osr_icon_btn" t-on-click="(ev) => this.toggleDropdown('showExportMenu', ev)">
                         <i class="fa fa-download"/>

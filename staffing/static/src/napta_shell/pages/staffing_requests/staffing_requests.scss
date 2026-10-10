@@ -36,15 +36,6 @@
         flex: 1 1 auto;
     }
 
-    .osr_mood_icon {
-        color: $napta-text-muted;
-        font-size: 18px;
-        cursor: pointer;
-        margin-right: 4px;
-
-        &:hover { color: $napta-text; }
-    }
-
     .osr_dropdown_wrap {
         position: relative;
         display: flex;
