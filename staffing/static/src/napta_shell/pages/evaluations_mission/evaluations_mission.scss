@@ -1,0 +1,175 @@
+.o_napta_evaluations_mission {
+    font-size: 13px;
+
+    .o_napta_em_header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .o_napta_em_title {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_em_count {
+        color: $napta-text-muted;
+        font-size: 13px;
+    }
+
+    .o_napta_em_header_actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .o_napta_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+
+        i { margin-right: 6px; color: $napta-text-muted; }
+    }
+
+    .o_napta_icon_btn {
+        padding: 6px 10px;
+        i { margin-right: 0; }
+    }
+
+    .o_napta_btn_primary {
+        background: $napta-text;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+
+        i { margin-right: 6px; }
+    }
+
+    .o_napta_tabs {
+        display: flex;
+        gap: 20px;
+        border-bottom: 1px solid $napta-border;
+        margin: 14px 0 12px;
+    }
+
+    .o_napta_tab {
+        padding-bottom: 10px;
+        color: $napta-text-muted;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+
+        &.o_napta_tab_active {
+            color: $napta-accent;
+            border-color: $napta-accent;
+            font-weight: 600;
+        }
+    }
+
+    .o_napta_em_toolbar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+
+    .o_napta_em_table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th, td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid $napta-border;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        th {
+            color: $napta-text-muted;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+    }
+
+    .o_napta_status_badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .o_napta_status_ongoing {
+        background: $napta-accent-light;
+        color: $napta-accent;
+    }
+
+    .o_napta_status_finished {
+        background: $napta-active-bg;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_em_person {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .o_napta_em_avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: $napta-active-bg;
+        color: $napta-text;
+        font-size: 11px;
+        font-weight: 700;
+        flex: 0 0 auto;
+    }
+
+    .o_napta_em_avatar_sm {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+
+    .o_napta_em_person_name {
+        font-weight: 600;
+        color: $napta-text;
+    }
+
+    .o_napta_em_person_role {
+        color: $napta-text-muted;
+        font-size: 12px;
+    }
+
+    .o_napta_em_assessor {
+        position: relative;
+        display: inline-block;
+        cursor: help;
+    }
+
+    .o_napta_em_check {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        color: $napta-accent;
+        background: #fff;
+        border-radius: 50%;
+        font-size: 11px;
+    }
+}

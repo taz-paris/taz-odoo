@@ -1,0 +1,741 @@
+// Couleurs de seuil de disponibilité (captures Napta : Availability Hub).
+$ah-zero-bg: #e5f6ec;
+$ah-zero-text: #1f9d67;
+$ah-mid-bg: #fbf2df;
+$ah-mid-text: #b8860b;
+$ah-high-bg: #efeafd;
+$ah-high-text: #6b4fd1;
+
+.o_napta_reports_availability_hub {
+    position: relative;
+    font-size: 13px;
+    color: $napta-text;
+
+    // --- switch (partagé avec le style de la page planification) ---
+    .o_napta_switch {
+        display: inline-flex;
+        align-items: center;
+        width: 30px;
+        height: 16px;
+        border-radius: 9px;
+        background: $napta-border;
+        padding: 2px;
+        flex: 0 0 auto;
+
+        .o_napta_switch_knob {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform .15s ease;
+        }
+
+        &.o_napta_switch_on {
+            background: $napta-accent;
+
+            .o_napta_switch_knob {
+                transform: translateX(14px);
+            }
+        }
+    }
+
+    // --- header ---
+    .o_ah_header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .o_ah_header_left h1 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        color: $napta-text;
+    }
+
+    .o_ah_subtitle {
+        color: $napta-text-muted;
+    }
+
+    .o_ah_header_right {
+        position: relative;
+    }
+
+    .o_ah_icon_btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: $napta-active-bg;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: $napta-text;
+    }
+
+    // --- toolbar ---
+    .o_ah_toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .o_ah_toolbar_left, .o_ah_toolbar_right {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .o_ah_toolbar_btn_wrap {
+        position: relative;
+    }
+
+    .o_ah_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+
+        i {
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_ah_horizon_btn {
+        background: #1c2b45;
+        color: #fff;
+        border-radius: 6px;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+
+        i {
+            color: #fff;
+        }
+    }
+
+    .o_ah_horizon_value {
+        background: rgba(255, 255, 255, .12);
+        border-radius: 4px;
+        padding: 1px 7px;
+        font-weight: 700;
+    }
+
+    .o_ah_horizon_stepper {
+        font-size: 10px;
+    }
+
+    // --- popovers ---
+    .o_ah_popover {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+        padding: 14px;
+        z-index: 20;
+    }
+
+    .o_ah_header_right .o_ah_popover,
+    .o_ah_toolbar_right .o_ah_popover {
+        left: auto;
+        right: 0;
+    }
+
+    .o_ah_popover_title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 12px;
+    }
+
+    .o_ah_popover_title_spaced {
+        margin-top: 14px;
+    }
+
+    .o_ah_popover_apply {
+        margin-top: 10px;
+        width: 100%;
+        background: $napta-active-bg;
+        border: none;
+        border-radius: 6px;
+        color: $napta-text-muted;
+    }
+
+    .o_ah_views_popover, .o_ah_filter_popover {
+        width: 280px;
+    }
+
+    .o_ah_views_empty {
+        color: $napta-text-muted;
+        text-align: center;
+        padding: 10px 0;
+        border-bottom: 1px solid $napta-border;
+        margin-bottom: 10px;
+    }
+
+    .o_ah_views_hint {
+        display: flex;
+        gap: 8px;
+        color: $napta-text-muted;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .o_ah_filter_group_title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: $napta-text-muted;
+        margin: 10px 0 6px;
+
+        &:first-child {
+            margin-top: 0;
+        }
+    }
+
+    .o_ah_filter_chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .o_ah_filter_chip {
+        border: 1px solid $napta-border;
+        border-radius: 14px;
+        padding: 3px 10px;
+        font-size: 12px;
+    }
+
+    // Availability filter popover
+    .o_ah_availability_popover {
+        width: 260px;
+    }
+
+    .o_ah_threshold_header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .o_ah_threshold_value {
+        font-weight: 700;
+        color: $napta-accent;
+    }
+
+    .o_ah_threshold_slider {
+        width: 100%;
+        accent-color: $napta-accent;
+    }
+
+    .o_ah_week_threshold_row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 2px;
+        cursor: default;
+        color: $napta-text;
+
+        i {
+            color: $napta-text-muted;
+            font-size: 11px;
+        }
+
+        &:hover {
+            background: $napta-active-bg;
+            border-radius: 6px;
+        }
+    }
+
+    .o_ah_legend_divider {
+        height: 1px;
+        background: $napta-border;
+        margin: 8px 0;
+    }
+
+    .o_ah_reset_row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        color: $napta-text-muted;
+        cursor: default;
+        padding-top: 2px;
+    }
+
+    // Columns popover
+    .o_ah_columns_popover {
+        width: 250px;
+    }
+
+    .o_ah_column_row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+    }
+
+    // Display settings popover
+    .o_ah_display_popover {
+        width: 260px;
+    }
+
+    .o_ah_check_row, .o_ah_radio_row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        font-weight: 400;
+        cursor: pointer;
+
+        input {
+            margin: 0;
+        }
+    }
+
+    .o_ah_toggle_row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+    }
+
+    // Horizon popover
+    .o_ah_horizon_popover {
+        width: 140px;
+        padding: 6px;
+    }
+
+    .o_ah_horizon_option {
+        padding: 7px 8px;
+        border-radius: 6px;
+        cursor: default;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: $napta-text-muted;
+
+        i {
+            font-size: 11px;
+            color: $napta-accent;
+            visibility: hidden;
+        }
+
+        &.o_ah_horizon_option_active {
+            color: $napta-text;
+            font-weight: 600;
+
+            i {
+                visibility: visible;
+            }
+        }
+
+        &:hover {
+            background: $napta-active-bg;
+        }
+    }
+
+    // Legend popover
+    .o_ah_legend_popover {
+        width: 210px;
+    }
+
+    .o_ah_legend_row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 0;
+    }
+
+    .o_ah_legend_swatch {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    // --- body layout : table + panneau détails ---
+    .o_ah_body {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .o_ah_table_wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        overflow-x: auto;
+    }
+
+    .o_ah_table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 980px;
+
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid $napta-border;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background: #fafafa;
+            color: $napta-text-muted;
+            font-weight: 600;
+            font-size: 12px;
+        }
+    }
+
+    .o_ah_col_expand {
+        width: 30px;
+    }
+
+    .o_ah_col_people {
+        min-width: 170px;
+        white-space: normal;
+    }
+
+    .o_ah_col_details {
+        min-width: 100px;
+    }
+
+    .o_ah_col_date {
+        min-width: 140px;
+    }
+
+    .o_ah_col_week {
+        min-width: 72px;
+    }
+
+    .o_ah_sort {
+        color: $napta-text-muted;
+        font-size: 11px;
+        margin-left: 4px;
+        cursor: pointer;
+    }
+
+    .o_ah_week_label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .o_ah_current_dot {
+        font-size: 5px;
+        color: $napta-accent;
+        cursor: help;
+    }
+
+    .o_ah_week_date {
+        font-weight: 400;
+        color: $napta-text-muted;
+        text-transform: none;
+    }
+
+    .o_ah_row:hover {
+        background: #fafbfb;
+    }
+
+    .o_ah_row_selected {
+        background: $napta-accent-light;
+    }
+
+    .o_ah_chevron {
+        cursor: pointer;
+        color: $napta-text-muted;
+        font-size: 11px;
+    }
+
+    .o_ah_person_cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .o_ah_avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: $napta-accent-light;
+        color: $napta-accent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        flex: 0 0 auto;
+    }
+
+    .o_ah_avatar_virtual {
+        background: #fce4f1;
+        color: #c23f91;
+    }
+
+    .o_ah_avatar_lg {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .o_ah_person_name {
+        font-weight: 600;
+    }
+
+    .o_ah_details_btn {
+        border: 1px solid $napta-border;
+        border-radius: 14px;
+        background: #fff;
+        font-size: 12px;
+        padding: 3px 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        i {
+            color: $napta-text-muted;
+            font-size: 11px;
+        }
+    }
+
+    .o_ah_cell {
+        display: inline-block;
+        min-width: 48px;
+        text-align: center;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    .o_ah_cell_zero {
+        background: $ah-zero-bg;
+        color: $ah-zero-text;
+    }
+
+    .o_ah_cell_mid {
+        background: $ah-mid-bg;
+        color: $ah-mid-text;
+    }
+
+    .o_ah_cell_high {
+        background: $ah-high-bg;
+        color: $ah-high-text;
+    }
+
+    // --- detail rows (dépliées) ---
+    .o_ah_detail_row {
+        background: #fcfcfc;
+
+        td {
+            border-bottom: 1px solid #f1f1f1;
+        }
+    }
+
+    .o_ah_detail_label {
+        font-size: 12px;
+        white-space: normal;
+    }
+
+    .o_ah_bank_holiday_dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: $napta-border;
+    }
+
+    .o_ah_suggestion_icon {
+        color: #3b6fd8;
+        margin-right: 6px;
+    }
+
+    .o_ah_suggestion_label {
+        font-weight: 700;
+        color: #3b6fd8;
+    }
+
+    .o_ah_suggestion_badge {
+        display: inline-block;
+        min-width: 48px;
+        text-align: center;
+        padding: 3px 8px;
+        border-radius: 6px;
+        border: 1px dashed #3b6fd8;
+        color: #3b6fd8;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    // --- footer ---
+    .o_ah_footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        color: $napta-text-muted;
+        font-size: 12px;
+        border-top: 1px solid $napta-border;
+    }
+
+    .o_ah_footer_center {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .o_ah_page_arrow {
+        cursor: pointer;
+    }
+
+    .o_ah_page_pill {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.o_ah_page_pill_active {
+            background: #1c2b45;
+            color: #fff;
+        }
+    }
+
+    .o_ah_page_input {
+        width: 40px;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 3px 6px;
+        text-align: center;
+    }
+
+    // --- right details panel ---
+    .o_ah_details_panel {
+        flex: 0 0 300px;
+        width: 300px;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        padding: 16px;
+        background: #fff;
+    }
+
+    .o_ah_details_panel_header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .o_ah_details_panel_name {
+        font-weight: 700;
+        flex: 1 1 auto;
+    }
+
+    .o_ah_details_cv, .o_ah_details_close {
+        color: $napta-text-muted;
+        cursor: pointer;
+    }
+
+    .o_ah_details_panel_nav {
+        display: flex;
+        gap: 6px;
+        color: $napta-text-muted;
+
+        i {
+            cursor: pointer;
+        }
+    }
+
+    .o_ah_details_section {
+        margin-bottom: 18px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid $napta-border;
+
+        &:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+    }
+
+    .o_ah_details_section_title {
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        i {
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_ah_details_line {
+        display: flex;
+        justify-content: space-between;
+        padding: 3px 0;
+        font-size: 12px;
+
+        span:first-child {
+            color: $napta-text-muted;
+        }
+
+        span:last-child {
+            font-weight: 600;
+        }
+    }
+
+    .o_ah_details_line_single {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .o_ah_badge_row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .o_ah_badge {
+        background: $napta-active-bg;
+        border-radius: 14px;
+        padding: 3px 10px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .o_ah_badge_skill {
+        background: $napta-accent-light;
+        color: $napta-accent;
+
+        i {
+            font-size: 10px;
+        }
+    }
+
+    .o_ah_details_summary {
+        font-size: 12px;
+        line-height: 1.5;
+        color: $napta-text;
+        margin: 0;
+    }
+}

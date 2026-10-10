@@ -1,0 +1,333 @@
+.o_napta_reports_suivi_consomme {
+    .o_napta_src_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_src_export {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        width: 34px;
+        height: 34px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_src_toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .o_napta_src_filter_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        color: $napta-text;
+        font-weight: 600;
+
+        i {
+            margin-right: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_src_toolbar_right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .o_napta_src_dropdown {
+        position: relative;
+
+        &:hover .o_napta_src_dropdown_panel {
+            display: block;
+        }
+    }
+
+    .o_napta_src_dropdown_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        color: $napta-text;
+
+        i {
+            margin-left: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_src_dropdown_panel {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 4px);
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .1);
+        padding: 12px 16px;
+        min-width: 240px;
+        z-index: 20;
+    }
+
+    .o_napta_src_dropdown_section_title {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: $napta-text-muted;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .o_napta_src_dropdown_sep {
+        height: 1px;
+        background: $napta-border;
+        margin: 10px 0;
+    }
+
+    .o_napta_src_radio {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        font-size: 13px;
+        cursor: pointer;
+        color: $napta-text;
+    }
+
+    .o_napta_src_date_range {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+
+        i {
+            color: $napta-text-muted;
+            cursor: pointer;
+        }
+    }
+
+    .o_napta_src_table_wrap {
+        overflow-x: auto;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+    }
+
+    .o_napta_src_table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+
+        th, td {
+            border-bottom: 1px solid $napta-border;
+            padding: 8px 12px;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background: #fafafa;
+            color: $napta-text-muted;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            text-align: left;
+        }
+    }
+
+    .o_napta_src_col_person {
+        min-width: 260px;
+        text-align: left;
+        white-space: normal;
+    }
+
+    .o_napta_src_col_period {
+        text-align: right;
+        min-width: 90px;
+    }
+
+    .o_napta_src_period_range {
+        font-size: 10px;
+        text-transform: none;
+        font-weight: 400;
+        color: $napta-text-muted;
+        margin-top: 2px;
+    }
+
+    .o_napta_src_row_person {
+        .o_napta_src_col_person {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    }
+
+    .o_napta_src_expand {
+        cursor: pointer;
+        color: $napta-text-muted;
+        width: 14px;
+    }
+
+    .o_napta_src_avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: $napta-active-bg;
+        color: $napta-text;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        flex: 0 0 auto;
+    }
+
+    .o_napta_src_person_info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .o_napta_src_person_name {
+        font-weight: 600;
+        color: $napta-text;
+    }
+
+    .o_napta_src_person_role {
+        font-size: 11px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_src_row_detail {
+        background: #fafcfc;
+
+        .o_napta_src_detail_label {
+            padding-left: 50px;
+            font-weight: 600;
+            font-size: 12px;
+            color: $napta-text;
+        }
+
+        .o_napta_src_detail_empty {
+            font-weight: 400;
+            font-style: italic;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_src_cell_planned {
+        color: $napta-text-muted;
+        font-size: 12px;
+    }
+
+    .o_napta_src_cell_actual {
+        font-weight: 600;
+        border-radius: 4px;
+        padding: 1px 4px;
+    }
+
+    .o_napta_sc_match {
+        background: $napta-accent-light;
+        color: $napta-accent;
+    }
+
+    .o_napta_sc_over {
+        background: #fdeee0;
+        color: #c97a21;
+    }
+
+    .o_napta_sc_under {
+        background: #fde3e1;
+        color: #c0392b;
+    }
+
+    .o_napta_src_footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 14px;
+        background: #fafafa;
+        border-radius: 8px;
+        padding: 10px 16px;
+    }
+
+    .o_napta_src_legend {
+        display: flex;
+        gap: 20px;
+    }
+
+    .o_napta_src_legend_item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: $napta-text;
+    }
+
+    .o_napta_src_legend_swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    .o_napta_src_legend_forecast {
+        background: $napta-accent-light;
+        border: 1px solid $napta-accent;
+    }
+
+    .o_napta_src_legend_real {
+        background: #fde3e1;
+        border: 1px solid #c0392b;
+    }
+
+    .o_napta_src_legend_info {
+        color: $napta-text-muted;
+        cursor: help;
+        margin-left: 2px;
+    }
+
+    .o_napta_src_pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: $napta-text-muted;
+
+        i {
+            cursor: pointer;
+        }
+    }
+
+    .o_napta_src_page_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 4px;
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+
+    .o_napta_src_page_active {
+        background: $napta-accent;
+        border-color: $napta-accent;
+        color: #fff;
+    }
+}

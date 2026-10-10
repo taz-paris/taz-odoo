@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.ReportsSuiviChargePage">
+        <div class="o_napta_reports_suivi_charge">
+            <h1>Suivi de la charge</h1>
+            <p class="o_napta_sc_intro">
+                Ce rapport vous permet de savoir si votre entreprise est en capacité de staffer vos futurs projets.<br/>
+                Deux indicateurs vous sont affichés :
+            </p>
+            <ul class="o_napta_sc_intro_list">
+                <li>La charge en ETP des demandes de staffing qui ne sont pas encore pourvues</li>
+                <li>La capacité totale en ETP de votre entreprise, répartie entre les collaborateurs disponibles et ceux déjà staffés</li>
+            </ul>
+
+            <div class="o_napta_sc_toolbar">
+                <button class="btn btn-sm o_napta_toolbar_btn">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+                <div class="o_napta_sc_toolbar_spacer"/>
+                <div class="o_napta_sc_settings_wrap">
+                    <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="() => this.toggleSettings()">
+                        Paramètres d'affichage <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.settingsOpen" class="o_napta_sc_settings_panel">
+                        <div class="o_napta_sc_settings_title">Grouper les données par</div>
+                        <label class="o_napta_sc_radio"><input type="radio" name="sc_group" disabled="disabled"/> Jour</label>
+                        <label class="o_napta_sc_radio"><input type="radio" name="sc_group" checked="checked" disabled="disabled"/> Semaine</label>
+                        <label class="o_napta_sc_radio"><input type="radio" name="sc_group" disabled="disabled"/> Mois</label>
+                        <label class="o_napta_sc_radio"><input type="radio" name="sc_group" disabled="disabled"/> Année</label>
+                    </div>
+                </div>
+                <div class="o_napta_sc_date_nav">
+                    <i class="fa fa-arrow-left"/>
+                    <span>22-01-24</span>
+                    <i class="fa fa-arrow-right"/>
+                    <span>05-04-24</span>
+                </div>
+            </div>
+
+            <div class="o_napta_sc_chart_card">
+                <div class="o_napta_sc_chart">
+                    <div class="o_napta_sc_chart_gridlines">
+                        <t t-foreach="gridlines" t-as="g" t-key="g">
+                            <div class="o_napta_sc_gridline"><span t-esc="g"/></div>
+                        </t>
+                    </div>
+                    <div class="o_napta_sc_chart_axis_label">Équivalent temps plein</div>
+                    <div class="o_napta_sc_chart_bars">
+                        <t t-foreach="weeks" t-as="week" t-key="week.label">
+                            <div class="o_napta_sc_week_group">
+                                <div class="o_napta_sc_week_bars">
+                                    <div class="o_napta_sc_stack_bar">
+                                        <div class="o_napta_sc_seg o_napta_sc_seg_surstaffe"
+                                             t-attf-style="height: {{ barHeight(week.surstaffe) }}"/>
+                                        <div class="o_napta_sc_seg o_napta_sc_seg_staffe"
+                                             t-attf-style="height: {{ barHeight(week.staffe) }}"/>
+                                        <div class="o_napta_sc_seg o_napta_sc_seg_conges"
+                                             t-attf-style="height: {{ barHeight(week.conges) }}"/>
+                                        <div class="o_napta_sc_seg o_napta_sc_seg_disponible"
+                                             t-attf-style="height: {{ barHeight(week.disponible) }}"/>
+                                    </div>
+                                    <div t-if="week.demande" class="o_napta_sc_demande_bar"
+                                         t-attf-style="height: {{ barHeight(week.demande) }}"/>
+                                    <div t-else="" class="o_napta_sc_demande_bar o_napta_sc_demande_empty"/>
+                                </div>
+                                <div class="o_napta_sc_week_label">
+                                    <div t-esc="week.label"/>
+                                    <div class="o_napta_sc_week_date" t-esc="week.date"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="o_napta_sc_legend">
+                    <t t-foreach="legend" t-as="item" t-key="item.key">
+                        <div class="o_napta_sc_legend_item">
+                            <span t-attf-class="o_napta_sc_swatch o_napta_sc_swatch_{{ item.key }}"/>
+                            <span t-esc="item.label"/>
+                            <i class="fa fa-info-circle o_napta_sc_legend_info" t-att-title="item.tooltip"/>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.ReportsOccupationGlobalePage">
+        <div class="o_napta_reports_occupation_globale">
+            <div class="o_napta_og_header">
+                <h1>Suivi du Staffing Global</h1>
+                <div class="o_napta_og_view_toggle">
+                    <div t-att-class="{ o_napta_og_view_btn: true, o_napta_og_view_btn_active: state.activeView === 'Graphique' }"
+                         t-on-click="() => this.setView('Graphique')">
+                        <i class="fa fa-bar-chart"/> Graphique
+                    </div>
+                    <div t-att-class="{ o_napta_og_view_btn: true, o_napta_og_view_btn_active: state.activeView === 'Tableau' }"
+                         t-on-click="() => this.setView('Tableau')">
+                        <i class="fa fa-list"/> Tableau
+                    </div>
+                </div>
+                <div class="o_napta_og_header_spacer"/>
+                <div class="o_napta_og_date_nav">
+                    <i class="fa fa-arrow-left"/>
+                    <span>01-07-23</span>
+                    <i class="fa fa-arrow-right"/>
+                    <span>30-09-23</span>
+                    <i class="fa fa-arrow-right"/>
+                </div>
+            </div>
+
+            <div class="o_napta_og_toolbar">
+                <button class="btn btn-sm o_napta_toolbar_btn">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+                <div class="o_napta_og_settings_wrap">
+                    <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="() => this.toggleSettings()">
+                        Paramètres d'affichage <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.settingsOpen" class="o_napta_og_settings_panel">
+                        <div class="o_napta_og_settings_title">Afficher les données provenant des</div>
+                        <label class="o_napta_og_radio"><input type="radio" name="og_source" disabled="disabled"/> Staffings</label>
+                        <label class="o_napta_og_radio"><input type="radio" name="og_source" disabled="disabled"/> Imputations</label>
+                        <label class="o_napta_og_radio"><input type="radio" name="og_source" checked="checked" disabled="disabled"/> Les deux</label>
+                        <div class="o_napta_og_settings_sep"/>
+                        <div class="o_napta_og_settings_title">Grouper les données par</div>
+                        <label class="o_napta_og_radio"><input type="radio" name="og_group" disabled="disabled"/> Jour</label>
+                        <label class="o_napta_og_radio"><input type="radio" name="og_group" checked="checked" disabled="disabled"/> Semaine</label>
+                        <label class="o_napta_og_radio"><input type="radio" name="og_group" disabled="disabled"/> Mois</label>
+                        <label class="o_napta_og_radio"><input type="radio" name="og_group" disabled="disabled"/> Année</label>
+                    </div>
+                </div>
+                <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="() => this.toggleAverage()">
+                    Montrer la moyenne
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn o_napta_og_download_btn">
+                    <i class="fa fa-download"/>
+                </button>
+            </div>
+
+            <div t-if="state.activeView === 'Graphique'" class="o_napta_og_chart_card">
+                <div class="o_napta_og_chart_title_row">
+                    <span class="o_napta_og_chart_title">Évolution du pourcentage d'occupation hebdomadaire</span>
+                    <i class="fa fa-info-circle o_napta_og_info_icon" t-att-data-tooltip="infoTooltip"/>
+                    <div class="o_napta_og_chart_title_spacer"/>
+                    <i class="fa fa-camera o_napta_og_camera_icon" t-att-data-tooltip="cameraTooltip"/>
+                </div>
+
+                <div class="o_napta_og_chart">
+                    <div class="o_napta_og_chart_gridlines">
+                        <div class="o_napta_og_gridline"><span>100%</span></div>
+                        <div class="o_napta_og_gridline"><span>75%</span></div>
+                        <div class="o_napta_og_gridline"><span>50%</span></div>
+                        <div class="o_napta_og_gridline"><span>25%</span></div>
+                        <div class="o_napta_og_gridline o_napta_og_gridline_base"><span>0%</span></div>
+                    </div>
+                    <div class="o_napta_og_chart_bars">
+                        <t t-foreach="weeks" t-as="week" t-key="week.label">
+                            <div class="o_napta_og_week_group">
+                                <div class="o_napta_og_week_bars">
+                                    <div t-if="week.reel !== null" class="o_napta_og_stack_bar">
+                                        <div t-if="week.simule" class="o_napta_og_bar_value" t-esc="week.reel + week.simule + '%'"/>
+                                        <div t-else="" class="o_napta_og_bar_value" t-esc="week.reel + '%'"/>
+                                        <div class="o_napta_og_stack_wrap">
+                                            <div t-if="week.simule" class="o_napta_og_seg_simule"
+                                                 t-attf-style="height: {{ barHeight(week.simule) }}">
+                                                <span t-if="week.simule > 4" t-esc="week.simule + '%'"/>
+                                            </div>
+                                            <div class="o_napta_og_seg_reel"
+                                                 t-attf-style="height: {{ barHeight(week.reel) }}">
+                                                <span t-esc="week.reel + '%'"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div t-if="week.imputation !== null" class="o_napta_og_imputation_bar">
+                                        <div class="o_napta_og_bar_value" t-esc="week.imputation + '%'"/>
+                                        <div class="o_napta_og_seg_imputation"
+                                             t-attf-style="height: {{ barHeight(week.imputation) }}"/>
+                                    </div>
+                                </div>
+                                <div class="o_napta_og_week_label" t-esc="week.label"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="o_napta_og_legend">
+                    <div class="o_napta_og_legend_title">Global</div>
+                    <div class="o_napta_og_legend_item"><span class="o_napta_og_swatch o_napta_og_swatch_simule"/> Simulé</div>
+                    <div class="o_napta_og_legend_item"><span class="o_napta_og_swatch o_napta_og_swatch_reel"/> Réel</div>
+                    <div class="o_napta_og_legend_item"><span class="o_napta_og_swatch o_napta_og_swatch_imputation"/> Imputation</div>
+                </div>
+            </div>
+
+            <div t-else="" class="o_napta_og_table_card">
+                <div class="o_napta_og_chart_title">Évolution du pourcentage d'occupation mensuelle</div>
+                <table class="o_napta_og_table">
+                    <thead>
+                        <tr>
+                            <th>Département (Utilisateur)</th>
+                            <th>Poste</th>
+                            <t t-foreach="tableMonths" t-as="month" t-key="month">
+                                <th class="o_napta_og_table_month" t-esc="month"/>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="tableRows" t-as="row" t-key="row_index">
+                            <td>
+                                <span class="o_napta_og_dot" t-attf-style="background: {{ row.color }}"/>
+                                <span t-esc="row.department"/>
+                            </td>
+                            <td t-esc="row.position"/>
+                            <t t-foreach="row.values" t-as="val" t-key="val_index">
+                                <td class="o_napta_og_table_month" t-esc="val + ' %'"/>
+                            </t>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="o_napta_og_legend">
+                    <div class="o_napta_og_legend_item"><span class="o_napta_og_swatch o_napta_og_swatch_simule"/> Staffing simulé</div>
+                    <div class="o_napta_og_legend_item"><span class="o_napta_og_swatch o_napta_og_swatch_reel"/> Staffing réel</div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

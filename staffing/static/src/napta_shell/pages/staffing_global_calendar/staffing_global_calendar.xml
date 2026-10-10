@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.StaffingGlobalCalendarPage">
+        <div class="o_napta_staffing_global_calendar" t-on-click="closeMenus">
+
+            <div class="o_napta_gc_header">
+                <h1>Calendrier global</h1>
+                <div class="o_napta_gc_header_actions">
+                    <button class="o_napta_gc_icon_btn" disabled="disabled" title="Rafraîchir">
+                        <i class="fa fa-refresh"/>
+                    </button>
+                    <button class="o_napta_gc_icon_btn" disabled="disabled" title="Imprimer">
+                        <i class="fa fa-print"/>
+                    </button>
+                    <button class="btn btn-sm o_napta_gc_create" disabled="disabled">
+                        <i class="fa fa-plus"/> Créer un projet
+                    </button>
+                </div>
+            </div>
+
+            <div class="o_napta_toolbar">
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    Afficher les demandes de modification (2) <i class="fa fa-caret-down"/>
+                </button>
+
+                <div class="o_napta_adw_dropdown_wrap">
+                    <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="toggleFilter">
+                        <i class="fa fa-filter"/> Filtrer
+                    </button>
+                    <div t-if="state.filterOpen" class="o_napta_adw_dropdown_menu o_napta_gc_filter_menu" t-on-click.stop="">
+                        <div class="o_napta_gc_filter_title">Filtrer par</div>
+                        <t t-foreach="filterSections" t-as="section" t-key="section.title">
+                            <div t-foreach="section.items" t-as="item" t-key="item" class="o_napta_adw_dropdown_item">
+                                <span t-esc="item"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="o_napta_adw_dropdown_wrap">
+                    <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="toggleSort">
+                        <i class="fa fa-sort"/> Trier : <t t-esc="state.sort === 'position' ? 'Poste' : 'Utilisateur'"/>
+                    </button>
+                    <div t-if="state.sortOpen" class="o_napta_adw_dropdown_menu o_napta_gc_sort_menu" t-on-click.stop="">
+                        <div t-attf-class="o_napta_adw_dropdown_item {{ state.sort === 'position' ? 'o_napta_gc_item_active' : '' }}" t-on-click="(ev) => this.setSort('position', ev)">
+                            <i t-if="state.sort === 'position'" class="fa fa-check"/><span>Poste</span>
+                        </div>
+                        <div t-attf-class="o_napta_adw_dropdown_item {{ state.sort === 'user' ? 'o_napta_gc_item_active' : '' }}" t-on-click="(ev) => this.setSort('user', ev)">
+                            <i t-if="state.sort === 'user'" class="fa fa-check"/><span>Utilisateur</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-bookmark-o"/> Sauvegarder la vue
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="goToday">Réinitialiser</button>
+                <div class="o_napta_toolbar_spacer"/>
+
+                <div class="o_napta_adw_dropdown_wrap">
+                    <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="toggleDisplay">
+                        <i class="fa fa-sliders"/> Paramètres d'affichage
+                    </button>
+                    <div t-if="state.displayOpen" class="o_napta_adw_dropdown_menu o_napta_gc_display_menu" t-on-click.stop="">
+                        <div class="o_napta_gc_filter_title">Afficher les périodes en</div>
+                        <label class="o_napta_gc_radio"><input type="radio" name="gc_unit" t-att-checked="state.unit === 'heures'" t-on-change="(ev) => this.setUnit('heures', ev)"/> Heures</label>
+                        <label class="o_napta_gc_radio"><input type="radio" name="gc_unit" t-att-checked="state.unit === 'jours'" t-on-change="(ev) => this.setUnit('jours', ev)"/> Jours</label>
+                        <label class="o_napta_gc_radio"><input type="radio" name="gc_unit" t-att-checked="state.unit === 'taux'" t-on-change="(ev) => this.setUnit('taux', ev)"/> Taux de staffing</label>
+                        <div class="o_napta_gc_menu_sep"/>
+                        <div class="o_napta_gc_filter_title">Afficher le calendrier en</div>
+                        <label class="o_napta_gc_radio"><input type="radio" name="gc_zoom" t-att-checked="state.zoom === 'semaine'" t-on-change="(ev) => this.setZoom('semaine', ev)"/> Vue semaine</label>
+                        <label class="o_napta_gc_radio"><input type="radio" name="gc_zoom" t-att-checked="state.zoom === 'mois'" t-on-change="(ev) => this.setZoom('mois', ev)"/> Vue mois</label>
+                        <label class="o_napta_gc_radio"><input type="radio" name="gc_zoom" t-att-checked="state.zoom === 'semestre'" t-on-change="(ev) => this.setZoom('semestre', ev)"/> Vue semestre</label>
+                    </div>
+                </div>
+
+                <button class="o_napta_gc_icon_btn" t-on-click="goPrev" title="Période précédente">
+                    <i class="fa fa-chevron-left"/>
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="goToday"><t t-esc="windowLabel"/></button>
+                <button class="o_napta_gc_icon_btn" t-on-click="goNext" title="Période suivante">
+                    <i class="fa fa-chevron-right"/>
+                </button>
+
+                <div class="o_napta_adw_dropdown_wrap">
+                    <button class="btn btn-sm o_napta_toolbar_btn" t-on-click="toggleGoTo">
+                        <i class="fa fa-calendar"/> Aller à
+                    </button>
+                    <div t-if="state.goToOpen" class="o_napta_adw_dropdown_menu o_napta_gc_goto_menu" t-on-click.stop="">
+                        <div class="o_napta_gc_goto_header">
+                            <i class="fa fa-chevron-left" t-on-click="(ev) => this.shiftGoToMonth(-1, ev)"/>
+                            <span t-esc="goToMonthLabel + ' ' + state.goToYear"/>
+                            <i class="fa fa-chevron-right" t-on-click="(ev) => this.shiftGoToMonth(1, ev)"/>
+                        </div>
+                        <div class="o_napta_gc_goto_dow">
+                            <span t-foreach="['L','M','M','J','V','S','D']" t-as="d" t-key="d_index" t-esc="d"/>
+                        </div>
+                        <div class="o_napta_gc_goto_days">
+                            <span t-foreach="goToDays" t-as="d" t-key="d_index"
+                                  t-attf-class="o_napta_gc_goto_day {{ d.getMonth() !== state.goToMonth ? 'o_napta_gc_goto_day_muted' : '' }} {{ d.getTime() === today.getTime() ? 'o_napta_gc_goto_day_today' : '' }}"
+                                  t-on-click="(ev) => this.pickGoToDate(d, ev)"
+                                  t-esc="d.getDate()"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="o_napta_gc_helpbar">
+                <div class="o_napta_gc_legend">
+                    <t t-foreach="legend" t-as="item" t-key="item.type">
+                        <span class="o_napta_gc_legend_item">
+                            <span t-attf-class="o_napta_gc_legend_swatch o_napta_gc_bar_{{ item.type }}"/>
+                            <t t-esc="item.label"/>
+                        </span>
+                    </t>
+                </div>
+                <div class="o_napta_gc_help">
+                    <i t-att-data-tooltip="rightsTooltip" class="fa fa-info-circle"/>
+                    <span>Les droits de l'utilisateur limitent les collaborateurs et projets visibles.</span>
+                    <i class="fa fa-mouse-pointer"/>
+                    <span>Glisser une période pour la décaler, glisser une zone vide pour en créer une. Échap pour annuler.</span>
+                </div>
+            </div>
+
+            <!-- Barre d'actions groupées : "Filtre utilisateur rapide" (épingler des collaborateurs) -->
+            <div t-if="pinnedCount" class="o_napta_gc_pin_bar">
+                <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-trash-o"/></button>
+                <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-comment-o"/></button>
+                <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-sign-out"/></button>
+                <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-forward"/></button>
+                <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-plus"/></button>
+                <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-calendar"/></button>
+                <span class="o_napta_gc_pin_count" t-esc="pinnedCount + ' épinglé(s)'"/>
+                <button t-attf-class="o_napta_gc_icon_btn {{ quickFilterActive ? 'o_napta_gc_icon_btn_active' : '' }}"
+                        t-on-click="toggleQuickFilter" title="Filtrer sur les collaborateurs épinglés">
+                    <i class="fa fa-filter"/>
+                </button>
+                <button class="o_napta_gc_pin_clear" t-on-click="clearPins">Tout désépingler</button>
+            </div>
+
+            <div class="o_napta_gc_grid_wrap">
+                <div class="o_napta_gc_grid" t-ref="grid"
+                     t-attf-style="grid-template-columns: 240px repeat({{ days.length }}, minmax(28px, 1fr));">
+
+                    <!-- Entête -->
+                    <div class="o_napta_gc_corner"/>
+                    <t t-foreach="headerGroups" t-as="group" t-key="group_index">
+                        <div class="o_napta_gc_week_header" t-attf-style="grid-column: span {{ group.span }};">
+                            <div class="o_napta_gc_week_label" t-esc="group.label"/>
+                        </div>
+                    </t>
+                    <t t-if="showDayNumbers">
+                        <div class="o_napta_gc_corner o_napta_gc_corner_sub"/>
+                        <t t-foreach="days" t-as="day" t-key="day_index">
+                            <div t-attf-class="o_napta_gc_day_header {{ day.weekend ? 'o_napta_gc_day_header_weekend' : '' }} {{ day.isToday ? 'o_napta_gc_day_header_today' : '' }}">
+                                <span t-esc="day.dayAbbr"/> <span t-esc="day.dayNum"/>
+                            </div>
+                        </t>
+                    </t>
+
+                    <!-- Lignes collaborateurs -->
+                    <t t-foreach="visiblePeople" t-as="person" t-key="person.id">
+                        <t t-set="lanes" t-value="personLanes(person)"/>
+                        <div class="o_napta_gc_person_cell" t-attf-style="grid-row: span {{ lanes.laneCount }};"
+                             t-on-mouseenter="(ev) => this.setHoverPerson(person.id, ev)"
+                             t-on-mouseleave="(ev) => this.setHoverPerson(null, ev)">
+                            <i t-attf-class="fa {{ state.pinned[person.id] ? 'fa-check-square' : 'fa-square-o' }} o_napta_gc_pin_check"
+                               t-on-click="(ev) => this.togglePin(person.id, ev)"/>
+                            <span class="o_napta_avatar" t-esc="person.initials"/>
+                            <div class="o_napta_gc_person_info">
+                                <div class="o_napta_gc_person_name" t-esc="person.name"/>
+                                <div class="o_napta_gc_person_role" t-esc="person.role"/>
+                            </div>
+                            <div t-if="state.hoverPersonId === person.id" class="o_napta_gc_person_menu" t-on-click.stop="">
+                                <div class="o_napta_adw_dropdown_item" t-on-click="(ev) => this.seeProfile(person, ev)">
+                                    <i class="fa fa-external-link"/><span>Voir le profil</span>
+                                </div>
+                                <div class="o_napta_adw_dropdown_item" t-on-click="(ev) => this.openAddStaffing(person, ev)">
+                                    <i class="fa fa-plus"/><span>Ajouter un staffing</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="o_napta_gc_row_track"
+                             t-attf-style="grid-column: 2 / span {{ days.length }}; grid-row: span {{ lanes.laneCount }}; grid-template-columns: repeat({{ days.length }}, minmax(28px, 1fr)); grid-template-rows: repeat({{ lanes.laneCount }}, 40px);">
+
+                            <t t-foreach="days" t-as="day" t-key="day_index">
+                                <div t-attf-class="o_napta_gc_bg_cell {{ day.weekend ? 'o_napta_gc_bg_cell_weekend' : '' }} {{ day.isToday ? 'o_napta_gc_bg_cell_today' : '' }} {{ isDragPreviewCell(day_index) and state.drag.personId === person.id ? 'o_napta_gc_bg_cell_preview' : '' }}"
+                                     t-attf-style="grid-column: {{ day_index + 1 }}; grid-row: 1 / -1;"
+                                     t-on-pointerdown="(ev) => this.startCreate(person, day_index, ev)" t-on-click.stop=""/>
+                            </t>
+
+                            <t t-foreach="lanes.workLanes" t-as="lane" t-key="lane_index">
+                                <t t-foreach="lane" t-as="seg" t-key="seg.id">
+                                    <div t-if="segmentGridStyle(seg, lane_index)"
+                                         t-attf-class="o_napta_gc_bar o_napta_gc_bar_{{ seg.conflict ? 'conflict' : seg.type }}"
+                                         t-attf-style="{{ moveDragStyle(seg, lane_index) or segmentGridStyle(seg, lane_index) }}"
+                                         t-on-pointerdown="(ev) => this.startMove(person, 'work', seg, ev)" t-on-click.stop="">
+                                        <span class="o_napta_gc_bar_label" t-esc="seg.client + ' - ' + seg.project"/>
+                                        <span class="o_napta_gc_bar_rate" t-esc="segmentLabel(seg)"/>
+                                    </div>
+                                </t>
+                                <t t-foreach="weekendOverlaysForLane(lane, lane_index)" t-as="ov" t-key="ov.key">
+                                    <div class="o_napta_gc_weekend_overlay" t-attf-style="{{ ov.style }}"/>
+                                </t>
+                            </t>
+
+                            <t t-foreach="lanes.leaveLanes" t-as="lane" t-key="'leave' + lane_index">
+                                <t t-set="row_offset" t-value="Math.max(1, lanes.workLanes.length)"/>
+                                <t t-foreach="lane" t-as="seg" t-key="seg.id">
+                                    <div t-if="segmentGridStyle(seg, row_offset + lane_index)"
+                                         t-attf-class="o_napta_gc_bar o_napta_gc_bar_{{ seg.type }}"
+                                         t-attf-style="{{ segmentGridStyle(seg, row_offset + lane_index) }}"
+                                         t-on-pointerdown="(ev) => this.startMove(person, 'leave', seg, ev)" t-on-click.stop="">
+                                        <span class="o_napta_gc_bar_label" t-esc="seg.label"/>
+                                    </div>
+                                </t>
+                                <t t-foreach="weekendOverlaysForLane(lane, row_offset + lane_index)" t-as="ov" t-key="ov.key">
+                                    <div class="o_napta_gc_weekend_overlay" t-attf-style="{{ ov.style }}"/>
+                                </t>
+                            </t>
+
+                            <!-- Pop-in d'une période -->
+                            <t t-if="openPeriodCtx and openPeriodCtx.person.id === person.id">
+                                <t t-set="ctx" t-value="openPeriodCtx"/>
+                                <t t-set="laneIdx" t-value="periodLaneIndex(ctx, lanes)"/>
+                                <div t-if="laneIdx >= 0" class="o_napta_gc_period_popup" t-attf-style="{{ segmentGridStyle(ctx.segment, laneIdx) }}" t-on-click.stop="">
+                                    <div class="o_napta_gc_popup_header">
+                                        <strong t-esc="ctx.segment.client + ' - ' + ctx.segment.project"/>
+                                        <i class="fa fa-times" t-on-click="closePeriod"/>
+                                    </div>
+                                    <div class="o_napta_gc_popup_project">
+                                        <i class="fa fa-calendar"/> Projet du <t t-esc="openPeriodProject.start"/> au <t t-esc="openPeriodProject.end"/>
+                                    </div>
+                                    <div class="o_napta_gc_popup_project o_napta_gc_popup_coowners">
+                                        <i class="fa fa-users"/> Copropriétaires : <t t-esc="openPeriodProject.coOwners"/>
+                                    </div>
+                                    <div class="o_napta_gc_popup_info">
+                                        <div><i class="fa fa-calendar-o"/> <t t-esc="formatPeriodDate(ctx.segment.start) + ' → ' + formatPeriodDate(ctx.segment.end)"/></div>
+                                        <div t-if="ctx.pool === 'work'"><i class="fa fa-clock-o"/> <t t-esc="segmentDays(ctx.segment)"/> j · <t t-esc="segmentDays(ctx.segment) * 8"/> h · <t t-esc="ctx.segment.rate"/> %</div>
+                                        <div t-if="ctx.pool === 'work'"><i class="fa fa-eur"/> TJM : <t t-esc="ctx.segment.fee"/> €</div>
+                                        <div t-if="ctx.pool === 'work'"><i class="fa fa-bookmark"/> <t t-esc="ctx.segment.billed ? 'Facturé' : 'Non facturé'"/></div>
+                                    </div>
+                                    <t t-if="ctx.pool === 'work'">
+                                        <div class="o_napta_gc_popup_actions">
+                                            <div class="o_napta_adw_dropdown_item" t-on-click="editPeriod"><i class="fa fa-pencil"/><span>Éditer</span></div>
+                                            <div class="o_napta_adw_dropdown_item" t-on-click="toggleRepeatForm"><i class="fa fa-repeat"/><span>Répéter la période</span></div>
+                                            <div t-if="state.repeatFormOpen" class="o_napta_gc_repeat_form" t-on-click.stop="">
+                                                <span>Toutes les</span>
+                                                <input type="number" min="1" t-model.number="state.repeatWeeks"/>
+                                                <span>semaine(s), pendant</span>
+                                                <input type="number" min="1" t-model.number="state.repeatCount"/>
+                                                <span>répétitions</span>
+                                                <button class="btn btn-sm o_napta_gc_popup_apply" t-on-click="applyRepeat">Appliquer</button>
+                                            </div>
+                                            <div class="o_napta_adw_dropdown_item" t-on-click="duplicatePeriod"><i class="fa fa-clone"/><span>Dupliquer la période</span></div>
+                                            <div class="o_napta_adw_dropdown_item" t-on-click="(ev) => this.shiftPeriod(7, ev)"><i class="fa fa-arrows-h"/><span>Décaler d'une semaine</span></div>
+                                            <div class="o_napta_adw_dropdown_item" t-on-click="splitPeriod"><i class="fa fa-cut"/><span>Découper par jour</span></div>
+                                            <div class="o_napta_adw_dropdown_item" t-on-click="reassignProject"><i class="fa fa-sign-in"/><span>Rattacher à un autre projet</span></div>
+                                            <div class="o_napta_adw_dropdown_item" t-on-click="toggleRealSimulated">
+                                                <i class="fa fa-toggle-on"/><span>Passer en <t t-esc="ctx.segment.type === 'real' ? 'simulé' : 'réel'"/></span>
+                                            </div>
+                                            <div class="o_napta_adw_dropdown_item o_napta_gc_popup_danger" t-on-click="deletePeriod"><i class="fa fa-trash-o"/><span>Supprimer la période</span></div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                </div>
+            </div>
+
+            <div class="o_napta_gc_footer">
+                <div class="o_napta_gc_page_size">
+                    <span>Éléments par page :</span>
+                    <select t-model="state.pageSize">
+                        <option value="10">10</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+                <div class="o_napta_gc_pagination">
+                    <button class="o_napta_gc_icon_btn" t-att-disabled="state.page &lt;= 1" t-on-click="(ev) => this.goPage(-1, ev)"><i class="fa fa-chevron-left"/></button>
+                    <span t-esc="state.page + ' / ' + pageCount"/>
+                    <button class="o_napta_gc_icon_btn" t-att-disabled="state.page &gt;= pageCount" t-on-click="(ev) => this.goPage(1, ev)"><i class="fa fa-chevron-right"/></button>
+                </div>
+            </div>
+
+            <AssignmentDrawer t-if="state.assignmentDrawer"
+                               kind="state.assignmentDrawer.kind"
+                               mode="state.assignmentDrawer.mode"
+                               record="state.assignmentDrawer.record"
+                               presetUsers="state.assignmentDrawer.presetUsers"
+                               onClose.bind="closeAssignmentDrawer"/>
+
+        </div>
+    </t>
+
+</templates>

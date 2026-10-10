@@ -1,0 +1,640 @@
+// Couleurs de seuil reprises de la légende du rapport (captures Napta).
+$pi-purple-bg: #ece9fb;
+$pi-purple-text: #6b4fd1;
+$pi-amber-bg: #fbf2df;
+$pi-amber-text: #b8860b;
+$pi-green-bg: #e5f6ec;
+$pi-green-text: #1f9d67;
+$pi-red-bg: #fbe7e8;
+$pi-red-text: #e0514a;
+
+.o_napta_reports_planification_individuelle {
+    position: relative;
+    font-size: 13px;
+    color: $napta-text;
+
+    // --- header ---
+    .o_pi_header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .o_pi_header_left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_pi_tabs {
+        display: flex;
+        background: $napta-active-bg;
+        border-radius: 8px;
+        padding: 3px;
+    }
+
+    .o_pi_tab {
+        padding: 5px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: $napta-text-muted;
+        font-weight: 500;
+
+        &.o_pi_tab_active {
+            background: #fff;
+            color: $napta-text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+        }
+    }
+
+    .o_pi_header_right {
+        position: relative;
+        display: flex;
+        gap: 8px;
+    }
+
+    .o_pi_icon_btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: $napta-active-bg;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: $napta-text;
+
+        &:hover {
+            background: darken(#e8e8e8, 4%);
+        }
+    }
+
+    // --- toolbar ---
+    .o_pi_toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .o_pi_toolbar_left, .o_pi_toolbar_right {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .o_pi_toolbar_btn_wrap {
+        position: relative;
+    }
+
+    .o_pi_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+
+        i {
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_pi_date_btn {
+        background: #1c2b45;
+        color: #fff;
+        border-radius: 6px;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+
+        i {
+            color: #fff;
+        }
+    }
+
+    // --- popovers ---
+    .o_pi_popover {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+        padding: 14px;
+        z-index: 20;
+    }
+
+    .o_pi_header_right .o_pi_popover {
+        left: auto;
+        right: 0;
+    }
+
+    .o_pi_popover_title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 12px;
+    }
+
+    .o_pi_popover_title_spaced {
+        margin-top: 14px;
+    }
+
+    .o_pi_popover_apply {
+        margin-top: 10px;
+        width: 100%;
+        background: $napta-active-bg;
+        border: none;
+        border-radius: 6px;
+        color: $napta-text-muted;
+    }
+
+    // Views popover
+    .o_pi_views_popover {
+        width: 280px;
+    }
+
+    .o_pi_views_empty {
+        color: $napta-text-muted;
+        text-align: center;
+        padding: 10px 0;
+        border-bottom: 1px solid $napta-border;
+        margin-bottom: 10px;
+    }
+
+    .o_pi_views_hint {
+        display: flex;
+        gap: 8px;
+        color: $napta-text-muted;
+        font-size: 12px;
+        line-height: 1.4;
+
+        i {
+            margin-top: 2px;
+        }
+    }
+
+    // Filter popover
+    .o_pi_filter_popover {
+        width: 300px;
+    }
+
+    .o_pi_filter_group_title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: $napta-text-muted;
+        margin: 10px 0 6px;
+    }
+
+    .o_pi_filter_chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .o_pi_filter_chip {
+        border: 1px solid $napta-border;
+        border-radius: 14px;
+        padding: 3px 10px;
+        font-size: 12px;
+        color: $napta-text;
+        cursor: default;
+    }
+
+    // Columns popover
+    .o_pi_columns_popover {
+        right: 0;
+        left: auto;
+        width: 260px;
+    }
+
+    .o_pi_column_row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+    }
+
+    .o_pi_column_info {
+        color: $napta-text-muted;
+        margin-left: auto;
+        cursor: help;
+    }
+
+    // Display settings popover
+    .o_pi_display_popover {
+        right: 0;
+        left: auto;
+        display: flex;
+        gap: 28px;
+        width: 480px;
+    }
+
+    .o_pi_display_col {
+        flex: 1 1 0;
+    }
+
+    .o_pi_radio_row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        font-weight: 400;
+        cursor: pointer;
+
+        input {
+            margin: 0;
+        }
+    }
+
+    .o_pi_toggle_row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 0;
+    }
+
+    .o_pi_toggle_label_muted {
+        color: $napta-text-muted;
+    }
+
+    // Date popover
+    .o_pi_date_popover {
+        right: 0;
+        left: auto;
+        width: 200px;
+    }
+
+    .o_pi_date_option {
+        padding: 7px 6px;
+        border-radius: 6px;
+        cursor: default;
+
+        &:hover {
+            background: $napta-active-bg;
+        }
+    }
+
+    .o_pi_legend_divider {
+        height: 1px;
+        background: $napta-border;
+        margin: 8px 0;
+    }
+
+    // Legend popover
+    .o_pi_legend_popover {
+        width: 230px;
+    }
+
+    .o_pi_legend_row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 6px 0;
+        font-size: 13px;
+    }
+
+    .o_pi_legend_swatch {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 56px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    .o_pi_legend_swatch_real {
+        background: $napta-active-bg;
+        color: $napta-text;
+    }
+
+    .o_pi_legend_swatch_simulated {
+        background: #fff;
+        border: 1px solid $napta-border;
+        color: $napta-text-muted;
+    }
+
+    // --- switch ---
+    .o_napta_switch {
+        display: inline-flex;
+        align-items: center;
+        width: 30px;
+        height: 16px;
+        border-radius: 9px;
+        background: $napta-border;
+        padding: 2px;
+        flex: 0 0 auto;
+
+        .o_napta_switch_knob {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform .15s ease;
+        }
+
+        &.o_napta_switch_on {
+            background: $napta-accent;
+
+            .o_napta_switch_knob {
+                transform: translateX(14px);
+            }
+        }
+    }
+
+    // --- table ---
+    .o_pi_table_wrap {
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        overflow-x: auto;
+    }
+
+    .o_pi_table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 920px;
+
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid $napta-border;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background: #fafafa;
+            color: $napta-text-muted;
+            font-weight: 600;
+            font-size: 12px;
+        }
+    }
+
+    .o_pi_col_expand {
+        width: 30px;
+    }
+
+    .o_pi_col_people {
+        min-width: 190px;
+        white-space: normal;
+    }
+
+    .o_pi_col_notes {
+        min-width: 150px;
+        white-space: normal;
+    }
+
+    .o_pi_col_availability {
+        min-width: 150px;
+    }
+
+    .o_pi_col_week {
+        min-width: 78px;
+    }
+
+    .o_pi_sort {
+        color: $napta-text-muted;
+        font-size: 11px;
+        margin-left: 4px;
+        cursor: pointer;
+    }
+
+    .o_pi_week_label {
+        display: flex;
+        align-items: center;
+    }
+
+    .o_pi_week_date {
+        font-weight: 400;
+        color: $napta-text-muted;
+        text-transform: none;
+    }
+
+    .o_pi_row:hover {
+        background: #fafbfb;
+    }
+
+    .o_pi_chevron {
+        cursor: pointer;
+        color: $napta-text-muted;
+        font-size: 11px;
+    }
+
+    .o_pi_person_cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .o_pi_avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: $napta-accent-light;
+        color: $napta-accent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        flex: 0 0 auto;
+    }
+
+    .o_pi_person_name {
+        font-weight: 600;
+    }
+
+    .o_pi_notes_alert {
+        color: #e0514a;
+        font-size: 7px;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+
+    .o_pi_today_cell {
+        line-height: 1.3;
+    }
+
+    .o_pi_today_sub {
+        font-size: 11px;
+        color: $napta-text-muted;
+        font-weight: 400;
+    }
+
+    .o_pi_cell {
+        display: inline-block;
+        min-width: 50px;
+        text-align: center;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    .o_pi_cell_purple {
+        background: $pi-purple-bg;
+        color: $pi-purple-text;
+    }
+
+    .o_pi_cell_amber {
+        background: $pi-amber-bg;
+        color: $pi-amber-text;
+    }
+
+    .o_pi_cell_green {
+        background: $pi-green-bg;
+        color: $pi-green-text;
+    }
+
+    .o_pi_cell_red {
+        background: $pi-red-bg;
+        color: $pi-red-text;
+    }
+
+    // --- detail (expanded) rows ---
+    .o_pi_detail_row {
+        background: #fcfcfc;
+
+        td {
+            border-bottom: 1px solid #f1f1f1;
+        }
+    }
+
+    .o_pi_detail_label {
+        font-size: 12px;
+        white-space: normal;
+    }
+
+    .o_pi_detail_client {
+        font-weight: 700;
+        color: $napta-text;
+    }
+
+    .o_pi_detail_client_highlight {
+        font-weight: 700;
+        color: #3b6fd8;
+    }
+
+    .o_pi_detail_client_muted {
+        font-weight: 600;
+        color: $napta-text-muted;
+    }
+
+    .o_pi_detail_dash {
+        color: $napta-text-muted;
+    }
+
+    .o_pi_cell_sub {
+        min-width: 44px;
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    .o_pi_cell_light {
+        background: #eef4fd;
+        color: #3b6fd8;
+    }
+
+    .o_pi_cell_simulated {
+        background: #fff;
+        border: 1px dashed $napta-border;
+        color: $napta-text-muted;
+    }
+
+    .o_pi_add_assignment_row {
+        color: $napta-accent;
+        font-weight: 500;
+        cursor: default;
+
+        i {
+            margin-right: 6px;
+        }
+    }
+
+    // --- projects placeholder ---
+    .o_pi_projects_placeholder {
+        border: 1px dashed $napta-border;
+        border-radius: 10px;
+        padding: 60px 20px;
+        text-align: center;
+        color: $napta-text-muted;
+
+        i {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: block;
+        }
+    }
+
+    // --- footer ---
+    .o_pi_footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 14px;
+        color: $napta-text-muted;
+        font-size: 12px;
+    }
+
+    .o_pi_footer_left, .o_pi_footer_right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .o_pi_page_size {
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 3px 6px;
+    }
+
+    .o_pi_footer_center {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .o_pi_page_arrow {
+        cursor: pointer;
+        color: $napta-text-muted;
+    }
+
+    .o_pi_page_pill {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: default;
+
+        &.o_pi_page_pill_active {
+            background: #1c2b45;
+            color: #fff;
+        }
+    }
+
+    .o_pi_page_input {
+        width: 40px;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 3px 6px;
+        text-align: center;
+    }
+}

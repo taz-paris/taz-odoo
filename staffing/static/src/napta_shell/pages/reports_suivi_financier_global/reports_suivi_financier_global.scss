@@ -1,0 +1,288 @@
+.o_napta_reports_suivi_financier_global {
+    $prev-bg: #f1f1f1;
+    $real-bg: $napta-accent-light;
+    $proj-bg: #efeafb;
+    $proj-color: #7b5fd9;
+
+    .o_napta_sfg_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .o_napta_sfg_title_group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_sfg_by {
+        color: $napta-text-muted;
+        font-size: 14px;
+    }
+
+    .o_napta_sfg_entry_dropdown {
+        position: relative;
+    }
+
+    .o_napta_sfg_entry_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-weight: 600;
+        color: $napta-text;
+
+        i {
+            margin-left: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_sfg_entry_panel {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+        min-width: 220px;
+        z-index: 30;
+        padding: 6px 0;
+    }
+
+    .o_napta_sfg_entry_option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        color: $napta-text;
+
+        i {
+            width: 12px;
+            color: $napta-accent;
+            font-size: 11px;
+        }
+
+        &:hover {
+            background: $napta-active-bg;
+        }
+    }
+
+    .o_napta_sfg_entry_selected {
+        font-weight: 700;
+    }
+
+    .o_napta_sfg_header_actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .o_napta_sfg_link_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        color: $napta-text;
+
+        i {
+            margin-right: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_sfg_export {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        width: 34px;
+        height: 34px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_sfg_toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .o_napta_sfg_filter_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        color: $napta-text;
+        font-weight: 600;
+
+        i {
+            margin-right: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_sfg_toolbar_right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .o_napta_sfg_dropdown_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        color: $napta-text;
+
+        i {
+            margin-left: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_sfg_date_range {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+
+        i {
+            color: $napta-text-muted;
+            cursor: pointer;
+        }
+    }
+
+    .o_napta_sfg_table_wrap {
+        overflow-x: auto;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+    }
+
+    .o_napta_sfg_table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+
+        th, td {
+            border-bottom: 1px solid $napta-border;
+            padding: 8px 10px;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background: #fafafa;
+            color: $napta-text-muted;
+            font-weight: 700;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            text-align: right;
+        }
+
+        .o_napta_sfg_col_label {
+            text-align: left;
+        }
+
+        .o_napta_sfg_group {
+            text-align: center;
+        }
+    }
+
+    .o_napta_sfg_col_label {
+        min-width: 240px;
+        text-align: left;
+        white-space: normal;
+        font-weight: 600;
+        color: $napta-text;
+    }
+
+    .o_napta_sfg_caret {
+        color: $napta-text-muted;
+        margin-right: 4px;
+    }
+
+    .o_napta_sfg_num {
+        text-align: right;
+    }
+
+    .o_napta_sfg_cell_prev {
+        background: $prev-bg;
+    }
+
+    .o_napta_sfg_cell_real {
+        background: $real-bg;
+    }
+
+    .o_napta_sfg_cell_proj {
+        background: $proj-bg;
+        color: $proj-color;
+    }
+
+    .o_napta_sfg_flag {
+        color: #c97a21;
+        margin-left: 4px;
+        cursor: help;
+    }
+
+    .o_napta_sfg_total_row {
+        font-weight: 700;
+
+        td {
+            border-bottom: none;
+            border-top: 2px solid $napta-border;
+        }
+    }
+
+    .o_napta_sfg_legend {
+        display: flex;
+        gap: 22px;
+        margin-top: 14px;
+        background: #fafafa;
+        border-radius: 8px;
+        padding: 10px 16px;
+    }
+
+    .o_napta_sfg_legend_item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: $napta-text;
+    }
+
+    .o_napta_sfg_legend_swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    .o_napta_sfg_legend_prev { background: $prev-bg; }
+    .o_napta_sfg_legend_real { background: $real-bg; }
+    .o_napta_sfg_legend_proj { background: $proj-bg; }
+
+    .o_napta_sfg_legend_info {
+        color: $napta-text-muted;
+        cursor: help;
+        margin-left: 2px;
+    }
+}
