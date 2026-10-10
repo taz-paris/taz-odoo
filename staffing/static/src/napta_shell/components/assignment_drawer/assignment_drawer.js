@@ -41,15 +41,40 @@ const USER_DIRECTORY = [
 ].sort((a, b) => a.localeCompare(b, "fr"));
 
 // Une demande ne staffe pas réellement : chaque utilisateur n'est que
-// suggéré ou pré-réservé, selon les droits de son créateur (doc §Option de
-// staffing). On simule ce choix par utilisateur sélectionné.
-const USER_STAFFING_OPTIONS = ["Suggéré", "Pré-réservé"];
+// suggéré ou pré-positionné (= pré-booké), selon les droits de son créateur
+// (doc staffing_pre-booking : Suggérée/Pré-booking sont liées à une DEMANDE,
+// Simulée/Réelle sont liées à une AFFECTATION — les 4 niveaux sont proposés
+// dans le même sélecteur par utilisateur, cf. capture produit).
+const USER_STAFFING_OPTIONS = ["Suggérer", "Pré-positionner", "Simulé", "Réel"];
+const USER_STAFFING_OPTION_SLUGS = { "Suggérer": "suggest", "Pré-positionner": "prebook", "Simulé": "simulated", "Réel": "real" };
 const REPLACE_SCOPE_OPTIONS = ["Pour l'ensemble de la mission", "Pour une partie de la mission", "À partir d'une date spécifique"];
 
 const ASSIGNMENT_STATUS_OPTIONS = ["Suggestion", "Pré-réservation", "Staffing simulé", "Staffing confirmé"];
 const PRIORITY_OPTIONS = ["Basse", "Normale", "Haute", "Urgente"];
 
 const COMMENT_MAX_LENGTH = 200;
+
+// Jours fériés fixes (mock, dates françaises) utilisés pour simuler la
+// détection de conflit "congés ou jours fériés" (doc staffing_les-calendriers
+// §Découper le staffing / notion de congé).
+const MOCK_HOLIDAYS_MMDD = ["01-01", "05-01", "05-08", "07-14", "08-15", "11-01", "11-11", "12-25"];
+
+function isoDatesInRange(startIso, endIso) {
+    const dates = [];
+    if (!startIso || !endIso) return dates;
+    let cur = new Date(startIso + "T00:00:00");
+    const end = new Date(endIso + "T00:00:00");
+    if (isNaN(cur) || isNaN(end)) return dates;
+    while (cur <= end) {
+        dates.push(cur.toISOString().slice(0, 10));
+        cur.setDate(cur.getDate() + 1);
+    }
+    return dates;
+}
+
+function holidaysInRange(startIso, endIso) {
+    return isoDatesInRange(startIso, endIso).filter((iso) => MOCK_HOLIDAYS_MMDD.includes(iso.slice(5)));
+}
 
 function computeInitials(name) {
     return (name || "")
@@ -58,6 +83,13 @@ function computeInitials(name) {
         .slice(0, 2)
         .map((w) => w[0].toUpperCase())
         .join("");
+}
+
+/** "YYYY-MM-DD" -> "DD/MM/YYYY" (affichage). */
+function formatIsoDateDisplay(iso) {
+    if (!iso) return "?";
+    const [y, m, d] = iso.split("-");
+    return `${d}/${m}/${y}`;
 }
 
 /** "DD/MM/YYYY" ou "DD/MM/YY" -> "YYYY-MM-DD" (pour <input type="date">). */
@@ -88,7 +120,9 @@ export class AssignmentDrawer extends Component {
         this.periodStatusOptions = PERIOD_STATUS_OPTIONS;
         this.currencyOptions = CURRENCY_OPTIONS;
         this.userStaffingOptions = USER_STAFFING_OPTIONS;
+        this.userStaffingOptionSlugs = USER_STAFFING_OPTION_SLUGS;
         this.replaceScopeOptions = REPLACE_SCOPE_OPTIONS;
+        this.periodSelectPresets = ["Toutes les périodes", "Toutes les périodes passées", "Toutes les périodes futures"];
         this.assignmentStatusOptions = ASSIGNMENT_STATUS_OPTIONS;
         this.priorityOptions = PRIORITY_OPTIONS;
         this.commentMaxLength = COMMENT_MAX_LENGTH;
@@ -101,11 +135,16 @@ export class AssignmentDrawer extends Component {
             openSections: {},
             need: "",
             project: isEdit ? "" : "",
+            title: this.defaultTitle,
+            titleEditing: false,
             criteria: { skills: [], businessUnits: [], positions: [], offices: [], contractTypes: [] },
             criteriaOpenField: null,
             periods: [],
             periodsConfig: { planningMode: "Dates fixes", unit: "Jours", ignoreLeaves: false, autoSplit: false },
             periodMenuOpenId: null,
+            periodSelectMenuOpen: false,
+            conflictModalOpen: false,
+            userOptionDropdownOpen: null,
             bulkEditOpen: false,
             bulkEdit: { amount: null, customFee: null, customFeeCurrency: "€", customCost: null, customCostCurrency: "€", status: "", description: "" },
             users: [],
@@ -147,7 +186,7 @@ export class AssignmentDrawer extends Component {
             this.state.users = (record.preBooked || [])
                 .filter((n) => n && !n.startsWith("+") && !/\.$/.test(n))
                 .map((name) => ({ name, role: "", initials: computeInitials(name) }));
-            this.state.userOptions = Object.fromEntries(this.state.users.map((u) => [u.name, "Pré-réservé"]));
+            this.state.userOptions = Object.fromEntries(this.state.users.map((u) => [u.name, "Pré-positionner"]));
             this.state.info.status = record.status || "";
             this.state.info.daysSold = record.soldDays ?? null;
             if (record.startDate || record.endDate) {
@@ -169,29 +208,50 @@ export class AssignmentDrawer extends Component {
             return {
                 title: record.project,
                 subtitle: record.subproject,
-                description: "",
                 tags: [
-                    { icon: "fa-suitcase", label: "Poste", value: record.position },
-                    { icon: "fa-building-o", label: "Bureau", value: record.office },
+                    { icon: "fa-sitemap", label: "Départements", value: record.department || "—" },
+                    { icon: "fa-map-marker", label: "Bureaux", value: record.office || "—" },
                 ],
             };
         }
         return {
             title: record.project,
             subtitle: record.client,
-            description: "",
             tags: [
-                { icon: "fa-star-o", label: "Compétences", value: (record.businessUnits || []).join(", ") || "—" },
-                { icon: "fa-sitemap", label: "Jours vendus", value: record.soldDays != null ? record.soldDays + " j" : "—" },
+                { icon: "fa-sitemap", label: "Départements", value: (record.businessUnits || []).join(", ") || "—" },
+                { icon: "fa-map-marker", label: "Bureaux", value: "—" },
             ],
         };
     }
 
-    get title() {
+    // Titre fixe en création ; personnalisable en édition (champ éditable
+    // avec icône crayon dans l'en-tête, observé en production).
+    get defaultTitle() {
         if (this.props.mode === "create") {
             return "Créer une demande";
         }
-        return this.props.kind === "staffing" ? "Modifier le staffing" : "Modifier la demande";
+        return this.props.kind === "staffing" ? "Personnaliser le titre du staffing" : "Personnaliser le titre de la demande";
+    }
+
+    startEditTitle(ev) {
+        if (ev) ev.stopPropagation();
+        if (this.props.mode !== "edit") return;
+        this.state.titleEditing = true;
+    }
+
+    commitTitle(ev) {
+        if (ev) ev.stopPropagation();
+        if (!this.state.title.trim()) {
+            this.state.title = this.defaultTitle;
+        }
+        this.state.titleEditing = false;
+    }
+
+    onTitleKeydown(ev) {
+        if (ev.key === "Enter") {
+            ev.preventDefault();
+            this.commitTitle(ev);
+        }
     }
 
     close(ev) {
@@ -204,6 +264,8 @@ export class AssignmentDrawer extends Component {
         this.state.userSearchFocused = false;
         this.state.periodMenuOpenId = null;
         this.state.replaceSearchFocused = false;
+        this.state.periodSelectMenuOpen = false;
+        this.state.userOptionDropdownOpen = null;
     }
 
     toggleSection(key) {
@@ -275,6 +337,7 @@ export class AssignmentDrawer extends Component {
             customCostCurrency: "€",
             status: "",
             description: "",
+            holidayAcknowledged: false,
         });
     }
 
@@ -330,20 +393,110 @@ export class AssignmentDrawer extends Component {
         return this.state.periodMenuOpenId === period.id;
     }
 
-    // Napta calcule automatiquement si le staffing entraînera un conflit
-    // (cf. doc staffing_creation-de-staffing §Périodes) ; on simule ce
-    // calcul par un simple recouvrement de dates entre périodes en mode
-    // "Dates fixes".
-    get hasPeriodConflict() {
-        const periods = this.state.periods.filter((p) => p.start && p.end);
-        for (let i = 0; i < periods.length; i++) {
-            for (let j = i + 1; j < periods.length; j++) {
-                if (periods[i].start <= periods[j].end && periods[j].start <= periods[i].end) {
-                    return true;
-                }
+    // ---- Sélection par préréglage (icône "lasso") ----
+    togglePeriodSelectMenu(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.periodSelectMenuOpen = !this.state.periodSelectMenuOpen;
+    }
+
+    applyPeriodSelectPreset(preset, ev) {
+        if (ev) ev.stopPropagation();
+        const today = new Date().toISOString().slice(0, 10);
+        for (const p of this.state.periods) {
+            if (preset === this.periodSelectPresets[0]) {
+                p.selected = true;
+            } else if (preset === this.periodSelectPresets[1]) {
+                p.selected = !!p.end && p.end < today;
+            } else {
+                p.selected = !!p.start && p.start >= today;
             }
         }
-        return false;
+        this.state.periodSelectMenuOpen = false;
+    }
+
+    // ---- Découper par jours (doc staffing_les-calendriers §Découper le
+    // staffing : scinde une période en sous-périodes, charge conservée) ----
+    splitSelectedPeriodsByDays(ev) {
+        if (ev) ev.stopPropagation();
+        const targets = this.selectedPeriods.filter((p) => p.start && p.end);
+        for (const period of targets) {
+            const days = isoDatesInRange(period.start, period.end);
+            if (days.length <= 1) continue;
+            const share = Math.round((period.amount / days.length) * 100) / 100;
+            const idx = this.state.periods.indexOf(period);
+            const newPeriods = days.map((iso) => {
+                this._periodId++;
+                return { ...period, id: this._periodId, start: iso, end: iso, amount: share, selected: false, expanded: false };
+            });
+            this.state.periods.splice(idx, 1, ...newPeriods);
+        }
+        this.state.periodMenuOpenId = null;
+    }
+
+    // ---- Conflit "congés ou jours fériés" (doc staffing_les-calendriers :
+    // le système propose de déduire les jours de congé/férié de la charge) ----
+    periodHolidays(period) {
+        if (this.state.periodsConfig.planningMode !== "Dates fixes" || this.state.periodsConfig.unit !== "Jours") {
+            return [];
+        }
+        return holidaysInRange(period.start, period.end);
+    }
+
+    isPeriodConflicting(period) {
+        return !period.holidayAcknowledged && this.periodHolidays(period).length > 0;
+    }
+
+    get conflictingPeriods() {
+        return this.state.periods.filter((p) => this.isPeriodConflicting(p));
+    }
+
+    get conflictCount() {
+        return this.conflictingPeriods.length;
+    }
+
+    get conflictBadgeLabel() {
+        return this.conflictCount > 9 ? "9+" : String(this.conflictCount);
+    }
+
+    get conflictDetails() {
+        return this.conflictingPeriods.map((period) => {
+            const count = this.periodHolidays(period).length;
+            const before = Number(period.amount) || 0;
+            const after = Math.max(before - count, 0);
+            return { period, count, before, after };
+        });
+    }
+
+    get conflictTotalDelta() {
+        return this.conflictDetails.reduce((sum, d) => sum + (d.after - d.before), 0);
+    }
+
+    get conflictPersonName() {
+        return this.state.users.length ? this.state.users[0].name : null;
+    }
+
+    formatPeriodDate(iso) {
+        return formatIsoDateDisplay(iso);
+    }
+
+    openConflictModal(ev) {
+        if (ev) ev.stopPropagation();
+        if (!this.conflictCount) return;
+        this.state.conflictModalOpen = true;
+    }
+
+    closeConflictModal(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.conflictModalOpen = false;
+    }
+
+    applyConflictAdjustments(ev) {
+        if (ev) ev.stopPropagation();
+        for (const { period, after } of this.conflictDetails) {
+            period.amount = after;
+            period.holidayAcknowledged = true;
+        }
+        this.state.conflictModalOpen = false;
     }
 
     // ---- Édition en masse des périodes sélectionnées ----
@@ -393,7 +546,7 @@ export class AssignmentDrawer extends Component {
     addUser(name, ev) {
         if (ev) ev.stopPropagation();
         this.state.users.push({ name, role: "", initials: computeInitials(name) });
-        this.state.userOptions[name] = "Suggéré";
+        this.state.userOptions[name] = "Suggérer";
         this.state.userSearch = "";
     }
 
@@ -406,9 +559,19 @@ export class AssignmentDrawer extends Component {
         delete this.state.userOptions[user.name];
     }
 
+    toggleUserOptionDropdown(name, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.userOptionDropdownOpen = this.state.userOptionDropdownOpen === name ? null : name;
+    }
+
+    isUserOptionDropdownOpen(name) {
+        return this.state.userOptionDropdownOpen === name;
+    }
+
     setUserOption(name, option, ev) {
         if (ev) ev.stopPropagation();
         this.state.userOptions[name] = option;
+        this.state.userOptionDropdownOpen = null;
     }
 
     focusUserSearch(ev) {
@@ -462,7 +625,7 @@ export class AssignmentDrawer extends Component {
         user.role = "";
         user.initials = computeInitials(this.state.replaceBy);
         delete this.state.userOptions[user.name];
-        this.state.userOptions[this.state.replaceBy] = "Suggéré";
+        this.state.userOptions[this.state.replaceBy] = "Suggérer";
         this.state.replaceOpen = null;
     }
 

@@ -43,6 +43,23 @@
 
 .o_napta_adw_header_icon { font-size: 15px; }
 
+.o_napta_adw_title_editable {
+    cursor: text;
+    border-bottom: 1px dashed transparent;
+    &:hover { border-bottom-color: $napta-border; }
+}
+
+.o_napta_adw_title_input {
+    flex: 1 1 auto;
+    font-size: 17px;
+    font-weight: 700;
+    border: none;
+    border-bottom: 1px solid $napta-accent;
+    padding: 0 0 2px;
+    color: $napta-text;
+    outline: none;
+}
+
 .o_napta_adw_label {
     display: flex;
     align-items: center;
@@ -133,6 +150,13 @@
     i { color: #2a56c6; }
 }
 
+.o_napta_adw_banner_edit {
+    margin-left: auto;
+    cursor: pointer;
+    font-size: 13px;
+    &:hover { color: #2a56c6; }
+}
+
 .o_napta_adw_banner_subtitle {
     font-weight: 400;
     color: #5b7bd1;
@@ -156,6 +180,12 @@
 .o_napta_adw_banner_tag_value {
     font-size: 12.5px;
     color: #5b7bd1;
+}
+
+.o_napta_adw_banner_tag_link {
+    color: #2a56c6;
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
 }
 
 // ---- Carte utilisateur affecté (mode édition) ----
@@ -198,6 +228,87 @@
     &:hover { color: $napta-text; }
 }
 
+// ---- Dropdown d'option de staffing par utilisateur (4 niveaux : doc
+// staffing_pre-booking — Suggérer/Pré-positionner liés à une demande,
+// Simulé/Réel liés à une affectation) ----
+.o_napta_adw_user_option_wrap {
+    position: relative;
+    flex: none;
+}
+
+.o_napta_adw_user_option_btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 14px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+
+    i { font-size: 10px; }
+}
+
+.o_napta_adw_user_option_btn_suggest, .o_napta_adw_user_option_btn_prebook {
+    background: #4a6fe0;
+}
+
+.o_napta_adw_user_option_btn_simulated {
+    background: #fff;
+    color: $napta-accent;
+    border: 1px solid $napta-accent;
+}
+
+.o_napta_adw_user_option_btn_real {
+    background: $napta-accent;
+}
+
+.o_napta_adw_user_option_menu {
+    top: calc(100% + 4px);
+    left: auto;
+    right: 0;
+    min-width: 170px;
+    padding: 6px;
+}
+
+.o_napta_adw_user_option_item {
+    border-radius: 6px;
+    padding: 6px 8px;
+    gap: 6px;
+
+    i { color: $napta-text; width: 12px; font-size: 11px; }
+}
+
+.o_napta_adw_user_option_item_active {
+    background: $napta-active-bg;
+}
+
+.o_napta_adw_user_option_pill {
+    display: inline-block;
+    border-radius: 12px;
+    padding: 3px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.o_napta_adw_user_option_pill_suggest, .o_napta_adw_user_option_pill_prebook {
+    background: #4a6fe0;
+}
+
+.o_napta_adw_user_option_pill_simulated {
+    background: #fff;
+    color: $napta-accent;
+    border: 1px solid $napta-accent;
+}
+
+.o_napta_adw_user_option_pill_real {
+    background: $napta-accent;
+}
+
 .o_napta_adw_type_badge {
     border-radius: 12px;
     padding: 2px 10px;
@@ -237,32 +348,122 @@
     margin: 4px 0 8px;
 }
 
-// ---- Bandeau de conflit ----
-.o_napta_adw_conflict_banner {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid #e8a0a0;
-    background: #fdf0f0;
-    color: #c0392b;
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin: 10px 0;
-    font-size: 12.5px;
-    font-weight: 600;
-
-    i { font-size: 15px; }
+// ---- Indicateur de conflit dans l'en-tête de section ----
+.o_napta_adw_section_warning {
+    color: #e08a3c;
+    font-size: 13px;
+    margin-left: 2px;
+    cursor: pointer;
 }
 
-.o_napta_adw_conflict_preview_btn {
-    margin-left: auto;
+// ---- Badge "Aperçu" (pied de tiroir) ----
+.o_napta_adw_conflict_badge {
     background: #c0392b;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    margin-left: 4px;
+}
+
+// ---- Modale "Conflit avec des congés ou jours fériés" ----
+.o_napta_adw_conflict_modal_overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 30, .45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+}
+
+.o_napta_adw_conflict_modal {
+    width: 380px;
+    max-width: calc(100% - 40px);
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .25);
+}
+
+.o_napta_adw_conflict_modal_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+
+    h3 { margin: 0; font-size: 16px; }
+    i { cursor: pointer; color: $napta-text-muted; }
+}
+
+.o_napta_adw_conflict_modal_text {
+    font-size: 12.5px;
+    color: $napta-text-muted;
+    margin: 0 0 14px;
+}
+
+.o_napta_adw_conflict_modal_row {
+    border: 1px solid $napta-border;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+}
+
+.o_napta_adw_conflict_modal_dates {
+    font-weight: 600;
+    font-size: 12.5px;
+    flex: 1 1 auto;
+}
+
+.o_napta_adw_conflict_modal_delta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+
+    i { color: $napta-text-muted; font-size: 11px; }
+}
+
+.o_napta_adw_conflict_modal_unit {
+    font-weight: 400;
+    font-size: 11px;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_conflict_modal_hint {
+    flex-basis: 100%;
+    font-size: 11px;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_conflict_modal_total {
+    display: flex;
+    justify-content: space-between;
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 13px;
+    margin: 10px 0 16px;
+}
+
+.o_napta_adw_conflict_apply_btn {
+    width: 100%;
+    background: #0b2540;
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 5px 12px;
-    font-size: 12px;
+    padding: 10px;
     font-weight: 600;
+    justify-content: center;
 }
 
 .o_napta_adw_section {
@@ -387,6 +588,20 @@
     margin-left: 8px;
 }
 
+.o_napta_adw_period_select_wrap {
+    position: relative;
+}
+
+.o_napta_adw_period_select_menu {
+    top: calc(100% + 4px);
+    left: auto;
+    right: -40px;
+    min-width: 200px;
+    padding: 4px 0;
+
+    .o_napta_adw_dropdown_item { padding: 10px 14px; font-weight: 600; }
+}
+
 // ---- Configuration globale des périodes ----
 .o_napta_adw_period_config {
     display: flex;
@@ -411,15 +626,27 @@
 }
 
 .o_napta_adw_period {
-    border-bottom: 1px solid $napta-border;
-    padding-bottom: 8px;
+    background: #f3ead9;
+    border-radius: 8px;
+    padding: 8px 10px;
     margin-bottom: 8px;
+}
+
+.o_napta_adw_period_conflict {
+    background: #fbe2e0;
 }
 
 .o_napta_adw_period_row {
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.o_napta_adw_period_warning {
+    color: #e08a3c;
+    flex: none;
+    cursor: pointer;
+    margin-left: 2px;
 }
 
 .o_napta_adw_period_toggle, .o_napta_adw_period_check {

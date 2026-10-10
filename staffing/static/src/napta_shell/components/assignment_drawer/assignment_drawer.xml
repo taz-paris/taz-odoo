@@ -14,11 +14,12 @@
                         <i class="fa fa-briefcase"/>
                         <span t-esc="banner.title"/>
                         <span class="o_napta_adw_banner_subtitle" t-esc="banner.subtitle"/>
+                        <i class="fa fa-pencil o_napta_adw_banner_edit" data-tooltip="Modifier le titre et les critères"/>
                     </div>
                     <div class="o_napta_adw_banner_tags">
                         <div t-foreach="banner.tags" t-as="tag" t-key="tag.label" class="o_napta_adw_banner_tag">
                             <div class="o_napta_adw_banner_tag_label"><i t-attf-class="fa {{ tag.icon }}"/> <t t-esc="tag.label"/></div>
-                            <div class="o_napta_adw_banner_tag_value" t-esc="tag.value"/>
+                            <div class="o_napta_adw_banner_tag_value o_napta_adw_banner_tag_link" t-esc="tag.value"/>
                         </div>
                     </div>
                 </div>
@@ -101,7 +102,11 @@
 
             <div class="o_napta_adw_drawer" t-on-click="(ev) => { ev.stopPropagation(); this.closeDropdowns(); }">
                 <div class="o_napta_adw_header">
-                    <h3 t-esc="title"/>
+                    <input t-if="props.mode === 'edit' and state.titleEditing" type="text" class="o_napta_adw_title_input" autofocus="autofocus"
+                           t-model="state.title" t-on-blur="commitTitle" t-on-keydown="onTitleKeydown"/>
+                    <h3 t-else="" t-att-class="{ o_napta_adw_title_editable: props.mode === 'edit' }" t-on-click="startEditTitle" t-esc="state.title"/>
+                    <i t-if="props.mode === 'edit' and !state.titleEditing" class="fa fa-pencil o_napta_adw_header_icon"
+                       data-tooltip="Personnaliser le titre" t-on-click="startEditTitle"/>
                     <i class="fa fa-cog o_napta_adw_header_icon" data-tooltip="Configuration du formulaire"/>
                     <i class="fa fa-smile-o o_napta_adw_header_icon" data-tooltip="Donner votre avis"/>
                     <i class="fa fa-times" t-on-click="close"/>
@@ -159,11 +164,12 @@
                             <i class="fa fa-briefcase"/>
                             <span t-esc="banner.title"/>
                             <span class="o_napta_adw_banner_subtitle" t-esc="banner.subtitle"/>
+                            <i class="fa fa-pencil o_napta_adw_banner_edit" data-tooltip="Modifier le titre et les critères"/>
                         </div>
                         <div class="o_napta_adw_banner_tags">
                             <div t-foreach="banner.tags" t-as="tag" t-key="tag.label" class="o_napta_adw_banner_tag">
                                 <div class="o_napta_adw_banner_tag_label"><i t-attf-class="fa {{ tag.icon }}"/> <t t-esc="tag.label"/></div>
-                                <div class="o_napta_adw_banner_tag_value" t-esc="tag.value"/>
+                                <div class="o_napta_adw_banner_tag_value o_napta_adw_banner_tag_link" t-esc="tag.value"/>
                             </div>
                         </div>
                     </div>
@@ -174,9 +180,21 @@
                             <div class="o_napta_adw_user_card_name" t-esc="user.name"/>
                             <div t-if="user.role" class="o_napta_adw_user_card_role" t-esc="user.role"/>
                         </div>
-                        <select t-if="props.kind === 'request'" class="o_napta_adw_user_chip_option" t-model="state.userOptions[user.name]">
-                            <option t-foreach="userStaffingOptions" t-as="o" t-key="o" t-att-value="o" t-esc="o"/>
-                        </select>
+                        <div t-if="props.kind === 'request'" class="o_napta_adw_dropdown_wrap o_napta_adw_user_option_wrap">
+                            <button type="button" t-attf-class="o_napta_adw_user_option_btn o_napta_adw_user_option_btn_{{ userStaffingOptionSlugs[state.userOptions[user.name]] }}"
+                                    t-on-click="(ev) => this.toggleUserOptionDropdown(user.name, ev)">
+                                <span t-esc="state.userOptions[user.name]"/>
+                                <i class="fa fa-chevron-down"/>
+                            </button>
+                            <div t-if="isUserOptionDropdownOpen(user.name)" class="o_napta_adw_dropdown_menu o_napta_adw_user_option_menu">
+                                <div t-foreach="userStaffingOptions" t-as="opt" t-key="opt"
+                                     t-attf-class="o_napta_adw_dropdown_item o_napta_adw_user_option_item {{ state.userOptions[user.name] === opt ? 'o_napta_adw_user_option_item_active' : '' }}"
+                                     t-on-click="(ev) => this.setUserOption(user.name, opt, ev)">
+                                    <i t-if="state.userOptions[user.name] === opt" class="fa fa-check"/>
+                                    <span t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[opt] }}" t-esc="opt"/>
+                                </div>
+                            </div>
+                        </div>
                         <i class="fa fa-pencil o_napta_adw_user_card_action" data-tooltip="Modifier l'utilisateur assigné"
                            t-on-click="(ev) => this.openReplace(user_index, ev)"/>
                         <i class="fa fa-times o_napta_adw_user_card_action" data-tooltip="Retirer"
@@ -219,11 +237,25 @@
                     <i class="fa fa-clock-o"/>
                     <span>Périodes</span>
                     <span class="o_napta_adw_section_count" t-esc="state.periods.length"/>
+                    <i t-if="conflictCount" class="fa fa-exclamation-circle o_napta_adw_section_warning"
+                       data-tooltip="Conflits avec des congés ou jours fériés" t-on-click="(ev) => this.openConflictModal(ev)"/>
                     <div class="o_napta_adw_section_tools">
-                        <i t-attf-class="fa {{ allPeriodsExpanded ? 'fa-compress' : 'fa-expand' }}" data-tooltip="Tout déplier / replier"
+                        <i t-attf-class="fa {{ allPeriodsExpanded ? 'fa-compress' : 'fa-expand' }}" data-tooltip="Ouvrir/Fermer les détails"
                            t-on-click="(ev) => this.toggleExpandAllPeriods(ev)"/>
+                        <div class="o_napta_adw_dropdown_wrap o_napta_adw_period_select_wrap">
+                            <i class="fa fa-object-group" data-tooltip="Sélectionner des périodes"
+                               t-on-click="(ev) => this.togglePeriodSelectMenu(ev)"/>
+                            <div t-if="state.periodSelectMenuOpen" class="o_napta_adw_dropdown_menu o_napta_adw_period_select_menu">
+                                <div t-foreach="periodSelectPresets" t-as="preset" t-key="preset" class="o_napta_adw_dropdown_item"
+                                     t-on-click="(ev) => this.applyPeriodSelectPreset(preset, ev)">
+                                    <span t-esc="preset"/>
+                                </div>
+                            </div>
+                        </div>
                         <i t-if="selectedPeriods.length" class="fa fa-pencil" data-tooltip="Modifier les périodes sélectionnées"
                            t-on-click="(ev) => this.openBulkEditPeriods(ev)"/>
+                        <i t-if="selectedPeriods.length" class="fa fa-scissors" data-tooltip="Découper par jours"
+                           t-on-click="(ev) => this.splitSelectedPeriodsByDays(ev)"/>
                         <i t-if="selectedPeriods.length" class="fa fa-trash-o" data-tooltip="Supprimer les périodes sélectionnées"
                            t-on-click="(ev) => this.deleteSelectedPeriods(ev)"/>
                     </div>
@@ -253,7 +285,8 @@
                         <span>Répartition automatique</span>
                     </label>
 
-                    <div t-foreach="state.periods" t-as="period" t-key="period.id" class="o_napta_adw_period">
+                    <div t-foreach="state.periods" t-as="period" t-key="period.id"
+                         t-attf-class="o_napta_adw_period {{ isPeriodConflicting(period) ? 'o_napta_adw_period_conflict' : '' }}">
                         <div class="o_napta_adw_period_row">
                             <i t-attf-class="fa {{ period.expanded ? 'fa-chevron-down' : 'fa-chevron-right' }} o_napta_adw_period_toggle"
                                t-on-click="(ev) => this.togglePeriodExpand(period, ev)"/>
@@ -277,6 +310,8 @@
                                     </div>
                                 </div>
                             </div>
+                            <i t-if="isPeriodConflicting(period)" class="fa fa-exclamation-circle o_napta_adw_period_warning"
+                               data-tooltip="Conflit avec un congé ou jour férié" t-on-click="(ev) => this.openConflictModal(ev)"/>
                         </div>
                         <div t-if="period.expanded" class="o_napta_adw_period_detail">
                             <div class="o_napta_adw_period_detail_col">
@@ -328,19 +363,13 @@
                     </button>
                 </div>
 
-                <div t-if="props.mode === 'edit' and hasPeriodConflict" class="o_napta_adw_conflict_banner">
-                    <i class="fa fa-exclamation-circle"/>
-                    <span>Certaines périodes sont en conflit.</span>
-                    <button type="button" class="btn o_napta_adw_conflict_preview_btn">Aperçu</button>
-                </div>
-
                 <!-- Utilisateurs (création uniquement — recherche + puces) -->
                 <t t-if="props.mode === 'create'">
                     <div class="o_napta_adw_section" t-on-click="(ev) => this.toggleSection('users', ev)">
                         <i class="fa fa-user-o"/>
                         <span>Utilisateurs <span class="o_napta_adw_required">*</span></span>
                         <i class="fa fa-info-circle o_napta_adw_info_icon"
-                           data-tooltip="Selon vos droits, chaque utilisateur sélectionné sera suggéré ou pré-réservé sur cette demande."/>
+                           data-tooltip="Selon vos droits, chaque utilisateur sélectionné sera suggéré ou pré-positionné sur cette demande."/>
                         <span class="o_napta_adw_section_count" t-esc="state.users.length"/>
                         <i t-attf-class="fa {{ isSectionOpen('users') ? 'fa-chevron-up' : 'fa-chevron-down' }} o_napta_adw_section_chevron"/>
                     </div>
@@ -348,9 +377,21 @@
                         <div t-if="state.users.length" class="o_napta_adw_user_chips">
                             <span t-foreach="state.users" t-as="user" t-key="user.name" class="o_napta_adw_user_chip">
                                 <span class="o_napta_adw_user_chip_name" t-esc="user.name"/>
-                                <select class="o_napta_adw_user_chip_option" t-model="state.userOptions[user.name]">
-                                    <option t-foreach="userStaffingOptions" t-as="o" t-key="o" t-att-value="o" t-esc="o"/>
-                                </select>
+                                <div class="o_napta_adw_dropdown_wrap o_napta_adw_user_option_wrap">
+                                    <button type="button" t-attf-class="o_napta_adw_user_option_btn o_napta_adw_user_option_btn_{{ userStaffingOptionSlugs[state.userOptions[user.name]] }}"
+                                            t-on-click="(ev) => this.toggleUserOptionDropdown(user.name, ev)">
+                                        <span t-esc="state.userOptions[user.name]"/>
+                                        <i class="fa fa-chevron-down"/>
+                                    </button>
+                                    <div t-if="isUserOptionDropdownOpen(user.name)" class="o_napta_adw_dropdown_menu o_napta_adw_user_option_menu">
+                                        <div t-foreach="userStaffingOptions" t-as="opt" t-key="opt"
+                                             t-attf-class="o_napta_adw_dropdown_item o_napta_adw_user_option_item {{ state.userOptions[user.name] === opt ? 'o_napta_adw_user_option_item_active' : '' }}"
+                                             t-on-click="(ev) => this.setUserOption(user.name, opt, ev)">
+                                            <i t-if="state.userOptions[user.name] === opt" class="fa fa-check"/>
+                                            <span t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[opt] }}" t-esc="opt"/>
+                                        </div>
+                                    </div>
+                                </div>
                                 <i class="fa fa-times" t-on-click="(ev) => this.removeUser(user, ev)"/>
                             </span>
                         </div>
@@ -412,15 +453,50 @@
                 </div>
 
                 <div class="o_napta_adw_footer">
-                    <button type="button" class="btn o_napta_adw_preview_btn"><i class="fa fa-search"/> Aperçu</button>
+                    <button type="button" class="btn o_napta_adw_preview_btn" t-on-click="(ev) => this.openConflictModal(ev)">
+                        <i class="fa fa-search"/> Aperçu
+                        <span t-if="conflictCount" class="o_napta_adw_conflict_badge" t-esc="conflictBadgeLabel"/>
+                    </button>
                     <button type="button" class="btn o_napta_adw_cancel_btn" t-on-click="close">Fermer</button>
                     <button type="button"
-                            t-attf-class="btn o_napta_adw_save_btn {{ props.mode === 'edit' and hasPeriodConflict ? 'o_napta_adw_save_btn_danger' : '' }}"
+                            t-attf-class="btn o_napta_adw_save_btn {{ props.mode === 'edit' and conflictCount ? 'o_napta_adw_save_btn_danger' : '' }}"
                             t-att-disabled="props.mode === 'create' and !state.project"
                             t-on-click="close">
-                        <t t-if="props.mode === 'edit' and hasPeriodConflict">Enregistrer quand même</t>
+                        <t t-if="props.mode === 'edit' and conflictCount">Enregistrer quand même</t>
                         <t t-else="">Enregistrer</t>
                     </button>
+                </div>
+            </div>
+
+            <!-- Modale "Conflit avec des congés ou jours fériés"
+                 (doc staffing_les-calendriers : le système propose de
+                 déduire les jours de congé/férié de la charge saisie) -->
+            <div t-if="state.conflictModalOpen" class="o_napta_adw_conflict_modal_overlay" t-on-click="closeConflictModal">
+                <div class="o_napta_adw_conflict_modal" t-on-click.stop="">
+                    <div class="o_napta_adw_conflict_modal_header">
+                        <h3>Conflit avec des congés ou jours fériés</h3>
+                        <i class="fa fa-times" t-on-click="closeConflictModal"/>
+                    </div>
+                    <p class="o_napta_adw_conflict_modal_text">
+                        <t t-if="conflictPersonName"><t t-esc="conflictPersonName"/> a des congés ou jours fériés pendant certaines périodes</t>
+                        <t t-else="">Certaines périodes incluent des congés ou jours fériés</t>
+                    </p>
+                    <div t-foreach="conflictDetails" t-as="detail" t-key="detail.period.id" class="o_napta_adw_conflict_modal_row">
+                        <div class="o_napta_adw_conflict_modal_dates"
+                             t-esc="formatPeriodDate(detail.period.start) + ' - ' + formatPeriodDate(detail.period.end)"/>
+                        <div class="o_napta_adw_conflict_modal_delta">
+                            <span t-esc="detail.before"/><span class="o_napta_adw_conflict_modal_unit">j</span>
+                            <i class="fa fa-long-arrow-right"/>
+                            <span t-esc="detail.after"/><span class="o_napta_adw_conflict_modal_unit">j</span>
+                        </div>
+                        <div class="o_napta_adw_conflict_modal_hint"
+                             t-esc="detail.count + (detail.count > 1 ? ' jours de congé ou férié' : ' jour de congé ou férié')"/>
+                    </div>
+                    <div class="o_napta_adw_conflict_modal_total">
+                        <span>Total</span>
+                        <strong t-esc="conflictTotalDelta + 'j'"/>
+                    </div>
+                    <button type="button" class="btn o_napta_adw_conflict_apply_btn" t-on-click="applyConflictAdjustments">Appliquer</button>
                 </div>
             </div>
         </div>
