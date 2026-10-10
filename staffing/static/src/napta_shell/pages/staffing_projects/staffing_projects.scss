@@ -488,9 +488,13 @@
     }
 
     // Le widget Staffings (avatar + nom + rôle + crayon) n'a pas besoin de
-    // la largeur du widget Demandes (dates/tags/pré-positionnements).
+    // la largeur du widget Demandes (dates/tags/pré-positionnements) : il
+    // s'adapte au nom de consultant le plus long (osp_sp_person_name en
+    // white-space: nowrap ci-dessous), borné pour rester raisonnable.
     .osp_cell_popover_staffing {
-        width: 230px;
+        width: max-content;
+        min-width: 190px;
+        max-width: 340px;
     }
 
     // -- Demandes --
@@ -624,8 +628,8 @@
     }
 
     .osp_sp_person_info { flex: 1 1 auto; min-width: 0; }
-    .osp_sp_person_name { font-size: 12.5px; font-weight: 700; color: $napta-text; }
-    .osp_sp_person_role { font-size: 11px; color: $napta-text-muted; }
+    .osp_sp_person_name { font-size: 12.5px; font-weight: 700; color: $napta-text; white-space: nowrap; }
+    .osp_sp_person_role { font-size: 11px; color: $napta-text-muted; white-space: nowrap; }
     .osp_sp_edit { color: $napta-text-muted; cursor: pointer; flex: none; }
 
     .osp_card_bottom {
