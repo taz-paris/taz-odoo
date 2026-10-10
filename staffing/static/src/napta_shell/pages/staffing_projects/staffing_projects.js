@@ -42,13 +42,13 @@ const PROJECTS = [
     p({ column: "a_staffer", title: "Audit data", client: "Aircall", dateStart: "16 décembre 2024", dateEnd: "15 août 2025", color: "vert", category: "Audit" }),
     p({ column: "a_staffer", title: "Optimisation fiscale", client: "PSG", dateStart: "3 février 2025", dateEnd: "24 octobre 2025", color: "violet", demandes: 1, staffingsSimules: 8, category: "Stratégie" }),
 
-    p({ column: "staffings_valider", title: "Projet de transformation digitale", client: "SIEMENS", dateStart: "30 janvier 2025", dateEnd: "27 juin 2025", color: "rose", staffingsSimules: 2, category: "Déploiement" }),
+    p({ column: "staffings_valider", title: "Projet de transformation digitale", client: "SIEMENS", dateStart: "30 janvier 2025", dateEnd: "27 juin 2025", color: "rose", staffingsSimules: 2, staffingsReels: 3, category: "Déploiement" }),
     p({ column: "staffings_valider", title: "Accompagnement - Intrapreneuriat", client: "L'ORÉAL", dateStart: "30 août 2024", dateEnd: "22 août 2025", color: "violet", staffingsSimules: 1, likes: 1, category: "Stratégie" }),
     p({ column: "staffings_valider", title: "Déploiement stratégie data", client: "Kering", dateStart: "26 mars 2025", dateEnd: "26 septembre 2025", color: "rose", demandes: 2, staffingsSimules: 5, likes: 1, category: "Déploiement", departments: "Data & Analytics" }),
     p({ column: "staffings_valider", title: "Refonte de la stratégie RH", client: "Sony", dateStart: "", dateEnd: "", color: "violet", category: "Stratégie" }),
 
-    p({ column: "en_cours", title: "Déploiement Salesforce", client: "BNP Paribas", dateStart: "9 décembre 2024", dateEnd: "25 juillet 2025", color: "rose", family: "child", demandes: 1, staffingsSimules: 2, likes: 6, tags: ["P1"], category: "Déploiement", status: "Projets en cours" }),
-    p({ column: "en_cours", title: "Réorganisation de la DSI", client: "AIRBUS", dateStart: "6 septembre 2024", dateEnd: "16 mai 2025", color: "violet", demandes: 1, staffingsSimules: 1, category: "Déploiement" }),
+    p({ column: "en_cours", title: "Déploiement Salesforce", client: "BNP Paribas", dateStart: "9 décembre 2024", dateEnd: "25 juillet 2025", color: "rose", family: "child", demandes: 1, staffingsSimules: 2, staffingsReels: 2, likes: 6, tags: ["P1"], category: "Déploiement", status: "Projets en cours" }),
+    p({ column: "en_cours", title: "Réorganisation de la DSI", client: "AIRBUS", dateStart: "6 septembre 2024", dateEnd: "16 mai 2025", color: "violet", demandes: 1, staffingsSimules: 1, staffingsReels: 1, category: "Déploiement" }),
 
     p({ column: "internes", title: "Amélioration de nos process...", client: "INTERNE", dateStart: "19 septembre 2024", dateEnd: "27 août 2025", color: "orange", family: "parent", demandes: 2, staffingsSimules: 1, likes: 1, tags: ["P1", "P2"], category: "Interne", status: "Projet interne" }),
     p({ column: "internes", title: "Amélioration de nos process R...", client: "INTERNE", dateStart: "19 septembre 2024", dateEnd: "19 septembre 2025", color: "violet", family: "child", likes: 1, category: "Interne" }),
@@ -68,7 +68,68 @@ const TABLE_COLUMNS = [
     { key: "departments", label: "Départements (Projet)", sortable: false },
     { key: "demandes", label: "Demandes", sortable: true },
     { key: "staffingsSimules", label: "Staffings simulés", sortable: true },
+    { key: "staffingsReels", label: "Staffings réels", sortable: true },
 ];
+
+/**
+ * Pool de personnes factices pour les widgets de survol/clic des colonnes
+ * Demandes / Staffings simulés / Staffings réels (vues Cartes et Tableau).
+ */
+const PEOPLE_POOL = [
+    { name: "Audrey Leymarie", role: "Manager", initials: "AL" },
+    { name: "Fiona Martin", role: "Consultant", initials: "FM" },
+    { name: "Stéphane Bocquillon", role: "Senior Manager", initials: "SB" },
+    { name: "Antoine Nguyen", role: "Consultant", initials: "AN" },
+    { name: "Omar El Hachimi", role: "Consultant", initials: "OE" },
+    { name: "Lucie Lirot", role: "Consultante Senior", initials: "LL" },
+    { name: "Gaëtan Jouanne", role: "Consultant", initials: "GJ" },
+    { name: "Emmanuel Dubois", role: "Directeur", initials: "ED" },
+    { name: "Maria Lamalouf", role: "Consultante", initials: "ML" },
+];
+
+/** Sélection déterministe (pas de doublon) de `count` personnes du pool, à partir d'une graine. */
+function pickPeople(seed, count) {
+    const picked = [];
+    let i = seed % PEOPLE_POOL.length;
+    while (picked.length < count && picked.length < PEOPLE_POOL.length) {
+        const person = PEOPLE_POOL[i % PEOPLE_POOL.length];
+        if (!picked.includes(person)) picked.push(person);
+        i++;
+    }
+    return picked;
+}
+
+const DEMANDE_DEPARTMENTS = ["Tasmane", "Data & Analytics", "Management des organisations"];
+const DEMANDE_OFFICES = ["Paris", "Londres", "Lyon"];
+const DEMANDE_POSITIONS = [[], ["Consultant"], ["Consultant", "Consultant Senior"]];
+
+/** Construit, de façon déterministe à partir de l'id du projet, les `project.demandes` demandes à afficher dans le widget de survol. */
+function buildDemandesList(project) {
+    const count = project.demandes || 0;
+    const list = [];
+    for (let i = 0; i < count; i++) {
+        const seed = project.id * 7 + i;
+        const days = 20 + ((seed * 13) % 40);
+        const pct = 25 + ((seed * 17) % 76);
+        const hasPrebooked = seed % 2 === 0;
+        list.push({
+            dateStart: "19 octobre 2026",
+            dateEnd: "8 janvier 2027",
+            durationDays: Math.round((days + pct / 100) * 10) / 10,
+            durationPct: pct,
+            department: DEMANDE_DEPARTMENTS[seed % DEMANDE_DEPARTMENTS.length],
+            positions: DEMANDE_POSITIONS[seed % DEMANDE_POSITIONS.length],
+            office: DEMANDE_OFFICES[seed % DEMANDE_OFFICES.length],
+            prebooked: hasPrebooked ? pickPeople(seed, 1) : [],
+            suggested: !hasPrebooked ? pickPeople(seed + 3, 2) : [],
+        });
+    }
+    return list;
+}
+
+function buildStaffingsList(project, count, offset) {
+    return pickPeople(project.id * 11 + offset, count || 0);
+}
 
 const FILTER_SECTIONS = [
     { title: "Projet", items: ["Catégorie de projet", "Chefs de projet", "Client", "Colonne (vue cartes)", "Département (Projet)", "Étiquette", "Mode de facturation", "Projet", "Statut de projet"] },
@@ -289,6 +350,9 @@ export class StaffingProjectsPage extends Component {
             detail: null, // project object ou null
             detailTab: "calendar",
             collapsedColumns: {},
+            // ---- Widgets Demandes / Staffings (vues Cartes et Tableau) ----
+            demandesHover: null, // id de projet dont le widget Demandes est survolé
+            staffingPopover: null, // "<simules|reels|combined>:<projectId>"
             // ---- Onglet "Suivi financier" ----
             financeMenuOpen: null, // "situation" | "columns" | "display" | null
             financeSituation: "current", // "current" | id d'une situation sauvegardée
@@ -479,6 +543,48 @@ export class StaffingProjectsPage extends Component {
         this.state.showFilter = false;
         this.state.showColumns = false;
         this.state.financeMenuOpen = null;
+        this.state.staffingPopover = null;
+    }
+
+    // ---- Widgets Demandes / Staffings (vues Cartes et Tableau) ----
+    demandesFor(project) {
+        return buildDemandesList(project);
+    }
+
+    staffingsFor(project, kind) {
+        if (kind === "reels") return buildStaffingsList(project, project.staffingsReels, 5);
+        return buildStaffingsList(project, project.staffingsSimules, 0);
+    }
+
+    openDemandesHover(project, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.demandesHover = project.id;
+    }
+
+    closeDemandesHover() {
+        this.state.demandesHover = null;
+    }
+
+    isDemandesHoverOpen(project) {
+        return this.state.demandesHover === project.id;
+    }
+
+    toggleStaffingPopover(project, kind, ev) {
+        if (ev) ev.stopPropagation();
+        const key = kind + ":" + project.id;
+        const wasOpen = this.state.staffingPopover === key;
+        this.closeMenus();
+        this.state.staffingPopover = wasOpen ? null : key;
+    }
+
+    isStaffingPopoverOpen(project, kind) {
+        return this.state.staffingPopover === kind + ":" + project.id;
+    }
+
+    openDetailFromCell(project, tab, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.demandesHover = null;
+        this.openDetail(project, tab);
     }
 
     toggleViews(ev) {
@@ -546,9 +652,9 @@ export class StaffingProjectsPage extends Component {
     }
 
     // ---- Détail projet ----
-    openDetail(project) {
+    openDetail(project, tab = "calendar") {
         this.state.detail = project;
-        this.state.detailTab = "calendar";
+        this.state.detailTab = tab;
     }
 
     closeDetail() {

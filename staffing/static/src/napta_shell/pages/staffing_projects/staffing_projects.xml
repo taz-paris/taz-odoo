@@ -125,14 +125,46 @@
                                 <span t-esc="card.dateStart"/> <i class="fa fa-angle-right"/> <span t-esc="card.dateEnd"/>
                             </div>
                             <div class="osp_card_badges">
-                                <span t-if="card.demandes" class="osp_badge osp_badge_blue"
-                                      title="Nombre de demandes sur le projet">
-                                    <span t-esc="card.demandes"/><i class="fa fa-search"/>
-                                </span>
-                                <span t-if="card.staffingsSimules" class="osp_badge osp_badge_green"
-                                      title="Nombre de staffings simulés sur le projet">
-                                    <span t-esc="card.staffingsSimules"/><i class="fa fa-pencil-square-o"/>
-                                </span>
+                                <div t-if="card.demandes" class="osp_cell_popover_wrap"
+                                     t-on-click.stop="" t-on-mouseenter="(ev) => this.openDemandesHover(card, ev)" t-on-mouseleave="closeDemandesHover">
+                                    <span class="osp_badge osp_badge_blue" title="Nombre de demandes sur le projet"
+                                          t-on-click="(ev) => this.openDetailFromCell(card, 'requests', ev)">
+                                        <span t-esc="card.demandes"/><i class="fa fa-search"/>
+                                    </span>
+                                    <div t-if="isDemandesHoverOpen(card)" class="osp_cell_popover">
+                                        <t t-call="staffing.StaffingProjectsPage.DemandesPopoverBody"><t t-set="project" t-value="card"/></t>
+                                    </div>
+                                </div>
+                                <div t-if="card.staffingsSimules or card.staffingsReels" class="osp_cell_popover_wrap" t-on-click.stop="">
+                                    <span class="osp_badge osp_badge_green" title="Nombre de staffings sur le projet"
+                                          t-on-click="(ev) => this.toggleStaffingPopover(card, 'combined', ev)">
+                                        <span t-esc="(card.staffingsSimules || 0) + (card.staffingsReels || 0)"/><i class="fa fa-pencil-square-o"/>
+                                    </span>
+                                    <div t-if="isStaffingPopoverOpen(card, 'combined')" class="osp_cell_popover">
+                                        <t t-if="card.staffingsReels">
+                                            <div class="osp_sp_title">Staffings réels</div>
+                                            <div t-foreach="staffingsFor(card, 'reels')" t-as="person" t-key="person.name" class="osp_sp_person">
+                                                <span class="o_napta_avatar" t-esc="person.initials"/>
+                                                <div class="osp_sp_person_info">
+                                                    <div class="osp_sp_person_name" t-esc="person.name"/>
+                                                    <div class="osp_sp_person_role" t-esc="person.role"/>
+                                                </div>
+                                                <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                            </div>
+                                        </t>
+                                        <t t-if="card.staffingsSimules">
+                                            <div class="osp_sp_title">Staffings simulés</div>
+                                            <div t-foreach="staffingsFor(card, 'simules')" t-as="person" t-key="person.name" class="osp_sp_person">
+                                                <span class="o_napta_avatar" t-esc="person.initials"/>
+                                                <div class="osp_sp_person_info">
+                                                    <div class="osp_sp_person_name" t-esc="person.name"/>
+                                                    <div class="osp_sp_person_role" t-esc="person.role"/>
+                                                </div>
+                                                <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
                             </div>
                             <div class="osp_card_bottom">
                                 <span class="osp_card_like" t-on-click="(ev) => this.toggleLike(card, ev)">
@@ -180,15 +212,55 @@
                             <span t-esc="row.category"/>
                         </td>
                         <td t-esc="row.departments"/>
-                        <td>
-                            <span t-if="row.demandes" class="osp_badge osp_badge_blue">
-                                <span t-esc="row.demandes"/><i class="fa fa-search"/>
-                            </span>
+                        <td t-on-click.stop="">
+                            <div t-if="row.demandes" class="osp_cell_popover_wrap"
+                                 t-on-mouseenter="(ev) => this.openDemandesHover(row, ev)" t-on-mouseleave="closeDemandesHover">
+                                <span class="osp_badge osp_badge_blue"
+                                      t-on-click="(ev) => this.openDetailFromCell(row, 'requests', ev)">
+                                    <span t-esc="row.demandes"/><i class="fa fa-search"/>
+                                </span>
+                                <div t-if="isDemandesHoverOpen(row)" class="osp_cell_popover">
+                                    <t t-call="staffing.StaffingProjectsPage.DemandesPopoverBody"><t t-set="project" t-value="row"/></t>
+                                </div>
+                            </div>
                         </td>
-                        <td>
-                            <span t-if="row.staffingsSimules" class="osp_badge osp_badge_green">
-                                <span t-esc="row.staffingsSimules"/><i class="fa fa-pencil-square-o"/>
-                            </span>
+                        <td t-on-click.stop="">
+                            <div t-if="row.staffingsSimules" class="osp_cell_popover_wrap">
+                                <span class="osp_badge osp_badge_green"
+                                      t-on-click="(ev) => this.toggleStaffingPopover(row, 'simules', ev)">
+                                    <span t-esc="row.staffingsSimules"/><i class="fa fa-pencil-square-o"/>
+                                </span>
+                                <div t-if="isStaffingPopoverOpen(row, 'simules')" class="osp_cell_popover">
+                                    <div class="osp_sp_title">Staffings simulés</div>
+                                    <div t-foreach="staffingsFor(row, 'simules')" t-as="person" t-key="person.name" class="osp_sp_person">
+                                        <span class="o_napta_avatar" t-esc="person.initials"/>
+                                        <div class="osp_sp_person_info">
+                                            <div class="osp_sp_person_name" t-esc="person.name"/>
+                                            <div class="osp_sp_person_role" t-esc="person.role"/>
+                                        </div>
+                                        <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td t-on-click.stop="">
+                            <div t-if="row.staffingsReels" class="osp_cell_popover_wrap">
+                                <span class="osp_badge osp_badge_green"
+                                      t-on-click="(ev) => this.toggleStaffingPopover(row, 'reels', ev)">
+                                    <span t-esc="row.staffingsReels"/><i class="fa fa-pencil-square-o"/>
+                                </span>
+                                <div t-if="isStaffingPopoverOpen(row, 'reels')" class="osp_cell_popover">
+                                    <div class="osp_sp_title">Staffings réels</div>
+                                    <div t-foreach="staffingsFor(row, 'reels')" t-as="person" t-key="person.name" class="osp_sp_person">
+                                        <span class="o_napta_avatar" t-esc="person.initials"/>
+                                        <div class="osp_sp_person_info">
+                                            <div class="osp_sp_person_name" t-esc="person.name"/>
+                                            <div class="osp_sp_person_role" t-esc="person.role"/>
+                                        </div>
+                                        <i class="fa fa-pencil osp_sp_edit" data-tooltip="Modifier"/>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -233,6 +305,47 @@
                 </div>
             </div>
 
+        </div>
+    </t>
+
+    <!-- Contenu du widget de survol "Demandes" (vues Cartes et Tableau) -->
+    <t t-name="staffing.StaffingProjectsPage.DemandesPopoverBody">
+        <div t-foreach="demandesFor(project)" t-as="d" t-key="d_index" class="osp_dp_item">
+            <div class="osp_dp_item_header">
+                <span class="osp_dp_dates"><i class="fa fa-calendar"/> <t t-esc="d.dateStart"/> <i class="fa fa-angle-right"/> <t t-esc="d.dateEnd"/></span>
+                <span class="osp_dp_duration"><i class="fa fa-clock-o"/> <t t-esc="d.durationDays"/>j · <t t-esc="d.durationPct"/>%</span>
+                <i class="fa fa-pencil osp_dp_edit" data-tooltip="Modifier la demande"/>
+            </div>
+            <div class="osp_dp_tags">
+                <span class="osp_dp_tag"><i class="fa fa-sitemap"/> <t t-esc="d.department"/></span>
+                <span t-if="d.positions.length" class="osp_dp_tag"><i class="fa fa-id-badge"/> <t t-esc="d.positions.join(', ')"/></span>
+                <span class="osp_dp_tag"><i class="fa fa-map-marker"/> <t t-esc="d.office"/></span>
+            </div>
+            <t t-if="d.prebooked.length">
+                <div class="osp_dp_section_title">PRÉPOSITIONNEMENTS (<t t-esc="d.prebooked.length"/>)</div>
+                <div t-foreach="d.prebooked" t-as="person" t-key="person.name" class="osp_dp_person">
+                    <span class="osp_dp_person_badge">PO</span>
+                    <span class="o_napta_avatar" t-esc="person.initials"/>
+                    <div class="osp_dp_person_info">
+                        <div class="osp_dp_person_name" t-esc="person.name"/>
+                        <div class="osp_dp_person_role" t-esc="person.role"/>
+                    </div>
+                    <span class="osp_dp_action_btn osp_dp_action_btn_outline" data-tooltip="Suggérer"><i class="fa fa-user-plus"/></span>
+                    <span class="osp_dp_action_btn osp_dp_action_btn_filled" data-tooltip="Pré-positionner"><i class="fa fa-user-plus"/></span>
+                </div>
+            </t>
+            <t t-if="d.suggested.length">
+                <div class="osp_dp_section_title">SUGGESTIONS (<t t-esc="d.suggested.length"/>)</div>
+                <div t-foreach="d.suggested" t-as="person" t-key="person.name" class="osp_dp_person">
+                    <span class="o_napta_avatar" t-esc="person.initials"/>
+                    <div class="osp_dp_person_info">
+                        <div class="osp_dp_person_name" t-esc="person.name"/>
+                        <div class="osp_dp_person_role" t-esc="person.role"/>
+                    </div>
+                    <span class="osp_dp_action_btn osp_dp_action_btn_outline" data-tooltip="Suggérer"><i class="fa fa-user-plus"/></span>
+                    <span class="osp_dp_action_btn osp_dp_action_btn_filled" data-tooltip="Pré-positionner"><i class="fa fa-user-plus"/></span>
+                </div>
+            </t>
         </div>
     </t>
 

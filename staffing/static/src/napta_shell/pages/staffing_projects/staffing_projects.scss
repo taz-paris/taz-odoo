@@ -424,6 +424,7 @@
         padding: 3px 10px 3px 3px;
         font-size: 12px;
         font-weight: 700;
+        cursor: pointer;
 
         span {
             width: 18px;
@@ -448,6 +449,168 @@
             span { background: $napta-accent; }
         }
     }
+
+    .o_napta_avatar {
+        flex: 0 0 auto;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: $napta-active-bg;
+        color: $napta-text;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10.5px;
+        font-weight: 600;
+    }
+
+    // ---- Widgets de survol/clic Demandes / Staffings (Cartes et Tableau) ----
+    .osp_cell_popover_wrap {
+        position: relative;
+        display: inline-block;
+    }
+
+    .osp_cell_popover {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        z-index: 50;
+        width: 320px;
+        max-height: 420px;
+        overflow-y: auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .16);
+        padding: 14px;
+        cursor: default;
+        white-space: normal;
+        font-weight: 400;
+    }
+
+    // -- Demandes --
+    .osp_dp_item {
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid $napta-border;
+
+        &:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    }
+
+    .osp_dp_item_header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        font-weight: 700;
+        color: $napta-text;
+        margin-bottom: 6px;
+
+        i.fa-pencil { color: $napta-text-muted; cursor: pointer; margin-left: auto; }
+    }
+
+    .osp_dp_dates i, .osp_dp_duration i { color: $napta-text-muted; margin-right: 2px; }
+    .osp_dp_duration { color: $napta-text-muted; font-weight: 600; }
+
+    .osp_dp_tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    .osp_dp_tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: $napta-active-bg;
+        color: $napta-text-muted;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 11px;
+
+        i { font-size: 10px; }
+    }
+
+    .osp_dp_section_title {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: .03em;
+        color: $napta-text-muted;
+        margin: 8px 0 4px;
+    }
+
+    .osp_dp_person {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        position: relative;
+    }
+
+    .osp_dp_person_badge {
+        position: absolute;
+        left: 16px;
+        top: -2px;
+        background: $napta-accent;
+        color: #fff;
+        font-size: 8px;
+        font-weight: 700;
+        border-radius: 7px;
+        padding: 0 3px;
+        line-height: 13px;
+        border: 1px solid #fff;
+    }
+
+    .osp_dp_person_info { flex: 1 1 auto; min-width: 0; }
+    .osp_dp_person_name { font-size: 12.5px; font-weight: 700; color: $napta-text; }
+    .osp_dp_person_role { font-size: 11px; color: $napta-text-muted; }
+
+    .osp_dp_action_btn {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex: none;
+        font-size: 10px;
+
+        &.osp_dp_action_btn_outline {
+            border: 1px solid $napta-border;
+            color: $napta-text-muted;
+            &:hover { border-color: $napta-accent; color: $napta-accent; }
+        }
+
+        &.osp_dp_action_btn_filled {
+            background: $napta-accent;
+            color: #fff;
+            &:hover { opacity: .85; }
+        }
+    }
+
+    // -- Staffings (simulés / réels) --
+    .osp_sp_title {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: .03em;
+        color: $napta-text-muted;
+        margin: 10px 0 6px;
+
+        &:first-child { margin-top: 0; }
+    }
+
+    .osp_sp_person {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+    }
+
+    .osp_sp_person_info { flex: 1 1 auto; min-width: 0; }
+    .osp_sp_person_name { font-size: 12.5px; font-weight: 700; color: $napta-text; }
+    .osp_sp_person_role { font-size: 11px; color: $napta-text-muted; }
+    .osp_sp_edit { color: $napta-text-muted; cursor: pointer; flex: none; }
 
     .osp_card_bottom {
         display: flex;
