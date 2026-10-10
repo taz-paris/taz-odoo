@@ -634,11 +634,63 @@
         font-style: italic;
     }
 
+    // ---- Outils d'en-tête de section (ex: Périodes) ----
+    .osr_create_section_tools {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+
+        i {
+            color: $napta-text-muted;
+            cursor: pointer;
+            &:hover { color: $napta-text; }
+        }
+    }
+
+    .osr_create_section_count + .osr_create_section_tools {
+        margin-left: 8px;
+    }
+
+    // ---- Configuration globale des périodes ----
+    .osr_create_period_config {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .osr_create_period_config_field {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .osr_create_toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12.5px;
+        margin-bottom: 8px;
+        cursor: pointer;
+
+        input { margin: 0; }
+    }
+
+    .osr_create_period {
+        border-bottom: 1px solid $napta-border;
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+
     .osr_create_period_row {
         display: flex;
         align-items: center;
         gap: 6px;
-        margin-bottom: 8px;
+    }
+
+    .osr_create_period_toggle, .osr_create_period_check {
+        color: $napta-text-muted;
+        cursor: pointer;
+        flex: none;
     }
 
     .osr_create_period_date {
@@ -659,20 +711,60 @@
         padding: 6px 4px;
         font-size: 12px;
         text-align: center;
+        flex: none;
     }
 
-    .osr_create_period_unit {
-        border: 1px solid $napta-border;
-        border-radius: 6px;
-        padding: 6px 4px;
-        font-size: 12px;
-        background: #fff;
+    .osr_create_period_unit_label {
+        color: $napta-text-muted;
+        font-size: 11.5px;
+        flex: none;
+        white-space: nowrap;
     }
 
-    .osr_create_period_remove {
+    .osr_create_period_menu_wrap {
+        flex: none;
+        margin-left: auto;
+    }
+
+    .osr_create_period_kebab {
         color: $napta-text-muted;
         cursor: pointer;
-        &:hover { color: #c0392b; }
+        padding: 2px 4px;
+        &:hover { color: $napta-text; }
+    }
+
+    .osr_create_period_menu {
+        right: 0;
+        left: auto;
+        min-width: 140px;
+    }
+
+    .osr_create_period_detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 14px;
+        margin: 10px 0 2px 24px;
+    }
+
+    .osr_create_period_detail_col {
+        min-width: 0;
+
+        .osr_create_label { margin-top: 0; }
+    }
+
+    .osr_create_amount_currency {
+        display: flex;
+
+        input { border-radius: 6px 0 0 6px; border-right: none; }
+    }
+
+    .osr_create_currency_select {
+        border: 1px solid $napta-border;
+        border-radius: 0 6px 6px 0;
+        padding: 6px 6px;
+        font-size: 12px;
+        background: #fafafa;
+        flex: none;
     }
 
     .osr_create_add_period {
@@ -691,6 +783,11 @@
         justify-content: center;
     }
 
+    .osr_create_info_icon {
+        color: $napta-text-muted;
+        font-size: 11px;
+    }
+
     .osr_create_user_chips {
         display: flex;
         flex-wrap: wrap;
@@ -704,12 +801,51 @@
         gap: 6px;
         background: $napta-active-bg;
         border-radius: 14px;
-        padding: 3px 8px 3px 10px;
+        padding: 3px 4px 3px 10px;
         font-size: 12px;
         font-weight: 600;
         color: $napta-text;
 
         i { cursor: pointer; color: $napta-text-muted; }
+    }
+
+    .osr_create_user_chip_name {
+        white-space: nowrap;
+    }
+
+    .osr_create_user_chip_option {
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        padding: 1px 6px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #fff;
+        color: $napta-text-muted;
+    }
+
+    .osr_create_user_search_row {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .osr_create_user_search_icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        background: #0b2540;
+        color: #fff;
+        border-radius: 6px 0 0 6px;
+        flex: none;
+    }
+
+    .osr_create_user_search_wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .osr_create_user_search_wrap .osr_create_user_search {
+        border-radius: 0 6px 6px 0;
     }
 
     .osr_create_user_search {
@@ -725,6 +861,11 @@
         text-align: right;
         font-size: 11px;
         margin-top: 4px;
+    }
+
+    // ---- Tiroir secondaire "Édition multi-périodes" ----
+    .osr_create_bulk_drawer {
+        margin-right: 10px;
     }
 
     .osr_create_footer {
