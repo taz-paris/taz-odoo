@@ -199,6 +199,51 @@
         font-size: 11px;
     }
 
+    // ---- Mode Jour + commentaires ----
+    .o_napta_ts_daycell_wrap {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        position: relative;
+    }
+
+    .o_napta_ts_comment_icon {
+        color: $napta-text-muted;
+        cursor: pointer;
+        font-size: 12px;
+
+        &:hover { color: $napta-accent; }
+    }
+
+    .fa-comment.o_napta_ts_comment_icon { color: $napta-accent; }
+
+    .o_napta_ts_comment_pop {
+        position: absolute;
+        top: calc(100% + 4px);
+        right: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+        padding: 8px;
+        width: 220px;
+        z-index: 60;
+        white-space: normal;
+        text-align: left;
+    }
+
+    .o_napta_ts_comment_textarea {
+        width: 100%;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 6px 8px;
+        font: inherit;
+        font-size: 12px;
+        resize: vertical;
+        margin-bottom: 6px;
+    }
+
     // Statuts de cellule (voir légende)
     .o_napta_ts_status_forecast { background: #fff; color: $napta-text-muted; }
     .o_napta_ts_status_to_complete { background: #fff; }
@@ -264,6 +309,123 @@
         border-radius: 3px;
         border: 1px solid $napta-border;
         display: inline-block;
+    }
+
+    // ---- Mode Mois / Semaine (Vue Équipe) ----
+    .o_napta_ts_periodmode {
+        display: flex;
+        background: $napta-active-bg;
+        border-radius: 6px;
+        padding: 2px;
+        gap: 2px;
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .o_napta_ts_periodmode_item {
+        padding: 4px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        color: $napta-text-muted;
+        font-weight: 500;
+
+        &.o_napta_ts_periodmode_active {
+            background: #fff;
+            color: $napta-text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+        }
+    }
+
+    .o_napta_dropdown_wrap {
+        position: relative;
+    }
+
+    .o_napta_ts_dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+        z-index: 50;
+        padding: 8px;
+        width: 260px;
+    }
+
+    .o_napta_ts_dropdown_item {
+        padding: 7px 8px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        color: $napta-text;
+
+        i { color: $napta-text-muted; width: 14px; }
+
+        &:hover { background: $napta-active-bg; }
+
+        &.o_napta_ts_dropdown_item_muted {
+            color: $napta-text-muted;
+            font-size: 11px;
+            border-top: 1px solid $napta-border;
+            margin-top: 6px;
+            padding-top: 10px;
+            cursor: default;
+
+            &:hover { background: transparent; }
+        }
+    }
+
+    // ---- Bandeau de sélection de masse ----
+    .o_napta_ts_bulkbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #16232c;
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+
+    .o_napta_ts_bulkbar_icon {
+        cursor: pointer;
+        opacity: .8;
+
+        &:hover { opacity: 1; }
+    }
+
+    .o_napta_ts_bulkbar_approve, .o_napta_ts_bulkbar_reopen {
+        margin-left: auto;
+        border-radius: 6px;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, .3);
+
+        i { margin-right: 6px; }
+    }
+
+    .o_napta_ts_bulkbar_approve {
+        background: #fff;
+        color: #16232c;
+        border-color: #fff;
+    }
+
+    .o_napta_ts_bulkbar_reopen {
+        background: transparent;
+        color: #fff;
+        margin-left: 0;
+
+        &:hover { background: rgba(255, 255, 255, .1); }
+    }
+
+    .o_napta_ts_weekactions_row td {
+        border-bottom: 1px solid $napta-border;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background: #fafafa;
     }
 
     // ---- Vue Équipe ----

@@ -24,6 +24,17 @@ const STATUS_LEGEND = [
 ];
 const MOVEMENT_TOOLTIP = "La valeur saisie diffère de la donnée prévisionnelle issue du staffing.";
 
+// Filtres disponibles en vue Équipe (voir "Filtrer" dans feuilles-de-temps_vue-equipe).
+const TEAM_FILTER_ITEMS = [
+    "Unité d'Affaires (Utilisateur)",
+    "Employé",
+    "Bureau",
+    "Poste",
+    "Projet",
+    "Responsables de projet",
+    "Statut",
+];
+
 const PERSONAL_WEEKS = [
     { key: "W05", label: "W05", range: "DU 1 AU 4 FÉV", info: "Semaine tronquée : elle chevauche janvier et février, seule la partie de février est affichée." },
     { key: "W06", label: "W06", range: "DU 5 AU 11 FÉV" },
@@ -72,13 +83,39 @@ function buildPersonalRows() {
 const PERSONAL_AVAILABILITY = ["1d", "2d", "2.5d", "2.5d", "0.67d"];
 const PERSONAL_AVAILABILITY_TOTAL = "8.67d";
 
-const PERSONAL_WEEK_STATUS = [
-    { label: "Validée", icon: "fa-lock", locked: true },
-    { label: "Validée", icon: "fa-lock", locked: true },
-    { label: "En attente", icon: "fa-hourglass-half", locked: false },
-    { label: null, icon: null, locked: false },
-    { label: null, icon: null, locked: false },
+/**
+ * Intervalle de saisie Jour (voir "Paramètres de saisie (intervalle,
+ * unité)") : c'est dans ce mode que les commentaires par jour sont
+ * disponibles (voir "Commentaires" dans la doc, image-04.gif) — en vue
+ * Personnelle comme en vue Équipe.
+ */
+const PERSONAL_DAYS = [
+    { key: "mon", label: "LUN", date: "04/03" },
+    { key: "tue", label: "MAR", date: "05/03" },
+    { key: "wed", label: "MER", date: "06/03" },
+    { key: "thu", label: "JEU", date: "07/03" },
+    { key: "fri", label: "VEN", date: "08/03" },
+    { key: "sat", label: "SAM", date: "09/03" },
+    { key: "sun", label: "DIM", date: "10/03" },
 ];
+
+function buildPersonalDayRows() {
+    return [
+        {
+            key: "bnp_day",
+            project: "BNP Paribas — Déploiement Salesforce",
+            cells: [
+                { value: "1", status: "approved", comment: "" },
+                { value: "1", status: "approved", comment: "Télétravail" },
+                { value: "1", status: "saved", comment: "" },
+                { value: "0.5", status: "saved", comment: "RDV client l'après-midi, parti plus tôt" },
+                { value: "0", status: "to_complete", comment: "" },
+                { value: "0", status: "to_complete", comment: "" },
+                { value: "0", status: "to_complete", comment: "" },
+            ],
+        },
+    ];
+}
 
 // --- Vue Équipe --------------------------------------------------------
 
@@ -104,12 +141,34 @@ const TEAM_DAYS = [
     { key: "sun", label: "DIMANCHE", date: "07/06/26" },
 ];
 
+/**
+ * Vue Équipe en intervalle Mois (colonnes Semaine) — c'est la configuration
+ * illustrée par l'article "Vue Équipe" de la doc (image-01, image-02) :
+ * déplier/replier, sélectionner une ou plusieurs lignes puis Approuver /
+ * Rouvrir en masse, et des actions "Validated / Approve / Save" propres à
+ * chaque semaine de la ligne sélectionnée.
+ */
+const TEAM_MONTH_WEEKS = [
+    { key: "w27", label: "S27", range: "22/06 → 28/06" },
+    { key: "w28", label: "S28", range: "29/06 → 05/07" },
+    { key: "w29", label: "S29", range: "06/07 → 12/07" },
+    { key: "w30", label: "S30", range: "13/07 → 19/07" },
+    { key: "w31", label: "S31", range: "20/07 → 26/07" },
+];
+
 const TEAM_PEOPLE = [
     {
         id: 1,
         name: "AMERI Armand",
         totalByDay: ["1d", "1d", "1d", "1d", "1d", "0d", "0d"],
         total: "5d",
+        monthCells: [
+            { value: "0.63", status: "approved", movement: "up", movementValue: "1d" },
+            { value: "3.13", status: "approved", movement: "down", movementValue: "0d" },
+            { value: "3.51", status: "pending", movement: "down", movementValue: "1d" },
+            { value: "3.13", status: "saved", movement: null },
+            { value: "0", status: "to_complete", movement: null },
+        ],
         projects: [
             {
                 name: "AIRCALL — Data Audit",
@@ -139,6 +198,13 @@ const TEAM_PEOPLE = [
         name: "BARTOL Jeremy",
         totalByDay: ["1d", "1d", "1d", "1d", "1d", "0d", "0d"],
         total: "5d",
+        monthCells: [
+            { value: "0.87", status: "approved", movement: "up", movementValue: "1d" },
+            { value: "4.36", status: "approved", movement: "down", movementValue: "0d" },
+            { value: "4.75", status: "pending", movement: "down", movementValue: "1d" },
+            { value: "0", status: "to_complete", movement: null },
+            { value: "0", status: "to_complete", movement: null },
+        ],
         projects: [
             {
                 name: "AIRCALL — Data Audit",
@@ -161,6 +227,13 @@ const TEAM_PEOPLE = [
         name: "CHEN John",
         totalByDay: ["1d", "1d", "1d", "1d", "1d", "0d", "0d"],
         total: "5d",
+        monthCells: [
+            { value: "0.65", status: "approved", movement: null },
+            { value: "3.25", status: "saved", movement: null },
+            { value: "0", status: "to_complete", movement: null },
+            { value: "0", status: "to_complete", movement: null },
+            { value: "0", status: "to_complete", movement: null },
+        ],
         projects: [
             {
                 name: "INTERNAL — HR Process Improvement",
@@ -191,9 +264,11 @@ export class TimesheetsTimesheetPage extends Component {
         this.personalWeeks = PERSONAL_WEEKS;
         this.personalAvailability = PERSONAL_AVAILABILITY;
         this.personalAvailabilityTotal = PERSONAL_AVAILABILITY_TOTAL;
-        this.personalWeekStatus = PERSONAL_WEEK_STATUS;
+        this.personalDays = PERSONAL_DAYS;
 
         this.teamDays = TEAM_DAYS;
+        this.teamMonthWeeks = TEAM_MONTH_WEEKS;
+        this.teamFilterItems = TEAM_FILTER_ITEMS;
 
         this.state = useState({
             tab: "personal", // "personal" | "team"
@@ -202,6 +277,11 @@ export class TimesheetsTimesheetPage extends Component {
             selected: {},
             team: TEAM_PEOPLE,
             personalRows: buildPersonalRows(),
+            personalDayRows: buildPersonalDayRows(),
+            personalPeriodMode: "week", // "week" (colonnes Semaine) | "day" (colonnes Jour, avec commentaires)
+            commentOpenFor: null, // "<rowKey>_<cellIndex>" | null
+            teamPeriodMode: "month", // "month" (colonnes Semaine) | "week" (colonnes Jour)
+            teamMenuOpen: null, // "filter" | null
         });
 
         this.availabilityTooltip =
@@ -238,6 +318,11 @@ export class TimesheetsTimesheetPage extends Component {
         return this.formatDays(sum);
     }
 
+    /** Formatte la valeur brute d'une cellule (ex. monthCells) en "Xd". */
+    cellDays(cell) {
+        return this.formatDays(parseFloat(cell.value) || 0);
+    }
+
     formatDays(n) {
         const rounded = Math.round(n * 100) / 100;
         return (Number.isInteger(rounded) ? String(rounded) : String(rounded)) + "d";
@@ -254,6 +339,72 @@ export class TimesheetsTimesheetPage extends Component {
             return;
         }
         this.state.personalRows = this.state.personalRows.filter((r) => r.key !== row.key);
+    }
+
+    /**
+     * Statut "canonique" d'une semaine (pris sur la 1ère ligne de projet,
+     * la validation d'une semaine s'applique au niveau utilisateur, pas
+     * ligne par ligne) — permet de proposer Enregistrer/Soumettre sur
+     * TOUTE semaine non validée, pas seulement une semaine figée en dur.
+     */
+    weekStatus(index) {
+        return this.state.personalRows[0]?.cells[index]?.status || "to_complete";
+    }
+
+    saveWeek(index) {
+        for (const row of this.state.personalRows) {
+            const cell = row.cells[index];
+            if (cell && cell.status === "to_complete") {
+                cell.status = "saved";
+            }
+        }
+    }
+
+    submitWeek(index) {
+        for (const row of this.state.personalRows) {
+            const cell = row.cells[index];
+            if (cell && cell.status === "saved") {
+                cell.status = "pending";
+            }
+        }
+    }
+
+    // ---- Intervalle de saisie Jour (vue Personnelle) + commentaires ----
+    setPersonalPeriodMode(mode) {
+        this.state.personalPeriodMode = mode;
+    }
+
+    onDayCellInput(cell, ev) {
+        cell.value = ev.target.value;
+        if (cell.status === "to_complete" && parseFloat(cell.value) > 0) {
+            cell.status = "saved";
+        }
+    }
+
+    dayRowTotal(row) {
+        return this.rowTotal(row);
+    }
+
+    commentKey(row, index) {
+        return row.key + "_" + index;
+    }
+
+    isCommentOpen(row, index) {
+        return this.state.commentOpenFor === this.commentKey(row, index);
+    }
+
+    toggleComment(row, index, ev) {
+        if (ev) ev.stopPropagation();
+        const key = this.commentKey(row, index);
+        this.state.commentOpenFor = this.state.commentOpenFor === key ? null : key;
+    }
+
+    closeComment() {
+        this.state.commentOpenFor = null;
+    }
+
+    onCommentInput(cell, ev) {
+        cell.comment = ev.target.value;
     }
 
     // ---- Vue Équipe ----
@@ -285,6 +436,71 @@ export class TimesheetsTimesheetPage extends Component {
 
     get selectedCount() {
         return Object.values(this.state.selected).filter(Boolean).length;
+    }
+
+    get selectedPeople() {
+        return this.state.team.filter((p) => this.isSelected(p));
+    }
+
+    setTeamPeriodMode(mode) {
+        this.state.teamPeriodMode = mode;
+    }
+
+    toggleTeamMenu(name, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.teamMenuOpen = this.state.teamMenuOpen === name ? null : name;
+    }
+
+    closeTeamMenus() {
+        this.state.teamMenuOpen = null;
+    }
+
+    /**
+     * Détermine quelle action proposer sous une semaine, pour la ligne
+     * sélectionnée : « Validated » (verrouillé) si déjà approuvée,
+     * « Approve » si une saisie attend l'approbation, « Save » sinon —
+     * reproduit les trois états visibles dans image-02/image-03 de la doc.
+     */
+    weekActionKind(cell) {
+        if (cell.status === "approved") {
+            return "locked";
+        }
+        if (cell.status === "saved" || cell.status === "pending") {
+            return "approve";
+        }
+        return "save";
+    }
+
+    approveCell(cell) {
+        cell.status = "approved";
+    }
+
+    saveCell(cell) {
+        if (parseFloat(cell.value) > 0) {
+            cell.status = "saved";
+        }
+    }
+
+    /** Bandeau de masse : « ✓ Approve » valide toutes les semaines saisies des lignes sélectionnées. */
+    bulkApprove() {
+        for (const person of this.selectedPeople) {
+            for (const cell of person.monthCells) {
+                if (cell.status === "saved" || cell.status === "pending") {
+                    cell.status = "approved";
+                }
+            }
+        }
+    }
+
+    /** Bandeau de masse : « 🔒 Re-open » rouvre les semaines déjà approuvées (repassent en attente). */
+    bulkReopen() {
+        for (const person of this.selectedPeople) {
+            for (const cell of person.monthCells) {
+                if (cell.status === "approved") {
+                    cell.status = "pending";
+                }
+            }
+        }
     }
 
     initials(name) {
