@@ -232,6 +232,156 @@
                 </div>
             </div>
 
+            <!-- Aperçu : volet plein-largeur ouvert depuis le bouton "Aperçu" du
+                 pied du tiroir, montre jour par jour la charge des utilisateurs
+                 déjà ajoutés à la demande/au staffing. -->
+            <div t-if="state.previewOpen" class="o_napta_adw_drawer o_napta_adw_finder_drawer o_napta_adw_preview_drawer" t-on-click.stop="">
+                <div t-if="conflictCount and !state.previewBannerDismissed" class="o_napta_adw_preview_banner">
+                    <i class="fa fa-exclamation-triangle"/>
+                    <span>Certaines périodes sont en conflit.</span>
+                    <i class="fa fa-times o_napta_adw_preview_banner_close" t-on-click="dismissPreviewBanner"/>
+                </div>
+                <div class="o_napta_adw_preview_toolbar">
+                    <div class="o_napta_adw_preview_toolbar_spacer"/>
+                    <div class="o_napta_adw_dropdown_wrap">
+                        <button type="button" class="o_napta_adw_preview_display_btn" t-on-click="togglePreviewDisplayMenu">
+                            Paramètres d'affichage <i class="fa fa-chevron-down"/>
+                        </button>
+                        <div t-if="state.previewDisplayMenuOpen" class="o_napta_adw_dropdown_menu o_napta_adw_preview_display_menu" t-on-click.stop="">
+                            <div class="o_napta_adw_preview_display_col">
+                                <div class="o_napta_adw_preview_display_title">Afficher l'occupation en</div>
+                                <label class="o_napta_adw_preview_radio">
+                                    <input type="radio" name="preview_unit" value="tace" t-model="state.previewSettings.unit"/> % : TACE
+                                </label>
+                                <label class="o_napta_adw_preview_radio">
+                                    <input type="radio" name="preview_unit" value="days" t-model="state.previewSettings.unit"/> Jours
+                                </label>
+                                <div class="o_napta_adw_preview_display_title">Inclure dans la ligne principale</div>
+                                <label class="o_napta_adw_preview_checkbox">
+                                    <input type="checkbox" t-model="state.previewSettings.includeReal"/> Réel
+                                </label>
+                                <label class="o_napta_adw_preview_checkbox">
+                                    <input type="checkbox" t-model="state.previewSettings.includeSimulated"/> Simulé
+                                </label>
+                                <label class="o_napta_adw_preview_checkbox">
+                                    <input type="checkbox" t-model="state.previewSettings.includePrebooked"/> Prépositionnement
+                                </label>
+                            </div>
+                            <div class="o_napta_adw_preview_display_col">
+                                <div class="o_napta_adw_preview_display_title">Grouper les données par</div>
+                                <t t-foreach="previewGroupOptions" t-as="g" t-key="g">
+                                    <label class="o_napta_adw_preview_radio">
+                                        <input type="radio" name="preview_group" t-att-value="g" t-model="state.previewSettings.groupBy"/> <t t-esc="g"/>
+                                    </label>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="o_napta_adw_dropdown_wrap">
+                        <button type="button" class="o_napta_adw_preview_info_btn" t-on-click="togglePreviewInfo">
+                            <i class="fa fa-info"/>
+                        </button>
+                        <div t-if="state.previewInfoOpen" class="o_napta_adw_dropdown_menu o_napta_adw_preview_info_menu" t-on-click.stop="">
+                            <div class="o_napta_adw_preview_legend_item">
+                                <span class="o_napta_adw_preview_legend_swatch o_napta_adw_preview_legend_swatch_real">100%</span>
+                                <span>Staffing réel</span>
+                            </div>
+                            <div class="o_napta_adw_preview_legend_item">
+                                <span class="o_napta_adw_preview_legend_swatch o_napta_adw_preview_legend_swatch_projected">150%</span>
+                                <span>Conflit projeté</span>
+                            </div>
+                            <div class="o_napta_adw_preview_legend_sep"/>
+                            <div class="o_napta_adw_preview_legend_item">
+                                <span class="o_napta_adw_preview_legend_swatch o_napta_adw_preview_legend_swatch_green">0%</span>
+                                <span>À partir de 0%</span>
+                            </div>
+                            <div class="o_napta_adw_preview_legend_item">
+                                <span class="o_napta_adw_preview_legend_swatch o_napta_adw_preview_legend_swatch_amber">50%</span>
+                                <span>À partir de 50%</span>
+                            </div>
+                            <div class="o_napta_adw_preview_legend_item">
+                                <span class="o_napta_adw_preview_legend_swatch o_napta_adw_preview_legend_swatch_red">101%</span>
+                                <span>À partir de 101%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_napta_adw_preview_table_wrap">
+                    <table class="o_napta_adw_preview_table">
+                        <thead>
+                            <tr>
+                                <th class="o_napta_adw_preview_col_people"/>
+                                <t t-foreach="previewDayColumns" t-as="day" t-key="day.key">
+                                    <th t-attf-class="o_napta_adw_preview_col_day {{ day.weekend ? 'o_napta_adw_preview_col_weekend' : '' }}" t-esc="day.label"/>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="previewRows" t-as="row" t-key="row.id">
+                                <tr class="o_napta_adw_preview_row_main">
+                                    <td class="o_napta_adw_preview_col_people">
+                                        <i t-attf-class="fa {{ isPreviewExpanded(row.id) ? 'fa-chevron-down' : 'fa-chevron-right' }} o_napta_adw_preview_chevron"
+                                           t-on-click="(ev) => this.togglePreviewExpand(row.id, ev)"/>
+                                        <span class="o_napta_avatar" t-esc="row.initials"/>
+                                        <span class="o_napta_adw_preview_person_name" t-esc="row.name"/>
+                                    </td>
+                                    <t t-foreach="row.totals" t-as="value" t-key="value_index">
+                                        <td t-attf-class="o_napta_adw_preview_col_day {{ previewDayColumns[value_index].weekend ? 'o_napta_adw_preview_col_weekend' : '' }}">
+                                            <span t-attf-class="o_napta_adw_preview_cell {{ previewCellClass(value) }}" t-esc="value + '%'"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <t t-if="isPreviewExpanded(row.id)">
+                                    <tr t-if="row.projected" class="o_napta_adw_preview_row_sub">
+                                        <td class="o_napta_adw_preview_col_people"><span class="o_napta_adw_preview_sub_label">Projeté — Staffing projeté</span></td>
+                                        <t t-foreach="row.projected" t-as="value" t-key="value_index">
+                                            <td class="o_napta_adw_preview_col_day">
+                                                <span t-if="value !== null" class="o_napta_adw_preview_projected_cell" t-esc="value + '%'"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr t-foreach="row.projects" t-as="project" t-key="project.key" class="o_napta_adw_preview_row_sub">
+                                        <td class="o_napta_adw_preview_col_people">
+                                            <span class="o_napta_adw_preview_sub_label o_napta_adw_preview_sub_label_strong" t-esc="project.client + ' — ' + project.project"/>
+                                        </td>
+                                        <t t-foreach="previewWeekBlocks" t-as="block" t-key="block.key">
+                                            <td class="o_napta_adw_preview_col_day" colspan="5">
+                                                <span t-attf-class="o_napta_adw_preview_bar {{ project.internal ? 'o_napta_adw_preview_bar_internal' : 'o_napta_adw_preview_bar_client' }}"
+                                                      t-esc="project.weeklyValues[block_index] + '%'"/>
+                                            </td>
+                                            <td class="o_napta_adw_preview_col_day o_napta_adw_preview_col_weekend" colspan="2">
+                                                <span class="o_napta_adw_preview_hatch"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr class="o_napta_adw_preview_row_sub">
+                                        <td class="o_napta_adw_preview_col_people"><span class="o_napta_adw_preview_sub_label">Congé</span></td>
+                                        <t t-foreach="previewWeekBlocks" t-as="block" t-key="block.key">
+                                            <td class="o_napta_adw_preview_col_day" colspan="5"/>
+                                            <td class="o_napta_adw_preview_col_day o_napta_adw_preview_col_weekend" colspan="2">
+                                                <span class="o_napta_adw_preview_hatch"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr class="o_napta_adw_preview_row_sub">
+                                        <td class="o_napta_adw_preview_col_people"><span class="o_napta_adw_preview_sub_label">Jour férié</span></td>
+                                        <t t-foreach="row.holidays" t-as="isHoliday" t-key="isHoliday_index">
+                                            <td class="o_napta_adw_preview_col_day">
+                                                <span t-if="isHoliday" class="o_napta_adw_preview_holiday_pill"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </t>
+                            <tr t-if="!previewRows.length">
+                                <td t-att-colspan="previewDayColumns.length + 1" class="o_napta_adw_preview_empty">Ajoutez des utilisateurs pour afficher l'aperçu.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="o_napta_adw_drawer" t-on-click="(ev) => { ev.stopPropagation(); this.closeDropdowns(); }">
                 <div class="o_napta_adw_header">
                     <input t-if="props.mode === 'edit' and state.titleEditing" type="text" class="o_napta_adw_title_input" autofocus="autofocus"
@@ -592,7 +742,7 @@
                 </div>
 
                 <div class="o_napta_adw_footer">
-                    <button type="button" class="btn o_napta_adw_preview_btn" t-on-click="(ev) => this.openConflictModal(ev)">
+                    <button type="button" class="btn o_napta_adw_preview_btn" t-on-click="(ev) => this.openPreview(ev)">
                         <i class="fa fa-search"/> Aperçu
                         <span t-if="conflictCount" class="o_napta_adw_conflict_badge" t-esc="conflictBadgeLabel"/>
                     </button>

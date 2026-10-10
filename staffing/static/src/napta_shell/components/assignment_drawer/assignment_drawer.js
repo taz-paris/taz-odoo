@@ -111,6 +111,75 @@ function buildFinderPeople() {
 
 const FINDER_PEOPLE = buildFinderPeople();
 
+// ---- Aperçu : volet plein-largeur ouvert depuis le bouton "Aperçu" du
+// pied du tiroir, montre jour par jour la charge des utilisateurs déjà
+// ajoutés à la demande/au staffing (réutilise finderCellClass pour les
+// mêmes seuils de couleur que le Profile Finder). ----
+const PREVIEW_WEEK_COUNT = 3;
+const PREVIEW_MONTH_ABBR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
+function buildPreviewDayColumns() {
+    const start = new Date(2026, 10, 2);
+    const columns = [];
+    for (let i = 0; i < PREVIEW_WEEK_COUNT * 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        columns.push({
+            key: "d" + i,
+            label: d.getDate() + " " + PREVIEW_MONTH_ABBR[d.getMonth()],
+            weekend: i % 7 === 5 || i % 7 === 6,
+        });
+    }
+    return columns;
+}
+
+const PREVIEW_DAY_COLUMNS = buildPreviewDayColumns();
+
+const PREVIEW_WEEK_BLOCKS = Array.from({ length: PREVIEW_WEEK_COUNT }, (_, wi) => ({
+    key: "pw" + wi,
+    weekdayStart: wi * 7,
+}));
+
+/** Ligne d'aperçu factice pour un utilisateur déjà ajouté à la demande. */
+function buildPreviewRow(user, index) {
+    const seed = index * 13 + user.name.length;
+    const conflictStart = 10 + (seed % 3);
+    const conflictEnd = conflictStart + 2;
+    const totals = PREVIEW_DAY_COLUMNS.map((day, i) => {
+        if (day.weekend) return (seed * (i + 1)) % 10;
+        const base = 2 + ((seed * (i + 3)) % 64);
+        return i >= conflictStart && i <= conflictEnd && index % 2 === 1 ? base + 90 : base;
+    });
+    const hasConflict = totals.some((v) => v >= 101);
+    const projected = hasConflict
+        ? PREVIEW_DAY_COLUMNS.map((_, i) => (i >= conflictStart && i <= conflictEnd ? Math.round(totals[i] * 0.55) : null))
+        : null;
+    const projectCount = 1 + (seed % 2);
+    const projects = Array.from({ length: projectCount }, (_, pi) => {
+        const pool = FINDER_PROJECT_POOL[(seed + pi) % FINDER_PROJECT_POOL.length];
+        return {
+            key: user.name + "-pprev-" + pi,
+            client: pool.client,
+            project: pool.project,
+            internal: !!pool.internal,
+            weeklyValues: Array.from({ length: PREVIEW_WEEK_COUNT }, (_, wi) => ((seed * (wi + pi + 2) * 3) % 60) || 2),
+        };
+    });
+    const holidayIndex = (seed * 7) % PREVIEW_DAY_COLUMNS.length;
+    return {
+        id: "preview-" + index,
+        name: user.name,
+        initials: user.initials || computeInitials(user.name),
+        totals,
+        projected,
+        projects,
+        conges: PREVIEW_DAY_COLUMNS.map((day) => day.weekend),
+        holidays: PREVIEW_DAY_COLUMNS.map((day, i) => i === holidayIndex && !day.weekend),
+    };
+}
+
+const PREVIEW_GROUP_OPTIONS = ["Demi-journée", "Jour", "Semaine", "Mois", "Trimestre", "Année", "Aucun groupement"];
+
 // Jours fériés fixes (mock, dates françaises) utilisés pour simuler la
 // détection de conflit "congés ou jours fériés" (doc staffing_les-calendriers
 // §Découper le staffing / notion de congé).
@@ -240,6 +309,9 @@ export class AssignmentDrawer extends Component {
         this.commentMaxLength = COMMENT_MAX_LENGTH;
         this.finderWeekColumns = FINDER_WEEK_COLUMNS;
         this.finderPeople = FINDER_PEOPLE;
+        this.previewDayColumns = PREVIEW_DAY_COLUMNS;
+        this.previewWeekBlocks = PREVIEW_WEEK_BLOCKS;
+        this.previewGroupOptions = PREVIEW_GROUP_OPTIONS;
         this._periodId = 0;
 
         const isEdit = this.props.mode === "edit";
@@ -271,6 +343,12 @@ export class AssignmentDrawer extends Component {
             finderSelected: {},
             finderHoverId: null,
             finderStatusMenuOpen: null,
+            previewOpen: false,
+            previewBannerDismissed: false,
+            previewExpanded: {},
+            previewDisplayMenuOpen: false,
+            previewInfoOpen: false,
+            previewSettings: { unit: "tace", includeReal: true, includeSimulated: true, includePrebooked: false, groupBy: "Jour" },
             info: { status: "", daysSold: null, description: "", duration: "", priority: "" },
             comment: "",
             assignmentType: "real",
@@ -388,6 +466,8 @@ export class AssignmentDrawer extends Component {
         this.state.periodSplitMenuOpen = false;
         this.state.userOptionDropdownOpen = null;
         this.state.finderStatusMenuOpen = null;
+        this.state.previewDisplayMenuOpen = false;
+        this.state.previewInfoOpen = false;
     }
 
     toggleSection(key) {
@@ -724,7 +804,9 @@ export class AssignmentDrawer extends Component {
     toggleProfileFinder(ev) {
         if (ev) ev.stopPropagation();
         this.state.profileFinderOpen = !this.state.profileFinderOpen;
-        if (!this.state.profileFinderOpen) {
+        if (this.state.profileFinderOpen) {
+            this.state.previewOpen = false;
+        } else {
             this.state.finderSelected = {};
             this.state.finderStatusMenuOpen = null;
         }
@@ -735,6 +817,55 @@ export class AssignmentDrawer extends Component {
         this.state.profileFinderOpen = false;
         this.state.finderSelected = {};
         this.state.finderStatusMenuOpen = null;
+    }
+
+    // ---- Aperçu (bouton "Aperçu" du pied du tiroir) ----
+    get previewRows() {
+        return this.state.users.map((user, i) => buildPreviewRow(user, i));
+    }
+
+    openPreview(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.profileFinderOpen = false;
+        this.state.previewBannerDismissed = false;
+        this.state.previewOpen = true;
+    }
+
+    closePreview(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.previewOpen = false;
+        this.state.previewDisplayMenuOpen = false;
+        this.state.previewInfoOpen = false;
+    }
+
+    dismissPreviewBanner(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.previewBannerDismissed = true;
+    }
+
+    togglePreviewExpand(rowId, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.previewExpanded[rowId] = !this.state.previewExpanded[rowId];
+    }
+
+    isPreviewExpanded(rowId) {
+        return !!this.state.previewExpanded[rowId];
+    }
+
+    togglePreviewDisplayMenu(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.previewInfoOpen = false;
+        this.state.previewDisplayMenuOpen = !this.state.previewDisplayMenuOpen;
+    }
+
+    togglePreviewInfo(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.previewDisplayMenuOpen = false;
+        this.state.previewInfoOpen = !this.state.previewInfoOpen;
+    }
+
+    previewCellClass(value) {
+        return finderCellClass(value);
     }
 
     toggleFinderExpand(personId, ev) {
