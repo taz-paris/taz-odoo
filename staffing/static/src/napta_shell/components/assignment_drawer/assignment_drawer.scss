@@ -31,6 +31,15 @@
     margin-right: 10px;
 }
 
+// ---- Profile Finder (recherche de profils, icône loupe de la section
+// Utilisateurs) : volet large façon rapport "Planification individuelle". ----
+.o_napta_adw_finder_drawer {
+    width: 860px;
+    max-width: 80vw;
+    margin-right: 10px;
+    padding: 18px;
+}
+
 .o_napta_adw_header {
     display: flex;
     align-items: center;
@@ -850,4 +859,230 @@
     .o_napta_adw_save_btn_danger {
         background: #c0392b;
     }
+}
+
+// ==== Profile Finder : toolbar, tableau, lignes de détail, barre d'actions ====
+.o_napta_adw_finder_toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.o_napta_adw_finder_toolbar_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    background: #fff;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: $napta-text;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.o_napta_adw_finder_filter_chip {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    line-height: 1.3;
+
+    span:last-child { font-weight: 600; color: $napta-text; }
+}
+
+.o_napta_adw_finder_filter_label {
+    color: $napta-text-muted;
+    font-size: 10.5px;
+}
+
+.o_napta_adw_finder_spacer {
+    flex: 1 1 auto;
+}
+
+.o_napta_adw_finder_date_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 6px;
+    background: #0b2540;
+    color: #fff;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.o_napta_adw_finder_reset {
+    color: $napta-text-muted;
+    cursor: pointer;
+    font-size: 13px;
+    margin: 6px 0 10px;
+    display: inline-block;
+    &:hover { color: $napta-text; }
+}
+
+.o_napta_adw_finder_table_wrap {
+    border: 1px solid $napta-border;
+    border-radius: 10px;
+    overflow: auto;
+    max-height: calc(100vh - 230px);
+}
+
+.o_napta_adw_finder_table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+    font-size: 12.5px;
+
+    th, td {
+        padding: 8px 10px;
+        border-bottom: 1px solid $napta-border;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    thead th {
+        background: #fafafa;
+        color: $napta-text-muted;
+        font-weight: 600;
+        font-size: 11.5px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+}
+
+.o_napta_adw_finder_col_check, .o_napta_adw_finder_col_expand {
+    width: 26px;
+}
+
+.o_napta_adw_finder_checkbox, .o_napta_adw_finder_chevron {
+    color: $napta-text-muted;
+    cursor: pointer;
+    &:hover { color: $napta-text; }
+}
+
+.o_napta_adw_finder_col_people {
+    min-width: 190px;
+    white-space: normal;
+}
+
+.o_napta_adw_finder_col_notes {
+    min-width: 90px;
+}
+
+.o_napta_adw_finder_col_week {
+    min-width: 66px;
+}
+
+.o_napta_adw_finder_week_date {
+    font-weight: 400;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_finder_row:hover {
+    background: #fafbfb;
+}
+
+.o_napta_adw_finder_person_cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.o_napta_adw_finder_person_info {
+    min-width: 0;
+}
+
+.o_napta_adw_finder_person_name {
+    font-weight: 600;
+}
+
+.o_napta_adw_finder_cell {
+    display: inline-block;
+    min-width: 42px;
+    text-align: center;
+    padding: 3px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.o_napta_adw_finder_cell_purple { background: #ece9fb; color: #6b4fd1; }
+.o_napta_adw_finder_cell_amber { background: #fbf2df; color: #b8860b; }
+.o_napta_adw_finder_cell_green { background: #e5f6ec; color: #1f9d67; }
+.o_napta_adw_finder_cell_red { background: #fbe7e8; color: #e0514a; }
+
+.o_napta_adw_finder_cell_sub {
+    min-width: 36px;
+    font-weight: 500;
+    font-size: 11.5px;
+    background: #eef4fd;
+    color: #3b6fd8;
+}
+
+.o_napta_adw_finder_detail_row {
+    background: #fcfcfc;
+
+    td { border-bottom: 1px solid #f1f1f1; }
+}
+
+.o_napta_adw_finder_detail_label {
+    font-size: 12px;
+    white-space: normal;
+}
+
+.o_napta_adw_finder_client_internal {
+    font-weight: 700;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_finder_client {
+    font-weight: 700;
+    color: #3b6fd8;
+}
+
+.o_napta_adw_finder_detail_dash {
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_finder_bulk_bar {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0b2540;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.o_napta_adw_finder_bulk_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    color: #0b2540;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: auto;
+
+    & + .o_napta_adw_finder_bulk_btn { margin-left: 0; }
 }

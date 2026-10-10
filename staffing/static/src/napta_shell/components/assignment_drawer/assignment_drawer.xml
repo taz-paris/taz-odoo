@@ -100,6 +100,141 @@
                 </div>
             </div>
 
+            <!-- Profile Finder : recherche de profils (ressemble au rapport
+                 "Planification individuelle"), ouvert depuis l'icône loupe
+                 de la section Utilisateurs. -->
+            <div t-if="state.profileFinderOpen" class="o_napta_adw_drawer o_napta_adw_finder_drawer" t-on-click.stop="">
+                <div class="o_napta_adw_finder_toolbar">
+                    <button type="button" class="o_napta_adw_finder_toolbar_btn"><i class="fa fa-filter"/> Filtrer</button>
+                    <div class="o_napta_adw_finder_filter_chip">
+                        <span class="o_napta_adw_finder_filter_label">Département (Utilisateur)</span>
+                        <span>Tasmane</span>
+                    </div>
+                    <div class="o_napta_adw_finder_filter_chip">
+                        <span class="o_napta_adw_finder_filter_label">Poste</span>
+                        <span>Consultant, Consultant Senior</span>
+                    </div>
+                    <div class="o_napta_adw_finder_filter_chip">
+                        <span class="o_napta_adw_finder_filter_label">Bureau</span>
+                        <span>Paris</span>
+                    </div>
+                    <div class="o_napta_adw_finder_spacer"/>
+                    <button type="button" class="o_napta_adw_finder_toolbar_btn">Colonnes <i class="fa fa-chevron-down"/></button>
+                    <button type="button" class="o_napta_adw_finder_toolbar_btn">Paramètres d'affichage <i class="fa fa-chevron-down"/></button>
+                    <button type="button" class="o_napta_adw_finder_date_btn"><i class="fa fa-calendar"/> 09/11/2026 - 18/12/2026</button>
+                </div>
+                <i class="fa fa-refresh o_napta_adw_finder_reset" title="Réinitialiser"/>
+
+                <div class="o_napta_adw_finder_table_wrap">
+                    <table class="o_napta_adw_finder_table">
+                        <thead>
+                            <tr>
+                                <th class="o_napta_adw_finder_col_check"/>
+                                <th class="o_napta_adw_finder_col_expand"/>
+                                <th>Collaborateur</th>
+                                <th>Notes</th>
+                                <th>Intérêts projet</th>
+                                <t t-foreach="finderWeekColumns" t-as="col" t-key="col.key">
+                                    <th class="o_napta_adw_finder_col_week">
+                                        <div t-esc="col.label"/>
+                                        <div class="o_napta_adw_finder_week_date" t-esc="col.date"/>
+                                    </th>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="finderPeople" t-as="person" t-key="person.id">
+                                <tr class="o_napta_adw_finder_row">
+                                    <td class="o_napta_adw_finder_col_check">
+                                        <i t-attf-class="fa {{ isFinderSelected(person.id) ? 'fa-check-square' : 'fa-square-o' }} o_napta_adw_finder_checkbox"
+                                           t-on-click="(ev) => this.toggleFinderSelect(person.id, ev)"/>
+                                    </td>
+                                    <td class="o_napta_adw_finder_col_expand">
+                                        <i t-attf-class="fa {{ isFinderExpanded(person.id) ? 'fa-chevron-down' : 'fa-chevron-right' }} o_napta_adw_finder_chevron"
+                                           t-on-click="(ev) => this.toggleFinderExpand(person.id, ev)"/>
+                                    </td>
+                                    <td class="o_napta_adw_finder_col_people"
+                                        t-on-mouseenter="(ev) => this.setFinderHover(person.id, ev)" t-on-mouseleave="(ev) => this.setFinderHover(null, ev)">
+                                        <div class="o_napta_adw_finder_person_cell">
+                                            <span class="o_napta_avatar" t-esc="person.initials"/>
+                                            <div class="o_napta_adw_finder_person_info">
+                                                <div class="o_napta_adw_finder_person_name" t-esc="person.name"/>
+
+                                                <span t-if="finderPersonStatus(person) and !isFinderHovered(person.id)"
+                                                      t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[finderPersonStatus(person)] }}"
+                                                      t-esc="finderPersonStatus(person)"/>
+
+                                                <div t-if="isFinderHovered(person.id)" class="o_napta_adw_dropdown_wrap o_napta_adw_user_option_wrap">
+                                                    <button type="button"
+                                                            t-attf-class="o_napta_adw_user_option_btn o_napta_adw_user_option_btn_{{ userStaffingOptionSlugs[finderPersonStatus(person) || 'Réel'] }}"
+                                                            t-on-click="(ev) => this.toggleFinderStatusMenu(person.id, ev)">
+                                                        <span t-esc="finderPersonStatus(person) || 'Réel'"/>
+                                                        <i class="fa fa-chevron-down"/>
+                                                    </button>
+                                                    <div t-if="isFinderStatusMenuOpen(person.id)" class="o_napta_adw_dropdown_menu o_napta_adw_user_option_menu">
+                                                        <div t-foreach="userStaffingOptions" t-as="opt" t-key="opt"
+                                                             t-attf-class="o_napta_adw_dropdown_item o_napta_adw_user_option_item {{ finderPersonStatus(person) === opt ? 'o_napta_adw_user_option_item_active' : '' }}"
+                                                             t-on-click="(ev) => this.pickFinderStatus(person, opt, ev)">
+                                                            <i t-if="finderPersonStatus(person) === opt" class="fa fa-check"/>
+                                                            <span t-attf-class="o_napta_adw_user_option_pill o_napta_adw_user_option_pill_{{ userStaffingOptionSlugs[opt] }}" t-esc="opt"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="o_napta_adw_finder_col_notes"/>
+                                    <td class="o_napta_adw_finder_col_notes"/>
+                                    <t t-foreach="person.weeks" t-as="value" t-key="value_index">
+                                        <td class="o_napta_adw_finder_col_week">
+                                            <span t-attf-class="o_napta_adw_finder_cell {{ finderCellClass(value) }}" t-esc="value + '%'"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <t t-if="isFinderExpanded(person.id)">
+                                    <tr t-foreach="person.projects" t-as="proj" t-key="proj_index" class="o_napta_adw_finder_detail_row">
+                                        <td class="o_napta_adw_finder_col_check"/>
+                                        <td class="o_napta_adw_finder_col_expand"/>
+                                        <td class="o_napta_adw_finder_detail_label" colspan="3">
+                                            <span t-att-class="proj.internal ? 'o_napta_adw_finder_client_internal' : 'o_napta_adw_finder_client'" t-esc="proj.client"/>
+                                            <span class="o_napta_adw_finder_detail_dash"> — </span>
+                                            <span t-esc="proj.project"/>
+                                        </td>
+                                        <t t-foreach="proj.weeks" t-as="w" t-key="w_index">
+                                            <td class="o_napta_adw_finder_col_week">
+                                                <span t-if="w" class="o_napta_adw_finder_cell o_napta_adw_finder_cell_sub" t-esc="w + '%'"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                    <tr class="o_napta_adw_finder_detail_row">
+                                        <td class="o_napta_adw_finder_col_check"/>
+                                        <td class="o_napta_adw_finder_col_expand"/>
+                                        <td class="o_napta_adw_finder_detail_label" colspan="3">Congé</td>
+                                        <t t-foreach="finderWeekColumns" t-as="col" t-key="col.key"><td class="o_napta_adw_finder_col_week"/></t>
+                                    </tr>
+                                    <tr class="o_napta_adw_finder_detail_row">
+                                        <td class="o_napta_adw_finder_col_check"/>
+                                        <td class="o_napta_adw_finder_col_expand"/>
+                                        <td class="o_napta_adw_finder_detail_label" colspan="3">Jour férié</td>
+                                        <t t-foreach="finderWeekColumns" t-as="col" t-key="col.key"><td class="o_napta_adw_finder_col_week"/></t>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div t-if="finderSelectedCount" class="o_napta_adw_finder_bulk_bar">
+                    <span t-esc="finderSelectedCount + ' / ' + finderPeople.length + ' éléments sélectionnés'"/>
+                    <button type="button" class="btn o_napta_adw_finder_bulk_btn" t-on-click="(ev) => this.bulkAddFromFinder('Pré-positionner', ev)">
+                        <i class="fa fa-plus"/> Pré-positionner
+                    </button>
+                    <button type="button" class="btn o_napta_adw_finder_bulk_btn" t-on-click="(ev) => this.bulkAddFromFinder('Suggérer', ev)">
+                        <i class="fa fa-plus"/> Suggérer
+                    </button>
+                </div>
+            </div>
+
             <div class="o_napta_adw_drawer" t-on-click="(ev) => { ev.stopPropagation(); this.closeDropdowns(); }">
                 <div class="o_napta_adw_header">
                     <input t-if="props.mode === 'edit' and state.titleEditing" type="text" class="o_napta_adw_title_input" autofocus="autofocus"
@@ -204,7 +339,7 @@
                     </div>
 
                     <div class="o_napta_adw_user_search_row">
-                        <span class="o_napta_adw_user_search_icon"><i class="fa fa-search"/></span>
+                        <span class="o_napta_adw_user_search_icon" t-on-click="toggleProfileFinder"><i t-attf-class="fa {{ state.profileFinderOpen ? 'fa-times' : 'fa-search' }}"/></span>
                         <div class="o_napta_adw_dropdown_wrap o_napta_adw_user_search_wrap">
                             <input type="text" class="o_napta_adw_user_search" placeholder="Ajouter un utilisateur…"
                                    t-model="state.userSearch" t-on-click="focusUserSearch"/>
@@ -403,7 +538,7 @@
                             </span>
                         </div>
                         <div class="o_napta_adw_user_search_row">
-                            <span class="o_napta_adw_user_search_icon"><i class="fa fa-search"/></span>
+                            <span class="o_napta_adw_user_search_icon" t-on-click="toggleProfileFinder"><i t-attf-class="fa {{ state.profileFinderOpen ? 'fa-times' : 'fa-search' }}"/></span>
                             <div class="o_napta_adw_dropdown_wrap o_napta_adw_user_search_wrap">
                                 <input type="text" class="o_napta_adw_user_search" placeholder="Rechercher un utilisateur…"
                                        t-model="state.userSearch" t-on-click="focusUserSearch"/>

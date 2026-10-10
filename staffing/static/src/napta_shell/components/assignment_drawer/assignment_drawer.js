@@ -54,6 +54,63 @@ const PRIORITY_OPTIONS = ["Basse", "Normale", "Haute", "Urgente"];
 
 const COMMENT_MAX_LENGTH = 200;
 
+// ---- Profile Finder : volet de recherche de profils ouvert depuis l'icône
+// loupe de la section Utilisateurs (ressemble au rapport "Planification
+// individuelle", avec sélection multiple + bascule de statut par ligne). ----
+const FINDER_WEEK_COLUMNS = [
+    { key: "w46", label: "S46", date: "9 nov." },
+    { key: "w47", label: "S47", date: "16 nov." },
+    { key: "w48", label: "S48", date: "23 nov." },
+    { key: "w49", label: "S49", date: "30 nov." },
+    { key: "w50", label: "S50", date: "7 déc." },
+    { key: "w51", label: "S51", date: "14 déc." },
+];
+
+const FINDER_PROJECT_POOL = [
+    { client: "Tasmane", project: "Interne - K4M", internal: true },
+    { client: "ARQUUS", project: "Arquus - audit architecture SI" },
+    { client: "GRDF", project: "Orga et Change projet Biométhane DR nord" },
+    { client: "CARVEN FRANCE", project: "MDM scoping and solution benchmark" },
+];
+
+const FINDER_ROLES = ["Consultant", "Consultant Senior", "Manager", "Directeur de mission", "Analyste"];
+const FINDER_OFFICES = ["Paris", "Lyon", "Londres"];
+
+/** Classe de couleur par seuil de charge, mêmes teintes que le rapport Planification individuelle. */
+function finderCellClass(value) {
+    if (value >= 101) return "o_napta_adw_finder_cell_red";
+    if (value >= 90) return "o_napta_adw_finder_cell_green";
+    if (value >= 50) return "o_napta_adw_finder_cell_amber";
+    return "o_napta_adw_finder_cell_purple";
+}
+
+/** Liste factice de profils, générée de façon déterministe (pas de lien back-office). */
+function buildFinderPeople() {
+    return USER_DIRECTORY.map((name, i) => {
+        const seed = i * 17 + name.length;
+        const weeks = FINDER_WEEK_COLUMNS.map((_, wi) => (seed * (wi + 3) * 7) % 140);
+        const projectCount = 1 + (seed % 2);
+        const projects = Array.from({ length: projectCount }, (_, pi) => {
+            const pool = FINDER_PROJECT_POOL[(seed + pi) % FINDER_PROJECT_POOL.length];
+            return {
+                ...pool,
+                weeks: FINDER_WEEK_COLUMNS.map((_, wi) => (wi === 0 && pi === 1 ? null : Math.round(weeks[wi] * (pi === 0 ? 0.6 : 0.3)) || null)),
+            };
+        });
+        return {
+            id: "finder-" + i,
+            name,
+            initials: computeInitials(name),
+            role: FINDER_ROLES[seed % FINDER_ROLES.length],
+            office: FINDER_OFFICES[seed % FINDER_OFFICES.length],
+            weeks,
+            projects,
+        };
+    });
+}
+
+const FINDER_PEOPLE = buildFinderPeople();
+
 // Jours fériés fixes (mock, dates françaises) utilisés pour simuler la
 // détection de conflit "congés ou jours fériés" (doc staffing_les-calendriers
 // §Découper le staffing / notion de congé).
@@ -181,6 +238,8 @@ export class AssignmentDrawer extends Component {
         this.assignmentStatusOptions = ASSIGNMENT_STATUS_OPTIONS;
         this.priorityOptions = PRIORITY_OPTIONS;
         this.commentMaxLength = COMMENT_MAX_LENGTH;
+        this.finderWeekColumns = FINDER_WEEK_COLUMNS;
+        this.finderPeople = FINDER_PEOPLE;
         this._periodId = 0;
 
         const isEdit = this.props.mode === "edit";
@@ -207,6 +266,11 @@ export class AssignmentDrawer extends Component {
             userOptions: {},
             userSearch: "",
             userSearchFocused: false,
+            profileFinderOpen: false,
+            finderExpanded: {},
+            finderSelected: {},
+            finderHoverId: null,
+            finderStatusMenuOpen: null,
             info: { status: "", daysSold: null, description: "", duration: "", priority: "" },
             comment: "",
             assignmentType: "real",
@@ -323,6 +387,7 @@ export class AssignmentDrawer extends Component {
         this.state.periodSelectMenuOpen = false;
         this.state.periodSplitMenuOpen = false;
         this.state.userOptionDropdownOpen = null;
+        this.state.finderStatusMenuOpen = null;
     }
 
     toggleSection(key) {
@@ -653,6 +718,102 @@ export class AssignmentDrawer extends Component {
     focusUserSearch(ev) {
         if (ev) ev.stopPropagation();
         this.state.userSearchFocused = true;
+    }
+
+    // ---- Profile Finder (icône loupe de la section Utilisateurs) ----
+    toggleProfileFinder(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.profileFinderOpen = !this.state.profileFinderOpen;
+        if (!this.state.profileFinderOpen) {
+            this.state.finderSelected = {};
+            this.state.finderStatusMenuOpen = null;
+        }
+    }
+
+    closeProfileFinder(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.profileFinderOpen = false;
+        this.state.finderSelected = {};
+        this.state.finderStatusMenuOpen = null;
+    }
+
+    toggleFinderExpand(personId, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.finderExpanded[personId] = !this.state.finderExpanded[personId];
+    }
+
+    isFinderExpanded(personId) {
+        return !!this.state.finderExpanded[personId];
+    }
+
+    toggleFinderSelect(personId, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.finderSelected[personId] = !this.state.finderSelected[personId];
+    }
+
+    isFinderSelected(personId) {
+        return !!this.state.finderSelected[personId];
+    }
+
+    get finderSelectedCount() {
+        return Object.values(this.state.finderSelected).filter(Boolean).length;
+    }
+
+    /** Ajoute (ou met à jour) un profil dans la section Utilisateurs du tiroir, avec le statut choisi. */
+    addFinderPerson(person, option) {
+        if (!this.state.users.some((u) => u.name === person.name)) {
+            this.state.users.push({ name: person.name, role: person.role, initials: person.initials });
+        }
+        this.state.userOptions[person.name] = option;
+    }
+
+    isFinderPersonAdded(person) {
+        return this.state.users.some((u) => u.name === person.name);
+    }
+
+    finderPersonStatus(person) {
+        return this.state.userOptions[person.name] || null;
+    }
+
+    bulkAddFromFinder(option, ev) {
+        if (ev) ev.stopPropagation();
+        for (const person of this.finderPeople) {
+            if (this.state.finderSelected[person.id]) {
+                this.addFinderPerson(person, option);
+            }
+        }
+        this.state.finderSelected = {};
+    }
+
+    finderCellClass(value) {
+        return finderCellClass(value);
+    }
+
+    // Le déclencheur de statut par ligne (pilule + chevron) n'apparaît qu'au
+    // survol d'une ligne de premier niveau — ailleurs, le statut déjà
+    // affecté s'affiche en texte simple (non interactif).
+    setFinderHover(personId, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.finderHoverId = personId;
+    }
+
+    isFinderHovered(personId) {
+        return this.state.finderHoverId === personId;
+    }
+
+    toggleFinderStatusMenu(personId, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.finderStatusMenuOpen = this.state.finderStatusMenuOpen === personId ? null : personId;
+    }
+
+    isFinderStatusMenuOpen(personId) {
+        return this.state.finderStatusMenuOpen === personId;
+    }
+
+    pickFinderStatus(person, option, ev) {
+        if (ev) ev.stopPropagation();
+        this.addFinderPerson(person, option);
+        this.state.finderStatusMenuOpen = null;
     }
 
     // ---- Remplacement de contributeur (édition uniquement) ----
