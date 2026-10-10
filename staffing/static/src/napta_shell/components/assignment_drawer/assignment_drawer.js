@@ -59,6 +59,16 @@ const COMMENT_MAX_LENGTH = 200;
 // §Découper le staffing / notion de congé).
 const MOCK_HOLIDAYS_MMDD = ["01-01", "05-01", "05-08", "07-14", "08-15", "11-01", "11-11", "12-25"];
 
+// Toujours dériver la chaîne ISO des composantes LOCALES de la date (pas
+// de toISOString(), qui convertit en UTC et décale la date d'un jour dès
+// que le fuseau local est en avance/retard sur UTC à minuit).
+function toIsoLocal(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
 function isoDatesInRange(startIso, endIso) {
     const dates = [];
     if (!startIso || !endIso) return dates;
@@ -66,7 +76,7 @@ function isoDatesInRange(startIso, endIso) {
     const end = new Date(endIso + "T00:00:00");
     if (isNaN(cur) || isNaN(end)) return dates;
     while (cur <= end) {
-        dates.push(cur.toISOString().slice(0, 10));
+        dates.push(toIsoLocal(cur));
         cur.setDate(cur.getDate() + 1);
     }
     return dates;
@@ -74,6 +84,51 @@ function isoDatesInRange(startIso, endIso) {
 
 function holidaysInRange(startIso, endIso) {
     return isoDatesInRange(startIso, endIso).filter((iso) => MOCK_HOLIDAYS_MMDD.includes(iso.slice(5)));
+}
+
+/** Lundi (ISO) de la semaine contenant la date donnée. */
+function weekStartIso(iso) {
+    const date = new Date(iso + "T00:00:00");
+    const day = date.getDay();
+    const diff = (day === 0 ? -6 : 1) - day;
+    date.setDate(date.getDate() + diff);
+    return toIsoLocal(date);
+}
+
+/** Regroupe une liste de dates ISO triées par clé (jour/semaine/mois). */
+function chunkDatesByKey(days, keyFn) {
+    const chunks = [];
+    let currentKey = null;
+    let current = null;
+    for (const d of days) {
+        const key = keyFn(d);
+        if (key !== currentKey) {
+            current = [];
+            chunks.push(current);
+            currentKey = key;
+        }
+        current.push(d);
+    }
+    return chunks;
+}
+
+/**
+ * Granularités de découpage disponibles pour une période, conformes à
+ * doc staffing_les-calendriers §Découper le staffing : "Seules les options
+ * possibles sont proposées" (ex. une période de 3 jours sur une même
+ * semaine ne propose ni le découpage semaine ni le découpage mois).
+ */
+function splitGranularityOptions(period) {
+    const days = isoDatesInRange(period.start, period.end);
+    if (days.length <= 1) return [];
+    const options = [{ value: "days", label: "Découper par jours" }];
+    if (new Set(days.map(weekStartIso)).size > 1) {
+        options.push({ value: "weeks", label: "Découper par semaines" });
+    }
+    if (new Set(days.map((d) => d.slice(0, 7))).size > 1) {
+        options.push({ value: "months", label: "Découper par mois" });
+    }
+    return options;
 }
 
 function computeInitials(name) {
@@ -143,6 +198,7 @@ export class AssignmentDrawer extends Component {
             periodsConfig: { planningMode: "Dates fixes", unit: "Jours", ignoreLeaves: false, autoSplit: false },
             periodMenuOpenId: null,
             periodSelectMenuOpen: false,
+            periodSplitMenuOpen: false,
             conflictModalOpen: false,
             userOptionDropdownOpen: null,
             bulkEditOpen: false,
@@ -265,6 +321,7 @@ export class AssignmentDrawer extends Component {
         this.state.periodMenuOpenId = null;
         this.state.replaceSearchFocused = false;
         this.state.periodSelectMenuOpen = false;
+        this.state.periodSplitMenuOpen = false;
         this.state.userOptionDropdownOpen = null;
     }
 
@@ -401,7 +458,7 @@ export class AssignmentDrawer extends Component {
 
     applyPeriodSelectPreset(preset, ev) {
         if (ev) ev.stopPropagation();
-        const today = new Date().toISOString().slice(0, 10);
+        const today = toIsoLocal(new Date());
         for (const p of this.state.periods) {
             if (preset === this.periodSelectPresets[0]) {
                 p.selected = true;
@@ -414,23 +471,42 @@ export class AssignmentDrawer extends Component {
         this.state.periodSelectMenuOpen = false;
     }
 
-    // ---- Découper par jours (doc staffing_les-calendriers §Découper le
-    // staffing : scinde une période en sous-périodes, charge conservée) ----
-    splitSelectedPeriodsByDays(ev) {
+    // ---- Découper (doc staffing_les-calendriers §Découper le staffing :
+    // scinde une période en sous-périodes jour/semaine/mois, en conservant
+    // la charge totale. "Seules les options possibles sont proposées" en
+    // fonction de l'étendue de la période sélectionnée. ----
+    togglePeriodSplitMenu(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.periodSplitMenuOpen = !this.state.periodSplitMenuOpen;
+    }
+
+    // Options de découpage dynamiques, calculées sur la première période
+    // sélectionnée (cf. doc : le découpage semaine/mois n'est proposé que
+    // si la période s'étend sur plusieurs semaines/mois).
+    get periodSplitOptions() {
+        if (!this.selectedPeriods.length) return [];
+        return splitGranularityOptions(this.selectedPeriods[0]);
+    }
+
+    splitSelectedPeriods(granularity, ev) {
         if (ev) ev.stopPropagation();
         const targets = this.selectedPeriods.filter((p) => p.start && p.end);
+        const keyFn = granularity === "weeks" ? weekStartIso : granularity === "months" ? (d) => d.slice(0, 7) : (d) => d;
         for (const period of targets) {
             const days = isoDatesInRange(period.start, period.end);
             if (days.length <= 1) continue;
-            const share = Math.round((period.amount / days.length) * 100) / 100;
+            const chunks = chunkDatesByKey(days, keyFn);
+            if (chunks.length <= 1) continue;
             const idx = this.state.periods.indexOf(period);
-            const newPeriods = days.map((iso) => {
+            const newPeriods = chunks.map((chunk) => {
                 this._periodId++;
-                return { ...period, id: this._periodId, start: iso, end: iso, amount: share, selected: false, expanded: false };
+                const share = Math.round((period.amount * (chunk.length / days.length)) * 100) / 100;
+                return { ...period, id: this._periodId, start: chunk[0], end: chunk[chunk.length - 1], amount: share, selected: false, expanded: false };
             });
             this.state.periods.splice(idx, 1, ...newPeriods);
         }
         this.state.periodMenuOpenId = null;
+        this.state.periodSplitMenuOpen = false;
     }
 
     // ---- Conflit "congés ou jours fériés" (doc staffing_les-calendriers :

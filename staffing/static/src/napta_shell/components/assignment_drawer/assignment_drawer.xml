@@ -254,8 +254,16 @@
                         </div>
                         <i t-if="selectedPeriods.length" class="fa fa-pencil" data-tooltip="Modifier les périodes sélectionnées"
                            t-on-click="(ev) => this.openBulkEditPeriods(ev)"/>
-                        <i t-if="selectedPeriods.length" class="fa fa-scissors" data-tooltip="Découper par jours"
-                           t-on-click="(ev) => this.splitSelectedPeriodsByDays(ev)"/>
+                        <div t-if="selectedPeriods.length" class="o_napta_adw_dropdown_wrap o_napta_adw_period_split_wrap">
+                            <i class="fa fa-scissors" data-tooltip="Découper" t-on-click="(ev) => this.togglePeriodSplitMenu(ev)"/>
+                            <div t-if="state.periodSplitMenuOpen" class="o_napta_adw_dropdown_menu o_napta_adw_period_select_menu">
+                                <div t-foreach="periodSplitOptions" t-as="opt" t-key="opt.value" class="o_napta_adw_dropdown_item"
+                                     t-on-click="(ev) => this.splitSelectedPeriods(opt.value, ev)">
+                                    <span t-esc="opt.label"/>
+                                </div>
+                                <div t-if="!periodSplitOptions.length" class="o_napta_adw_empty_hint">Aucun découpage possible.</div>
+                            </div>
+                        </div>
                         <i t-if="selectedPeriods.length" class="fa fa-trash-o" data-tooltip="Supprimer les périodes sélectionnées"
                            t-on-click="(ev) => this.deleteSelectedPeriods(ev)"/>
                     </div>
