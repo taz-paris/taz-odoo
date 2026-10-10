@@ -290,6 +290,7 @@ export class AssignmentDrawer extends Component {
         mode: String, // "create" | "edit"
         record: { type: [Object, { value: null }], optional: true },
         projectOptions: { type: Array, optional: true },
+        presetUsers: { type: Array, optional: true }, // mode "create" : utilisateurs pré-ajoutés (ex. depuis le calendrier global)
         onClose: Function,
     };
 
@@ -362,6 +363,11 @@ export class AssignmentDrawer extends Component {
 
         if (isEdit && record) {
             this.seedFromRecord(record);
+        } else if (this.props.presetUsers) {
+            for (const u of this.props.presetUsers) {
+                this.state.users.push({ name: u.name, role: u.role || "", initials: u.initials || computeInitials(u.name) });
+                this.state.userOptions[u.name] = "Pré-positionner";
+            }
         }
     }
 
