@@ -47,11 +47,11 @@
                         Créer une demande <i class="fa fa-chevron-down"/>
                     </button>
                     <div t-if="state.showCreateMenu" class="osr_dropdown osr_create_dropdown" t-on-click.stop="">
-                        <div class="osr_dropdown_item">
+                        <div class="osr_dropdown_item" t-on-click="(ev) => this.openCreateDrawer('single', ev)">
                             <i class="fa fa-plus"/>
                             <span>Créer une demande</span>
                         </div>
-                        <div class="osr_dropdown_item">
+                        <div class="osr_dropdown_item" t-on-click="(ev) => this.openCreateDrawer('multiple', ev)">
                             <i class="fa fa-files-o"/>
                             <span>Créer plusieurs demandes</span>
                         </div>
@@ -170,6 +170,81 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Tiroir "Créer une demande" -->
+            <div t-if="state.createDrawer === 'single'" class="osr_create_overlay" t-on-click="closeCreateDrawer">
+                <div class="osr_create_drawer" t-on-click.stop="">
+                    <div class="osr_create_header">
+                        <h3>Créer une demande</h3>
+                        <i class="fa fa-times" t-on-click="closeCreateDrawer"/>
+                    </div>
+
+                    <label class="osr_create_label"><i class="fa fa-magic"/> Décrivez votre besoin</label>
+                    <textarea class="osr_create_textarea" rows="4"
+                              placeholder="Collez une fiche de poste, écrivez librement...  Exemple : Besoin d'un développeur Java senior avec Spring Boot"
+                              t-model="state.createNeed"/>
+                    <button type="button" class="btn osr_create_ai_btn" t-att-disabled="!state.createNeed">
+                        <i class="fa fa-magic"/> Analyser les critères avec l'IA
+                    </button>
+
+                    <div class="osr_create_divider">ou remplissez le formulaire manuellement</div>
+
+                    <label class="osr_create_label">Projet <span class="osr_create_required">*</span></label>
+                    <select class="osr_create_select" t-model="state.createProject">
+                        <option value="">Sélectionner un projet…</option>
+                        <option t-foreach="projectOptions" t-as="p" t-key="p" t-att-value="p" t-esc="p"/>
+                    </select>
+
+                    <t t-foreach="createSections" t-as="section" t-key="section.key">
+                        <div class="osr_create_section" t-on-click="(ev) => this.toggleCreateSection(section.key, ev)">
+                            <i t-attf-class="fa {{ section.icon }}"/>
+                            <span t-esc="section.label"/>
+                            <span class="osr_create_section_count">0</span>
+                            <i t-attf-class="fa {{ isCreateSectionOpen(section.key) ? 'fa-chevron-up' : 'fa-chevron-down' }} osr_create_section_chevron"/>
+                        </div>
+                        <div t-if="isCreateSectionOpen(section.key)" class="osr_create_section_body">
+                            Aucune donnée pour le moment.
+                        </div>
+                    </t>
+
+                    <div class="osr_create_footer">
+                        <button type="button" class="btn osr_create_preview_btn"><i class="fa fa-search"/> Aperçu</button>
+                        <button type="button" class="btn osr_create_cancel_btn" t-on-click="closeCreateDrawer">Fermer</button>
+                        <button type="button" class="btn osr_create_save_btn" t-att-disabled="!state.createProject" t-on-click="closeCreateDrawer">Enregistrer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tiroir "Créer plusieurs demandes" -->
+            <div t-if="state.createDrawer === 'multiple'" class="osr_create_overlay" t-on-click="closeCreateDrawer">
+                <div class="osr_create_drawer" t-on-click.stop="">
+                    <div class="osr_create_header">
+                        <h3>Créer plusieurs demandes</h3>
+                        <i class="fa fa-times" t-on-click="closeCreateDrawer"/>
+                    </div>
+
+                    <label class="osr_create_label"><i class="fa fa-magic"/> Décrivez votre besoin</label>
+                    <div class="osr_create_textarea_wrap">
+                        <textarea class="osr_create_textarea" rows="6"
+                                  placeholder="Collez une fiche de poste, écrivez librement...  Exemple : Besoin d'un développeur Java senior"
+                                  t-model="state.createNeed"/>
+                        <button type="button" class="osr_create_pdf_btn"><i class="fa fa-paperclip"/> Ajouter un fichier PDF</button>
+                    </div>
+
+                    <label class="osr_create_label">Projet <span class="osr_create_required">*</span></label>
+                    <select class="osr_create_select" t-model="state.createProject">
+                        <option value="">Sélectionner un projet…</option>
+                        <option t-foreach="projectOptions" t-as="p" t-key="p" t-att-value="p" t-esc="p"/>
+                    </select>
+
+                    <div class="osr_create_footer">
+                        <button type="button" class="btn osr_create_cancel_btn" t-on-click="closeCreateDrawer">Fermer</button>
+                        <button type="button" class="btn osr_create_save_btn osr_create_ai_save" t-att-disabled="!state.createProject" t-on-click="closeCreateDrawer">
+                            <i class="fa fa-magic"/> Analyser avec l'IA
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </div>

@@ -404,4 +404,190 @@
         color: $napta-text-muted;
         padding: 30px 0;
     }
+
+    // ---- Tiroir "Créer une/plusieurs demande(s)" ----
+    .osr_create_overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 20, 30, .35);
+        display: flex;
+        justify-content: flex-end;
+        z-index: 200;
+    }
+
+    .osr_create_drawer {
+        width: 420px;
+        max-width: 100%;
+        height: 100%;
+        background: #fff;
+        padding: 22px;
+        overflow-y: auto;
+        box-shadow: -8px 0 24px rgba(0, 0, 0, .12);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .osr_create_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+
+        h3 { margin: 0; font-size: 17px; }
+        i { cursor: pointer; color: $napta-text-muted; }
+    }
+
+    .osr_create_label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 6px;
+
+        i { color: #7b5fc4; }
+    }
+
+    .osr_create_required { color: #c0392b; }
+
+    .osr_create_textarea_wrap {
+        position: relative;
+        margin-bottom: 16px;
+    }
+
+    .osr_create_textarea {
+        width: 100%;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        padding: 10px;
+        font-family: inherit;
+        font-size: 13px;
+        resize: vertical;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    .osr_create_textarea_wrap .osr_create_textarea {
+        margin-bottom: 0;
+    }
+
+    .osr_create_pdf_btn {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        background: #fff;
+        padding: 5px 10px;
+        font-size: 12px;
+        color: $napta-text-muted;
+        cursor: pointer;
+    }
+
+    .osr_create_ai_btn {
+        align-self: flex-end;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #efeafb;
+        color: #7b5fc4;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 18px;
+
+        &:disabled { opacity: .5; cursor: not-allowed; }
+    }
+
+    .osr_create_divider {
+        text-align: center;
+        color: $napta-text-muted;
+        font-size: 12px;
+        margin: 4px 0 16px;
+        position: relative;
+
+        &::before, &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 36%;
+            border-top: 1px solid $napta-border;
+        }
+        &::before { left: 0; }
+        &::after { right: 0; }
+    }
+
+    .osr_create_select {
+        width: 100%;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 13px;
+        color: $napta-text;
+        background: #fff;
+        margin-bottom: 18px;
+    }
+
+    .osr_create_section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 2px;
+        border-top: 1px solid $napta-border;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+
+        i:first-child { color: $napta-text-muted; width: 16px; }
+    }
+
+    .osr_create_section_count {
+        background: $napta-active-bg;
+        color: $napta-text-muted;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 1px 7px;
+    }
+
+    .osr_create_section_chevron {
+        margin-left: auto;
+        color: $napta-text-muted;
+    }
+
+    .osr_create_section_body {
+        padding: 2px 2px 14px 24px;
+        font-size: 12.5px;
+        color: $napta-text-muted;
+    }
+
+    .osr_create_footer {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 18px;
+
+        .osr_create_preview_btn, .osr_create_cancel_btn {
+            background: #fff;
+            border: 1px solid $napta-border;
+            color: $napta-text;
+        }
+
+        .osr_create_save_btn {
+            background: #0b2540;
+            color: #fff;
+            border: none;
+            margin-left: auto;
+
+            &:disabled { opacity: .5; cursor: not-allowed; }
+        }
+
+        .osr_create_ai_save {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    }
 }

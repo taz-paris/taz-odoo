@@ -74,6 +74,16 @@ const FILTER_SECTIONS = [
 
 const COLUMNS_MENU = TABLE_COLUMNS.map((c) => c.label).concat(["Compétences", "Postes", "Partenaires", "Dernier commentaire"]);
 
+const PROJECT_OPTIONS = [...new Set(REQUESTS.map((r) => r.project))].sort((a, b) => a.localeCompare(b, "fr"));
+
+const CREATE_SECTIONS = [
+    { key: "criteria", label: "Critères", icon: "fa-bullseye" },
+    { key: "periods", label: "Périodes", icon: "fa-clock-o" },
+    { key: "users", label: "Utilisateurs", icon: "fa-user-o" },
+    { key: "information", label: "Informations", icon: "fa-info-circle" },
+    { key: "comments", label: "Commentaires", icon: "fa-comment-o" },
+];
+
 export class StaffingRequestsPage extends Component {
     static template = "staffing.StaffingRequestsPage";
     static props = { page: Object };
@@ -83,6 +93,8 @@ export class StaffingRequestsPage extends Component {
         this.tabs = TABS;
         this.filterSections = FILTER_SECTIONS;
         this.columnsMenu = COLUMNS_MENU;
+        this.projectOptions = PROJECT_OPTIONS;
+        this.createSections = CREATE_SECTIONS;
 
         this.state = useState({
             requests: REQUESTS,
@@ -95,6 +107,10 @@ export class StaffingRequestsPage extends Component {
             showExportMenu: false,
             sortKey: null,
             sortDir: "asc",
+            createDrawer: null,
+            createNeed: "",
+            createProject: "",
+            createOpenSections: {},
         });
 
         this.scenarioTooltip = "Résoudre automatiquement les demandes grâce à l'IA (fonctionnalité en version bêta)";
@@ -188,5 +204,28 @@ export class StaffingRequestsPage extends Component {
         const wasOpen = this.state[name];
         this.closeMenus();
         this.state[name] = !wasOpen;
+    }
+
+    // ---- Tiroir de création de demande(s) ----
+    openCreateDrawer(mode, ev) {
+        if (ev) ev.stopPropagation();
+        this.closeMenus();
+        this.state.createDrawer = mode;
+        this.state.createNeed = "";
+        this.state.createProject = "";
+        this.state.createOpenSections = {};
+    }
+
+    closeCreateDrawer() {
+        this.state.createDrawer = null;
+    }
+
+    toggleCreateSection(key, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.createOpenSections[key] = !this.state.createOpenSections[key];
+    }
+
+    isCreateSectionOpen(key) {
+        return !!this.state.createOpenSections[key];
     }
 }
