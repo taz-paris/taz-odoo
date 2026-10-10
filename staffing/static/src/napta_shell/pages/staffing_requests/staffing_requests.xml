@@ -11,7 +11,7 @@
                     <div class="osr_counter">
                         <span t-esc="totalCount + ' demandes'"/>
                         <span class="osr_counter_sep">·</span>
-                        <span t-esc="noOwnerCount + ' sans suggestion ni pré-réservation'"/>
+                        <span t-esc="noOwnerCount + ' sans suggestion ni pré-positionnement'"/>
                     </div>
                 </div>
                 <div class="osr_header_spacer"/>

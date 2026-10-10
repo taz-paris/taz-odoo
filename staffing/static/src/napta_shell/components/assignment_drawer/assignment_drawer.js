@@ -49,7 +49,7 @@ const USER_STAFFING_OPTIONS = ["Suggérer", "Pré-positionner", "Simulé", "Rée
 const USER_STAFFING_OPTION_SLUGS = { "Suggérer": "suggest", "Pré-positionner": "prebook", "Simulé": "simulated", "Réel": "real" };
 const REPLACE_SCOPE_OPTIONS = ["Pour l'ensemble de la mission", "Pour une partie de la mission", "À partir d'une date spécifique"];
 
-const ASSIGNMENT_STATUS_OPTIONS = ["Suggestion", "Pré-réservation", "Staffing simulé", "Staffing confirmé"];
+const ASSIGNMENT_STATUS_OPTIONS = ["Suggestion", "Pré-positionnement", "Staffing simulé", "Staffing confirmé"];
 const PRIORITY_OPTIONS = ["Basse", "Normale", "Haute", "Urgente"];
 
 const COMMENT_MAX_LENGTH = 200;

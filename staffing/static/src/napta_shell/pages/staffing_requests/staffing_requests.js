@@ -56,7 +56,7 @@ const TABLE_COLUMNS = [
     { key: "soldDays", label: "Jours vendus", sortable: false },
     { key: "workloadDays", label: "Charge (Jours)", sortable: false },
     { key: "workloadPct", label: "Charge (%)", sortable: false },
-    { key: "preBooked", label: "Utilisateur pré-réservé", sortable: true },
+    { key: "preBooked", label: "Utilisateur pré-positionné", sortable: true },
     { key: "status", label: "Statut", sortable: true },
     { key: "businessUnits", label: "Unité commerciale (Projet)", sortable: false },
 ];
@@ -70,7 +70,7 @@ const TABS = [
 const FILTER_SECTIONS = [
     { title: "Projet", items: ["Projet", "Catégorie de projet", "Chef de projet", "Type de projet"] },
     { title: "Critères", items: ["Unité commerciale (Projet)", "Type de contrat", "Poste", "Bureau", "Compétence"] },
-    { title: "Demande", items: ["Créée depuis", "Date de fin prévue", "Utilisateur pré-réservé", "Pré-réservation", "Statut", "Utilisateur suggéré", "Type"] },
+    { title: "Demande", items: ["Créée depuis", "Date de fin prévue", "Utilisateur pré-positionné", "Pré-positionnement", "Statut", "Utilisateur suggéré", "Type"] },
 ];
 
 const COLUMNS_MENU = TABLE_COLUMNS.map((c) => c.label).concat(["Compétences", "Postes", "Partenaires", "Dernier commentaire"]);
