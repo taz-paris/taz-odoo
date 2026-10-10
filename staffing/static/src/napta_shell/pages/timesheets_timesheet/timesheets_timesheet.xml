@@ -59,21 +59,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr t-foreach="personalRows" t-as="row" t-key="row.key">
+                        <tr t-foreach="state.personalRows" t-as="row" t-key="row.key">
                             <td class="o_napta_ts_projectcell">
                                 <span t-esc="row.project"/>
-                                <i t-if="row.removable" class="fa fa-trash-o o_napta_ts_remove" title="Retirer le projet des feuilles de temps"/>
+                                <i t-if="isRowEmpty(row)" class="fa fa-trash-o o_napta_ts_remove"
+                                   title="Retirer le projet des feuilles de temps" t-on-click="(ev) => this.removeProjectRow(row, ev)"/>
                             </td>
                             <t t-foreach="row.cells" t-as="cell" t-key="cell_index">
                                 <td t-att-class="cellClass(cell)">
-                                    <span t-esc="cell.value"/>
+                                    <input type="text" class="o_napta_ts_cell_input"
+                                           t-att-value="cell.value"
+                                           t-att-disabled="isCellLocked(cell) ? 'disabled' : undefined"
+                                           t-on-input="(ev) => this.onCellInput(cell, ev)"/>
+                                    <span class="o_napta_ts_cell_unit">d</span>
                                     <i t-if="cell.movement === 'down'" class="fa fa-arrow-down o_napta_ts_movement" t-att-title="movementTooltip"/>
                                     <i t-if="cell.movement === 'up'" class="fa fa-arrow-up o_napta_ts_movement" t-att-title="movementTooltip"/>
                                 </td>
                             </t>
                             <td class="o_napta_ts_totalcell">
-                                <span t-esc="row.total"/>
-                                <i t-if="row.totalMovement" t-attf-class="fa fa-arrow-{{row.totalMovement}} o_napta_ts_movement" t-att-title="movementTooltip"/>
+                                <span t-esc="rowTotal(row)"/>
                             </td>
                         </tr>
                         <tr class="o_napta_ts_availability_row">

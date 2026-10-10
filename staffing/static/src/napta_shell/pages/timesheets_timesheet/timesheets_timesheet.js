@@ -32,23 +32,42 @@ const PERSONAL_WEEKS = [
     { key: "W09", label: "W09", range: "DU 26 AU 29 FÉV" },
 ];
 
-const PERSONAL_ROWS = [
-    {
-        key: "bnp",
-        project: "BNP Paribas — Déploiement Salesforce",
-        removable: false,
-        cells: [
-            { value: "1.33d", status: "approved", movement: "down", movementValue: "1d" },
-            { value: "1.67d", status: "approved", movement: "up", movementValue: "3d" },
-            { value: "4d", status: "pending", movement: "down", movementValue: "2.5d" },
-            { value: "2.5d", status: "saved", movement: null },
-            { value: "3.33d", status: "to_complete", movement: null },
-        ],
-        total: "12.83d",
-        totalMovement: "down",
-        totalMovementValue: "12.33d",
-    },
-];
+/**
+ * Valeurs numériques brutes (sans suffixe "d") : la vue Personnelle est
+ * rendue éditable (voir onCellInput) et recalcule le total de la ligne en
+ * direct. Seules les cellules au statut "approved" restent en lecture
+ * seule, conformément à la doc : « Une fois la semaine approuvée, il n'est
+ * plus possible pour l'employé de modifier la saisie depuis la vue
+ * Personnelle. » Rien n'est persisté : l'état ne vit que dans le composant.
+ */
+function buildPersonalRows() {
+    return [
+        {
+            key: "bnp",
+            project: "BNP Paribas — Déploiement Salesforce",
+            removable: false,
+            cells: [
+                { value: "1.33", status: "approved", movement: "down", movementValue: "1d" },
+                { value: "1.67", status: "approved", movement: "up", movementValue: "3d" },
+                { value: "4", status: "pending", movement: "down", movementValue: "2.5d" },
+                { value: "2.5", status: "saved", movement: null },
+                { value: "3.33", status: "to_complete", movement: null },
+            ],
+        },
+        {
+            key: "backmarket",
+            project: "BackMarket — Refonte stratégie d'acquisition",
+            removable: true,
+            cells: [
+                { value: "0", status: "approved", movement: null },
+                { value: "0", status: "approved", movement: null },
+                { value: "0", status: "pending", movement: null },
+                { value: "0", status: "saved", movement: null },
+                { value: "0", status: "to_complete", movement: null },
+            ],
+        },
+    ];
+}
 
 const PERSONAL_AVAILABILITY = ["1d", "2d", "2.5d", "2.5d", "0.67d"];
 const PERSONAL_AVAILABILITY_TOTAL = "8.67d";
@@ -170,7 +189,6 @@ export class TimesheetsTimesheetPage extends Component {
         this.movementTooltip = MOVEMENT_TOOLTIP;
 
         this.personalWeeks = PERSONAL_WEEKS;
-        this.personalRows = PERSONAL_ROWS;
         this.personalAvailability = PERSONAL_AVAILABILITY;
         this.personalAvailabilityTotal = PERSONAL_AVAILABILITY_TOTAL;
         this.personalWeekStatus = PERSONAL_WEEK_STATUS;
@@ -183,6 +201,7 @@ export class TimesheetsTimesheetPage extends Component {
             allExpanded: true,
             selected: {},
             team: TEAM_PEOPLE,
+            personalRows: buildPersonalRows(),
         });
 
         this.availabilityTooltip =
@@ -194,9 +213,47 @@ export class TimesheetsTimesheetPage extends Component {
         this.state.tab = tab;
     }
 
-    // ---- Vue Personnelle ----
+    // ---- Vue Personnelle (éditable, rien n'est persisté) ----
     cellClass(cell) {
         return "o_napta_ts_cell o_napta_ts_status_" + cell.status;
+    }
+
+    /** Une cellule n'est plus modifiable une fois la semaine approuvée. */
+    isCellLocked(cell) {
+        return cell.status === "approved";
+    }
+
+    onCellInput(cell, ev) {
+        cell.value = ev.target.value;
+        // Saisir une valeur dans une semaine "à compléter" la fait vivre
+        // visuellement : elle passe à "Sauvegardé", comme le ferait un
+        // clic sur "Enregistrer" dans Napta.
+        if (cell.status === "to_complete" && parseFloat(cell.value) > 0) {
+            cell.status = "saved";
+        }
+    }
+
+    rowTotal(row) {
+        const sum = row.cells.reduce((acc, c) => acc + (parseFloat(c.value) || 0), 0);
+        return this.formatDays(sum);
+    }
+
+    formatDays(n) {
+        const rounded = Math.round(n * 100) / 100;
+        return (Number.isInteger(rounded) ? String(rounded) : String(rounded)) + "d";
+    }
+
+    /** « L'icône de suppression est affichée uniquement sur les lignes de projet ne contenant aucune saisie de temps. » */
+    isRowEmpty(row) {
+        return row.cells.every((c) => !(parseFloat(c.value) > 0));
+    }
+
+    removeProjectRow(row, ev) {
+        if (ev) ev.stopPropagation();
+        if (!this.isRowEmpty(row)) {
+            return;
+        }
+        this.state.personalRows = this.state.personalRows.filter((r) => r.key !== row.key);
     }
 
     // ---- Vue Équipe ----

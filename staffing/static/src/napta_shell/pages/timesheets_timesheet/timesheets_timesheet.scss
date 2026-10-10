@@ -168,6 +168,37 @@
         color: $napta-text-muted;
     }
 
+    .o_napta_ts_cell_input {
+        width: 38px;
+        border: none;
+        background: transparent;
+        text-align: right;
+        font: inherit;
+        color: inherit;
+        padding: 2px 0;
+        border-radius: 4px;
+
+        &:focus {
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 2px $napta-accent;
+        }
+
+        &:disabled {
+            color: inherit;
+            cursor: not-allowed;
+            opacity: .85;
+        }
+
+        // Masquer les flèches natives du champ numérique si le navigateur en ajoute.
+        &::-webkit-outer-spin-button, &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    }
+
+    .o_napta_ts_cell_unit {
+        color: $napta-text-muted;
+        font-size: 11px;
+    }
+
     // Statuts de cellule (voir légende)
     .o_napta_ts_status_forecast { background: #fff; color: $napta-text-muted; }
     .o_napta_ts_status_to_complete { background: #fff; }
