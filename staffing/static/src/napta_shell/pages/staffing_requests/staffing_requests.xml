@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.StaffingRequestsPage">
+        <div class="o_napta_staffing_requests" t-on-click="closeMenus">
+
+            <!-- Header -->
+            <div class="osr_header">
+                <div class="osr_title_block">
+                    <h1>Demandes</h1>
+                    <div class="osr_counter">
+                        <span t-esc="totalCount + ' demandes'"/>
+                        <span class="osr_counter_sep">·</span>
+                        <span t-esc="noOwnerCount + ' sans suggestion ni pré-positionnement'"/>
+                    </div>
+                </div>
+                <div class="osr_header_spacer"/>
+
+                <div class="osr_dropdown_wrap">
+                    <button type="button" class="osr_icon_btn" t-on-click="(ev) => this.toggleDropdown('showExportMenu', ev)">
+                        <i class="fa fa-download"/>
+                    </button>
+                    <button type="button" class="osr_icon_caret_btn" t-on-click="(ev) => this.toggleDropdown('showExportMenu', ev)">
+                        <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.showExportMenu" class="osr_dropdown osr_export_dropdown" t-on-click.stop="">
+                        <div class="osr_dropdown_item">
+                            <i class="fa fa-table"/>
+                            <span>Exporter les périodes des demandes</span>
+                        </div>
+                        <div class="osr_dropdown_item">
+                            <i class="fa fa-list-alt"/>
+                            <span>Exporter les demandes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="osr_btn_scenario" t-att-data-tooltip="scenarioTooltip">
+                    <i class="fa fa-magic"/> Résoudre avec Scenario Architect
+                    <span class="osr_badge_beta">bêta</span>
+                </button>
+
+                <div class="osr_dropdown_wrap">
+                    <button type="button" class="osr_btn_primary" t-on-click="(ev) => this.toggleDropdown('showCreateMenu', ev)">
+                        Créer une demande <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div t-if="state.showCreateMenu" class="osr_dropdown osr_create_dropdown" t-on-click.stop="">
+                        <div class="osr_dropdown_item" t-on-click="openCreateRequestDrawer">
+                            <i class="fa fa-plus"/>
+                            <span>Créer une demande</span>
+                        </div>
+                        <div class="osr_dropdown_item" t-on-click="openBulkCreateDrawer">
+                            <i class="fa fa-files-o"/>
+                            <span>Créer plusieurs demandes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="osr_toolbar">
+                <div class="osr_toolbar_left">
+                    <div class="osr_dropdown_wrap">
+                        <button type="button" class="osr_toolbar_btn" t-on-click="(ev) => this.toggleDropdown('showViews', ev)">
+                            <i class="fa fa-bookmark-o"/> Vues
+                        </button>
+                        <div t-if="state.showViews" class="osr_dropdown osr_views_dropdown" t-on-click.stop="">
+                            <div class="osr_views_title">Sauvegarder la vue actuelle</div>
+                            <div class="osr_views_empty">Aucune vue enregistrée</div>
+                        </div>
+                    </div>
+
+                    <div class="osr_dropdown_wrap">
+                        <button type="button" class="osr_toolbar_btn" t-on-click="(ev) => this.toggleDropdown('showFilter', ev)">
+                            <i class="fa fa-filter"/> Filtrer
+                        </button>
+                        <div t-if="state.showFilter" class="osr_dropdown osr_filter_dropdown" t-on-click.stop="">
+                            <input type="text" class="osr_filter_search" placeholder="Rechercher un filtre"/>
+                            <t t-foreach="filterSections" t-as="section" t-key="section.title">
+                                <div class="osr_filter_section_title" t-esc="section.title"/>
+                                <div t-foreach="section.items" t-as="item" t-key="item" class="osr_filter_item">
+                                    <span t-esc="item"/>
+                                    <i class="fa fa-chevron-right osr_filter_chevron"/>
+                                </div>
+                            </t>
+                            <button type="button" class="osr_filter_save">Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="osr_toolbar_right">
+                    <div class="osr_dropdown_wrap">
+                        <button type="button" class="osr_toolbar_btn" t-on-click="(ev) => this.toggleDropdown('showColumns', ev)">
+                            Colonnes <i class="fa fa-chevron-down"/>
+                        </button>
+                        <div t-if="state.showColumns" class="osr_dropdown osr_columns_dropdown" t-on-click.stop="">
+                            <div class="osr_columns_title">Tout sélectionner</div>
+                            <div t-foreach="columnsMenu" t-as="label" t-key="label" class="osr_columns_item">
+                                <i class="fa fa-check"/>
+                                <span t-esc="label"/>
+                                <i class="fa fa-ellipsis-v osr_columns_handle"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="osr_tabs">
+                        <t t-foreach="tabs" t-as="tab" t-key="tab.key">
+                            <div t-att-class="{ osr_tab: true, osr_tab_active: state.activeTab === tab.key }"
+                                 t-on-click="() => this.setTab(tab.key)">
+                                <span t-esc="tab.label"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk bar -->
+            <div t-if="selectedCount" class="osr_bulk_bar">
+                <span class="osr_bulk_count" t-esc="selectedCount + ' demandes sélectionnées'"/>
+                <button type="button" class="osr_bulk_btn"><i class="fa fa-trash-o"/> Supprimer</button>
+                <button type="button" class="osr_bulk_btn"><i class="fa fa-clone"/> Dupliquer</button>
+                <button type="button" class="osr_bulk_btn"><i class="fa fa-sign-in"/> Attacher à un autre projet</button>
+                <button type="button" class="osr_bulk_btn"><i class="fa fa-arrows-h"/> Décaler</button>
+                <button type="button" class="osr_bulk_btn"><i class="fa fa-calendar-plus-o"/> Ajouter des périodes</button>
+            </div>
+
+            <!-- Tableau -->
+            <div class="osr_table_wrap">
+                <table class="osr_table">
+                    <thead>
+                        <tr>
+                            <th class="osr_th_checkbox"><i class="fa fa-square-o"/></th>
+                            <t t-foreach="tableColumns" t-as="col" t-key="col.key">
+                                <th t-on-click="() => this.sortBy(col)" t-att-class="{ osr_th_sortable: col.sortable }">
+                                    <span t-esc="col.label"/>
+                                    <i t-if="col.sortable" t-attf-class="fa {{ sortIcon(col) }} osr_sort_icon"/>
+                                </th>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="sortedRequests" t-as="row" t-key="row.id"
+                            class="osr_row_clickable" t-on-click="(ev) => this.openEditRequestDrawer(row, ev)">
+                            <td class="osr_th_checkbox" t-on-click="(ev) => this.toggleSelect(row, ev)">
+                                <i t-att-class="isSelected(row) ? 'fa fa-check-square' : 'fa fa-square-o'"/>
+                            </td>
+                            <td class="osr_td_project" t-esc="row.project"/>
+                            <td t-esc="row.client"/>
+                            <td t-esc="row.startDate"/>
+                            <td t-esc="row.endDate"/>
+                            <td t-esc="row.soldDays + ' j'"/>
+                            <td t-esc="row.workloadDays + ' j'"/>
+                            <td t-esc="row.workloadPct + '%'"/>
+                            <td>
+                                <span t-if="row.preBooked.length" class="osr_badge_user">
+                                    <span class="osr_badge_user_count" t-esc="row.preBooked.length"/>
+                                    <span class="osr_badge_user_names" t-esc="row.preBooked.join(', ')"/>
+                                </span>
+                            </td>
+                            <td>
+                                <span t-if="row.status" class="osr_status_pending" t-esc="row.status"/>
+                            </td>
+                            <td class="osr_td_bu">
+                                <span t-foreach="row.businessUnits" t-as="bu" t-key="bu" class="osr_bu_tag" t-esc="bu"/>
+                            </td>
+                        </tr>
+                        <tr t-if="!sortedRequests.length">
+                            <td t-att-colspan="tableColumns.length + 1" class="osr_empty">Aucune demande dans cet onglet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tiroir mutualisé "Créer / Modifier une demande"
+                 (components/assignment_drawer) : création via le menu
+                 "Créer une demande", édition via un clic sur une ligne. -->
+            <AssignmentDrawer t-if="state.assignmentDrawer"
+                               t-key="assignmentDrawerKey"
+                               kind="'request'"
+                               mode="state.assignmentDrawer.mode"
+                               record="state.assignmentDrawer.record"
+                               projectOptions="projectOptions"
+                               onClose.bind="closeAssignmentDrawer"/>
+
+            <!-- Tiroir "Créer plusieurs demandes" (flux PDF + IA, non mutualisé) -->
+            <div t-if="state.bulkCreateOpen" class="osr_create_overlay" t-on-click="closeBulkCreateDrawer">
+                <div class="osr_create_drawer" t-on-click.stop="">
+                    <div class="osr_create_header">
+                        <h3>Créer plusieurs demandes</h3>
+                        <i class="fa fa-times" t-on-click="closeBulkCreateDrawer"/>
+                    </div>
+
+                    <label class="osr_create_label"><i class="fa fa-magic"/> Décrivez votre besoin</label>
+                    <div class="osr_create_textarea_wrap">
+                        <textarea class="osr_create_textarea" rows="6"
+                                  placeholder="Collez une fiche de poste, écrivez librement...  Exemple : Besoin d'un développeur Java senior"
+                                  t-model="state.bulkNeed"/>
+                        <button type="button" class="osr_create_pdf_btn"><i class="fa fa-paperclip"/> Ajouter un fichier PDF</button>
+                    </div>
+
+                    <label class="osr_create_label">Projet <span class="osr_create_required">*</span></label>
+                    <select class="osr_create_select" t-model="state.bulkProject">
+                        <option value="">Sélectionner un projet…</option>
+                        <option t-foreach="projectOptions" t-as="p" t-key="p" t-att-value="p" t-esc="p"/>
+                    </select>
+
+                    <div class="osr_create_footer">
+                        <button type="button" class="btn osr_create_cancel_btn" t-on-click="closeBulkCreateDrawer">Fermer</button>
+                        <button type="button" class="btn osr_create_save_btn osr_create_ai_save" t-att-disabled="!state.bulkProject" t-on-click="closeBulkCreateDrawer">
+                            <i class="fa fa-magic"/> Analyser avec l'IA
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

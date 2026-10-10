@@ -1,0 +1,23 @@
+// Palette extraite des captures d'écran Napta (modules-napta/staffing_les-calendriers)
+$napta-sidebar-bg: #fcfcfc;
+$napta-accent: #007570;
+$napta-accent-light: #ebfbf9;
+$napta-active-bg: #e8e8e8;
+$napta-text: #40474c;
+$napta-text-muted: #8a9096;
+$napta-border: #e5e5e5;
+
+.o_napta_shell {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    background: #ffffff;
+    color: $napta-text;
+    font-size: 14px;
+}
+
+.o_napta_content {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 28px 32px;
+}

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.NaptaSidebar">
+        <nav class="o_napta_sidebar">
+            <div class="o_napta_sidebar_logo">
+                <div class="o_napta_logo_badge">N</div>
+            </div>
+
+            <ul class="o_napta_sidebar_list">
+                <t t-foreach="menu" t-as="group" t-key="group.key">
+
+                    <!-- Groupe sans sous-items : item simple -->
+                    <li t-if="!group.items"
+                        t-att-class="{
+                            o_napta_item: true,
+                            o_napta_item_inert: group.inert,
+                            o_napta_item_active: isGroupActive(group),
+                        }"
+                        t-on-click="() => this.onClickGroup(group)">
+                        <i t-att-class="'fa ' + group.icon + ' o_napta_item_icon'"/>
+                        <span class="o_napta_item_label" t-esc="group.label"/>
+                        <span t-if="group.badge" class="o_napta_badge" t-esc="group.badge"/>
+                    </li>
+
+                    <!-- Groupe avec sous-items : dépliable -->
+                    <li t-else="" class="o_napta_group">
+                        <div t-att-class="{
+                                o_napta_item: true,
+                                o_napta_item_active: isGroupActive(group) and !isGroupOpen(group),
+                             }"
+                             t-on-click="() => this.onClickGroup(group)">
+                            <i t-att-class="'fa ' + group.icon + ' o_napta_item_icon'"/>
+                            <span class="o_napta_item_label" t-esc="group.label"/>
+                            <i t-att-class="'fa ' + (isGroupOpen(group) ? 'fa-chevron-up' : 'fa-chevron-down') + ' o_napta_item_chevron'"/>
+                        </div>
+                        <ul t-if="isGroupOpen(group)" class="o_napta_sublist">
+                            <t t-foreach="group.items" t-as="item" t-key="item.key">
+                                <li t-att-class="{
+                                        o_napta_subitem: true,
+                                        o_napta_subitem_active: item.key === props.activeKey,
+                                    }"
+                                    t-on-click="() => this.onClickItem(item)">
+                                    <span t-esc="item.label"/>
+                                </li>
+                            </t>
+                        </ul>
+                    </li>
+                </t>
+            </ul>
+
+            <div class="o_napta_sidebar_footer">
+                <div class="o_napta_user">
+                    <div class="o_napta_user_avatar">
+                        <i class="fa fa-user"/>
+                    </div>
+                    <span class="o_napta_user_name">Vous</span>
+                    <i class="fa fa-chevron-up o_napta_item_chevron"/>
+                </div>
+            </div>
+        </nav>
+    </t>
+
+</templates>

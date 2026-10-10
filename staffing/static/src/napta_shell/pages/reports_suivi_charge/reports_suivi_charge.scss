@@ -1,0 +1,283 @@
+$sc-disponible: #cfe9dd;
+$sc-conges: #e2e2e2;
+$sc-staffe: #4f7a68;
+$sc-surstaffe: #1c1c1c;
+$sc-demande: #5b7fd4;
+
+.o_napta_reports_suivi_charge {
+    h1 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 8px;
+        color: $napta-text;
+    }
+
+    .o_napta_sc_intro {
+        margin: 0;
+        color: $napta-text;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .o_napta_sc_intro_list {
+        margin: 4px 0 18px;
+        padding-left: 18px;
+        color: $napta-text;
+        font-size: 13px;
+
+        li {
+            margin-bottom: 2px;
+        }
+    }
+
+    .o_napta_sc_toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .o_napta_sc_toolbar_spacer {
+        flex: 1 1 auto;
+    }
+
+    .o_napta_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+
+        i {
+            margin-right: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_sc_settings_wrap {
+        position: relative;
+    }
+
+    .o_napta_sc_settings_panel {
+        position: absolute;
+        top: 36px;
+        right: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+        padding: 14px 16px;
+        width: 200px;
+        z-index: 20;
+    }
+
+    .o_napta_sc_settings_title {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 8px;
+        color: $napta-text;
+    }
+
+    .o_napta_sc_radio {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: $napta-text;
+        margin-bottom: 8px;
+    }
+
+    .o_napta_sc_date_nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-size: 13px;
+        color: $napta-text;
+
+        i {
+            color: $napta-text-muted;
+            font-size: 11px;
+        }
+    }
+
+    .o_napta_sc_chart_card {
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        padding: 20px 24px 0;
+        background: #fff;
+    }
+
+    .o_napta_sc_chart {
+        display: flex;
+        position: relative;
+        height: 300px;
+        margin-bottom: 10px;
+    }
+
+    .o_napta_sc_chart_axis_label {
+        position: absolute;
+        left: -14px;
+        top: 50%;
+        transform: rotate(-90deg) translateX(50%);
+        transform-origin: left center;
+        font-size: 11px;
+        color: $napta-text-muted;
+        white-space: nowrap;
+    }
+
+    .o_napta_sc_chart_gridlines {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 34px;
+        padding-bottom: 26px;
+        padding-right: 8px;
+        text-align: right;
+        margin-left: 14px;
+
+        span {
+            font-size: 11px;
+            color: $napta-text-muted;
+            position: relative;
+            top: -6px;
+        }
+    }
+
+    .o_napta_sc_chart_bars {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        border-left: 1px solid $napta-border;
+        border-bottom: 1px solid $napta-text;
+        padding: 0 10px;
+        overflow-x: auto;
+    }
+
+    .o_napta_sc_week_group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1 1 0;
+        min-width: 50px;
+    }
+
+    .o_napta_sc_week_bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 240px;
+    }
+
+    .o_napta_sc_stack_bar {
+        width: 26px;
+        height: 100%;
+        display: flex;
+        flex-direction: column-reverse;
+        justify-content: flex-start;
+    }
+
+    .o_napta_sc_seg {
+        width: 100%;
+    }
+
+    .o_napta_sc_seg_disponible {
+        background: $sc-disponible;
+        order: 1;
+    }
+
+    .o_napta_sc_seg_conges {
+        background: $sc-conges;
+        order: 2;
+    }
+
+    .o_napta_sc_seg_staffe {
+        background: $sc-staffe;
+        order: 3;
+    }
+
+    .o_napta_sc_seg_surstaffe {
+        background: $sc-surstaffe;
+        order: 4;
+        border-radius: 2px 2px 0 0;
+    }
+
+    .o_napta_sc_demande_bar {
+        width: 14px;
+        background: $sc-demande;
+        border-radius: 2px 2px 0 0;
+        align-self: flex-end;
+    }
+
+    .o_napta_sc_demande_empty {
+        visibility: hidden;
+    }
+
+    .o_napta_sc_week_label {
+        margin-top: 8px;
+        font-size: 11px;
+        color: $napta-text;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .o_napta_sc_week_date {
+        font-weight: 400;
+        color: $napta-text-muted;
+        font-size: 10px;
+    }
+
+    .o_napta_sc_legend {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 20px;
+        background: #fafafa;
+        border-top: 1px solid $napta-border;
+        padding: 14px 10px;
+        margin: 14px -24px 0;
+    }
+
+    .o_napta_sc_legend_item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: $napta-text;
+    }
+
+    .o_napta_sc_legend_info {
+        color: $napta-text-muted;
+        font-size: 11px;
+        cursor: help;
+    }
+
+    .o_napta_sc_swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    .o_napta_sc_swatch_disponible {
+        background: $sc-disponible;
+    }
+
+    .o_napta_sc_swatch_conges {
+        background: $sc-conges;
+    }
+
+    .o_napta_sc_swatch_staffe {
+        background: $sc-staffe;
+    }
+
+    .o_napta_sc_swatch_surstaffe {
+        background: $sc-surstaffe;
+    }
+
+    .o_napta_sc_swatch_demande {
+        background: $sc-demande;
+    }
+}

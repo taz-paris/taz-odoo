@@ -1,0 +1,361 @@
+$og-purple-dark: #6c4cd4;
+$og-purple-light: #c6b8ef;
+
+.o_napta_reports_occupation_globale {
+    .o_napta_og_header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 4px;
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_og_header_spacer {
+        flex: 1 1 auto;
+    }
+
+    .o_napta_og_view_toggle {
+        display: flex;
+        background: #f2f2f2;
+        border-radius: 8px;
+        padding: 3px;
+    }
+
+    .o_napta_og_view_btn {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        color: $napta-text-muted;
+        cursor: pointer;
+
+        i {
+            margin-right: 6px;
+        }
+
+        &.o_napta_og_view_btn_active {
+            background: #fff;
+            color: $napta-text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+            font-weight: 600;
+        }
+    }
+
+    .o_napta_og_date_nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-size: 13px;
+        color: $napta-text;
+
+        i {
+            color: $napta-text-muted;
+            font-size: 11px;
+        }
+    }
+
+    .o_napta_og_toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 0 16px;
+    }
+
+    .o_napta_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+
+        i {
+            margin-right: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_og_download_btn {
+        padding: 6px 10px;
+
+        i {
+            margin: 0;
+        }
+    }
+
+    .o_napta_og_settings_wrap {
+        position: relative;
+    }
+
+    .o_napta_og_settings_panel {
+        position: absolute;
+        top: 36px;
+        left: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
+        padding: 14px 16px;
+        width: 240px;
+        z-index: 20;
+    }
+
+    .o_napta_og_settings_title {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 8px;
+        color: $napta-text;
+    }
+
+    .o_napta_og_settings_sep {
+        border-top: 1px dashed $napta-border;
+        margin: 10px 0;
+    }
+
+    .o_napta_og_radio {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: $napta-text;
+        margin-bottom: 8px;
+        cursor: default;
+    }
+
+    // --- chart card ---
+    .o_napta_og_chart_card {
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        padding: 20px 24px 8px;
+        background: #fff;
+    }
+
+    .o_napta_og_chart_title_row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .o_napta_og_chart_title {
+        font-weight: 600;
+        font-size: 14px;
+        color: $napta-text;
+    }
+
+    .o_napta_og_chart_title_spacer {
+        flex: 1 1 auto;
+    }
+
+    .o_napta_og_info_icon, .o_napta_og_camera_icon {
+        color: $napta-text-muted;
+        cursor: pointer;
+    }
+
+    .o_napta_og_camera_icon {
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 6px 8px;
+    }
+
+    .o_napta_og_chart {
+        display: flex;
+        height: 260px;
+        margin-bottom: 10px;
+    }
+
+    .o_napta_og_chart_gridlines {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 40px;
+        padding-bottom: 20px;
+        text-align: right;
+        padding-right: 8px;
+
+        span {
+            font-size: 11px;
+            color: $napta-text-muted;
+            position: relative;
+            top: -6px;
+        }
+    }
+
+    .o_napta_og_chart_bars {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        border-left: 1px solid $napta-border;
+        border-bottom: 1px solid $napta-text;
+        padding: 0 8px;
+        overflow-x: auto;
+    }
+
+    .o_napta_og_week_group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1 1 0;
+        min-width: 56px;
+    }
+
+    .o_napta_og_week_bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 220px;
+    }
+
+    .o_napta_og_stack_bar, .o_napta_og_imputation_bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 20px;
+        height: 100%;
+        justify-content: flex-end;
+    }
+
+    .o_napta_og_bar_value {
+        font-size: 10px;
+        color: $napta-text;
+        margin-bottom: 3px;
+        white-space: nowrap;
+    }
+
+    .o_napta_og_stack_wrap {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        height: 184px;
+    }
+
+    .o_napta_og_seg_simule {
+        background: #fff;
+        border: 1px solid $og-purple-light;
+        border-bottom: none;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        font-size: 9px;
+        color: $napta-text;
+        padding-top: 2px;
+    }
+
+    .o_napta_og_seg_reel {
+        background: $og-purple-light;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        font-size: 9px;
+        color: $napta-text;
+        padding-top: 2px;
+        border-radius: 0 0 2px 2px;
+    }
+
+    .o_napta_og_seg_imputation {
+        width: 100%;
+        background: $og-purple-dark;
+        border-radius: 2px 2px 0 0;
+        height: 184px;
+    }
+
+    .o_napta_og_week_label {
+        margin-top: 8px;
+        font-size: 11px;
+        color: $napta-text-muted;
+        white-space: nowrap;
+    }
+
+    .o_napta_og_legend {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        background: #fafafa;
+        border-top: 1px solid $napta-border;
+        padding: 12px 10px;
+        margin: 0 -24px;
+    }
+
+    .o_napta_og_legend_title {
+        font-weight: 600;
+        font-size: 12px;
+        color: $napta-text;
+        margin-right: 6px;
+    }
+
+    .o_napta_og_legend_item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: $napta-text;
+    }
+
+    .o_napta_og_swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    .o_napta_og_swatch_simule {
+        background: #fff;
+        border: 1px solid $og-purple-light;
+    }
+
+    .o_napta_og_swatch_reel {
+        background: $og-purple-light;
+    }
+
+    .o_napta_og_swatch_imputation {
+        background: $og-purple-dark;
+    }
+
+    // --- table view ---
+    .o_napta_og_table_card {
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        padding: 20px 24px;
+        background: #fff;
+    }
+
+    .o_napta_og_table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 14px;
+
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid $napta-border;
+            font-size: 13px;
+        }
+
+        th {
+            color: $napta-text-muted;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+    }
+
+    .o_napta_og_table_month {
+        text-align: right;
+    }
+
+    .o_napta_og_dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        margin-right: 8px;
+    }
+}

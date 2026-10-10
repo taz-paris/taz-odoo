@@ -1,0 +1,266 @@
+.o_napta_reports_competences_individuelles {
+    .o_napta_ci_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        position: relative;
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_ci_export_toggle {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        width: 34px;
+        height: 34px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_ci_export_panel {
+        position: absolute;
+        top: 40px;
+        right: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+        min-width: 300px;
+        z-index: 30;
+        padding: 6px 0;
+    }
+
+    .o_napta_ci_export_option {
+        padding: 9px 16px;
+        font-size: 13px;
+        color: $napta-text;
+        cursor: pointer;
+
+        &:hover {
+            background: $napta-active-bg;
+        }
+    }
+
+    .o_napta_ci_toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .o_napta_ci_dropdown {
+        position: relative;
+    }
+
+    .o_napta_ci_sort_btn, .o_napta_ci_user_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        color: $napta-text;
+        font-weight: 600;
+
+        i {
+            color: $napta-text-muted;
+        }
+
+        i.fa-caret-down {
+            margin-left: 6px;
+        }
+
+        i.fa-sort {
+            margin-right: 6px;
+        }
+    }
+
+    .o_napta_ci_user_btn {
+        background: $napta-active-bg;
+        font-weight: 700;
+    }
+
+    .o_napta_ci_reset_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        color: $napta-accent;
+        font-weight: 600;
+    }
+
+    .o_napta_ci_date_range {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+
+        i {
+            color: $napta-text-muted;
+            cursor: pointer;
+        }
+    }
+
+    .o_napta_ci_dropdown_panel {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+        min-width: 240px;
+        max-height: 320px;
+        overflow-y: auto;
+        z-index: 30;
+        padding: 6px 0;
+    }
+
+    .o_napta_ci_user_panel {
+        min-width: 260px;
+    }
+
+    .o_napta_ci_user_search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px 10px;
+        border-bottom: 1px solid $napta-border;
+        margin-bottom: 4px;
+
+        i {
+            color: $napta-text-muted;
+        }
+
+        input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            flex: 1 1 auto;
+        }
+    }
+
+    .o_napta_ci_dropdown_option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        color: $napta-text;
+
+        i {
+            width: 12px;
+            color: $napta-accent;
+            font-size: 11px;
+        }
+
+        &:hover {
+            background: $napta-active-bg;
+        }
+    }
+
+    .o_napta_ci_dropdown_selected {
+        font-weight: 700;
+    }
+
+    .o_napta_ci_table_wrap {
+        overflow-x: auto;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+    }
+
+    .o_napta_ci_table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+
+        th, td {
+            border-bottom: 1px solid $napta-border;
+            padding: 14px 16px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        thead th {
+            background: #fafafa;
+            color: $napta-text-muted;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+    }
+
+    .o_napta_ci_skill_cell {
+        min-width: 180px;
+    }
+
+    .o_napta_ci_skill_name {
+        font-weight: 700;
+        color: $napta-text;
+    }
+
+    .o_napta_ci_skill_category {
+        font-size: 12px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_ci_description {
+        color: $napta-text-muted;
+        max-width: 320px;
+    }
+
+    .o_napta_ci_note_cell {
+        min-width: 160px;
+    }
+
+    .o_napta_ci_note_value {
+        font-weight: 700;
+        margin-right: 4px;
+    }
+
+    .o_napta_ci_stars {
+        i {
+            color: #16232c;
+            font-size: 12px;
+            margin-right: 1px;
+        }
+
+        i.fa-star-o {
+            color: $napta-border;
+        }
+    }
+
+    .o_napta_ci_note_comment {
+        font-style: italic;
+        color: $napta-text-muted;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .o_napta_ci_evaluator, .o_napta_ci_updated {
+        font-weight: 600;
+        color: $napta-text;
+        white-space: nowrap;
+    }
+
+    .o_napta_ci_context_main {
+        font-weight: 700;
+        color: $napta-text;
+    }
+
+    .o_napta_ci_context_detail {
+        font-size: 12px;
+        color: $napta-text-muted;
+    }
+}

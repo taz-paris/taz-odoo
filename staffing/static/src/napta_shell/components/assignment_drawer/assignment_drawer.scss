@@ -1,0 +1,1378 @@
+// Tiroir latéral mutualisé "Créer / Modifier une demande ou un staffing"
+// (voir assignment_drawer.js). Rendu en overlay plein écran, donc ces
+// règles sont volontairement à plat (non imbriquées sous une classe de
+// page) : le composant est utilisé aussi bien par Staffing > Demandes que
+// par Staffing > Staffings.
+
+.o_napta_adw_overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 30, .35);
+    display: flex;
+    justify-content: flex-end;
+    z-index: 200;
+}
+
+.o_napta_adw_drawer {
+    width: 420px;
+    max-width: 100%;
+    height: 100%;
+    background: #fff;
+    padding: 22px;
+    overflow-y: auto;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, .12);
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    color: $napta-text;
+}
+
+.o_napta_adw_side_drawer {
+    margin-right: 10px;
+}
+
+// ---- Profile Finder (recherche de profils, icône loupe de la section
+// Utilisateurs) : volet large façon rapport "Planification individuelle". ----
+.o_napta_adw_finder_drawer {
+    // Occupe toute la largeur disponible à gauche du tiroir principal
+    // (overlay en flex row, justify-content: flex-end).
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    margin-right: 10px;
+    padding: 18px;
+}
+
+.o_napta_adw_header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+
+    h3 { margin: 0; font-size: 17px; flex: 1 1 auto; }
+    i { cursor: pointer; color: $napta-text-muted; }
+}
+
+.o_napta_adw_header_icon { font-size: 15px; }
+
+.o_napta_adw_title_editable {
+    cursor: text;
+    border-bottom: 1px dashed transparent;
+    &:hover { border-bottom-color: $napta-border; }
+}
+
+.o_napta_adw_title_input {
+    flex: 1 1 auto;
+    font-size: 17px;
+    font-weight: 700;
+    border: none;
+    border-bottom: 1px solid $napta-accent;
+    padding: 0 0 2px;
+    color: $napta-text;
+    outline: none;
+}
+
+.o_napta_adw_label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+
+    i { color: #7b5fc4; }
+}
+
+.o_napta_adw_required { color: #c0392b; }
+
+.o_napta_adw_textarea {
+    width: 100%;
+    border: 1px solid $napta-border;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.o_napta_adw_ai_btn {
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #efeafb;
+    color: #7b5fc4;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 18px;
+
+    &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+.o_napta_adw_divider {
+    text-align: center;
+    color: $napta-text-muted;
+    font-size: 12px;
+    margin: 4px 0 16px;
+    position: relative;
+
+    &::before, &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 36%;
+        border-top: 1px solid $napta-border;
+    }
+    &::before { left: 0; }
+    &::after { right: 0; }
+}
+
+.o_napta_adw_select {
+    width: 100%;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: $napta-text;
+    background: #fff;
+    margin-bottom: 18px;
+}
+
+// ---- Bandeau de rappel (mode édition) ----
+.o_napta_adw_banner {
+    background: #eef3fc;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.o_napta_adw_banner_title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-weight: 700;
+    color: #2a56c6;
+    margin-bottom: 6px;
+
+    i { color: #2a56c6; }
+}
+
+.o_napta_adw_banner_edit {
+    margin-left: auto;
+    cursor: pointer;
+    font-size: 13px;
+    &:hover { color: #2a56c6; }
+}
+
+.o_napta_adw_banner_subtitle {
+    font-weight: 400;
+    color: #5b7bd1;
+}
+
+.o_napta_adw_banner_tags {
+    display: flex;
+    gap: 24px;
+}
+
+.o_napta_adw_banner_tag_label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #2a56c6;
+    margin-bottom: 2px;
+}
+
+.o_napta_adw_banner_tag_value {
+    font-size: 12.5px;
+    color: #5b7bd1;
+}
+
+.o_napta_adw_banner_tag_link {
+    color: #2a56c6;
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
+}
+
+// ---- Carte utilisateur affecté (mode édition) ----
+.o_napta_avatar {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: $napta-active-bg;
+    color: $napta-text;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.o_napta_adw_user_card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f1f1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.o_napta_adw_user_card_info { flex: 1 1 auto; min-width: 0; }
+
+.o_napta_adw_user_card_name { font-weight: 700; font-size: 13px; }
+
+.o_napta_adw_user_card_role {
+    font-size: 11.5px;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_user_card_action {
+    color: $napta-text-muted;
+    cursor: pointer;
+    &:hover { color: $napta-text; }
+}
+
+// ---- Dropdown d'option de staffing par utilisateur (4 niveaux : doc
+// staffing_pre-booking — Suggérer/Pré-positionner liés à une demande,
+// Simulé/Réel liés à une affectation) ----
+.o_napta_adw_user_option_wrap {
+    position: relative;
+    flex: none;
+}
+
+.o_napta_adw_user_option_btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 14px;
+    padding: 3px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+
+    i { font-size: 10px; }
+}
+
+.o_napta_adw_user_option_btn_suggest, .o_napta_adw_user_option_btn_prebook {
+    background: #4a6fe0;
+}
+
+.o_napta_adw_user_option_btn_simulated {
+    background: #fff;
+    color: $napta-accent;
+    border: 1px solid $napta-accent;
+}
+
+.o_napta_adw_user_option_btn_real {
+    background: $napta-accent;
+}
+
+.o_napta_adw_user_option_menu {
+    top: calc(100% + 4px);
+    left: auto;
+    right: 0;
+    min-width: 170px;
+    padding: 6px;
+}
+
+.o_napta_adw_user_option_item {
+    border-radius: 6px;
+    padding: 6px 8px;
+    gap: 6px;
+
+    i { color: $napta-text; width: 12px; font-size: 11px; }
+}
+
+.o_napta_adw_user_option_item_active {
+    background: $napta-active-bg;
+}
+
+.o_napta_adw_user_option_pill {
+    display: inline-block;
+    border-radius: 12px;
+    padding: 3px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.o_napta_adw_user_option_pill_suggest, .o_napta_adw_user_option_pill_prebook {
+    background: #4a6fe0;
+}
+
+.o_napta_adw_user_option_pill_simulated {
+    background: #fff;
+    color: $napta-accent;
+    border: 1px solid $napta-accent;
+}
+
+.o_napta_adw_user_option_pill_real {
+    background: $napta-accent;
+}
+
+.o_napta_adw_type_badge {
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.o_napta_adw_type_badge_real { background: #fff; color: $napta-text-muted; border-color: $napta-border; }
+.o_napta_adw_type_badge_simulated { background: #ebfbf9; color: $napta-accent; border-color: $napta-accent; }
+
+.o_napta_adw_type_toggle {
+    display: flex;
+    border: 1px solid $napta-border;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 18px;
+
+    span {
+        flex: 1 1 0;
+        text-align: center;
+        padding: 8px;
+        font-weight: 700;
+        font-size: 13px;
+        color: $napta-text-muted;
+        cursor: pointer;
+    }
+}
+
+.o_napta_adw_type_toggle_active {
+    background: $napta-active-bg;
+    color: $napta-text !important;
+}
+
+.o_napta_adw_section_divider {
+    border-top: 1px solid $napta-border;
+    margin: 4px 0 8px;
+}
+
+// ---- Indicateur de conflit dans l'en-tête de section ----
+.o_napta_adw_section_warning {
+    color: #e08a3c;
+    font-size: 13px;
+    margin-left: 2px;
+    cursor: pointer;
+}
+
+// ---- Badge "Aperçu" (pied de tiroir) ----
+.o_napta_adw_conflict_badge {
+    background: #c0392b;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 6px;
+    margin-left: 4px;
+}
+
+// ---- Modale "Conflit avec des congés ou jours fériés" ----
+.o_napta_adw_conflict_modal_overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 30, .45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+}
+
+.o_napta_adw_conflict_modal {
+    width: 380px;
+    max-width: calc(100% - 40px);
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .25);
+}
+
+.o_napta_adw_conflict_modal_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+
+    h3 { margin: 0; font-size: 16px; }
+    i { cursor: pointer; color: $napta-text-muted; }
+}
+
+.o_napta_adw_conflict_modal_text {
+    font-size: 12.5px;
+    color: $napta-text-muted;
+    margin: 0 0 14px;
+}
+
+.o_napta_adw_conflict_modal_row {
+    border: 1px solid $napta-border;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+}
+
+.o_napta_adw_conflict_modal_dates {
+    font-weight: 600;
+    font-size: 12.5px;
+    flex: 1 1 auto;
+}
+
+.o_napta_adw_conflict_modal_delta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+
+    i { color: $napta-text-muted; font-size: 11px; }
+}
+
+.o_napta_adw_conflict_modal_unit {
+    font-weight: 400;
+    font-size: 11px;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_conflict_modal_hint {
+    flex-basis: 100%;
+    font-size: 11px;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_conflict_modal_total {
+    display: flex;
+    justify-content: space-between;
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-weight: 700;
+    font-size: 13px;
+    margin: 10px 0 16px;
+}
+
+.o_napta_adw_conflict_apply_btn {
+    width: 100%;
+    background: #0b2540;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-weight: 600;
+    justify-content: center;
+}
+
+.o_napta_adw_section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 2px;
+    border-top: 1px solid $napta-border;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+
+    i:first-child { color: $napta-text-muted; width: 16px; }
+}
+
+.o_napta_adw_section_count {
+    background: $napta-active-bg;
+    color: $napta-text-muted;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+}
+
+.o_napta_adw_section_chevron {
+    margin-left: auto;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_section_body {
+    padding: 2px 2px 14px 24px;
+    font-size: 12.5px;
+    color: $napta-text-muted;
+
+    .o_napta_adw_label {
+        margin-top: 12px;
+        &:first-child { margin-top: 0; }
+    }
+}
+
+.o_napta_adw_input {
+    width: 100%;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+    color: $napta-text;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.o_napta_adw_dropdown_wrap {
+    position: relative;
+}
+
+.o_napta_adw_dropdown_btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+    color: $napta-text;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+
+    span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    i { color: $napta-text-muted; flex: none; }
+}
+
+.o_napta_adw_dropdown_menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid $napta-border;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.o_napta_adw_dropdown_item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: $napta-text;
+    cursor: pointer;
+
+    &:hover { background: $napta-active-bg; }
+    i { color: $napta-accent; width: 14px; }
+}
+
+.o_napta_adw_empty_hint {
+    padding: 8px 0;
+    font-style: italic;
+}
+
+// ---- Outils d'en-tête de section (ex: Périodes) ----
+.o_napta_adw_section_tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+
+    i {
+        color: $napta-text-muted;
+        cursor: pointer;
+        &:hover { color: $napta-text; }
+    }
+}
+
+.o_napta_adw_section_count + .o_napta_adw_section_tools {
+    margin-left: 8px;
+}
+
+.o_napta_adw_period_select_wrap, .o_napta_adw_period_split_wrap {
+    position: relative;
+}
+
+.o_napta_adw_period_select_menu {
+    top: calc(100% + 4px);
+    left: auto;
+    right: -40px;
+    min-width: 200px;
+    padding: 4px 0;
+
+    .o_napta_adw_dropdown_item { padding: 10px 14px; font-weight: 600; }
+}
+
+// ---- Configuration globale des périodes ----
+.o_napta_adw_period_config {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.o_napta_adw_period_config_field {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.o_napta_adw_toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    margin-bottom: 8px;
+    cursor: pointer;
+
+    input { margin: 0; }
+}
+
+.o_napta_adw_period {
+    background: #f3ead9;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+}
+
+.o_napta_adw_period_conflict {
+    background: #fbe2e0;
+}
+
+.o_napta_adw_period_row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.o_napta_adw_period_warning {
+    color: #e08a3c;
+    flex: none;
+    cursor: pointer;
+    margin-left: 2px;
+}
+
+.o_napta_adw_period_toggle, .o_napta_adw_period_check {
+    color: $napta-text-muted;
+    cursor: pointer;
+    flex: none;
+}
+
+.o_napta_adw_period_date {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+.o_napta_adw_period_sep { color: $napta-text-muted; }
+
+.o_napta_adw_period_amount {
+    width: 50px;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 6px 4px;
+    font-size: 12px;
+    text-align: center;
+    flex: none;
+}
+
+.o_napta_adw_period_unit_label {
+    color: $napta-text-muted;
+    font-size: 11.5px;
+    flex: none;
+    white-space: nowrap;
+}
+
+.o_napta_adw_period_menu_wrap {
+    flex: none;
+    margin-left: auto;
+}
+
+.o_napta_adw_period_kebab {
+    color: $napta-text-muted;
+    cursor: pointer;
+    padding: 2px 4px;
+    &:hover { color: $napta-text; }
+}
+
+.o_napta_adw_period_menu {
+    right: 0;
+    left: auto;
+    min-width: 140px;
+}
+
+.o_napta_adw_period_detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+    margin: 10px 0 2px 24px;
+}
+
+.o_napta_adw_period_detail_col {
+    min-width: 0;
+
+    .o_napta_adw_label { margin-top: 0; }
+}
+
+.o_napta_adw_amount_currency {
+    display: flex;
+
+    input { border-radius: 6px 0 0 6px; border-right: none; }
+}
+
+.o_napta_adw_currency_select {
+    border: 1px solid $napta-border;
+    border-radius: 0 6px 6px 0;
+    padding: 6px 6px;
+    font-size: 12px;
+    background: #fafafa;
+    flex: none;
+}
+
+.o_napta_adw_add_period {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px dashed $napta-border;
+    border-radius: 6px;
+    background: #fff;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: $napta-text;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+}
+
+.o_napta_adw_info_icon {
+    color: $napta-text-muted;
+    font-size: 11px;
+}
+
+.o_napta_adw_user_chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.o_napta_adw_user_chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: $napta-active-bg;
+    border-radius: 14px;
+    padding: 3px 4px 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $napta-text;
+
+    i { cursor: pointer; color: $napta-text-muted; }
+}
+
+.o_napta_adw_user_chip_name {
+    white-space: nowrap;
+}
+
+.o_napta_adw_user_chip_option {
+    border: 1px solid $napta-border;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #fff;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_user_search_row {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 14px;
+}
+
+.o_napta_adw_user_search_icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    background: #0b2540;
+    color: #fff;
+    border-radius: 6px 0 0 6px;
+    flex: none;
+}
+
+.o_napta_adw_user_search_wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.o_napta_adw_user_search_wrap .o_napta_adw_user_search {
+    border-radius: 0 6px 6px 0;
+}
+
+.o_napta_adw_user_search {
+    width: 100%;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.o_napta_adw_char_count {
+    text-align: right;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.o_napta_adw_footer {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 18px;
+
+    .o_napta_adw_preview_btn, .o_napta_adw_cancel_btn {
+        background: #fff;
+        border: 1px solid $napta-border;
+        color: $napta-text;
+    }
+
+    .o_napta_adw_save_btn {
+        background: #0b2540;
+        color: #fff;
+        border: none;
+        margin-left: auto;
+
+        &:disabled { opacity: .5; cursor: not-allowed; }
+    }
+
+    .o_napta_adw_save_btn_danger {
+        background: #c0392b;
+    }
+}
+
+// ==== Profile Finder : toolbar, tableau, lignes de détail, barre d'actions ====
+.o_napta_adw_finder_toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.o_napta_adw_finder_toolbar_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    background: #fff;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: $napta-text;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.o_napta_adw_finder_filter_chip {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    line-height: 1.3;
+
+    span:last-child { font-weight: 600; color: $napta-text; }
+}
+
+.o_napta_adw_finder_filter_label {
+    color: $napta-text-muted;
+    font-size: 10.5px;
+}
+
+.o_napta_adw_finder_spacer {
+    flex: 1 1 auto;
+}
+
+.o_napta_adw_finder_date_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 6px;
+    background: #0b2540;
+    color: #fff;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.o_napta_adw_finder_reset {
+    color: $napta-text-muted;
+    cursor: pointer;
+    font-size: 13px;
+    margin: 6px 0 10px;
+    display: inline-block;
+    &:hover { color: $napta-text; }
+}
+
+.o_napta_adw_finder_table_wrap {
+    border: 1px solid $napta-border;
+    border-radius: 10px;
+    overflow: auto;
+    max-height: calc(100vh - 230px);
+}
+
+.o_napta_adw_finder_table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+    font-size: 12.5px;
+
+    th, td {
+        padding: 8px 10px;
+        border-bottom: 1px solid $napta-border;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    thead th {
+        background: #fafafa;
+        color: $napta-text-muted;
+        font-weight: 600;
+        font-size: 11.5px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+}
+
+.o_napta_adw_finder_col_check, .o_napta_adw_finder_col_expand {
+    width: 26px;
+}
+
+.o_napta_adw_finder_checkbox, .o_napta_adw_finder_chevron {
+    color: $napta-text-muted;
+    cursor: pointer;
+    &:hover { color: $napta-text; }
+}
+
+.o_napta_adw_finder_col_people {
+    // Assez large pour loger nom + pastille de statut (ou le menu
+    // déroulant au survol) sur une seule ligne, à droite du nom.
+    min-width: 300px;
+    white-space: normal;
+}
+
+.o_napta_adw_finder_col_notes {
+    min-width: 90px;
+}
+
+.o_napta_adw_finder_col_week {
+    min-width: 66px;
+}
+
+.o_napta_adw_finder_week_date {
+    font-weight: 400;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_finder_row:hover {
+    background: #fafbfb;
+}
+
+// Profils déjà liés à la demande/au staffing en cours : remontés en tête de
+// liste (cf. sortedFinderPeople) et mis en évidence en bleu clair, comme le
+// bandeau de rappel du tiroir.
+.o_napta_adw_finder_row_added {
+    background: #eef3fc;
+
+    &:hover { background: #e3ecfa; }
+}
+
+.o_napta_adw_finder_person_cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.o_napta_adw_finder_person_name {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.o_napta_adw_finder_cell {
+    display: inline-block;
+    min-width: 42px;
+    text-align: center;
+    padding: 3px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.o_napta_adw_finder_cell_purple { background: #ece9fb; color: #6b4fd1; }
+.o_napta_adw_finder_cell_amber { background: #fbf2df; color: #b8860b; }
+.o_napta_adw_finder_cell_green { background: #e5f6ec; color: #1f9d67; }
+.o_napta_adw_finder_cell_red { background: #fbe7e8; color: #e0514a; }
+
+.o_napta_adw_finder_cell_sub {
+    min-width: 36px;
+    font-weight: 500;
+    font-size: 11.5px;
+    background: #eef4fd;
+    color: #3b6fd8;
+}
+
+.o_napta_adw_finder_detail_row {
+    background: #fcfcfc;
+
+    td { border-bottom: 1px solid #f1f1f1; }
+}
+
+.o_napta_adw_finder_detail_label {
+    font-size: 12px;
+    white-space: normal;
+}
+
+.o_napta_adw_finder_client_internal {
+    font-weight: 700;
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_finder_client {
+    font-weight: 700;
+    color: #3b6fd8;
+}
+
+.o_napta_adw_finder_detail_dash {
+    color: $napta-text-muted;
+}
+
+.o_napta_adw_finder_bulk_bar {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0b2540;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.o_napta_adw_finder_bulk_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    color: #0b2540;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: auto;
+
+    & + .o_napta_adw_finder_bulk_btn { margin-left: 0; }
+}
+
+// ==== Aperçu (bouton "Aperçu" du pied du tiroir) : volet plein-largeur,
+// charge jour par jour des utilisateurs déjà ajoutés à la demande/au
+// staffing. Réutilise .o_napta_adw_finder_drawer pour la largeur et
+// .o_napta_adw_finder_cell_* pour les seuils de couleur. ====
+.o_napta_adw_preview_banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fdeceb;
+    color: #c0392b;
+    border: 1px solid #f6c9c6;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+
+    span { flex: 1 1 auto; font-weight: 600; }
+    i.fa-exclamation-triangle { color: #c0392b; }
+}
+
+.o_napta_adw_preview_banner_close {
+    cursor: pointer;
+    color: #c0392b;
+    &:hover { opacity: .7; }
+}
+
+.o_napta_adw_preview_toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.o_napta_adw_preview_toolbar_spacer {
+    flex: 1 1 auto;
+}
+
+.o_napta_adw_preview_display_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid $napta-border;
+    border-radius: 6px;
+    background: #fff;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: $napta-text;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.o_napta_adw_preview_info_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid $napta-border;
+    border-radius: 50%;
+    background: #fff;
+    color: $napta-text-muted;
+    cursor: pointer;
+}
+
+.o_napta_adw_preview_display_menu {
+    left: auto;
+    right: 0;
+    display: flex;
+    gap: 24px;
+    width: 460px;
+    max-height: none;
+    padding: 14px 18px;
+}
+
+.o_napta_adw_preview_display_col {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.o_napta_adw_preview_display_title {
+    font-weight: 700;
+    font-size: 12px;
+    margin: 10px 0 6px;
+
+    &:first-child { margin-top: 0; }
+}
+
+.o_napta_adw_preview_radio, .o_napta_adw_preview_checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    padding: 4px 0;
+    cursor: pointer;
+}
+
+.o_napta_adw_preview_info_menu {
+    left: auto;
+    right: 0;
+    width: 220px;
+    max-height: none;
+    padding: 10px 14px;
+}
+
+.o_napta_adw_preview_legend_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 12.5px;
+}
+
+.o_napta_adw_preview_legend_sep {
+    border-top: 1px solid $napta-border;
+    margin: 4px 0;
+}
+
+.o_napta_adw_preview_legend_swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.o_napta_adw_preview_legend_swatch_real { background: #fbf2df; color: #b8860b; }
+.o_napta_adw_preview_legend_swatch_projected { background: #fbe7e8; color: #e0514a; border-left: 3px solid #e0514a; }
+.o_napta_adw_preview_legend_swatch_green { background: #e5f6ec; color: #1f9d67; }
+.o_napta_adw_preview_legend_swatch_amber { background: #fbf2df; color: #b8860b; }
+.o_napta_adw_preview_legend_swatch_red { background: #fbe7e8; color: #e0514a; }
+
+.o_napta_adw_preview_table_wrap {
+    border: 1px solid $napta-border;
+    border-radius: 10px;
+    overflow: auto;
+    max-height: calc(100vh - 230px);
+}
+
+.o_napta_adw_preview_table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 960px;
+    font-size: 12px;
+
+    th, td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #f1f1f1;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    thead th {
+        background: #fafafa;
+        color: $napta-text-muted;
+        font-weight: 600;
+        font-size: 11px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+}
+
+.o_napta_adw_preview_col_people {
+    min-width: 230px;
+    text-align: left !important;
+    white-space: normal;
+}
+
+.o_napta_adw_preview_col_day {
+    min-width: 54px;
+}
+
+.o_napta_adw_preview_col_weekend {
+    background: #fbfbfb;
+}
+
+.o_napta_adw_preview_person_cell {
+    // .o_napta_avatar est en display: flex (donc block-level) : sans ce
+    // conteneur flex, il saute à la ligne et pousse le nom en dessous.
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.o_napta_adw_preview_chevron {
+    color: $napta-text-muted;
+    cursor: pointer;
+    &:hover { color: $napta-text; }
+}
+
+.o_napta_adw_preview_person_name {
+    font-weight: 600;
+}
+
+.o_napta_adw_preview_row_main:hover {
+    background: #fafbfb;
+}
+
+.o_napta_adw_preview_cell {
+    display: inline-block;
+    min-width: 36px;
+    text-align: center;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.o_napta_adw_preview_row_sub {
+    background: #fcfcfc;
+    td { border-bottom: 1px solid #f1f1f1; }
+}
+
+.o_napta_adw_preview_sub_label {
+    font-size: 11.5px;
+    color: #6b4fd1;
+    font-weight: 600;
+}
+
+.o_napta_adw_preview_sub_label_strong {
+    color: $napta-text;
+}
+
+.o_napta_adw_preview_projected_cell {
+    display: inline-block;
+    min-width: 36px;
+    text-align: center;
+    padding: 2px 5px;
+    border: 1px dashed #8d7bd6;
+    border-radius: 5px;
+    background: #f4f2fc;
+    color: #6b4fd1;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.o_napta_adw_preview_bar {
+    display: block;
+    padding: 4px 0;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.o_napta_adw_preview_bar_internal {
+    background: linear-gradient(90deg, #bfe3d4, #4fa384);
+}
+
+.o_napta_adw_preview_bar_client {
+    background: linear-gradient(90deg, #bcd8f5, #4f8fd6);
+}
+
+.o_napta_adw_preview_hatch {
+    display: block;
+    height: 22px;
+    border-radius: 4px;
+    background: repeating-linear-gradient(135deg, #e9e9e9, #e9e9e9 4px, #f6f6f6 4px, #f6f6f6 9px);
+}
+
+.o_napta_adw_preview_holiday_pill {
+    display: inline-block;
+    width: 28px;
+    height: 10px;
+    border-radius: 5px;
+    background: #dcdcdc;
+}
+
+.o_napta_adw_preview_empty {
+    text-align: center;
+    color: $napta-text-muted;
+    padding: 24px 0;
+}

@@ -1,0 +1,241 @@
+.o_napta_staffing_modification_requests {
+    .o_napta_smr_header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 4px;
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    }
+
+    .o_napta_smr_count {
+        font-weight: 400;
+        color: $napta-text-muted;
+        font-size: 18px;
+    }
+
+    .o_napta_smr_info {
+        color: $napta-text-muted;
+        font-size: 14px;
+        cursor: help;
+    }
+
+    .o_napta_smr_export {
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        background: #fff;
+        color: $napta-text-muted;
+        width: 32px;
+        height: 32px;
+    }
+
+    .o_napta_tabs {
+        display: flex;
+        gap: 20px;
+        border-bottom: 1px solid $napta-border;
+        margin: 20px 0 16px;
+    }
+
+    .o_napta_tab {
+        padding-bottom: 10px;
+        color: $napta-text-muted;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        font-size: 14px;
+
+        &.o_napta_tab_active {
+            color: $napta-accent;
+            border-color: $napta-accent;
+            font-weight: 600;
+        }
+    }
+
+    .o_napta_toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .o_napta_toolbar_spacer {
+        flex: 1 1 auto;
+    }
+
+    .o_napta_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+
+        i {
+            margin-right: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_smr_table_wrap {
+        overflow-x: auto;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+    }
+
+    .o_napta_smr_table {
+        min-width: 1300px;
+
+        th, td {
+            white-space: nowrap;
+        }
+
+        th {
+            background: #fafafa;
+        }
+    }
+
+    .o_napta_smr_checkbox_col {
+        width: 36px;
+    }
+
+    .o_napta_smr_project {
+        display: flex;
+        flex-direction: column;
+        font-weight: 600;
+        white-space: normal;
+        min-width: 220px;
+    }
+
+    .o_napta_smr_project_id {
+        font-size: 11px;
+        font-weight: 400;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_smr_employee {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: normal;
+    }
+
+    .o_napta_avatar {
+        flex: 0 0 auto;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: $napta-active-bg;
+        color: $napta-text;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .o_napta_smr_employee_name {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .o_napta_smr_employee_role {
+        font-size: 11px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_badge {
+        display: inline-block;
+        border-radius: 10px;
+        padding: 2px 10px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .o_napta_badge_status_pending {
+        background: $napta-accent-light;
+        color: #2f6fa8;
+        background: #e7f0fc;
+    }
+
+    .o_napta_badge_status_accepted {
+        background: #e4f5ea;
+        color: #227a44;
+    }
+
+    .o_napta_badge_status_rejected {
+        background: #fbe7e7;
+        color: #ab2c2c;
+    }
+
+    .o_napta_badge_type_addition {
+        background: $napta-active-bg;
+        color: $napta-text;
+    }
+
+    .o_napta_badge_type_deletion {
+        background: $napta-active-bg;
+        color: $napta-text;
+    }
+
+    .o_napta_smr_dates {
+        color: $napta-text-muted;
+    }
+
+    .o_napta_smr_comments {
+        color: $napta-text-muted;
+        cursor: pointer;
+
+        i {
+            margin-right: 2px;
+        }
+
+        &:hover {
+            color: $napta-accent;
+        }
+    }
+
+    .o_napta_smr_comments_empty {
+        color: $napta-text-muted;
+    }
+
+    .o_napta_smr_actions {
+        display: flex;
+        gap: 6px;
+    }
+
+    .o_napta_smr_action_btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .o_napta_smr_reject {
+        border-color: #d9534f;
+        color: #d9534f;
+
+        &:hover {
+            background: #fbe7e7;
+        }
+    }
+
+    .o_napta_smr_accept {
+        border-color: $napta-text;
+        background: $napta-text;
+        color: #fff;
+
+        &:hover {
+            opacity: .85;
+        }
+    }
+}

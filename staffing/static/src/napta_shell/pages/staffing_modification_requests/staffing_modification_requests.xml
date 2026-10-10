@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.StaffingModificationRequestsPage">
+        <div class="o_napta_staffing_modification_requests">
+
+            <div class="o_napta_smr_header">
+                <h1>
+                    Demandes de modifications
+                    <span class="o_napta_smr_count" t-esc="'- ' + pendingCount + ' en attente'"/>
+                    <i t-att-data-tooltip="infoTooltip" class="fa fa-info-circle o_napta_smr_info"/>
+                </h1>
+                <button class="btn btn-sm o_napta_smr_export" disabled="disabled" title="Exporter les demandes">
+                    <i class="fa fa-download"/>
+                </button>
+            </div>
+
+            <div class="o_napta_tabs">
+                <t t-foreach="TABS" t-as="tab" t-key="tab.key">
+                    <div t-att-class="{ o_napta_tab: true, o_napta_tab_active: tab.key === state.activeTab }"
+                         t-on-click="() => this.setTab(tab.key)">
+                        <span t-esc="tab.label"/>
+                    </div>
+                </t>
+            </div>
+
+            <div class="o_napta_toolbar">
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+                <div class="o_napta_toolbar_spacer"/>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-table"/> Colonnes
+                </button>
+            </div>
+
+            <div class="o_napta_smr_table_wrap">
+                <table class="o_napta_table o_napta_smr_table">
+                    <thead>
+                        <tr>
+                            <th class="o_napta_smr_checkbox_col"><input type="checkbox" disabled="disabled"/></th>
+                            <t t-foreach="columns" t-as="col" t-key="col.key">
+                                <th t-esc="col.label"/>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="rows" t-as="row" t-key="row.id">
+                            <td class="o_napta_smr_checkbox_col"><input type="checkbox" disabled="disabled"/></td>
+                            <td t-esc="row.client"/>
+                            <td class="o_napta_smr_project">
+                                <span class="o_napta_smr_project_id" t-esc="row.id"/>
+                                <span t-esc="row.project"/>
+                            </td>
+                            <td t-esc="row.category"/>
+                            <td>
+                                <div class="o_napta_smr_employee">
+                                    <span class="o_napta_avatar" t-esc="row.employee.initials"/>
+                                    <div>
+                                        <div class="o_napta_smr_employee_name" t-esc="row.employee.name"/>
+                                        <div class="o_napta_smr_employee_role" t-esc="row.employee.role"/>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span t-attf-class="o_napta_badge o_napta_badge_status_{{ row.status }}" t-esc="statusLabel(row.status)"/>
+                            </td>
+                            <td>
+                                <span t-attf-class="o_napta_badge o_napta_badge_type_{{ row.type }}" t-esc="typeLabel(row.type)"/>
+                            </td>
+                            <td class="o_napta_smr_dates" t-esc="row.startDate + ' → ' + row.endDate"/>
+                            <td t-esc="row.createdDate"/>
+                            <td t-esc="row.requestedBy"/>
+                            <td>
+                                <span t-if="row.comments" class="o_napta_smr_comments" title="Voir les commentaires">
+                                    <i class="fa fa-comment-o"/> <t t-esc="row.comments"/>
+                                </span>
+                                <span t-else="" class="o_napta_smr_comments_empty">-</span>
+                            </td>
+                            <td class="o_napta_smr_actions">
+                                <t t-if="row.status === 'pending'">
+                                    <button class="o_napta_smr_action_btn o_napta_smr_reject" title="Refuser la demande">
+                                        <i class="fa fa-times"/>
+                                    </button>
+                                    <button class="o_napta_smr_action_btn o_napta_smr_accept" title="Accepter la demande">
+                                        <i class="fa fa-check"/>
+                                    </button>
+                                </t>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.StaffingStaffingsPage">
+        <div class="o_napta_staffing_staffings">
+
+            <div class="o_napta_st_header">
+                <h1>
+                    Staffings
+                    <span class="o_napta_st_count" t-esc="totalCount + ' dont ' + simulatedCount + ' simulés'"/>
+                    <i t-att-data-tooltip="infoTooltip" class="fa fa-info-circle o_napta_st_info"/>
+                </h1>
+                <div class="o_napta_st_header_actions">
+                    <button class="btn btn-sm o_napta_st_export" disabled="disabled">Exporter le REX</button>
+                    <button class="btn btn-sm o_napta_st_add" disabled="disabled">
+                        <i class="fa fa-plus"/> Ajouter un staffing
+                    </button>
+                </div>
+            </div>
+
+            <div class="o_napta_tabs">
+                <t t-foreach="TABS" t-as="tab" t-key="tab.key">
+                    <div t-att-class="{ o_napta_tab: true, o_napta_tab_active: tab.key === state.activeTab }"
+                         t-on-click="() => this.setTab(tab.key)">
+                        <span t-esc="tab.label"/>
+                    </div>
+                </t>
+            </div>
+
+            <div class="o_napta_toolbar">
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-sort"/> Trier : Date de création
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-bookmark-o"/> Sauvegarder la vue
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">Réinitialiser</button>
+                <div class="o_napta_toolbar_spacer"/>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-table"/> Colonnes
+                </button>
+            </div>
+
+            <div class="o_napta_st_body">
+                <div class="o_napta_st_table_wrap">
+                    <table class="o_napta_table o_napta_st_table">
+                        <thead>
+                            <tr>
+                                <th class="o_napta_st_checkbox_col"><input type="checkbox" disabled="disabled"/></th>
+                                <th>Projet</th>
+                                <th>Collaborateur staffé</th>
+                                <th>Type</th>
+                                <th>Statut facturable</th>
+                                <th>Période d'intervention</th>
+                                <th>Indicateurs clés</th>
+                                <th>Poste</th>
+                                <th>Département</th>
+                                <th>Bureau</th>
+                                <th>Type de contrat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="rows" t-as="row" t-key="row.id"
+                                t-att-class="{ o_napta_st_row_open: row.id === state.openRowId }"
+                                t-on-click="() => this.openDrawer(row.id)">
+                                <td class="o_napta_st_checkbox_col">
+                                    <input type="checkbox" disabled="disabled"/>
+                                </td>
+                                <td class="o_napta_st_project">
+                                    <span class="o_napta_st_project_name" t-esc="row.project"/>
+                                    <span class="o_napta_st_project_sub" t-esc="row.subproject"/>
+                                </td>
+                                <td>
+                                    <div class="o_napta_st_employee">
+                                        <span class="o_napta_avatar" t-esc="row.employee.initials"/>
+                                        <div>
+                                            <div class="o_napta_st_employee_name" t-esc="row.employee.name"/>
+                                            <div class="o_napta_st_employee_role" t-esc="row.employee.role"/>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span t-attf-class="o_napta_badge o_napta_badge_kind_{{ row.kind }}"
+                                          t-esc="row.kind === 'real' ? 'Réel' : 'Simulé'"
+                                          title="Un staffing réel est confirmé, un staffing simulé est une réservation non confirmée."/>
+                                </td>
+                                <td>
+                                    <span t-attf-class="o_napta_badge {{ row.billable ? 'o_napta_badge_billable_yes' : 'o_napta_badge_billable_no' }}"
+                                          t-esc="row.billable ? 'Facturé' : 'Non facturé'"/>
+                                </td>
+                                <td class="o_napta_st_period">
+                                    <div t-esc="row.period"/>
+                                    <div class="o_napta_st_rate" t-esc="'À ' + row.rate"/>
+                                </td>
+                                <td class="o_napta_st_indicators">
+                                    <div><b>Charge vendue :</b> <t t-esc="row.indicators.sold"/></div>
+                                    <div><b>Reste à planifier :</b> <t t-esc="row.indicators.remaining"/></div>
+                                    <div><b>Dérive de date :</b> <t t-esc="row.indicators.drift"/></div>
+                                </td>
+                                <td t-esc="row.position"/>
+                                <td t-esc="row.department"/>
+                                <td t-esc="row.office"/>
+                                <td t-esc="row.contract"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tiroir mutualisé "Modifier le staffing"
+                     (components/assignment_drawer), partagé avec l'édition
+                     d'une demande sur Staffing > Demandes. -->
+                <AssignmentDrawer t-if="openRow"
+                                  t-key="openRow.id"
+                                  kind="'staffing'"
+                                  mode="'edit'"
+                                  record="openRow"
+                                  onClose.bind="closeDrawer"/>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

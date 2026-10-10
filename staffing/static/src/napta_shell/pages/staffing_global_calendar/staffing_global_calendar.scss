@@ -1,0 +1,554 @@
+.o_napta_staffing_global_calendar {
+    $gc-real: #2e8f6b;
+    $gc-simulated: #8b5fd1;
+    $gc-conflict: #c0392b;
+    $gc-absence: #dcdfe2;
+
+    .o_napta_gc_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_gc_header_actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .o_napta_gc_icon_btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        color: $napta-text-muted;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:disabled { cursor: default; opacity: .5; }
+        &:hover:not(:disabled) { background: #fafafa; }
+    }
+
+    .o_napta_gc_icon_btn_active {
+        border-color: $napta-accent;
+        color: $napta-accent;
+        background: $napta-accent-light;
+    }
+
+    .o_napta_gc_create {
+        background: $napta-text;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+
+        i { margin-right: 6px; }
+    }
+
+    .o_napta_toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    .o_napta_toolbar_spacer {
+        flex: 1 1 auto;
+    }
+
+    .o_napta_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+        white-space: nowrap;
+        cursor: pointer;
+
+        i { margin-right: 6px; color: $napta-text-muted; }
+        &:disabled { cursor: default; opacity: .5; }
+        &:hover:not(:disabled) { background: #fafafa; }
+    }
+
+    .o_napta_adw_dropdown_wrap { position: relative; display: inline-flex; }
+
+    .o_napta_gc_filter_menu, .o_napta_gc_sort_menu, .o_napta_gc_display_menu, .o_napta_gc_goto_menu {
+        left: 0;
+        right: auto;
+        width: 280px;
+        max-height: none;
+        padding: 10px 12px;
+    }
+
+    .o_napta_gc_filter_title {
+        font-weight: 700;
+        font-size: 12px;
+        color: $napta-text-muted;
+        padding: 6px 4px 4px;
+    }
+
+    .o_napta_gc_item_active { color: $napta-accent; font-weight: 600; i { color: $napta-accent; width: 14px; } }
+
+    .o_napta_gc_menu_sep { border-top: 1px solid $napta-border; margin: 8px 0; }
+
+    .o_napta_gc_radio {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 4px;
+        font-size: 12.5px;
+        cursor: pointer;
+    }
+
+    // ---- Mini date-picker "Aller à" ----
+    .o_napta_gc_goto_menu { width: 260px; padding: 12px; }
+
+    .o_napta_gc_goto_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 700;
+        margin-bottom: 10px;
+
+        i { cursor: pointer; color: $napta-text-muted; &:hover { color: $napta-text; } }
+    }
+
+    .o_napta_gc_goto_dow, .o_napta_gc_goto_days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        text-align: center;
+    }
+
+    .o_napta_gc_goto_dow span {
+        font-size: 11px;
+        color: $napta-text-muted;
+        padding-bottom: 4px;
+    }
+
+    .o_napta_gc_goto_day {
+        padding: 5px 0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12.5px;
+
+        &:hover { background: $napta-active-bg; }
+    }
+
+    .o_napta_gc_goto_day_muted { color: $napta-text-muted; opacity: .5; }
+
+    .o_napta_gc_goto_day_today {
+        background: $napta-accent;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    // ---- aide / légende ----
+    .o_napta_gc_helpbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #fafafa;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 14px;
+        font-size: 12px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_gc_legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .o_napta_gc_legend_item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .o_napta_gc_legend_swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    .o_napta_gc_help {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+
+        i { color: $napta-accent; cursor: help; }
+        span { margin-right: 10px; }
+    }
+
+    // ---- barre "filtre utilisateur rapide" ----
+    .o_napta_gc_pin_bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #0b2540;
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin-bottom: 10px;
+
+        .o_napta_gc_icon_btn {
+            background: rgba(255, 255, 255, .08);
+            border: none;
+            color: #fff;
+            &:hover:not(:disabled) { background: rgba(255, 255, 255, .18); }
+        }
+
+        .o_napta_gc_icon_btn_active {
+            background: rgba(255, 255, 255, .28);
+            color: #fff;
+        }
+    }
+
+    .o_napta_gc_pin_count {
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 600;
+        margin: 0 4px 0 6px;
+        white-space: nowrap;
+    }
+
+    .o_napta_gc_pin_clear {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: #cfe0ef;
+        font-size: 12px;
+        cursor: pointer;
+        text-decoration: underline;
+        white-space: nowrap;
+
+        &:hover { color: #fff; }
+    }
+
+    // ---- grille ----
+    .o_napta_gc_grid_wrap {
+        overflow-x: auto;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+    }
+
+    .o_napta_gc_grid {
+        display: grid;
+        min-width: 1100px;
+        position: relative;
+    }
+
+    .o_napta_gc_corner {
+        border-bottom: 1px solid $napta-border;
+        background: #fafafa;
+    }
+
+    .o_napta_gc_corner_sub { border-top: 1px solid $napta-border; }
+
+    .o_napta_gc_week_header {
+        border-bottom: 1px solid $napta-border;
+        border-left: 1px solid $napta-border;
+        background: #fafafa;
+        padding: 6px 4px;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .o_napta_gc_week_label {
+        font-size: 11px;
+        font-weight: 600;
+        color: $napta-text;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_napta_gc_day_header {
+        border-bottom: 1px solid $napta-border;
+        border-left: 1px solid $napta-border;
+        border-top: 1px solid $napta-border;
+        background: #fafafa;
+        padding: 3px 2px;
+        text-align: center;
+        font-size: 10px;
+        color: $napta-text-muted;
+        white-space: nowrap;
+    }
+
+    .o_napta_gc_day_header_weekend { background: #f1f1f1; }
+
+    .o_napta_gc_day_header_today {
+        background: $napta-accent-light;
+        color: $napta-accent;
+        font-weight: 700;
+    }
+
+    .o_napta_gc_person_cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid $napta-border;
+        background: #fff;
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        position: relative;
+    }
+
+    .o_napta_gc_pin_check {
+        color: $napta-text-muted;
+        cursor: pointer;
+        flex: 0 0 auto;
+        &:hover { color: $napta-text; }
+    }
+
+    .o_napta_gc_person_info { min-width: 0; }
+
+    .o_napta_gc_person_name {
+        font-weight: 600;
+        font-size: 13px;
+        color: $napta-text;
+    }
+
+    .o_napta_gc_person_role {
+        font-size: 11px;
+        color: $napta-text-muted;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .o_napta_gc_person_menu {
+        position: absolute;
+        left: 100%;
+        top: 8px;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
+        z-index: 30;
+        padding: 6px;
+        width: 180px;
+    }
+
+    .o_napta_avatar {
+        flex: 0 0 auto;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: $napta-active-bg;
+        color: $napta-text;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .o_napta_gc_row_track {
+        display: grid;
+        position: relative;
+        border-bottom: 1px solid $napta-border;
+    }
+
+    .o_napta_gc_bg_cell {
+        border-left: 1px solid $napta-border;
+        cursor: crosshair;
+    }
+
+    .o_napta_gc_bg_cell_weekend { background: #fafafa; }
+    .o_napta_gc_bg_cell_today { background: $napta-accent-light; }
+    .o_napta_gc_bg_cell_preview { background: rgba(0, 117, 112, .18); }
+
+    .o_napta_gc_bar {
+        margin: 5px 2px;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        cursor: grab;
+        z-index: 1;
+        position: relative;
+
+        &:active { cursor: grabbing; }
+    }
+
+    .o_napta_gc_bar_label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_napta_gc_bar_real { background: $gc-real; }
+
+    .o_napta_gc_bar_simulated {
+        background: #fff;
+        color: $gc-simulated;
+        border: 1.5px solid $gc-simulated;
+    }
+
+    .o_napta_gc_bar_conflict { background: $gc-conflict; }
+
+    .o_napta_gc_bar_absence, .o_napta_gc_bar_holiday {
+        background: $gc-absence;
+        color: $napta-text;
+    }
+
+    // Jours non travaillés (weekend) à l'intérieur d'une barre : contour en
+    // pointillés superposé, sans masquer la couleur de la barre.
+    .o_napta_gc_weekend_overlay {
+        margin: 5px 2px;
+        border: 1.5px dashed rgba(255, 255, 255, .7);
+        border-radius: 4px;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .o_napta_gc_bar_simulated + .o_napta_gc_weekend_overlay, .o_napta_gc_weekend_overlay {
+        border-color: rgba(0, 0, 0, .25);
+    }
+
+    // légende : swatch "simulé" doit rester cohérent même en petit carré plein
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_simulated {
+        background: #fff;
+        border: 1.5px solid $gc-simulated;
+    }
+
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_real { background: $gc-real; border: none; }
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_conflict { background: $gc-conflict; border: none; }
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_absence { background: $gc-absence; border: none; }
+
+    // ---- pop-in d'une période ----
+    .o_napta_gc_period_popup {
+        position: absolute;
+        margin-top: 44px;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, .18);
+        z-index: 40;
+        width: 290px;
+        font-size: 12.5px;
+        cursor: default;
+    }
+
+    .o_napta_gc_popup_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid $napta-border;
+
+        strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        i { cursor: pointer; color: $napta-text-muted; &:hover { color: $napta-text; } }
+    }
+
+    .o_napta_gc_popup_project {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px 0;
+        color: $napta-text-muted;
+        font-size: 11.5px;
+    }
+
+    .o_napta_gc_popup_coowners { padding-bottom: 6px; }
+
+    .o_napta_gc_popup_info {
+        padding: 8px 12px;
+        border-top: 1px solid $napta-border;
+        border-bottom: 1px solid $napta-border;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        i { width: 16px; color: $napta-text-muted; }
+    }
+
+    .o_napta_gc_popup_actions {
+        padding: 6px;
+        max-height: 260px;
+        overflow-y: auto;
+    }
+
+    .o_napta_gc_popup_danger { color: #c0392b; i { color: #c0392b; } }
+
+    .o_napta_gc_popup_apply {
+        background: $napta-accent;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 3px 8px;
+        font-size: 11.5px;
+    }
+
+    .o_napta_gc_repeat_form {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 6px 10px;
+        margin: 2px 4px 6px;
+        background: #fafafa;
+        border-radius: 6px;
+        font-size: 11.5px;
+
+        input {
+            width: 42px;
+            border: 1px solid $napta-border;
+            border-radius: 4px;
+            padding: 2px 4px;
+            text-align: center;
+        }
+    }
+
+    .o_napta_gc_footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+        font-size: 12px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_gc_page_size {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        select {
+            border: 1px solid $napta-border;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+    }
+
+    .o_napta_gc_pagination {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+}

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.ReportsCompetencesIndividuellesPage">
+        <div class="o_napta_reports_competences_individuelles">
+            <div class="o_napta_ci_header">
+                <h1>Suivi des Compétences Individuelles</h1>
+                <button class="btn o_napta_ci_export_toggle" t-on-click="toggleExportMenu">
+                    <i class="fa fa-download"/>
+                </button>
+                <div t-if="state.exportMenuOpen" class="o_napta_ci_export_panel">
+                    <t t-foreach="exports" t-as="item" t-key="item">
+                        <div class="o_napta_ci_export_option" t-esc="item"/>
+                    </t>
+                </div>
+            </div>
+
+            <div class="o_napta_ci_toolbar">
+                <div class="o_napta_ci_dropdown">
+                    <button class="btn o_napta_ci_sort_btn" t-on-click="toggleSortMenu">
+                        <i class="fa fa-sort"/> Trier : <span t-esc="currentSortLabel"/> <i class="fa fa-caret-down"/>
+                    </button>
+                    <div t-if="state.sortMenuOpen" class="o_napta_ci_dropdown_panel">
+                        <t t-foreach="sortOptions" t-as="opt" t-key="opt.key">
+                            <div t-att-class="{ o_napta_ci_dropdown_option: true, o_napta_ci_dropdown_selected: opt.key === state.sortKey }"
+                                 t-on-click="() => this.setSortKey(opt.key)">
+                                <i t-att-class="opt.key === state.sortKey ? 'fa fa-check' : ''"/>
+                                <span t-esc="opt.label"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="o_napta_ci_dropdown">
+                    <button class="btn o_napta_ci_user_btn" t-on-click="toggleUserMenu">
+                        <span t-esc="state.user"/> <i class="fa fa-caret-down"/>
+                    </button>
+                    <div t-if="state.userMenuOpen" class="o_napta_ci_dropdown_panel o_napta_ci_user_panel">
+                        <div class="o_napta_ci_user_search">
+                            <i class="fa fa-search"/>
+                            <input type="text" placeholder="Rechercher un collaborateur"
+                                   t-att-value="state.userSearch" t-on-input="onUserSearchInput"/>
+                        </div>
+                        <t t-foreach="filteredPeople" t-as="person" t-key="person">
+                            <div t-att-class="{ o_napta_ci_dropdown_option: true, o_napta_ci_dropdown_selected: person === state.user }"
+                                 t-on-click="() => this.setUser(person)">
+                                <i t-att-class="person === state.user ? 'fa fa-check' : ''"/>
+                                <span t-esc="person"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <button class="btn o_napta_ci_reset_btn" t-on-click="reset">Réinitialiser</button>
+
+                <div class="o_napta_ci_date_range">
+                    <i class="fa fa-chevron-left" t-on-click="() => this.shiftRange(-6)"/>
+                    <span t-esc="dateFromLabel"/>
+                    <i class="fa fa-arrow-right"/>
+                    <span t-esc="dateToLabel"/>
+                    <i class="fa fa-chevron-right" t-on-click="() => this.shiftRange(6)"/>
+                </div>
+            </div>
+
+            <div class="o_napta_ci_table_wrap">
+                <table class="o_napta_ci_table">
+                    <thead>
+                        <tr>
+                            <th>Compétence / Catégorie</th>
+                            <th>Description</th>
+                            <th>Note</th>
+                            <th>Donnée par</th>
+                            <th>Mise à jour le</th>
+                            <th>Contexte</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="skills" t-as="row" t-key="row_index">
+                            <td class="o_napta_ci_skill_cell">
+                                <div class="o_napta_ci_skill_name" t-esc="row.skill"/>
+                                <div class="o_napta_ci_skill_category" t-esc="row.category"/>
+                            </td>
+                            <td class="o_napta_ci_description" t-esc="row.description"/>
+                            <td class="o_napta_ci_note_cell">
+                                <span class="o_napta_ci_note_value" t-esc="row.note"/>
+                                <span class="o_napta_ci_stars">
+                                    <t t-foreach="stars(row.note)" t-as="filled" t-key="filled_index">
+                                        <i t-att-class="filled ? 'fa fa-star' : 'fa fa-star-o'"/>
+                                    </t>
+                                </span>
+                                <div t-if="row.comment" class="o_napta_ci_note_comment" t-esc="'&quot;' + row.comment + '&quot;'"/>
+                            </td>
+                            <td class="o_napta_ci_evaluator" t-esc="row.evaluator"/>
+                            <td class="o_napta_ci_updated" t-esc="row.updatedOn"/>
+                            <td class="o_napta_ci_context">
+                                <div class="o_napta_ci_context_main" t-esc="row.context"/>
+                                <div t-if="row.contextDetail" class="o_napta_ci_context_detail" t-esc="row.contextDetail"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+</templates>

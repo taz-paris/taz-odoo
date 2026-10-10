@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.ReportsSuiviConsommePage">
+        <div class="o_napta_reports_suivi_consomme">
+            <div class="o_napta_src_header">
+                <h1>Suivi du consommé</h1>
+                <button class="btn o_napta_src_export" title="Exporter (XLSX / CSV)">
+                    <i class="fa fa-download"/>
+                </button>
+            </div>
+
+            <div class="o_napta_src_toolbar">
+                <button class="btn o_napta_src_filter_btn">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+
+                <div class="o_napta_src_toolbar_right">
+                    <div class="o_napta_src_dropdown">
+                        <button class="btn o_napta_src_dropdown_btn">
+                            Paramètres d'affichage <i class="fa fa-caret-down"/>
+                        </button>
+                        <div class="o_napta_src_dropdown_panel">
+                            <div class="o_napta_src_dropdown_section_title">Afficher</div>
+                            <label class="o_napta_src_radio">
+                                <input type="radio" name="display" t-att-checked="state.display === 'day'"
+                                       t-on-change="() => this.setDisplay('day')"/> Jour
+                            </label>
+                            <label class="o_napta_src_radio">
+                                <input type="radio" name="display" t-att-checked="state.display === 'hour'"
+                                       t-on-change="() => this.setDisplay('hour')"/> Heure
+                            </label>
+                            <label class="o_napta_src_radio">
+                                <input type="radio" name="display" t-att-checked="state.display === 'rate'"
+                                       t-on-change="() => this.setDisplay('rate')"/> % : taux d'utilisation (hors congés)
+                            </label>
+                            <div class="o_napta_src_dropdown_sep"/>
+                            <div class="o_napta_src_dropdown_section_title">Regrouper par</div>
+                            <label class="o_napta_src_radio">
+                                <input type="radio" name="groupby" t-att-checked="state.groupBy === 'day'"
+                                       t-on-change="() => this.setGroupBy('day')"/> Jour
+                            </label>
+                            <label class="o_napta_src_radio">
+                                <input type="radio" name="groupby" t-att-checked="state.groupBy === 'week'"
+                                       t-on-change="() => this.setGroupBy('week')"/> Semaine
+                            </label>
+                            <label class="o_napta_src_radio">
+                                <input type="radio" name="groupby" t-att-checked="state.groupBy === 'month'"
+                                       t-on-change="() => this.setGroupBy('month')"/> Mois
+                            </label>
+                            <label class="o_napta_src_radio">
+                                <input type="radio" name="groupby" t-att-checked="state.groupBy === 'year'"
+                                       t-on-change="() => this.setGroupBy('year')"/> Année
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="o_napta_src_date_range">
+                        <i class="fa fa-chevron-left"/>
+                        <span t-esc="state.dateFrom"/>
+                        <i class="fa fa-arrow-right"/>
+                        <span t-esc="state.dateTo"/>
+                        <i class="fa fa-chevron-right"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="o_napta_src_table_wrap">
+                <table class="o_napta_src_table">
+                    <thead>
+                        <tr>
+                            <th class="o_napta_src_col_person">PERSONNE / PROJET</th>
+                            <t t-foreach="periods" t-as="period" t-key="period.key">
+                                <th class="o_napta_src_col_period">
+                                    <div t-esc="period.label"/>
+                                    <div class="o_napta_src_period_range" t-esc="period.range"/>
+                                </th>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="rows" t-as="row" t-key="row.key">
+                            <tr class="o_napta_src_row_person">
+                                <td class="o_napta_src_col_person">
+                                    <span class="o_napta_src_expand" t-on-click="() => this.toggleRow(row.key)">
+                                        <i t-att-class="isExpanded(row.key) ? 'fa fa-caret-down' : 'fa fa-caret-right'"/>
+                                    </span>
+                                    <span class="o_napta_src_avatar" t-esc="row.initials"/>
+                                    <span class="o_napta_src_person_info">
+                                        <span class="o_napta_src_person_name" t-esc="row.name"/>
+                                        <span class="o_napta_src_person_role" t-esc="row.role"/>
+                                    </span>
+                                </td>
+                                <t t-foreach="periods" t-as="period" t-key="period.key">
+                                    <td class="o_napta_src_col_period">
+                                        <div class="o_napta_src_cell_planned" t-esc="row.values[period.key].planned"/>
+                                        <div t-att-class="'o_napta_src_cell_actual ' + statusClass(row.values[period.key])"
+                                             t-esc="row.values[period.key].actual"/>
+                                    </td>
+                                </t>
+                            </tr>
+                            <t t-if="isExpanded(row.key)">
+                                <tr t-foreach="row.details" t-as="detail" t-key="detail.label" class="o_napta_src_row_detail">
+                                    <td class="o_napta_src_col_person o_napta_src_detail_label" t-esc="detail.label"/>
+                                    <t t-foreach="periods" t-as="period" t-key="period.key">
+                                        <td class="o_napta_src_col_period">
+                                            <div class="o_napta_src_cell_planned" t-esc="detail.values[period.key].planned"/>
+                                            <div t-att-class="'o_napta_src_cell_actual ' + statusClass(detail.values[period.key])"
+                                                 t-esc="detail.values[period.key].actual"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr t-if="!row.details.length" class="o_napta_src_row_detail">
+                                    <td class="o_napta_src_col_person o_napta_src_detail_label o_napta_src_detail_empty">
+                                        Aucun détail de projet sur la période
+                                    </td>
+                                    <t t-foreach="periods" t-as="period" t-key="period.key">
+                                        <td class="o_napta_src_col_period"/>
+                                    </t>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="o_napta_src_footer">
+                <div class="o_napta_src_legend">
+                    <span class="o_napta_src_legend_item">
+                        <span class="o_napta_src_legend_swatch o_napta_src_legend_forecast"/> Planifié
+                    </span>
+                    <span class="o_napta_src_legend_item">
+                        <span class="o_napta_src_legend_swatch o_napta_src_legend_real"/> Réel
+                        <i class="fa fa-info-circle o_napta_src_legend_info" t-att-data-tooltip="legendTooltip"/>
+                    </span>
+                </div>
+                <div class="o_napta_src_pagination">
+                    <span>Page 1 sur 2</span>
+                    <button class="o_napta_src_page_btn o_napta_src_page_active">1</button>
+                    <button class="o_napta_src_page_btn">2</button>
+                    <i class="fa fa-chevron-right"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
