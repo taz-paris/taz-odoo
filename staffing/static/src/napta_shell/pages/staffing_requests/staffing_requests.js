@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component, useState } from "@odoo/owl";
+import { AssignmentDrawer } from "../../components/assignment_drawer/assignment_drawer";
 
 /**
  * Données factices LOCALES à cette page.
@@ -76,44 +77,10 @@ const COLUMNS_MENU = TABLE_COLUMNS.map((c) => c.label).concat(["Compétences", "
 
 const PROJECT_OPTIONS = [...new Set(REQUESTS.map((r) => r.project))].sort((a, b) => a.localeCompare(b, "fr"));
 
-/**
- * Champs du tiroir "Créer une demande", conformes à
- * modules-napta/staffing_creation-de-staffing (sections Critères, Périodes,
- * Utilisateurs, Informations, Commentaire).
- */
-const CRITERIA_FIELDS = [
-    { key: "skills", label: "Compétences", options: ["Excel", "Anglais", "Python", "Salesforce", "Data analysis", "Communication", "Budget", "Design"] },
-    { key: "businessUnits", label: "Unité commerciale", options: ["Conseil RH", "Audit", "Stratégie", "Transformation digitale", "Finance"] },
-    { key: "positions", label: "Poste", options: ["Consultant", "Senior Consultant", "Manager", "Directeur de mission", "Analyste"] },
-    { key: "offices", label: "Bureau", options: ["Paris", "Lyon", "Marseille", "Londres", "Bruxelles"] },
-    { key: "contractTypes", label: "Type de contrat", options: ["CDI", "CDD", "Stage", "Alternance", "Freelance"] },
-];
-
-// L'unité de charge est commune à toutes les périodes (cf. doc : "L'unité
-// est la même pour toutes les périodes"), d'où un seul sélecteur global.
-const PERIOD_UNITS = ["Jours", "Heures", "% (congés exclus)"];
-const PERIOD_PLANNING_MODES = ["Dates fixes", "À partir de"];
-const HALF_DAY_OPTIONS = ["Matin", "Après-midi"];
-const PERIOD_STATUS_OPTIONS = ["Non défini", "À valider", "Confirmée", "Annulée"];
-const CURRENCY_OPTIONS = ["€", "$", "£"];
-
-const USER_DIRECTORY = [...new Set(REQUESTS.flatMap((r) => r.preBooked).filter((n) => n && !n.startsWith("+") && !/\.$/.test(n)))].concat([
-    "Jérémie BARTOL", "Aurore BARTOLIE", "Sylvain BRIZARD", "Marie-Claire RODRIGUES",
-]).sort((a, b) => a.localeCompare(b, "fr"));
-
-// Une demande ne staffe pas réellement : chaque utilisateur n'est que
-// suggéré ou pré-réservé, selon les droits de son créateur (doc §Option de
-// staffing). On simule ce choix par utilisateur sélectionné.
-const USER_STAFFING_OPTIONS = ["Suggéré", "Pré-réservé"];
-
-const ASSIGNMENT_STATUS_OPTIONS = ["Suggestion", "Pré-réservation", "Staffing simulé", "Staffing confirmé"];
-const PRIORITY_OPTIONS = ["Basse", "Normale", "Haute", "Urgente"];
-
-const COMMENT_MAX_LENGTH = 200;
-
 export class StaffingRequestsPage extends Component {
     static template = "staffing.StaffingRequestsPage";
     static props = { page: Object };
+    static components = { AssignmentDrawer };
 
     setup() {
         this.tableColumns = TABLE_COLUMNS;
@@ -121,17 +88,6 @@ export class StaffingRequestsPage extends Component {
         this.filterSections = FILTER_SECTIONS;
         this.columnsMenu = COLUMNS_MENU;
         this.projectOptions = PROJECT_OPTIONS;
-        this.criteriaFields = CRITERIA_FIELDS;
-        this.periodUnits = PERIOD_UNITS;
-        this.periodPlanningModes = PERIOD_PLANNING_MODES;
-        this.halfDayOptions = HALF_DAY_OPTIONS;
-        this.periodStatusOptions = PERIOD_STATUS_OPTIONS;
-        this.currencyOptions = CURRENCY_OPTIONS;
-        this.userStaffingOptions = USER_STAFFING_OPTIONS;
-        this.assignmentStatusOptions = ASSIGNMENT_STATUS_OPTIONS;
-        this.priorityOptions = PRIORITY_OPTIONS;
-        this.commentMaxLength = COMMENT_MAX_LENGTH;
-        this._periodId = 0;
 
         this.state = useState({
             requests: REQUESTS,
@@ -144,23 +100,14 @@ export class StaffingRequestsPage extends Component {
             showExportMenu: false,
             sortKey: null,
             sortDir: "asc",
-            createDrawer: null,
-            createNeed: "",
-            createProject: "",
-            createOpenSections: {},
-            createCriteria: { skills: [], businessUnits: [], positions: [], offices: [], contractTypes: [] },
-            createCriteriaOpenField: null,
-            createPeriods: [],
-            createPeriodsConfig: { planningMode: "Dates fixes", unit: "Jours", ignoreLeaves: false, autoSplit: false },
-            createPeriodMenuOpenId: null,
-            createBulkEditOpen: false,
-            createBulkEdit: { amount: null, customFee: null, customFeeCurrency: "€", customCost: null, customCostCurrency: "€", status: "", description: "" },
-            createUsers: [],
-            createUserOptions: {},
-            createUserSearch: "",
-            createUserSearchFocused: false,
-            createInfo: { status: "", daysSold: null, description: "", duration: "", priority: "" },
-            createComment: "",
+            // Tiroir mutualisé de création/édition (components/assignment_drawer) :
+            // { mode: "create"|"edit", record: Object|null } ou null si fermé.
+            assignmentDrawer: null,
+            // Tiroir "Créer plusieurs demandes" : flux spécifique (upload PDF +
+            // analyse IA groupée), distinct du tiroir mutualisé ci-dessus.
+            bulkCreateOpen: false,
+            bulkNeed: "",
+            bulkProject: "",
         });
 
         this.scenarioTooltip = "Résoudre automatiquement les demandes grâce à l'IA (fonctionnalité en version bêta)";
@@ -256,243 +203,39 @@ export class StaffingRequestsPage extends Component {
         this.state[name] = !wasOpen;
     }
 
-    // ---- Tiroir de création de demande(s) ----
-    openCreateDrawer(mode, ev) {
+    // ---- Tiroir mutualisé "Créer / Modifier une demande" ----
+    // (components/assignment_drawer/assignment_drawer.js — partagé avec
+    // Staffing > Staffings pour l'édition d'un staffing).
+    openCreateRequestDrawer(ev) {
         if (ev) ev.stopPropagation();
         this.closeMenus();
-        this.state.createDrawer = mode;
-        this.state.createNeed = "";
-        this.state.createProject = "";
-        this.state.createOpenSections = {};
-        this.state.createCriteria = { skills: [], businessUnits: [], positions: [], offices: [], contractTypes: [] };
-        this.state.createCriteriaOpenField = null;
-        this.state.createPeriods = [];
-        this.state.createPeriodsConfig = { planningMode: "Dates fixes", unit: "Jours", ignoreLeaves: false, autoSplit: false };
-        this.state.createPeriodMenuOpenId = null;
-        this.state.createBulkEditOpen = false;
-        this.state.createBulkEdit = { amount: null, customFee: null, customFeeCurrency: "€", customCost: null, customCostCurrency: "€", status: "", description: "" };
-        this.state.createUsers = [];
-        this.state.createUserOptions = {};
-        this.state.createUserSearch = "";
-        this.state.createUserSearchFocused = false;
-        this.state.createInfo = { status: "", daysSold: null, description: "", duration: "", priority: "" };
-        this.state.createComment = "";
+        this.state.assignmentDrawer = { mode: "create", record: null };
     }
 
-    closeCreateDrawer() {
-        this.state.createDrawer = null;
-    }
-
-    closeCreateDropdowns() {
-        this.state.createCriteriaOpenField = null;
-        this.state.createUserSearchFocused = false;
-        this.state.createPeriodMenuOpenId = null;
-    }
-
-    toggleCreateSection(key) {
-        // Ne stoppe pas la propagation : le clic doit atteindre le tiroir
-        // pour que closeCreateDropdowns() referme les menus Critères/Utilisateurs
-        // d'une autre section restée ouverte.
-        this.state.createOpenSections[key] = !this.state.createOpenSections[key];
-    }
-
-    isCreateSectionOpen(key) {
-        return !!this.state.createOpenSections[key];
-    }
-
-    // ---- Section Critères ----
-    get criteriaCount() {
-        const c = this.state.createCriteria;
-        return c.skills.length + c.businessUnits.length + c.positions.length + c.offices.length + c.contractTypes.length;
-    }
-
-    toggleCriteriaDropdown(fieldKey, ev) {
+    openEditRequestDrawer(row, ev) {
         if (ev) ev.stopPropagation();
-        const wasOpen = this.state.createCriteriaOpenField === fieldKey;
-        this.state.createCriteriaOpenField = wasOpen ? null : fieldKey;
+        this.state.assignmentDrawer = { mode: "edit", record: row };
     }
 
-    isCriteriaDropdownOpen(fieldKey) {
-        return this.state.createCriteriaOpenField === fieldKey;
+    closeAssignmentDrawer() {
+        this.state.assignmentDrawer = null;
     }
 
-    toggleCriteriaValue(fieldKey, option, ev) {
+    get assignmentDrawerKey() {
+        const d = this.state.assignmentDrawer;
+        return d ? d.mode + "-" + (d.record ? d.record.id : "new") : "";
+    }
+
+    // ---- Tiroir "Créer plusieurs demandes" (flux PDF + IA, non mutualisé) ----
+    openBulkCreateDrawer(ev) {
         if (ev) ev.stopPropagation();
-        const list = this.state.createCriteria[fieldKey];
-        const idx = list.indexOf(option);
-        if (idx === -1) {
-            list.push(option);
-        } else {
-            list.splice(idx, 1);
-        }
+        this.closeMenus();
+        this.state.bulkCreateOpen = true;
+        this.state.bulkNeed = "";
+        this.state.bulkProject = "";
     }
 
-    isCriteriaValueSelected(fieldKey, option) {
-        return this.state.createCriteria[fieldKey].includes(option);
-    }
-
-    criteriaFieldSummary(fieldKey) {
-        const list = this.state.createCriteria[fieldKey];
-        if (!list.length) {
-            return "Sélectionner…";
-        }
-        return list.join(", ");
-    }
-
-    // ---- Section Périodes ----
-    // Par défaut la demie-journée de début est le matin et celle de fin
-    // l'après-midi (staffing à la journée pleine), cf. doc "Section détail
-    // de la période".
-    addCreatePeriod(ev) {
-        if (ev) ev.stopPropagation();
-        this._periodId++;
-        this.state.createPeriods.push({
-            id: this._periodId,
-            start: "",
-            end: "",
-            amount: 0,
-            expanded: false,
-            selected: false,
-            halfDayStart: "Matin",
-            halfDayEnd: "Après-midi",
-            customFee: null,
-            customFeeCurrency: "€",
-            customCost: null,
-            customCostCurrency: "€",
-            status: "",
-            description: "",
-        });
-    }
-
-    duplicateCreatePeriod(period, ev) {
-        if (ev) ev.stopPropagation();
-        this._periodId++;
-        const idx = this.state.createPeriods.indexOf(period);
-        this.state.createPeriods.splice(idx + 1, 0, { ...period, id: this._periodId, selected: false });
-        this.state.createPeriodMenuOpenId = null;
-    }
-
-    removeCreatePeriod(period, ev) {
-        if (ev) ev.stopPropagation();
-        const idx = this.state.createPeriods.indexOf(period);
-        if (idx !== -1) {
-            this.state.createPeriods.splice(idx, 1);
-        }
-        this.state.createPeriodMenuOpenId = null;
-    }
-
-    togglePeriodExpand(period, ev) {
-        if (ev) ev.stopPropagation();
-        period.expanded = !period.expanded;
-    }
-
-    get allPeriodsExpanded() {
-        return this.state.createPeriods.length > 0 && this.state.createPeriods.every((p) => p.expanded);
-    }
-
-    toggleExpandAllPeriods(ev) {
-        if (ev) ev.stopPropagation();
-        const expand = !this.allPeriodsExpanded;
-        for (const p of this.state.createPeriods) {
-            p.expanded = expand;
-        }
-    }
-
-    togglePeriodSelected(period, ev) {
-        if (ev) ev.stopPropagation();
-        period.selected = !period.selected;
-    }
-
-    get selectedPeriods() {
-        return this.state.createPeriods.filter((p) => p.selected);
-    }
-
-    togglePeriodMenu(period, ev) {
-        if (ev) ev.stopPropagation();
-        this.state.createPeriodMenuOpenId = this.state.createPeriodMenuOpenId === period.id ? null : period.id;
-    }
-
-    isPeriodMenuOpen(period) {
-        return this.state.createPeriodMenuOpenId === period.id;
-    }
-
-    // ---- Édition en masse des périodes sélectionnées ----
-    openBulkEditPeriods(ev) {
-        if (ev) ev.stopPropagation();
-        if (!this.selectedPeriods.length) {
-            return;
-        }
-        this.state.createBulkEdit = { amount: null, customFee: null, customFeeCurrency: "€", customCost: null, customCostCurrency: "€", status: "", description: "" };
-        this.state.createBulkEditOpen = true;
-    }
-
-    closeBulkEditPeriods(ev) {
-        if (ev) ev.stopPropagation();
-        this.state.createBulkEditOpen = false;
-    }
-
-    deleteSelectedPeriods(ev) {
-        if (ev) ev.stopPropagation();
-        this.state.createPeriods = this.state.createPeriods.filter((p) => !p.selected);
-    }
-
-    applyBulkEditPeriods(ev) {
-        if (ev) ev.stopPropagation();
-        const edit = this.state.createBulkEdit;
-        for (const period of this.selectedPeriods) {
-            if (edit.amount !== null && edit.amount !== "") period.amount = edit.amount;
-            if (edit.customFee !== null && edit.customFee !== "") { period.customFee = edit.customFee; period.customFeeCurrency = edit.customFeeCurrency; }
-            if (edit.customCost !== null && edit.customCost !== "") { period.customCost = edit.customCost; period.customCostCurrency = edit.customCostCurrency; }
-            if (edit.status) period.status = edit.status;
-            if (edit.description) period.description = edit.description;
-            period.selected = false;
-        }
-        this.state.createBulkEditOpen = false;
-    }
-
-    // ---- Section Utilisateurs ----
-    get createUserSuggestions() {
-        const search = this.state.createUserSearch.trim().toLowerCase();
-        return USER_DIRECTORY
-            .filter((name) => !this.state.createUsers.includes(name))
-            .filter((name) => !search || name.toLowerCase().includes(search))
-            .slice(0, 8);
-    }
-
-    addCreateUser(name, ev) {
-        if (ev) ev.stopPropagation();
-        this.state.createUsers.push(name);
-        this.state.createUserOptions[name] = "Suggéré";
-        this.state.createUserSearch = "";
-    }
-
-    removeCreateUser(name, ev) {
-        if (ev) ev.stopPropagation();
-        const idx = this.state.createUsers.indexOf(name);
-        if (idx !== -1) {
-            this.state.createUsers.splice(idx, 1);
-        }
-        delete this.state.createUserOptions[name];
-    }
-
-    setUserOption(name, option, ev) {
-        if (ev) ev.stopPropagation();
-        this.state.createUserOptions[name] = option;
-    }
-
-    focusCreateUserSearch(ev) {
-        if (ev) ev.stopPropagation();
-        this.state.createUserSearchFocused = true;
-    }
-
-    // ---- Section Informations ----
-    get informationCount() {
-        const info = this.state.createInfo;
-        return ["status", "daysSold", "description", "duration", "priority"].filter((k) => info[k]).length;
-    }
-
-    // ---- Section Commentaire ----
-    get commentCount() {
-        return this.state.createComment.trim() ? 1 : 0;
+    closeBulkCreateDrawer() {
+        this.state.bulkCreateOpen = false;
     }
 }

@@ -109,43 +109,15 @@
                     </table>
                 </div>
 
-                <!-- Tiroir latéral : aperçu statique (non interactif) du panneau d'édition
-                     observé dans staffing_creation-de-staffing.md (image-14) -->
-                <div t-if="openRow" class="o_napta_st_drawer">
-                    <div class="o_napta_st_drawer_header">
-                        <span>Aperçu du staffing</span>
-                        <i class="fa fa-times" t-on-click="() => this.closeDrawer()"/>
-                    </div>
-                    <div class="o_napta_st_drawer_body">
-                        <label>Projet</label>
-                        <div class="o_napta_st_drawer_field" t-esc="openRow.project + ' - ' + openRow.subproject"/>
-
-                        <label>Collaborateur</label>
-                        <div class="o_napta_st_drawer_person">
-                            <span class="o_napta_avatar" t-esc="openRow.employee.initials"/>
-                            <div>
-                                <div class="o_napta_st_employee_name" t-esc="openRow.employee.name"/>
-                                <div class="o_napta_st_employee_role" t-esc="openRow.employee.role"/>
-                            </div>
-                        </div>
-
-                        <label>Période</label>
-                        <div class="o_napta_st_drawer_field" t-esc="openRow.period + ' - à ' + openRow.rate"/>
-
-                        <label>Type d'affectation</label>
-                        <div class="o_napta_st_drawer_toggle">
-                            <span t-att-class="{ o_napta_st_toggle_active: openRow.kind === 'real' }">Réel</span>
-                            <span t-att-class="{ o_napta_st_toggle_active: openRow.kind === 'simulated' }">Simulé</span>
-                        </div>
-
-                        <label>Statut facturable</label>
-                        <div class="o_napta_st_drawer_field" t-esc="openRow.billable ? 'Facturé' : 'Non facturé'"/>
-                    </div>
-                    <div class="o_napta_st_drawer_footer">
-                        <button class="btn btn-sm" disabled="disabled">Annuler</button>
-                        <button class="btn btn-sm o_napta_st_drawer_save" disabled="disabled">Enregistrer</button>
-                    </div>
-                </div>
+                <!-- Tiroir mutualisé "Modifier le staffing"
+                     (components/assignment_drawer), partagé avec l'édition
+                     d'une demande sur Staffing > Demandes. -->
+                <AssignmentDrawer t-if="openRow"
+                                  t-key="openRow.id"
+                                  kind="'staffing'"
+                                  mode="'edit'"
+                                  record="openRow"
+                                  onClose.bind="closeDrawer"/>
             </div>
 
         </div>

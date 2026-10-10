@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.AssignmentDrawer">
+        <div class="o_napta_adw_overlay" t-on-click="close">
+            <div t-if="state.replaceOpen" class="o_napta_adw_drawer o_napta_adw_side_drawer" t-on-click.stop="">
+                <div class="o_napta_adw_header">
+                    <h3>Modifier l'utilisateur assigné</h3>
+                    <i class="fa fa-times" t-on-click="closeReplace"/>
+                </div>
+
+                <div t-if="banner" class="o_napta_adw_banner">
+                    <div class="o_napta_adw_banner_title">
+                        <i class="fa fa-briefcase"/>
+                        <span t-esc="banner.title"/>
+                        <span class="o_napta_adw_banner_subtitle" t-esc="banner.subtitle"/>
+                    </div>
+                    <div class="o_napta_adw_banner_tags">
+                        <div t-foreach="banner.tags" t-as="tag" t-key="tag.label" class="o_napta_adw_banner_tag">
+                            <div class="o_napta_adw_banner_tag_label"><i t-attf-class="fa {{ tag.icon }}"/> <t t-esc="tag.label"/></div>
+                            <div class="o_napta_adw_banner_tag_value" t-esc="tag.value"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_napta_adw_user_card">
+                    <span class="o_napta_avatar" t-esc="state.users[state.replaceOpen.index].initials"/>
+                    <div class="o_napta_adw_user_card_info">
+                        <div class="o_napta_adw_user_card_name" t-esc="state.users[state.replaceOpen.index].name"/>
+                    </div>
+                    <span t-if="props.kind === 'staffing'" t-attf-class="o_napta_adw_type_badge o_napta_adw_type_badge_{{ state.assignmentType }}"
+                          t-esc="state.assignmentType === 'real' ? 'Réel' : 'Simulé'"/>
+                </div>
+
+                <label class="o_napta_adw_label">Remplacer le contributeur</label>
+                <select class="o_napta_adw_select" t-model="state.replaceScope">
+                    <option t-foreach="replaceScopeOptions" t-as="s" t-key="s" t-att-value="s" t-esc="s"/>
+                </select>
+
+                <label t-if="state.replaceScope === replaceScopeOptions[2]" class="o_napta_adw_label">À partir du</label>
+                <input t-if="state.replaceScope === replaceScopeOptions[2]" type="date" class="o_napta_adw_input" t-model="state.replaceDate"/>
+
+                <label class="o_napta_adw_label">Par <span class="o_napta_adw_required">*</span></label>
+                <div class="o_napta_adw_dropdown_wrap">
+                    <input type="text" class="o_napta_adw_user_search" placeholder="Rechercher un utilisateur…"
+                           t-model="state.replaceSearch" t-on-click="focusReplaceSearch"/>
+                    <div t-if="state.replaceSearchFocused" class="o_napta_adw_dropdown_menu">
+                        <div t-foreach="replaceSuggestions" t-as="name" t-key="name" class="o_napta_adw_dropdown_item"
+                             t-on-click="(ev) => this.pickReplaceBy(name, ev)">
+                            <span t-esc="name"/>
+                        </div>
+                        <div t-if="!replaceSuggestions.length" class="o_napta_adw_empty_hint">Aucun utilisateur trouvé.</div>
+                    </div>
+                </div>
+
+                <div class="o_napta_adw_footer">
+                    <button type="button" class="btn o_napta_adw_cancel_btn" t-on-click="closeReplace">Fermer</button>
+                    <button type="button" class="btn o_napta_adw_save_btn" t-att-disabled="!state.replaceBy" t-on-click="applyReplace">Enregistrer</button>
+                </div>
+            </div>
+
+            <div t-if="state.bulkEditOpen" class="o_napta_adw_drawer o_napta_adw_side_drawer" t-on-click.stop="">
+                <div class="o_napta_adw_header">
+                    <h3>Édition multi-périodes</h3>
+                    <i class="fa fa-times" t-on-click="closeBulkEditPeriods"/>
+                </div>
+
+                <label class="o_napta_adw_label">Charge (<t t-esc="state.periodsConfig.unit"/>)</label>
+                <input type="number" min="0" class="o_napta_adw_input" t-model="state.bulkEdit.amount"/>
+
+                <label class="o_napta_adw_label">Honoraires journaliers personnalisés</label>
+                <div class="o_napta_adw_amount_currency">
+                    <input type="number" min="0" class="o_napta_adw_input" t-model="state.bulkEdit.customFee"/>
+                    <select class="o_napta_adw_currency_select" t-model="state.bulkEdit.customFeeCurrency">
+                        <option t-foreach="currencyOptions" t-as="c" t-key="c" t-att-value="c" t-esc="c"/>
+                    </select>
+                </div>
+
+                <label class="o_napta_adw_label">Coûts journaliers personnalisés</label>
+                <div class="o_napta_adw_amount_currency">
+                    <input type="number" min="0" class="o_napta_adw_input" t-model="state.bulkEdit.customCost"/>
+                    <select class="o_napta_adw_currency_select" t-model="state.bulkEdit.customCostCurrency">
+                        <option t-foreach="currencyOptions" t-as="c" t-key="c" t-att-value="c" t-esc="c"/>
+                    </select>
+                </div>
+
+                <label class="o_napta_adw_label">Statut de la période</label>
+                <select class="o_napta_adw_select" t-model="state.bulkEdit.status">
+                    <option value="">Sélectionner…</option>
+                    <option t-foreach="periodStatusOptions" t-as="s" t-key="s" t-att-value="s" t-esc="s"/>
+                </select>
+
+                <label class="o_napta_adw_label">Description</label>
+                <input type="text" class="o_napta_adw_input" t-model="state.bulkEdit.description"/>
+
+                <div class="o_napta_adw_footer">
+                    <button type="button" class="btn o_napta_adw_cancel_btn" t-on-click="closeBulkEditPeriods">Annuler</button>
+                    <button type="button" class="btn o_napta_adw_save_btn" t-on-click="applyBulkEditPeriods">Appliquer les modifications</button>
+                </div>
+            </div>
+
+            <div class="o_napta_adw_drawer" t-on-click="(ev) => { ev.stopPropagation(); this.closeDropdowns(); }">
+                <div class="o_napta_adw_header">
+                    <h3 t-esc="title"/>
+                    <i class="fa fa-cog o_napta_adw_header_icon" data-tooltip="Configuration du formulaire"/>
+                    <i class="fa fa-smile-o o_napta_adw_header_icon" data-tooltip="Donner votre avis"/>
+                    <i class="fa fa-times" t-on-click="close"/>
+                </div>
+
+                <!-- Mode création : besoin libre + sélection du projet -->
+                <t t-if="props.mode === 'create'">
+                    <label class="o_napta_adw_label"><i class="fa fa-magic"/> Décrivez votre besoin</label>
+                    <textarea class="o_napta_adw_textarea" rows="4"
+                              placeholder="Collez une fiche de poste, écrivez librement...  Exemple : Besoin d'un développeur Java senior avec Spring Boot"
+                              t-model="state.need"/>
+                    <button type="button" class="btn o_napta_adw_ai_btn" t-att-disabled="!state.need">
+                        <i class="fa fa-magic"/> Analyser les critères avec l'IA
+                    </button>
+
+                    <div class="o_napta_adw_divider">ou remplissez le formulaire manuellement</div>
+
+                    <label class="o_napta_adw_label">Projet <span class="o_napta_adw_required">*</span></label>
+                    <select class="o_napta_adw_select" t-model="state.project">
+                        <option value="">Sélectionner un projet…</option>
+                        <option t-foreach="props.projectOptions || []" t-as="p" t-key="p" t-att-value="p" t-esc="p"/>
+                    </select>
+
+                    <!-- Critères -->
+                    <div class="o_napta_adw_section" t-on-click="(ev) => this.toggleSection('criteria', ev)">
+                        <i class="fa fa-bullseye"/>
+                        <span>Critères</span>
+                        <span class="o_napta_adw_section_count" t-esc="criteriaCount"/>
+                        <i t-attf-class="fa {{ isSectionOpen('criteria') ? 'fa-chevron-up' : 'fa-chevron-down' }} o_napta_adw_section_chevron"/>
+                    </div>
+                    <div t-if="isSectionOpen('criteria')" class="o_napta_adw_section_body">
+                        <t t-foreach="criteriaFields" t-as="field" t-key="field.key">
+                            <label class="o_napta_adw_label" t-esc="field.label"/>
+                            <div class="o_napta_adw_dropdown_wrap">
+                                <button type="button" class="o_napta_adw_dropdown_btn" t-on-click="(ev) => this.toggleCriteriaDropdown(field.key, ev)">
+                                    <span t-esc="criteriaFieldSummary(field.key)"/>
+                                    <i t-attf-class="fa {{ isCriteriaDropdownOpen(field.key) ? 'fa-chevron-up' : 'fa-chevron-down' }}"/>
+                                </button>
+                                <div t-if="isCriteriaDropdownOpen(field.key)" class="o_napta_adw_dropdown_menu">
+                                    <div t-foreach="field.options" t-as="opt" t-key="opt" class="o_napta_adw_dropdown_item"
+                                         t-on-click="(ev) => this.toggleCriteriaValue(field.key, opt, ev)">
+                                        <i t-attf-class="fa {{ isCriteriaValueSelected(field.key, opt) ? 'fa-check-square' : 'fa-square-o' }}"/>
+                                        <span t-esc="opt"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- Mode édition : bandeau de rappel + utilisateur(s) affecté(s) -->
+                <t t-if="props.mode === 'edit'">
+                    <div t-if="banner" class="o_napta_adw_banner">
+                        <div class="o_napta_adw_banner_title">
+                            <i class="fa fa-briefcase"/>
+                            <span t-esc="banner.title"/>
+                            <span class="o_napta_adw_banner_subtitle" t-esc="banner.subtitle"/>
+                        </div>
+                        <div class="o_napta_adw_banner_tags">
+                            <div t-foreach="banner.tags" t-as="tag" t-key="tag.label" class="o_napta_adw_banner_tag">
+                                <div class="o_napta_adw_banner_tag_label"><i t-attf-class="fa {{ tag.icon }}"/> <t t-esc="tag.label"/></div>
+                                <div class="o_napta_adw_banner_tag_value" t-esc="tag.value"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div t-foreach="state.users" t-as="user" t-key="user.name" class="o_napta_adw_user_card">
+                        <span class="o_napta_avatar" t-esc="user.initials"/>
+                        <div class="o_napta_adw_user_card_info">
+                            <div class="o_napta_adw_user_card_name" t-esc="user.name"/>
+                            <div t-if="user.role" class="o_napta_adw_user_card_role" t-esc="user.role"/>
+                        </div>
+                        <select t-if="props.kind === 'request'" class="o_napta_adw_user_chip_option" t-model="state.userOptions[user.name]">
+                            <option t-foreach="userStaffingOptions" t-as="o" t-key="o" t-att-value="o" t-esc="o"/>
+                        </select>
+                        <i class="fa fa-pencil o_napta_adw_user_card_action" data-tooltip="Modifier l'utilisateur assigné"
+                           t-on-click="(ev) => this.openReplace(user_index, ev)"/>
+                        <i class="fa fa-times o_napta_adw_user_card_action" data-tooltip="Retirer"
+                           t-on-click="(ev) => this.removeUser(user, ev)"/>
+                    </div>
+                    <div t-if="props.kind === 'staffing' and !state.users.length" class="o_napta_adw_empty_hint">
+                        Cette affectation sera transformée en demande.
+                    </div>
+
+                    <div class="o_napta_adw_user_search_row">
+                        <span class="o_napta_adw_user_search_icon"><i class="fa fa-search"/></span>
+                        <div class="o_napta_adw_dropdown_wrap o_napta_adw_user_search_wrap">
+                            <input type="text" class="o_napta_adw_user_search" placeholder="Ajouter un utilisateur…"
+                                   t-model="state.userSearch" t-on-click="focusUserSearch"/>
+                            <div t-if="state.userSearchFocused" class="o_napta_adw_dropdown_menu">
+                                <div t-foreach="userSuggestions" t-as="name" t-key="name" class="o_napta_adw_dropdown_item"
+                                     t-on-click="(ev) => this.addUser(name, ev)">
+                                    <span t-esc="name"/>
+                                </div>
+                                <div t-if="!userSuggestions.length" class="o_napta_adw_empty_hint">Aucun utilisateur trouvé.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <t t-if="props.kind === 'staffing'">
+                        <label class="o_napta_adw_label">Type d'affectation</label>
+                        <div class="o_napta_adw_type_toggle">
+                            <span t-att-class="{ o_napta_adw_type_toggle_active: state.assignmentType === 'real' }"
+                                  t-on-click="(ev) => this.setAssignmentType('real', ev)">Réel</span>
+                            <span t-att-class="{ o_napta_adw_type_toggle_active: state.assignmentType === 'simulated' }"
+                                  t-on-click="(ev) => this.setAssignmentType('simulated', ev)">Simulé</span>
+                        </div>
+                    </t>
+
+                    <div class="o_napta_adw_section_divider"/>
+                </t>
+
+                <!-- Périodes (création et édition) -->
+                <div class="o_napta_adw_section" t-on-click="(ev) => this.toggleSection('periods', ev)">
+                    <i class="fa fa-clock-o"/>
+                    <span>Périodes</span>
+                    <span class="o_napta_adw_section_count" t-esc="state.periods.length"/>
+                    <div class="o_napta_adw_section_tools">
+                        <i t-attf-class="fa {{ allPeriodsExpanded ? 'fa-compress' : 'fa-expand' }}" data-tooltip="Tout déplier / replier"
+                           t-on-click="(ev) => this.toggleExpandAllPeriods(ev)"/>
+                        <i t-if="selectedPeriods.length" class="fa fa-pencil" data-tooltip="Modifier les périodes sélectionnées"
+                           t-on-click="(ev) => this.openBulkEditPeriods(ev)"/>
+                        <i t-if="selectedPeriods.length" class="fa fa-trash-o" data-tooltip="Supprimer les périodes sélectionnées"
+                           t-on-click="(ev) => this.deleteSelectedPeriods(ev)"/>
+                    </div>
+                    <i t-attf-class="fa {{ isSectionOpen('periods') ? 'fa-chevron-up' : 'fa-chevron-down' }} o_napta_adw_section_chevron"/>
+                </div>
+                <div t-if="isSectionOpen('periods')" class="o_napta_adw_section_body">
+                    <div class="o_napta_adw_period_config">
+                        <div class="o_napta_adw_period_config_field">
+                            <label class="o_napta_adw_label">Mode de planification</label>
+                            <select class="o_napta_adw_select" t-model="state.periodsConfig.planningMode">
+                                <option t-foreach="periodPlanningModes" t-as="m" t-key="m" t-att-value="m" t-esc="m"/>
+                            </select>
+                        </div>
+                        <div class="o_napta_adw_period_config_field">
+                            <label class="o_napta_adw_label">Unité</label>
+                            <select class="o_napta_adw_select" t-model="state.periodsConfig.unit">
+                                <option t-foreach="periodUnits" t-as="u" t-key="u" t-att-value="u" t-esc="u"/>
+                            </select>
+                        </div>
+                    </div>
+                    <label class="o_napta_adw_toggle">
+                        <input type="checkbox" t-model="state.periodsConfig.ignoreLeaves"/>
+                        <span>Ignorer les congés (taux d'utilisation congés inclus)</span>
+                    </label>
+                    <label class="o_napta_adw_toggle">
+                        <input type="checkbox" t-model="state.periodsConfig.autoSplit"/>
+                        <span>Répartition automatique</span>
+                    </label>
+
+                    <div t-foreach="state.periods" t-as="period" t-key="period.id" class="o_napta_adw_period">
+                        <div class="o_napta_adw_period_row">
+                            <i t-attf-class="fa {{ period.expanded ? 'fa-chevron-down' : 'fa-chevron-right' }} o_napta_adw_period_toggle"
+                               t-on-click="(ev) => this.togglePeriodExpand(period, ev)"/>
+                            <i t-attf-class="fa {{ period.selected ? 'fa-check-square' : 'fa-square-o' }} o_napta_adw_period_check"
+                               t-on-click="(ev) => this.togglePeriodSelected(period, ev)"/>
+                            <input type="date" class="o_napta_adw_period_date" t-model="period.start"/>
+                            <t t-if="state.periodsConfig.planningMode === 'Dates fixes'">
+                                <span class="o_napta_adw_period_sep">–</span>
+                                <input type="date" class="o_napta_adw_period_date" t-model="period.end"/>
+                            </t>
+                            <input type="number" min="0" class="o_napta_adw_period_amount" t-model="period.amount"/>
+                            <span class="o_napta_adw_period_unit_label" t-esc="state.periodsConfig.unit"/>
+                            <div class="o_napta_adw_dropdown_wrap o_napta_adw_period_menu_wrap">
+                                <i class="fa fa-ellipsis-v o_napta_adw_period_kebab" t-on-click="(ev) => this.togglePeriodMenu(period, ev)"/>
+                                <div t-if="isPeriodMenuOpen(period)" class="o_napta_adw_dropdown_menu o_napta_adw_period_menu">
+                                    <div class="o_napta_adw_dropdown_item" t-on-click="(ev) => this.duplicatePeriod(period, ev)">
+                                        <i class="fa fa-clone"/><span>Dupliquer</span>
+                                    </div>
+                                    <div class="o_napta_adw_dropdown_item" t-on-click="(ev) => this.removePeriod(period, ev)">
+                                        <i class="fa fa-trash-o"/><span>Supprimer</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div t-if="period.expanded" class="o_napta_adw_period_detail">
+                            <div class="o_napta_adw_period_detail_col">
+                                <label class="o_napta_adw_label">Début</label>
+                                <select class="o_napta_adw_select" t-model="period.halfDayStart">
+                                    <option t-foreach="halfDayOptions" t-as="h" t-key="h" t-att-value="h" t-esc="h"/>
+                                </select>
+                            </div>
+                            <div class="o_napta_adw_period_detail_col">
+                                <label class="o_napta_adw_label">Fin</label>
+                                <select class="o_napta_adw_select" t-model="period.halfDayEnd">
+                                    <option t-foreach="halfDayOptions" t-as="h" t-key="h" t-att-value="h" t-esc="h"/>
+                                </select>
+                            </div>
+                            <div class="o_napta_adw_period_detail_col">
+                                <label class="o_napta_adw_label">Honoraires journaliers personnalisés</label>
+                                <div class="o_napta_adw_amount_currency">
+                                    <input type="number" min="0" class="o_napta_adw_input" t-model="period.customFee"/>
+                                    <select class="o_napta_adw_currency_select" t-model="period.customFeeCurrency">
+                                        <option t-foreach="currencyOptions" t-as="c" t-key="c" t-att-value="c" t-esc="c"/>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="o_napta_adw_period_detail_col">
+                                <label class="o_napta_adw_label">Coûts journaliers personnalisés</label>
+                                <div class="o_napta_adw_amount_currency">
+                                    <input type="number" min="0" class="o_napta_adw_input" t-model="period.customCost"/>
+                                    <select class="o_napta_adw_currency_select" t-model="period.customCostCurrency">
+                                        <option t-foreach="currencyOptions" t-as="c" t-key="c" t-att-value="c" t-esc="c"/>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="o_napta_adw_period_detail_col">
+                                <label class="o_napta_adw_label">Statut de la période</label>
+                                <select class="o_napta_adw_select" t-model="period.status">
+                                    <option value="">Sélectionner…</option>
+                                    <option t-foreach="periodStatusOptions" t-as="s" t-key="s" t-att-value="s" t-esc="s"/>
+                                </select>
+                            </div>
+                            <div class="o_napta_adw_period_detail_col">
+                                <label class="o_napta_adw_label">Description</label>
+                                <input type="text" class="o_napta_adw_input" t-model="period.description"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-if="!state.periods.length" class="o_napta_adw_empty_hint">Aucune période ajoutée.</div>
+                    <button type="button" class="o_napta_adw_add_period" t-on-click="addPeriod">
+                        <i class="fa fa-plus"/> Ajouter une période d'affectation
+                    </button>
+                </div>
+
+                <div t-if="props.mode === 'edit' and hasPeriodConflict" class="o_napta_adw_conflict_banner">
+                    <i class="fa fa-exclamation-circle"/>
+                    <span>Certaines périodes sont en conflit.</span>
+                    <button type="button" class="btn o_napta_adw_conflict_preview_btn">Aperçu</button>
+                </div>
+
+                <!-- Utilisateurs (création uniquement — recherche + puces) -->
+                <t t-if="props.mode === 'create'">
+                    <div class="o_napta_adw_section" t-on-click="(ev) => this.toggleSection('users', ev)">
+                        <i class="fa fa-user-o"/>
+                        <span>Utilisateurs <span class="o_napta_adw_required">*</span></span>
+                        <i class="fa fa-info-circle o_napta_adw_info_icon"
+                           data-tooltip="Selon vos droits, chaque utilisateur sélectionné sera suggéré ou pré-réservé sur cette demande."/>
+                        <span class="o_napta_adw_section_count" t-esc="state.users.length"/>
+                        <i t-attf-class="fa {{ isSectionOpen('users') ? 'fa-chevron-up' : 'fa-chevron-down' }} o_napta_adw_section_chevron"/>
+                    </div>
+                    <div t-if="isSectionOpen('users')" class="o_napta_adw_section_body">
+                        <div t-if="state.users.length" class="o_napta_adw_user_chips">
+                            <span t-foreach="state.users" t-as="user" t-key="user.name" class="o_napta_adw_user_chip">
+                                <span class="o_napta_adw_user_chip_name" t-esc="user.name"/>
+                                <select class="o_napta_adw_user_chip_option" t-model="state.userOptions[user.name]">
+                                    <option t-foreach="userStaffingOptions" t-as="o" t-key="o" t-att-value="o" t-esc="o"/>
+                                </select>
+                                <i class="fa fa-times" t-on-click="(ev) => this.removeUser(user, ev)"/>
+                            </span>
+                        </div>
+                        <div class="o_napta_adw_user_search_row">
+                            <span class="o_napta_adw_user_search_icon"><i class="fa fa-search"/></span>
+                            <div class="o_napta_adw_dropdown_wrap o_napta_adw_user_search_wrap">
+                                <input type="text" class="o_napta_adw_user_search" placeholder="Rechercher un utilisateur…"
+                                       t-model="state.userSearch" t-on-click="focusUserSearch"/>
+                                <div t-if="state.userSearchFocused" class="o_napta_adw_dropdown_menu">
+                                    <div t-foreach="userSuggestions" t-as="name" t-key="name" class="o_napta_adw_dropdown_item"
+                                         t-on-click="(ev) => this.addUser(name, ev)">
+                                        <span t-esc="name"/>
+                                    </div>
+                                    <div t-if="!userSuggestions.length" class="o_napta_adw_empty_hint">Aucun utilisateur trouvé.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+                <!-- Informations -->
+                <div class="o_napta_adw_section" t-on-click="(ev) => this.toggleSection('information', ev)">
+                    <i class="fa fa-info-circle"/>
+                    <span>Informations</span>
+                    <span class="o_napta_adw_section_count" t-esc="informationCount"/>
+                    <i t-attf-class="fa {{ isSectionOpen('information') ? 'fa-chevron-up' : 'fa-chevron-down' }} o_napta_adw_section_chevron"/>
+                </div>
+                <div t-if="isSectionOpen('information')" class="o_napta_adw_section_body">
+                    <label class="o_napta_adw_label">Statut de l'affectation</label>
+                    <select class="o_napta_adw_select" t-model="state.info.status">
+                        <option value="">Sélectionner…</option>
+                        <option t-foreach="assignmentStatusOptions" t-as="s" t-key="s" t-att-value="s" t-esc="s"/>
+                    </select>
+                    <label class="o_napta_adw_label">Jours vendus</label>
+                    <input type="number" min="0" class="o_napta_adw_input" t-model="state.info.daysSold"/>
+                    <label class="o_napta_adw_label">Description de la mission</label>
+                    <input type="text" class="o_napta_adw_input" t-model="state.info.description"/>
+                    <label class="o_napta_adw_label">Durée</label>
+                    <input type="text" class="o_napta_adw_input" t-model="state.info.duration"/>
+                    <label class="o_napta_adw_label">Priorité</label>
+                    <select class="o_napta_adw_select" t-model="state.info.priority">
+                        <option value="">Sélectionner…</option>
+                        <option t-foreach="priorityOptions" t-as="p" t-key="p" t-att-value="p" t-esc="p"/>
+                    </select>
+                </div>
+
+                <!-- Commentaires -->
+                <div class="o_napta_adw_section" t-on-click="(ev) => this.toggleSection('comments', ev)">
+                    <i class="fa fa-comment-o"/>
+                    <span>Commentaires</span>
+                    <span class="o_napta_adw_section_count" t-esc="commentCount"/>
+                    <i t-attf-class="fa {{ isSectionOpen('comments') ? 'fa-chevron-up' : 'fa-chevron-down' }} o_napta_adw_section_chevron"/>
+                </div>
+                <div t-if="isSectionOpen('comments')" class="o_napta_adw_section_body">
+                    <textarea class="o_napta_adw_textarea" rows="3" maxlength="200"
+                              placeholder="Ajouter un commentaire, taguez un collègue avec @"
+                              t-model="state.comment"/>
+                    <div class="o_napta_adw_char_count" t-esc="state.comment.length + ' / ' + commentMaxLength + ' caractères'"/>
+                </div>
+
+                <div class="o_napta_adw_footer">
+                    <button type="button" class="btn o_napta_adw_preview_btn"><i class="fa fa-search"/> Aperçu</button>
+                    <button type="button" class="btn o_napta_adw_cancel_btn" t-on-click="close">Fermer</button>
+                    <button type="button"
+                            t-attf-class="btn o_napta_adw_save_btn {{ props.mode === 'edit' and hasPeriodConflict ? 'o_napta_adw_save_btn_danger' : '' }}"
+                            t-att-disabled="props.mode === 'create' and !state.project"
+                            t-on-click="close">
+                        <t t-if="props.mode === 'edit' and hasPeriodConflict">Enregistrer quand même</t>
+                        <t t-else="">Enregistrer</t>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

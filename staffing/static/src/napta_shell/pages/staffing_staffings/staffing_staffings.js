@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component, useState } from "@odoo/owl";
+import { AssignmentDrawer } from "../../components/assignment_drawer/assignment_drawer";
 
 /**
  * Données factices pour la page « Staffing > Staffings ».
@@ -181,6 +182,7 @@ const TABS = [
 export class StaffingStaffingsPage extends Component {
     static template = "staffing.StaffingStaffingsPage";
     static props = { page: Object };
+    static components = { AssignmentDrawer };
 
     setup() {
         this.TABS = TABS;
