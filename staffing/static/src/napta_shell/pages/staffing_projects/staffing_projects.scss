@@ -488,12 +488,16 @@
     }
 
     // -- Demandes --
+    // Même thème bleu que le bandeau de rappel du tiroir d'édition
+    // (components/assignment_drawer : o_napta_adw_banner) : chaque demande
+    // est une carte bleu clair, pas une ligne séparée par une bordure.
     .osp_dp_item {
-        padding-bottom: 12px;
-        margin-bottom: 12px;
-        border-bottom: 1px solid $napta-border;
+        background: #eef3fc;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
 
-        &:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        &:last-child { margin-bottom: 0; }
     }
 
     .osp_dp_item_header {
@@ -502,19 +506,19 @@
         gap: 10px;
         font-size: 12px;
         font-weight: 700;
-        color: $napta-text;
+        color: #2a56c6;
         margin-bottom: 6px;
 
-        i.fa-pencil { color: $napta-text-muted; cursor: pointer; margin-left: auto; }
+        i.fa-pencil { color: #2a56c6; cursor: pointer; margin-left: auto; opacity: .7; &:hover { opacity: 1; } }
     }
 
-    .osp_dp_dates i, .osp_dp_duration i { color: $napta-text-muted; margin-right: 2px; }
-    .osp_dp_duration { color: $napta-text-muted; font-weight: 600; }
+    .osp_dp_dates i, .osp_dp_duration i { margin-right: 2px; }
+    .osp_dp_duration { font-weight: 600; color: #5b7bd1; }
 
     .osp_dp_tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 2px 14px;
         margin-bottom: 8px;
     }
 
@@ -522,20 +526,20 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        background: $napta-active-bg;
-        color: $napta-text-muted;
-        border-radius: 6px;
-        padding: 2px 8px;
-        font-size: 11px;
+        color: #2a56c6;
+        font-size: 11.5px;
+        font-weight: 600;
+        cursor: pointer;
 
         i { font-size: 10px; }
+        &:hover { text-decoration: underline; }
     }
 
     .osp_dp_section_title {
         font-size: 10.5px;
         font-weight: 700;
         letter-spacing: .03em;
-        color: $napta-text-muted;
+        color: #5b7bd1;
         margin: 8px 0 4px;
     }
 
@@ -547,18 +551,23 @@
         position: relative;
     }
 
+    .osp_dp_person .o_napta_avatar {
+        background: #0b2540;
+        color: #fff;
+    }
+
     .osp_dp_person_badge {
         position: absolute;
         left: 16px;
         top: -2px;
-        background: $napta-accent;
+        background: #0b2540;
         color: #fff;
         font-size: 8px;
         font-weight: 700;
         border-radius: 7px;
         padding: 0 3px;
         line-height: 13px;
-        border: 1px solid #fff;
+        border: 1px solid #eef3fc;
     }
 
     .osp_dp_person_info { flex: 1 1 auto; min-width: 0; }
@@ -577,13 +586,14 @@
         font-size: 10px;
 
         &.osp_dp_action_btn_outline {
+            background: #fff;
             border: 1px solid $napta-border;
             color: $napta-text-muted;
-            &:hover { border-color: $napta-accent; color: $napta-accent; }
+            &:hover { border-color: #0b2540; color: #0b2540; }
         }
 
         &.osp_dp_action_btn_filled {
-            background: $napta-accent;
+            background: #0b2540;
             color: #fff;
             &:hover { opacity: .85; }
         }
