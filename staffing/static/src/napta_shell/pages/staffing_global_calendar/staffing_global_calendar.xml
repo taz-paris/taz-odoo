@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.StaffingGlobalCalendarPage">
+        <div class="o_napta_staffing_global_calendar">
+
+            <div class="o_napta_gc_header">
+                <h1>Calendrier global</h1>
+                <div class="o_napta_gc_header_actions">
+                    <button class="o_napta_gc_icon_btn" disabled="disabled" title="Rafraîchir">
+                        <i class="fa fa-refresh"/>
+                    </button>
+                    <button class="o_napta_gc_icon_btn" disabled="disabled" title="Imprimer">
+                        <i class="fa fa-print"/>
+                    </button>
+                    <button class="btn btn-sm o_napta_gc_create" disabled="disabled">
+                        <i class="fa fa-plus"/> Créer un projet
+                    </button>
+                </div>
+            </div>
+
+            <div class="o_napta_toolbar">
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    Afficher les demandes de modification <i class="fa fa-caret-down"/>
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-sort"/> Trier : Utilisateur
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-bookmark-o"/> Sauvegarder la vue
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">Réinitialiser</button>
+                <div class="o_napta_toolbar_spacer"/>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-sliders"/> Paramètres d'affichage
+                </button>
+                <button class="o_napta_gc_icon_btn" disabled="disabled">
+                    <i class="fa fa-chevron-left"/>
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">Aujourd'hui</button>
+                <button class="o_napta_gc_icon_btn" disabled="disabled">
+                    <i class="fa fa-chevron-right"/>
+                </button>
+            </div>
+
+            <div class="o_napta_gc_helpbar">
+                <div class="o_napta_gc_legend">
+                    <t t-foreach="legend" t-as="item" t-key="item.type">
+                        <span class="o_napta_gc_legend_item">
+                            <span t-attf-class="o_napta_gc_legend_swatch o_napta_gc_bar_{{ item.type }}"/>
+                            <t t-esc="item.label"/>
+                        </span>
+                    </t>
+                </div>
+                <div class="o_napta_gc_help">
+                    <i t-att-data-tooltip="rightsTooltip" class="fa fa-info-circle"/>
+                    <span>Les droits de l'utilisateur limitent les collaborateurs et projets visibles.</span>
+                    <i t-att-data-tooltip="interactionTooltip" class="fa fa-mouse-pointer"/>
+                    <span>Clic sur une période pour les actions, double-clic pour l'édition rapide.</span>
+                </div>
+            </div>
+
+            <div class="o_napta_gc_grid_wrap">
+                <div class="o_napta_gc_grid" t-attf-style="grid-template-columns: 240px repeat({{ weeks.length }}, minmax(96px, 1fr));">
+
+                    <!-- Entête -->
+                    <div class="o_napta_gc_corner"/>
+                    <t t-foreach="weeks" t-as="week" t-key="week.key">
+                        <div class="o_napta_gc_week_header">
+                            <div class="o_napta_gc_week_label" t-esc="week.label"/>
+                            <div class="o_napta_gc_week_days">
+                                <span t-foreach="week.days" t-as="day" t-key="day" t-esc="day"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Lignes collaborateurs -->
+                    <t t-foreach="people" t-as="person" t-key="person.id">
+                        <div class="o_napta_gc_person_cell">
+                            <span class="o_napta_avatar" t-esc="person.initials"/>
+                            <div>
+                                <div class="o_napta_gc_person_name" t-esc="person.name"/>
+                                <div class="o_napta_gc_person_role" t-esc="person.role"/>
+                            </div>
+                        </div>
+
+                        <div class="o_napta_gc_row_track"
+                             t-attf-style="grid-column: 2 / span {{ weeks.length }}; grid-template-columns: repeat({{ weeks.length }}, minmax(96px, 1fr));">
+                            <t t-foreach="weeks" t-as="week" t-key="week.key">
+                                <div class="o_napta_gc_bg_cell" t-attf-style="grid-column: {{ week_index + 1 }}; grid-row: 1;"/>
+                            </t>
+                            <t t-foreach="person.bars" t-as="bar" t-key="bar_index">
+                                <div t-attf-class="o_napta_gc_bar o_napta_gc_bar_{{ bar.type }}"
+                                     t-attf-style="grid-column: {{ bar.col }} / span {{ bar.span }}; grid-row: 1;"
+                                     t-att-title="bar.label + (bar.rate ? ' - ' + bar.rate : '')">
+                                    <span class="o_napta_gc_bar_label" t-esc="bar.label"/>
+                                    <span t-if="bar.rate" class="o_napta_gc_bar_rate" t-esc="bar.rate"/>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+
+                </div>
+            </div>
+
+            <div class="o_napta_gc_footer">
+                <span>Éléments par page : 30</span>
+                <div class="o_napta_gc_pagination">
+                    <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-chevron-left"/></button>
+                    <span class="o_napta_gc_page_active">1</span>
+                    <span>2</span>
+                    <button class="o_napta_gc_icon_btn" disabled="disabled"><i class="fa fa-chevron-right"/></button>
+                </div>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

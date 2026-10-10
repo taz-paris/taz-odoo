@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.ReportsCompetencesGlobalesPage">
+        <div class="o_napta_reports_competences_globales">
+            <div class="o_napta_cg_header">
+                <div class="o_napta_cg_title_group">
+                    <h1>Compétences globales</h1>
+                    <div class="o_napta_cg_view_toggle">
+                        <button t-att-class="{ o_napta_cg_view_btn: true, o_napta_cg_view_active: state.view === 'graph' }"
+                                t-on-click="() => this.setView('graph')">
+                            <i class="fa fa-bar-chart"/> Graphique
+                        </button>
+                        <button t-att-class="{ o_napta_cg_view_btn: true, o_napta_cg_view_active: state.view === 'table' }"
+                                t-on-click="() => this.setView('table')">
+                            <i class="fa fa-table"/> Tableau
+                        </button>
+                    </div>
+                </div>
+                <button class="btn o_napta_cg_export">
+                    <i class="fa fa-download"/>
+                </button>
+            </div>
+
+            <div class="o_napta_cg_toolbar">
+                <button class="btn o_napta_cg_filter_btn">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+
+                <div class="o_napta_cg_toolbar_right">
+                    <div class="o_napta_cg_dropdown">
+                        <span class="o_napta_cg_dropdown_label">Nombre de résultats</span>
+                        <button class="btn o_napta_cg_dropdown_btn" t-on-click="toggleResultsMenu">
+                            <span t-esc="state.resultsCount"/> <i class="fa fa-caret-down"/>
+                        </button>
+                        <div t-if="state.resultsMenuOpen" class="o_napta_cg_dropdown_panel">
+                            <t t-foreach="resultCounts" t-as="count" t-key="count">
+                                <div t-att-class="{ o_napta_cg_dropdown_option: true, o_napta_cg_dropdown_selected: count === state.resultsCount }"
+                                     t-on-click="() => this.setResultsCount(count)">
+                                    <i t-att-class="count === state.resultsCount ? 'fa fa-check' : ''"/>
+                                    <span t-esc="count"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <div class="o_napta_cg_dropdown">
+                        <span class="o_napta_cg_dropdown_label"><i class="fa fa-sort-amount-desc"/> Trier par</span>
+                        <button class="btn o_napta_cg_dropdown_btn" t-on-click="toggleSortMenu">
+                            <span t-esc="currentSort.label"/> <i class="fa fa-caret-down"/>
+                        </button>
+                        <div t-if="state.sortMenuOpen" class="o_napta_cg_dropdown_panel o_napta_cg_sort_panel">
+                            <t t-foreach="sortOptions" t-as="opt" t-key="opt.key">
+                                <div t-att-class="{ o_napta_cg_dropdown_option: true, o_napta_cg_dropdown_selected: opt.key === state.sortKey }"
+                                     t-on-click="() => this.setSortKey(opt.key)">
+                                    <i t-att-class="opt.key === state.sortKey ? 'fa fa-check' : ''"/>
+                                    <span t-esc="opt.label"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VUE GRAPHIQUE -->
+            <div t-if="state.view === 'graph'" class="o_napta_cg_graph">
+                <div class="o_napta_cg_legend">
+                    <span class="o_napta_cg_legend_item">
+                        <span class="o_napta_cg_legend_swatch o_napta_cg_legend_aspirations"/> # d'aspirations
+                    </span>
+                    <span class="o_napta_cg_legend_item">
+                        <span class="o_napta_cg_legend_swatch o_napta_cg_legend_people"/> # de personnes avec la compétence
+                    </span>
+                    <span class="o_napta_cg_legend_item">
+                        <span class="o_napta_cg_legend_dot"/> Note moyenne
+                    </span>
+                </div>
+
+                <div class="o_napta_cg_bars">
+                    <t t-foreach="skills" t-as="skill" t-key="skill.label">
+                        <div class="o_napta_cg_bar_row" t-att-title="skillTitle(skill)">
+                            <span class="o_napta_cg_bar_label" t-esc="skill.label"/>
+                            <div class="o_napta_cg_bar_track">
+                                <div class="o_napta_cg_bar_aspirations"
+                                     t-attf-style="width: {{ aspirationsWidth(skill) }}"/>
+                                <div class="o_napta_cg_bar_people"
+                                     t-attf-style="width: {{ peopleWidth(skill) }}"/>
+                                <span class="o_napta_cg_bar_dot"
+                                      t-attf-style="left: {{ dotPosition(skill) }}"
+                                      t-esc="skill.avgGrade"/>
+                            </div>
+                            <span class="o_napta_cg_bar_value" t-esc="skill.aspirations + skill.peopleWithSkill"/>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- VUE TABLEAU -->
+            <div t-if="state.view === 'table'" class="o_napta_cg_table_wrap">
+                <table class="o_napta_cg_table">
+                    <thead>
+                        <tr>
+                            <th>Compétence</th>
+                            <th>Catégorie</th>
+                            <th>Catégorie parente</th>
+                            <th class="o_napta_cg_num">Nombre d'ajouts</th>
+                            <th class="o_napta_cg_num">Nombre d'aspirations</th>
+                            <th class="o_napta_cg_num">Note moyenne</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="skills" t-as="skill" t-key="skill.label">
+                            <td t-esc="skill.label"/>
+                            <td t-esc="skill.category"/>
+                            <td t-esc="skill.parentCategory"/>
+                            <td class="o_napta_cg_num" t-esc="skill.peopleWithSkill"/>
+                            <td class="o_napta_cg_num" t-esc="skill.aspirations"/>
+                            <td class="o_napta_cg_num" t-esc="skill.avgGrade"/>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </t>
+
+</templates>

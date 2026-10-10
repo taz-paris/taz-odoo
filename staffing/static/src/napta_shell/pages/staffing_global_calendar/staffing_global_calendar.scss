@@ -1,0 +1,298 @@
+.o_napta_staffing_global_calendar {
+    $gc-real: #2e8f6b;
+    $gc-simulated: #8b5fd1;
+    $gc-conflict: #c0392b;
+    $gc-absence: #dcdfe2;
+
+    .o_napta_gc_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_gc_header_actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .o_napta_gc_icon_btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid $napta-border;
+        background: #fff;
+        border-radius: 6px;
+        color: $napta-text-muted;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .o_napta_gc_create {
+        background: $napta-text;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+
+        i {
+            margin-right: 6px;
+        }
+    }
+
+    .o_napta_toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    .o_napta_toolbar_spacer {
+        flex: 1 1 auto;
+    }
+
+    .o_napta_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+        white-space: nowrap;
+
+        i {
+            margin-right: 6px;
+            color: $napta-text-muted;
+        }
+    }
+
+    // --- aide / légende ---
+    .o_napta_gc_helpbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #fafafa;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 14px;
+        font-size: 12px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_gc_legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .o_napta_gc_legend_item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .o_napta_gc_legend_swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    .o_napta_gc_help {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+
+        i {
+            color: $napta-accent;
+            cursor: help;
+        }
+
+        span {
+            margin-right: 10px;
+        }
+    }
+
+    // --- grille ---
+    .o_napta_gc_grid_wrap {
+        overflow-x: auto;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+    }
+
+    .o_napta_gc_grid {
+        display: grid;
+        min-width: 1100px;
+    }
+
+    .o_napta_gc_corner {
+        border-bottom: 1px solid $napta-border;
+        background: #fafafa;
+    }
+
+    .o_napta_gc_week_header {
+        border-bottom: 1px solid $napta-border;
+        border-left: 1px solid $napta-border;
+        background: #fafafa;
+        padding: 6px 8px;
+        text-align: center;
+    }
+
+    .o_napta_gc_week_label {
+        font-size: 11px;
+        font-weight: 600;
+        color: $napta-text;
+        white-space: nowrap;
+    }
+
+    .o_napta_gc_week_days {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: $napta-text-muted;
+        margin-top: 2px;
+    }
+
+    .o_napta_gc_person_cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid $napta-border;
+        background: #fff;
+        position: sticky;
+        left: 0;
+        z-index: 1;
+    }
+
+    .o_napta_gc_person_name {
+        font-weight: 600;
+        font-size: 13px;
+        color: $napta-text;
+    }
+
+    .o_napta_gc_person_role {
+        font-size: 11px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_avatar {
+        flex: 0 0 auto;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: $napta-active-bg;
+        color: $napta-text;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .o_napta_gc_row_track {
+        display: grid;
+        position: relative;
+        border-bottom: 1px solid $napta-border;
+        min-height: 54px;
+    }
+
+    .o_napta_gc_bg_cell {
+        border-left: 1px solid $napta-border;
+    }
+
+    .o_napta_gc_bar {
+        margin: 7px 2px;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+    .o_napta_gc_bar_label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_napta_gc_bar_real {
+        background: $gc-real;
+    }
+
+    .o_napta_gc_bar_simulated {
+        background: #fff;
+        color: $gc-simulated;
+        border: 1.5px solid $gc-simulated;
+    }
+
+    .o_napta_gc_bar_conflict {
+        background: $gc-conflict;
+    }
+
+    .o_napta_gc_bar_absence, .o_napta_gc_bar_holiday {
+        background: $gc-absence;
+        color: $napta-text;
+    }
+
+    // légende : swatch "simulé" doit rester cohérent même en petit carré plein
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_simulated {
+        background: #fff;
+        border: 1.5px solid $gc-simulated;
+    }
+
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_real {
+        background: $gc-real;
+        border: none;
+    }
+
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_conflict {
+        background: $gc-conflict;
+        border: none;
+    }
+
+    .o_napta_gc_legend_swatch.o_napta_gc_bar_absence {
+        background: $gc-absence;
+        border: none;
+    }
+
+    .o_napta_gc_footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+        font-size: 12px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_gc_pagination {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        span {
+            cursor: pointer;
+        }
+
+        .o_napta_gc_page_active {
+            font-weight: 700;
+            color: $napta-accent;
+        }
+    }
+}

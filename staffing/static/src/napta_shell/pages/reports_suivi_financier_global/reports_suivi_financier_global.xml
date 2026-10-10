@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.ReportsSuiviFinancierGlobalPage">
+        <div class="o_napta_reports_suivi_financier_global">
+            <div class="o_napta_sfg_header">
+                <div class="o_napta_sfg_title_group">
+                    <h1>Suivi financier global</h1>
+                    <span class="o_napta_sfg_by">par</span>
+                    <div class="o_napta_sfg_entry_dropdown">
+                        <button class="btn o_napta_sfg_entry_btn" t-on-click="toggleEntryMenu">
+                            <span t-esc="state.entryKey"/> <i class="fa fa-caret-down"/>
+                        </button>
+                        <div t-if="state.entryMenuOpen" class="o_napta_sfg_entry_panel">
+                            <t t-foreach="entryKeys" t-as="key" t-key="key">
+                                <div t-att-class="{ o_napta_sfg_entry_option: true, o_napta_sfg_entry_selected: key === state.entryKey }"
+                                     t-on-click="() => this.setEntryKey(key)">
+                                    <i t-att-class="key === state.entryKey ? 'fa fa-check' : ''"/>
+                                    <span t-esc="key"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+                <div class="o_napta_sfg_header_actions">
+                    <button class="btn o_napta_sfg_link_btn">
+                        <i class="fa fa-external-link"/> Voir le détail des calculs
+                    </button>
+                    <button class="btn o_napta_sfg_export">
+                        <i class="fa fa-download"/>
+                    </button>
+                </div>
+            </div>
+
+            <div class="o_napta_sfg_toolbar">
+                <button class="btn o_napta_sfg_filter_btn">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+                <div class="o_napta_sfg_toolbar_right">
+                    <button class="btn o_napta_sfg_dropdown_btn">
+                        Colonnes <i class="fa fa-caret-down"/>
+                    </button>
+                    <button class="btn o_napta_sfg_dropdown_btn">
+                        Paramètres d'affichage <i class="fa fa-caret-down"/>
+                    </button>
+                    <div class="o_napta_sfg_date_range">
+                        <i class="fa fa-chevron-left"/>
+                        <span t-esc="state.dateFrom"/>
+                        <i class="fa fa-arrow-right"/>
+                        <span t-esc="state.dateTo"/>
+                        <i class="fa fa-chevron-right"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="o_napta_sfg_table_wrap">
+                <table class="o_napta_sfg_table">
+                    <thead>
+                        <tr>
+                            <th class="o_napta_sfg_col_label" t-esc="state.entryKey.toUpperCase()"/>
+                            <th>Mode de facturation</th>
+                            <th class="o_napta_sfg_num">Budget vendu</th>
+                            <th class="o_napta_sfg_group" colspan="2">Chiffre d'affaires à date</th>
+                            <th class="o_napta_sfg_group" colspan="2">Chiffre d'affaires à terme</th>
+                            <th class="o_napta_sfg_group" colspan="2">Coût à date</th>
+                            <th class="o_napta_sfg_num">Coût à terme</th>
+                            <th class="o_napta_sfg_num">Marge</th>
+                            <th class="o_napta_sfg_group" colspan="2">Charge (jours) à date</th>
+                            <th class="o_napta_sfg_group" colspan="2">Charge (jours) à terme</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="rows" t-as="row" t-key="row.key">
+                            <td class="o_napta_sfg_col_label">
+                                <i class="fa fa-caret-right o_napta_sfg_caret"/> <span t-esc="row.label"/>
+                            </td>
+                            <td t-esc="row.billing"/>
+                            <td class="o_napta_sfg_num" t-esc="row.budget"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_prev" t-esc="row.caDate.previsionnel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real" t-esc="row.caDate.reel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real" t-esc="row.caTerme.reel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_proj" t-esc="row.caTerme.projete"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_prev" t-esc="row.coutDate.previsionnel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real" t-esc="row.coutDate.reel"/>
+                            <td class="o_napta_sfg_num" t-esc="row.coutTerme"/>
+                            <td class="o_napta_sfg_num" t-esc="row.marge"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real">
+                                <span t-esc="row.chargeDate.reel"/>
+                                <i t-if="row.chargeDate.unapproved" class="fa fa-flag o_napta_sfg_flag"
+                                   t-att-title="unapprovedTitle(row.chargeDate.unapproved)"/>
+                            </td>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_proj">
+                                <span t-esc="row.chargeDate.projete"/>
+                            </td>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real">
+                                <span t-esc="row.chargeTerme.reel"/>
+                                <i t-if="row.chargeTerme.unapproved" class="fa fa-flag o_napta_sfg_flag"
+                                   t-att-title="unapprovedTitle(row.chargeTerme.unapproved)"/>
+                            </td>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_proj">
+                                <span t-esc="row.chargeTerme.projete"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="o_napta_sfg_total_row">
+                            <td>Total</td>
+                            <td/>
+                            <td class="o_napta_sfg_num"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_prev" t-esc="total.caDate.previsionnel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real" t-esc="total.caDate.reel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real" t-esc="total.caTerme.reel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_proj" t-esc="total.caTerme.projete"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_prev" t-esc="total.coutDate.previsionnel"/>
+                            <td class="o_napta_sfg_num o_napta_sfg_cell_real" t-esc="total.coutDate.reel"/>
+                            <td class="o_napta_sfg_num" t-esc="total.coutTerme"/>
+                            <td class="o_napta_sfg_num" t-esc="total.marge"/>
+                            <td class="o_napta_sfg_num" colspan="2"/>
+                            <td class="o_napta_sfg_num" colspan="2"/>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="o_napta_sfg_legend">
+                <span class="o_napta_sfg_legend_item">
+                    <span class="o_napta_sfg_legend_swatch o_napta_sfg_legend_prev"/> Prévisionnel
+                    <i class="fa fa-info-circle o_napta_sfg_legend_info" t-att-data-tooltip="legendPrevisionnelTooltip"/>
+                </span>
+                <span class="o_napta_sfg_legend_item">
+                    <span class="o_napta_sfg_legend_swatch o_napta_sfg_legend_real"/> Réel
+                    <i class="fa fa-info-circle o_napta_sfg_legend_info" t-att-data-tooltip="legendReelTooltip"/>
+                </span>
+                <span class="o_napta_sfg_legend_item">
+                    <span class="o_napta_sfg_legend_swatch o_napta_sfg_legend_proj"/> Projeté
+                    <i class="fa fa-info-circle o_napta_sfg_legend_info" t-att-data-tooltip="legendProjeteTooltip"/>
+                </span>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.CareerJobSheetsPage">
+        <div class="o_napta_career_job_sheets">
+            <div class="o_napta_js_header">
+                <h1>Fiches de poste</h1>
+            </div>
+
+            <div class="o_napta_tabs">
+                <t t-foreach="tabs" t-as="tab" t-key="tab">
+                    <div t-att-class="{ o_napta_tab: true, o_napta_tab_active: tab === state.activeTab }"
+                         t-on-click="() => this.setTab(tab)">
+                        <span t-esc="tab"/>
+                    </div>
+                </t>
+            </div>
+
+            <div class="o_napta_js_list">
+                <div class="o_napta_js_list_head">
+                    <span class="o_napta_js_col_job">Fiche de poste</span>
+                    <span class="o_napta_js_col_desc">Description</span>
+                    <span class="o_napta_js_col_tracks">Parcours associés</span>
+                    <span class="o_napta_js_col_score">Votre score</span>
+                </div>
+
+                <t t-foreach="jobSheets" t-as="job" t-key="job.id">
+                    <div class="o_napta_js_row">
+                        <div class="o_napta_js_row_main" t-on-click="() => this.toggleExpand(job.id)">
+                            <div class="o_napta_js_col_job">
+                                <i t-att-class="'fa ' + (isExpanded(job.id) ? 'fa-chevron-down' : 'fa-chevron-right') + ' o_napta_js_chevron'"/>
+                                <span t-esc="job.name"/>
+                                <i t-if="job.mine" class="fa fa-star o_napta_js_star"
+                                   title="Cette fiche de poste est associée à votre profil"/>
+                            </div>
+                            <ul class="o_napta_js_col_desc o_napta_js_desc_list">
+                                <t t-foreach="job.description" t-as="line" t-key="line_index">
+                                    <li t-esc="line"/>
+                                </t>
+                            </ul>
+                            <div class="o_napta_js_col_tracks">
+                                <span t-foreach="job.tracks" t-as="track" t-key="track" class="o_napta_js_track_tag" t-esc="track"/>
+                            </div>
+                            <div class="o_napta_js_col_score">
+                                <div class="o_napta_js_score_track">
+                                    <div class="o_napta_js_score_fill"
+                                         t-attf-style="width: {{ scorePercent(job) }}"/>
+                                </div>
+                                <span class="o_napta_js_score_label"
+                                      t-esc="job.yourScore.met + '/' + job.yourScore.total + ' expected skills'"/>
+                            </div>
+                        </div>
+
+                        <div t-if="isExpanded(job.id)" class="o_napta_js_expected">
+                            <div class="o_napta_js_expected_title">Expected skills</div>
+                            <div class="o_napta_js_table">
+                                <div class="o_napta_js_table_head">
+                                    <span class="o_napta_js_th_name">Name</span>
+                                    <span class="o_napta_js_th_grade">Required grade</span>
+                                    <span class="o_napta_js_th_gradedesc">Grade description</span>
+                                    <span class="o_napta_js_th_score">Your score</span>
+                                </div>
+                                <t t-foreach="job.categories" t-as="category" t-key="category.name">
+                                    <div class="o_napta_js_category_row">
+                                        <div class="o_napta_js_category_label">
+                                            <i class="fa fa-chevron-down"/>
+                                            <span t-esc="category.name.toUpperCase() + ' (' + category.skills.length + ')'"/>
+                                        </div>
+                                        <div class="o_napta_js_category_status">
+                                            <i t-if="categoryMet(category)" class="fa fa-check o_napta_js_check"/>
+                                            <span t-else="" t-esc="categoryCount(category)"/>
+                                        </div>
+                                    </div>
+                                    <t t-foreach="category.skills" t-as="skill" t-key="skill.name">
+                                        <div class="o_napta_js_skill_row">
+                                            <span class="o_napta_js_th_name" t-esc="skill.name"/>
+                                            <span class="o_napta_js_th_grade">
+                                                <span class="o_napta_js_grade_num" t-esc="skill.requiredGrade"/>
+                                                <i class="fa fa-star o_napta_js_grade_star"/>
+                                                <div class="o_napta_js_grade_level" t-esc="skill.requiredLevel"/>
+                                            </span>
+                                            <span class="o_napta_js_th_gradedesc" t-esc="skill.gradeDescription"/>
+                                            <span t-att-class="'o_napta_js_th_score' + (skillMet(skill) ? ' o_napta_js_score_ok' : '')">
+                                                <t t-if="skill.yourScore !== null">
+                                                    <span t-esc="skill.yourScore"/>
+                                                    <i class="fa fa-star o_napta_js_grade_star"/>
+                                                </t>
+                                            </span>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>

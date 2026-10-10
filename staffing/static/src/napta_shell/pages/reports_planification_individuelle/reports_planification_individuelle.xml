@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.ReportsPlanificationIndividuellePage">
+        <div class="o_napta_reports_planification_individuelle">
+
+            <!-- Header -->
+            <div class="o_pi_header">
+                <div class="o_pi_header_left">
+                    <h1>Individual planning report</h1>
+                    <div class="o_pi_tabs">
+                        <div t-att-class="'o_pi_tab' + (state.activeTab === 'users' ? ' o_pi_tab_active' : '')"
+                             t-on-click="() => this.setTab('users')">Users</div>
+                        <div t-att-class="'o_pi_tab' + (state.activeTab === 'projects' ? ' o_pi_tab_active' : '')"
+                             t-on-click="() => this.setTab('projects')">Projects</div>
+                    </div>
+                </div>
+                <div class="o_pi_header_right">
+                    <div class="o_pi_icon_btn" t-on-click="() => this.toggleLegend()">
+                        <i class="fa fa-info"/>
+                    </div>
+                    <div class="o_pi_icon_btn" t-att-data-tooltip="downloadTooltip">
+                        <i class="fa fa-download"/>
+                    </div>
+
+                    <div t-if="state.legendOpen" class="o_pi_popover o_pi_legend_popover">
+                        <div class="o_pi_legend_row">
+                            <span class="o_pi_legend_swatch o_pi_legend_swatch_real">100%</span>
+                            <span>Real assignment</span>
+                        </div>
+                        <div class="o_pi_legend_row">
+                            <span class="o_pi_legend_swatch o_pi_legend_swatch_simulated">100%</span>
+                            <span>Simulated assignment</span>
+                        </div>
+                        <div class="o_pi_legend_divider"/>
+                        <div class="o_pi_legend_row">
+                            <span class="o_pi_legend_swatch o_pi_cell_red">101%</span>
+                            <span>From 101%</span>
+                        </div>
+                        <div class="o_pi_legend_row">
+                            <span class="o_pi_legend_swatch o_pi_cell_green">90%</span>
+                            <span>From 90%</span>
+                        </div>
+                        <div class="o_pi_legend_row">
+                            <span class="o_pi_legend_swatch o_pi_cell_amber">50%</span>
+                            <span>From 50%</span>
+                        </div>
+                        <div class="o_pi_legend_row">
+                            <span class="o_pi_legend_swatch o_pi_cell_purple">0%</span>
+                            <span>From 0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="o_pi_toolbar">
+                <div class="o_pi_toolbar_left">
+                    <div class="o_pi_toolbar_btn_wrap">
+                        <button class="btn btn-sm o_pi_toolbar_btn" t-on-click="() => this.toggleMenu('views')">
+                            <i class="fa fa-bookmark-o"/> Views
+                        </button>
+                        <div t-if="state.openMenu === 'views'" class="o_pi_popover o_pi_views_popover">
+                            <div class="o_pi_popover_title">Save current view</div>
+                            <div class="o_pi_views_empty">No saved view</div>
+                            <div class="o_pi_views_hint">
+                                <i class="fa fa-info-circle"/>
+                                <span>A view allows you to save the filters selected, the columns displayed, the sorting, the display parameters and the date range selected.</span>
+                            </div>
+                            <button class="btn btn-sm o_pi_popover_apply" disabled="disabled">Save current view</button>
+                        </div>
+                    </div>
+
+                    <div class="o_pi_toolbar_btn_wrap">
+                        <button class="btn btn-sm o_pi_toolbar_btn" t-on-click="() => this.toggleMenu('filter')">
+                            <i class="fa fa-filter"/> Filter
+                        </button>
+                        <div t-if="state.openMenu === 'filter'" class="o_pi_popover o_pi_filter_popover">
+                            <div class="o_pi_popover_title">Filters</div>
+                            <div class="o_pi_filter_group_title">Users</div>
+                            <div class="o_pi_filter_chips">
+                                <span class="o_pi_filter_chip">Office</span>
+                                <span class="o_pi_filter_chip">Skill</span>
+                                <span class="o_pi_filter_chip">Business unit</span>
+                                <span class="o_pi_filter_chip">Position</span>
+                                <span class="o_pi_filter_chip">Manager</span>
+                                <span class="o_pi_filter_chip">User</span>
+                            </div>
+                            <div class="o_pi_filter_group_title">Projects</div>
+                            <div class="o_pi_filter_chips">
+                                <span class="o_pi_filter_chip">Project category</span>
+                                <span class="o_pi_filter_chip">Client</span>
+                                <span class="o_pi_filter_chip">Project status</span>
+                            </div>
+                            <div class="o_pi_filter_group_title">Staffings</div>
+                            <div class="o_pi_filter_chips">
+                                <span class="o_pi_filter_chip">Staffing status</span>
+                                <span class="o_pi_filter_chip">Staffing type</span>
+                            </div>
+                            <button class="btn btn-sm o_pi_popover_apply" disabled="disabled">Apply</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_pi_toolbar_right">
+                    <div class="o_pi_toolbar_btn_wrap">
+                        <button class="btn btn-sm o_pi_toolbar_btn" t-on-click="() => this.toggleMenu('columns')">
+                            Columns <i class="fa fa-caret-down"/>
+                        </button>
+                        <div t-if="state.openMenu === 'columns'" class="o_pi_popover o_pi_columns_popover">
+                            <div class="o_pi_column_row">
+                                <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
+                                <span>People</span>
+                            </div>
+                            <div class="o_pi_column_row">
+                                <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
+                                <span>Notes</span>
+                            </div>
+                            <div class="o_pi_column_row">
+                                <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
+                                <span>First availability</span>
+                            </div>
+                            <div class="o_pi_column_row">
+                                <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
+                                <span>Position</span>
+                            </div>
+                            <div class="o_pi_column_row">
+                                <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
+                                <span>Business Unit (User)</span>
+                            </div>
+                            <div class="o_pi_column_row">
+                                <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
+                                <span>Office</span>
+                            </div>
+                            <div class="o_pi_column_row">
+                                <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
+                                <span>Daily Cost</span>
+                                <i class="fa fa-info-circle o_pi_column_info" t-att-data-tooltip="dailyCostTooltip"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="o_pi_toolbar_btn_wrap">
+                        <button class="btn btn-sm o_pi_toolbar_btn" t-on-click="() => this.toggleMenu('display')">
+                            Display settings <i class="fa fa-caret-down"/>
+                        </button>
+                        <div t-if="state.openMenu === 'display'" class="o_pi_popover o_pi_display_popover">
+                            <div class="o_pi_display_col">
+                                <div class="o_pi_popover_title">Display</div>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_display" checked="checked"/> Utilization</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_display"/> Availability (limited to 0)</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_display"/> Availability</label>
+
+                                <div class="o_pi_popover_title o_pi_popover_title_spaced">Display utilization in</div>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_unit" checked="checked"/> % : Details</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_unit"/> % : Util. rate (holidays incl.)</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_unit"/> % : Util. rate (holidays excl.)</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_unit"/> Days</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_unit"/> Hours</label>
+
+                                <div class="o_pi_popover_title o_pi_popover_title_spaced">Display mode (main line)</div>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_mode"/> Real</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_mode"/> Simulated</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_mode"/> Pre-booking</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_mode" checked="checked"/> All</label>
+                            </div>
+                            <div class="o_pi_display_col">
+                                <div class="o_pi_popover_title">Group data by</div>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_group"/> Half-day</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_group"/> Day</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_group" checked="checked"/> Week</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_group"/> Month</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_group"/> Quarter</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_group"/> Year</label>
+                                <label class="o_pi_radio_row"><input type="radio" name="pi_group"/> No grouping</label>
+
+                                <div class="o_pi_popover_title o_pi_popover_title_spaced">Filtered data</div>
+                                <div class="o_pi_toggle_row">
+                                    <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
+                                    <span class="o_pi_toggle_label_muted">See unassigned users</span>
+                                </div>
+                                <div class="o_pi_toggle_row">
+                                    <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
+                                    <span>Display leaves and bank holidays</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="o_pi_toolbar_btn_wrap">
+                        <button class="btn btn-sm o_pi_date_btn" t-on-click="() => this.toggleMenu('date')">
+                            <i class="fa fa-calendar"/> 21/07/2025 - 31/08/2025 <i class="fa fa-caret-down"/>
+                        </button>
+                        <div t-if="state.openMenu === 'date'" class="o_pi_popover o_pi_date_popover">
+                            <div class="o_pi_date_option">This week</div>
+                            <div class="o_pi_date_option">This month</div>
+                            <div class="o_pi_date_option">This quarter</div>
+                            <div class="o_pi_date_option">This year</div>
+                            <div class="o_pi_legend_divider"/>
+                            <div class="o_pi_date_option">Custom range</div>
+                            <div class="o_pi_date_option">Relative range</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div t-if="state.activeTab === 'users'" class="o_pi_table_wrap">
+                <table class="o_pi_table">
+                    <thead>
+                        <tr>
+                            <th class="o_pi_col_expand"/>
+                            <th class="o_pi_col_people">People <i class="fa fa-sort o_pi_sort" title="Trier"/></th>
+                            <th class="o_pi_col_notes">Notes <i class="fa fa-info-circle" t-att-data-tooltip="notesTooltip"/></th>
+                            <th class="o_pi_col_availability">First availability <i class="fa fa-sort o_pi_sort" title="Trier"/></th>
+                            <t t-foreach="weekColumns" t-as="col" t-key="col.key">
+                                <th class="o_pi_col_week">
+                                    <div class="o_pi_week_label"><span t-esc="col.label"/> <i class="fa fa-sort o_pi_sort" title="Trier"/></div>
+                                    <div class="o_pi_week_date" t-esc="col.date"/>
+                                </th>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="people" t-as="person" t-key="person.id">
+                            <tr class="o_pi_row">
+                                <td class="o_pi_col_expand">
+                                    <i t-att-class="'fa ' + (isExpanded(person.id) ? 'fa-chevron-down' : 'fa-chevron-right') + ' o_pi_chevron'"
+                                       title="Afficher le détail"
+                                       t-on-click="() => this.toggleRow(person.id)"/>
+                                </td>
+                                <td class="o_pi_col_people">
+                                    <div class="o_pi_person_cell">
+                                        <span class="o_pi_avatar" t-esc="person.initials"/>
+                                        <span class="o_pi_person_name" t-esc="person.name"/>
+                                    </div>
+                                </td>
+                                <td class="o_pi_col_notes">
+                                    <span t-if="person.notes" t-esc="person.notes"/>
+                                    <i t-if="person.notesAlert" class="fa fa-circle o_pi_notes_alert" title="À surveiller"/>
+                                </td>
+                                <td class="o_pi_col_availability">
+                                    <div t-if="person.today" class="o_pi_today_cell">
+                                        <div>Today</div>
+                                        <div class="o_pi_today_sub" t-esc="person.lastAssignment"/>
+                                    </div>
+                                    <span t-else="" t-esc="person.availability"/>
+                                </td>
+                                <t t-foreach="person.weeks" t-as="value" t-key="value_index">
+                                    <td class="o_pi_col_week">
+                                        <span t-att-class="'o_pi_cell ' + cellClass(value)" t-esc="value + '%'"/>
+                                    </td>
+                                </t>
+                            </tr>
+
+                            <t t-if="isExpanded(person.id)">
+                                <tr t-foreach="detailRows(person)" t-as="detail" t-key="detail_index" class="o_pi_detail_row">
+                                    <td class="o_pi_col_expand"/>
+                                    <td class="o_pi_col_people o_pi_detail_label" colspan="3">
+                                        <span t-att-class="detail.highlight ? 'o_pi_detail_client_highlight' : (detail.simulated ? 'o_pi_detail_client_muted' : 'o_pi_detail_client')"
+                                              t-esc="detail.client"/>
+                                        <span class="o_pi_detail_dash"> — </span>
+                                        <span t-esc="detail.project"/>
+                                    </td>
+                                    <t t-foreach="detail.cells" t-as="cell" t-key="cell_index">
+                                        <td class="o_pi_col_week">
+                                            <span t-if="cell"
+                                                  t-att-class="'o_pi_cell o_pi_cell_sub ' + (detail.simulated ? 'o_pi_cell_simulated' : 'o_pi_cell_light')"
+                                                  t-esc="cell + '%'"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                                <tr class="o_pi_detail_row">
+                                    <td class="o_pi_col_expand"/>
+                                    <td class="o_pi_col_people o_pi_detail_label" colspan="3">Bank holiday</td>
+                                    <t t-foreach="weekColumns" t-as="col" t-key="col.key">
+                                        <td class="o_pi_col_week"/>
+                                    </t>
+                                </tr>
+                                <tr class="o_pi_detail_row o_pi_add_assignment_row">
+                                    <td class="o_pi_col_expand"/>
+                                    <td colspan="9">
+                                        <i class="fa fa-plus"/> Add assignment
+                                    </td>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+
+            <div t-if="state.activeTab === 'projects'" class="o_pi_projects_placeholder">
+                <i class="fa fa-folder-open-o"/>
+                <div>Vue Projets : détail des affectations et demandes par projet sur la période sélectionnée.</div>
+            </div>
+
+            <!-- Footer / pagination -->
+            <div class="o_pi_footer">
+                <div class="o_pi_footer_left">
+                    Items per page
+                    <select class="o_pi_page_size">
+                        <option>10</option>
+                        <option selected="selected">30</option>
+                        <option>50</option>
+                        <option>100</option>
+                    </select>
+                </div>
+                <div class="o_pi_footer_center">
+                    <i class="fa fa-chevron-left o_pi_page_arrow"/>
+                    <span class="o_pi_page_pill o_pi_page_pill_active">1</span>
+                    <span class="o_pi_page_pill">2</span>
+                    <i class="fa fa-chevron-right o_pi_page_arrow"/>
+                </div>
+                <div class="o_pi_footer_right">
+                    Page <input type="text" class="o_pi_page_input" value="1"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

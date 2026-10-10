@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.StaffingProjectsPage">
+        <div class="o_napta_staffing_projects" t-on-click="closeMenus">
+
+            <!-- Header -->
+            <div class="osp_header">
+                <h1>Projets</h1>
+                <div class="osp_view_switch">
+                    <button type="button"
+                            t-att-class="{ osp_view_btn: true, osp_view_btn_active: state.view === 'cards' }"
+                            t-on-click="() => this.setView('cards')">Cartes</button>
+                    <button type="button"
+                            t-att-class="{ osp_view_btn: true, osp_view_btn_active: state.view === 'table' }"
+                            t-on-click="() => this.setView('table')">Projets</button>
+                </div>
+                <div class="osp_header_spacer"/>
+                <button type="button" class="osp_icon_btn" t-att-data-tooltip="exportTooltip">
+                    <i class="fa fa-download"/>
+                </button>
+                <button type="button" class="btn osp_btn_primary">Créer un projet</button>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="osp_toolbar">
+                <div class="osp_toolbar_left">
+                    <div class="osp_dropdown_wrap">
+                        <button type="button" class="osp_toolbar_btn" t-on-click="toggleViews">
+                            <i class="fa fa-bookmark-o"/> Vues
+                        </button>
+                        <div t-if="state.showViews" class="osp_dropdown osp_views_dropdown" t-on-click.stop="">
+                            <div class="osp_views_title">Sauvegarder la vue actuelle</div>
+                            <div class="osp_views_empty">Aucune vue enregistrée</div>
+                            <div class="osp_views_info">
+                                <i class="fa fa-info-circle"/>
+                                <span>Une vue permet de sauvegarder les filtres sélectionnés, les colonnes affichées, le tri, les paramètres d'affichage.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="osp_dropdown_wrap">
+                        <button type="button" class="osp_toolbar_btn" t-on-click="toggleFilter">
+                            <i class="fa fa-filter"/> Filtrer
+                        </button>
+                        <div t-if="state.showFilter" class="osp_dropdown osp_filter_dropdown" t-on-click.stop="">
+                            <input type="text" class="osp_filter_search" placeholder="Rechercher un filtre"/>
+                            <t t-foreach="filterSections" t-as="section" t-key="section.title">
+                                <div class="osp_filter_section_title" t-esc="section.title"/>
+                                <div t-foreach="section.items" t-as="item" t-key="item" class="osp_filter_item">
+                                    <i class="fa fa-star-o osp_filter_fav"/>
+                                    <span t-esc="item"/>
+                                    <i class="fa fa-chevron-right osp_filter_chevron"/>
+                                </div>
+                            </t>
+                            <div class="osp_filter_info">
+                                <i class="fa fa-info-circle"/>
+                                <span>Résultats restreints par les filtres actifs</span>
+                            </div>
+                            <button type="button" class="osp_filter_save">Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div t-if="state.view === 'table'" class="osp_toolbar_right">
+                    <div class="osp_dropdown_wrap">
+                        <button type="button" class="osp_toolbar_btn" t-on-click="toggleColumnsMenu">
+                            Colonnes <i class="fa fa-chevron-down"/>
+                        </button>
+                        <div t-if="state.showColumns" class="osp_dropdown osp_columns_dropdown" t-on-click.stop="">
+                            <div class="osp_columns_title">Tout sélectionner</div>
+                            <div t-foreach="tableColumns" t-as="col" t-key="col.key" class="osp_columns_item">
+                                <i class="fa fa-check"/>
+                                <span t-esc="col.label"/>
+                                <i class="fa fa-ellipsis-v osp_columns_handle"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk actions bar -->
+            <div t-if="selectedCount" class="osp_bulk_bar">
+                <span class="osp_bulk_count" t-esc="selectedCount + ' éléments sélectionnés'"/>
+                <button type="button" class="osp_bulk_btn"><i class="fa fa-sign-in"/> Déplacer</button>
+                <button type="button" class="osp_bulk_btn"><i class="fa fa-archive"/> Archiver</button>
+                <button type="button" class="osp_bulk_btn"><i class="fa fa-eye-slash"/> Retirer du tableau de bord</button>
+                <button type="button" class="osp_bulk_btn osp_bulk_btn_danger"><i class="fa fa-trash-o"/> Supprimer</button>
+            </div>
+
+            <!-- VUE CARTES -->
+            <div t-if="state.view === 'cards'" class="osp_board">
+                <div t-foreach="columns" t-as="column" t-key="column.key" class="osp_column">
+                    <div class="osp_column_header">
+                        <span class="osp_column_count" t-esc="cardsForColumn(column.key).length"/>
+                        <span class="osp_column_title" t-esc="column.title"/>
+                        <i class="fa fa-minus osp_column_collapse" t-on-click="() => this.toggleColumnCollapse(column.key)"/>
+                    </div>
+
+                    <t t-foreach="cardsForColumn(column.key)" t-as="card" t-key="card.id">
+                        <div t-att-class="{ osp_card: true, osp_card_selected: isSelected(card) }"
+                             t-on-click="() => this.openDetail(card)">
+                            <div class="osp_card_select" t-on-click="(ev) => this.toggleSelect(card, ev)">
+                                <i t-att-class="isSelected(card) ? 'fa fa-check-square' : 'fa fa-square-o'"/>
+                            </div>
+                            <div class="osp_card_top">
+                                <span t-attf-class="osp_dot osp_dot_{{card.color}}"/>
+                                <span class="osp_card_title" t-esc="card.title"/>
+                                <i t-if="card.family" t-attf-class="fa {{ card.family === 'parent' ? 'fa-folder-o' : 'fa-sitemap' }} osp_card_family"
+                                   title="Accéder au carnet de famille du projet"/>
+                                <div class="osp_card_menu_wrap">
+                                    <i class="fa fa-ellipsis-v osp_card_menu_trigger" t-on-click="(ev) => this.toggleCardMenu(card, ev)"/>
+                                    <div t-if="state.openMenuFor === card.id" class="osp_dropdown osp_card_menu" t-on-click.stop="">
+                                        <div t-foreach="cardMenuItems" t-as="mi" t-key="mi.key"
+                                             t-att-class="{ osp_card_menu_item: true, osp_card_menu_item_danger: mi.danger }">
+                                            <i t-attf-class="fa {{mi.icon}}"/>
+                                            <span t-esc="mi.label"/>
+                                            <i t-if="mi.chevron" class="fa fa-chevron-right osp_card_menu_chevron"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="osp_card_client" t-esc="card.client"/>
+                            <div t-if="card.dateStart" class="osp_card_dates">
+                                <span t-esc="card.dateStart"/> <i class="fa fa-angle-right"/> <span t-esc="card.dateEnd"/>
+                            </div>
+                            <div class="osp_card_badges">
+                                <span t-if="card.demandes" class="osp_badge osp_badge_blue"
+                                      title="Nombre de demandes sur le projet">
+                                    <span t-esc="card.demandes"/><i class="fa fa-search"/>
+                                </span>
+                                <span t-if="card.staffingsSimules" class="osp_badge osp_badge_green"
+                                      title="Nombre de staffings simulés sur le projet">
+                                    <span t-esc="card.staffingsSimules"/><i class="fa fa-pencil-square-o"/>
+                                </span>
+                            </div>
+                            <div class="osp_card_bottom">
+                                <span class="osp_card_like" t-on-click="(ev) => this.toggleLike(card, ev)">
+                                    <i t-att-class="card.liked ? 'fa fa-heart' : 'fa fa-heart-o'"/>
+                                    <span t-if="card.likes" t-esc="card.likes"/>
+                                </span>
+                                <div class="osp_card_tags">
+                                    <span t-foreach="card.tags" t-as="tag" t-key="tag" class="osp_card_tag" t-esc="tag"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <div class="osp_column_add"><i class="fa fa-plus"/></div>
+                </div>
+            </div>
+
+            <!-- VUE TABLEAU -->
+            <table t-if="state.view === 'table'" class="osp_table">
+                <thead>
+                    <tr>
+                        <th class="osp_th_checkbox"><i class="fa fa-square-o"/></th>
+                        <th class="osp_th_icon"/>
+                        <t t-foreach="tableColumns" t-as="col" t-key="col.key">
+                            <th t-on-click="() => this.sortBy(col)" t-att-class="{ osp_th_sortable: col.sortable }">
+                                <span t-esc="col.label"/>
+                                <i t-if="col.sortable" t-attf-class="fa {{ sortIcon(col) }} osp_sort_icon"/>
+                            </th>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="sortedProjects" t-as="row" t-key="row.id" t-on-click="() => this.openDetail(row)">
+                        <td class="osp_th_checkbox" t-on-click="(ev) => this.toggleSelect(row, ev)">
+                            <i t-att-class="isSelected(row) ? 'fa fa-check-square' : 'fa fa-square-o'"/>
+                        </td>
+                        <td class="osp_th_icon">
+                            <i t-if="row.family" t-attf-class="fa {{ row.family === 'parent' ? 'fa-folder-o' : 'fa-sitemap' }}"/>
+                        </td>
+                        <td class="osp_td_project" t-esc="row.title"/>
+                        <td t-esc="row.client"/>
+                        <td t-esc="row.status"/>
+                        <td>
+                            <span t-attf-class="osp_dot osp_dot_{{row.color}} osp_dot_inline"/>
+                            <span t-esc="row.category"/>
+                        </td>
+                        <td t-esc="row.departments"/>
+                        <td>
+                            <span t-if="row.demandes" class="osp_badge osp_badge_blue">
+                                <span t-esc="row.demandes"/><i class="fa fa-search"/>
+                            </span>
+                        </td>
+                        <td>
+                            <span t-if="row.staffingsSimules" class="osp_badge osp_badge_green">
+                                <span t-esc="row.staffingsSimules"/><i class="fa fa-pencil-square-o"/>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Détail projet (onglets) -->
+            <div t-if="state.detail" class="osp_detail_overlay" t-on-click="closeDetail">
+                <div class="osp_detail_panel" t-on-click.stop="">
+                    <div class="osp_detail_header">
+                        <span t-attf-class="osp_dot osp_dot_{{state.detail.color}}"/>
+                        <h2 t-esc="state.detail.title"/>
+                        <i class="fa fa-times osp_detail_close" t-on-click="closeDetail"/>
+                    </div>
+                    <div class="osp_detail_subtitle">
+                        <span t-esc="state.detail.client"/>
+                        <span t-if="state.detail.dateStart"> · <t t-esc="state.detail.dateStart"/> <i class="fa fa-angle-right"/> <t t-esc="state.detail.dateEnd"/></span>
+                    </div>
+                    <div class="osp_detail_tabs">
+                        <div t-foreach="detailTabs" t-as="tab" t-key="tab.key"
+                             t-att-class="{ osp_detail_tab: true, osp_detail_tab_active: state.detailTab === tab.key }"
+                             t-on-click="() => this.setDetailTab(tab.key)">
+                            <i t-attf-class="fa {{tab.icon}}"/>
+                            <span t-esc="tab.label"/>
+                        </div>
+                    </div>
+                    <div class="osp_detail_body">
+                        <div t-if="state.detailTab === 'calendar'" class="osp_detail_placeholder">
+                            <p>Vue calendrier du projet : intervenants et périodes de staffing.</p>
+                            <button type="button" class="osp_toolbar_btn"><i class="fa fa-user-plus"/> Ajouter un staffing</button>
+                        </div>
+                        <div t-if="state.detailTab === 'requests'" class="osp_detail_placeholder">
+                            <p><strong>Demandes</strong> — liste des demandes de ressources existantes sur le projet.</p>
+                            <p><strong>Staffings</strong> — liste des staffings existants sur le projet.</p>
+                        </div>
+                        <div t-if="state.detailTab === 'subprojects'" class="osp_detail_placeholder">
+                            <p>Sous-projets rattachés à ce projet.</p>
+                            <button type="button" class="osp_toolbar_btn"><i class="fa fa-link"/> Connecter un sous-projet</button>
+                        </div>
+                        <div t-if="state.detailTab === 'finance'" class="osp_detail_placeholder">
+                            <p>Comparaison vendu / staffé / réalisé pour ce projet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

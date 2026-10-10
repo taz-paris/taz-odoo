@@ -1,0 +1,591 @@
+.o_napta_staffing_projects {
+    font-size: 13px;
+    color: $napta-text;
+
+    // ---------- Header ----------
+    .osp_header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+
+        h1 {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .osp_header_spacer {
+        flex: 1 1 auto;
+    }
+
+    .osp_view_switch {
+        display: flex;
+        background: #f1f1f1;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .osp_view_btn {
+        border: none;
+        background: transparent;
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        color: $napta-text-muted;
+        cursor: pointer;
+
+        &.osp_view_btn_active {
+            background: #fff;
+            color: $napta-text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+        }
+    }
+
+    .osp_icon_btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid $napta-border;
+        background: #f6f6f6;
+        color: $napta-text;
+        cursor: pointer;
+    }
+
+    .osp_btn_primary {
+        background: #0b2540;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 18px;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover { opacity: .92; }
+    }
+
+    // ---------- Toolbar ----------
+    .osp_toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .osp_toolbar_left, .osp_toolbar_right {
+        display: flex;
+        gap: 10px;
+        position: relative;
+    }
+
+    .osp_dropdown_wrap {
+        position: relative;
+    }
+
+    .osp_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        i { color: $napta-text-muted; }
+
+        &:hover { background: #fafafa; }
+    }
+
+    .osp_dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+        z-index: 50;
+        padding: 10px;
+    }
+
+    // Vues dropdown
+    .osp_views_dropdown {
+        width: 280px;
+    }
+
+    .osp_views_title {
+        font-weight: 700;
+        padding: 6px 4px 10px;
+        border-bottom: 1px solid $napta-border;
+        margin-bottom: 8px;
+    }
+
+    .osp_views_empty {
+        color: $napta-text-muted;
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    .osp_views_info {
+        display: flex;
+        gap: 8px;
+        color: $napta-text-muted;
+        font-size: 12px;
+        padding-top: 8px;
+
+        i { margin-top: 2px; }
+    }
+
+    // Filtres dropdown
+    .osp_filter_dropdown {
+        width: 320px;
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .osp_filter_search {
+        width: 100%;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin-bottom: 8px;
+    }
+
+    .osp_filter_section_title {
+        font-weight: 700;
+        padding: 8px 4px 4px;
+    }
+
+    .osp_filter_item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 4px;
+        border-radius: 6px;
+        cursor: pointer;
+
+        span { flex: 1 1 auto; }
+
+        &:hover { background: $napta-active-bg; }
+    }
+
+    .osp_filter_fav { color: $napta-text-muted; }
+    .osp_filter_chevron { color: $napta-text-muted; font-size: 11px; }
+
+    .osp_filter_info {
+        display: flex;
+        gap: 6px;
+        align-items: flex-start;
+        background: $napta-accent-light;
+        color: $napta-accent;
+        border-radius: 6px;
+        padding: 8px;
+        margin: 8px 0;
+        font-size: 12px;
+    }
+
+    .osp_filter_save {
+        width: 100%;
+        background: $napta-accent;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    // Colonnes dropdown
+    .osp_columns_dropdown {
+        width: 260px;
+        right: 0;
+        left: auto;
+    }
+
+    .osp_columns_title {
+        font-weight: 700;
+        padding: 4px 4px 8px;
+    }
+
+    .osp_columns_item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 4px;
+
+        i.fa-check { color: $napta-accent; width: 14px; }
+        span { flex: 1 1 auto; }
+        .osp_columns_handle { color: $napta-text-muted; cursor: grab; }
+    }
+
+    // ---------- Bulk bar ----------
+    .osp_bulk_bar {
+        position: sticky;
+        bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #0b2540;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 16px;
+        margin: 10px 0;
+        width: fit-content;
+    }
+
+    .osp_bulk_count {
+        font-weight: 600;
+        padding-right: 10px;
+        border-right: 1px solid rgba(255, 255, 255, .25);
+    }
+
+    .osp_bulk_btn {
+        background: rgba(255, 255, 255, .08);
+        border: none;
+        color: #fff;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+
+        &:hover { background: rgba(255, 255, 255, .18); }
+    }
+
+    .osp_bulk_btn_danger:hover { background: #a33; }
+
+    // ---------- Vue Cartes ----------
+    .osp_board {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+        overflow-x: auto;
+        padding-bottom: 12px;
+    }
+
+    .osp_column {
+        flex: 0 0 260px;
+        background: #fafafa;
+        border-radius: 10px;
+        padding: 12px;
+    }
+
+    .osp_column_header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        .osp_column_count {
+            background: $napta-active-bg;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 2px 7px;
+        }
+
+        .osp_column_title {
+            font-weight: 700;
+            flex: 1 1 auto;
+        }
+
+        .osp_column_collapse {
+            color: $napta-text-muted;
+            cursor: pointer;
+            opacity: 0;
+        }
+    }
+
+    .osp_column:hover .osp_column_collapse { opacity: 1; }
+
+    .osp_card {
+        position: relative;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+
+        &:hover { border-color: darken($napta-border, 12%); }
+        &.osp_card_selected { border-color: $napta-accent; box-shadow: 0 0 0 1px $napta-accent; }
+    }
+
+    .osp_card_select {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        opacity: 0;
+        color: $napta-accent;
+    }
+
+    .osp_card:hover .osp_card_select, .osp_card_selected .osp_card_select { opacity: 1; }
+
+    .osp_card_top {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+
+    .osp_dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: 0 0 auto;
+        display: inline-block;
+
+        &.osp_dot_violet { background: #8b5cf6; }
+        &.osp_dot_rose { background: #ec4899; }
+        &.osp_dot_vert { background: #22c55e; }
+        &.osp_dot_orange { background: #f59e0b; }
+        &.osp_dot_grisclaire { background: #c4c9ce; }
+
+        &.osp_dot_inline { margin-right: 6px; }
+    }
+
+    .osp_card_title {
+        font-weight: 700;
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .osp_card_family {
+        color: $napta-text-muted;
+    }
+
+    .osp_card_menu_wrap {
+        position: relative;
+    }
+
+    .osp_card_menu_trigger {
+        color: $napta-text-muted;
+        cursor: pointer;
+        padding: 2px 4px;
+        opacity: 0;
+    }
+
+    .osp_card:hover .osp_card_menu_trigger { opacity: 1; }
+
+    .osp_card_menu {
+        right: 0;
+        left: auto;
+        width: 230px;
+        padding: 6px;
+    }
+
+    .osp_card_menu_item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+
+        i:first-child { width: 14px; color: $napta-text-muted; }
+        span { flex: 1 1 auto; }
+        .osp_card_menu_chevron { font-size: 10px; color: $napta-text-muted; }
+
+        &:hover { background: $napta-active-bg; }
+        &.osp_card_menu_item_danger { color: #c0392b; i:first-child { color: #c0392b; } }
+    }
+
+    .osp_card_client {
+        color: $napta-text-muted;
+        margin-bottom: 4px;
+    }
+
+    .osp_card_dates {
+        color: $napta-text-muted;
+        font-size: 12px;
+        margin-bottom: 10px;
+
+        i { font-size: 10px; margin: 0 2px; }
+    }
+
+    .osp_card_badges {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .osp_badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 14px;
+        padding: 3px 10px 3px 3px;
+        font-size: 12px;
+        font-weight: 700;
+
+        span {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 11px;
+        }
+
+        &.osp_badge_blue {
+            background: rgba(59, 130, 246, .12);
+            color: #2563eb;
+            span { background: #2563eb; }
+        }
+
+        &.osp_badge_green {
+            background: rgba(16, 150, 100, .12);
+            color: $napta-accent;
+            span { background: $napta-accent; }
+        }
+    }
+
+    .osp_card_bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .osp_card_like {
+        cursor: pointer;
+        color: $napta-text-muted;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+
+        .fa-heart { color: #e0245e; }
+        &:hover { color: #e0245e; }
+    }
+
+    .osp_card_tags {
+        display: flex;
+        gap: 4px;
+    }
+
+    .osp_card_tag {
+        background: $napta-active-bg;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 7px;
+        color: $napta-text-muted;
+    }
+
+    .osp_column_add {
+        text-align: center;
+        color: $napta-text-muted;
+        border: 1px dashed $napta-border;
+        border-radius: 8px;
+        padding: 8px;
+        cursor: pointer;
+
+        &:hover { background: #fff; color: $napta-accent; border-color: $napta-accent; }
+    }
+
+    // ---------- Vue Tableau ----------
+    .osp_table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th, td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid $napta-border;
+            white-space: nowrap;
+        }
+
+        th {
+            color: $napta-text-muted;
+            font-weight: 600;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        tbody tr { cursor: pointer; }
+        tbody tr:hover { background: #fafafa; }
+
+        .osp_th_checkbox, .osp_th_icon {
+            width: 30px;
+            color: $napta-text-muted;
+        }
+
+        .osp_th_sortable { cursor: pointer; }
+        .osp_sort_icon { margin-left: 4px; color: $napta-text-muted; font-size: 11px; }
+
+        .osp_td_project { font-weight: 700; }
+    }
+
+    // ---------- Détail projet ----------
+    .osp_detail_overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 20, 30, .35);
+        display: flex;
+        justify-content: flex-end;
+        z-index: 100;
+    }
+
+    .osp_detail_panel {
+        width: 560px;
+        max-width: 100%;
+        height: 100%;
+        background: #fff;
+        padding: 24px;
+        overflow-y: auto;
+        box-shadow: -8px 0 24px rgba(0, 0, 0, .12);
+    }
+
+    .osp_detail_header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        h2 { font-size: 20px; margin: 0; flex: 1 1 auto; }
+        .osp_detail_close { cursor: pointer; color: $napta-text-muted; }
+    }
+
+    .osp_detail_subtitle {
+        color: $napta-text-muted;
+        margin: 8px 0 18px;
+
+        i { font-size: 10px; margin: 0 2px; }
+    }
+
+    .osp_detail_tabs {
+        display: flex;
+        gap: 20px;
+        border-bottom: 1px solid $napta-border;
+        margin-bottom: 16px;
+    }
+
+    .osp_detail_tab {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding-bottom: 10px;
+        color: $napta-text-muted;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+
+        &.osp_detail_tab_active {
+            color: $napta-accent;
+            border-color: $napta-accent;
+            font-weight: 600;
+        }
+    }
+
+    .osp_detail_placeholder {
+        color: $napta-text;
+
+        p { color: $napta-text-muted; margin-bottom: 10px; }
+    }
+}

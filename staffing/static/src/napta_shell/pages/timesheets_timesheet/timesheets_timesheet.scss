@@ -1,0 +1,323 @@
+.o_napta_timesheets_timesheet {
+    font-size: 13px;
+
+    .o_napta_ts_header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 14px;
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: $napta-text;
+        }
+    }
+
+    .o_napta_ts_viewtabs {
+        display: flex;
+        background: $napta-active-bg;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .o_napta_ts_viewtab {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: $napta-text-muted;
+        font-weight: 500;
+
+        &.o_napta_ts_viewtab_active {
+            background: #fff;
+            color: $napta-text;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+        }
+    }
+
+    .o_napta_ts_period_row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+        font-weight: 600;
+    }
+
+    .o_napta_badge_period {
+        background: $napta-accent-light;
+        color: $napta-accent;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 12px;
+    }
+
+    .o_napta_badge_filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: $napta-active-bg;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 12px;
+        color: $napta-text;
+    }
+
+    .o_napta_ts_toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .o_napta_ts_toolbar_spacer {
+        flex: 1 1 auto;
+    }
+
+    .o_napta_toolbar_btn {
+        border: 1px solid $napta-border;
+        background: #fff;
+        color: $napta-text;
+        border-radius: 6px;
+        white-space: nowrap;
+
+        i {
+            margin-right: 4px;
+            color: $napta-text-muted;
+        }
+    }
+
+    .o_napta_btn_submit {
+        background: $napta-text;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .o_napta_btn_save {
+        background: #fff;
+        color: $napta-text;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    // ---- Tableau commun (Personnel + Équipe) ----
+    .o_napta_ts_table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th, td {
+            padding: 8px 12px;
+            border-bottom: 1px solid $napta-border;
+            white-space: nowrap;
+        }
+    }
+
+    .o_napta_ts_colhead {
+        text-align: left;
+    }
+
+    .o_napta_ts_weekhead, .o_napta_ts_totalhead {
+        text-align: right;
+        color: $napta-text-muted;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: #fafafa;
+    }
+
+    .o_napta_ts_info {
+        color: $napta-text-muted;
+        margin-left: 4px;
+        cursor: help;
+        font-size: 11px;
+    }
+
+    .o_napta_ts_projectcell {
+        text-align: left;
+        font-weight: 600;
+        white-space: normal;
+    }
+
+    .o_napta_ts_remove {
+        margin-left: 8px;
+        color: $napta-text-muted;
+        cursor: pointer;
+
+        &:hover { color: #c0392b; }
+    }
+
+    .o_napta_ts_cell, .o_napta_ts_totalcell, .o_napta_ts_availabilitycell, .o_napta_ts_daytotal {
+        text-align: right;
+        color: $napta-text;
+    }
+
+    .o_napta_ts_movement {
+        font-size: 10px;
+        margin-left: 4px;
+        color: $napta-text-muted;
+    }
+
+    // Statuts de cellule (voir légende)
+    .o_napta_ts_status_forecast { background: #fff; color: $napta-text-muted; }
+    .o_napta_ts_status_to_complete { background: #fff; }
+    .o_napta_ts_status_saved { background: #eef3fb; }
+    .o_napta_ts_status_pending { background: #f1ecfb; }
+    .o_napta_ts_status_approved { background: #e9f7ee; }
+
+    .o_napta_ts_availability_row td {
+        background: #fafafa;
+        font-weight: 600;
+    }
+
+    .o_napta_ts_actions_row td {
+        border-bottom: none;
+        padding-top: 14px;
+    }
+
+    .o_napta_ts_actioncell {
+        text-align: center;
+    }
+
+    .o_napta_ts_weekstatus {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: $napta-text-muted;
+        font-size: 12px;
+        white-space: nowrap;
+
+        i { font-size: 11px; }
+    }
+
+    .o_napta_ts_weekbtns {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    // ---- Légende des statuts ----
+    .o_napta_ts_legend {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 24px;
+        padding-top: 14px;
+        border-top: 1px solid $napta-border;
+        font-size: 12px;
+        color: $napta-text;
+    }
+
+    .o_napta_ts_legend_item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        .fa-arrow-up, .fa-arrow-down { font-size: 10px; color: $napta-text-muted; }
+    }
+
+    .o_napta_ts_legend_swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        border: 1px solid $napta-border;
+        display: inline-block;
+    }
+
+    // ---- Vue Équipe ----
+    .o_napta_ts_team_table {
+        .o_napta_ts_team_head {
+            text-align: left;
+            min-width: 260px;
+        }
+    }
+
+    .o_napta_ts_expandall, .o_napta_ts_expand {
+        margin: 0 8px;
+        color: $napta-text-muted;
+        cursor: pointer;
+        font-size: 11px;
+    }
+
+    .o_napta_ts_person_row {
+        td { font-weight: 700; background: #fafafa; }
+    }
+
+    .o_napta_ts_avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: $napta-active-bg;
+        color: $napta-text;
+        font-size: 10px;
+        font-weight: 700;
+        margin-right: 8px;
+    }
+
+    .o_napta_ts_person_name {
+        white-space: normal;
+    }
+
+    .o_napta_ts_team_projectcell {
+        text-align: left;
+        padding-left: 46px;
+        white-space: normal;
+    }
+
+    .o_napta_ts_gauge_wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        cursor: help;
+    }
+
+    .o_napta_ts_gauge_track {
+        width: 90px;
+        height: 5px;
+        border-radius: 3px;
+        background: $napta-active-bg;
+        overflow: hidden;
+    }
+
+    .o_napta_ts_gauge_fill {
+        height: 100%;
+        border-radius: 3px;
+
+        &.o_napta_ts_gauge_blue { background: #3b82f6; }
+        &.o_napta_ts_gauge_orange { background: #f0a500; }
+        &.o_napta_ts_gauge_green { background: #2e9e5b; }
+        &.o_napta_ts_gauge_red { background: #d9453d; }
+    }
+
+    .o_napta_ts_gauge_label {
+        font-size: 11px;
+        color: $napta-text-muted;
+    }
+
+    .o_napta_ts_addproject_row td {
+        border-bottom: 1px solid $napta-border;
+    }
+
+    .o_napta_ts_addproject {
+        color: $napta-text-muted;
+        padding-left: 46px;
+        font-size: 12px;
+
+        i { margin-right: 6px; }
+    }
+}

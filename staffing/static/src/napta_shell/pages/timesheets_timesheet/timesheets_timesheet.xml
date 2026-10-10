@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.TimesheetsTimesheetPage">
+        <div class="o_napta_timesheets_timesheet">
+
+            <div class="o_napta_ts_header">
+                <h1>Feuilles de temps</h1>
+                <div class="o_napta_ts_viewtabs">
+                    <div t-att-class="{ o_napta_ts_viewtab: true, o_napta_ts_viewtab_active: state.tab === 'personal' }"
+                         t-on-click="() => this.setTab('personal')">
+                        <i class="fa fa-user"/> Personnel
+                    </div>
+                    <div t-att-class="{ o_napta_ts_viewtab: true, o_napta_ts_viewtab_active: state.tab === 'team' }"
+                         t-on-click="() => this.setTab('team')">
+                        <i class="fa fa-users"/> Équipe
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================= VUE PERSONNELLE ============================= -->
+            <t t-if="state.tab === 'personal'">
+
+                <div class="o_napta_ts_period_row">
+                    <span class="o_napta_ts_period">Février 2024 du 01/02/24 au 29/02/24</span>
+                    <span class="o_napta_badge_period">Partiellement validée</span>
+                </div>
+
+                <div class="o_napta_ts_toolbar">
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        Projet <i class="fa fa-chevron-down"/>
+                    </button>
+                    <div class="o_napta_ts_toolbar_spacer"/>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        <i class="fa fa-plus"/> Ajouter un projet
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        Ce mois
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+
+                <table class="o_napta_ts_table">
+                    <thead>
+                        <tr>
+                            <th class="o_napta_ts_colhead"/>
+                            <t t-foreach="personalWeeks" t-as="week" t-key="week.key">
+                                <th class="o_napta_ts_weekhead">
+                                    <span t-esc="'FROM ' + week.range.replace('DU ', '').replace(' AU ', ' TO ')"/>
+                                    <i t-if="week.info" class="fa fa-info-circle o_napta_ts_info" t-att-title="week.info"/>
+                                </th>
+                            </t>
+                            <th class="o_napta_ts_totalhead">TOTAL<br/>FÉVRIER 2024</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="personalRows" t-as="row" t-key="row.key">
+                            <td class="o_napta_ts_projectcell">
+                                <span t-esc="row.project"/>
+                                <i t-if="row.removable" class="fa fa-trash-o o_napta_ts_remove" title="Retirer le projet des feuilles de temps"/>
+                            </td>
+                            <t t-foreach="row.cells" t-as="cell" t-key="cell_index">
+                                <td t-att-class="cellClass(cell)">
+                                    <span t-esc="cell.value"/>
+                                    <i t-if="cell.movement === 'down'" class="fa fa-arrow-down o_napta_ts_movement" t-att-title="movementTooltip"/>
+                                    <i t-if="cell.movement === 'up'" class="fa fa-arrow-up o_napta_ts_movement" t-att-title="movementTooltip"/>
+                                </td>
+                            </t>
+                            <td class="o_napta_ts_totalcell">
+                                <span t-esc="row.total"/>
+                                <i t-if="row.totalMovement" t-attf-class="fa fa-arrow-{{row.totalMovement}} o_napta_ts_movement" t-att-title="movementTooltip"/>
+                            </td>
+                        </tr>
+                        <tr class="o_napta_ts_availability_row">
+                            <td>
+                                Disponibilité
+                                <i t-att-data-tooltip="availabilityTooltip" class="fa fa-info-circle o_napta_ts_info"/>
+                            </td>
+                            <t t-foreach="personalAvailability" t-as="a" t-key="a_index">
+                                <td class="o_napta_ts_availabilitycell" t-esc="a"/>
+                            </t>
+                            <td class="o_napta_ts_totalcell" t-esc="personalAvailabilityTotal"/>
+                        </tr>
+                        <tr class="o_napta_ts_actions_row">
+                            <td/>
+                            <t t-foreach="personalWeekStatus" t-as="st" t-key="st_index">
+                                <td class="o_napta_ts_actioncell">
+                                    <span t-if="st.label" class="o_napta_ts_weekstatus">
+                                        <i t-att-class="'fa ' + st.icon"/> <t t-esc="st.label"/>
+                                    </span>
+                                    <span t-if="!st.label and st_index === 3" class="o_napta_ts_weekbtns">
+                                        <button class="btn btn-sm o_napta_btn_submit" disabled="disabled">Soumettre</button>
+                                        <button class="btn btn-sm o_napta_btn_save" disabled="disabled">Enregistrer</button>
+                                    </span>
+                                </td>
+                            </t>
+                            <td/>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="o_napta_ts_legend">
+                    <t t-foreach="statusLegend" t-as="item" t-key="item.key">
+                        <span class="o_napta_ts_legend_item">
+                            <span t-attf-class="o_napta_ts_legend_swatch o_napta_ts_status_{{item.key}}"/>
+                            <t t-esc="item.label"/>
+                            <i class="fa fa-info-circle o_napta_ts_info" t-att-title="item.tooltip"/>
+                        </span>
+                    </t>
+                    <span class="o_napta_ts_legend_item">
+                        <i class="fa fa-arrow-up o_napta_ts_movement"/><i class="fa fa-arrow-down o_napta_ts_movement"/>
+                        Écarts de saisie
+                        <i class="fa fa-info-circle o_napta_ts_info" t-att-title="movementTooltip"/>
+                    </span>
+                </div>
+            </t>
+
+            <!-- ================================ VUE ÉQUIPE ================================ -->
+            <t t-if="state.tab === 'team'">
+
+                <div class="o_napta_ts_period_row">
+                    <span class="o_napta_ts_period">W23 du 01/06/26 au 07/06/26</span>
+                </div>
+
+                <div class="o_napta_ts_toolbar">
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        <i class="fa fa-filter"/> Filtrer
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        <i class="fa fa-bookmark-o"/> Sauvegarder la vue
+                    </button>
+                    <span class="o_napta_badge_filter">Personne (3) <i class="fa fa-times"/></span>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">Réinitialiser</button>
+                    <div class="o_napta_ts_toolbar_spacer"/>
+                    <button t-if="selectedCount" class="btn btn-sm o_napta_btn_submit" disabled="disabled">
+                        Approuver (<t t-esc="selectedCount"/>)
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        <i class="fa fa-chevron-left"/>
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        Cette semaine
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                        <i class="fa fa-chevron-right"/>
+                    </button>
+                </div>
+
+                <table class="o_napta_ts_table o_napta_ts_team_table">
+                    <thead>
+                        <tr>
+                            <th class="o_napta_ts_team_head">
+                                <input type="checkbox" disabled="disabled"/>
+                                <i t-att-class="'fa ' + (state.allExpanded ? 'fa-chevron-up' : 'fa-chevron-down')"
+                                   class="o_napta_ts_expandall" t-on-click="() => this.toggleExpandAll()"/>
+                                PERSONNE / PROJET
+                            </th>
+                            <t t-foreach="teamDays" t-as="day" t-key="day.key">
+                                <th class="o_napta_ts_weekhead">
+                                    <span t-esc="day.label"/><br/>
+                                    <span t-esc="day.date"/>
+                                </th>
+                            </t>
+                            <th class="o_napta_ts_totalhead">TOTAL<br/>W23 - JUIN 2026</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="state.team" t-as="person" t-key="person.id">
+                            <tr class="o_napta_ts_person_row">
+                                <td class="o_napta_ts_team_head">
+                                    <input type="checkbox" t-att-checked="isSelected(person)"
+                                           t-on-click="(ev) => this.toggleSelect(person, ev)"/>
+                                    <i t-att-class="'fa ' + (isExpanded(person) ? 'fa-chevron-up' : 'fa-chevron-down')"
+                                       class="o_napta_ts_expand" t-on-click="() => this.toggleExpand(person)"/>
+                                    <span class="o_napta_ts_avatar" t-esc="initials(person.name)"/>
+                                    <span class="o_napta_ts_person_name" t-esc="person.name"/>
+                                </td>
+                                <t t-foreach="person.totalByDay" t-as="d" t-key="d_index">
+                                    <td class="o_napta_ts_daytotal" t-esc="d"/>
+                                </t>
+                                <td class="o_napta_ts_totalcell" t-esc="person.total"/>
+                            </tr>
+
+                            <t t-if="isExpanded(person)">
+                                <tr t-foreach="person.projects" t-as="proj" t-key="proj.name" class="o_napta_ts_project_row">
+                                    <td class="o_napta_ts_team_projectcell">
+                                        <span t-esc="proj.name"/>
+                                        <div class="o_napta_ts_gauge_wrap" t-att-title="proj.gauge.tooltip">
+                                            <div class="o_napta_ts_gauge_track">
+                                                <div t-attf-class="o_napta_ts_gauge_fill o_napta_ts_gauge_{{proj.gauge.color}}"
+                                                     t-attf-style="width: {{proj.gauge.percent}}%"/>
+                                            </div>
+                                            <span class="o_napta_ts_gauge_label">
+                                                <t t-if="proj.gaugeNote" t-esc="proj.gaugeNote"/>
+                                                <t t-else="" t-esc="proj.gauge.real + ' / ' + proj.gauge.planned + 'd'"/>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <t t-foreach="proj.values" t-as="v" t-key="v_index">
+                                        <td class="o_napta_ts_daytotal" t-esc="v"/>
+                                    </t>
+                                    <td class="o_napta_ts_totalcell" t-esc="proj.total"/>
+                                </tr>
+                                <tr class="o_napta_ts_availability_row">
+                                    <td>
+                                        Disponibilité <i class="fa fa-info-circle o_napta_ts_info" title="Disponibilité calculée à partir des temps déclarés."/>
+                                    </td>
+                                    <t t-foreach="person.availability" t-as="a" t-key="a_index">
+                                        <td class="o_napta_ts_availabilitycell" t-esc="a"/>
+                                    </t>
+                                    <td class="o_napta_ts_totalcell" t-esc="person.availabilityTotal"/>
+                                </tr>
+                                <tr class="o_napta_ts_addproject_row">
+                                    <td colspan="9">
+                                        <button class="btn btn-link o_napta_ts_addproject" disabled="disabled">
+                                            <i class="fa fa-plus"/> Ajouter un projet
+                                        </button>
+                                    </td>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+        </div>
+    </t>
+
+</templates>

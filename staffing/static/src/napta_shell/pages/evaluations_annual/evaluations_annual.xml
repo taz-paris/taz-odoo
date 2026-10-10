@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="staffing.EvaluationsAnnualPage">
+        <div class="o_napta_evaluations_annual">
+
+            <div class="o_napta_ea_header">
+                <div class="o_napta_ea_title">
+                    <h1>Évaluations annuelles</h1>
+                    <span class="o_napta_ea_count">
+                        <t t-esc="total"/> dont <t t-esc="ongoingCount"/> en cours
+                    </span>
+                </div>
+                <div class="o_napta_ea_header_actions">
+                    <button class="btn btn-sm o_napta_toolbar_btn o_napta_icon_btn" disabled="disabled" title="Exporter les évaluations">
+                        <i class="fa fa-download"/>
+                    </button>
+                    <button class="btn btn-sm o_napta_toolbar_btn o_napta_icon_btn" disabled="disabled" title="Importer des évaluations">
+                        <i class="fa fa-upload"/>
+                    </button>
+                    <button class="btn btn-sm o_napta_btn_primary" disabled="disabled">
+                        <i class="fa fa-plus"/> Ajouter une évaluation
+                    </button>
+                </div>
+            </div>
+
+            <div class="o_napta_tabs">
+                <div t-att-class="{ o_napta_tab: true, o_napta_tab_active: state.tab === 'ongoing' }"
+                     t-on-click="() => this.setTab('ongoing')">En cours</div>
+                <div t-att-class="{ o_napta_tab: true, o_napta_tab_active: state.tab === 'finished' }"
+                     t-on-click="() => this.setTab('finished')">Terminées</div>
+            </div>
+
+            <div class="o_napta_ea_toolbar">
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-filter"/> Filtrer
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-sort"/> Trier : Mise à jour le
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">
+                    <i class="fa fa-bookmark-o"/> Sauvegarder la vue
+                </button>
+                <button class="btn btn-sm o_napta_toolbar_btn" disabled="disabled">Réinitialiser</button>
+            </div>
+
+            <table class="o_napta_ea_table">
+                <thead>
+                    <tr>
+                        <t t-foreach="columns" t-as="col" t-key="col.key">
+                            <th t-esc="col.label"/>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="filtered" t-as="row" t-key="row.person">
+                        <td>
+                            <span t-attf-class="o_napta_status_badge o_napta_status_{{row.status}}" t-esc="statusLabel(row.status)"/>
+                        </td>
+                        <td class="o_napta_ea_person">
+                            <span class="o_napta_ea_avatar" t-esc="initials(row.person)"/>
+                            <span>
+                                <div class="o_napta_ea_person_name" t-esc="row.person"/>
+                                <div class="o_napta_ea_person_role" t-esc="row.role"/>
+                            </span>
+                        </td>
+                        <td t-esc="row.campaign"/>
+                        <td>
+                            <span t-foreach="row.assessors" t-as="a" t-key="a.name" class="o_napta_ea_assessor" t-att-title="a.name + (a.done ? ' — Terminé' : ' — En attente')">
+                                <span class="o_napta_ea_avatar o_napta_ea_avatar_sm" t-esc="initials(a.name)"/>
+                                <i t-if="a.done" class="fa fa-check-circle o_napta_ea_check"/>
+                            </span>
+                        </td>
+                        <td t-esc="row.period"/>
+                        <td t-esc="row.createdAt"/>
+                        <td t-esc="row.updatedAt"/>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </t>
+
+</templates>
