@@ -112,6 +112,45 @@ const FINANCE_WEEKS = [
     { key: "s40", label: "S40", range: "Du 02-10-23 au 08-10-23" },
 ];
 
+/**
+ * Les 4 mêmes intervenants (reprenant image-12) servent de base à la
+ * ventilation "par demande ou staffing" de CHAQUE ligne du tableau — la doc
+ * précise que toutes les lignes sont dépliables, pas uniquement Charge :
+ * "Les lignes du tableau sont dépliables (en cliquant sur le chevron) et
+ * permettent d'afficher le détail par demande ou staffing sur le projet."
+ * Faute de détail par ligne dans la doc au-delà de l'exemple "Charge", la
+ * répartition par personne est calculée au prorata de sa part de charge.
+ */
+const FINANCE_PEOPLE_SHARES = [
+    { name: "Consultant Senior", role: "Rôle sur le projet", shareToDate: 0, shareAtEnd: 40 / 140, shareWeek: 0 },
+    { name: "BARTOLIE Aurore", role: "Consultant Senior", shareToDate: 0, shareAtEnd: 30 / 140, shareWeek: 0 },
+    { name: "CONSTABE Etienne", role: "Partner", shareToDate: 10.5 / 18.38, shareAtEnd: 40 / 140, shareWeek: 2.5 / 4.38 },
+    { name: "MEROT Isabelle", role: "Manager", shareToDate: 7.88 / 18.38, shareAtEnd: 30 / 140, shareWeek: 1.88 / 4.38 },
+];
+
+function round2(v) {
+    return v === null || v === undefined ? null : Math.round(v * 100) / 100;
+}
+
+/** Calcule les sous-lignes "par demande ou staffing" d'une ligne, au prorata de la charge de chacun. */
+function distributeRow(row) {
+    row.subRows = FINANCE_PEOPLE_SHARES.map((p) => ({
+        name: p.name,
+        role: p.role,
+        totalToDate: {
+            planned: round2(row.totalToDate.planned !== null ? row.totalToDate.planned * p.shareToDate : null),
+            real: round2(row.totalToDate.real !== null ? row.totalToDate.real * p.shareToDate : null),
+        },
+        totalAtEnd: {
+            planned: round2(row.totalAtEnd.planned !== null ? row.totalAtEnd.planned * p.shareAtEnd : null),
+            projected: round2(row.totalAtEnd.projected !== null ? row.totalAtEnd.projected * p.shareAtEnd : null),
+        },
+        weeks: row.weeks.map((w) => round2(w !== null ? w * p.shareWeek : null)),
+    }));
+    row.expandable = true;
+    return row;
+}
+
 const FINANCE_ROWS = [
     {
         key: "advancement", label: "Taux d'avancement", unit: "%", forfaitOnly: true,
@@ -119,15 +158,9 @@ const FINANCE_ROWS = [
         weeks: [3.12, 3.13, 3.12, 3.13],
     },
     {
-        key: "charge", label: "Charge (jours)", unit: "JH", expandable: true,
+        key: "charge", label: "Charge (jours)", unit: "JH",
         totalToDate: { planned: 18.38, real: 17 }, totalAtEnd: { planned: 140, projected: 138.63 },
         weeks: [4.38, 4.38, 4.38, 4.38],
-        subRows: [
-            { name: "Consultant Senior", role: "Rôle sur le projet", totalToDate: { planned: 0, real: 0 }, totalAtEnd: { planned: 40, projected: 40 }, weeks: [0, 0, 0, 0] },
-            { name: "BARTOLIE Aurore", role: "Consultant Senior", totalToDate: { planned: 0, real: 0 }, totalAtEnd: { planned: 30, projected: 30 }, weeks: [0, 0, 0, 0] },
-            { name: "CONSTABE Etienne", role: "Partner", totalToDate: { planned: 10.5, real: 9.5 }, totalAtEnd: { planned: 40, projected: 39 }, weeks: [2.5, 2.5, 2.5, 2.5] },
-            { name: "MEROT Isabelle", role: "Manager", totalToDate: { planned: 7.88, real: 7.5 }, totalAtEnd: { planned: 30, projected: 29.63 }, weeks: [1.88, 1.88, 1.88, 1.88] },
-        ],
     },
     {
         key: "tjm", label: "TJM", unit: "€",
@@ -159,7 +192,7 @@ const FINANCE_ROWS = [
         totalToDate: { planned: 47.21, real: 47.48 }, totalAtEnd: { planned: 49.1, projected: 49.64 },
         weeks: [47.21, 47.24, 47.21, 47.24],
     },
-];
+].map(distributeRow);
 
 const FINANCE_CHARGE_GLOBALE = {
     days: {
