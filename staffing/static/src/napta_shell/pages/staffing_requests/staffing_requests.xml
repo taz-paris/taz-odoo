@@ -174,7 +174,7 @@
 
             <!-- Tiroir "Créer une demande" -->
             <div t-if="state.createDrawer === 'single'" class="osr_create_overlay" t-on-click="closeCreateDrawer">
-                <div class="osr_create_drawer" t-on-click.stop="">
+                <div class="osr_create_drawer" t-on-click="(ev) => { ev.stopPropagation(); this.closeCreateDropdowns(); }">
                     <div class="osr_create_header">
                         <h3>Créer une demande</h3>
                         <i class="fa fa-times" t-on-click="closeCreateDrawer"/>
@@ -196,17 +196,122 @@
                         <option t-foreach="projectOptions" t-as="p" t-key="p" t-att-value="p" t-esc="p"/>
                     </select>
 
-                    <t t-foreach="createSections" t-as="section" t-key="section.key">
-                        <div class="osr_create_section" t-on-click="(ev) => this.toggleCreateSection(section.key, ev)">
-                            <i t-attf-class="fa {{ section.icon }}"/>
-                            <span t-esc="section.label"/>
-                            <span class="osr_create_section_count">0</span>
-                            <i t-attf-class="fa {{ isCreateSectionOpen(section.key) ? 'fa-chevron-up' : 'fa-chevron-down' }} osr_create_section_chevron"/>
+                    <!-- Critères -->
+                    <div class="osr_create_section" t-on-click="(ev) => this.toggleCreateSection('criteria', ev)">
+                        <i class="fa fa-bullseye"/>
+                        <span>Critères</span>
+                        <span class="osr_create_section_count" t-esc="criteriaCount"/>
+                        <i t-attf-class="fa {{ isCreateSectionOpen('criteria') ? 'fa-chevron-up' : 'fa-chevron-down' }} osr_create_section_chevron"/>
+                    </div>
+                    <div t-if="isCreateSectionOpen('criteria')" class="osr_create_section_body">
+                        <t t-foreach="criteriaFields" t-as="field" t-key="field.key">
+                            <label class="osr_create_label" t-esc="field.label"/>
+                            <div class="osr_create_dropdown_wrap">
+                                <button type="button" class="osr_create_dropdown_btn" t-on-click="(ev) => this.toggleCriteriaDropdown(field.key, ev)">
+                                    <span t-esc="criteriaFieldSummary(field.key)"/>
+                                    <i t-attf-class="fa {{ isCriteriaDropdownOpen(field.key) ? 'fa-chevron-up' : 'fa-chevron-down' }}"/>
+                                </button>
+                                <div t-if="isCriteriaDropdownOpen(field.key)" class="osr_create_dropdown_menu">
+                                    <div t-foreach="field.options" t-as="opt" t-key="opt" class="osr_create_dropdown_item"
+                                         t-on-click="(ev) => this.toggleCriteriaValue(field.key, opt, ev)">
+                                        <i t-attf-class="fa {{ isCriteriaValueSelected(field.key, opt) ? 'fa-check-square' : 'fa-square-o' }}"/>
+                                        <span t-esc="opt"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Périodes -->
+                    <div class="osr_create_section" t-on-click="(ev) => this.toggleCreateSection('periods', ev)">
+                        <i class="fa fa-clock-o"/>
+                        <span>Périodes</span>
+                        <span class="osr_create_section_count" t-esc="state.createPeriods.length"/>
+                        <i t-attf-class="fa {{ isCreateSectionOpen('periods') ? 'fa-chevron-up' : 'fa-chevron-down' }} osr_create_section_chevron"/>
+                    </div>
+                    <div t-if="isCreateSectionOpen('periods')" class="osr_create_section_body">
+                        <div t-foreach="state.createPeriods" t-as="period" t-key="period.id" class="osr_create_period_row">
+                            <input type="date" class="osr_create_period_date" t-model="period.start"/>
+                            <span class="osr_create_period_sep">–</span>
+                            <input type="date" class="osr_create_period_date" t-model="period.end"/>
+                            <input type="number" min="0" class="osr_create_period_amount" t-model="period.amount"/>
+                            <select class="osr_create_period_unit" t-model="period.unit">
+                                <option t-foreach="periodUnits" t-as="u" t-key="u" t-att-value="u" t-esc="u"/>
+                            </select>
+                            <i class="fa fa-trash-o osr_create_period_remove" t-on-click="(ev) => this.removeCreatePeriod(period, ev)"/>
                         </div>
-                        <div t-if="isCreateSectionOpen(section.key)" class="osr_create_section_body">
-                            Aucune donnée pour le moment.
+                        <div t-if="!state.createPeriods.length" class="osr_create_empty_hint">Aucune période ajoutée.</div>
+                        <button type="button" class="osr_create_add_period" t-on-click="addCreatePeriod">
+                            <i class="fa fa-plus"/> Ajouter une période d'affectation
+                        </button>
+                    </div>
+
+                    <!-- Utilisateurs -->
+                    <div class="osr_create_section" t-on-click="(ev) => this.toggleCreateSection('users', ev)">
+                        <i class="fa fa-user-o"/>
+                        <span>Utilisateurs <span class="osr_create_required">*</span></span>
+                        <span class="osr_create_section_count" t-esc="state.createUsers.length"/>
+                        <i t-attf-class="fa {{ isCreateSectionOpen('users') ? 'fa-chevron-up' : 'fa-chevron-down' }} osr_create_section_chevron"/>
+                    </div>
+                    <div t-if="isCreateSectionOpen('users')" class="osr_create_section_body">
+                        <div t-if="state.createUsers.length" class="osr_create_user_chips">
+                            <span t-foreach="state.createUsers" t-as="name" t-key="name" class="osr_create_user_chip">
+                                <span t-esc="name"/>
+                                <i class="fa fa-times" t-on-click="(ev) => this.removeCreateUser(name, ev)"/>
+                            </span>
                         </div>
-                    </t>
+                        <div class="osr_create_dropdown_wrap">
+                            <input type="text" class="osr_create_user_search" placeholder="Rechercher un utilisateur…"
+                                   t-model="state.createUserSearch" t-on-click="focusCreateUserSearch"/>
+                            <div t-if="state.createUserSearchFocused" class="osr_create_dropdown_menu">
+                                <div t-foreach="createUserSuggestions" t-as="name" t-key="name" class="osr_create_dropdown_item"
+                                     t-on-click="(ev) => this.addCreateUser(name, ev)">
+                                    <span t-esc="name"/>
+                                </div>
+                                <div t-if="!createUserSuggestions.length" class="osr_create_empty_hint">Aucun utilisateur trouvé.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations -->
+                    <div class="osr_create_section" t-on-click="(ev) => this.toggleCreateSection('information', ev)">
+                        <i class="fa fa-info-circle"/>
+                        <span>Informations</span>
+                        <span class="osr_create_section_count" t-esc="informationCount"/>
+                        <i t-attf-class="fa {{ isCreateSectionOpen('information') ? 'fa-chevron-up' : 'fa-chevron-down' }} osr_create_section_chevron"/>
+                    </div>
+                    <div t-if="isCreateSectionOpen('information')" class="osr_create_section_body">
+                        <label class="osr_create_label">Statut de l'affectation</label>
+                        <select class="osr_create_select" t-model="state.createInfo.status">
+                            <option value="">Sélectionner…</option>
+                            <option t-foreach="assignmentStatusOptions" t-as="s" t-key="s" t-att-value="s" t-esc="s"/>
+                        </select>
+                        <label class="osr_create_label">Jours vendus</label>
+                        <input type="number" min="0" class="osr_create_input" t-model="state.createInfo.daysSold"/>
+                        <label class="osr_create_label">Description de la mission</label>
+                        <input type="text" class="osr_create_input" t-model="state.createInfo.description"/>
+                        <label class="osr_create_label">Durée</label>
+                        <input type="text" class="osr_create_input" t-model="state.createInfo.duration"/>
+                        <label class="osr_create_label">Priorité</label>
+                        <select class="osr_create_select" t-model="state.createInfo.priority">
+                            <option value="">Sélectionner…</option>
+                            <option t-foreach="priorityOptions" t-as="p" t-key="p" t-att-value="p" t-esc="p"/>
+                        </select>
+                    </div>
+
+                    <!-- Commentaires -->
+                    <div class="osr_create_section" t-on-click="(ev) => this.toggleCreateSection('comments', ev)">
+                        <i class="fa fa-comment-o"/>
+                        <span>Commentaires</span>
+                        <span class="osr_create_section_count" t-esc="commentCount"/>
+                        <i t-attf-class="fa {{ isCreateSectionOpen('comments') ? 'fa-chevron-up' : 'fa-chevron-down' }} osr_create_section_chevron"/>
+                    </div>
+                    <div t-if="isCreateSectionOpen('comments')" class="osr_create_section_body">
+                        <textarea class="osr_create_textarea" rows="3" maxlength="200"
+                                  placeholder="Ajouter un commentaire, taguez un collègue avec @"
+                                  t-model="state.createComment"/>
+                        <div class="osr_create_char_count" t-esc="state.createComment.length + ' / ' + commentMaxLength + ' caractères'"/>
+                    </div>
 
                     <div class="osr_create_footer">
                         <button type="button" class="btn osr_create_preview_btn"><i class="fa fa-search"/> Aperçu</button>

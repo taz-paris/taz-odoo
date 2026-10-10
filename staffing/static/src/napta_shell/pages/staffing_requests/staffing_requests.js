@@ -76,13 +76,29 @@ const COLUMNS_MENU = TABLE_COLUMNS.map((c) => c.label).concat(["Compétences", "
 
 const PROJECT_OPTIONS = [...new Set(REQUESTS.map((r) => r.project))].sort((a, b) => a.localeCompare(b, "fr"));
 
-const CREATE_SECTIONS = [
-    { key: "criteria", label: "Critères", icon: "fa-bullseye" },
-    { key: "periods", label: "Périodes", icon: "fa-clock-o" },
-    { key: "users", label: "Utilisateurs", icon: "fa-user-o" },
-    { key: "information", label: "Informations", icon: "fa-info-circle" },
-    { key: "comments", label: "Commentaires", icon: "fa-comment-o" },
+/**
+ * Champs du tiroir "Créer une demande", conformes à
+ * modules-napta/staffing_creation-de-staffing (sections Critères, Périodes,
+ * Utilisateurs, Informations, Commentaire).
+ */
+const CRITERIA_FIELDS = [
+    { key: "skills", label: "Compétences", options: ["Excel", "Anglais", "Python", "Salesforce", "Data analysis", "Communication", "Budget", "Design"] },
+    { key: "businessUnits", label: "Unité commerciale", options: ["Conseil RH", "Audit", "Stratégie", "Transformation digitale", "Finance"] },
+    { key: "positions", label: "Poste", options: ["Consultant", "Senior Consultant", "Manager", "Directeur de mission", "Analyste"] },
+    { key: "offices", label: "Bureau", options: ["Paris", "Lyon", "Marseille", "Londres", "Bruxelles"] },
+    { key: "contractTypes", label: "Type de contrat", options: ["CDI", "CDD", "Stage", "Alternance", "Freelance"] },
 ];
+
+const PERIOD_UNITS = ["Jours", "Heures", "%"];
+
+const USER_DIRECTORY = [...new Set(REQUESTS.flatMap((r) => r.preBooked).filter((n) => n && !n.startsWith("+") && !/\.$/.test(n)))].concat([
+    "Jérémie BARTOL", "Aurore BARTOLIE", "Sylvain BRIZARD", "Marie-Claire RODRIGUES",
+]).sort((a, b) => a.localeCompare(b, "fr"));
+
+const ASSIGNMENT_STATUS_OPTIONS = ["Suggestion", "Pré-réservation", "Staffing simulé", "Staffing confirmé"];
+const PRIORITY_OPTIONS = ["Basse", "Normale", "Haute", "Urgente"];
+
+const COMMENT_MAX_LENGTH = 200;
 
 export class StaffingRequestsPage extends Component {
     static template = "staffing.StaffingRequestsPage";
@@ -94,7 +110,12 @@ export class StaffingRequestsPage extends Component {
         this.filterSections = FILTER_SECTIONS;
         this.columnsMenu = COLUMNS_MENU;
         this.projectOptions = PROJECT_OPTIONS;
-        this.createSections = CREATE_SECTIONS;
+        this.criteriaFields = CRITERIA_FIELDS;
+        this.periodUnits = PERIOD_UNITS;
+        this.assignmentStatusOptions = ASSIGNMENT_STATUS_OPTIONS;
+        this.priorityOptions = PRIORITY_OPTIONS;
+        this.commentMaxLength = COMMENT_MAX_LENGTH;
+        this._periodId = 0;
 
         this.state = useState({
             requests: REQUESTS,
@@ -111,6 +132,14 @@ export class StaffingRequestsPage extends Component {
             createNeed: "",
             createProject: "",
             createOpenSections: {},
+            createCriteria: { skills: [], businessUnits: [], positions: [], offices: [], contractTypes: [] },
+            createCriteriaOpenField: null,
+            createPeriods: [],
+            createUsers: [],
+            createUserSearch: "",
+            createUserSearchFocused: false,
+            createInfo: { status: "", daysSold: null, description: "", duration: "", priority: "" },
+            createComment: "",
         });
 
         this.scenarioTooltip = "Résoudre automatiquement les demandes grâce à l'IA (fonctionnalité en version bêta)";
@@ -214,18 +243,126 @@ export class StaffingRequestsPage extends Component {
         this.state.createNeed = "";
         this.state.createProject = "";
         this.state.createOpenSections = {};
+        this.state.createCriteria = { skills: [], businessUnits: [], positions: [], offices: [], contractTypes: [] };
+        this.state.createCriteriaOpenField = null;
+        this.state.createPeriods = [];
+        this.state.createUsers = [];
+        this.state.createUserSearch = "";
+        this.state.createUserSearchFocused = false;
+        this.state.createInfo = { status: "", daysSold: null, description: "", duration: "", priority: "" };
+        this.state.createComment = "";
     }
 
     closeCreateDrawer() {
         this.state.createDrawer = null;
     }
 
-    toggleCreateSection(key, ev) {
-        if (ev) ev.stopPropagation();
+    closeCreateDropdowns() {
+        this.state.createCriteriaOpenField = null;
+        this.state.createUserSearchFocused = false;
+    }
+
+    toggleCreateSection(key) {
+        // Ne stoppe pas la propagation : le clic doit atteindre le tiroir
+        // pour que closeCreateDropdowns() referme les menus Critères/Utilisateurs
+        // d'une autre section restée ouverte.
         this.state.createOpenSections[key] = !this.state.createOpenSections[key];
     }
 
     isCreateSectionOpen(key) {
         return !!this.state.createOpenSections[key];
+    }
+
+    // ---- Section Critères ----
+    get criteriaCount() {
+        const c = this.state.createCriteria;
+        return c.skills.length + c.businessUnits.length + c.positions.length + c.offices.length + c.contractTypes.length;
+    }
+
+    toggleCriteriaDropdown(fieldKey, ev) {
+        if (ev) ev.stopPropagation();
+        const wasOpen = this.state.createCriteriaOpenField === fieldKey;
+        this.state.createCriteriaOpenField = wasOpen ? null : fieldKey;
+    }
+
+    isCriteriaDropdownOpen(fieldKey) {
+        return this.state.createCriteriaOpenField === fieldKey;
+    }
+
+    toggleCriteriaValue(fieldKey, option, ev) {
+        if (ev) ev.stopPropagation();
+        const list = this.state.createCriteria[fieldKey];
+        const idx = list.indexOf(option);
+        if (idx === -1) {
+            list.push(option);
+        } else {
+            list.splice(idx, 1);
+        }
+    }
+
+    isCriteriaValueSelected(fieldKey, option) {
+        return this.state.createCriteria[fieldKey].includes(option);
+    }
+
+    criteriaFieldSummary(fieldKey) {
+        const list = this.state.createCriteria[fieldKey];
+        if (!list.length) {
+            return "Sélectionner…";
+        }
+        return list.join(", ");
+    }
+
+    // ---- Section Périodes ----
+    addCreatePeriod(ev) {
+        if (ev) ev.stopPropagation();
+        this._periodId++;
+        this.state.createPeriods.push({ id: this._periodId, start: "", end: "", amount: 0, unit: "Jours" });
+    }
+
+    removeCreatePeriod(period, ev) {
+        if (ev) ev.stopPropagation();
+        const idx = this.state.createPeriods.indexOf(period);
+        if (idx !== -1) {
+            this.state.createPeriods.splice(idx, 1);
+        }
+    }
+
+    // ---- Section Utilisateurs ----
+    get createUserSuggestions() {
+        const search = this.state.createUserSearch.trim().toLowerCase();
+        return USER_DIRECTORY
+            .filter((name) => !this.state.createUsers.includes(name))
+            .filter((name) => !search || name.toLowerCase().includes(search))
+            .slice(0, 8);
+    }
+
+    addCreateUser(name, ev) {
+        if (ev) ev.stopPropagation();
+        this.state.createUsers.push(name);
+        this.state.createUserSearch = "";
+    }
+
+    removeCreateUser(name, ev) {
+        if (ev) ev.stopPropagation();
+        const idx = this.state.createUsers.indexOf(name);
+        if (idx !== -1) {
+            this.state.createUsers.splice(idx, 1);
+        }
+    }
+
+    focusCreateUserSearch(ev) {
+        if (ev) ev.stopPropagation();
+        this.state.createUserSearchFocused = true;
+    }
+
+    // ---- Section Informations ----
+    get informationCount() {
+        const info = this.state.createInfo;
+        return ["status", "daysSold", "description", "duration", "priority"].filter((k) => info[k]).length;
+    }
+
+    // ---- Section Commentaire ----
+    get commentCount() {
+        return this.state.createComment.trim() ? 1 : 0;
     }
 }

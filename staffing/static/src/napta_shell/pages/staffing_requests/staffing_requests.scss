@@ -561,6 +561,170 @@
         padding: 2px 2px 14px 24px;
         font-size: 12.5px;
         color: $napta-text-muted;
+
+        .osr_create_label {
+            margin-top: 12px;
+            &:first-child { margin-top: 0; }
+        }
+    }
+
+    .osr_create_input {
+        width: 100%;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 13px;
+        color: $napta-text;
+        background: #fff;
+        box-sizing: border-box;
+    }
+
+    .osr_create_dropdown_wrap {
+        position: relative;
+    }
+
+    .osr_create_dropdown_btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 13px;
+        color: $napta-text;
+        background: #fff;
+        cursor: pointer;
+        text-align: left;
+
+        span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        i { color: $napta-text-muted; flex: none; }
+    }
+
+    .osr_create_dropdown_menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid $napta-border;
+        border-radius: 8px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
+        max-height: 220px;
+        overflow-y: auto;
+        z-index: 10;
+    }
+
+    .osr_create_dropdown_item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        color: $napta-text;
+        cursor: pointer;
+
+        &:hover { background: $napta-active-bg; }
+        i { color: $napta-accent; width: 14px; }
+    }
+
+    .osr_create_empty_hint {
+        padding: 8px 0;
+        font-style: italic;
+    }
+
+    .osr_create_period_row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    .osr_create_period_date {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+
+    .osr_create_period_sep { color: $napta-text-muted; }
+
+    .osr_create_period_amount {
+        width: 50px;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 6px 4px;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .osr_create_period_unit {
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 6px 4px;
+        font-size: 12px;
+        background: #fff;
+    }
+
+    .osr_create_period_remove {
+        color: $napta-text-muted;
+        cursor: pointer;
+        &:hover { color: #c0392b; }
+    }
+
+    .osr_create_add_period {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px dashed $napta-border;
+        border-radius: 6px;
+        background: #fff;
+        padding: 7px 10px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: $napta-text;
+        cursor: pointer;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .osr_create_user_chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    .osr_create_user_chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: $napta-active-bg;
+        border-radius: 14px;
+        padding: 3px 8px 3px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: $napta-text;
+
+        i { cursor: pointer; color: $napta-text-muted; }
+    }
+
+    .osr_create_user_search {
+        width: 100%;
+        border: 1px solid $napta-border;
+        border-radius: 6px;
+        padding: 7px 10px;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    .osr_create_char_count {
+        text-align: right;
+        font-size: 11px;
+        margin-top: 4px;
     }
 
     .osr_create_footer {
