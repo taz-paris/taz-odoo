@@ -487,6 +487,12 @@
         font-weight: 400;
     }
 
+    // Le widget Staffings (avatar + nom + rôle + crayon) n'a pas besoin de
+    // la largeur du widget Demandes (dates/tags/pré-positionnements).
+    .osp_cell_popover_staffing {
+        width: 230px;
+    }
+
     // -- Demandes --
     // Même thème bleu que le bandeau de rappel du tiroir d'édition
     // (components/assignment_drawer : o_napta_adw_banner) : chaque demande

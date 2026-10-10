@@ -140,7 +140,7 @@
                                           t-on-click="(ev) => this.toggleStaffingPopover(card, 'combined', ev)">
                                         <span t-esc="(card.staffingsSimules || 0) + (card.staffingsReels || 0)"/><i class="fa fa-pencil-square-o"/>
                                     </span>
-                                    <div t-if="isStaffingPopoverOpen(card, 'combined')" class="osp_cell_popover">
+                                    <div t-if="isStaffingPopoverOpen(card, 'combined')" class="osp_cell_popover osp_cell_popover_staffing">
                                         <t t-if="card.staffingsReels">
                                             <div class="osp_sp_title">Staffings réels</div>
                                             <div t-foreach="staffingsFor(card, 'reels')" t-as="person" t-key="person.name" class="osp_sp_person">
@@ -232,7 +232,7 @@
                                       t-on-click="(ev) => this.toggleStaffingPopover(row, 'simules', ev)">
                                     <span t-esc="row.staffingsSimules"/><i class="fa fa-pencil-square-o"/>
                                 </span>
-                                <div t-if="isStaffingPopoverOpen(row, 'simules')" class="osp_cell_popover">
+                                <div t-if="isStaffingPopoverOpen(row, 'simules')" class="osp_cell_popover osp_cell_popover_staffing">
                                     <div class="osp_sp_title">Staffings simulés</div>
                                     <div t-foreach="staffingsFor(row, 'simules')" t-as="person" t-key="person.name" class="osp_sp_person">
                                         <span class="o_napta_avatar" t-esc="person.initials"/>
@@ -252,7 +252,7 @@
                                       t-on-click="(ev) => this.toggleStaffingPopover(row, 'reels', ev)">
                                     <span t-esc="row.staffingsReels"/><i class="fa fa-pencil-square-o"/>
                                 </span>
-                                <div t-if="isStaffingPopoverOpen(row, 'reels')" class="osp_cell_popover">
+                                <div t-if="isStaffingPopoverOpen(row, 'reels')" class="osp_cell_popover osp_cell_popover_staffing">
                                     <div class="osp_sp_title">Staffings réels</div>
                                     <div t-foreach="staffingsFor(row, 'reels')" t-as="person" t-key="person.name" class="osp_sp_person">
                                         <span class="o_napta_avatar" t-esc="person.initials"/>
