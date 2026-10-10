@@ -250,6 +250,8 @@
                                 <td class="o_napta_ts_team_head">
                                     <input type="checkbox" t-att-checked="isSelected(person)"
                                            t-on-click="(ev) => this.toggleSelect(person, ev)"/>
+                                    <i t-att-class="'fa ' + (isExpanded(person) ? 'fa-chevron-up' : 'fa-chevron-down')"
+                                       class="o_napta_ts_expand" t-on-click="() => this.toggleExpand(person)"/>
                                     <span class="o_napta_ts_avatar" t-esc="initials(person.name)"/>
                                     <span class="o_napta_ts_person_name" t-esc="person.name"/>
                                 </td>
@@ -279,6 +281,45 @@
                                 </t>
                                 <td/>
                             </tr>
+
+                            <!-- Missions de la personne, dépliables comme en vue Semaine -->
+                            <t t-if="isExpanded(person)">
+                                <tr t-foreach="person.projects" t-as="proj" t-key="proj.name" class="o_napta_ts_project_row">
+                                    <td class="o_napta_ts_team_projectcell">
+                                        <span t-esc="proj.name"/>
+                                        <div class="o_napta_ts_gauge_wrap" t-att-data-tooltip="proj.gauge.tooltip">
+                                            <div class="o_napta_ts_gauge_track">
+                                                <div t-attf-class="o_napta_ts_gauge_fill o_napta_ts_gauge_{{proj.gauge.color}}"
+                                                     t-attf-style="width: {{proj.gauge.percent}}%"/>
+                                            </div>
+                                            <span class="o_napta_ts_gauge_label">
+                                                <t t-if="proj.gaugeNote" t-esc="proj.gaugeNote"/>
+                                                <t t-else="" t-esc="proj.gauge.real + ' / ' + proj.gauge.planned + 'd'"/>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <t t-foreach="proj.monthValues" t-as="mv" t-key="mv_index">
+                                        <td class="o_napta_ts_daytotal" t-esc="formatDays(mv)"/>
+                                    </t>
+                                    <td class="o_napta_ts_totalcell" t-esc="formatDays(proj.monthValues.reduce((a, b) => a + b, 0))"/>
+                                </tr>
+                                <tr class="o_napta_ts_availability_row">
+                                    <td>
+                                        Disponibilité <i class="fa fa-info-circle o_napta_ts_info" title="Disponibilité calculée à partir des temps déclarés."/>
+                                    </td>
+                                    <t t-foreach="person.monthAvailability" t-as="a" t-key="a_index">
+                                        <td class="o_napta_ts_availabilitycell" t-esc="a"/>
+                                    </t>
+                                    <td class="o_napta_ts_totalcell" t-esc="person.monthAvailabilityTotal"/>
+                                </tr>
+                                <tr class="o_napta_ts_addproject_row">
+                                    <td colspan="7">
+                                        <button class="btn btn-link o_napta_ts_addproject" disabled="disabled">
+                                            <i class="fa fa-plus"/> Ajouter un projet
+                                        </button>
+                                    </td>
+                                </tr>
+                            </t>
                         </t>
                     </tbody>
                 </table>
