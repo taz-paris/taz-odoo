@@ -11,7 +11,7 @@
                   id="napta_shell_root"
                   action="napta_shell_action"
                   sequence="5"
-                  groups="base.group_user"/>
+                  groups="base.group_system"/>
 
     </data>
 </odoo>
