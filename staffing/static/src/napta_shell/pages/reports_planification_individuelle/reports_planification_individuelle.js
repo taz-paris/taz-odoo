@@ -9,23 +9,23 @@ import { Component, useState } from "@odoo/owl";
  * d'affichage et détail dépliable par personne.
  */
 const WEEK_COLUMNS = [
-    { key: "w30", label: "W30", date: "Jul 21" },
-    { key: "w31", label: "W31", date: "Jul 28" },
-    { key: "w32", label: "W32", date: "Aug 4" },
-    { key: "w33", label: "W33", date: "Aug 11" },
-    { key: "w34", label: "W34", date: "Aug 18" },
-    { key: "w35", label: "W35", date: "Aug 25" },
+    { key: "w30", label: "S30", date: "21 juil." },
+    { key: "w31", label: "S31", date: "28 juil." },
+    { key: "w32", label: "S32", date: "4 août" },
+    { key: "w33", label: "S33", date: "11 août" },
+    { key: "w34", label: "S34", date: "18 août" },
+    { key: "w35", label: "S35", date: "25 août" },
 ];
 
 const PEOPLE_ROWS = [
-    { id: "ameri", name: "Armand AMERI", initials: "AA", notes: "Check for overstaffing", notesAlert: true, availability: "22/09/2025", weeks: [50, 102, 102, 122, 153, 153] },
+    { id: "ameri", name: "Armand AMERI", initials: "AA", notes: "Vérifier la sur-dotation", notesAlert: true, availability: "22/09/2025", weeks: [50, 102, 102, 122, 153, 153] },
     { id: "bartol", name: "Jeremy BARTOL", initials: "JB", notes: "", availability: "18/08/2025", weeks: [87, 87, 87, 95, 65, 96] },
-    { id: "bartoli", name: "Nour BARTOLI", initials: "NB", notes: "", today: true, lastAssignment: "Last assignment 6 days ago", weeks: [60, 0, 120, 60, 0, 20] },
+    { id: "bartoli", name: "Nour BARTOLI", initials: "NB", notes: "", today: true, lastAssignment: "Dernière affectation il y a 6 jours", weeks: [60, 0, 120, 60, 0, 20] },
     { id: "berarda", name: "Katharina BERARDA", initials: "KB", notes: "", availability: "19/01/2026", weeks: [85, 85, 85, 100, 73, 143] },
     { id: "berger", name: "Claire BERGER", initials: "CB", notes: "", availability: "06/10/2025", weeks: [98, 98, 98, 60, 98, 98] },
-    { id: "bompard", name: "Jess BOMPARD", initials: "JB", notes: "Transfer request", availability: "18/08/2025", weeks: [139, 139, 139, 131, 39, 39] },
-    { id: "boyle", name: "Timothy BOYLE", initials: "TB", notes: "", today: true, lastAssignment: "Last assignment 1 day ago", weeks: [100, 10, 313, 173, 113, 159] },
-    { id: "brun", name: "Olivier BRUN", initials: "OB", notes: "Priority team Bruno", availability: "20/10/2025", weeks: [98, 100, 156, 96, 96, 96] },
+    { id: "bompard", name: "Jess BOMPARD", initials: "JB", notes: "Demande de transfert", availability: "18/08/2025", weeks: [139, 139, 139, 131, 39, 39] },
+    { id: "boyle", name: "Timothy BOYLE", initials: "TB", notes: "", today: true, lastAssignment: "Dernière affectation il y a 1 jour", weeks: [100, 10, 313, 173, 113, 159] },
+    { id: "brun", name: "Olivier BRUN", initials: "OB", notes: "Équipe prioritaire Bruno", availability: "20/10/2025", weeks: [98, 100, 156, 96, 96, 96] },
 ];
 
 /** Classe de couleur par seuil, identique à la légende du rapport. */
@@ -43,8 +43,8 @@ function thresholdClass(value) {
 /** Génère un détail de calendrier déplié, dérivé des valeurs de la ligne. */
 function buildDetailRows(person) {
     const clients = [
-        { client: "AIRCALL", project: "Data Audit", simulated: false },
-        { client: "INTERNAL", project: "Deployment Process Improvement", simulated: false },
+        { client: "AIRCALL", project: "Audit data", simulated: false },
+        { client: "INTERNE", project: "Amélioration des process de déploiement", simulated: false },
     ];
     const rows = clients.map((c, idx) => ({
         ...c,
@@ -58,13 +58,13 @@ function buildDetailRows(person) {
     }));
     rows.push({
         client: "Decathlon",
-        project: "Internal Audit",
+        project: "Audit interne",
         simulated: true,
         cells: person.weeks.map((w, i) => (i === person.weeks.length - 2 ? Math.round(w * 0.2) : null)),
     });
     rows.push({
         client: "APPLE",
-        project: "Acquisition Strategy Redesign",
+        project: "Refonte stratégie d'acquisition",
         simulated: false,
         highlight: true,
         cells: person.weeks.map((w) => Math.round(w * 0.3) || null),

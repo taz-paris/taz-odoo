@@ -9,7 +9,7 @@
                 <div class="o_ah_header_left">
                     <h1>Availability Hub</h1>
                     <div class="o_ah_subtitle">
-                        <span t-esc="availablePeopleCount"/> people available at over <span t-esc="state.threshold"/>% in the next <span t-esc="state.horizonValue"/> weeks
+                        <span t-esc="availablePeopleCount"/> personnes disponibles à plus de <span t-esc="state.threshold"/>% dans les <span t-esc="state.horizonValue"/> prochaines semaines
                     </div>
                 </div>
                 <div class="o_ah_header_right">
@@ -18,18 +18,18 @@
                     </div>
 
                     <div t-if="state.legendOpen" class="o_ah_popover o_ah_legend_popover">
-                        <div class="o_ah_popover_title">Availability colors</div>
+                        <div class="o_ah_popover_title">Couleurs de disponibilité</div>
                         <div class="o_ah_legend_row">
                             <span class="o_ah_legend_swatch o_ah_cell_high">65%</span>
-                            <span>Above 50%</span>
+                            <span>Plus de 50%</span>
                         </div>
                         <div class="o_ah_legend_row">
                             <span class="o_ah_legend_swatch o_ah_cell_mid">20%</span>
-                            <span>1% to 50%</span>
+                            <span>De 1% à 50%</span>
                         </div>
                         <div class="o_ah_legend_row">
                             <span class="o_ah_legend_swatch o_ah_cell_zero">0%</span>
-                            <span>Not available</span>
+                            <span>Non disponible</span>
                         </div>
                     </div>
                 </div>
@@ -40,46 +40,46 @@
                 <div class="o_ah_toolbar_left">
                     <div class="o_ah_toolbar_btn_wrap">
                         <button class="btn btn-sm o_ah_toolbar_btn" t-on-click="() => this.toggleMenu('views')">
-                            <i class="fa fa-bookmark-o"/> Views
+                            <i class="fa fa-bookmark-o"/> Vues
                         </button>
                         <div t-if="state.openMenu === 'views'" class="o_ah_popover o_ah_views_popover">
-                            <div class="o_ah_popover_title">Save current view</div>
-                            <div class="o_ah_views_empty">No saved view</div>
+                            <div class="o_ah_popover_title">Sauvegarder la vue actuelle</div>
+                            <div class="o_ah_views_empty">Aucune vue enregistrée</div>
                             <div class="o_ah_views_hint">
                                 <i class="fa fa-info-circle"/>
-                                <span>A saved view keeps your filters, sorting, visible columns, display settings and date range.</span>
+                                <span>Une vue enregistrée conserve vos filtres, le tri, les colonnes visibles, les paramètres d'affichage et la plage de dates.</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="o_ah_toolbar_btn_wrap">
                         <button class="btn btn-sm o_ah_toolbar_btn" t-on-click="() => this.toggleMenu('filter')">
-                            <i class="fa fa-filter"/> Filter
+                            <i class="fa fa-filter"/> Filtrer
                         </button>
                         <div t-if="state.openMenu === 'filter'" class="o_ah_popover o_ah_filter_popover">
-                            <div class="o_ah_filter_group_title">Users</div>
+                            <div class="o_ah_filter_group_title">Utilisateurs</div>
                             <div class="o_ah_filter_chips">
-                                <span class="o_ah_filter_chip">Office</span>
-                                <span class="o_ah_filter_chip">Skill</span>
-                                <span class="o_ah_filter_chip">Business unit</span>
-                                <span class="o_ah_filter_chip">Position</span>
+                                <span class="o_ah_filter_chip">Bureau</span>
+                                <span class="o_ah_filter_chip">Compétence</span>
+                                <span class="o_ah_filter_chip">Unité commerciale</span>
+                                <span class="o_ah_filter_chip">Poste</span>
                             </div>
-                            <div class="o_ah_filter_group_title">Projects</div>
+                            <div class="o_ah_filter_group_title">Projets</div>
                             <div class="o_ah_filter_chips">
-                                <span class="o_ah_filter_chip">Project status</span>
+                                <span class="o_ah_filter_chip">Statut du projet</span>
                                 <span class="o_ah_filter_chip">Client</span>
                             </div>
-                            <button class="btn btn-sm o_ah_popover_apply" disabled="disabled">Apply</button>
+                            <button class="btn btn-sm o_ah_popover_apply" disabled="disabled">Appliquer</button>
                         </div>
                     </div>
 
                     <div class="o_ah_toolbar_btn_wrap">
                         <button class="btn btn-sm o_ah_toolbar_btn" t-on-click="() => this.toggleMenu('availability')">
-                            <i class="fa fa-calendar"/> Availability filter
+                            <i class="fa fa-calendar"/> Filtre de disponibilité
                         </button>
                         <div t-if="state.openMenu === 'availability'" class="o_ah_popover o_ah_availability_popover">
                             <div class="o_ah_threshold_header">
-                                <span class="o_ah_popover_title">Availability threshold:</span>
+                                <span class="o_ah_popover_title">Seuil de disponibilité :</span>
                                 <span class="o_ah_threshold_value" t-esc="state.threshold + '%'"/>
                             </div>
                             <input type="range" class="o_ah_threshold_slider" min="0" max="100"
@@ -94,7 +94,7 @@
                             </t>
                             <div class="o_ah_legend_divider"/>
                             <div class="o_ah_reset_row">
-                                <i class="fa fa-refresh"/> Reset
+                                <i class="fa fa-refresh"/> Réinitialiser
                             </div>
                         </div>
                     </div>
@@ -103,28 +103,28 @@
                 <div class="o_ah_toolbar_right">
                     <div class="o_ah_toolbar_btn_wrap">
                         <button class="btn btn-sm o_ah_toolbar_btn" t-on-click="() => this.toggleMenu('columns')">
-                            Columns <i class="fa fa-caret-down"/>
+                            Colonnes <i class="fa fa-caret-down"/>
                         </button>
                         <div t-if="state.openMenu === 'columns'" class="o_ah_popover o_ah_columns_popover">
                             <div class="o_ah_column_row">
                                 <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
-                                <span>People</span>
+                                <span>Personnes</span>
                             </div>
                             <div class="o_ah_column_row">
                                 <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
-                                <span>Last staffing date</span>
+                                <span>Date du dernier staffing</span>
                             </div>
                             <div class="o_ah_column_row">
                                 <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
-                                <span>First availability date</span>
+                                <span>Date de première disponibilité</span>
                             </div>
                             <div class="o_ah_column_row">
                                 <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
-                                <span>Business Unit</span>
+                                <span>Unité commerciale</span>
                             </div>
                             <div class="o_ah_column_row">
                                 <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
-                                <span>Office</span>
+                                <span>Bureau</span>
                             </div>
                             <div class="o_ah_column_row">
                                 <span class="o_napta_switch"><span class="o_napta_switch_knob"/></span>
@@ -135,30 +135,30 @@
 
                     <div class="o_ah_toolbar_btn_wrap">
                         <button class="btn btn-sm o_ah_toolbar_btn" t-on-click="() => this.toggleMenu('display')">
-                            Display settings <i class="fa fa-caret-down"/>
+                            Paramètres d'affichage <i class="fa fa-caret-down"/>
                         </button>
                         <div t-if="state.openMenu === 'display'" class="o_ah_popover o_ah_display_popover">
-                            <div class="o_ah_popover_title">Include in main line</div>
-                            <label class="o_ah_check_row"><input type="checkbox" checked="checked"/> Real</label>
-                            <label class="o_ah_check_row"><input type="checkbox" checked="checked"/> Simulated</label>
-                            <label class="o_ah_check_row"><input type="checkbox" checked="checked"/> Pre-booking</label>
+                            <div class="o_ah_popover_title">Inclure dans la ligne principale</div>
+                            <label class="o_ah_check_row"><input type="checkbox" checked="checked"/> Réel</label>
+                            <label class="o_ah_check_row"><input type="checkbox" checked="checked"/> Simulé</label>
+                            <label class="o_ah_check_row"><input type="checkbox" checked="checked"/> Pré-positionnement</label>
 
-                            <div class="o_ah_popover_title o_ah_popover_title_spaced">Display availability in</div>
-                            <label class="o_ah_radio_row"><input type="radio" name="ah_unit" checked="checked"/> % : Details</label>
-                            <label class="o_ah_radio_row"><input type="radio" name="ah_unit"/> Days</label>
-                            <label class="o_ah_radio_row"><input type="radio" name="ah_unit"/> Hours</label>
+                            <div class="o_ah_popover_title o_ah_popover_title_spaced">Afficher la disponibilité en</div>
+                            <label class="o_ah_radio_row"><input type="radio" name="ah_unit" checked="checked"/> % : Détails</label>
+                            <label class="o_ah_radio_row"><input type="radio" name="ah_unit"/> Jours</label>
+                            <label class="o_ah_radio_row"><input type="radio" name="ah_unit"/> Heures</label>
 
-                            <div class="o_ah_popover_title o_ah_popover_title_spaced">Suggested requests</div>
+                            <div class="o_ah_popover_title o_ah_popover_title_spaced">Demandes suggérées</div>
                             <div class="o_ah_toggle_row">
                                 <span class="o_napta_switch o_napta_switch_on"><span class="o_napta_switch_knob"/></span>
-                                <span>Show request suggestions</span>
+                                <span>Afficher les suggestions de demandes</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="o_ah_toolbar_btn_wrap">
                         <button class="btn btn-sm o_ah_horizon_btn" t-on-click="() => this.toggleMenu('horizon')">
-                            Next
+                            Prochaines
                             <span class="o_ah_horizon_value" t-esc="state.horizonValue"/>
                             <i class="fa fa-sort o_ah_horizon_stepper"/>
                             <span t-esc="state.horizonUnit"/>
@@ -166,10 +166,10 @@
                         </button>
                         <div t-if="state.openMenu === 'horizon'" class="o_ah_popover o_ah_horizon_popover">
                             <div class="o_ah_horizon_option o_ah_horizon_option_active">
-                                <i class="fa fa-check"/> Weeks
+                                <i class="fa fa-check"/> Semaines
                             </div>
-                            <div class="o_ah_horizon_option">Months</div>
-                            <div class="o_ah_horizon_option">Years</div>
+                            <div class="o_ah_horizon_option">Mois</div>
+                            <div class="o_ah_horizon_option">Années</div>
                         </div>
                     </div>
                 </div>
@@ -182,10 +182,10 @@
                         <thead>
                             <tr>
                                 <th class="o_ah_col_expand"/>
-                                <th class="o_ah_col_people">People <i class="fa fa-sort o_ah_sort" title="Trier"/></th>
+                                <th class="o_ah_col_people">Personnes <i class="fa fa-sort o_ah_sort" title="Trier"/></th>
                                 <th class="o_ah_col_details"/>
-                                <th class="o_ah_col_date">Last staffing date <i class="fa fa-sort o_ah_sort" title="Trier"/></th>
-                                <th class="o_ah_col_date">First availability date <i class="fa fa-sort o_ah_sort" title="Trier"/></th>
+                                <th class="o_ah_col_date">Date du dernier staffing <i class="fa fa-sort o_ah_sort" title="Trier"/></th>
+                                <th class="o_ah_col_date">Date de première disponibilité <i class="fa fa-sort o_ah_sort" title="Trier"/></th>
                                 <t t-foreach="weekColumns" t-as="col" t-key="col.key">
                                     <th class="o_ah_col_week">
                                         <div class="o_ah_week_label">
@@ -215,7 +215,7 @@
                                     <td class="o_ah_col_details">
                                         <button class="btn btn-sm o_ah_details_btn" title="Voir le profil"
                                                 t-on-click="() => this.selectPerson(person.id)">
-                                            Details <i class="fa fa-search"/>
+                                            Détails <i class="fa fa-search"/>
                                         </button>
                                     </td>
                                     <td class="o_ah_col_date" t-esc="person.lastStaffing"/>
@@ -230,7 +230,7 @@
                                 <t t-if="isExpanded(person.id) and person.hasDetail">
                                     <tr class="o_ah_detail_row">
                                         <td class="o_ah_col_expand"/>
-                                        <td class="o_ah_col_people o_ah_detail_label" colspan="4">Bank holiday</td>
+                                        <td class="o_ah_col_people o_ah_detail_label" colspan="4">Jour férié</td>
                                         <t t-foreach="weekColumns" t-as="col" t-key="col.key">
                                             <td class="o_ah_col_week">
                                                 <span t-if="col_index &lt; 3" class="o_ah_bank_holiday_dot"/>
@@ -257,7 +257,7 @@
                     </table>
 
                     <div class="o_ah_footer">
-                        <div class="o_ah_footer_left">1 - <span t-esc="people.length"/> of <span t-esc="people.length"/> items</div>
+                        <div class="o_ah_footer_left">1 - <span t-esc="people.length"/> sur <span t-esc="people.length"/> éléments</div>
                         <div class="o_ah_footer_center">
                             <i class="fa fa-chevron-left o_ah_page_arrow"/>
                             <span class="o_ah_page_pill o_ah_page_pill_active">1</span>
@@ -283,12 +283,12 @@
                     </div>
 
                     <div class="o_ah_details_section">
-                        <div class="o_ah_details_section_title"><i class="fa fa-user-circle-o"/> Identity</div>
-                        <div class="o_ah_details_line"><span>Job position</span><span t-esc="selectedProfile.jobPosition"/></div>
-                        <div class="o_ah_details_line"><span>Business unit (User)</span><span t-esc="selectedProfile.businessUnit"/></div>
-                        <div class="o_ah_details_line"><span>Office</span><span t-esc="selectedProfile.office"/></div>
-                        <div class="o_ah_details_line"><span>Daily cost</span><span t-esc="selectedProfile.dailyCost"/></div>
-                        <div class="o_ah_details_line"><span>Contract type</span><span t-esc="selectedProfile.contractType"/></div>
+                        <div class="o_ah_details_section_title"><i class="fa fa-user-circle-o"/> Identité</div>
+                        <div class="o_ah_details_line"><span>Poste</span><span t-esc="selectedProfile.jobPosition"/></div>
+                        <div class="o_ah_details_line"><span>Unité commerciale (Utilisateur)</span><span t-esc="selectedProfile.businessUnit"/></div>
+                        <div class="o_ah_details_line"><span>Bureau</span><span t-esc="selectedProfile.office"/></div>
+                        <div class="o_ah_details_line"><span>Coût journalier</span><span t-esc="selectedProfile.dailyCost"/></div>
+                        <div class="o_ah_details_line"><span>Type de contrat</span><span t-esc="selectedProfile.contractType"/></div>
                     </div>
 
                     <div t-if="selectedProfile.certifications.length" class="o_ah_details_section">
@@ -301,7 +301,7 @@
                     </div>
 
                     <div t-if="selectedProfile.skills.length" class="o_ah_details_section">
-                        <div class="o_ah_details_section_title"><i class="fa fa-tags"/> Top skills</div>
+                        <div class="o_ah_details_section_title"><i class="fa fa-tags"/> Compétences clés</div>
                         <div class="o_ah_badge_row">
                             <span t-foreach="selectedProfile.skills" t-as="skill" t-key="skill.label" class="o_ah_badge o_ah_badge_skill">
                                 <t t-esc="skill.label"/> <i class="fa fa-star-o"/> <t t-esc="skill.rating"/>
@@ -310,12 +310,12 @@
                     </div>
 
                     <div class="o_ah_details_section">
-                        <div class="o_ah_details_section_title"><i class="fa fa-file-text-o"/> Professional summary</div>
+                        <div class="o_ah_details_section_title"><i class="fa fa-file-text-o"/> Résumé professionnel</div>
                         <p class="o_ah_details_summary" t-esc="selectedProfile.summary"/>
                     </div>
 
                     <div class="o_ah_details_section">
-                        <div class="o_ah_details_section_title"><i class="fa fa-briefcase"/> Last experience</div>
+                        <div class="o_ah_details_section_title"><i class="fa fa-briefcase"/> Dernière expérience</div>
                         <div class="o_ah_details_line_single" t-esc="selectedProfile.lastExperience"/>
                     </div>
                 </div>

@@ -9,28 +9,28 @@ import { Component, useState } from "@odoo/owl";
  * avec panneau de détails et suggestions "Scenario Architect".
  */
 const WEEK_COLUMNS = [
-    { key: "w17", label: "W17", date: "24 Apr", current: true },
-    { key: "w18", label: "W18", date: "27 Apr" },
-    { key: "w19", label: "W19", date: "4 May" },
-    { key: "w20", label: "W20", date: "11 May" },
-    { key: "w21", label: "W21", date: "18 May" },
-    { key: "w22", label: "W22", date: "25 May" },
-    { key: "w23", label: "W23", date: "1 Jun" },
+    { key: "w17", label: "S17", date: "24 avr.", current: true },
+    { key: "w18", label: "S18", date: "27 avr." },
+    { key: "w19", label: "S19", date: "4 mai" },
+    { key: "w20", label: "S20", date: "11 mai" },
+    { key: "w21", label: "S21", date: "18 mai" },
+    { key: "w22", label: "S22", date: "25 mai" },
+    { key: "w23", label: "S23", date: "1 juin" },
 ];
 
 const PEOPLE_ROWS = [
-    { id: "hernandez", name: "Leah HERNANDEZ", initials: "LH", lastStaffing: "0 days ago", firstAvailability: "Today", weeks: [75, 50, 70, 100, 100, 71, 77] },
+    { id: "hernandez", name: "Leah HERNANDEZ", initials: "LH", lastStaffing: "il y a 0 jour", firstAvailability: "Aujourd'hui", weeks: [75, 50, 70, 100, 100, 71, 77] },
     {
-        id: "zyvel", name: "Luca ZYVEL", initials: "LZ", lastStaffing: "-", firstAvailability: "Today", weeks: [100, 80, 80, 80, 100, 80, 100],
+        id: "zyvel", name: "Luca ZYVEL", initials: "LZ", lastStaffing: "-", firstAvailability: "Aujourd'hui", weeks: [100, 80, 80, 80, 100, 80, 100],
         hasDetail: true,
         suggestions: [
-            { label: "AIRBUS — ISD Reorganization", weekIndex: 5, value: 40 },
-            { label: "INTERNAL — Open a new Agency", weekIndex: 5, value: 100 },
+            { label: "AIRBUS — Réorganisation de la DSI", weekIndex: 5, value: 40 },
+            { label: "INTERNE — Ouverture d'une nouvelle agence", weekIndex: 5, value: 100 },
         ],
     },
-    { id: "zamora", name: "Sofia ZAMORA", initials: "SZ", lastStaffing: "-", firstAvailability: "Today", weeks: [100, 100, 80, 100, 100, 100, 100] },
-    { id: "dev_virtual", name: "Dev Virtual", initials: "DV", virtual: true, lastStaffing: "-", firstAvailability: "Today", weeks: [100, 100, 100, 100, 100, 100, 100] },
-    { id: "data_analyst_virtual", name: "Data Analyst Virtual", initials: "DA", virtual: true, lastStaffing: "-", firstAvailability: "Today", weeks: [100, 100, 100, 100, 100, 100, 100] },
+    { id: "zamora", name: "Sofia ZAMORA", initials: "SZ", lastStaffing: "-", firstAvailability: "Aujourd'hui", weeks: [100, 100, 80, 100, 100, 100, 100] },
+    { id: "dev_virtual", name: "Dev Virtual", initials: "DV", virtual: true, lastStaffing: "-", firstAvailability: "Aujourd'hui", weeks: [100, 100, 100, 100, 100, 100, 100] },
+    { id: "data_analyst_virtual", name: "Data Analyst Virtual", initials: "DA", virtual: true, lastStaffing: "-", firstAvailability: "Aujourd'hui", weeks: [100, 100, 100, 100, 100, 100, 100] },
     { id: "scott", name: "James SCOTT", initials: "JS", lastStaffing: "-", firstAvailability: "29/04/2026", weeks: [0, 60, 20, 100, 100, 100, 100] },
     { id: "ferris", name: "Thomas FERRIS", initials: "TF", lastStaffing: "-", firstAvailability: "05/05/2026", weeks: [0, 0, 50, 68, 68, 68, 68] },
     { id: "vincent", name: "Anthony VINCENT", initials: "AV", lastStaffing: "-", firstAvailability: "05/05/2026", weeks: [0, 0, 20, 100, 100, 100, 100] },
@@ -41,29 +41,29 @@ const PEOPLE_ROWS = [
         profile: {
             jobPosition: "Senior",
             businessUnit: "Change Management",
-            office: "London",
-            dailyCost: "€357",
-            contractType: "Internal",
+            office: "Londres",
+            dailyCost: "357 €",
+            contractType: "Interne",
             certifications: ["IFRS", "CloudFormation", "US GAAP"],
             skills: [
-                { label: "Model optimisation", rating: 5 },
+                { label: "Optimisation de modèles", rating: 5 },
                 { label: "Google Ads", rating: 5 },
                 { label: "Agile CRM", rating: 5 },
                 { label: "PowerPoint", rating: 5 },
                 { label: "Reporting", rating: 4 },
             ],
-            summary: "Autonomous, rigorous, and possessing excellent interpersonal skills, Serena has strong Audit and Analysis skills, mostly in the banking sector, allowing work with multidisciplinary teams.",
-            lastExperience: "Senior Consultant",
+            summary: "Autonome, rigoureuse et dotée d'un excellent relationnel, Serena possède de solides compétences en audit et en analyse, principalement dans le secteur bancaire, lui permettant de travailler avec des équipes pluridisciplinaires.",
+            lastExperience: "Consultant Senior",
         },
     },
 ];
 
 const DEFAULT_PROFILE = {
     jobPosition: "Consultant",
-    businessUnit: "Operations",
+    businessUnit: "Opérations",
     office: "Paris",
-    dailyCost: "€—",
-    contractType: "Internal",
+    dailyCost: "— €",
+    contractType: "Interne",
     certifications: [],
     skills: [],
     summary: "Aucun résumé professionnel renseigné pour ce profil.",
@@ -95,7 +95,7 @@ export class ReportsAvailabilityHubPage extends Component {
             selectedPersonId: "rossi",
             threshold: 50,
             horizonValue: 6,
-            horizonUnit: "Weeks",
+            horizonUnit: "Semaines",
         });
 
         this.currentWeekTooltip = "Semaine en cours.";
