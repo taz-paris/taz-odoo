@@ -1279,16 +1279,22 @@
     background: #fbfbfb;
 }
 
+.o_napta_adw_preview_person_cell {
+    // .o_napta_avatar est en display: flex (donc block-level) : sans ce
+    // conteneur flex, il saute à la ligne et pousse le nom en dessous.
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .o_napta_adw_preview_chevron {
     color: $napta-text-muted;
     cursor: pointer;
-    margin-right: 6px;
     &:hover { color: $napta-text; }
 }
 
 .o_napta_adw_preview_person_name {
     font-weight: 600;
-    margin-left: 6px;
 }
 
 .o_napta_adw_preview_row_main:hover {

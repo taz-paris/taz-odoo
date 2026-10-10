@@ -321,10 +321,12 @@
                             <t t-foreach="previewRows" t-as="row" t-key="row.id">
                                 <tr class="o_napta_adw_preview_row_main">
                                     <td class="o_napta_adw_preview_col_people">
-                                        <i t-attf-class="fa {{ isPreviewExpanded(row.id) ? 'fa-chevron-down' : 'fa-chevron-right' }} o_napta_adw_preview_chevron"
-                                           t-on-click="(ev) => this.togglePreviewExpand(row.id, ev)"/>
-                                        <span class="o_napta_avatar" t-esc="row.initials"/>
-                                        <span class="o_napta_adw_preview_person_name" t-esc="row.name"/>
+                                        <div class="o_napta_adw_preview_person_cell">
+                                            <i t-attf-class="fa {{ isPreviewExpanded(row.id) ? 'fa-chevron-down' : 'fa-chevron-right' }} o_napta_adw_preview_chevron"
+                                               t-on-click="(ev) => this.togglePreviewExpand(row.id, ev)"/>
+                                            <span class="o_napta_avatar" t-esc="row.initials"/>
+                                            <span class="o_napta_adw_preview_person_name" t-esc="row.name"/>
+                                        </div>
                                     </td>
                                     <t t-foreach="row.totals" t-as="value" t-key="value_index">
                                         <td t-attf-class="o_napta_adw_preview_col_day {{ previewDayColumns[value_index].weekend ? 'o_napta_adw_preview_col_weekend' : '' }}">
