@@ -314,7 +314,8 @@
             <div class="osp_dp_item_header">
                 <span class="osp_dp_dates"><i class="fa fa-calendar"/> <t t-esc="d.dateStart"/> <i class="fa fa-angle-right"/> <t t-esc="d.dateEnd"/></span>
                 <span class="osp_dp_duration"><i class="fa fa-clock-o"/> <t t-esc="d.durationDays"/>j · <t t-esc="d.durationPct"/>%</span>
-                <i class="fa fa-pencil osp_dp_edit" data-tooltip="Modifier la demande"/>
+                <i class="fa fa-pencil osp_dp_edit" data-tooltip="Modifier la demande"
+                   t-on-click="(ev) => this.openDetailFromCell(project, 'requests', ev)"/>
             </div>
             <div class="osp_dp_tags">
                 <span class="osp_dp_tag"><i class="fa fa-sitemap"/> <t t-esc="d.department"/></span>
