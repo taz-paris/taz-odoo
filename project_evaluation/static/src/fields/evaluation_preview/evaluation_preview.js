@@ -51,6 +51,7 @@ export class EvaluationPreview extends Component {
             skillTypeId: null,
             levels: [],
             levelId: null,
+            levelName: "Aucun niveau",
             comment: "",
             saving: false,
         });
@@ -114,12 +115,14 @@ export class EvaluationPreview extends Component {
                 skillGroups.set(skillId, {
                     skillId,
                     skillName: (d.skill_id && d.skill_id[1]) || "",
+                    skillDescription: d.skill_description || "",
                     skillTypeId: d.skill_type_id && d.skill_type_id[0],
                     grades: [],
                 });
             }
             skillGroups.get(skillId).grades.push({
                 levelName: (d.skill_level_id && d.skill_level_id[1]) || "",
+                levelDescription: d.skill_level_description || "",
                 raterEmployeeId: d.rater_employee_id && d.rater_employee_id[0],
                 raterName: (d.rater_employee_id && d.rater_employee_id[1]) || "",
                 isSelf: !!d.is_self_assessment,
@@ -150,6 +153,7 @@ export class EvaluationPreview extends Component {
     get skillAutocompleteSources() {
         return [
             {
+                optionTemplate: "project_evaluation.SkillGradeFormAutocompleteOption",
                 options: async (query) => {
                     if (!query) {
                         return [];
@@ -157,16 +161,37 @@ export class EvaluationPreview extends Component {
                     const skills = await this.orm.searchRead(
                         "hr.skill",
                         [["name", "ilike", query]],
-                        ["name", "skill_type_id"],
+                        ["name", "description", "skill_type_id"],
                         { limit: 8 }
                     );
                     return skills.map((skill) => ({
                         label: skill.name,
                         skillId: skill.id,
                         skillName: skill.name,
+                        skillDescription: skill.description || "",
                         skillTypeId: skill.skill_type_id && skill.skill_type_id[0],
                     }));
                 },
+            },
+        ];
+    }
+
+    // Même mécanisme que skillAutocompleteSources, mais en liste statique (pas de recherche serveur :
+    // il y a peu de niveaux, déjà chargés par loadSkillLevels) -- un AutoComplete dont la source
+    // "options" est un tableau (et non une fonction) affiche directement tout son contenu au clic,
+    // sans attendre de saisie, exactement comme un <select> mais avec un rendu riche (description).
+    get levelAutocompleteSources() {
+        const noneOption = { label: "Aucun niveau", levelId: null, levelName: "Aucun niveau", levelDescription: "" };
+        const levelOptions = this.skillGradeForm.levels.map((level) => ({
+            label: level.name,
+            levelId: level.id,
+            levelName: level.name,
+            levelDescription: level.description || "",
+        }));
+        return [
+            {
+                optionTemplate: "project_evaluation.SkillGradeFormLevelAutocompleteOption",
+                options: [noneOption, ...levelOptions],
             },
         ];
     }
@@ -179,6 +204,7 @@ export class EvaluationPreview extends Component {
             skillTypeId,
             levels: [],
             levelId: null,
+            levelName: "Aucun niveau",
             comment: "",
             saving: false,
         });
@@ -192,13 +218,12 @@ export class EvaluationPreview extends Component {
     }
 
     async loadSkillLevels(skillTypeId) {
-        const levels = await this.orm.searchRead(
+        this.skillGradeForm.levels = await this.orm.searchRead(
             "hr.skill.level",
             [["skill_type_id", "=", skillTypeId]],
-            ["name"],
+            ["name", "description"],
             { order: "level_progress asc" }
         );
-        this.skillGradeForm.levels = levels;
     }
 
     async onSkillGradeAutocompleteSelect(option) {
@@ -206,13 +231,15 @@ export class EvaluationPreview extends Component {
         this.skillGradeForm.skillName = option.skillName;
         this.skillGradeForm.skillTypeId = option.skillTypeId;
         this.skillGradeForm.levelId = null;
+        this.skillGradeForm.levelName = "Aucun niveau";
         if (option.skillTypeId) {
             await this.loadSkillLevels(option.skillTypeId);
         }
     }
 
-    onSkillGradeLevelChange(ev) {
-        this.skillGradeForm.levelId = ev.target.value ? parseInt(ev.target.value, 10) : null;
+    onSkillGradeLevelAutocompleteSelect(option) {
+        this.skillGradeForm.levelId = option.levelId;
+        this.skillGradeForm.levelName = option.levelName;
     }
 
     onSkillGradeCommentInput(ev) {

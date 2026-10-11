@@ -12,8 +12,10 @@ class HrEmployeeSkillGrade(models.Model):
     employee_id = fields.Many2one(related='employee_skill_id.employee_id', store=True)
     skill_id = fields.Many2one(related='employee_skill_id.skill_id', store=True)
     skill_type_id = fields.Many2one(related='employee_skill_id.skill_id.skill_type_id', store=True)
+    skill_description = fields.Text(related='skill_id.description', string="Description de la compétence")
     rater_employee_id = fields.Many2one('hr.employee', string="Noté par", required=True)
     skill_level_id = fields.Many2one('hr.skill.level', string="Niveau")
+    skill_level_description = fields.Text(related='skill_level_id.description', string="Description du niveau")
     comment = fields.Text()
     is_self_assessment = fields.Boolean("Auto-évaluation", compute='_compute_is_self_assessment', store=True)
     graded_on = fields.Datetime(

@@ -48,7 +48,10 @@
                         <t t-foreach="group[1]" t-as="skill" t-key="skill.skillId">
                             <div class="o_pe_skills_skill">
                                 <div class="o_pe_skills_skill_header">
-                                    <span class="o_pe_skills_skill_name" t-esc="skill.skillName"/>
+                                    <div class="o_pe_skills_skill_title">
+                                        <span class="o_pe_skills_skill_name" t-esc="skill.skillName"/>
+                                        <span t-if="skill.skillDescription" class="o_pe_skills_skill_description text-muted" t-esc="skill.skillDescription"/>
+                                    </div>
                                     <button t-if="!isReadonly and !skill.alreadyGradedByMe" type="button"
                                             class="btn btn-link btn-sm o_pe_skills_add_note"
                                             t-on-click="() => this.openSkillGradeForm(skill.skillId, skill.skillName, skill.skillTypeId)">
@@ -58,6 +61,7 @@
                                 <t t-foreach="skill.grades" t-as="grade" t-key="grade_index">
                                     <div class="o_pe_skills_grade">
                                         <span class="o_pe_skills_level" t-esc="grade.levelName || '—'"/>
+                                        <span t-if="grade.levelDescription" class="o_pe_skills_level_description text-muted" t-esc="grade.levelDescription"/>
                                         <span class="o_pe_skills_rater">
                                             <t t-if="grade.isSelf">Auto-évaluation</t>
                                             <t t-else="">Noté par <t t-esc="grade.raterName"/></t>
@@ -89,14 +93,12 @@
                         <strong t-esc="skillGradeForm.skillName"/>
                     </div>
                     <div class="o_pe_skill_grade_form_row">
-                        <select class="form-select form-select-sm" t-on-change="onSkillGradeLevelChange">
-                            <option value="">Niveau (optionnel)</option>
-                            <t t-foreach="skillGradeForm.levels" t-as="level" t-key="level.id">
-                                <option t-att-value="level.id" t-att-selected="level.id === skillGradeForm.levelId">
-                                    <t t-esc="level.name"/>
-                                </option>
-                            </t>
-                        </select>
+                        <AutoComplete
+                            placeholder="'Niveau…'"
+                            value="skillGradeForm.levelName"
+                            sources="levelAutocompleteSources"
+                            onSelect.bind="onSkillGradeLevelAutocompleteSelect"
+                        />
                     </div>
                     <div class="o_pe_skill_grade_form_row">
                         <textarea class="form-control form-control-sm" rows="2"
@@ -237,6 +239,20 @@
                 Composant non géré : <t t-esc="node.type"/>
             </div>
         </t>
+    </t>
+
+    <t t-name="project_evaluation.SkillGradeFormAutocompleteOption">
+        <div class="o_pe_skill_autocomplete_option">
+            <span t-esc="option.skillName"/>
+            <div t-if="option.skillDescription" class="text-muted small text-wrap" t-esc="option.skillDescription"/>
+        </div>
+    </t>
+
+    <t t-name="project_evaluation.SkillGradeFormLevelAutocompleteOption">
+        <div class="o_pe_skill_autocomplete_option">
+            <span t-esc="option.levelName"/>
+            <div t-if="option.levelDescription" class="text-muted small text-wrap" t-esc="option.levelDescription"/>
+        </div>
     </t>
 
 </templates>
