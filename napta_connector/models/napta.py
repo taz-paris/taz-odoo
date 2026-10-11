@@ -568,6 +568,10 @@ class naptaProject(models.Model):
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
         client = ClientRestNapta(self.env)
+        self.env['project.evaluation.template'].create_update_odoo_evaluation_template()
+        self.env['project.evaluation'].create_update_odoo_evaluation()
+        a=1/0
+        
         client.refresh_cache()
 
         #### Retreive project that previous sync failled
@@ -1538,6 +1542,12 @@ class naptaProjectEvaluation(models.Model):
                 # Nullable côté API Napta, mais ça reste une évaluation sans gabarit : cas à surveiller.
                 _logger.warning("Évaluation Napta id=%s sans template_id (user_project_id=%s)." % (napta_id, str(napta_user_project_id)))
 
+            napta_project_id = user_project['attributes']['project_id']
+            odoo_project = self.env['project.project'].search([('napta_id', '=', napta_project_id)])
+            if len(odoo_project) != 1:
+                _logger.info("Impossible de créer/mettre à jour l'évaluation Napta id=%s : projet napta id=%s introuvable sur Odoo." % (napta_id, str(napta_project_id)))
+                continue
+
             is_closed = bool(evaluation['attributes']['closed'])
             napta_evaluee_user_id = user_project['attributes']['user_id']
 
@@ -1558,8 +1568,12 @@ class naptaProjectEvaluation(models.Model):
 
             dic = {
                     'napta_id' : napta_id,
+                    # company_id doit être fixé explicitement : sans ça, create_update_odoo crée l'objet avec
+                    # la société par défaut de l'environnement (with_company(False)), qui ne correspond pas
+                    # forcément à celle de l'employé/du projet et fait échouer les contraintes check_company.
+                    'company_id' : {'id' : odoo_project.company_id.id},
                     'employee_id' : {'napta_id' : napta_evaluee_user_id},
-                    'project_id' : {'napta_id' : user_project['attributes']['project_id']},
+                    'project_id' : {'napta_id' : napta_project_id},
                     'template_id' : {'napta_id' : napta_template_id},
                     'data' : json.dumps(evaluation['attributes'].get('data')),
                     # Sur Napta, le statut d'une évaluation de mission n'a que 2 valeurs (En cours / Fermée) :
