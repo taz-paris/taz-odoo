@@ -21,13 +21,19 @@
         <field name="model">project.evaluation</field>
         <field name="arch" type="xml">
             <list>
-                <field name="company_id" optional="show" groups="base.group_multi_company"/>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
                 <field name="project_id"/>
-                <field name="employee_id"/>
-                <field name="template_id" optional="show"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="employee_id" optional="show"/>
+                <field name="state" optional="show" widget="badge"
+                       decoration-success="state == 'closed'" decoration-muted="state == 'ongoing'"/>
+                <field name="template_id" optional="hide"/>
                 <field name="is_published" optional="hide"/>
                 <field name="employee_validated" optional="hide"/>
-                <field name="state"/>
+                <field name="create_date" optional="show"/>
+                <field name="write_date" optional="show"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="write_uid" optional="hide"/>
             </list>
         </field>
     </record>
@@ -142,7 +148,6 @@
         <field name="name">Évaluations de mission</field>
         <field name="res_model">project.evaluation</field>
         <field name="view_mode">list,form</field>
-        <field name="context">{'search_default_group_project': 1}</field>
     </record>
 
 </odoo>
