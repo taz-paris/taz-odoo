@@ -13,7 +13,7 @@
     'category': 'Uncategorized',
     'version': "18.0.1.0.0",
 
-    'depends': ['project', 'hr'],
+    'depends': ['project', 'hr', 'hr_skill_grade'],
 
     'data': [
         'security/security.xml',
@@ -21,6 +21,7 @@
         'views/project_evaluation_template_views.xml',
         'views/project_evaluation_views.xml',
         'views/project_evaluation_menus.xml',
+        'views/hr_employee_skill_grade_views.xml',
     ],
 
     'assets': {

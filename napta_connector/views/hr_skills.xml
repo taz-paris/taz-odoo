@@ -26,7 +26,7 @@
     <record id="hr_skill_view_form_inherit_napta" model="ir.ui.view">
         <field name="name">hr.skill.form.inherit.napta</field>
         <field name="model">hr.skill</field>
-        <field name="inherit_id" ref="staffing.hr_skill_view_form_inherit_staffing"/>
+        <field name="inherit_id" ref="hr_skill_grade.hr_skill_view_form_inherit_hr_skill_grade"/>
         <field name="arch" type="xml">
             <field name="description" position="after">
                 <field name="napta_id" readonly="1"/>
@@ -37,7 +37,7 @@
     <record id="employee_skill_view_tree_inherit_napta" model="ir.ui.view">
         <field name="name">hr.skill.list.inherit.napta</field>
         <field name="model">hr.skill</field>
-        <field name="inherit_id" ref="staffing.employee_skill_view_tree_inherit_staffing"/>
+        <field name="inherit_id" ref="hr_skill_grade.employee_skill_view_tree_inherit_hr_skill_grade"/>
         <field name="arch" type="xml">
             <field name="is_certification" position="after">
                 <field name="napta_id" readonly="1" optional="hide"/>
@@ -48,7 +48,7 @@
     <record id="employee_skill_level_view_form_inherit_napta" model="ir.ui.view">
         <field name="name">hr.skill.level.form.inherit.napta</field>
         <field name="model">hr.skill.level</field>
-        <field name="inherit_id" ref="staffing.employee_skill_level_view_form_inherit_staffing"/>
+        <field name="inherit_id" ref="hr_skill_grade.employee_skill_level_view_form_inherit_hr_skill_grade"/>
         <field name="arch" type="xml">
             <field name="description" position="after">
                 <field name="napta_id" readonly="1"/>
@@ -59,7 +59,7 @@
     <record id="employee_skill_level_view_tree_inherit_napta" model="ir.ui.view">
         <field name="name">hr.skill.level.list.inherit.napta</field>
         <field name="model">hr.skill.level</field>
-        <field name="inherit_id" ref="staffing.employee_skill_level_view_tree_inherit_staffing"/>
+        <field name="inherit_id" ref="hr_skill_grade.employee_skill_level_view_tree_inherit_hr_skill_grade"/>
         <field name="arch" type="xml">
             <field name="description" position="after">
                 <field name="napta_id" readonly="1" optional="hide"/>

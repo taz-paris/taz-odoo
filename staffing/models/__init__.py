@@ -8,4 +8,3 @@ from . import hr_contract
 from . import employee_staffing_report
 from . import res_company
 from . import timesheet
-from . import hr_skills

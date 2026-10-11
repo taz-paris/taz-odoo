@@ -569,6 +569,14 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
         client = ClientRestNapta(self.env)
         client.refresh_cache()
+        self.env['hr.skill.type'].create_update_odoo_skill_type()
+        self.env['hr.skill'].create_update_odoo_skill()
+        self.env['hr.skill.level'].create_update_odoo_skill_level()
+        self.env['hr.employee.skill'].create_update_odoo_employee_skill()
+        self.env['hr.employee.skill'].create_update_odoo_interest()
+        self.env['project.evaluation.template'].create_update_odoo_evaluation_template()
+        self.env['project.evaluation'].create_update_odoo_evaluation()
+        a=1/0
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -593,6 +601,7 @@ class naptaProject(models.Model):
         self.env['hr.skill'].create_update_odoo_skill()
         self.env['hr.skill.level'].create_update_odoo_skill_level()
         self.env['hr.employee.skill'].create_update_odoo_employee_skill()
+        self.env['hr.employee.skill'].create_update_odoo_interest()
         self.env['hr.work.location'].create_update_odoo_location()
         self.env['hr.contract'].create_update_odoo_user_history()
         self.env['hr.leave.type'].create_update_odoo_user_holiday_category()
@@ -1356,13 +1365,15 @@ class naptaHrSkillLevel(models.Model):
 
         # Suppression des hr.skill.level qui ne sont plus retournés par Napta pour leur skill_type_id
         # (pas d'utilisation de client.delete_not_found_anymore_object_on_napta car le napta_id n'est pas unique sur ce modèle)
+        _logger.info('--- delete_not_found_anymore_object_on_napta (hr.skill.level, cas particulier napta_id non unique)')
         existing_skill_levels = self.env['hr.skill.level'].search([('napta_id', '!=', False)])
-        for skill_level in existing_skill_levels:
-            kept_napta_ids = kept_napta_ids_by_skill_type_id.get(skill_level.skill_type_id.id, set())
-            if skill_level.napta_id not in kept_napta_ids:
-                _logger.info("hr.skill.level obsolète supprimé : napta_id=%s skill_type_id=%s" % (skill_level.napta_id, skill_level.skill_type_id.id))
-                skill_level.unlink()
-                self.env.cr.commit()
+        obsolete_skill_levels = existing_skill_levels.filtered(
+            lambda sl: sl.napta_id not in kept_napta_ids_by_skill_type_id.get(sl.skill_type_id.id, set()))
+        _logger.info("Nombre d'objets hr.skill.level qui portent un ID Napta qui n'est plus retourné par l'API Napta : %s" % len(obsolete_skill_levels))
+        for skill_level in obsolete_skill_levels:
+            _logger.info("hr.skill.level obsolète supprimé : napta_id=%s skill_type_id=%s" % (skill_level.napta_id, skill_level.skill_type_id.id))
+            skill_level.unlink()
+            self.env.cr.commit()
 
 
 class naptaHrSkill(models.Model):
@@ -1414,6 +1425,30 @@ class naptaHrEmployeeSkill(models.Model):
             key = (grade['attributes']['grade_group_id'], grade['attributes']['value'])
             grade_napta_id_by_group_and_value[key] = grade_napta_id
 
+        # Pré-chargement des lookups (au lieu d'un search() par user_skill, soit ~4 x len(user_skill_list)
+        # requêtes individuelles) : un seul search_read() par modèle, indexé en dict Python par napta_id.
+        # Comportement inchangé -- on garde les mêmes vérifications "trouvé en un seul exemplaire" qu'avant
+        # (len(...) != 1), juste sur des listes d'ids déjà en mémoire plutôt que sur un recordset recherché
+        # à la volée.
+        employee_ids_by_napta_id = {}
+        for rec in self.env['hr.employee'].search_read(
+                [('napta_id', '!=', False), ('active', 'in', [True, False])], ['napta_id']):
+            employee_ids_by_napta_id.setdefault(rec['napta_id'], []).append(rec['id'])
+
+        skill_by_napta_id = {}
+        for rec in self.env['hr.skill'].search_read([('napta_id', '!=', False)], ['napta_id', 'skill_type_id']):
+            skill_by_napta_id.setdefault(rec['napta_id'], []).append(
+                {'id': rec['id'], 'skill_type_id': rec['skill_type_id'] and rec['skill_type_id'][0]})
+
+        skill_level_ids_by_napta_id_and_type = {}
+        for rec in self.env['hr.skill.level'].search_read([('napta_id', '!=', False)], ['napta_id', 'skill_type_id']):
+            key = (rec['napta_id'], rec['skill_type_id'] and rec['skill_type_id'][0])
+            skill_level_ids_by_napta_id_and_type.setdefault(key, []).append(rec['id'])
+
+        employee_skill_ids_by_napta_id = {}
+        for rec in self.env['hr.employee.skill'].search_read([('napta_id', '!=', False)], ['napta_id']):
+            employee_skill_ids_by_napta_id.setdefault(rec['napta_id'], []).append(rec['id'])
+
         kept_napta_ids = []
         for napta_id, user_skill in user_skill_list.items():
             if user_skill['attributes']['user_id'] in EXCLUDED_USERLIST:
@@ -1425,35 +1460,38 @@ class naptaHrEmployeeSkill(models.Model):
                 # grade == null ou 0 signifie "non noté" côté Napta (value minimum = 1 sur un grade réel) : rien à faire, ce n'est pas une anomalie.
                 continue
 
-            employee = self.env['hr.employee'].search([('napta_id', '=', user_skill['attributes']['user_id']), ('active', 'in', [True, False])])
-            skill = self.env['hr.skill'].search([('napta_id', '=', user_skill['attributes']['skill_id'])])
-            if len(employee) != 1 or len(skill) != 1:
+            employee_ids = employee_ids_by_napta_id.get(user_skill['attributes']['user_id'], [])
+            skills = skill_by_napta_id.get(user_skill['attributes']['skill_id'], [])
+            if len(employee_ids) != 1 or len(skills) != 1:
                 _logger.info("Impossible de créer/mettre à jour le user_skill Napta id=%s : employé ou skill introuvable sur Odoo." % napta_id)
                 continue
+            employee_id = employee_ids[0]
+            skill_id = skills[0]['id']
+            skill_type_id = skills[0]['skill_type_id']
 
             skill_napta = skill_list.get(user_skill['attributes']['skill_id'], {})
             grade_group_id = skill_napta.get('attributes', {}).get('grade_group_id')
             grade_napta_id = grade_napta_id_by_group_and_value.get((grade_group_id, int(grade_value)))
-            skill_level = False
+            skill_level_ids = []
             if grade_napta_id:
-                skill_level = self.env['hr.skill.level'].search([('napta_id', '=', grade_napta_id), ('skill_type_id', '=', skill.skill_type_id.id)])
-            if not skill_level or len(skill_level) != 1:
-                _logger.info("Aucun hr.skill.level Odoo trouvé pour la note Napta=%s (skill Napta id=%s, grade_group_id=%s, skill_type_id=%s)." % (grade_value, user_skill['attributes']['skill_id'], grade_group_id, skill.skill_type_id.id))
-                skill_level = False
+                skill_level_ids = skill_level_ids_by_napta_id_and_type.get((grade_napta_id, skill_type_id), [])
+            if len(skill_level_ids) != 1:
+                _logger.info("Aucun hr.skill.level Odoo trouvé pour la note Napta=%s (skill Napta id=%s, grade_group_id=%s, skill_type_id=%s)." % (grade_value, user_skill['attributes']['skill_id'], grade_group_id, skill_type_id))
+                skill_level_ids = []
 
             vals = {
                     'napta_id' : napta_id,
-                    'employee_id' : employee.id,
-                    'skill_type_id' : skill.skill_type_id.id,
-                    'skill_id' : skill.id,
+                    'employee_id' : employee_id,
+                    'skill_type_id' : skill_type_id,
+                    'skill_id' : skill_id,
                     'obtained_date' : user_skill['attributes']['obtained_date'] or False,
                 }
-            if skill_level:
-                vals['skill_level_id'] = skill_level.id
+            if skill_level_ids:
+                vals['skill_level_id'] = skill_level_ids[0]
 
-            employee_skill = self.env['hr.employee.skill'].search([('napta_id', '=', napta_id)])
-            if employee_skill:
-                employee_skill.write(vals)
+            existing_employee_skill_ids = employee_skill_ids_by_napta_id.get(napta_id, [])
+            if existing_employee_skill_ids:
+                self.env['hr.employee.skill'].browse(existing_employee_skill_ids).write(vals)
             else:
                 if 'skill_level_id' not in vals:
                     _logger.info("Impossible de créer le employee_skill Napta id=%s sans skill_level_id." % napta_id)
@@ -1468,6 +1506,25 @@ class naptaHrEmployeeSkill(models.Model):
             _logger.info("hr.employee.skill obsolète supprimé : napta_id=%s" % employee_skill.napta_id)
             employee_skill.unlink()
             self.env.cr.commit()
+
+    def create_update_odoo_interest(self):
+        # Mapping : userskill_interest (Napta) -> hr.employee.skill.interest (Odoo)
+        _logger.info('---- BATCH Create or update Odoo interest (userskill_interest)')
+        client = ClientRestNapta(self.env)
+        interest_list = client.read_cache('userskill_interest')
+
+        interest_by_user_skill_napta_id = {}
+        for interest in interest_list.values():
+            user_skill_napta_id = str(interest['attributes']['user_skill_id'])
+            interest_by_user_skill_napta_id[user_skill_napta_id] = 'yes' if interest['attributes']['like'] else 'no'
+
+        # On reparcourt tous les hr.employee.skill synchronisés (pas seulement ceux qui ont un intérêt déclaré)
+        # pour pouvoir remettre interest à False si la déclaration a disparu côté Napta.
+        for employee_skill in self.env['hr.employee.skill'].search([('napta_id', '!=', False)]):
+            new_interest = interest_by_user_skill_napta_id.get(employee_skill.napta_id, False)
+            if employee_skill.interest != new_interest:
+                employee_skill.interest = new_interest
+        self.env.cr.commit()
 
 
 class naptaProjectEvaluationTemplate(models.Model):
@@ -1519,16 +1576,25 @@ class naptaProjectEvaluation(models.Model):
         # On ne passe pas par read_cache() car elle ne conserve pas la clé "included" de la réponse.
         _logger.info('---- BATCH Create or update Odoo evaluation (user_project_evaluation)')
         client = ClientRestNapta(self.env)
-        evaluation_api_return = client.get_api('user_project_evaluation', include=['authors', 'approvals.created_by'])
+        evaluation_api_return = client.get_api('user_project_evaluation', include=[
+            'authors', 'approvals.created_by',
+            'user_project_evaluation_user_project_user_skills.grades.created_by',
+        ])
         user_project_list = client.read_cache('user_project')
 
         included_authors = {}
         included_approvals = {}
+        included_skill_entries = {}
+        included_skill_grades = {}
         for included_object in evaluation_api_return['included']:
             if included_object['type'] == 'user_project_evaluation_author':
                 included_authors[included_object['id']] = included_object
             elif included_object['type'] == 'user_project_evaluation_approval':
                 included_approvals[included_object['id']] = included_object
+            elif included_object['type'] == 'user_project_evaluation_user_project_user_skill':
+                included_skill_entries[included_object['id']] = included_object
+            elif included_object['type'] == 'user_project_evaluation_user_project_user_skill_grade':
+                included_skill_grades[included_object['id']] = included_object
 
         for evaluation in evaluation_api_return['data']:
             napta_id = evaluation['id']
@@ -1584,17 +1650,26 @@ class naptaProjectEvaluation(models.Model):
                     'state' : 'closed' if is_closed else 'ongoing',
                     'is_published' : bool(evaluation['attributes']['is_published']),
                 }
-            odoo_evaluation = create_update_odoo(self.env, 'project.evaluation', dic)
+            try:
+                odoo_evaluation = create_update_odoo(self.env, 'project.evaluation', dic)
+            except UserError as err:
+                # Ex. : project.evaluation refuse de changer template_id si data n'est pas vide.
+                # On ne laisse pas ça planter toute la synchro des autres évaluations.
+                _logger.warning("Impossible de créer/mettre à jour l'évaluation Napta id=%s : %s" % (napta_id, str(err)))
+                continue
             if not odoo_evaluation:
                 continue
 
             # Validation de l'évalué : précise (avec date exacte) grâce à approvals, avec repli sur l'agrégat
             # "closed" si jamais l'évalué n'apparaît pas (il ne devrait normalement toujours y être si is_closed est vrai).
+            # skip_employee_validated_check : le connecteur sait, via les données Napta elles-mêmes (approvals),
+            # que l'évalué a bien validé -- ce n'est pas un tiers qui essaie de cocher à sa place.
             employee_validated_on = approval_date_by_napta_user_id.get(napta_evaluee_user_id)
             if employee_validated_on:
-                odoo_evaluation.write({'employee_validated' : True, 'employee_validated_on' : employee_validated_on})
+                odoo_evaluation.with_context(skip_employee_validated_check=True).write(
+                    {'employee_validated' : True, 'employee_validated_on' : employee_validated_on})
             elif is_closed and not odoo_evaluation.employee_validated:
-                odoo_evaluation.employee_validated = True
+                odoo_evaluation.with_context(skip_employee_validated_check=True).employee_validated = True
 
             # Validation par évaluateur : un project.evaluation.assessor par author Napta, avec son statut
             # et sa date de validation exacte (si disponible via approvals).
@@ -1623,7 +1698,142 @@ class naptaProjectEvaluation(models.Model):
             obsolete_assessors = odoo_evaluation.assessor_ids.filtered(lambda a: a.employee_id.id not in kept_assessor_employee_ids)
             obsolete_assessors.unlink()
 
+            # Notes de compétences liées à cette évaluation : user_project_evaluation_user_project_user_skills
+            # (une entrée par compétence) -> grades (une entrée par notateur, auto-évaluation incluse).
+            # Comme pour authors/approvals, cette relation n'est pas documentée dans le swagger officiel.
+            kept_skill_grade_napta_ids = []
+            for skill_entry_ref in evaluation.get('relationships', {}).get(
+                    'user_project_evaluation_user_project_user_skills', {}).get('data', []):
+                skill_entry = included_skill_entries.get(skill_entry_ref['id'])
+                if not skill_entry:
+                    continue
+                napta_skill_id = skill_entry['attributes']['skill_id']
+                skill = self.env['hr.skill'].search([('napta_id', '=', napta_skill_id)])
+                if len(skill) != 1:
+                    _logger.info("Skill Napta id=%s introuvable sur Odoo (évaluation Napta id=%s)." % (napta_skill_id, napta_id))
+                    continue
+
+                employee_skill = self.env['hr.employee.skill'].search([
+                        ('employee_id', '=', odoo_evaluation.employee_id.id), ('skill_id', '=', skill.id),
+                    ])
+                if len(employee_skill) > 1:
+                    _logger.info("Plusieurs hr.employee.skill trouvés pour employee_id=%s / skill_id=%s (évaluation Napta id=%s)." % (
+                            odoo_evaluation.employee_id.id, skill.id, napta_id))
+                    continue
+                # hr.employee.skill.skill_level_id est NOT NULL (contrainte du module hr_skills core) : on
+                # résout d'abord tous les grades de ce skill_entry pour déterminer, le cas échéant, quel
+                # niveau utiliser à la création -- même règle de priorité que _recompute_skill_level_from_grades
+                # (note tierce la plus récente, sinon auto-évaluation la plus récente).
+                resolved_grades = []
+                for grade_ref in skill_entry.get('relationships', {}).get('grades', {}).get('data', []):
+                    grade_entry = included_skill_grades.get(grade_ref['id'])
+                    if not grade_entry:
+                        continue
+                    skill_grade_napta_id = grade_ref['id']
+
+                    napta_grade_id = grade_entry['attributes'].get('grade_id')
+                    skill_level = False
+                    if napta_grade_id:
+                        skill_level = self.env['hr.skill.level'].search([
+                                ('napta_id', '=', napta_grade_id), ('skill_type_id', '=', skill.skill_type_id.id),
+                            ])
+
+                    rater_napta_user_id = grade_entry['attributes']['created_by_id']
+                    rater_employee = self.env['hr.employee'].search([
+                            ('napta_id', '=', rater_napta_user_id), ('active', 'in', [True, False]),
+                        ])
+                    if len(rater_employee) != 1:
+                        _logger.info("Notateur Napta user_id=%s introuvable sur Odoo (note de compétence Napta id=%s)." % (rater_napta_user_id, skill_grade_napta_id))
+                        continue
+
+                    graded_on = False
+                    napta_graded_on = grade_entry['attributes'].get('updated_on') or grade_entry['attributes'].get('created_on')
+                    if napta_graded_on:
+                        graded_on = datetime.datetime.strptime(napta_graded_on, '%Y-%m-%dT%H:%M:%S.%f')
+
+                    resolved_grades.append({
+                            'skill_grade_napta_id': skill_grade_napta_id,
+                            'skill_level': skill_level if len(skill_level) == 1 else False,
+                            'rater_employee': rater_employee,
+                            'graded_on': graded_on,
+                            'comment': grade_entry['attributes'].get('comment') or False,
+                            'is_self_assessment': rater_employee.id == odoo_evaluation.employee_id.id,
+                        })
+
+                if not employee_skill:
+                    # skill_level_id n'est plus obligatoire (cf. hr_skill_grade.HrEmployeeSkill) : on
+                    # peut créer le hr.employee.skill même si aucun grade n'est résolvable, pour ne pas
+                    # perdre la note/l'intérêt associés à cette évaluation. Même règle de priorité que
+                    # _recompute_skill_level_from_grades pour choisir le niveau initial si plusieurs
+                    # grades sont résolvables (note tierce la plus récente, sinon auto-évaluation).
+                    peer_grades = [g for g in resolved_grades if not g['is_self_assessment'] and g['skill_level']]
+                    self_grades = [g for g in resolved_grades if g['is_self_assessment'] and g['skill_level']]
+                    candidates = peer_grades or self_grades
+                    initial_skill_level = max(candidates, key=lambda g: g['graded_on'] or datetime.datetime.min)['skill_level'] if candidates else False
+                    # La note n'existe que dans le contexte de cette évaluation de mission : le user_skill
+                    # global côté Napta peut rester non noté (grade null/0, cf. create_update_odoo_employee_skill)
+                    # tant que personne ne l'a évalué hors évaluation de mission. On crée quand même le
+                    # hr.employee.skill ici pour ne pas perdre la note de l'évaluation.
+                    employee_skill = self.env['hr.employee.skill'].create({
+                            'employee_id': odoo_evaluation.employee_id.id,
+                            'skill_id': skill.id,
+                            'skill_type_id': skill.skill_type_id.id,
+                            'skill_level_id': initial_skill_level.id if initial_skill_level else False,
+                        })
+
+                for resolved_grade in resolved_grades:
+                    skill_grade_napta_id = resolved_grade['skill_grade_napta_id']
+                    skill_level = resolved_grade['skill_level']
+                    rater_employee = resolved_grade['rater_employee']
+                    graded_on = resolved_grade['graded_on']
+
+                    grade_vals = {
+                            'employee_skill_id' : employee_skill.id,
+                            'rater_employee_id' : rater_employee.id,
+                            'skill_level_id' : skill_level.id if skill_level else False,
+                            'comment' : resolved_grade['comment'],
+                            'project_evaluation_id' : odoo_evaluation.id,
+                            'graded_on' : graded_on,
+                        }
+                    # skip_skill_level_recompute : tant que Napta reste la source, c'est sa propre valeur
+                    # (synchronisée dans create_update_odoo_employee_skill) qui fait foi pour le niveau
+                    # courant -- on ne veut pas que l'écriture de ces notes la recalcule nous-mêmes à partir
+                    # d'une vue partielle (seules les notes liées à une évaluation de mission sont visibles ici).
+                    skill_grade = self.env['hr.employee.skill.grade'].search([('napta_id', '=', skill_grade_napta_id)])
+                    if skill_grade:
+                        skill_grade.with_context(skip_skill_level_recompute=True).write(grade_vals)
+                    else:
+                        self.env['hr.employee.skill.grade'].with_context(skip_skill_level_recompute=True).create(
+                            dict(grade_vals, napta_id=skill_grade_napta_id))
+                    kept_skill_grade_napta_ids.append(skill_grade_napta_id)
+
+            obsolete_skill_grades = odoo_evaluation.skill_grade_ids.filtered(lambda g: g.napta_id not in kept_skill_grade_napta_ids)
+            obsolete_skill_grades.with_context(skip_skill_level_recompute=True).unlink()
+
         client.delete_not_found_anymore_object_on_napta('project.evaluation', 'user_project_evaluation')
+
+
+class naptaHrEmployeeSkillGrade(models.Model):
+    _inherit = 'hr.employee.skill.grade'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID", copy=False)
+    # La synchronisation elle-même se fait dans naptaProjectEvaluation.create_update_odoo_evaluation()
+    # (les notes de compétences ne sont accessibles qu'imbriquées sous une évaluation Napta, cf. commentaire
+    # à ce niveau-là sur le caractère non documenté de cette relation).
+    #
+    # LIMITE CONNUE (volontaire, pas un oubli) : seules les notes liées à une évaluation de mission
+    # sont synchronisées. Napta expose bien, sur le profil d'un utilisateur, une vue complète
+    # "auto-évaluation + toutes les notes tierces" (quel que soit leur contexte d'origine) via
+    # POST /api/bff/profile/talent_skill_details {"userId":..., "skillId":...} — mais c'est un
+    # endpoint BFF (Backend For Frontend), pas l'API métier /api/v1/. Testé en direct depuis ce
+    # connecteur avec le token M2M (client_credentials) déjà utilisé pour tout le reste : 403
+    # "You don't have authorization to do this", alors que ce même token fonctionne normalement sur
+    # /api/v1/skill. Ce endpoint est donc réservé à une session utilisateur (cookie navigateur), pas
+    # accessible à une intégration serveur-à-serveur. Pas de contournement propre : si un jour Napta
+    # documente un vrai endpoint /api/v1/ équivalent, c'est ici qu'il faudra brancher la synchro des
+    # notes hors évaluation.
 
 
 ########################################################################################

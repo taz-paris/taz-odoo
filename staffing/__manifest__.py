@@ -33,7 +33,6 @@
         'views/hr_contract.xml',
         'views/employee_staffing_report.xml',
         'views/timesheet_grid.xml',
-        'views/hr_skills.xml',
         'views/napta_shell_menus.xml',
     ],
 

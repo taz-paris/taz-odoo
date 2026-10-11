@@ -58,8 +58,87 @@
         margin: 16px 0;
     }
 
-    .o_pe_skills_placeholder {
-        margin-bottom: 12px;
+    .o_pe_skills {
+        margin-bottom: 16px;
+
+        .o_pe_skills_group {
+            margin-bottom: 12px;
+
+            h6 {
+                font-weight: 600;
+                margin-bottom: 6px;
+            }
+        }
+
+        .o_pe_skills_skill {
+            padding: 4px 0;
+            border-bottom: 1px solid var(--o-view-border-color, #e9ecef);
+        }
+
+        .o_pe_skills_skill_header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+
+            .o_pe_skills_skill_name {
+                font-weight: 600;
+            }
+
+            .o_pe_skills_add_note {
+                font-size: 0.85em;
+                padding: 0;
+            }
+        }
+
+        .o_pe_skills_grade {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            padding: 2px 0;
+
+            .o_pe_skills_level {
+                flex: 0 0 auto;
+            }
+
+            .o_pe_skills_rater {
+                flex: 0 0 auto;
+                color: var(--o-view-text-muted-color, #6c757d);
+                font-size: 0.9em;
+            }
+
+            .o_pe_skills_comment {
+                flex-basis: 100%;
+                font-size: 0.9em;
+                white-space: pre-wrap;
+            }
+        }
+
+        .o_pe_skills_add_skill {
+            margin-top: 8px;
+        }
+
+        .o_pe_skill_grade_form {
+            margin-top: 8px;
+            padding: 8px;
+            border: 1px solid var(--o-view-border-color, #e9ecef);
+            border-radius: 4px;
+
+            .o_pe_skill_grade_form_row {
+                margin-bottom: 6px;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            .o_pe_skill_grade_form_actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+        }
     }
 
     .o_pe_field_input[readonly],

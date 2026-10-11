@@ -4,6 +4,9 @@ from odoo import models, fields, api
 class ProjectEvaluationAssessor(models.Model):
     _name = 'project.evaluation.assessor'
     _description = "Évaluateur d'une évaluation de mission"
+    # Pas d'identité propre : le nom affiché (ex. pour le widget many2many_tags sur
+    # project.evaluation.assessor_ids) est celui de l'évaluateur.
+    _rec_name = 'employee_id'
 
     evaluation_id = fields.Many2one(
         'project.evaluation',
@@ -17,6 +20,17 @@ class ProjectEvaluationAssessor(models.Model):
         ('done', 'Fait'),
         ], string="Statut", default='pending', required=True)
     validated_on = fields.Datetime("Date de validation", readonly=True)
+    display_name = fields.Char(compute='_compute_display_name', search='_search_display_name')
+
+    @api.depends('employee_id')
+    def _compute_display_name(self):
+        for rec in self:
+            rec.display_name = rec.employee_id.display_name or ''
+
+    @api.model
+    def _search_display_name(self, operator, value):
+        return [('employee_id', operator, value)]
+
 
     _sql_constraints = [
         ('evaluation_employee_uniq', 'UNIQUE (evaluation_id, employee_id)',

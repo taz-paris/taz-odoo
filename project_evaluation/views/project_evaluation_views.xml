@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
+    <record id="project_evaluation_assessor_view_form" model="ir.ui.view">
+        <field name="name">project.evaluation.assessor.form</field>
+        <field name="model">project.evaluation.assessor</field>
+        <field name="arch" type="xml">
+            <form string="Évaluateur">
+                <group>
+                    <field name="evaluation_id" invisible="1"/>
+                    <field name="employee_id"/>
+                    <field name="state" readonly="1"/>
+                    <field name="validated_on" readonly="1"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
     <record id="project_evaluation_view_list" model="ir.ui.view">
         <field name="name">project.evaluation.list</field>
         <field name="model">project.evaluation</field>
@@ -23,39 +38,78 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="ongoing,closed"/>
+                    <button name="action_approve" type="object" class="btn-primary" invisible="not can_approve">
+                        <i class="fa fa-gavel"/> Approuver
+                    </button>
+                    <field name="can_approve" invisible="1"/>
+                    <field name="state" widget="statusbar" statusbar_visible="ongoing,closed" readonly="state == 'closed'"/>
                 </header>
                 <sheet>
                     <group>
                         <group>
-                            <field name="company_id" invisible="1"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="project_id"/>
-                            <field name="employee_id" widget="many2one_avatar_employee"/>
-                        </group>
-                        <group>
-                            <field name="template_id"/>
-                            <field name="is_published"/>
-                            <field name="employee_validated"/>
+                            <field name="project_id" readonly="data or state == 'closed'"/>
+                            <field name="employee_id" widget="many2one_avatar_employee" readonly="data or state == 'closed'"/>
+                            <field name="employee_validated" readonly="not can_validate or state == 'closed'"/>
                             <field name="employee_validated_on" readonly="1" invisible="not employee_validated"/>
                         </group>
-                    </group>
-                    <notebook>
-                        <page string="Évaluateurs">
-                            <field name="assessor_ids">
+                        <group>
+                            <field name="assessor_ids" nolabel="1" readonly="state == 'closed'">
                                 <list editable="bottom">
-                                    <field name="employee_id" widget="many2one_avatar_employee"/>
-                                    <field name="state"/>
-                                    <field name="validated_on" readonly="1"/>
+                                    <field name="employee_id"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'done'" decoration-muted="state == 'pending'"/>
+                                </list>
+                            </field>
+                        </group>
+                    </group>
+                    
+                    <field name="can_edit_content" invisible="1"/>
+                    <notebook>
+                        <page string="Formulaire">
+                            <field name="template_form_template" invisible="1"/>
+                            <field name="skill_grade_ids" invisible="1">
+                                <list>
+                                    <field name="skill_id"/>
+                                    <field name="skill_type_id"/>
+                                    <field name="rater_employee_id"/>
+                                    <field name="is_self_assessment"/>
+                                    <field name="skill_level_id"/>
+                                    <field name="comment"/>
+                                </list>
+                            </field>
+                            <field name="data" widget="project_evaluation_preview" nolabel="1"
+                                   readonly="state == 'closed' or not can_edit_content"/>
+                        </page>
+                        <page string="Compétences">
+                            <field name="skill_grade_ids" readonly="1">
+                                <list>
+                                    <field name="skill_id"/>
+                                    <field name="skill_type_id" optional="show"/>
+                                    <field name="rater_employee_id" widget="many2one_avatar_employee"/>
+                                    <field name="is_self_assessment" optional="hide"/>
+                                    <field name="skill_level_id"/>
+                                    <field name="comment"/>
                                 </list>
                             </field>
                         </page>
-                        <page string="Contenu (JSON)">
-                            <field name="data" nolabel="1" widget="text" readonly="state == 'closed'"/>
+                        <page string="Autres évaluations">
+                            <field name="other_evaluation_ids" readonly="1" nolabel="1">
+                                <list>
+                                    <field name="template_id" optional="show"/>
+                                    <field name="is_published" optional="hide"/>
+                                    <field name="employee_validated" optional="hide"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
                         </page>
-                        <page string="Aperçu">
-                            <field name="template_form_template" invisible="1"/>
-                            <field name="data" widget="project_evaluation_preview" nolabel="1" readonly="state == 'closed'"/>
+                        <page string="Autres informations">
+                            <field name="company_id" invisible="1"/>
+                            <field name="can_validate" invisible="1"/>
+                            <group>
+                                <field name="company_id" groups="base.group_multi_company" readonly="state == 'closed'"/>
+                                <field name="template_id" readonly="state == 'closed'"/>
+                                <field name="is_published" readonly="state == 'closed'"/>
+                                <field name="data" nolabel="1" widget="text" readonly="1" groups="project.group_project_manager"/>
+                            </group>
                         </page>
                     </notebook>
                 </sheet>

@@ -38,8 +38,83 @@
         </t>
 
         <t t-elif="node.type === 'skills'">
-            <div class="alert alert-secondary o_pe_skills_placeholder" role="alert">
-                Module d'évaluation des compétences (affichage détaillé non encore implémenté côté Odoo).
+            <div class="o_pe_skills">
+                <div t-if="!skillGradesByType.length" class="text-muted">
+                    Aucune note de compétence sur cette évaluation.
+                </div>
+                <t t-foreach="skillGradesByType" t-as="group" t-key="group[0]">
+                    <div class="o_pe_skills_group">
+                        <h6 t-esc="group[0]"/>
+                        <t t-foreach="group[1]" t-as="skill" t-key="skill.skillId">
+                            <div class="o_pe_skills_skill">
+                                <div class="o_pe_skills_skill_header">
+                                    <span class="o_pe_skills_skill_name" t-esc="skill.skillName"/>
+                                    <button t-if="!isReadonly and !skill.alreadyGradedByMe" type="button"
+                                            class="btn btn-link btn-sm o_pe_skills_add_note"
+                                            t-on-click="() => this.openSkillGradeForm(skill.skillId, skill.skillName, skill.skillTypeId)">
+                                        <i class="fa fa-plus"/> Ajouter ma note
+                                    </button>
+                                </div>
+                                <t t-foreach="skill.grades" t-as="grade" t-key="grade_index">
+                                    <div class="o_pe_skills_grade">
+                                        <span class="o_pe_skills_level" t-esc="grade.levelName || '—'"/>
+                                        <span class="o_pe_skills_rater">
+                                            <t t-if="grade.isSelf">Auto-évaluation</t>
+                                            <t t-else="">Noté par <t t-esc="grade.raterName"/></t>
+                                        </span>
+                                        <div t-if="grade.comment" class="o_pe_skills_comment" t-esc="grade.comment"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <button t-if="!isReadonly and !skillGradeForm.open" type="button"
+                        class="btn btn-secondary btn-sm o_pe_skills_add_skill"
+                        t-on-click="() => this.openSkillGradeForm()">
+                    <i class="fa fa-plus"/> Ajouter une compétence
+                </button>
+
+                <div t-if="skillGradeForm.open" class="o_pe_skill_grade_form">
+                    <div t-if="!skillGradeForm.skillTypeId" class="o_pe_skill_grade_form_row">
+                        <AutoComplete
+                            placeholder="'Rechercher une compétence…'"
+                            value="skillGradeForm.skillName"
+                            sources="skillAutocompleteSources"
+                            onSelect.bind="onSkillGradeAutocompleteSelect"
+                        />
+                    </div>
+                    <div t-else="" class="o_pe_skill_grade_form_row">
+                        <strong t-esc="skillGradeForm.skillName"/>
+                    </div>
+                    <div class="o_pe_skill_grade_form_row">
+                        <select class="form-select form-select-sm" t-on-change="onSkillGradeLevelChange">
+                            <option value="">Niveau (optionnel)</option>
+                            <t t-foreach="skillGradeForm.levels" t-as="level" t-key="level.id">
+                                <option t-att-value="level.id" t-att-selected="level.id === skillGradeForm.levelId">
+                                    <t t-esc="level.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="o_pe_skill_grade_form_row">
+                        <textarea class="form-control form-control-sm" rows="2"
+                                  placeholder="Commentaire (optionnel)"
+                                  t-att-value="skillGradeForm.comment"
+                                  t-on-input="onSkillGradeCommentInput"/>
+                    </div>
+                    <div class="o_pe_skill_grade_form_row o_pe_skill_grade_form_actions">
+                        <button type="button" class="btn btn-secondary btn-sm" t-on-click="closeSkillGradeForm">
+                            Annuler
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm"
+                                t-att-disabled="!skillGradeForm.skillId or skillGradeForm.saving"
+                                t-on-click="submitSkillGradeForm">
+                            Enregistrer
+                        </button>
+                    </div>
+                </div>
             </div>
         </t>
 

@@ -13,7 +13,7 @@
     'category': 'Uncategorized',
     'version': "18.0.1.0.0",
 
-    'depends': ['staffing', 'project_accounting', 'project', 'analytic', 'project_evaluation'],
+    'depends': ['staffing', 'project_accounting', 'project', 'analytic', 'project_evaluation', 'hr_skill_grade'],
 
     'data': [
         'security/ir.model.access.csv',
@@ -23,6 +23,7 @@
         'views/project.xml',
         'views/hr_skills.xml',
         'views/project_evaluation.xml',
+        'views/hr_employee_skill_grade.xml',
         'views/wizard_timesheet_mass_validation.xml',
     ],
 

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="employee_skill_view_form_inherit_hr_skill_grade" model="ir.ui.view">
+        <field name="name">hr.employee.skill.form.inherit.hr_skill_grade</field>
+        <field name="model">hr.employee.skill</field>
+        <field name="inherit_id" ref="hr_skills.employee_skill_view_form"/>
+        <field name="arch" type="xml">
+            <!-- skill_level_id n'est plus saisissable directement : il est dérivé des notes
+                 (hr.employee.skill.grade, onglet "Notes" ci-dessous) via
+                 _recompute_skill_level_from_grades(), ou pour l'instant poussé par la synchro Napta.
+                 Le modifier ici serait écrasé au prochain recalcul, sans avertissement. -->
+            <field name="skill_level_id" position="attributes">
+                <attribute name="readonly">1</attribute>
+            </field>
+            <field name="level_progress" position="after">
+                <field name="interest" widget="radio"/>
+            </field>
+            <xpath expr="//sheet/group" position="after">
+                <group invisible="not skill_is_certification">
+                    <field name="skill_is_certification" invisible="1"/>
+                    <field name="obtained_date"/>
+                    <field name="expiry_date" readonly="1"/>
+                </group>
+                <notebook>
+                    <page string="Notes">
+                        <field name="grade_ids"/>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -2,7 +2,10 @@
 
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { user } from "@web/core/user";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { Component, useState, onWillStart } from "@odoo/owl";
 
 // Moteur de rendu (et d'édition) du contenu d'une évaluation de mission (project.evaluation.data),
 // à partir du gabarit Napta project.evaluation.template.form_template : arbre de noeuds
@@ -17,7 +20,41 @@ import { Component } from "@odoo/owl";
 // template.form_template.globalText.select[].
 export class EvaluationPreview extends Component {
     static template = "project_evaluation.EvaluationPreview";
+    static components = { AutoComplete };
     static props = { ...standardFieldProps };
+
+    setup() {
+        this.orm = useService("orm");
+        // hr.employee de l'utilisateur courant : pas dans les infos de session (qui ne connaissent que
+        // le res.users), donc un aller-retour RPC dédié, fait une fois au montage. Sert à savoir si
+        // l'utilisateur a déjà noté une compétence donnée sur cette évaluation (masque alors "Ajouter
+        // ma note" pour cette compétence).
+        this.currentEmployeeId = null;
+        onWillStart(async () => {
+            const employees = await this.orm.searchRead(
+                "hr.employee",
+                [["user_id", "=", user.userId]],
+                ["id"],
+                { limit: 1 }
+            );
+            this.currentEmployeeId = employees.length ? employees[0].id : null;
+        });
+
+        // Formulaire d'ajout de note de compétence (propre à Odoo, cf. add_skill_grade côté modèle :
+        // jamais remonté à Napta). Un seul formulaire ouvert à la fois ; skillId/skillTypeId/skillName
+        // sont pré-remplis quand on clique "Ajouter ma note" sur une compétence déjà présente, vides
+        // quand on part du bouton général "Ajouter une compétence" (choix via l'autocomplete).
+        this.skillGradeForm = useState({
+            open: false,
+            skillId: null,
+            skillName: "",
+            skillTypeId: null,
+            levels: [],
+            levelId: null,
+            comment: "",
+            saving: false,
+        });
+    }
 
     // ------------------------------------------------------------------
     // Gabarit (form_template)
@@ -47,6 +84,158 @@ export class EvaluationPreview extends Component {
 
     get isReadonly() {
         return !!this.props.readonly;
+    }
+
+    // ------------------------------------------------------------------
+    // Notes de compétences (hr.employee.skill.grade) : hors du rendu form_template/data. Les notes
+    // elles-mêmes viennent de Napta (lecture seule), mais l'évalué/les évaluateurs peuvent en ajouter
+    // de nouvelles depuis Odoo (cf. add_skill_grade) -- jamais remontées vers Napta, l'API ne le
+    // permet pas.
+    // ------------------------------------------------------------------
+
+    // Groupé par skill_type_id puis par compétence : Napta a une hiérarchie de catégories à 2
+    // niveaux (ex. "Certifications Agilité" sous "Certifications"), mais hr.skill (Odoo) ne porte
+    // qu'un seul niveau de regroupement (skill_type_id, sans parent) -- donc le regroupement ici est
+    // forcément plus plat que sur le profil Napta. Le sous-regroupement par compétence permet de
+    // n'afficher qu'un seul bouton "Ajouter ma note" par compétence, même si plusieurs personnes
+    // l'ont déjà notée.
+    get skillGradesByType() {
+        const records = (this.props.record.data.skill_grade_ids && this.props.record.data.skill_grade_ids.records) || [];
+        const typeGroups = new Map();
+        for (const r of records) {
+            const d = r.data;
+            const typeName = (d.skill_type_id && d.skill_type_id[1]) || "Autres";
+            if (!typeGroups.has(typeName)) {
+                typeGroups.set(typeName, new Map());
+            }
+            const skillGroups = typeGroups.get(typeName);
+            const skillId = d.skill_id && d.skill_id[0];
+            if (!skillGroups.has(skillId)) {
+                skillGroups.set(skillId, {
+                    skillId,
+                    skillName: (d.skill_id && d.skill_id[1]) || "",
+                    skillTypeId: d.skill_type_id && d.skill_type_id[0],
+                    grades: [],
+                });
+            }
+            skillGroups.get(skillId).grades.push({
+                levelName: (d.skill_level_id && d.skill_level_id[1]) || "",
+                raterEmployeeId: d.rater_employee_id && d.rater_employee_id[0],
+                raterName: (d.rater_employee_id && d.rater_employee_id[1]) || "",
+                isSelf: !!d.is_self_assessment,
+                comment: d.comment || "",
+            });
+        }
+        return Array.from(typeGroups.entries()).map(([typeName, skillGroups]) => [
+            typeName,
+            Array.from(skillGroups.values()).map((skill) => ({
+                ...skill,
+                // Empêche de redonner une 2e note sur la même compétence dans la même évaluation :
+                // "Ajouter ma note" ne doit proposer QUE les compétences que l'utilisateur courant n'a
+                // pas encore notées lui-même ici.
+                alreadyGradedByMe: this.currentEmployeeId
+                    ? skill.grades.some((g) => g.raterEmployeeId === this.currentEmployeeId)
+                    : false,
+            })),
+        ]);
+    }
+
+    // ------------------------------------------------------------------
+    // Ajout d'une note de compétence (hr.employee.skill.grade, propre à Odoo -- cf.
+    // project.evaluation.add_skill_grade). Le formulaire est générique : ouvert sans compétence
+    // pré-choisie (bouton "Ajouter une compétence", recherche via autocomplete) ou avec une
+    // compétence déjà fixée (bouton "Ajouter ma note" sur une ligne existante).
+    // ------------------------------------------------------------------
+
+    get skillAutocompleteSources() {
+        return [
+            {
+                options: async (query) => {
+                    if (!query) {
+                        return [];
+                    }
+                    const skills = await this.orm.searchRead(
+                        "hr.skill",
+                        [["name", "ilike", query]],
+                        ["name", "skill_type_id"],
+                        { limit: 8 }
+                    );
+                    return skills.map((skill) => ({
+                        label: skill.name,
+                        skillId: skill.id,
+                        skillName: skill.name,
+                        skillTypeId: skill.skill_type_id && skill.skill_type_id[0],
+                    }));
+                },
+            },
+        ];
+    }
+
+    async openSkillGradeForm(skillId = null, skillName = "", skillTypeId = null) {
+        Object.assign(this.skillGradeForm, {
+            open: true,
+            skillId,
+            skillName,
+            skillTypeId,
+            levels: [],
+            levelId: null,
+            comment: "",
+            saving: false,
+        });
+        if (skillTypeId) {
+            await this.loadSkillLevels(skillTypeId);
+        }
+    }
+
+    closeSkillGradeForm() {
+        Object.assign(this.skillGradeForm, { open: false, skillId: null, skillTypeId: null, levels: [] });
+    }
+
+    async loadSkillLevels(skillTypeId) {
+        const levels = await this.orm.searchRead(
+            "hr.skill.level",
+            [["skill_type_id", "=", skillTypeId]],
+            ["name"],
+            { order: "level_progress asc" }
+        );
+        this.skillGradeForm.levels = levels;
+    }
+
+    async onSkillGradeAutocompleteSelect(option) {
+        this.skillGradeForm.skillId = option.skillId;
+        this.skillGradeForm.skillName = option.skillName;
+        this.skillGradeForm.skillTypeId = option.skillTypeId;
+        this.skillGradeForm.levelId = null;
+        if (option.skillTypeId) {
+            await this.loadSkillLevels(option.skillTypeId);
+        }
+    }
+
+    onSkillGradeLevelChange(ev) {
+        this.skillGradeForm.levelId = ev.target.value ? parseInt(ev.target.value, 10) : null;
+    }
+
+    onSkillGradeCommentInput(ev) {
+        this.skillGradeForm.comment = ev.target.value;
+    }
+
+    async submitSkillGradeForm() {
+        if (!this.skillGradeForm.skillId || this.skillGradeForm.saving) {
+            return;
+        }
+        this.skillGradeForm.saving = true;
+        try {
+            await this.orm.call("project.evaluation", "add_skill_grade", [
+                [this.props.record.resId],
+                this.skillGradeForm.skillId,
+                this.skillGradeForm.levelId || false,
+                this.skillGradeForm.comment || false,
+            ]);
+            this.closeSkillGradeForm();
+            await this.props.record.load();
+        } finally {
+            this.skillGradeForm.saving = false;
+        }
     }
 
     // ------------------------------------------------------------------

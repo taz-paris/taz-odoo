@@ -28,7 +28,7 @@
         <field name="model">project.evaluation</field>
         <field name="inherit_id" ref="project_evaluation.project_evaluation_view_form"/>
         <field name="arch" type="xml">
-            <field name="employee_id" position="after">
+            <field name="data" position="after">
                 <field name="napta_id" readonly="1"/>
             </field>
         </field>
