@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="project_evaluation_template_view_list" model="ir.ui.view">
+        <field name="name">project.evaluation.template.list</field>
+        <field name="model">project.evaluation.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="evaluation_count"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="project_evaluation_template_view_form" model="ir.ui.view">
+        <field name="name">project.evaluation.template.form</field>
+        <field name="model">project.evaluation.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_evaluations" type="object" class="oe_stat_button" icon="fa-list">
+                            <field name="evaluation_count" widget="statinfo" string="Évaluations"/>
+                        </button>
+                    </div>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                    </group>
+                    <group string="Schéma (JSON)">
+                        <field name="schema" nolabel="1" widget="text"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="project_evaluation_template_view_search" model="ir.ui.view">
+        <field name="name">project.evaluation.template.search</field>
+        <field name="model">project.evaluation.template</field>
+        <field name="arch" type="xml">
+            <search string="Gabarits d'évaluation">
+                <field name="name"/>
+                <filter name="inactive" string="Archivés" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="project_evaluation_template_action" model="ir.actions.act_window">
+        <field name="name">Gabarits d'évaluation</field>
+        <field name="res_model">project.evaluation.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

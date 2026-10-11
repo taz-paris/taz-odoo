@@ -13,7 +13,7 @@
     'category': 'Uncategorized',
     'version': "18.0.1.0.0",
 
-    'depends': ['staffing', 'project_accounting', 'project', 'analytic'],
+    'depends': ['staffing', 'project_accounting', 'project', 'analytic', 'project_evaluation'],
 
     'data': [
         'security/ir.model.access.csv',
@@ -22,6 +22,7 @@
         'views/napta.xml',
         'views/project.xml',
         'views/hr_skills.xml',
+        'views/project_evaluation.xml',
         'views/wizard_timesheet_mass_validation.xml',
     ],
 

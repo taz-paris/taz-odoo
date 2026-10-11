@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <menuitem name="Évaluations missions"
+              id="project_evaluation_menu_root"
+              sequence="40"/>
+
+    <menuitem name="Évaluations"
+              id="project_evaluation_menu_evaluation"
+              parent="project_evaluation_menu_root"
+              action="project_evaluation_action"
+              sequence="10"/>
+
+    <menuitem name="Gabarits"
+              id="project_evaluation_menu_template"
+              parent="project_evaluation_menu_root"
+              action="project_evaluation_template_action"
+              sequence="20"/>
+
+</odoo>

@@ -568,12 +568,6 @@ class naptaProject(models.Model):
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
         client = ClientRestNapta(self.env)
-        self.env['hr.skill.type'].create_update_odoo_skill_type()
-        self.env['hr.skill'].create_update_odoo_skill()
-        self.env['hr.skill.level'].create_update_odoo_skill_level()
-        self.env['hr.employee.skill'].create_update_odoo_employee_skill()
-        a=1/0
-
         client.refresh_cache()
 
         #### Retreive project that previous sync failled
@@ -610,6 +604,8 @@ class naptaProject(models.Model):
         self.env['account.analytic.line'].create_update_odoo_timesheetperiod()
         #Suppression du staffing.need une fois la dernière account.analytic.line supprimée
         client.delete_not_found_anymore_object_on_napta('staffing.need', 'user_project')
+        self.env['project.evaluation.template'].create_update_odoo_evaluation_template()
+        self.env['project.evaluation'].create_update_odoo_evaluation()
         #Recalculer les staffing report
         self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
         self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()
@@ -1472,6 +1468,147 @@ class naptaHrEmployeeSkill(models.Model):
             _logger.info("hr.employee.skill obsolète supprimé : napta_id=%s" % employee_skill.napta_id)
             employee_skill.unlink()
             self.env.cr.commit()
+
+
+class naptaProjectEvaluationTemplate(models.Model):
+    _inherit = 'project.evaluation.template'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID", copy=False)
+
+    def create_update_odoo_evaluation_template(self):
+        # Mapping : user_project_evaluation_template (Napta) -> project.evaluation.template (Odoo)
+        _logger.info('---- BATCH Create or update Odoo evaluation_template (user_project_evaluation_template)')
+        client = ClientRestNapta(self.env)
+        template_list = client.read_cache('user_project_evaluation_template')
+        for napta_id, template in template_list.items():
+            dic = {
+                    'napta_id' : napta_id,
+                    'name' : template['attributes']['name'],
+                    'schema' : json.dumps(template['attributes'].get('schema') or template['attributes'].get('form')),
+                }
+            create_update_odoo(self.env, 'project.evaluation.template', dic)
+
+        client.delete_not_found_anymore_object_on_napta('project.evaluation.template', 'user_project_evaluation_template')
+
+
+class naptaProjectEvaluation(models.Model):
+    _inherit = 'project.evaluation'
+    _sql_constraints = [
+        ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
+    ]
+    napta_id = fields.Char("Napta ID", copy=False)
+
+    def create_update_odoo_evaluation(self):
+        # Mapping : user_project_evaluation (Napta) -> project.evaluation (Odoo)
+        # user_project_evaluation ne porte que user_project_id (l'affectation) : on passe par le cache
+        # user_project pour retrouver l'employé et le projet, car project.evaluation pointe directement
+        # sur hr.employee/project.project et non plus sur staffing.need.
+        #
+        # ATTENTION : les relations "authors" (les évaluateurs) et "approvals" (qui a validé, et quand)
+        # ne sont PAS documentées dans le swagger officiel de Napta. Elles ont été repérées en inspectant
+        # le trafic réseau de l'app Napta (mécanisme standard JSON:API include=/sparse fieldsets, sur le
+        # même serveur/la même API que celle déjà utilisée ici). Napta ne garantit donc pas leur stabilité :
+        # si cette synchro se met à échouer sur ces deux relations, c'est le premier endroit à vérifier.
+        # On ne passe pas par read_cache() car elle ne conserve pas la clé "included" de la réponse.
+        _logger.info('---- BATCH Create or update Odoo evaluation (user_project_evaluation)')
+        client = ClientRestNapta(self.env)
+        evaluation_api_return = client.get_api('user_project_evaluation', include=['authors', 'approvals.created_by'])
+        user_project_list = client.read_cache('user_project')
+
+        included_authors = {}
+        included_approvals = {}
+        for included_object in evaluation_api_return['included']:
+            if included_object['type'] == 'user_project_evaluation_author':
+                included_authors[included_object['id']] = included_object
+            elif included_object['type'] == 'user_project_evaluation_approval':
+                included_approvals[included_object['id']] = included_object
+
+        for evaluation in evaluation_api_return['data']:
+            napta_id = evaluation['id']
+            napta_user_project_id = evaluation['attributes']['user_project_id']
+            user_project = user_project_list.get(str(napta_user_project_id))
+            if not user_project:
+                _logger.info("Impossible de créer/mettre à jour l'évaluation Napta id=%s : user_project id=%s introuvable." % (napta_id, str(napta_user_project_id)))
+                continue
+
+            napta_template_id = evaluation['attributes'].get('template_id')
+            if not napta_template_id:
+                # Nullable côté API Napta, mais ça reste une évaluation sans gabarit : cas à surveiller.
+                _logger.warning("Évaluation Napta id=%s sans template_id (user_project_id=%s)." % (napta_id, str(napta_user_project_id)))
+
+            is_closed = bool(evaluation['attributes']['closed'])
+            napta_evaluee_user_id = user_project['attributes']['user_id']
+
+            # Qui a validé (approvals), et quand : indexé par napta_id de l'utilisateur ayant approuvé.
+            approval_date_by_napta_user_id = {}
+            for approval_ref in evaluation.get('relationships', {}).get('approvals', {}).get('data', []):
+                approval = included_approvals.get(approval_ref['id'])
+                if approval:
+                    approval_date = datetime.datetime.strptime(approval['attributes']['created_on'], '%Y-%m-%dT%H:%M:%S.%f')
+                    approval_date_by_napta_user_id[approval['attributes']['created_by_id']] = approval_date
+
+            # Qui est évaluateur (authors) sur cette évaluation.
+            evaluator_napta_user_ids = []
+            for author_ref in evaluation.get('relationships', {}).get('authors', {}).get('data', []):
+                author = included_authors.get(author_ref['id'])
+                if author:
+                    evaluator_napta_user_ids.append(author['attributes']['author_id'])
+
+            dic = {
+                    'napta_id' : napta_id,
+                    'employee_id' : {'napta_id' : napta_evaluee_user_id},
+                    'project_id' : {'napta_id' : user_project['attributes']['project_id']},
+                    'template_id' : {'napta_id' : napta_template_id},
+                    'data' : json.dumps(evaluation['attributes'].get('data')),
+                    # Sur Napta, le statut d'une évaluation de mission n'a que 2 valeurs (En cours / Fermée) :
+                    # elle passe à Fermée quand elle a été approuvée par l'évalué ET par au moins un évaluateur.
+                    # is_published est une dimension indépendante (mode brouillon évaluateur, masque le contenu à l'évalué) :
+                    # ça n'a rien à voir avec la clôture, donc ce n'est plus mélangé dans le statut.
+                    'state' : 'closed' if is_closed else 'ongoing',
+                    'is_published' : bool(evaluation['attributes']['is_published']),
+                }
+            odoo_evaluation = create_update_odoo(self.env, 'project.evaluation', dic)
+            if not odoo_evaluation:
+                continue
+
+            # Validation de l'évalué : précise (avec date exacte) grâce à approvals, avec repli sur l'agrégat
+            # "closed" si jamais l'évalué n'apparaît pas (il ne devrait normalement toujours y être si is_closed est vrai).
+            employee_validated_on = approval_date_by_napta_user_id.get(napta_evaluee_user_id)
+            if employee_validated_on:
+                odoo_evaluation.write({'employee_validated' : True, 'employee_validated_on' : employee_validated_on})
+            elif is_closed and not odoo_evaluation.employee_validated:
+                odoo_evaluation.employee_validated = True
+
+            # Validation par évaluateur : un project.evaluation.assessor par author Napta, avec son statut
+            # et sa date de validation exacte (si disponible via approvals).
+            kept_assessor_employee_ids = []
+            for evaluator_napta_user_id in evaluator_napta_user_ids:
+                employee = self.env['hr.employee'].search([('napta_id', '=', evaluator_napta_user_id), ('active', 'in', [True, False])])
+                if len(employee) != 1:
+                    _logger.info("Évaluateur Napta user_id=%s introuvable sur Odoo (évaluation Napta id=%s)." % (evaluator_napta_user_id, napta_id))
+                    continue
+
+                validated_on = approval_date_by_napta_user_id.get(evaluator_napta_user_id)
+                assessor_vals = {
+                        'state' : 'done' if validated_on else 'pending',
+                        'validated_on' : validated_on or False,
+                    }
+                assessor = self.env['project.evaluation.assessor'].search([
+                        ('evaluation_id', '=', odoo_evaluation.id), ('employee_id', '=', employee.id),
+                    ])
+                if assessor:
+                    if assessor.state != assessor_vals['state'] or assessor.validated_on != assessor_vals['validated_on']:
+                        assessor.write(assessor_vals)
+                else:
+                    self.env['project.evaluation.assessor'].create(dict(assessor_vals, evaluation_id=odoo_evaluation.id, employee_id=employee.id))
+                kept_assessor_employee_ids.append(employee.id)
+
+            obsolete_assessors = odoo_evaluation.assessor_ids.filtered(lambda a: a.employee_id.id not in kept_assessor_employee_ids)
+            obsolete_assessors.unlink()
+
+        client.delete_not_found_anymore_object_on_napta('project.evaluation', 'user_project_evaluation')
 
 
 ########################################################################################
