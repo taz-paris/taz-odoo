@@ -569,14 +569,6 @@ class naptaProject(models.Model):
         _logger.info('======== DEMARRAGE synchAllNapta')
         client = ClientRestNapta(self.env)
         client.refresh_cache()
-        self.env['hr.skill.type'].create_update_odoo_skill_type()
-        self.env['hr.skill'].create_update_odoo_skill()
-        self.env['hr.skill.level'].create_update_odoo_skill_level()
-        self.env['hr.employee.skill'].create_update_odoo_employee_skill()
-        self.env['hr.employee.skill'].create_update_odoo_interest()
-        self.env['project.evaluation.template'].create_update_odoo_evaluation_template()
-        self.env['project.evaluation'].create_update_odoo_evaluation()
-        a=1/0
 
         #### Retreive project that previous sync failled
         projects_to_sync = self.env['project.project'].search([('napta_to_sync', '=', True)])
@@ -1298,6 +1290,23 @@ class naptaHrSkillType(models.Model):
         client.delete_not_found_anymore_object_on_napta('hr.skill.type', 'skill_category')
 
 
+def _draftjs_blocks_to_text(raw):
+    # La description d'un grade Napta est un contenu riche au format Draft.js (JSON avec une liste
+    # de "blocks", chacun portant son texte dans block.text) et non du texte brut -- on n'en extrait
+    # que le texte, sans mise en forme (gras/italique perdus, pas exploités côté Odoo). Retourne la
+    # valeur telle quelle si ce n'est pas un JSON Draft.js reconnaissable (ex. déjà du texte brut).
+    if not raw:
+        return raw
+    try:
+        parsed = json.loads(raw)
+        blocks = parsed.get('blocks')
+    except (ValueError, AttributeError):
+        return raw
+    if not isinstance(blocks, list):
+        return raw
+    return "\n".join(block.get('text', '') for block in blocks).strip()
+
+
 class naptaHrSkillLevel(models.Model):
     _inherit = 'hr.skill.level'
     _sql_constraints = [
@@ -1337,8 +1346,12 @@ class naptaHrSkillLevel(models.Model):
 
             values = grade_group_values.get(grade_group_id, [])
             min_value, max_value = min(values), max(values)
-            if max_value > min_value:
-                level_progress = round((grade['attributes']['value'] - min_value) / (max_value - min_value) * 100)
+            # +1 au numérateur ET au dénominateur : sans ça, le niveau le plus bas d'une échelle
+            # à N valeurs (ex. 1 à 4) tombe à 0%, ce qui n'est pas voulu (il doit déjà représenter
+            # une vraie maîtrise, ex. 25% sur une échelle à 4 valeurs, pas "aucune compétence").
+            level_count = max_value - min_value + 1
+            if level_count > 1:
+                level_progress = round((grade['attributes']['value'] - min_value + 1) / level_count * 100)
             else:
                 level_progress = 100
 
@@ -1351,7 +1364,7 @@ class naptaHrSkillLevel(models.Model):
                 vals = {
                         'napta_id' : napta_id,
                         'name' : grade['attributes']['name'],
-                        'description' : grade['attributes']['description'] or False,
+                        'description' : _draftjs_blocks_to_text(grade['attributes']['description']) or False,
                         'skill_type_id' : skill_type.id,
                         'level_progress' : level_progress,
                     }
@@ -1395,6 +1408,7 @@ class naptaHrSkill(models.Model):
             dic = {
                     'napta_id' : napta_id,
                     'name' : skill['attributes']['name'],
+                    'description' : _draftjs_blocks_to_text(skill['attributes'].get('description')) or False,
                     'skill_type_id' : {'napta_id' : skill['attributes']['skill_category_id']},
                 }
             create_update_odoo(self.env, 'hr.skill', dic)

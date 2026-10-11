@@ -81,13 +81,27 @@
             justify-content: space-between;
             gap: 8px;
 
+            .o_pe_skills_skill_title {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 8px;
+                min-width: 0;
+            }
+
             .o_pe_skills_skill_name {
                 font-weight: 600;
+                flex: 0 0 auto;
+            }
+
+            .o_pe_skills_skill_description {
+                font-size: 0.85em;
             }
 
             .o_pe_skills_add_note {
                 font-size: 0.85em;
                 padding: 0;
+                flex: 0 0 auto;
             }
         }
 
@@ -102,10 +116,20 @@
                 flex: 0 0 auto;
             }
 
+            .o_pe_skills_level_description {
+                font-size: 0.85em;
+            }
+
             .o_pe_skills_rater {
                 flex: 0 0 auto;
                 color: var(--o-view-text-muted-color, #6c757d);
                 font-size: 0.9em;
+            }
+
+            .o_pe_skills_delete_note {
+                font-size: 0.85em;
+                padding: 0;
+                flex: 0 0 auto;
             }
 
             .o_pe_skills_comment {
@@ -165,5 +189,14 @@
 
     .o_pe_unsupported {
         font-style: italic;
+    }
+
+    // L'option "text-truncate" (core, sur le <a> du dropdown AutoComplete) coupe sur une seule
+    // ligne par défaut -- on l'autorise à s'étendre sur plusieurs lignes pour laisser de la place
+    // à la description sous le nom de la compétence (project_evaluation.SkillGradeFormAutocompleteOption).
+    .o-autocomplete--dropdown-item:has(.o_pe_skill_autocomplete_option) a {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
     }
 }

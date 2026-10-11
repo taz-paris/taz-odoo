@@ -70,9 +70,11 @@
                                 <list>
                                     <field name="skill_id"/>
                                     <field name="skill_type_id"/>
+                                    <field name="skill_description"/>
                                     <field name="rater_employee_id"/>
                                     <field name="is_self_assessment"/>
                                     <field name="skill_level_id"/>
+                                    <field name="skill_level_description"/>
                                     <field name="comment"/>
                                 </list>
                             </field>
