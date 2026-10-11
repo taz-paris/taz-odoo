@@ -21,19 +21,20 @@
         <field name="model">project.evaluation</field>
         <field name="arch" type="xml">
             <list>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
                 <field name="state" optional="show" widget="badge"
                        decoration-success="state == 'closed'" decoration-muted="state == 'ongoing'"/>
-                <field name="employee_id" optional="show"/>
+                <field name="employee_id" optional="show" width="150px"/>
                 <field name="partner_id" optional="show"/>
                 <field name="project_id" optional="show"/>
-                <field name="create_date" optional="show"/>
-                <field name="write_date" optional="show"/>
-                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                <field name="create_date" optional="show" string="Date de création"/>
+                <field name="create_uid" optional="hide" string="Créateur"/>
+                <field name="write_date" optional="show" string="Date de mise à jour"/>
+                <field name="write_uid" optional="hide" string="Auteur de la MAJ"/>
                 <field name="template_id" optional="hide"/>
                 <field name="is_published" optional="hide"/>
                 <field name="employee_validated" optional="hide"/>
-                <field name="create_uid" optional="hide"/>
-                <field name="write_uid" optional="hide"/>
+
             </list>
         </field>
     </record>
