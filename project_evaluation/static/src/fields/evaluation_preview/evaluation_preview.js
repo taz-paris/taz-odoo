@@ -5,6 +5,7 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Component, useState, onWillStart } from "@odoo/owl";
 
 // Moteur de rendu (et d'édition) du contenu d'une évaluation de mission (project.evaluation.data),
@@ -25,6 +26,7 @@ export class EvaluationPreview extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.dialog = useService("dialog");
         // hr.employee de l'utilisateur courant : pas dans les infos de session (qui ne connaissent que
         // le res.users), donc un aller-retour RPC dédié, fait une fois au montage. Sert à savoir si
         // l'utilisateur a déjà noté une compétence donnée sur cette évaluation (masque alors "Ajouter
@@ -121,6 +123,8 @@ export class EvaluationPreview extends Component {
                 });
             }
             skillGroups.get(skillId).grades.push({
+                gradeId: r.resId,
+                levelId: d.skill_level_id && d.skill_level_id[0],
                 levelName: (d.skill_level_id && d.skill_level_id[1]) || "",
                 levelDescription: d.skill_level_description || "",
                 raterEmployeeId: d.rater_employee_id && d.rater_employee_id[0],
@@ -131,15 +135,15 @@ export class EvaluationPreview extends Component {
         }
         return Array.from(typeGroups.entries()).map(([typeName, skillGroups]) => [
             typeName,
-            Array.from(skillGroups.values()).map((skill) => ({
-                ...skill,
-                // Empêche de redonner une 2e note sur la même compétence dans la même évaluation :
-                // "Ajouter ma note" ne doit proposer QUE les compétences que l'utilisateur courant n'a
-                // pas encore notées lui-même ici.
-                alreadyGradedByMe: this.currentEmployeeId
-                    ? skill.grades.some((g) => g.raterEmployeeId === this.currentEmployeeId)
-                    : false,
-            })),
+            Array.from(skillGroups.values()).map((skill) => {
+                // Un même auteur ne peut avoir qu'une note par compétence sur cette évaluation (cf.
+                // add_skill_grade, upsert côté serveur) : on retrouve SA note, s'il en a une, pour
+                // basculer "Ajouter ma note" en "Modifier ma note" et pré-remplir le formulaire.
+                const myGrade = this.currentEmployeeId
+                    ? skill.grades.find((g) => g.raterEmployeeId === this.currentEmployeeId)
+                    : null;
+                return { ...skill, myGrade };
+            }),
         ]);
     }
 
@@ -196,16 +200,18 @@ export class EvaluationPreview extends Component {
         ];
     }
 
-    async openSkillGradeForm(skillId = null, skillName = "", skillTypeId = null) {
+    // existingGrade : la note déjà posée par l'utilisateur courant sur cette compétence (cf. myGrade
+    // dans skillGradesByType), pour pré-remplir le formulaire en mode édition ("Modifier ma note").
+    async openSkillGradeForm(skillId = null, skillName = "", skillTypeId = null, existingGrade = null) {
         Object.assign(this.skillGradeForm, {
             open: true,
             skillId,
             skillName,
             skillTypeId,
             levels: [],
-            levelId: null,
-            levelName: "Aucun niveau",
-            comment: "",
+            levelId: existingGrade ? existingGrade.levelId : null,
+            levelName: existingGrade ? existingGrade.levelName || "Aucun niveau" : "Aucun niveau",
+            comment: existingGrade ? existingGrade.comment : "",
             saving: false,
         });
         if (skillTypeId) {
@@ -263,6 +269,25 @@ export class EvaluationPreview extends Component {
         } finally {
             this.skillGradeForm.saving = false;
         }
+    }
+
+    // Seul l'auteur d'une note peut la supprimer (cf. delete_skill_grade côté modèle, qui revérifie
+    // ça côté serveur) : le bouton n'est de toute façon affiché que sur ses propres notes.
+    deleteSkillGrade(gradeId) {
+        this.dialog.add(ConfirmationDialog, {
+            title: "Supprimer la note",
+            body: "Supprimer définitivement cette note de compétence ?",
+            confirmLabel: "Supprimer",
+            confirmClass: "btn-danger",
+            confirm: async () => {
+                await this.orm.call("project.evaluation", "delete_skill_grade", [
+                    [this.props.record.resId],
+                    gradeId,
+                ]);
+                await this.props.record.load();
+            },
+            cancel: () => {},
+        });
     }
 
     // ------------------------------------------------------------------

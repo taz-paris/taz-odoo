@@ -52,10 +52,13 @@
                                         <span class="o_pe_skills_skill_name" t-esc="skill.skillName"/>
                                         <span t-if="skill.skillDescription" class="o_pe_skills_skill_description text-muted" t-esc="skill.skillDescription"/>
                                     </div>
-                                    <button t-if="!isReadonly and !skill.alreadyGradedByMe" type="button"
+                                    <button t-if="!isReadonly" type="button"
                                             class="btn btn-link btn-sm o_pe_skills_add_note"
-                                            t-on-click="() => this.openSkillGradeForm(skill.skillId, skill.skillName, skill.skillTypeId)">
-                                        <i class="fa fa-plus"/> Ajouter ma note
+                                            t-on-click="() => this.openSkillGradeForm(skill.skillId, skill.skillName, skill.skillTypeId, skill.myGrade)">
+                                        <i class="fa fa-plus" t-if="!skill.myGrade"/>
+                                        <i class="fa fa-pencil" t-else=""/>
+                                        <t t-if="skill.myGrade"> Modifier ma note</t>
+                                        <t t-else=""> Ajouter ma note</t>
                                     </button>
                                 </div>
                                 <t t-foreach="skill.grades" t-as="grade" t-key="grade_index">
@@ -66,6 +69,11 @@
                                             <t t-if="grade.isSelf">Auto-évaluation</t>
                                             <t t-else="">Noté par <t t-esc="grade.raterName"/></t>
                                         </span>
+                                        <button t-if="!isReadonly and grade.raterEmployeeId === currentEmployeeId" type="button"
+                                                class="btn btn-link btn-sm text-danger o_pe_skills_delete_note"
+                                                t-on-click="() => this.deleteSkillGrade(grade.gradeId)">
+                                            <i class="fa fa-trash"/>
+                                        </button>
                                         <div t-if="grade.comment" class="o_pe_skills_comment" t-esc="grade.comment"/>
                                     </div>
                                 </t>

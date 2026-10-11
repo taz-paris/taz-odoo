@@ -173,13 +173,43 @@ class ProjectEvaluation(models.Model):
                     'skill_type_id': skill.skill_type_id.id,
                 })
 
-        self.env['hr.employee.skill.grade'].create({
+        # Upsert : un même auteur ne peut avoir qu'UNE note par compétence sur une même évaluation
+        # (cf. contrainte SQL project_evaluation_skill_rater_uniq). On met à jour sa note existante
+        # plutôt que d'en créer une 2e en double, quel que soit le chemin emprunté côté widget
+        # ("Ajouter ma note" sur une compétence déjà notée, ou "Ajouter une compétence" en
+        # sélectionnant une compétence qu'il a déjà notée via la recherche).
+        existing_grade = self.env['hr.employee.skill.grade'].search([
+                ('employee_skill_id', '=', employee_skill.id),
+                ('project_evaluation_id', '=', self.id),
+                ('rater_employee_id', '=', rater_employee.id),
+            ])
+        grade_vals = {
                 'employee_skill_id': employee_skill.id,
                 'rater_employee_id': rater_employee.id,
                 'skill_level_id': skill_level_id or False,
                 'comment': comment or False,
                 'project_evaluation_id': self.id,
-            })
+            }
+        if existing_grade:
+            existing_grade.write(grade_vals)
+        else:
+            self.env['hr.employee.skill.grade'].create(grade_vals)
+
+    def delete_skill_grade(self, grade_id):
+        # Seul l'auteur d'une note peut la supprimer, et seulement tant que l'évaluation n'est pas
+        # clôturée -- même esprit que add_skill_grade. L'ACL/ir.rule (hr_employee_skill_grade_rule_own)
+        # autorise déjà l'auteur à supprimer ses propres notes, mais ne sait pas vérifier la clôture
+        # de l'évaluation : d'où ce contrôle explicite ici.
+        self.ensure_one()
+        if self.state == 'closed':
+            raise UserError(_("Impossible de supprimer une note de compétence sur une évaluation clôturée."))
+        grade = self.env['hr.employee.skill.grade'].browse(grade_id)
+        if not grade.exists() or grade.project_evaluation_id != self:
+            raise UserError(_("Note de compétence introuvable sur cette évaluation."))
+        rater_employee = self.env.user.employee_id
+        if not rater_employee or grade.rater_employee_id != rater_employee:
+            raise UserError(_("Seul l'auteur d'une note peut la supprimer."))
+        grade.unlink()
 
     def _has_data_content(self):
         self.ensure_one()
