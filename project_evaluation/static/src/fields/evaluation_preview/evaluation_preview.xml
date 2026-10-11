@@ -80,7 +80,10 @@
         <t t-elif="node.type === 'table'">
             <div class="o_pe_table_block">
                 <div t-if="node.title" class="o_pe_table_title" t-esc="node.title"/>
-                <table class="table table-sm table-bordered o_pe_table">
+                <div t-if="node.hasRowAdd and !tableRowCount(node)" class="text-muted o_pe_table_empty">
+                    Aucune ligne pour l'instant.
+                </div>
+                <table t-if="tableRowCount(node)" class="table table-sm table-bordered o_pe_table">
                     <thead t-if="node.hasHeader">
                         <tr>
                             <t t-foreach="node.columns || []" t-as="col" t-key="col.key">

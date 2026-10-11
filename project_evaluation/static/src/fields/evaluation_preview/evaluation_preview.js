@@ -152,15 +152,15 @@ export class EvaluationPreview extends Component {
     }
 
     // Nombre de lignes à afficher : si la table accepte l'ajout de lignes (hasRowAdd), on se base
-    // sur les lignes réellement saisies (au moins 1 en édition pour pouvoir commencer à saisir) ;
-    // sinon (table à lignes fixes), le nombre de lignes vient du gabarit (defaultRows).
+    // sur les lignes réellement saisies ; sinon (table à lignes fixes), le nombre de lignes vient
+    // du gabarit (defaultRows).
+    // Important : ne jamais afficher une ligne "fantôme" qui n'existe pas dans data (un précédent
+    // essai affichait 1 ligne vide par défaut quand data était vide, ce qui rendait le premier clic
+    // sur "Ajouter une ligne" invisible : il créait la vraie 1re ligne, mais le total affiché restait
+    // à 1, donc rien ne semblait se passer avant le 2e clic).
     tableRowCount(node) {
-        const dataRows = this.getRows(node.key);
         if (node.hasRowAdd) {
-            if (dataRows.length) {
-                return dataRows.length;
-            }
-            return this.isReadonly ? 0 : 1;
+            return this.getRows(node.key).length;
         }
         return (node.defaultRows || []).length;
     }
