@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="hr_skill_type_view_form_inherit_hr_skill_grade" model="ir.ui.view">
+        <field name="name">hr.skill.type.form.inherit.hr_skill_grade</field>
+        <field name="model">hr.skill.type</field>
+        <field name="inherit_id" ref="hr_skills.hr_employee_skill_type_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='skill_ids']//field[@name='name']" position="after">
+                <field name="description"/>
+                <field name="is_certification"/>
+                <field name="validity_duration_in_months" invisible="not is_certification"/>
+            </xpath>
+            <!-- skill_level_ids n'a pas d'arch inline dans la vue de base (elle retombe sur la vue
+                 liste par défaut de hr.skill.level) : on lui en donne une explicite pour ajouter
+                 "description" sans dépendre de la colonne optionnelle (masquée par défaut) de
+                 employee_skill_level_view_tree. -->
+            <xpath expr="//field[@name='skill_level_ids']" position="inside">
+                <list editable="bottom" class="o_skill_level_tree">
+                    <field name="name"/>
+                    <field name="level_progress" widget="progressbar" options="{'editable': true}"/>
+                    <field name="default_level" widget="boolean_toggle_load"/>
+                    <field name="description"/>
+                </list>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

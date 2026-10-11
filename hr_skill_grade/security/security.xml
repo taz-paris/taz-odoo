@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Même logique que le core hr_skills sur hr.employee.skill (hr_skill_rule_employee_update) :
+         un utilisateur de base peut créer/modifier/supprimer ses PROPRES notes de compétence. "Propre"
+         ici veut dire "dont il est l'auteur" (rater_employee_id), pas "dont il est le sujet" (employee_id
+         via employee_skill_id) : ça couvre l'auto-évaluation (rater == sujet) sans donner le droit de
+         toucher aux notes données par quelqu'un d'autre sur sa propre fiche. -->
+    <record id="hr_employee_skill_grade_rule_own" model="ir.rule">
+        <field name="name">Employee skill grade: own (rater): create/write/unlink</field>
+        <field name="model_id" ref="model_hr_employee_skill_grade"/>
+        <field name="domain_force">[('rater_employee_id.user_id', '=', user.id)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+</odoo>

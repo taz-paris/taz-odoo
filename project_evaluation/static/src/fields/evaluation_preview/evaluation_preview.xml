@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="project_evaluation.EvaluationPreview">
+        <div class="o_project_evaluation_preview">
+            <t t-if="formNodes.length">
+                <t t-foreach="formNodes" t-as="node" t-key="node_index">
+                    <t t-call="project_evaluation.EvaluationPreview.Node">
+                        <t t-set="node" t-value="node"/>
+                    </t>
+                </t>
+            </t>
+            <t t-else="">
+                <div class="text-muted">
+                    Aucun gabarit exploitable pour cette évaluation : voir l'onglet "Contenu (JSON)".
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="project_evaluation.EvaluationPreview.Node">
+
+        <t t-if="node.type === 'text'">
+            <div class="o_pe_markdown" t-att-style="node.styles and node.styles.text">
+                <t t-foreach="parseMarkdown(node.text)" t-as="paragraph" t-key="paragraph_index">
+                    <div class="o_pe_md_line">
+                        <t t-if="!paragraph.length">&#160;</t>
+                        <t t-foreach="paragraph" t-as="segment" t-key="segment_index">
+                            <span t-attf-class="{{segment.bold ? 'fw-bold' : ''}} {{segment.italic ? 'fst-italic' : ''}}" t-esc="segment.text"/>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </t>
+
+        <t t-elif="node.type === 'divider'">
+            <hr class="o_pe_divider"/>
+        </t>
+
+        <t t-elif="node.type === 'skills'">
+            <div class="o_pe_skills">
+                <div t-if="!skillGradesByType.length" class="text-muted">
+                    Aucune note de compétence sur cette évaluation.
+                </div>
+                <t t-foreach="skillGradesByType" t-as="group" t-key="group[0]">
+                    <div class="o_pe_skills_group">
+                        <h6 t-esc="group[0]"/>
+                        <t t-foreach="group[1]" t-as="skill" t-key="skill.skillId">
+                            <div class="o_pe_skills_skill">
+                                <div class="o_pe_skills_skill_header">
+                                    <span class="o_pe_skills_skill_name" t-esc="skill.skillName"/>
+                                    <button t-if="!isReadonly and !skill.alreadyGradedByMe" type="button"
+                                            class="btn btn-link btn-sm o_pe_skills_add_note"
+                                            t-on-click="() => this.openSkillGradeForm(skill.skillId, skill.skillName, skill.skillTypeId)">
+                                        <i class="fa fa-plus"/> Ajouter ma note
+                                    </button>
+                                </div>
+                                <t t-foreach="skill.grades" t-as="grade" t-key="grade_index">
+                                    <div class="o_pe_skills_grade">
+                                        <span class="o_pe_skills_level" t-esc="grade.levelName || '—'"/>
+                                        <span class="o_pe_skills_rater">
+                                            <t t-if="grade.isSelf">Auto-évaluation</t>
+                                            <t t-else="">Noté par <t t-esc="grade.raterName"/></t>
+                                        </span>
+                                        <div t-if="grade.comment" class="o_pe_skills_comment" t-esc="grade.comment"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <button t-if="!isReadonly and !skillGradeForm.open" type="button"
+                        class="btn btn-secondary btn-sm o_pe_skills_add_skill"
+                        t-on-click="() => this.openSkillGradeForm()">
+                    <i class="fa fa-plus"/> Ajouter une compétence
+                </button>
+
+                <div t-if="skillGradeForm.open" class="o_pe_skill_grade_form">
+                    <div t-if="!skillGradeForm.skillTypeId" class="o_pe_skill_grade_form_row">
+                        <AutoComplete
+                            placeholder="'Rechercher une compétence…'"
+                            value="skillGradeForm.skillName"
+                            sources="skillAutocompleteSources"
+                            onSelect.bind="onSkillGradeAutocompleteSelect"
+                        />
+                    </div>
+                    <div t-else="" class="o_pe_skill_grade_form_row">
+                        <strong t-esc="skillGradeForm.skillName"/>
+                    </div>
+                    <div class="o_pe_skill_grade_form_row">
+                        <select class="form-select form-select-sm" t-on-change="onSkillGradeLevelChange">
+                            <option value="">Niveau (optionnel)</option>
+                            <t t-foreach="skillGradeForm.levels" t-as="level" t-key="level.id">
+                                <option t-att-value="level.id" t-att-selected="level.id === skillGradeForm.levelId">
+                                    <t t-esc="level.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="o_pe_skill_grade_form_row">
+                        <textarea class="form-control form-control-sm" rows="2"
+                                  placeholder="Commentaire (optionnel)"
+                                  t-att-value="skillGradeForm.comment"
+                                  t-on-input="onSkillGradeCommentInput"/>
+                    </div>
+                    <div class="o_pe_skill_grade_form_row o_pe_skill_grade_form_actions">
+                        <button type="button" class="btn btn-secondary btn-sm" t-on-click="closeSkillGradeForm">
+                            Annuler
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm"
+                                t-att-disabled="!skillGradeForm.skillId or skillGradeForm.saving"
+                                t-on-click="submitSkillGradeForm">
+                            Enregistrer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </t>
+
+        <t t-elif="node.type === 'textarea' or node.type === 'input'">
+            <div class="o_pe_field">
+                <div t-if="node.title" class="o_pe_field_title" t-att-style="node.styles and node.styles.title" t-esc="node.title"/>
+                <div t-if="node.description" class="o_pe_field_desc text-muted" t-att-style="node.styles and node.styles.description" t-esc="node.description"/>
+                <textarea t-if="node.type === 'textarea'"
+                          class="form-control o_pe_field_input"
+                          t-att-rows="node.countRows || 3"
+                          t-att-placeholder="node.placeholder"
+                          t-att-readonly="isReadonly"
+                          t-att-value="getValue(node.key)"
+                          t-on-change="(ev) => this.onFieldInput(node, ev)"/>
+                <input t-else="" type="text"
+                       class="form-control o_pe_field_input"
+                       t-att-placeholder="node.placeholder"
+                       t-att-readonly="isReadonly"
+                       t-att-value="getValue(node.key)"
+                       t-on-change="(ev) => this.onFieldInput(node, ev)"/>
+            </div>
+        </t>
+
+        <t t-elif="node.type === 'select'">
+            <div class="o_pe_field">
+                <div t-if="node.title" class="o_pe_field_title" t-esc="node.title"/>
+                <select class="form-select o_pe_field_input"
+                        t-att-disabled="isReadonly"
+                        t-on-change="(ev) => this.onFieldSelectChange(node, ev)">
+                    <option value="">—</option>
+                    <t t-foreach="selectOptions(node)" t-as="opt" t-key="opt.id">
+                        <option t-att-value="opt.id" t-att-selected="getValue(node.key) === opt.id" t-esc="opt.text"/>
+                    </t>
+                </select>
+            </div>
+        </t>
+
+        <t t-elif="node.type === 'table'">
+            <div class="o_pe_table_block">
+                <div t-if="node.title" class="o_pe_table_title" t-esc="node.title"/>
+                <table class="table table-sm table-bordered o_pe_table">
+                    <thead t-if="node.hasHeader">
+                        <tr>
+                            <t t-foreach="node.columns || []" t-as="col" t-key="col.key">
+                                <th t-esc="tableColumnTitle(col)"/>
+                            </t>
+                            <th t-if="node.hasRowAdd and !isReadonly" class="o_pe_table_action_col"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="Array.from({length: tableRowCount(node)})" t-as="row" t-key="row_index">
+                            <tr>
+                                <t t-foreach="node.columns || []" t-as="col" t-key="col.key">
+                                    <td class="o_pe_table_cell">
+                                        <t t-if="col.type === 'text'">
+                                            <t t-esc="tableStaticCellText(node, col.key, row_index)"/>
+                                        </t>
+                                        <t t-elif="col.type === 'select'">
+                                            <select class="form-select form-select-sm"
+                                                    t-att-disabled="isReadonly"
+                                                    t-on-change="(ev) => this.onCellSelectChange(node, row_index, col, ev)">
+                                                <option value="">—</option>
+                                                <t t-foreach="selectOptions(col)" t-as="opt" t-key="opt.id">
+                                                    <option t-att-value="opt.id" t-att-selected="getCell(node.key, row_index, col.key) === opt.id" t-esc="opt.text"/>
+                                                </t>
+                                            </select>
+                                        </t>
+                                        <t t-else="">
+                                            <textarea class="form-control form-control-sm o_pe_table_cell_input"
+                                                      rows="2"
+                                                      t-att-placeholder="tableCellPlaceholder(node, col.key, row_index)"
+                                                      t-att-readonly="isReadonly"
+                                                      t-att-value="getCell(node.key, row_index, col.key)"
+                                                      t-on-change="(ev) => this.onCellInput(node, row_index, col, ev)"/>
+                                        </t>
+                                    </td>
+                                </t>
+                                <td t-if="node.hasRowAdd and !isReadonly" class="o_pe_table_action_col">
+                                    <button class="btn btn-sm btn-link text-danger o_pe_remove_row" type="button"
+                                            t-on-click="() => this.onRemoveRowClick(node, row_index)">
+                                        <i class="fa fa-trash"/>
+                                    </button>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <button t-if="node.hasRowAdd and !isReadonly" type="button" class="btn btn-sm btn-link o_pe_add_row"
+                        t-on-click="() => this.onAddRowClick(node)">
+                    <i class="fa fa-plus"/> Ajouter une ligne
+                </button>
+            </div>
+        </t>
+
+        <t t-elif="node.type === 'section'">
+            <div class="o_pe_section">
+                <h5 t-if="node.title" t-att-style="node.styles and node.styles.title" t-esc="node.title"/>
+                <t t-foreach="node.children || []" t-as="child" t-key="child_index">
+                    <t t-call="project_evaluation.EvaluationPreview.Node">
+                        <t t-set="node" t-value="child"/>
+                    </t>
+                </t>
+            </div>
+        </t>
+
+        <t t-elif="node.type === 'columns'">
+            <div class="o_pe_group">
+                <t t-foreach="node.children || []" t-as="child" t-key="child_index">
+                    <div class="o_pe_group_item">
+                        <t t-call="project_evaluation.EvaluationPreview.Node">
+                            <t t-set="node" t-value="child"/>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </t>
+
+        <t t-else="">
+            <div class="text-muted o_pe_unsupported">
+                Composant non géré : <t t-esc="node.type"/>
+            </div>
+        </t>
+    </t>
+
+</templates>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="group_evaluation_consultant" model="res.groups">
+            <field name="name">Évaluations de mission : Consultant</field>
+            <field name="comment">Accès en lecture aux évaluations de mission où l'utilisateur est l'évalué (si publiée) ou l'un des évaluateurs (quel que soit l'état de publication).</field>
+        </record>
+
+        <record model="ir.rule" id="project_evaluation_comp_rule">
+            <field name="name">Project evaluation: multi-company</field>
+            <field name="model_id" ref="model_project_evaluation"/>
+            <field name="domain_force">['|', ('company_id', 'in', company_ids), ('company_id', '=', False)]</field>
+        </record>
+
+        <record model="ir.rule" id="project_evaluation_consultant_rule">
+            <field name="name">Project evaluation: consultant ne voit que les évaluations qui le concernent</field>
+            <field name="model_id" ref="model_project_evaluation"/>
+            <field name="groups" eval="[(4, ref('group_evaluation_consultant'))]"/>
+            <field name="domain_force">['|', '&amp;', ('employee_id.user_id', '=', user.id), ('is_published', '=', True), ('assessor_ids.employee_id.user_id', '=', user.id)]</field>
+        </record>
+
+        <record model="ir.rule" id="project_evaluation_assessor_consultant_rule">
+            <field name="name">Project evaluation assessor: consultant ne voit que les évaluateurs des évaluations qui le concernent</field>
+            <field name="model_id" ref="model_project_evaluation_assessor"/>
+            <field name="groups" eval="[(4, ref('group_evaluation_consultant'))]"/>
+            <field name="domain_force">['|', '&amp;', ('evaluation_id.employee_id.user_id', '=', user.id), ('evaluation_id.is_published', '=', True), ('evaluation_id.assessor_ids.employee_id.user_id', '=', user.id)]</field>
+        </record>
+    </data>
+</odoo>

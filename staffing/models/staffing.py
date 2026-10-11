@@ -166,7 +166,8 @@ class staffingProposal(models.Model):
         ('need_employee_uniq', 'UNIQUE (staffing_need_id, employee_id)',  "Impossible d'enregistrer deux propositions de staffing pour le même besoin et le même consultant.")
     ]
 
-    @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id', 'staffing_need_id.skill_ids', 'employee_id.employee_skill_ids')
+    @api.depends('staffing_need_id', 'staffing_need_id.begin_date', 'staffing_need_id.end_date', 'employee_id', 'staffing_need_id.skill_ids')
+    # il n'y a pas 'employee_id.employee_skill_ids' car celà est trop couteux en recompute quand on enregistre des compétences en masse
     def compute(self):
         for rec in self :
             #_logger.info('staffingProposal compute %s' % rec.employee_id.name)

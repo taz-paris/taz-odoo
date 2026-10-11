@@ -1,0 +1,169 @@
+.o_project_evaluation_preview {
+    .o_pe_markdown {
+        margin-bottom: 8px;
+
+        .o_pe_md_line {
+            white-space: pre-wrap;
+        }
+    }
+
+    .o_pe_field {
+        margin-bottom: 12px;
+
+        .o_pe_field_title {
+            font-weight: 600;
+        }
+
+        .o_pe_field_desc {
+            font-size: 0.85em;
+        }
+
+        .o_pe_field_value {
+            white-space: pre-wrap;
+        }
+
+        .o_pe_field_input {
+            margin-top: 4px;
+        }
+    }
+
+    .o_pe_table_block {
+        margin-bottom: 16px;
+
+        .o_pe_table_title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .o_pe_table_cell {
+            white-space: pre-wrap;
+            vertical-align: top;
+        }
+
+        .o_pe_table_cell_input {
+            min-width: 160px;
+        }
+
+        .o_pe_table_action_col {
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        .o_pe_add_row {
+            margin-top: 4px;
+        }
+    }
+
+    .o_pe_divider {
+        margin: 16px 0;
+    }
+
+    .o_pe_skills {
+        margin-bottom: 16px;
+
+        .o_pe_skills_group {
+            margin-bottom: 12px;
+
+            h6 {
+                font-weight: 600;
+                margin-bottom: 6px;
+            }
+        }
+
+        .o_pe_skills_skill {
+            padding: 4px 0;
+            border-bottom: 1px solid var(--o-view-border-color, #e9ecef);
+        }
+
+        .o_pe_skills_skill_header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 8px;
+
+            .o_pe_skills_skill_name {
+                font-weight: 600;
+            }
+
+            .o_pe_skills_add_note {
+                font-size: 0.85em;
+                padding: 0;
+            }
+        }
+
+        .o_pe_skills_grade {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            padding: 2px 0;
+
+            .o_pe_skills_level {
+                flex: 0 0 auto;
+            }
+
+            .o_pe_skills_rater {
+                flex: 0 0 auto;
+                color: var(--o-view-text-muted-color, #6c757d);
+                font-size: 0.9em;
+            }
+
+            .o_pe_skills_comment {
+                flex-basis: 100%;
+                font-size: 0.9em;
+                white-space: pre-wrap;
+            }
+        }
+
+        .o_pe_skills_add_skill {
+            margin-top: 8px;
+        }
+
+        .o_pe_skill_grade_form {
+            margin-top: 8px;
+            padding: 8px;
+            border: 1px solid var(--o-view-border-color, #e9ecef);
+            border-radius: 4px;
+
+            .o_pe_skill_grade_form_row {
+                margin-bottom: 6px;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            .o_pe_skill_grade_form_actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+        }
+    }
+
+    .o_pe_field_input[readonly],
+    .o_pe_table_cell_input[readonly],
+    .form-select:disabled {
+        background-color: var(--o-view-background-color, #f8f9fa);
+        opacity: 1;
+    }
+
+    .o_pe_section {
+        margin: 16px 0 8px;
+    }
+
+    .o_pe_group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+
+        .o_pe_group_item {
+            flex: 1 1 260px;
+            min-width: 0;
+        }
+    }
+
+    .o_pe_unsupported {
+        font-style: italic;
+    }
+}

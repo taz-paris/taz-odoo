@@ -2,6 +2,7 @@
 <odoo>
     <data>
 
+        <!-- Action racine : ouvre la page Projets par défaut (napta_page non précisé). -->
         <record id="napta_shell_action" model="ir.actions.client">
             <field name="name">Napta UI</field>
             <field name="tag">staffing.napta_shell_action</field>
@@ -12,6 +13,134 @@
                   action="napta_shell_action"
                   sequence="5"
                   groups="base.group_system"/>
+
+        <!-- ==================== Staffing ==================== -->
+        <menuitem name="Staffing" id="napta_menu_staffing" parent="napta_shell_root" sequence="1"/>
+
+        <record id="napta_action_staffing_projects" model="ir.actions.client">
+            <field name="name">Projets</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'staffing.projects' }&quot;"/>
+        </record>
+        <menuitem name="Projets" id="napta_menu_staffing_projects" parent="napta_menu_staffing"
+                  action="napta_action_staffing_projects" sequence="1"/>
+
+        <record id="napta_action_staffing_requests" model="ir.actions.client">
+            <field name="name">Demandes</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'staffing.requests' }&quot;"/>
+        </record>
+        <menuitem name="Demandes" id="napta_menu_staffing_requests" parent="napta_menu_staffing"
+                  action="napta_action_staffing_requests" sequence="2"/>
+
+        <record id="napta_action_staffing_modification_requests" model="ir.actions.client">
+            <field name="name">Demandes de modifications</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'staffing.modification_requests' }&quot;"/>
+        </record>
+        <menuitem name="Demandes de modifications" id="napta_menu_staffing_modification_requests" parent="napta_menu_staffing"
+                  action="napta_action_staffing_modification_requests" sequence="3"/>
+
+        <record id="napta_action_staffing_staffings" model="ir.actions.client">
+            <field name="name">Staffings</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'staffing.staffings' }&quot;"/>
+        </record>
+        <menuitem name="Staffings" id="napta_menu_staffing_staffings" parent="napta_menu_staffing"
+                  action="napta_action_staffing_staffings" sequence="4"/>
+
+        <record id="napta_action_staffing_global_calendar" model="ir.actions.client">
+            <field name="name">Calendrier global</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'staffing.global_calendar' }&quot;"/>
+        </record>
+        <menuitem name="Calendrier global" id="napta_menu_staffing_global_calendar" parent="napta_menu_staffing"
+                  action="napta_action_staffing_global_calendar" sequence="5"/>
+
+        <!-- ==================== Feuilles de temps (page unique, menu direct) ==================== -->
+        <record id="napta_action_timesheets_timesheet" model="ir.actions.client">
+            <field name="name">Feuilles de temps</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'timesheets.timesheet' }&quot;"/>
+        </record>
+        <menuitem name="Feuilles de temps" id="napta_menu_timesheets" parent="napta_shell_root"
+                  action="napta_action_timesheets_timesheet" sequence="2"/>
+
+        <!-- ==================== Évaluations de mission (page unique, menu direct) ==================== -->
+        <record id="napta_action_evaluations_mission" model="ir.actions.client">
+            <field name="name">Évaluations de mission</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'evaluations.mission' }&quot;"/>
+        </record>
+        <menuitem name="Évaluations de mission" id="napta_menu_evaluations" parent="napta_shell_root"
+                  action="napta_action_evaluations_mission" sequence="3"/>
+
+        <!-- ==================== Rapports ==================== -->
+        <menuitem name="Rapports" id="napta_menu_reports" parent="napta_shell_root" sequence="4"/>
+
+        <record id="napta_action_reports_occupation_globale" model="ir.actions.client">
+            <field name="name">Occupation globale</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.occupation_globale' }&quot;"/>
+        </record>
+        <menuitem name="Occupation globale" id="napta_menu_reports_occupation_globale" parent="napta_menu_reports"
+                  action="napta_action_reports_occupation_globale" sequence="1"/>
+
+        <record id="napta_action_reports_planification_individuelle" model="ir.actions.client">
+            <field name="name">Planification individuelle</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.planification_individuelle' }&quot;"/>
+        </record>
+        <menuitem name="Planification individuelle" id="napta_menu_reports_planification_individuelle" parent="napta_menu_reports"
+                  action="napta_action_reports_planification_individuelle" sequence="2"/>
+
+        <record id="napta_action_reports_availability_hub" model="ir.actions.client">
+            <field name="name">Availability Hub</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.availability_hub' }&quot;"/>
+        </record>
+        <menuitem name="Availability Hub" id="napta_menu_reports_availability_hub" parent="napta_menu_reports"
+                  action="napta_action_reports_availability_hub" sequence="3"/>
+
+        <record id="napta_action_reports_suivi_charge" model="ir.actions.client">
+            <field name="name">Suivi de la charge</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.suivi_charge' }&quot;"/>
+        </record>
+        <menuitem name="Suivi de la charge" id="napta_menu_reports_suivi_charge" parent="napta_menu_reports"
+                  action="napta_action_reports_suivi_charge" sequence="4"/>
+
+        <record id="napta_action_reports_suivi_consomme" model="ir.actions.client">
+            <field name="name">Suivi du consommé</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.suivi_consomme' }&quot;"/>
+        </record>
+        <menuitem name="Suivi du consommé" id="napta_menu_reports_suivi_consomme" parent="napta_menu_reports"
+                  action="napta_action_reports_suivi_consomme" sequence="5"/>
+
+        <record id="napta_action_reports_suivi_financier_global" model="ir.actions.client">
+            <field name="name">Suivi financier global</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.suivi_financier_global' }&quot;"/>
+        </record>
+        <menuitem name="Suivi financier global" id="napta_menu_reports_suivi_financier_global" parent="napta_menu_reports"
+                  action="napta_action_reports_suivi_financier_global" sequence="6"/>
+
+        <record id="napta_action_reports_competences_globales" model="ir.actions.client">
+            <field name="name">Compétences globales</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.competences_globales' }&quot;"/>
+        </record>
+        <menuitem name="Compétences globales" id="napta_menu_reports_competences_globales" parent="napta_menu_reports"
+                  action="napta_action_reports_competences_globales" sequence="7"/>
+
+        <record id="napta_action_reports_competences_individuelles" model="ir.actions.client">
+            <field name="name">Compétences individuelles</field>
+            <field name="tag">staffing.napta_shell_action</field>
+            <field name="params" eval="&quot;{ 'napta_page': 'reports.competences_individuelles' }&quot;"/>
+        </record>
+        <menuitem name="Compétences individuelles" id="napta_menu_reports_competences_individuelles" parent="napta_menu_reports"
+                  action="napta_action_reports_competences_individuelles" sequence="8"/>
 
     </data>
 </odoo>

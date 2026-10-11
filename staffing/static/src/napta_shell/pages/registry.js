@@ -10,10 +10,7 @@ import { StaffingModificationRequestsPage } from "./staffing_modification_reques
 import { StaffingStaffingsPage } from "./staffing_staffings/staffing_staffings";
 import { StaffingGlobalCalendarPage } from "./staffing_global_calendar/staffing_global_calendar";
 import { TimesheetsTimesheetPage } from "./timesheets_timesheet/timesheets_timesheet";
-import { EvaluationsAnnualPage } from "./evaluations_annual/evaluations_annual";
 import { EvaluationsMissionPage } from "./evaluations_mission/evaluations_mission";
-import { CareerTracksPage } from "./career_tracks/career_tracks";
-import { CareerJobSheetsPage } from "./career_job_sheets/career_job_sheets";
 import { ReportsOccupationGlobalePage } from "./reports_occupation_globale/reports_occupation_globale";
 import { ReportsPlanificationIndividuellePage } from "./reports_planification_individuelle/reports_planification_individuelle";
 import { ReportsAvailabilityHubPage } from "./reports_availability_hub/reports_availability_hub";
@@ -30,10 +27,7 @@ export const PAGE_COMPONENTS = {
     "staffing.staffings": StaffingStaffingsPage,
     "staffing.global_calendar": StaffingGlobalCalendarPage,
     "timesheets.timesheet": TimesheetsTimesheetPage,
-    "evaluations.annual": EvaluationsAnnualPage,
     "evaluations.mission": EvaluationsMissionPage,
-    "career.career_tracks": CareerTracksPage,
-    "career.job_sheets": CareerJobSheetsPage,
     "reports.occupation_globale": ReportsOccupationGlobalePage,
     "reports.planification_individuelle": ReportsPlanificationIndividuellePage,
     "reports.availability_hub": ReportsAvailabilityHubPage,

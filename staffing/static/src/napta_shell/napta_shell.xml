@@ -3,9 +3,8 @@
 
     <t t-name="staffing.NaptaShell">
         <div class="o_napta_shell">
-            <NaptaSidebar activeKey="state.activeKey" onSelect="(key) => this.onSelect(key)"/>
             <main class="o_napta_content">
-                <t t-if="activePage" t-component="activeComponent" t-key="state.activeKey" page="activePage"/>
+                <t t-if="activePage" t-component="ActiveComponent" t-key="activePage.label" page="activePage"/>
             </main>
         </div>
     </t>

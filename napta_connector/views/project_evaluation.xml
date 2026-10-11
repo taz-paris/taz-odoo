@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="project_evaluation_template_view_form_inherit_napta" model="ir.ui.view">
+        <field name="name">project.evaluation.template.form.inherit.napta</field>
+        <field name="model">project.evaluation.template</field>
+        <field name="inherit_id" ref="project_evaluation.project_evaluation_template_view_form"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="napta_id" readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="project_evaluation_template_view_list_inherit_napta" model="ir.ui.view">
+        <field name="name">project.evaluation.template.list.inherit.napta</field>
+        <field name="model">project.evaluation.template</field>
+        <field name="inherit_id" ref="project_evaluation.project_evaluation_template_view_list"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="napta_id" readonly="1" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="project_evaluation_view_form_inherit_napta" model="ir.ui.view">
+        <field name="name">project.evaluation.form.inherit.napta</field>
+        <field name="model">project.evaluation</field>
+        <field name="inherit_id" ref="project_evaluation.project_evaluation_view_form"/>
+        <field name="arch" type="xml">
+            <field name="data" position="after">
+                <field name="napta_id" readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="project_evaluation_view_list_inherit_napta" model="ir.ui.view">
+        <field name="name">project.evaluation.list.inherit.napta</field>
+        <field name="model">project.evaluation</field>
+        <field name="inherit_id" ref="project_evaluation.project_evaluation_view_list"/>
+        <field name="arch" type="xml">
+            <field name="employee_id" position="after">
+                <field name="napta_id" readonly="1" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="hr_employee_skill_grade_view_list" model="ir.ui.view">
+        <field name="name">hr.employee.skill.grade.list</field>
+        <field name="model">hr.employee.skill.grade</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="0">
+                <field name="rater_employee_id" widget="many2one_avatar_employee"/>
+                <field name="is_self_assessment" optional="hide"/>
+                <field name="skill_level_id"/>
+                <field name="comment"/>
+            </list>
+        </field>
+    </record>
+
+</odoo>

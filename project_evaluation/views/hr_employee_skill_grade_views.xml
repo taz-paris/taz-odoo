@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="hr_employee_skill_grade_view_list_inherit_project_evaluation" model="ir.ui.view">
+        <field name="name">hr.employee.skill.grade.list.inherit.project_evaluation</field>
+        <field name="model">hr.employee.skill.grade</field>
+        <field name="inherit_id" ref="hr_skill_grade.hr_employee_skill_grade_view_list"/>
+        <field name="arch" type="xml">
+            <field name="comment" position="before">
+                <field name="project_evaluation_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
