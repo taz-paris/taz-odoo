@@ -58,9 +58,15 @@
         margin: 16px 0;
     }
 
-    .o_pe_legacy_notice,
     .o_pe_skills_placeholder {
         margin-bottom: 12px;
+    }
+
+    .o_pe_field_input[readonly],
+    .o_pe_table_cell_input[readonly],
+    .form-select:disabled {
+        background-color: var(--o-view-background-color, #f8f9fa);
+        opacity: 1;
     }
 
     .o_pe_section {

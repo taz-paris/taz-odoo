@@ -3,19 +3,9 @@
 
     <t t-name="project_evaluation.EvaluationPreview">
         <div class="o_project_evaluation_preview">
-            <t t-if="renderMode === 'rich'">
-                <t t-foreach="richNodes" t-as="node" t-key="node_index">
-                    <t t-call="project_evaluation.EvaluationPreview.RichNode">
-                        <t t-set="node" t-value="node"/>
-                    </t>
-                </t>
-            </t>
-            <t t-elif="renderMode === 'legacy'">
-                <div class="alert alert-info o_pe_legacy_notice" role="alert">
-                    Gabarit sans formulaire éditeur exploitable : aperçu en lecture seule uniquement.
-                </div>
-                <t t-foreach="legacyNodes" t-as="node" t-key="node_index">
-                    <t t-call="project_evaluation.EvaluationPreview.LegacyNode">
+            <t t-if="formNodes.length">
+                <t t-foreach="formNodes" t-as="node" t-key="node_index">
+                    <t t-call="project_evaluation.EvaluationPreview.Node">
                         <t t-set="node" t-value="node"/>
                     </t>
                 </t>
@@ -28,9 +18,7 @@
         </div>
     </t>
 
-    <!-- ==================== Dialecte riche (form_template) : éditable ==================== -->
-
-    <t t-name="project_evaluation.EvaluationPreview.RichNode">
+    <t t-name="project_evaluation.EvaluationPreview.Node">
 
         <t t-if="node.type === 'text'">
             <div class="o_pe_markdown" t-att-style="node.styles and node.styles.text">
@@ -59,32 +47,33 @@
             <div class="o_pe_field">
                 <div t-if="node.title" class="o_pe_field_title" t-att-style="node.styles and node.styles.title" t-esc="node.title"/>
                 <div t-if="node.description" class="o_pe_field_desc text-muted" t-att-style="node.styles and node.styles.description" t-esc="node.description"/>
-                <textarea t-if="!isReadonly and node.type === 'textarea'"
+                <textarea t-if="node.type === 'textarea'"
                           class="form-control o_pe_field_input"
                           t-att-rows="node.countRows || 3"
                           t-att-placeholder="node.placeholder"
+                          t-att-readonly="isReadonly"
                           t-att-value="getValue(node.key)"
                           t-on-change="(ev) => this.onFieldInput(node, ev)"/>
-                <input t-elif="!isReadonly" type="text"
+                <input t-else="" type="text"
                        class="form-control o_pe_field_input"
                        t-att-placeholder="node.placeholder"
+                       t-att-readonly="isReadonly"
                        t-att-value="getValue(node.key)"
                        t-on-change="(ev) => this.onFieldInput(node, ev)"/>
-                <div t-else="" class="o_pe_field_value" t-esc="getValue(node.key) || '—'"/>
             </div>
         </t>
 
         <t t-elif="node.type === 'select'">
             <div class="o_pe_field">
                 <div t-if="node.title" class="o_pe_field_title" t-esc="node.title"/>
-                <select t-if="!isReadonly" class="form-select o_pe_field_input"
+                <select class="form-select o_pe_field_input"
+                        t-att-disabled="isReadonly"
                         t-on-change="(ev) => this.onFieldSelectChange(node, ev)">
                     <option value="">—</option>
                     <t t-foreach="selectOptions(node)" t-as="opt" t-key="opt.id">
                         <option t-att-value="opt.id" t-att-selected="getValue(node.key) === opt.id" t-esc="opt.text"/>
                     </t>
                 </select>
-                <div t-else="" class="o_pe_field_value" t-esc="selectLabel(node, getValue(node.key)) || '—'"/>
             </div>
         </t>
 
@@ -109,22 +98,22 @@
                                             <t t-esc="tableStaticCellText(node, col.key, row_index)"/>
                                         </t>
                                         <t t-elif="col.type === 'select'">
-                                            <select t-if="!isReadonly" class="form-select form-select-sm"
+                                            <select class="form-select form-select-sm"
+                                                    t-att-disabled="isReadonly"
                                                     t-on-change="(ev) => this.onCellSelectChange(node, row_index, col, ev)">
                                                 <option value="">—</option>
                                                 <t t-foreach="selectOptions(col)" t-as="opt" t-key="opt.id">
                                                     <option t-att-value="opt.id" t-att-selected="getCell(node.key, row_index, col.key) === opt.id" t-esc="opt.text"/>
                                                 </t>
                                             </select>
-                                            <t t-else="" t-esc="selectLabel(col, getCell(node.key, row_index, col.key)) || '—'"/>
                                         </t>
                                         <t t-else="">
-                                            <textarea t-if="!isReadonly" class="form-control form-control-sm o_pe_table_cell_input"
+                                            <textarea class="form-control form-control-sm o_pe_table_cell_input"
                                                       rows="2"
                                                       t-att-placeholder="tableCellPlaceholder(node, col.key, row_index)"
+                                                      t-att-readonly="isReadonly"
                                                       t-att-value="getCell(node.key, row_index, col.key)"
                                                       t-on-change="(ev) => this.onCellInput(node, row_index, col, ev)"/>
-                                            <t t-else="" t-esc="getCell(node.key, row_index, col.key) || '—'"/>
                                         </t>
                                     </td>
                                 </t>
@@ -149,7 +138,7 @@
             <div class="o_pe_section">
                 <h5 t-if="node.title" t-att-style="node.styles and node.styles.title" t-esc="node.title"/>
                 <t t-foreach="node.children || []" t-as="child" t-key="child_index">
-                    <t t-call="project_evaluation.EvaluationPreview.RichNode">
+                    <t t-call="project_evaluation.EvaluationPreview.Node">
                         <t t-set="node" t-value="child"/>
                     </t>
                 </t>
@@ -160,7 +149,7 @@
             <div class="o_pe_group">
                 <t t-foreach="node.children || []" t-as="child" t-key="child_index">
                     <div class="o_pe_group_item">
-                        <t t-call="project_evaluation.EvaluationPreview.RichNode">
+                        <t t-call="project_evaluation.EvaluationPreview.Node">
                             <t t-set="node" t-value="child"/>
                         </t>
                     </div>
@@ -171,91 +160,6 @@
         <t t-else="">
             <div class="text-muted o_pe_unsupported">
                 Composant non géré : <t t-esc="node.type"/>
-            </div>
-        </t>
-    </t>
-
-    <!-- ==================== Dialecte simplifié (form) : lecture seule uniquement ==================== -->
-
-    <t t-name="project_evaluation.EvaluationPreview.LegacyNode">
-        <t t-if="node.component === 'MarkdownDisplay'">
-            <div class="o_pe_markdown">
-                <t t-foreach="parseMarkdown(legacyMarkdownText(node))" t-as="paragraph" t-key="paragraph_index">
-                    <div class="o_pe_md_line">
-                        <t t-if="!paragraph.length">&#160;</t>
-                        <t t-foreach="paragraph" t-as="segment" t-key="segment_index">
-                            <span t-attf-class="{{segment.bold ? 'fw-bold' : ''}} {{segment.italic ? 'fst-italic' : ''}}" t-esc="segment.text"/>
-                        </t>
-                    </div>
-                </t>
-            </div>
-        </t>
-
-        <t t-elif="node.component === 'TextArea'">
-            <div class="o_pe_field">
-                <div class="o_pe_field_title" t-esc="node.title"/>
-                <div t-if="node.description" class="o_pe_field_desc text-muted" t-esc="node.description"/>
-                <div class="o_pe_field_value" t-esc="legacyFieldValue(node)"/>
-            </div>
-        </t>
-
-        <t t-elif="node.component === 'Selector'">
-            <div class="o_pe_field">
-                <div class="o_pe_field_title" t-esc="node.title"/>
-                <div class="o_pe_field_value" t-esc="legacySelectorLabel(node) || '—'"/>
-            </div>
-        </t>
-
-        <t t-elif="node.component === 'Table'">
-            <div class="o_pe_table_block">
-                <div t-if="node.title" class="o_pe_table_title" t-esc="node.title"/>
-                <table class="table table-sm table-bordered o_pe_table">
-                    <thead>
-                        <tr>
-                            <t t-foreach="legacyTableColumns(node)" t-as="col" t-key="col_index">
-                                <th t-esc="col.title"/>
-                            </t>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="legacyTableRows(node)" t-as="row" t-key="row_index">
-                            <tr>
-                                <t t-foreach="row" t-as="cell" t-key="cell_index">
-                                    <td class="o_pe_table_cell" t-esc="cell"/>
-                                </t>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
-            </div>
-        </t>
-
-        <t t-elif="node.component === 'Section'">
-            <div class="o_pe_section">
-                <h5 t-if="node.title" t-esc="node.title"/>
-                <t t-foreach="node.items || []" t-as="child" t-key="child_index">
-                    <t t-call="project_evaluation.EvaluationPreview.LegacyNode">
-                        <t t-set="node" t-value="child"/>
-                    </t>
-                </t>
-            </div>
-        </t>
-
-        <t t-elif="node.component === 'Group'">
-            <div class="o_pe_group">
-                <t t-foreach="node.items || []" t-as="child" t-key="child_index">
-                    <div class="o_pe_group_item">
-                        <t t-call="project_evaluation.EvaluationPreview.LegacyNode">
-                            <t t-set="node" t-value="child"/>
-                        </t>
-                    </div>
-                </t>
-            </div>
-        </t>
-
-        <t t-else="">
-            <div class="text-muted o_pe_unsupported">
-                Composant non géré : <t t-esc="node.component"/>
             </div>
         </t>
     </t>

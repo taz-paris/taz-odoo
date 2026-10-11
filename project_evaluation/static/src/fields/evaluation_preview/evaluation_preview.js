@@ -5,29 +5,22 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { Component } from "@odoo/owl";
 
 // Moteur de rendu (et d'édition) du contenu d'une évaluation de mission (project.evaluation.data),
-// à partir du gabarit Napta. Deux dialectes de gabarit existent côté Napta :
+// à partir du gabarit Napta project.evaluation.template.form_template : arbre de noeuds
+// {type, key, children/columns, ...}. C'est le seul dialecte exploité ici (l'ancien dialecte
+// simplifié "form", en lecture seule, a été retiré : un seul rendu, les champs passent juste en
+// readonly/disabled classique quand l'évaluation est clôturée).
 //
-// - project.evaluation.template.form_template (dialecte "riche", utilisé en priorité) : arbre de
-//   noeuds {type, key, children/columns, ...}. C'est le seul des deux à porter tout ce dont on a
-//   besoin pour éditer (placeholders, nombre de lignes des textarea, tables à lignes ajoutables
-//   "hasRowAdd", séparateurs "divider") et le marqueur du module compétences ("type": "skills",
-//   absent de form). Les options des champs "select" sont soit inline (node.options), soit
-//   référencées via node.global_text_id dans template.form_template.globalText.select[].
-// - project.evaluation.template.form (dialecte "simplifié", repli) : arbre de noeuds
-//   {component, key, items/staticData, itemProps...}. Utilisé uniquement si form_template est
-//   absent/invalide pour un gabarit donné. Lecture seule : ce dialecte ne porte aucune métadonnée
-//   d'édition (pas de placeholder, pas d'indication de table à lignes libres).
-//
-// Dans les deux cas, chaque noeud qui porte une "key" correspond à une entrée du dict JSON
-// evaluation.data sous ce nom ; les tableaux de data[key] portent les lignes saisies, les
-// colonnes "statiques" (type text/MarkdownDisplay) viennent du gabarit (defaultRows/staticData),
-// jamais de data.
+// Chaque noeud qui porte une "key" correspond à une entrée du dict JSON evaluation.data sous ce
+// nom ; les tableaux de data[key] portent les lignes saisies, les colonnes "statiques" (type
+// text) viennent du gabarit (defaultRows), jamais de data. Les options des champs "select" sont
+// soit inline (node.options), soit référencées via node.global_text_id dans
+// template.form_template.globalText.select[].
 export class EvaluationPreview extends Component {
     static template = "project_evaluation.EvaluationPreview";
     static props = { ...standardFieldProps };
 
     // ------------------------------------------------------------------
-    // Gabarit : dialecte riche (form_template)
+    // Gabarit (form_template)
     // ------------------------------------------------------------------
 
     get formTemplateParsed() {
@@ -42,41 +35,14 @@ export class EvaluationPreview extends Component {
         }
     }
 
-    get richNodes() {
+    get formNodes() {
         const parsed = this.formTemplateParsed;
-        return parsed && Array.isArray(parsed.form) ? parsed.form : null;
+        return parsed && Array.isArray(parsed.form) ? parsed.form : [];
     }
 
     get globalText() {
         const parsed = this.formTemplateParsed;
         return (parsed && parsed.globalText) || {};
-    }
-
-    // ------------------------------------------------------------------
-    // Gabarit : dialecte simplifié (form), utilisé en repli lecture seule
-    // ------------------------------------------------------------------
-
-    get legacyNodes() {
-        const raw = this.props.record.data.template_form;
-        if (!raw) {
-            return [];
-        }
-        try {
-            const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return [];
-        }
-    }
-
-    get renderMode() {
-        if (this.richNodes && this.richNodes.length) {
-            return "rich";
-        }
-        if (this.legacyNodes.length) {
-            return "legacy";
-        }
-        return "none";
     }
 
     get isReadonly() {
@@ -150,7 +116,7 @@ export class EvaluationPreview extends Component {
     }
 
     // ------------------------------------------------------------------
-    // Gestionnaires d'évènements (dialecte riche, formulaires éditables)
+    // Gestionnaires d'évènements
     // ------------------------------------------------------------------
 
     onFieldInput(node, ev) {
@@ -178,7 +144,7 @@ export class EvaluationPreview extends Component {
     }
 
     // ------------------------------------------------------------------
-    // Tables (dialecte riche)
+    // Tables
     // ------------------------------------------------------------------
 
     tableColumnTitle(col) {
@@ -210,7 +176,7 @@ export class EvaluationPreview extends Component {
     }
 
     // ------------------------------------------------------------------
-    // Sélecteurs (dialecte riche) : résolution des options
+    // Sélecteurs : résolution des options
     // ------------------------------------------------------------------
 
     selectOptions(node) {
@@ -239,7 +205,7 @@ export class EvaluationPreview extends Component {
     }
 
     // ------------------------------------------------------------------
-    // Texte statique Draft.js, commun aux deux dialectes
+    // Texte statique Draft.js
     // ------------------------------------------------------------------
 
     // Retourne un texte Draft.js (ou une chaîne brute) sous forme de paragraphes : chaque
@@ -290,60 +256,6 @@ export class EvaluationPreview extends Component {
             }
             return segments;
         });
-    }
-
-    // ------------------------------------------------------------------
-    // Dialecte simplifié (form) : repli en lecture seule uniquement
-    // ------------------------------------------------------------------
-
-    legacyFieldValue(node) {
-        return this.evaluationData[node.key] || "";
-    }
-
-    legacySelectorLabel(node) {
-        const code = this.evaluationData[node.key];
-        if (!code) {
-            return "";
-        }
-        const options = (node.itemProps && node.itemProps.options) || {};
-        return options[code] || code;
-    }
-
-    legacyTableColumns(node) {
-        return (node.items || []).map((col) => ({ key: col.key, title: col.title || "" }));
-    }
-
-    legacyTableRows(node) {
-        const dataRows = this.evaluationData[node.key] || [];
-        const staticRows = node.staticData || [];
-        const rowCount = Math.max(dataRows.length, staticRows.length);
-        const columns = node.items || [];
-        const rows = [];
-        for (let i = 0; i < rowCount; i++) {
-            const dataRow = dataRows[i] || {};
-            const staticRow = staticRows[i] || {};
-            rows.push(
-                columns.map((col) => {
-                    if (col.component === "MarkdownDisplay") {
-                        return staticRow[col.key] || "";
-                    }
-                    if (col.component === "Selector") {
-                        const code = dataRow[col.key];
-                        if (!code) {
-                            return "";
-                        }
-                        const options = (col.itemProps && col.itemProps.options) || {};
-                        return options[code] || code;
-                    }
-                    return dataRow[col.key] || "";
-                })
-            );
-        }
-        return rows;
-    }
-
-    legacyMarkdownText(node) {
-        return (node.itemProps && node.itemProps.text) || "";
     }
 }
 
