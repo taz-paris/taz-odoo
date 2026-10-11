@@ -102,6 +102,13 @@ export class EvaluationPreview extends Component {
     async addRow(tableKey) {
         const data = { ...this.evaluationData };
         const rows = (data[tableKey] || []).map((row) => ({ ...row }));
+        if (rows.length === 0) {
+            // Une ligne vide "fantôme" (non stockée dans data) est affichée quand la table est
+            // vide, pour pouvoir saisir tout de suite. Le bouton doit alors matérialiser CETTE
+            // ligne ET en ajouter une nouvelle, sinon le total affiché ne bouge pas (1 -> 1) et le
+            // clic paraît sans effet.
+            rows.push({});
+        }
         rows.push({});
         data[tableKey] = rows;
         await this.commitData(data);
@@ -152,15 +159,18 @@ export class EvaluationPreview extends Component {
     }
 
     // Nombre de lignes à afficher : si la table accepte l'ajout de lignes (hasRowAdd), on se base
-    // sur les lignes réellement saisies ; sinon (table à lignes fixes), le nombre de lignes vient
-    // du gabarit (defaultRows).
-    // Important : ne jamais afficher une ligne "fantôme" qui n'existe pas dans data (un précédent
-    // essai affichait 1 ligne vide par défaut quand data était vide, ce qui rendait le premier clic
-    // sur "Ajouter une ligne" invisible : il créait la vraie 1re ligne, mais le total affiché restait
-    // à 1, donc rien ne semblait se passer avant le 2e clic).
+    // sur les lignes réellement saisies (au moins 1 en édition, pour pouvoir commencer à saisir
+    // sans avoir à cliquer sur "Ajouter une ligne" d'abord) ; sinon (table à lignes fixes), le
+    // nombre de lignes vient du gabarit (defaultRows).
+    // Cette première ligne, quand data est vide, est "fantôme" (pas encore dans data) : voir
+    // addRow() qui compense pour que le bouton "Ajouter une ligne" reste toujours visible à l'effet.
     tableRowCount(node) {
         if (node.hasRowAdd) {
-            return this.getRows(node.key).length;
+            const count = this.getRows(node.key).length;
+            if (count) {
+                return count;
+            }
+            return this.isReadonly ? 0 : 1;
         }
         return (node.defaultRows || []).length;
     }
