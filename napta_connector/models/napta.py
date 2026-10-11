@@ -568,10 +568,6 @@ class naptaProject(models.Model):
     def synchAllNapta(self):
         _logger.info('======== DEMARRAGE synchAllNapta')
         client = ClientRestNapta(self.env)
-        self.env['project.evaluation.template'].create_update_odoo_evaluation_template()
-        self.env['project.evaluation'].create_update_odoo_evaluation()
-        a=1/0
-        
         client.refresh_cache()
 
         #### Retreive project that previous sync failled
@@ -1490,7 +1486,12 @@ class naptaProjectEvaluationTemplate(models.Model):
             dic = {
                     'napta_id' : napta_id,
                     'name' : template['attributes']['name'],
-                    'schema' : json.dumps(template['attributes'].get('schema') or template['attributes'].get('form')),
+                    # schema ne décrit que les types (JSON-Schema), form est l'arbre de présentation du
+                    # formulaire (composants/titres/options) nécessaire pour un rendu lisible, form_template
+                    # est la représentation interne de l'éditeur Napta (gardée telle quelle, pas exploitée).
+                    'schema' : json.dumps(template['attributes'].get('schema')),
+                    'form' : json.dumps(template['attributes'].get('form')),
+                    'form_template' : json.dumps(template['attributes'].get('form_template')),
                 }
             create_update_odoo(self.env, 'project.evaluation.template', dic)
 

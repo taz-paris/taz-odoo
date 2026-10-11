@@ -1,0 +1,84 @@
+.o_project_evaluation_preview {
+    .o_pe_markdown {
+        margin-bottom: 8px;
+
+        .o_pe_md_line {
+            white-space: pre-wrap;
+        }
+    }
+
+    .o_pe_field {
+        margin-bottom: 12px;
+
+        .o_pe_field_title {
+            font-weight: 600;
+        }
+
+        .o_pe_field_desc {
+            font-size: 0.85em;
+        }
+
+        .o_pe_field_value {
+            white-space: pre-wrap;
+        }
+
+        .o_pe_field_input {
+            margin-top: 4px;
+        }
+    }
+
+    .o_pe_table_block {
+        margin-bottom: 16px;
+
+        .o_pe_table_title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .o_pe_table_cell {
+            white-space: pre-wrap;
+            vertical-align: top;
+        }
+
+        .o_pe_table_cell_input {
+            min-width: 160px;
+        }
+
+        .o_pe_table_action_col {
+            width: 1%;
+            white-space: nowrap;
+        }
+
+        .o_pe_add_row {
+            margin-top: 4px;
+        }
+    }
+
+    .o_pe_divider {
+        margin: 16px 0;
+    }
+
+    .o_pe_legacy_notice,
+    .o_pe_skills_placeholder {
+        margin-bottom: 12px;
+    }
+
+    .o_pe_section {
+        margin: 16px 0 8px;
+    }
+
+    .o_pe_group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+
+        .o_pe_group_item {
+            flex: 1 1 260px;
+            min-width: 0;
+        }
+    }
+
+    .o_pe_unsupported {
+        font-style: italic;
+    }
+}

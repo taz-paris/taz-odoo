@@ -53,6 +53,11 @@
                         <page string="Contenu (JSON)">
                             <field name="data" nolabel="1" widget="text" readonly="state == 'closed'"/>
                         </page>
+                        <page string="Aperçu">
+                            <field name="template_form" invisible="1"/>
+                            <field name="template_form_template" invisible="1"/>
+                            <field name="data" widget="project_evaluation_preview" nolabel="1" readonly="state == 'closed'"/>
+                        </page>
                     </notebook>
                 </sheet>
             </form>

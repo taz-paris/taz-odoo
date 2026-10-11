@@ -33,6 +33,11 @@ class ProjectEvaluation(models.Model):
         check_company=True,
     )
     template_id = fields.Many2one('project.evaluation.template', string="Gabarit")
+    template_form = fields.Text(related='template_id.form', string="Formulaire du gabarit (technique)")
+    template_form_template = fields.Text(
+        related='template_id.form_template',
+        string="Formulaire éditeur du gabarit (technique)",
+    )
     data = fields.Text(
         "Contenu (JSON)",
         help="Réponses de l'évaluation, au format JSON brut tel que reçu de la source externe.",

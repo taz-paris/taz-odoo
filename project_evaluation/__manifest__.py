@@ -22,4 +22,12 @@
         'views/project_evaluation_views.xml',
         'views/project_evaluation_menus.xml',
     ],
+
+    'assets': {
+        'web.assets_backend': [
+            'project_evaluation/static/src/fields/evaluation_preview/evaluation_preview.js',
+            'project_evaluation/static/src/fields/evaluation_preview/evaluation_preview.xml',
+            'project_evaluation/static/src/fields/evaluation_preview/evaluation_preview.scss',
+        ],
+    },
 }

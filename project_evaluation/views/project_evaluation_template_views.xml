@@ -28,9 +28,17 @@
                         <field name="name"/>
                         <field name="active"/>
                     </group>
-                    <group string="Schéma (JSON)">
-                        <field name="schema" nolabel="1" widget="text"/>
-                    </group>
+                    <notebook>
+                        <page string="Formulaire (JSON)">
+                            <field name="form" nolabel="1" widget="text"/>
+                        </page>
+                        <page string="Schéma (JSON)">
+                            <field name="schema" nolabel="1" widget="text"/>
+                        </page>
+                        <page string="Formulaire éditeur (JSON)">
+                            <field name="form_template" nolabel="1" widget="text"/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
