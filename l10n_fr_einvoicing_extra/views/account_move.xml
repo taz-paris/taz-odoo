@@ -5,7 +5,7 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form" />
         <field name="arch" type="xml">
-            <field name="payment_reference" position="after">
+            <xpath expr="//group[@name='accounting_info_group']" position="after">
                 <group string="Références documentaires (EN16931)" name="l10n_fr_bt_references">
                     <field name="l10n_fr_bt12_contract_reference" />
                     <field name="l10n_fr_bt15_receiving_advice_reference" />
@@ -15,7 +15,7 @@
                     <field name="l10n_fr_bt18_invoiced_object_scheme" />
                     <field name="l10n_fr_bt19_buyer_accounting_reference" />
                 </group>
-            </field>
+            </xpath>
         </field>
     </record>
 </odoo>
