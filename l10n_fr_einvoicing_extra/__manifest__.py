@@ -1,6 +1,6 @@
 {
     "name": "France eInvoicing: Extra Customizations",
-    "version": "18.0.1.0.0",
+    "version": "18.0.1.1.0",
     "category": "Accounting",
     "license": "AGPL-3",
     "summary": "Extra customizations on top of l10n_fr_einvoicing and l10n_fr_ereporting",
@@ -11,6 +11,7 @@
         "l10n_fr_ereporting",
         "l10n_fr_siret",
         "l10n_fr_einvoicing_import",
+        "project_accounting",
     ],
     "external_dependencies": {
         "python": [
@@ -24,6 +25,7 @@
     },
     "data": [
         "views/res_partner.xml",
+        "views/account_move.xml",
     ],
     "installable": True,
 }
