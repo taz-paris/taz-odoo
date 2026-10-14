@@ -14,10 +14,10 @@
     # Check https://github.com/odoo/odoo/blob/16.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': "18.0.1.0.0",
+    'version': "18.0.1.1.0",
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement', 'web_list_multi_line', 'hr_timesheet'],
+    'depends': ['base', 'mail', 'utm', 'account', 'project', 'analytic', 'sale', 'taz-common', 'sale_management', 'web_widget_bokeh_chart', 'agreement', 'web_list_multi_line', 'hr_timesheet', 'account_payment_base_oca'],
 
     # always loaded
     'data': [
