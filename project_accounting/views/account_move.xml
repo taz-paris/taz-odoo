@@ -16,6 +16,28 @@
                 <field name="partner_shipping_id" position="attributes">
                     <attribute name="invisible">False</attribute>
                 </field>
+                <!-- Since account_payment_base_oca now derives partner_bank_id
+                     from the customer's preferred payment method line, but
+                     only for inbound moves (account.move.is_inbound(), which
+                     is True for out_invoice but False for out_refund: a
+                     customer refund is an outbound move per
+                     get_outbound_types()), manual edition is locked only for
+                     out_invoice on this occurrence (group "sale_info_group",
+                     shared by out_invoice/out_refund) to avoid silently
+                     reintroducing a divergence between the PDF
+                     (partner_bank_id) and the structured e-invoice XML
+                     (preferred_payment_method_line_id). out_refund stays
+                     editable: no automatic derivation covers it.
+                     The other occurrence of this field (for in_invoice/
+                     in_refund/in_receipt) is left untouched/editable too:
+                     that automatic derivation only covers inbound (customer)
+                     moves. -->
+                <xpath
+                    expr="//group[@name='sale_info_group']/field[@name='partner_bank_id']"
+                    position="attributes"
+                >
+                    <attribute name="readonly">move_type == 'out_invoice'</attribute>
+                </xpath>
                 <xpath expr="//list/field[@name='purchase_order_id']" position="before">
                     <field name="purchase_line_id" optional="hide" on_change="1"/>
                     <field name="sale_line_ids" optional="hide" on_change="1" widget="many2many_tags"/>
