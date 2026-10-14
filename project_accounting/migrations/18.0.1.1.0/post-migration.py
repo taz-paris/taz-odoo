@@ -17,6 +17,21 @@ logger = logging.getLogger(__name__)
 # time for a single company), while the direct SQL update of the same jsonb
 # structure Odoo itself uses completes in about 1 second and is read back
 # correctly through the ORM afterwards.
+#
+# account_payment_base_oca adds a "selectable" boolean on
+# account.payment.method.line and restricts the domain of
+# property_inbound_payment_method_line_id (and the outbound equivalent) to
+# selectable=True lines. It defaults to False, so every payment method line
+# we actually point partners to here must be flagged selectable=True,
+# otherwise the dropdown for that field is empty in the partner form.
+
+
+def _mark_selectable(cr, line_id):
+    cr.execute(
+        "UPDATE account_payment_method_line SET selectable = true WHERE id = %s"
+        " AND selectable IS DISTINCT FROM true",
+        (line_id,),
+    )
 
 
 def migrate(cr, version):
@@ -67,6 +82,7 @@ def migrate(cr, version):
                 total_missing_line += len(partner_ids)
                 continue
             line_id = line_row[0]
+            _mark_selectable(cr, line_id)
             cr.execute(
                 """
                 UPDATE res_partner
@@ -164,6 +180,7 @@ def _migrate_ir_default(cr):
                 bank_id,
             )
             continue
+        _mark_selectable(cr, line_row[0])
         cr.execute(
             """
             SELECT id FROM ir_default
