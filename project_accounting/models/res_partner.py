@@ -37,7 +37,7 @@ PROTECTED_FIELD_LIST = [
             'property_payment_term_id',
             'property_supplier_payment_term_id',
             'property_account_position_id',
-            'property_payment_bank_account',
+            'property_inbound_payment_method_line_id',
         ]
 
 class projectAccountingResPartner(models.Model):
