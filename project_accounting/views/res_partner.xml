@@ -61,7 +61,6 @@
                 </field>
                 <field name="bank_ids" position="after">
                     <field name="property_inbound_payment_method_line_id" options="{'no_create': True, 'no_create_edit':True}"/>
-                    <field name="property_payment_bank_account" readonly="1" options="{'no_create': True, 'no_create_edit':True}"/>
                     <field name="is_protected_partner"/>
                 </field>
             </field>

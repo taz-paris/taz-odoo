@@ -166,15 +166,6 @@ class tazResPartner(models.Model):
      contact_user_link_ids = fields.One2many("taz.contact_user_link", 'partner_id', string="Liens contacts-utilisateurs")
 
 
-     def _get_default_property_payment_bank_account_domain(self):
-         return [('partner_id', '=', self.env.company.partner_id.id)]
-
-     property_payment_bank_account = fields.Many2one('res.partner.bank',
-             company_dependent=True,
-             string="Compte bancaire de paiement",
-             help="Compte bancaire qui apparaitra par défaut sur les factures envoyées à ce client, et sur lequel le client devra payer la facture.",
-             domain=_get_default_property_payment_bank_account_domain)
-
 
      @api.depends('is_company', 'name', 'first_name', 'parent_id.name', 'type', 'company_name', 'commercial_company_name') #Ajout de la dépendance à first_name
      def _compute_complete_name(self):
