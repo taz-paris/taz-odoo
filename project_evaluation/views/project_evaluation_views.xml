@@ -133,12 +133,13 @@
             <search string="Évaluations de mission">
                 <field name="project_id"/>
                 <field name="employee_id"/>
-                <field name="template_id"/>
+                <field name="partner_id"/>
                 <filter name="state_ongoing" string="En cours" domain="[('state', '=', 'ongoing')]"/>
                 <filter name="state_closed" string="Fermée" domain="[('state', '=', 'closed')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
                     <filter string="Consultant" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Client" name="group_partner" context="{'group_by': 'partner_id'}"/>
                     <filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>
