@@ -1370,11 +1370,25 @@ class naptaHrSkillLevel(models.Model):
                     }
                 skill_level = self.env['hr.skill.level'].search([('napta_id', '=', napta_id), ('skill_type_id', '=', skill_type.id)])
                 if skill_level:
-                    skill_level.write(vals)
+                    current_vals = {
+                            'name' : skill_level.name,
+                            'description' : skill_level.description or False,
+                            'level_progress' : skill_level.level_progress,
+                        }
+                    new_vals_for_compare = {
+                            'name' : vals['name'],
+                            'description' : vals['description'],
+                            'level_progress' : vals['level_progress'],
+                        }
+                    if current_vals != new_vals_for_compare:
+                        _logger.info("Mise à jour de l'objet hr.skill.level ID=%s (napta_id=%s, skill_type_id=%s) avec les valeurs %s" % (skill_level.id, napta_id, skill_type.id, str(new_vals_for_compare)))
+                        _logger.info("      > Old odoo values : %s" % str(current_vals))
+                        skill_level.write(vals)
                 else:
+                    _logger.info("Création de l'objet hr.skill.level (napta_id=%s, skill_type_id=%s) avec les valeurs %s" % (napta_id, skill_type.id, str(vals)))
                     self.env['hr.skill.level'].create(vals)
-                self.env.cr.commit()
                 kept_napta_ids_by_skill_type_id.setdefault(skill_type.id, set()).add(napta_id)
+                self.env.cr.commit()
 
         # Suppression des hr.skill.level qui ne sont plus retournés par Napta pour leur skill_type_id
         # (pas d'utilisation de client.delete_not_found_anymore_object_on_napta car le napta_id n'est pas unique sur ce modèle)
@@ -1459,9 +1473,11 @@ class naptaHrEmployeeSkill(models.Model):
             key = (rec['napta_id'], rec['skill_type_id'] and rec['skill_type_id'][0])
             skill_level_ids_by_napta_id_and_type.setdefault(key, []).append(rec['id'])
 
-        employee_skill_ids_by_napta_id = {}
-        for rec in self.env['hr.employee.skill'].search_read([('napta_id', '!=', False)], ['napta_id']):
-            employee_skill_ids_by_napta_id.setdefault(rec['napta_id'], []).append(rec['id'])
+        employee_skill_by_napta_id = {}
+        for rec in self.env['hr.employee.skill'].search_read(
+                [('napta_id', '!=', False)],
+                ['napta_id', 'employee_id', 'skill_type_id', 'skill_id', 'obtained_date', 'skill_level_id']):
+            employee_skill_by_napta_id.setdefault(rec['napta_id'], []).append(rec)
 
         kept_napta_ids = []
         for napta_id, user_skill in user_skill_list.items():
@@ -1503,16 +1519,34 @@ class naptaHrEmployeeSkill(models.Model):
             if skill_level_ids:
                 vals['skill_level_id'] = skill_level_ids[0]
 
-            existing_employee_skill_ids = employee_skill_ids_by_napta_id.get(napta_id, [])
-            if existing_employee_skill_ids:
-                self.env['hr.employee.skill'].browse(existing_employee_skill_ids).write(vals)
+            existing_records = employee_skill_by_napta_id.get(napta_id, [])
+            if existing_records:
+                existing = existing_records[0]
+                current_vals = {
+                        'employee_id' : existing['employee_id'] and existing['employee_id'][0],
+                        'skill_type_id' : existing['skill_type_id'] and existing['skill_type_id'][0],
+                        'skill_id' : existing['skill_id'] and existing['skill_id'][0],
+                        'obtained_date' : existing['obtained_date'] or False,
+                        'skill_level_id' : existing['skill_level_id'] and existing['skill_level_id'][0] or False,
+                    }
+                new_vals_for_compare = {
+                        'employee_id' : vals['employee_id'],
+                        'skill_type_id' : vals['skill_type_id'],
+                        'skill_id' : vals['skill_id'],
+                        'obtained_date' : vals['obtained_date'],
+                        'skill_level_id' : vals.get('skill_level_id', False),
+                    }
+                if current_vals != new_vals_for_compare:
+                    _logger.info("Mise à jour de l'objet hr.employee.skill ID=%s (napta_id=%s) avec les valeurs %s" % (existing['id'], napta_id, str(new_vals_for_compare)))
+                    _logger.info("      > Old odoo values : %s" % str(current_vals))
+                    self.env['hr.employee.skill'].browse(existing['id']).write(vals)
             else:
                 if 'skill_level_id' not in vals:
                     _logger.info("Impossible de créer le employee_skill Napta id=%s sans skill_level_id." % napta_id)
                     continue
                 self.env['hr.employee.skill'].create(vals)
-            self.env.cr.commit()
             kept_napta_ids.append(napta_id)
+            self.env.cr.commit()
         _logger.info('---- ENDDDD Create or update Odoo employee_skill (user_skill)')
 
         obsolete_employee_skills = self.env['hr.employee.skill'].search([('napta_id', '!=', False), ('napta_id', 'not in', kept_napta_ids)])
@@ -1680,8 +1714,11 @@ class naptaProjectEvaluation(models.Model):
             # que l'évalué a bien validé -- ce n'est pas un tiers qui essaie de cocher à sa place.
             employee_validated_on = approval_date_by_napta_user_id.get(napta_evaluee_user_id)
             if employee_validated_on:
-                odoo_evaluation.with_context(skip_employee_validated_check=True).write(
-                    {'employee_validated' : True, 'employee_validated_on' : employee_validated_on})
+                if not odoo_evaluation.employee_validated or odoo_evaluation.employee_validated_on != employee_validated_on:
+                    _logger.info("Mise à jour de l'objet project.evaluation ID=%s (napta_id=%s) avec les valeurs employee_validated=True, employee_validated_on=%s" % (odoo_evaluation.id, napta_id, employee_validated_on))
+                    _logger.info("      > Old odoo values : employee_validated=%s, employee_validated_on=%s" % (odoo_evaluation.employee_validated, odoo_evaluation.employee_validated_on))
+                    odoo_evaluation.with_context(skip_employee_validated_check=True).write(
+                        {'employee_validated' : True, 'employee_validated_on' : employee_validated_on})
             elif is_closed and not odoo_evaluation.employee_validated:
                 odoo_evaluation.with_context(skip_employee_validated_check=True).employee_validated = True
 
@@ -1815,14 +1852,28 @@ class naptaProjectEvaluation(models.Model):
                     # d'une vue partielle (seules les notes liées à une évaluation de mission sont visibles ici).
                     skill_grade = self.env['hr.employee.skill.grade'].search([('napta_id', '=', skill_grade_napta_id)])
                     if skill_grade:
-                        skill_grade.with_context(skip_skill_level_recompute=True).write(grade_vals)
+                        current_vals = {
+                                'employee_skill_id' : skill_grade.employee_skill_id.id,
+                                'rater_employee_id' : skill_grade.rater_employee_id.id,
+                                'skill_level_id' : skill_grade.skill_level_id.id or False,
+                                'comment' : skill_grade.comment or False,
+                                'project_evaluation_id' : skill_grade.project_evaluation_id.id,
+                                'graded_on' : skill_grade.graded_on,
+                            }
+                        new_vals_for_compare = dict(grade_vals)
+                        if current_vals != new_vals_for_compare:
+                            _logger.info("Mise à jour de l'objet hr.employee.skill.grade ID=%s (napta_id=%s) avec les valeurs %s" % (skill_grade.id, skill_grade_napta_id, str(new_vals_for_compare)))
+                            _logger.info("      > Old odoo values : %s" % str(current_vals))
+                            skill_grade.with_context(skip_skill_level_recompute=True).write(grade_vals)
                     else:
+                        _logger.info("Création de l'objet hr.employee.skill.grade (napta_id=%s) avec les valeurs %s" % (skill_grade_napta_id, str(grade_vals)))
                         self.env['hr.employee.skill.grade'].with_context(skip_skill_level_recompute=True).create(
                             dict(grade_vals, napta_id=skill_grade_napta_id))
                     kept_skill_grade_napta_ids.append(skill_grade_napta_id)
 
             obsolete_skill_grades = odoo_evaluation.skill_grade_ids.filtered(lambda g: g.napta_id not in kept_skill_grade_napta_ids)
             obsolete_skill_grades.with_context(skip_skill_level_recompute=True).unlink()
+            self.env.cr.commit()
 
         client.delete_not_found_anymore_object_on_napta('project.evaluation', 'user_project_evaluation')
 
