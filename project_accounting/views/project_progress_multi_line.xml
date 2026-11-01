@@ -11,6 +11,7 @@
                 <group col="4">
                     <group>
                         <field name="rel_project_id" readonly="1"/>
+                        <field name="rel_project_partner_id" readonly="1"/>
                     </group>
                     <group>
                         <field name="rel_closing_date" readonly="1"/>
@@ -48,6 +49,7 @@
                         <field name="rel_previous_progress_cost_amount"/>
                         <field name="rel_previous_progress_revenue_rate" widget="percentage"/>
                         <field name="rel_previous_progress_revenue_amount"/>
+                        <field name="rel_previous_progress_revenue_margin_rate" widget="percentage"/>
                         <field name="rel_previous_progress_comment"/>
                     </group>
                     <!-- Bloc pour la production interne (avec style bleu) -->
@@ -104,9 +106,11 @@
                         <field name="target_project_margin" decoration-danger="target_project_margin &lt; 0"/>
                         <field name="target_project_margin_rate" widget="percentage" decoration-danger="target_project_margin_rate &lt; 0"/>
                         <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
-		    </group>
-		    <group name="cutoff" string="Répartition Année N/N+1" style="background-color:#ffaaaa;" invisible="type != 'internal_production'">
-			<field name="future_revenue_next_year" invisible="type != 'internal_production'" readonly="is_validated"/>
+                    </group>
+                    <group name="cutoff" string="Répartition Année N/N+1" style="background-color:#ffaaaa;" invisible="type != 'internal_production'">
+                        <field name="future_revenue"/>
+                        <field name="future_revenue_next_year" readonly="is_validated"/>
+                        <field name="future_revenue_current_year"/>
                     </group>
                 </group>
             </list>

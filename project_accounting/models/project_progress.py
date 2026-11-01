@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from odoo.tools import float_compare
 from .project_outsourcing_link import OUTSOURCING_LINK_TYPES
 
 import datetime
@@ -26,6 +27,7 @@ class ProjectProgress(models.Model):
     rel_project_id = fields.Many2one('project.project', related='accounting_closing_id.project_id', string="Projet", store=True)
     rel_project_user_id = fields.Many2one(related='rel_project_id.user_id', string="Directeur de mission", store=True)
     rel_project_manager_user_id = fields.Many2one(related='rel_project_id.project_manager.user_id', string="Partner ou manager en appui", store=True)
+    rel_project_partner_id = fields.Many2one(related='rel_project_id.partner_id', string="Client", store=True)
     rel_original_stage_id = fields.Many2one(related='accounting_closing_id.original_stage_id', string="Statut début clôture", store=True)
     rel_outsourcing_partner_id = fields.Many2one(related='outsourcing_link_id.partner_id', string="Fournisseur", store=True)
     rel_is_alliance_partner = fields.Boolean(related='rel_outsourcing_partner_id.is_alliance_partner', store=True)
@@ -48,6 +50,7 @@ class ProjectProgress(models.Model):
     rel_previous_progress_cost_amount = fields.Monetary(related='previous_progress_id.progress_cost_amount', string="Coût de revient cumulé précédent")
     rel_previous_progress_revenue_rate = fields.Float(related='previous_progress_id.progress_revenue_rate', aggregator=False, string="CA cumulé en % précédent")
     rel_previous_progress_revenue_amount = fields.Monetary(related='previous_progress_id.progress_revenue_amount', string="CA cumulé en € précédent")
+    rel_previous_progress_revenue_margin_rate = fields.Float(related='previous_progress_id.progress_revenue_margin_rate', aggregator=False, string="Marge en % précédent")
 
     # --- Projections à terminaison ---
     target_project_cost = fields.Monetary(string="Coût de revient total projeté", compute='_compute_target_project_cost', inverse='_inverse_target_project_cost', store=True, readonly=False)
@@ -91,16 +94,13 @@ class ProjectProgress(models.Model):
     fnp_period_amount = fields.Monetary('FNP(-)', compute='_compute_fnp_period_amount', store=True)
     fnp_balance = fields.Monetary('Solde FNP', compute='_compute_provisions_balances', store=True, aggregator='sum')
 
-    # --- cut off fin d'année
-    """
-    @api.constrains('target_project_revenue', 'progress_revenue_amount')
-    def _check_future_revenue_next_year(self):
-        for rec in self:
-            if (rec.target_project_revenue - rec.progress_revenue_amount) < rec.future_revenue_next_year :
-                raise ValidationError("Le CA à venir > 31/12/N, c'est à dire le CA qui sera reconnu l'an prochain, ne peut être supérieur au CA qui reste à reconnaitre (CA total projecté - CA cumulé)")
-    """
-
-    future_revenue_next_year = fields.Monetary('CA à venir > 31/12/N', aggregator='sum')
+    # --- Reste à reconnaître / cut-off fin d'année ---
+    future_revenue = fields.Monetary(string="Reste à reconnaître", compute='_compute_future_revenue', store=True, aggregator='sum',
+                                     help="CA total projeté - CA cumulé à date. Peut être négatif si le CA cumulé dépasse le CA projeté (dépassement) ou si le CA projeté est négatif.")
+    future_revenue_next_year = fields.Monetary('CA à venir > 31/12/N', aggregator='sum',
+                                               help="Part du reste à reconnaître qui sera reconnue l'année suivante. Saisi par le DM, initialisé à la création à partir de l'avancement précédent de la même année.")
+    future_revenue_current_year = fields.Monetary(string="CA fin d'année", compute='_compute_future_revenue_current_year', store=True, aggregator='sum',
+                                                  help="Reste à reconnaître - CA à venir > 31/12/N, c'est à dire le CA qui reste à reconnaître d'ici le 31/12 de l'année en cours.")
 
     # --- Autres calculs ---
     future_staffing_days = fields.Float(string="Jours restant à produire", help="Somme des jours staffés dans Napta (tous grades confondus) pour les périodes de staffing qui commencent après la date de clôture. Valeur telle que disponible dans TazForce à date du dernier rafraichissement forcé.", compute='_compute_future_staffing_days', store=True)
@@ -129,8 +129,34 @@ class ProjectProgress(models.Model):
             rec.display_name = f"{project_label} ({date_str}) - {origin}"
 
     # ===================================================================
-    # WRITE / UNLINK
+    # CREATE / WRITE / UNLINK
     # ===================================================================
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec, vals in zip(records, vals_list):
+            if 'future_revenue_next_year' not in vals:
+                initial = rec._get_initial_future_revenue_next_year()
+                if initial:
+                    rec.future_revenue_next_year = initial
+        return records
+
+    def _get_initial_future_revenue_next_year(self):
+        """Valeur initiale du CA à venir > 31/12/N à la création d'un avancement.
+
+        Si l'avancement précédent porte sur la même année civile, on reprend sa valeur,
+        plafonnée au reste à reconnaître du nouvel avancement (le cut-off ne peut pas dépasser
+        ce qu'il reste à reconnaître). Sinon (changement d'année ou pas de précédent) : 0.
+        Jamais négatif : si le reste à reconnaître est négatif (dépassement), on initialise à 0.
+        """
+        self.ensure_one()
+        previous = self.previous_progress_id
+        if not previous or not self.rel_closing_date or not previous.rel_closing_date:
+            return 0.0
+        if self.rel_closing_date.year != previous.rel_closing_date.year:
+            return 0.0
+        return max(0.0, min(self.future_revenue or 0.0, previous.future_revenue_next_year or 0.0))
+
     def write(self, vals):
         for rec in self:
             rec._check_can_write(vals)
@@ -517,6 +543,25 @@ class ProjectProgress(models.Model):
             rec._check_can_write()
             rec.fnp_period_amount = rec.fnp_balance - rec.fnp_previous_balance
 
+    # --- Reste à reconnaître / cut-off ---
+    # _check_can_write() est sauté pendant le chargement du registre (self.pool._init vrai lors de
+    # l'installation / mise à jour du module) : Odoo remplit alors une seule fois les nouvelles colonnes
+    # stockées sur tous les avancements existants, validés compris, sans toucher aux autres valeurs.
+    # Hors de cette phase, la protection est la même que pour les autres champs calculés.
+    @api.depends('target_project_revenue', 'progress_revenue_amount')
+    def _compute_future_revenue(self):
+        for rec in self:
+            if not self.pool._init:
+                rec._check_can_write()
+            rec.future_revenue = (rec.target_project_revenue or 0.0) - (rec.progress_revenue_amount or 0.0)
+
+    @api.depends('future_revenue', 'future_revenue_next_year')
+    def _compute_future_revenue_current_year(self):
+        for rec in self:
+            if not self.pool._init:
+                rec._check_can_write()
+            rec.future_revenue_current_year = (rec.future_revenue or 0.0) - (rec.future_revenue_next_year or 0.0)
+
     # ===================================================================
     # ONCHANGE (Ponts de réactivité IHM)
     # Les inverses ne tournant qu'au save, ces onchanges permettent de 
@@ -602,6 +647,29 @@ class ProjectProgress(models.Model):
                     type=rec.type
                 ))
     """
+
+    @api.constrains('future_revenue_next_year', 'future_revenue')
+    def _check_future_revenue_next_year(self):
+        """Le CA à venir > 31/12/N ne peut pas dépasser le reste à reconnaître.
+
+        Le contrôle ne s'applique que si une valeur de cut-off a effectivement été saisie
+        (future_revenue_next_year non nul) et uniquement en production interne.
+        Sans ces conditions, la création en masse des avancements échouait : à la création
+        future_revenue_next_year vaut 0, et le reste à reconnaître est négatif dès que le CA
+        cumulé dépasse le CA projeté (dépassement, CA projeté nul ou négatif, CA cumulé repris
+        du précédent sur un lien S/T), donc 'reste < 0' était vrai et la contrainte levait.
+        """
+        for rec in self:
+            if rec.type != 'internal_production' or not rec.future_revenue_next_year:
+                continue
+            rounding = rec.currency_id.rounding or 0.01
+            if float_compare(rec.future_revenue_next_year, 0.0, precision_rounding=rounding) < 0:
+                raise ValidationError(_("Le CA à venir > 31/12/N ne peut pas être négatif [projet = %(project)s].", project=rec.rel_project_id.number))
+            if float_compare(rec.future_revenue_next_year, rec.future_revenue, precision_rounding=rounding) > 0:
+                raise ValidationError(_(
+                    "Le CA à venir > 31/12/N (%(next_year)s), c'est à dire le CA qui sera reconnu l'an prochain, "
+                    "ne peut être supérieur au CA qui reste à reconnaître (%(future)s = CA total projeté - CA cumulé) [projet = %(project)s].",
+                    next_year=rec.future_revenue_next_year, future=rec.future_revenue, project=rec.rel_project_id.number))
 
     @api.constrains('outsourcing_link_id', 'accounting_closing_id')
     def _check_project_consistency(self):
