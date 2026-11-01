@@ -544,22 +544,16 @@ class ProjectProgress(models.Model):
             rec.fnp_period_amount = rec.fnp_balance - rec.fnp_previous_balance
 
     # --- Reste à reconnaître / cut-off ---
-    # _check_can_write() est sauté pendant le chargement du registre (self.pool._init vrai lors de
-    # l'installation / mise à jour du module) : Odoo remplit alors une seule fois les nouvelles colonnes
-    # stockées sur tous les avancements existants, validés compris, sans toucher aux autres valeurs.
-    # Hors de cette phase, la protection est la même que pour les autres champs calculés.
     @api.depends('target_project_revenue', 'progress_revenue_amount')
     def _compute_future_revenue(self):
         for rec in self:
-            if not self.pool._init:
-                rec._check_can_write()
+            rec._check_can_write()
             rec.future_revenue = (rec.target_project_revenue or 0.0) - (rec.progress_revenue_amount or 0.0)
 
     @api.depends('future_revenue', 'future_revenue_next_year')
     def _compute_future_revenue_current_year(self):
         for rec in self:
-            if not self.pool._init:
-                rec._check_can_write()
+            rec._check_can_write()
             rec.future_revenue_current_year = (rec.future_revenue or 0.0) - (rec.future_revenue_next_year or 0.0)
 
     # ===================================================================
