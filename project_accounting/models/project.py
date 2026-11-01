@@ -82,8 +82,6 @@ class projectAccountProject(models.Model):
         #_logger.info('----- projet WRITE odooID=%s' % str(self.id))
         #_logger.info(vals)
         for record in self :
-            if 'futur_internal_revenue_current_year' in vals.keys():
-                vals['date_last_update_futur_internal_revenue_current_year'] = datetime.now()
             if 'expected_revenue' in vals.keys() or 'probability' in vals.keys():
                 vals['date_last_update_prorated_revenue'] = datetime.now()
             if 'stage_id' in vals.keys():
@@ -1266,11 +1264,10 @@ class projectAccountProject(models.Model):
         project_ids = self.env['project.project'].search([])
         for project_id in project_ids:
             project_id.begin_year_stage_id = project_id.stage_id.id
-            project_id.futur_internal_revenue_current_year = 0.0
         _logger.info("FIN cron_update_begin_year_stage_id")
 
 
-    @api.depends('reporting_sum_company_outsource_code3_code_4', 'futur_internal_revenue_current_year', 'accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance', 'accounting_closing_ids.production_external_destocking')  # Recalculé lorsqu'une nouvelle cloture comptable est ajoutée ou modifiée. On recalcule aussi les valeur au 1er janvier (begin_year_past_internal_revenu et begin_year_futur_internal_revenue) car la clôture au 31/12 est enregistrée au cours du premier trimestre, bien après le 1er janvier
+    @api.depends('reporting_sum_company_outsource_code3_code_4', 'accounting_closing_ids', 'accounting_closing_ids.closing_date', 'accounting_closing_ids.is_validated', 'accounting_closing_ids.pca_balance', 'accounting_closing_ids.fae_balance', 'accounting_closing_ids.fnp_balance', 'accounting_closing_ids.cca_balance', 'accounting_closing_ids.production_external_destocking')  # Recalculé lorsqu'une nouvelle cloture comptable est ajoutée ou modifiée. On recalcule aussi les valeur au 1er janvier (begin_year_past_internal_revenu et begin_year_futur_internal_revenue) car la clôture au 31/12 est enregistrée au cours du premier trimestre, bien après le 1er janvier
     def compute_begin_year_futur_revenue(self):
         #_logger.info('--- compute_begin_year_futur_revenue')
         for rec in self:
@@ -1295,8 +1292,6 @@ class projectAccountProject(models.Model):
                 rec.futur_internal_revenue = 0.0
             else :
                 rec.futur_internal_revenue = rec.reporting_sum_company_outsource_code3_code_4 - rec.past_internal_revenue
-
-            rec.futur_internal_revenue_next_year = rec.futur_internal_revenue - rec.futur_internal_revenue_current_year
 
     @api.depends('expected_revenue', 'probability', 'stage_id')
     def _compute_prorated_revenue(self):
@@ -1496,9 +1491,6 @@ class projectAccountProject(models.Model):
 
     past_internal_revenue = fields.Monetary("CA net de S/T déjà reconnu à date", compute=compute_begin_year_futur_revenue, store=True, help="Somme des [CA net - destockage externe] de toutes les clôtures comptables du projet")
     futur_internal_revenue = fields.Monetary("CA net de S/T à venir à date", compute=compute_begin_year_futur_revenue, store=True, help="[Prise de commande à date] - [CA net de S/T déjà reconnu à date]")
-    futur_internal_revenue_current_year = fields.Monetary("CA net de S/T estimé pour l'année en cours", tracking=True, help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre avant le 31/12/N (inclus)")
-    futur_internal_revenue_next_year = fields.Monetary("CA net de S/T estimé pour l'année prochaine", compute=compute_begin_year_futur_revenue, store=True, help="Part du CA net de S/T à venir que le DM pense pouvoir reconnaitre après le 31/12/N (exclus)")
-    date_last_update_futur_internal_revenue_current_year = fields.Datetime("Date MAJ CA N", readonly=True, help="Date de dernière MAJ du CA à reconnaitre cette année")
     last_closing_production_balance = fields.Monetary("Stock de production interne", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production interne après destokage de la clôture validée la plus récente")
     last_closing_production_external_balance = fields.Monetary("Stock de production externe", compute=compute_has_provision_running, store=True, help="Valeur de Stock de production externe après destokage de la clôture validée la plus récente")
 
