@@ -607,6 +607,7 @@ class naptaProject(models.Model):
         client.delete_not_found_anymore_object_on_napta('staffing.need', 'user_project')
         self.env['project.evaluation.template'].create_update_odoo_evaluation_template()
         self.env['project.evaluation'].create_update_odoo_evaluation()
+        self.env['hr.employee.skill.grade'].create_update_odoo_usergrade()
         #Recalculer les staffing report
         self.env['hr.employee_staffing_report'].sudo().recompute_if_has_to_be_recomputed()
         self.env['project.project'].sudo().recompute_if_has_to_be_recomputed()
@@ -1884,21 +1885,126 @@ class naptaHrEmployeeSkillGrade(models.Model):
         ('napta_id_uniq', 'UNIQUE (napta_id)',  "Impossible d'enregistrer deux objets avec le même Napta ID.")
     ]
     napta_id = fields.Char("Napta ID", copy=False)
-    # La synchronisation elle-même se fait dans naptaProjectEvaluation.create_update_odoo_evaluation()
-    # (les notes de compétences ne sont accessibles qu'imbriquées sous une évaluation Napta, cf. commentaire
-    # à ce niveau-là sur le caractère non documenté de cette relation).
+    # Les notes liées à une évaluation de mission sont synchronisées dans
+    # naptaProjectEvaluation.create_update_odoo_evaluation() (cf. commentaire à ce niveau-là sur le
+    # caractère non documenté de cette relation). Les notes HORS évaluation (notation libre d'une
+    # compétence, auto-évaluation incluse) sont synchronisées ci-dessous via create_update_odoo_usergrade().
     #
-    # LIMITE CONNUE (volontaire, pas un oubli) : seules les notes liées à une évaluation de mission
-    # sont synchronisées. Napta expose bien, sur le profil d'un utilisateur, une vue complète
-    # "auto-évaluation + toutes les notes tierces" (quel que soit leur contexte d'origine) via
-    # POST /api/bff/profile/talent_skill_details {"userId":..., "skillId":...} — mais c'est un
-    # endpoint BFF (Backend For Frontend), pas l'API métier /api/v1/. Testé en direct depuis ce
-    # connecteur avec le token M2M (client_credentials) déjà utilisé pour tout le reste : 403
-    # "You don't have authorization to do this", alors que ce même token fonctionne normalement sur
-    # /api/v1/skill. Ce endpoint est donc réservé à une session utilisateur (cookie navigateur), pas
-    # accessible à une intégration serveur-à-serveur. Pas de contournement propre : si un jour Napta
-    # documente un vrai endpoint /api/v1/ équivalent, c'est ici qu'il faudra brancher la synchro des
-    # notes hors évaluation.
+    # HISTORIQUE : on pensait cette seconde catégorie inaccessible depuis une intégration serveur-à-serveur
+    # -- le seul endpoint connu à l'époque pour la vue complète "auto-évaluation + toutes les notes tierces"
+    # d'un utilisateur était POST /api/bff/profile/talent_skill_details, un endpoint BFF (Backend For
+    # Frontend) qui renvoie 403 "You don't have authorization to do this" avec le token M2M
+    # (client_credentials) alors que ce même token fonctionne normalement sur /api/v1/skill -- réservé à
+    # une session utilisateur (cookie navigateur), pas à une intégration serveur-à-serveur.
+    # En inspectant le trafic réseau de l'app Napta (fiche "Historique des notes" d'un utilisateur), on a
+    # trouvé GET /api/v1/userskill_usergrade, qui lui est un vrai endpoint /api/v1/ et expose la même
+    # donnée (grade_id, comment, updated_on, relations user_skill et created_by) indépendamment de tout
+    # contexte d'évaluation. À confirmer qu'il accepte bien le token M2M en conditions réelles (capturé via
+    # HAR depuis une session navigateur, pas encore vérifié avec le token M2M) avant de considérer cette
+    # synchro fiable en production.
+
+    def create_update_odoo_usergrade(self):
+        # Mapping : userskill_usergrade (Napta) -> hr.employee.skill.grade (Odoo), notes HORS évaluation de
+        # mission (project_evaluation_id reste vide ici, cf. commentaire ci-dessus).
+        #
+        # ATTENTION : napta_id préfixé "ug" pour éviter toute collision avec les napta_id (non préfixés) des
+        # notes issues des évaluations de mission (create_update_odoo_evaluation) : ce sont deux espaces
+        # d'id Napta distincts (objets différents, "userskill_usergrade" vs
+        # "user_project_evaluation_user_project_user_skill_grade"), qui pourraient sinon se chevaucher sur
+        # la contrainte UNIQUE(napta_id).
+        #
+        # ATTENTION 2 : risque de doublon sémantique non vérifié -- il est possible qu'une note donnée lors
+        # d'une évaluation de mission apparaisse AUSSI ici (si Napta journalise tout changement de
+        # user_skill.grade dans userskill_usergrade, y compris ceux faits via une évaluation). Dans ce cas,
+        # la même note se retrouverait en double sur le profil de l'employé côté Odoo (une fois via
+        # create_update_odoo_evaluation, une fois via cette méthode). À surveiller après la première synchro
+        # en conditions réelles.
+        _logger.info('---- BATCH Create or update Odoo usergrade (userskill_usergrade)')
+        client = ClientRestNapta(self.env)
+        usergrade_api_return = client.get_api('userskill_usergrade', include=['user_skill'])
+
+        included_user_skills = {}
+        for included_object in usergrade_api_return['included']:
+            if included_object['type'] == 'user_skill':
+                included_user_skills[included_object['id']] = included_object
+
+        kept_napta_ids = []
+        for usergrade in usergrade_api_return['data']:
+            raw_napta_id = usergrade['id']
+            napta_id = 'ug%s' % raw_napta_id
+
+            user_skill_ref = usergrade.get('relationships', {}).get('user_skill', {}).get('data')
+            created_by_ref = usergrade.get('relationships', {}).get('created_by', {}).get('data')
+            if not user_skill_ref or not created_by_ref:
+                continue
+            user_skill = included_user_skills.get(user_skill_ref['id'])
+            if not user_skill:
+                _logger.info("usergrade Napta id=%s : user_skill Napta id=%s non inclus dans la réponse." % (raw_napta_id, user_skill_ref['id']))
+                continue
+
+            napta_skill_id = user_skill['attributes']['skill_id']
+            napta_evaluee_user_id = user_skill['attributes']['user_id']
+
+            skill = self.env['hr.skill'].search([('napta_id', '=', napta_skill_id)])
+            employee = self.env['hr.employee'].search([('napta_id', '=', napta_evaluee_user_id), ('active', 'in', [True, False])])
+            rater_employee = self.env['hr.employee'].search([('napta_id', '=', created_by_ref['id']), ('active', 'in', [True, False])])
+            employee_skill = self.env['hr.employee.skill']
+            if len(skill) == 1 and len(employee) == 1:
+                employee_skill = self.env['hr.employee.skill'].search([('employee_id', '=', employee.id), ('skill_id', '=', skill.id)])
+            if len(skill) != 1 or len(employee) != 1 or len(rater_employee) != 1 or len(employee_skill) != 1:
+                _logger.info("Impossible de créer/mettre à jour le usergrade Napta id=%s : employé, noteur, skill ou employee_skill introuvable sur Odoo." % raw_napta_id)
+                continue
+
+            napta_grade_id = usergrade['attributes'].get('grade_id')
+            skill_level = False
+            if napta_grade_id:
+                skill_level = self.env['hr.skill.level'].search([('napta_id', '=', str(napta_grade_id)), ('skill_type_id', '=', skill.skill_type_id.id)])
+                if len(skill_level) != 1:
+                    _logger.info("Aucun hr.skill.level Odoo trouvé pour le grade Napta id=%s (usergrade Napta id=%s, skill_type_id=%s)." % (napta_grade_id, raw_napta_id, skill.skill_type_id.id))
+                    skill_level = False
+
+            graded_on = False
+            napta_updated_on = usergrade['attributes'].get('updated_on')
+            if napta_updated_on:
+                graded_on = datetime.datetime.strptime(napta_updated_on, '%Y-%m-%dT%H:%M:%S.%f')
+
+            vals = {
+                    'employee_skill_id' : employee_skill.id,
+                    'rater_employee_id' : rater_employee.id,
+                    'skill_level_id' : skill_level.id if skill_level else False,
+                    'comment' : usergrade['attributes'].get('comment') or False,
+                    'graded_on' : graded_on,
+                }
+
+            skill_grade = self.env['hr.employee.skill.grade'].search([('napta_id', '=', napta_id)])
+            if skill_grade:
+                current_vals = {
+                        'employee_skill_id' : skill_grade.employee_skill_id.id,
+                        'rater_employee_id' : skill_grade.rater_employee_id.id,
+                        'skill_level_id' : skill_grade.skill_level_id.id or False,
+                        'comment' : skill_grade.comment or False,
+                        'graded_on' : skill_grade.graded_on,
+                    }
+                if current_vals != vals:
+                    _logger.info("Mise à jour de l'objet hr.employee.skill.grade ID=%s (napta_id=%s) avec les valeurs %s" % (skill_grade.id, napta_id, str(vals)))
+                    _logger.info("      > Old odoo values : %s" % str(current_vals))
+                    skill_grade.with_context(skip_skill_level_recompute=True).write(vals)
+            else:
+                _logger.info("Création de l'objet hr.employee.skill.grade (napta_id=%s) avec les valeurs %s" % (napta_id, str(vals)))
+                self.env['hr.employee.skill.grade'].with_context(skip_skill_level_recompute=True).create(dict(vals, napta_id=napta_id))
+            kept_napta_ids.append(napta_id)
+            self.env.cr.commit()
+
+        # Suppression des notes hors évaluation qui ne sont plus retournées par Napta. On ne touche pas aux
+        # notes liées à une évaluation de mission (gérées séparément dans create_update_odoo_evaluation),
+        # d'où le filtre sur le préfixe "ug" plutôt qu'un simple ('napta_id', '!=', False).
+        obsolete_usergrades = self.env['hr.employee.skill.grade'].search([
+                ('napta_id', 'like', 'ug%'), ('napta_id', 'not in', kept_napta_ids),
+            ])
+        for skill_grade in obsolete_usergrades:
+            _logger.info("hr.employee.skill.grade (usergrade) obsolète supprimé : napta_id=%s" % skill_grade.napta_id)
+            skill_grade.with_context(skip_skill_level_recompute=True).unlink()
+        self.env.cr.commit()
 
 
 ########################################################################################

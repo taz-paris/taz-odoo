@@ -23,6 +23,7 @@
             <list string="Avancements" expand="1">
                 <field name="company_id" optional="hide" groups="base.group_multi_company" options="{'no_create': True, 'no_open': True}"/>
                 <field name="rel_project_id"/>
+                <field name="rel_project_partner_id" optional="show"/>
                 <field name="rel_project_user_id" optional="hide"/>
                 <field name="rel_project_manager_user_id" optional="hide"/>
                 <field name="accounting_closing_id" optional="hide"/>
@@ -35,11 +36,15 @@
                 <field name="rel_previous_progress_revenue_rate" optional="hide" widget="percentage"/>
                 <field name="rel_previous_progress_cost_amount" optional="hide"/>
                 <field name="rel_previous_progress_revenue_amount" optional="hide"/>
+                <field name="rel_previous_progress_revenue_margin_rate" optional="hide" widget="percentage"/>
                 <field name="progress_revenue_rate" optional="hide" widget="percentage"/>
                 <field name="target_project_cost" optional="hide" sum="Total Cost"/>
                 <field name="target_project_revenue" optional="hide" sum="Total Revenue"/>
                 <field name="target_project_margin" optional="hide" sum="Total Margin"/>
                 <field name="target_project_margin_rate" optional="hide" widget="percentage"/>
+                <field name="future_revenue" optional="hide" sum="Total reste à reconnaître"/>
+                <field name="future_revenue_next_year" optional="hide" sum="Total CA à venir > 31/12/N"/>
+                <field name="future_revenue_current_year" optional="hide" sum="Total CA fin d'année"/>
                 <field name="progress_cost_amount" optional="show" sum="Total Cost"/>
                 <field name="progress_revenue_amount" optional="show" sum="Total Revenue"/>
                 <field name="progress_cost_amount_period" optional="show" sum="Total Cost Period"/>
@@ -79,6 +84,7 @@
                     <group col="3">
                         <group name="info_base" string="Informations de base">
                             <field name="rel_project_id" readonly="1"/>
+                            <field name="rel_project_partner_id" readonly="1"/>
                             <field name="accounting_closing_id" readonly="1"/>
                             <field name="rel_closing_date" readonly="1"/>
                             <field name="rel_original_stage_id" readonly="1"/>
@@ -116,6 +122,7 @@
                             <field name="rel_previous_progress_cost_amount"/>
                             <field name="rel_previous_progress_revenue_rate" widget="percentage"/>
                             <field name="rel_previous_progress_revenue_amount"/>
+                            <field name="rel_previous_progress_revenue_margin_rate" widget="percentage"/>
                             <field name="rel_previous_progress_comment"/>
                         </group>
                         <!-- Bloc pour la production interne (avec style bleu) -->
@@ -172,7 +179,12 @@
                             <field name="target_project_margin" decoration-danger="target_project_margin &lt; 0"/>
                             <field name="target_project_margin_rate" widget="percentage" decoration-danger="target_project_margin_rate &lt; 0"/>
                             <field name="reselling_price_unit" invisible="type in ['internal_production', 'other']"/>
-			    <field name="future_revenue_next_year" invisible="type != 'internal_production'" readonly="is_validated"/>
+                            <field name="future_revenue"/>
+                        </group>
+                        <group name="cutoff" string="Répartition Année N/N+1" style="background-color:#ffaaaa;" invisible="type != 'internal_production'">
+                            <field name="future_revenue"/>
+                            <field name="future_revenue_next_year" readonly="is_validated"/>
+                            <field name="future_revenue_current_year"/>
                         </group>
                         <group name="provisions" string="Provisions (CCA / FNP)" invisible="not outsourcing_link_id">
                             <field name="auto_compute_provisions" readonly="1"/>
@@ -197,6 +209,7 @@
         <field name="arch" type="xml">
             <search string="Recherche Avancements">
                 <field name="rel_project_id"/>
+                <field name="rel_project_partner_id"/>
                 <field name="rel_project_user_id"/>
                 <separator/>
                 <filter string="Date de clôture" name="closing_date_filter" date="rel_closing_date"/>
@@ -223,6 +236,7 @@
                 <filter string="Commentaire non vide" name="with_comment" domain="[('comment', '!=', False)]"/>
                 <group expand="0" string="Regrouper par">
                     <filter string="Projet" name="group_by_project" context="{'group_by': 'rel_project_id'}"/>
+                    <filter string="Client" name="group_by_project_partner" context="{'group_by': 'rel_project_partner_id'}"/>
                     <filter string="Directeur de mission" name="group_by_rel_project_user_id" context="{'group_by': 'rel_project_user_id'}"/>
                     <filter string="Date de clôture" name="group_by_closing_date" context="{'group_by': 'rel_closing_date'}"/>
                     <filter string="Statut début clôture" name="group_by_stage" context="{'group_by': 'rel_original_stage_id'}"/>

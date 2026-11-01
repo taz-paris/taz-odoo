@@ -2,6 +2,24 @@ from odoo import models, fields, api
 
 
 class HrEmployeeSkillGrade(models.Model):
+    """Journal des notations d'une compétence : qui a noté, quand, avec quel niveau et quel
+    commentaire libre. Plusieurs notes concurrentes sont possibles pour une même compétence
+    (auto-évaluation de l'employé + une ou plusieurs évaluations tierces), y compris le même jour.
+
+    À ne pas confondre avec le hr.employee.skill.log natif d'Odoo (module hr_skills), qui est un
+    journal d'ÉTAT : une photo du niveau courant, au plus une ligne par employé/compétence/jour
+    (contrainte SQL), sans auteur ni commentaire. Ce modèle a été créé plutôt que d'étendre
+    hr.employee.skill.log car le besoin (auteur obligatoire, plusieurs notes/jour, distinction
+    auto/tierce, commentaire) est structurellement incompatible avec sa contrainte d'unicité
+    journalière et sa sémantique de snapshot, conçue pour le graphique "Skills History" natif.
+
+    Ce modèle est en AMONT de hr.employee.skill.log : _recompute_skill_level_from_grades()
+    (voir hr.employee.skill) dérive hr.employee.skill.skill_level_id à partir des notes les plus
+    pertinentes, ce qui déclenche en aval le _create_logs() natif qui alimente hr.employee.skill.log.
+    Le journal natif continue donc à se remplir automatiquement, sans code à maintenir ici ; il
+    n'est en retour jamais lu ni piloté par ce module (il ne connaît ni l'auteur, ni le commentaire,
+    ni les notes multiples du même jour).
+    """
     _name = 'hr.employee.skill.grade'
     _description = "Note sur une compétence d'un employé"
     _order = 'id desc'
