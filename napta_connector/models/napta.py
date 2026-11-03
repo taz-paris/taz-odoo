@@ -1515,12 +1515,20 @@ class naptaHrEmployeeSkill(models.Model):
                 _logger.info("Aucun hr.skill.level Odoo trouvé pour la note Napta=%s (skill Napta id=%s, grade_group_id=%s, skill_type_id=%s)." % (grade_value, user_skill['attributes']['skill_id'], grade_group_id, skill_type_id))
                 skill_level_ids = []
 
+            napta_obtained_date = user_skill['attributes']['obtained_date']
+            obtained_date = False
+            if napta_obtained_date:
+                # Conversion en date Python : sinon la comparaison avec current_vals['obtained_date']
+                # (un vrai datetime.date, renvoyé par search_read) échoue toujours car '2004-09-01' != date(2004, 9, 1),
+                # ce qui déclenche un write() à chaque run même sans changement réel.
+                obtained_date = datetime.datetime.strptime(napta_obtained_date, '%Y-%m-%d').date()
+
             vals = {
                     'napta_id' : napta_id,
                     'employee_id' : employee_id,
                     'skill_type_id' : skill_type_id,
                     'skill_id' : skill_id,
-                    'obtained_date' : user_skill['attributes']['obtained_date'] or False,
+                    'obtained_date' : obtained_date,
                 }
             if skill_level_ids:
                 vals['skill_level_id'] = skill_level_ids[0]
