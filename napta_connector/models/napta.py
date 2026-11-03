@@ -913,6 +913,10 @@ class naptaResUsers(models.Model):
                 if odoo_user.active != employee.active :
                     employee.active = odoo_user.active
                     _logger.info("L'employé associé à l'utilisateur avec le login=%s a maintenant l'attribut active=%s" % (odoo_user.login, str(odoo_user.active)))
+                lucca_id = user['attributes']['external_id'] or False
+                if employee.lucca_id != lucca_id :
+                    employee.lucca_id = lucca_id
+                    _logger.info("L'employé associé à l'utilisateur avec le login=%s a maintenant l'attribut lucca_id=%s" % (odoo_user.login, str(lucca_id)))
 
 
 class naptaJob(models.Model):
@@ -1180,6 +1184,7 @@ class naptaHrLeave(models.Model):
                         # max => évite d'avoir un nombre de jours de congés négatif (ce qui est interdit techniquement) dans le cas où un congés d'une demie-journée posée dans Napta sur un jour non-ouvré
                         # TODO : doit-on obligatoirement envoyer cet attribut à Odoo... qui doit le reclaculer de son côté...
                     'state' : 'validate',
+                    'lucca_id' : user_holiday['attributes']['external_id'],
                 }
             create_update_odoo(self.env, 'hr.leave', dic, context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True, 'do_not_update_staffing_report' : True, 'do_not_update_project' : True}, company_id=company_id)
         client.delete_not_found_anymore_object_on_napta('hr.leave', 'user_holiday', context_add={'tz' : 'UTC', 'from_cancel_wizard' : True, 'leave_skip_state_check' : True, 'leave_skip_date_check' : True})
