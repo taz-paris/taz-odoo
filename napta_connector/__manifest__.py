@@ -13,7 +13,7 @@
     'category': 'Uncategorized',
     'version': "18.0.1.0.0",
 
-    'depends': ['staffing', 'project_accounting', 'project', 'analytic', 'project_evaluation', 'hr_skill_grade'],
+    'depends': ['staffing', 'project_accounting', 'project', 'analytic', 'project_evaluation', 'hr_skill_grade', 'lucca_connector'],
 
     'data': [
         'security/ir.model.access.csv',
