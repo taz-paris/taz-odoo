@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bill_po_reconcile_wizard,bill.po.reconcile.wizard,model_bill_po_reconcile_wizard,base.group_user,1,1,1,1
+access_bill_po_reconcile_suggestion,bill.po.reconcile.suggestion,model_bill_po_reconcile_suggestion,base.group_user,1,1,1,1
+access_bill_po_reconcile_invoice_line,bill.po.reconcile.invoice.line,model_bill_po_reconcile_invoice_line,base.group_user,1,1,1,1
+access_bill_po_reconcile_po_line,bill.po.reconcile.po.line,model_bill_po_reconcile_po_line,base.group_user,1,1,1,1

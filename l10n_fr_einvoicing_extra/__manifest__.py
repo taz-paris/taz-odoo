@@ -1,6 +1,6 @@
 {
     "name": "France eInvoicing: Extra Customizations",
-    "version": "18.0.1.1.0",
+    "version": "18.0.1.3.0",
     "category": "Accounting",
     "license": "AGPL-3",
     "summary": "Extra customizations on top of l10n_fr_einvoicing and l10n_fr_ereporting",
@@ -12,6 +12,7 @@
         "l10n_fr_siret",
         "l10n_fr_einvoicing_import",
         "project_accounting",
+        "purchase",
     ],
     "external_dependencies": {
         "python": [
@@ -24,8 +25,21 @@
         ]
     },
     "data": [
+        "security/ir.model.access.csv",
         "views/res_partner.xml",
         "views/account_move.xml",
+        "views/bill_po_reconcile.xml",
+        "views/res_company.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "l10n_fr_einvoicing_extra/static/src/bill_po_reconcile/panel.js",
+            "l10n_fr_einvoicing_extra/static/src/bill_po_reconcile/panel.xml",
+            "l10n_fr_einvoicing_extra/static/src/bill_po_reconcile/panel.scss",
+        ],
+        "web.assets_tests": [
+            "l10n_fr_einvoicing_extra/static/tests/tours/bill_po_reconcile_tour.js",
+        ],
+    },
     "installable": True,
 }

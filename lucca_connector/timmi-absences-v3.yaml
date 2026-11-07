@@ -1,0 +1,1327 @@
+openapi: 3.1.0
+info:
+  title: Lucca Absences API
+  version: '1.0'
+  description: Welcome on the documentation for Lucca Absences API.
+  contact:
+    name: API Support
+    url: 'https://www.luccasoftware.com'
+    email: no-reply@luccasoftware.com
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0'
+servers:
+  - url: "https://{host}"
+    description: |-
+      Your Lucca account URL.
+    variables:
+      host:
+        default: example.ilucca.net
+        description: |-
+          The URL of your dedicated Lucca account: `{account}.{env}.{region}`.
+          
+          Account reflects your company name. Env indicates the environment. Region depends on your server location.
+
+          **Please, use your test or sandbox environments (and not your production env.) for testing purposes.**
+
+          Environments:
+          - `ilucca`: production environment for customers.
+          - `ilucca-test`: test environment for customers.
+          - `ilucca-demo`: demo environment for prospects.
+
+          Regions:
+          - `.ch` for Swiss located accounts.
+          - `.net` for the others.
+
+          Regarding sandboxes, the pattern differs: `https://{account}-{sandboxName}.sandbox.{server}.luccasoftware.com`, where:
+          - `{sandboxName}` is automatically generated upon creation.
+          - `{server}` may be "eu1", "eu2" or "ch1".
+tags:
+  - name: Leaves
+    description: Absences taken on a given day
+  - name: Leave Requests
+    description: Workflow object for submiting an absence.
+  - name: Imports
+    description: Absences imports
+  - name: SickLeaveCertificates
+    description: Complementary data for certain leave types in order to comply with French law.
+paths:
+  /api/v3/leaves:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+    get:
+      operationId: get-leaves
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/leaves/list-leaves
+      summary: List leaves
+      description: |-
+        Retrieve a list of approved leaves for one or several users on a given period.
+        
+        You MUST filter out results both on a date-range as well as a set of employees through the following query parameters.
+
+        In regards to employees filtering, you may:
+          - either retrieve Leaves of a set of specific **employees**: `?leavePeriod.ownerId=5,6,7`
+          - or retrieve Leaves of employees working in a set of specific **departments**: `?leavePeriod.owner.departmentId=3,4,5`
+          - or retrieve Leaves of employees working in a set of specific **establishments**: `?leavePeriod.owner.legalEntityId=1,2,3`
+        
+        The `date` query parameter can operate comparisons with a given date value:
+          - `?date=2021-01-01`: strict equality.
+          - `?date=since,2021-01-01`: greater than or equal.
+          - `?date=until,2021-01-01`: lower than or equal.
+          - `?date=between,2021-01-01,2021-01-31`: comprised between two dates.
+      tags: [Leaves]
+      parameters:
+        - $ref: "#/components/parameters/paging"
+        - name: leaveAccountId
+          in: query
+          description: ID of the leave-account the leave must have been taken on.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+        - name: date
+          in: query
+          required: true
+          description: '{comparator},{date-time}'
+          schema:
+            type: string
+            examples:
+              - "2021-01-01"
+              - "since,2021-01-01"
+              - "until,2021-01-01"
+              - "between,2021-01-01,2021-01-31"
+        - name: leavePeriod.ownerId
+          in: query
+          description: Employee's identifier
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+        - name: leavePeriod.owner.departmentId
+          in: query
+          description: Employees department identifier
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+        - name: leavePeriod.owner.legalEntityId
+          in: query
+          description: Employees establishment (i.e. legal-entity) identifier
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+              minimum: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Leave'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /api/v3/leaves/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: Identifier of the leave.
+    get:
+      summary: Get a leave by id
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/leaves/get-a-leave-by-id
+      tags:
+        - Leaves
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Leave'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      operationId: get-leaves-leaveId
+      description: |-
+        Retrieve a single Leave by its unique identifier.
+    delete:
+      summary: Cancellation of a leave
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/leaves/cancellation-of-a-leave
+      description: |-
+        Cancel a single Leave by its unique identifier.
+      operationId: delete-api-v3-leaves-leaveId
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: "#/components/responses/Problem"
+      tags:
+        - Leaves
+  /api/v3/leaveRequests:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+    get:
+      summary: List leave requests
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/leave-requests/list-leave-requests
+      tags:
+        - Leave Requests
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LeaveRequest'
+                      count:
+                        type: integer
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      operationId: get-leaveRequests
+      description: |-
+        Retrieve a list of Leave Requests.
+  /api/v3/leaveRequests/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - schema:
+          type: string
+        name: id
+        description: ID of the leave-request.
+        in: path
+        required: true
+    get:
+      summary: Get a leave request by id
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/leave-requests/get-a-leave-request-by-id
+      tags:
+        - Leave Requests
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LeaveRequest'
+              examples: {}
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      operationId: get-leaveRequests-leaveRequestId
+      description: |-
+        Retrieve a single Leave Request by its unique identifier.
+    delete:
+      summary: Request to cancel a leave request
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/leave-requests/request-to-cancel-a-leave-request
+      operationId: delete-leaveRequests-leaveRequestId
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: "#/components/responses/Problem"
+      description: Request to cancel a single Leave Request by its unique identifier
+      tags:
+        - Leave Requests
+  /api/v3/leaveRequests/{id}/approvals:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - schema:
+          type: string
+        name: id
+        description: ID of the leave-request.
+        in: path
+        required: true
+    post:
+      summary: Approve or deny a leave request
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/leave-requests/approve-or-deny-a-leave-request
+      operationId: post-api-v3-leaveRequests-leaveRequestId-approvals
+      description: |
+        Approve or deny a single Leave Request by its unique identifier
+
+        Only the Leave Requests pending approval can be approved or denied.
+
+        A comment is required to deny a Leave Request.
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: "#/components/responses/Problem"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approved:
+                  type: boolean
+                comment:
+                  type:
+                    - 'null'
+                    - string
+            examples:
+              example:
+                value:
+                  approved: false
+                  comment: your presence is required at the working meeting
+      tags:
+        - Leave Requests
+  /timmi-absences/api/public/services/v1.0/leaveEntitlementsImport:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+    post:
+      operationId: post-timmi-absences-leave-entitlements-import
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/imports/import-entitlements
+      summary: Import entitlements
+      tags:
+        - Imports
+      parameters:
+        - name: strict
+          in: query
+          description: 'In strict mode, if the import has errors, nothing is imported. Without strict mode, the lines in error are ignored and those in success are imported.'
+          schema:
+            type: boolean
+            default: false
+        - name: simulate
+          in: query
+          description: 'Allows you to simulate the import. In this case, the response indicates the theoretical result of the import without any data being recorded.'
+          schema:
+            type: boolean
+            default: false
+      description: |
+        **Import entitlements** credits leave accounts by **adding** the values provided in the import file to the employees' existing balances. Each value in the file is treated as a new credit entry, increasing the current entitlement total. This operation generates new accounting entries of type "entitlements import". It corresponds to the **"Entitlements import"** feature in the Lucca Absences UI. See the [Entitlements imports guide](/api-reference/legacy/timmi-absences/guides/entitlements-imports) to understand the differences with *Replace entitlements*.
+
+        **Supported file formats:**
+        - CSV
+          - "UTF-8" encoding
+          - separator “;”
+        - XSLX
+
+        **Columns to fill in:**
+
+        | Column name                                     | Description                                              |
+        | :---------------------------------------------- | :------------------------------------------------------- |
+        | `LegalEntityCode`                               | Employee legal entity code.                              |
+        | `EmployeeNumber`                                | Employee payroll number.                                 |
+        | `LastName`                                      | Last name.                                               |
+        | `FirstName`                                     | First name.                                              |
+        | Account number or name (one column per account) | Value to import for the account defined in the header.   |
+
+        *Remark:
+        A template file can be downloaded from the import page (Credit / Debit> A group of collaborators> File import).*
+
+        In the event of a malformed (or unrecognized) file, no data will be imported; the problems detected will be specified in the `globalErrors` field.
+
+        If successful, the number of imported lines is indicated by the “successLinesCount” field; the lines in error are detailed in the `lineErrors` field.
+
+
+        *Remarks:
+        Any import made by the API is of course available in the import history.
+        A simulation returns the same level of information, but does not trigger an import*
+
+        **List of errors handled**
+
+        Here is the list of fatal errors, which can be returned in the `globalErrors`:
+        - Unauthorized
+        - FileEmpty,
+        - FileExtensionNotSupported,
+        - ColumnsFormatNotSupported,
+        - AccountColumnMissing,
+        - ColumnNamesDistinct,
+        - LineErrorForbiddenInStrictMode,
+
+        The list of line processing errors, which can be restored in the `lineErrors`:
+        - AccountNotFound,
+        - AccountsNotFound,
+        - AccountColumnsProcessing,
+        - LegalEntityCodesNotFound,
+        - MissingValuesForAccount,
+        - AccountNotAvailableForUser,
+        - LegalEntityCodeRequired,
+        - EmployeeNumberRequired,
+        - LoginRequired,
+        - LoginNotFound,
+        - AccountNumberRequired,
+        - LegalEntityNotFound,
+        - EmployeeNumberNotExist,
+        - EmployeeNumberNotInLegalEntity,
+        - FistNameAndLastNameNotMatching,
+        - FistNameNotMatching,
+        - LastLameNotMatching,
+        - FistNameAndLastNameNotMatchingEmployeeNumber,
+        - FistNameNotMatchingEmployeeNumber,
+        - LastLameNotMatchingEmployeeNumber,
+        - FistNameAndLastNameNotMatchingLogin,
+        - FistNameNotMatchingLogin,
+        - LastLameNotMatchingLogin,
+        - DuplicatedLine,
+        - AmbiguousLegalEntity,
+        - ColumnNotExists,
+        - LegalEntityNameNotAvailable,
+        - AccountNameNotUnique
+
+        The list of import generation errors:
+        - UnableToCreditAccount
+      responses:
+        '200':
+          $ref: '#/components/responses/ImportResponse'
+        '400':
+          $ref: "#/components/responses/Problem"
+      requestBody:
+        description: ''
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                File:
+                  type: string
+                  contentMediaType: application/octet-stream
+                Description:
+                  type: string
+                  description: Description of the entries generated by the import (visible to users in the account details).
+                ReferenceDate:
+                  type: string
+                  description: |-
+                    Reference date (text mode).
+                    Respect the format: yyyy-MM-ddThh: mm: ss
+                  format: date-time
+  /timmi-absences/api/public/services/v1.0/leaveEntitlementsReplace:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+    post:
+      operationId: post-timmi-absences-leave-entitlements-replace
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/imports/replace-entitlements
+      summary: Replace entitlements
+      tags:
+        - Imports
+      description: |
+        **Replace entitlements** adjusts leave accounts so that the entitlement total for selected entry types **matches exactly** the values provided in the import file. The system computes the difference between the target value and the current entitlement total (based on the `EntryTypes` parameter), then creates a positive or negative adjustment entry. It corresponds to the **"Import cumulative entitlements"** feature in the Lucca Absences UI. See the [Entitlements imports guide](/api-reference/legacy/timmi-absences/guides/entitlements-imports) to understand the differences with *Import entitlements*.
+
+        **Supported file formats:**
+        - CSV
+          - "UTF-8" encoding
+          - separator “;”
+        - XSLX
+
+        **Columns to fill in:**
+
+        | Column name                                     | Description                                              |
+        | :---------------------------------------------- | :------------------------------------------------------- |
+        | `LegalEntityCode`                               | Employee legal entity code.                              |
+        | `EmployeeNumber`                                | Employee payroll number.                                 |
+        | `LastName`                                      | Last name.                                               |
+        | `FirstName`                                     | First name.                                              |
+        | Account number or name (one column per account) | Value to import for the account defined in the header.   |
+
+
+        *Remark:
+        A template file can be downloaded from the import page (Credit / Debit> A group of collaborators> File import).*
+
+        In the event of a malformed (or unrecognized) file, no data will be imported; the problems detected will be specified in the `globalErrors` field.
+
+        If successful, the number of imported lines is indicated by the “successLinesCount” field; the lines in error are detailed in the `lineErrors` field.
+
+
+        *Remarks:
+        Any import made by the API is of course available in the import history.
+        A simulation returns the same level of information, but does not trigger an import*
+
+        **List of errors handled**
+
+        Here is the list of fatal errors, which can be returned in the `globalErrors`:
+        - Unauthorized
+        - FileEmpty,
+        - FileExtensionNotSupported,
+        - ColumnsFormatNotSupported,
+        - AccountColumnMissing,
+        - ColumnNamesDistinct,
+        - LineErrorForbiddenInStrictMode,
+
+        The list of line processing errors, which can be restored in the `lineErrors`:
+        - AccountNotFound,
+        - AccountsNotFound,
+        - AccountColumnsProcessing,
+        - LegalEntityCodesNotFound,
+        - MissingValuesForAccount,
+        - AccountNotAvailableForUser,
+        - LegalEntityCodeRequired,
+        - EmployeeNumberRequired,
+        - LoginRequired,
+        - LoginNotFound,
+        - AccountNumberRequired,
+        - LegalEntityNotFound,
+        - EmployeeNumberNotExist,
+        - EmployeeNumberNotInLegalEntity,
+        - FistNameAndLastNameNotMatching,
+        - FistNameNotMatching,
+        - LastLameNotMatching,
+        - FistNameAndLastNameNotMatchingEmployeeNumber,
+        - FistNameNotMatchingEmployeeNumber,
+        - LastLameNotMatchingEmployeeNumber,
+        - FistNameAndLastNameNotMatchingLogin,
+        - FistNameNotMatchingLogin,
+        - LastLameNotMatchingLogin,
+        - DuplicatedLine,
+        - AmbiguousLegalEntity,
+        - ColumnNotExists,
+        - LegalEntityNameNotAvailable,
+        - AccountNameNotUnique
+
+        The list of import generation errors:
+        - UnableToCreditAccount
+      parameters:
+        - name: strict
+          in: query
+          description: 'In strict mode, if the import has errors, nothing is imported. Without strict mode, the lines in error are ignored and those in success are imported.'
+          schema:
+            type: boolean
+            default: false
+        - name: simulate
+          in: query
+          description: 'Allows you to simulate the import. In this case, the response indicates the theoretical result of the import without any data being recorded.'
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                File:
+                  type: string
+                  contentMediaType: application/octet-stream
+                Description:
+                  type: string
+                  description: Description of the entries generated by the import (visible to users in the account details).
+                ReferenceDate:
+                  type: string
+                  description: |-
+                    Reference date (text mode).
+                    Respect the format: yyyy-MM-ddThh: mm: ss
+                  format: date-time
+                EntryTypes:
+                  type: string
+                  description: |-
+                    Types of entries to take into account, separated by commas, from the following list:
+                    AutoAccruals,
+                    ManualAccruals,
+                    Regularisations,
+                    EntitlementsImport,
+                    Seniority,
+                    Fractionnement,
+                    TimeSavings,
+                    Comp
+
+                    By default: `AutoAccruals, ManualAccruals, Regularizations` which correspond to the main cases of acquisition (automatic acquisition, manual adjustments, regularisations).
+                  default: 'AutoAccruals,ManualAccruals,Regularizations'
+        description: ''
+      responses:
+        '200':
+          $ref: '#/components/responses/ImportResponse'
+        '400':
+          $ref: "#/components/responses/Problem"
+  /timmi-absences/api/imports/v1.0/leavePeriods:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+    post:
+      summary: Import leaves
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/imports/import-leaves
+      tags:
+        - Imports
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summaryId:
+                    type: string
+                    format: uuid
+                  hasError:
+                    type: boolean
+                x-examples:
+                  example-1:
+                    summaryId: 51564472-08cc-4410-94cc-a2b67f77f980
+                    hasError: false
+        '400':
+          $ref: "#/components/responses/Problem"
+      operationId: post-figgo-api-imports-v1.0-leavePeriods
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Content-Type
+          required: true
+          example: multipart/form-data; boundary=myBoundary
+          description: Multipart boundary **MUST** be set in the Content-Type header.
+        - schema:
+            type: boolean
+          in: query
+          name: create
+          description: Use `false` to simulate the import.
+        - schema:
+            type: boolean
+          in: query
+          name: recredit
+          description: 'Use `true` if absences should **not** be deducted from the user balance. Use `false` if absences should be deducted from the user balance. Note: if the absence type doesn’t have balance management, absence won’t impact the balance in any case.'
+        - schema:
+            type: string
+            default: import.csv
+          in: query
+          name: originalFileName
+          description: Filename
+        - schema:
+            type: boolean
+          in: query
+          name: synchronize
+          description: 'Use `true` to force synchronization of the absences in the sync webservice (sync to Exchange/0365, Google Calendar, Webhook or ADP GXP, depending on configuration). Use `false` to import absences without synchronizing absences.'
+        - schema:
+            type: boolean
+          in: query
+          name: async
+          description: 'Use `true` if you want to import absences with the asynchronous processing (you have to request figgo/api/imports/v1.0/leavePeriods/{summaryId}/progress API to track the status). Use `false` if you want import absences with the synchronous processing (the response is sent when the file is fully imported).'
+        - schema:
+            type: boolean
+            default: false
+          in: query
+          name: overrideLeaves
+          description: |-
+            Use `true` to override (i.e. replace) existing absences that overlap with the imported ones, instead of letting the import fail on the conflicting rows. Use `false` (default) to leave existing absences untouched.
+
+            > ⚠️ **This option only takes effect if the corresponding feature has been enabled on your environment (opt-in). If you would like to use it, please contact our support beforehand.**
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+            encoding:
+              files:
+                contentType: application/vnd.ms-excel
+        description: |
+          Content of the CSV file to import. Each file in its dedicated part
+          of the multipart request. Parts are divided by the 'boundary' string
+          set in the Content-Type HTTP header.
+          
+          Example of a single file request body:
+          ```
+          --myBoundary
+          Content-Disposition: form-data; name="figgo-import-5875e9dd-0b1f-4a9f-8756-0f25fb0a2946.csv"; filename="figgo-import-5875e9dd-0b1f-4a9f-8756-0f25fb0a2946.csv"
+          Content-Type: application/vnd.ms-excel
+
+          legalEntity;employeeNumber;lastName;firstName;accountId;startDate;flagStartDate;endDate;flagEndDate;isApproved
+          Lucca FR;M0029;Bart;Maurice;1322;16/08/2022;am;17/08/2022;pm;true
+          Lucca FR;M0029;Bart;Maurice;1322;22/08/2022;am;23/08/2022;pm;false
+          Lucca FR;M0029;Bart;Maurice;8;29/08/2022;am;30/08/2022;pm;true
+          --myBoundary--
+          ```
+      description: |
+        Create absences in batch from a CSV file.
+
+        **Important notice: Absence imports cannot be cancelled.** 
+
+        In case of a mistake absences must be deleted manually through the interface or using the API (see Use cases). **Use import with care!**
+
+        **File format**
+
+        Content-Type: CSV. Column divider is semicolon ";". Line breaks between rows.
+
+        Encoding: UTF-8
+
+        All the following fields must be present with the field name in the header:
+
+        - legalEntity: Name of the establishment the employee belongs to.
+        - employeeNumber: Employee number.
+        - lastName: Family (last) name of the employee.
+        - firstName: Given (first) name of the employee.
+        - accountId: Identifier of the absence account in Lucca Absences (can be found in the leave accounts admin page).
+        - startDate: Start date of the absence, formatted as `DD/MM/YYYY`.
+        - flagStartDate: `"AM"` if the absence starts in the morning or `"PM"` if the absence starts in the afternoon.
+        - endDate: End date of the absence, formatted as `DD/MM/YYYY`.
+        - flagEndDate: `"AM"` if the absence ends at noon or `"PM"` if the absence ends in the afternoon.
+        - isApproved: `true` or `false`. Dictates whether the absence request should be created and already approved. 
+          Required if the type of the absence requires approval, optional otherwise.
+
+        **History**
+        Import history is available in the import module. It includes imports made via the API.
+  /timmi-absences/api/imports/v1.0/leavePeriods/{summaryId}/progress:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - schema:
+          type: string
+        name: summaryId
+        description: Identifier of the import
+        in: path
+        required: true
+    get:
+      summary: Get import leaves progress
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/imports/get-import-leaves-progress
+      tags:
+        - Imports
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                description: '0:not started, 1-99:in progress, 100:success, -1:error'
+        '400':
+          $ref: "#/components/responses/Problem"
+      operationId: get-figgo-api-imports-v1.0-leavePeriods-summaryId-progress
+      description: Retrieve the progress of Import leaves API request.
+  /api/v3/sickLeaveCertificates:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+    get:
+      operationId: GetAllSickLeaveCertificates
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/sick-leave-certificates/list-sick-leave-certificates
+      summary: List SickLeaveCertificates
+      description: |-
+        Retrieve a paginated list of SickLeaveCertificate objects, which contain further information about certain types of leaves.
+
+        In France, some leave types require extra details in order to comply with legal expectations: sick leaves, maternity, paternity, etc...
+      tags: [SickLeaveCertificates]
+      parameters:
+        - $ref: "#/components/parameters/paging"
+        - name: leavePeriod.ownerId
+          description: Filter out results on the related employee ID.
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: leavePeriod.owner.departmentId
+          description: Filter out results on the related employee department ID.
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: leavePeriod.owner.legalEntityId
+          description: Filter out results on the related employee legalEntity (ie business-establishment) ID.
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: creationDate
+          description: Filter out results on their creation date.
+          in: query
+          schema:
+            type: string
+            examples:
+              - 'since,2024-01-01T09:45:23.000'
+              - 'until,2024-12-01T09:45:23.000'
+              - 'between,2024-01-01T09:45:23.999,2024-12-01T09:45:23.000'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SickLeaveCertificate"
+  /api/v3/sickLeaveCertificates/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Authorization"
+    get:
+      operationId: get-sick-leave-certificate
+      x-mint:
+        href: /api-reference/legacy/timmi-absences/sick-leave-certificates/get-sick-leave-certificate
+      summary: Get a SickLeaveCertificate
+      description: Retrieve a single SickLeaveCertificate.
+      tags: [SickLeaveCertificates]
+      parameters:
+      - name: id
+        description: The SickLeaveCertificate ID.
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SickLeaveCertificate" 
+components:
+  parameters:
+    paging:
+      name: paging
+      in: query
+      required: true
+      schema:
+        type: string
+        example: '2000,500'
+      description: '{offset},{limit}. Defaults to 0,1000.'
+    Authorization:
+      name: Authorization
+      required: true
+      description: |-
+        API key. Value must be formatted like so: `lucca application={api_key}`.
+      in: header
+      schema:
+        type: string
+  schemas:
+    Leave:
+      title: The Leave resource
+      type: object
+      examples: []
+      x-tags:
+        - Leaves
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the Leave
+        date:
+          type: string
+          format: date
+          description: Date of the leave in ISO format `yyyy-mm-dd`
+        isAm:
+          type: boolean
+          description: Has the value `true` for morning or the value `false` for afternoon
+        leaveAccountId:
+          type: integer
+          description: Unique identifier for the attached LeaveAccount
+        leaveAccount:
+          $ref: '#/components/schemas/LeaveAccount'
+        leavePeriodId:
+          type: integer
+          description: Unique identifier for the attached LeavePeriod
+        leavePeriod:
+          $ref: '#/components/schemas/LeavePeriod'
+        value:
+          type:
+            - string
+            - 'null'
+          format: duration
+          description: Leave duration in hours
+        creationDate:
+          type: string
+          format: date-time
+          description: Time at which the object was created
+        isActive:
+          type: boolean
+          description: |
+            Has the value `true` when the Leave exists (for pending or confirmed LeavePeriods), or the value `false` when it has been deleted (for canceled or denied LeaveRequests).
+        cancellationDate:
+          type:
+            - 'null'
+            - string
+          format: date-time
+          description: Time at which the request was canceled
+        cancellationUserId:
+          type:
+            - 'null'
+            - integer
+          default: null
+          description: 'Unique identifier for the user who canceled the request '
+        comment:
+          type: string
+          description: Comments
+      required:
+        - id
+        - date
+        - isAm
+        - leaveAccountId
+        - leavePeriodId
+    LeavePeriod:
+      title: The LeavePeriod resource
+      type: object
+      examples: []
+      x-tags:
+        - Leave Requests
+      properties:
+        id:
+          type: number
+          description: Unique identifier for the LeavePeriod
+        ownerId:
+          type: number
+          description: 'Unique identifier for the user '
+        isConfirmed:
+          type: boolean
+          description: Has the value `true` for approved LeavePeriod or the value `false` for LeavePeriod pending approval
+        confirmationDate:
+          type:
+            - 'null'
+            - string
+          format: date-time
+          description: Time at which the LeavePeriod was approved
+        attachmentId:
+          type:
+            - 'null'
+            - string
+          description: Unique identifier for the attached document
+        leaves:
+          type: array
+          items:
+            type: object
+            description: Leave objects
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeavePeriodLog'
+    LeavePeriodLog:
+      title: The LeavePeriodLog resource
+      type: object
+      description: '## Fields'
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        comment:
+          type: string
+        status:
+          type: number
+          enum: [0, 2, 3, 4, 5]
+          description: |
+            - 0 = PENDING_APPROVAL
+            - 2 = APPROVED
+            - 3 = DENIED
+            - 4 = CANCELLED
+            - 5 = CANCELLATION_PENDING
+    LeaveRequest:
+      title: The LeaveRequest resource
+      type: object
+      examples: []
+      x-tags:
+        - Leave Requests
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the LeaveRequest
+        leavePeriodId:
+          format: date-time
+          type: integer
+          description: Unique identifier for the attached LeavePeriod
+        leavePeriod:
+          $ref: '#/components/schemas/LeavePeriod'
+        status:
+          type: number
+          enum:
+            - 0
+            - 2
+            - 3
+            - 4
+            - 5
+          description: |
+            Status of the Leave request. Can be : 
+
+            0 = PENDING_APPROVAL
+
+            2 = APPROVED
+
+            3 = DENIED
+
+            4 = CANCELLED
+
+            5 = CANCELLATION_PENDING
+        creationDate:
+          type: string
+          format: date-time
+          description: Time at which the object was created
+        nextApproverId:
+          type:
+            - 'null'
+            - integer
+          description: Unique identifier for the next approver
+        cancellationUserId:
+          type:
+            - 'null'
+            - integer
+          description: Unique identifier for the user that cancelled the Leave Request
+        cancellationDate:
+          type:
+            - 'null'
+            - string
+          format: date-time
+          description: Time at which the object was cancelled
+        isActive:
+          type: boolean
+          description: Has the value `true` for acitve Leave Request or the value `false` for cancelled Leave Request
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaveRequestApproval'
+        cancellationRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancellationRequest'
+    LeaveAccount:
+      title: The LeaveAccount resource
+      x-tags:
+        - Leaves
+      type: object
+      description: |-
+        **LeaveAccounts** are the type of absences that can be selected by the user
+
+
+        ## Fields
+      examples: []
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the LeaveAccount
+        name:
+          type: string
+          description: Name of the LeaveAccount
+    LeaveRequestApproval:
+      title: The LeaveRequestApproval resource
+      type: object
+      description: '## Fields'
+      examples: []
+      x-tags:
+        - Leave Requests
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the LeaveRequestApproval
+        date:
+          type: string
+          format: date-time
+        approverId:
+          type: number
+          description: Unique identifier for the approver
+        substitutedApproverId:
+          type:
+            - 'null'
+            - number
+          enum:
+            - 0
+            - 2
+            - 3
+            - 4
+            - 5
+          description: |
+            0 = PENDING_APPROVAL
+
+            2 = APPROVED
+
+            3 = DENIED
+
+            4 = CANCELLED
+
+            5 = CANCELLATION_PENDING
+        approved:
+          type: boolean
+          description: Has the value `true` for approved LeaveRequest or the value `false` for LeaveRequest pending approval
+        comment:
+          type: string
+          description: Comments
+    CancellationRequest:
+      title: The CancellationRequest resource
+      x-tags:
+        - Leave Requests
+      type: object
+      description: '## Fields'
+      examples: []
+      properties:
+        id:
+          type: integer
+        authorId:
+          type: integer
+        comment:
+          type: string
+        rank:
+          type: number
+          enum:
+            - 0
+            - 2
+            - 3
+            - 4
+            - 5
+          description: |
+            0 = PENDING_APPROVAL
+
+            2 = APPROVED
+
+            3 = DENIED
+
+            4 = CANCELLED
+
+            5 = CANCELLATION_PENDING
+        approved:
+          type: boolean
+        creationDate:
+          type: string
+          format: date-time
+        nextApproverId:
+          type:
+            - 'null'
+            - number
+        isActive:
+          type: boolean
+    SickLeaveCertificate:
+      type: object
+      properties:
+        id:
+          type: integer
+        leavePeriodId:
+          type: integer
+        leaveAccountId:
+          type: integer
+          description: ID of the related LeaveAccount.
+        authorId:
+          type: integer
+          description: ID of the user who created this object.
+        creationDate:
+          type: string
+          format: date-time
+          description: Non UTC date-time when this object was created.
+        isActive:
+          type: boolean
+          description: Whether this SickLeaveCertificate was cancelled (equivalent to deleted).
+        cancellationDate:
+          type: [string, 'null']
+          format: date-time
+          description: Non UTC date-time when this SickLeaveCertificate was cancelled / deleted. Null when not cancelled.
+        cancellationUserId:
+          type: [integer, 'null']
+          description: ID of the user who cancelled / deleted this SickLeaveCertificate. Null when not cancelled.
+        subrogation:
+          type: boolean
+          description: When true, the company maintains the employee salary and will itself be compensated by Social Security.
+        subrogationStartDate:
+          type: [string, 'null']
+          format: date-time
+          description: Start of subrogation.
+        subrogationEndDate:
+          type: [string, 'null']
+          description: Last day (included) of subrogation.
+        lastWorkingDay:
+          type: string
+          format: date-time
+          description: Last day (included) this employee worked before being on sick leave.
+        numberOfWaitingPeriodDays:
+          type: integer
+          minimum: 0
+          description: Number of days the employee will have to wait before being compensated.
+        numberOfCompensatedDays:
+          type: integer
+          minimum: 0
+          description: Total number of days the employee will be compensated for.
+        partTimeNature:
+          type: [integer, 'null']
+          enum: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+          description: |-
+            - 0: Other
+            - 1: Work accident
+            - 2: Commute accident
+            - 3: Sickness
+            - 4: Occupational disease 
+            - 5: Maternity
+            - 6: Paternity
+            - 7: Therapeutic part-time
+        partTimeActivityRate:
+          type: [number, 'null']
+          format: decimal
+          description: |-
+            When the employee returns part-time: the actual part-time percentage.
+        partTimeReturnType:
+          type: integer
+          enum: [0, 1, 2]
+          description: |-
+            - 0: Employee returns in full-time.
+            - 1: Employee returns in part-time for therapeutic reasons.
+            - 2: Employee returns in part-time for personal undisclosed reasons.
+        earlyReturn:
+          type: boolean
+          description: Whether the employee will actually return to work before the expected leave end date.
+        extension:
+          type: boolean
+          description: Is this SickLeaveCertificate an extension of a previous one?
+        comments:
+          type: [string, 'null']
+          description: Comments left when creating this SickLeaveCertificate.
+        originalLeavePeriodId:
+          type: integer
+          description: ID of the previous SickLeaveCertificate.LeavePeriod when this one is an extension or an early return to work.
+        accidentDate:
+          type: [string, 'null']
+          description: When due to a work commuting accident, the date when the accident occurred.
+        accidentPlace:
+          type: [integer, 'null']
+          enum: [0, 1, 2]
+          description: |-
+            - 0: outward trip
+            - 1: return trip
+            - 2: lunch place
+        firstObservationDate:
+          type: [string, 'null']
+          format: date-time
+          description: When were the first symptoms observed.
+        childArrivalScheduledDate:
+          type: [string, 'null']
+          description: On maternity leaves, the date when the child is expected to arrive (birth or adoption).
+        childArrivalEffectiveDate:
+          type: [string, 'null']
+          description: On maternity leaves, the date when the child actually arrived (birth or adoption).
+        childArrivalType:
+          type: [integer, 'null']
+          enum: [0, 1]
+          description: |-
+            - 0: Birth
+            - 1: Adoption
+        isSingleChild:
+          type: [boolean, 'null']
+          description: |-
+            On maternity leaves, whether there are one or several children expected.
+        childAdoptionDistribution:
+          type: [integer, 'null']
+          enum: [0, 1]
+          description: |-
+            - 0: single parent
+            - 1: split between both parents
+        paternityLeavePartType:
+          type: [integer, 'null']
+          enum: [0, 1]
+          description: |-
+            - 0: First part
+            - 1: Splittable part
+        compensationRate:
+          type: [number, 'null']
+          format: decimal
+          description: Percentage of compensation.
+        longLastingAffection:
+          type: [boolean, 'null']
+          description: Long-lasting conditions are severe enough and/or have a chronic nature that requires prolonged treatment.
+  responses:
+    Problem:
+      description: Problem
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              Status:
+                type: integer
+                description: HTTP status code.
+                example: 401
+              Message:
+                type: string
+                description: Human readable error message.
+                example: Unauthorized
+    ImportResponse:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              successLinesCount:
+                type: integer
+              globalErrors:
+                type: object
+              lineErrors:
+                type: object
+          examples:
+            ImportResponse:
+              value:
+                successLinesCount: 0
+                globalErrors:
+                  columnsFormatNotSupported: 'The file must have columns ''login, lastName, firstName'' or ''code, employeeNumber, lastName, firstName''.'
+                lineErrors:
+                  '7':
+                    loginNotFound: User login not found
+                  '8':
+                    duplicatedLine: Line 8 is identical to line 23
+                  '9':
+                    lastLameNotMatchingLogin: Lastname does not match to the login of this employee
+                    accountNotAvailableForUser: The user does not have access to the account 6
