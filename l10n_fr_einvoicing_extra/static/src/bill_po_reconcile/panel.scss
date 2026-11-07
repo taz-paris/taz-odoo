@@ -1,0 +1,19 @@
+.o_bill_po_panel {
+    .o_bill_po_col { min-width: 320px; flex-basis: 0; }
+    .o_bill_po_line {
+        padding: 4px 8px;
+        border-bottom: 1px solid var(--border-color, #dee2e6);
+        cursor: pointer;
+        &.o_bill_po_selected { background-color: rgba(113, 75, 103, 0.12); }
+    }
+    .o_bill_po_group {
+        margin-bottom: 10px;
+        border-left: 4px solid var(--bill-po-color, #adb5bd);
+        .o_bill_po_group_title { padding: 4px 8px; }
+    }
+    .o_bill_po_qty { width: 80px; text-align: right; }
+    @for $i from 0 through 5 {
+        $colors: #714b67, #017e84, #e6a24e, #4f8f52, #3a6ea5, #a9610f;
+        .o_bill_po_color_#{$i} { --bill-po-color: #{nth($colors, $i + 1)}; }
+    }
+}

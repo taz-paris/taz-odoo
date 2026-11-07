@@ -103,6 +103,14 @@ class projectAccountingAccountMove(models.Model):
 class projectAccountingAccountMoveLine(models.Model):
     _inherit = "account.move.line"
  
+    def _prepare_line_values_for_purchase(self):
+        # Le standard (bouton « Add to PO ») ne recopie pas la distribution analytique :
+        # le BC créé n'était rattaché à aucun projet.
+        vals_list = super()._prepare_line_values_for_purchase()
+        for line, vals in zip(self, vals_list):
+            vals['analytic_distribution'] = line.analytic_distribution
+        return vals_list
+
     @api.depends('price_subtotal', 'direction_sign')
     def _compute_price_subtotal_signed(self):
         for rec in self:

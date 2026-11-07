@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="l10n_fr_einvoicing_extra.BillPoReconcilePanel">
+        <div class="o_bill_po_panel d-flex flex-wrap gap-3">
+            <div class="o_bill_po_col flex-grow-1">
+                <h6 class="text-uppercase text-muted">Lignes de la facture</h6>
+                <t t-foreach="invoiceLines" t-as="line" t-key="line.id or line.resId or line_index">
+                    <div class="o_bill_po_line d-flex align-items-center gap-2"
+                         t-att-class="{'o_bill_po_selected': line.data.selected, 'text-muted': line.data.linked}"
+                         t-on-click="() => !line.data.linked and this.toggle(line)">
+                        <input type="checkbox" t-att-checked="line.data.selected"
+                               t-att-disabled="line.data.linked or props.readonly"
+                               t-on-click.stop="() => this.toggle(line)"/>
+                        <span class="flex-grow-1" t-esc="line.data.name"/>
+                        <span class="text-muted">
+                            <t t-esc="num(line.data.quantity)"/> × <t t-esc="num(line.data.price_unit)"/>
+                        </span>
+                        <strong t-esc="money(line.data.price_subtotal)"/>
+                        <span t-if="line.data.linked" class="badge text-bg-secondary">Déjà rapprochée</span>
+                    </div>
+                </t>
+            </div>
+            <div class="o_bill_po_col flex-grow-1" t-if="!wizard.data.new_order">
+                <h6 class="text-uppercase text-muted">Lignes des BC</h6>
+                <t t-foreach="groups" t-as="group" t-key="group.key">
+                    <div t-attf-class="o_bill_po_group o_bill_po_color_{{group.color}}">
+                        <div class="o_bill_po_group_title fw-bold">
+                            <t t-esc="group.name"/>
+                            <a t-if="group.key" class="ms-2 fa fa-external-link" title="Ouvrir le BC dans un nouvel onglet"
+                               t-att-href="'/odoo/action-purchase.purchase_form_action/' + group.key"
+                               target="_blank" rel="noopener" t-on-click.stop=""/>
+                        </div>
+                        <t t-foreach="group.lines" t-as="line" t-key="line.id or line.resId or line_index">
+                            <div class="o_bill_po_line d-flex align-items-center gap-2"
+                                 t-att-class="{'o_bill_po_selected': line.data.selected, 'text-muted': !line.data.selectable}"
+                                 t-on-click="() => line.data.selectable and this.toggle(line)">
+                                <input type="checkbox" t-att-checked="line.data.selected"
+                                       t-att-disabled="!line.data.selectable or props.readonly"
+                                       t-on-click.stop="() => this.toggle(line)"/>
+                                <span class="flex-grow-1" t-esc="line.data.name"/>
+                                <span t-if="line.data.state !== 'open'"
+                                      t-attf-class="badge {{line.data.state === 'partial' ? 'text-bg-warning' : 'text-bg-secondary'}}"
+                                      t-esc="stateLabel(line)"/>
+                                <span t-if="line.data.is_mirror" class="badge text-bg-info">Inter-société</span>
+                                <span class="text-muted">reste <t t-esc="money(line.data.amount_open)"/></span>
+                                <t t-if="consumption and line.data.selected">
+                                    <input type="text" class="o_bill_po_qty form-control form-control-sm"
+                                           t-att-value="num(line.data.qty_consumed)"
+                                           t-att-title="'Quantité restante : ' + num(line.data.qty_open)"
+                                           t-on-click.stop=""
+                                           t-on-change="(ev) => this.onQtyChange(line, ev)"/>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </div>
+        <div class="o_bill_po_totals d-flex gap-4 mt-2">
+            <span>Facture : <strong class="o_bill_po_invoice_total" t-esc="money(invoiceTotal)"/></span>
+            <span t-if="!wizard.data.new_order">BC : <strong class="o_bill_po_po_total" t-esc="money(poTotal)"/></span>
+        </div>
+    </t>
+</templates>

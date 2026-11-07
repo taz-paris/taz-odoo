@@ -192,11 +192,20 @@ class projectAccountingPurchaseOrderLine(models.Model):
                 line.analytic_distribution = line._context.get('default_analytic_distribution')
 
 
-    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state', 'direct_payment_sale_order_line_id')
+    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'qty_received', 'product_uom_qty', 'order_id.state', 'direct_payment_sale_order_line_id', 'qty_invoiced_override')
     def _compute_qty_invoiced(self):
         res = super()._compute_qty_invoiced()
 
         for line in self:
+            # Rapprochement en mode consommation : la quantité de la facture n'a pas de sens dans l'UoM du BC
+            # (ex. facture à 1 forfait pour 12 jours). La ligne clôturée par le wizard est donc comptée
+            # comme entièrement facturée dès qu'une ligne de facture non annulée lui est rattachée.
+            if line.qty_invoiced_override and any(
+                    inv_line.move_id.state != 'cancel' for inv_line in line.invoice_lines):
+                line.qty_invoiced = line.product_qty
+                line.qty_to_invoice = 0.0
+                continue
+
             # Complément nécessaire pour que la quantité à facturer soit TOUJOURS nulle si la ligne est en paiement direct, même si un quantité reçue a été saisie.
             if line.direct_payment_sale_order_line_id :
                 line.qty_to_invoice = 0
@@ -223,6 +232,47 @@ class projectAccountingPurchaseOrderLine(models.Model):
                     line.qty_to_invoice = line.qty_received - line.qty_invoiced
         return res
 
+
+    qty_invoiced_override = fields.Boolean(
+        'Facturée par rapprochement', copy=False,
+        help="Posé par le rapprochement facture/BC en mode consommation : la quantité facturée est forcée à la quantité commandée "
+             "dès qu'une ligne de facture non annulée est rattachée, quelle que soit la quantité ou l'unité de la ligne de facture.")
+
+    def _get_unlink_blockers(self):
+        """Retourne {ligne: motif} pour les lignes dont la suppression casserait un lien ou un historique."""
+        blockers = {}
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        mirror_line_ids = set()
+        if 'auto_purchase_line_id' in self.env['sale.order.line']._fields:
+            # sudo : les règles d'accès cachent ces lignes de vente aux utilisateurs courants (société vendeuse)
+            mirror_lines = self.env['sale.order.line'].sudo().search_read(
+                [('auto_purchase_line_id', 'in', self.ids)], ['auto_purchase_line_id'])
+            mirror_line_ids = {d['auto_purchase_line_id'][0] for d in mirror_lines}
+        for line in self:
+            if any(inv_line.move_id.state != 'cancel' for inv_line in line.invoice_lines) \
+                    or not float_is_zero(line.qty_invoiced, precision_digits=precision):
+                blockers[line] = _("elle est déjà rattachée à une facture")
+            elif line.direct_payment_sale_order_line_id:
+                blockers[line] = _("elle est liée à une ligne de commande du client final (paiement direct) : supprimez d'abord ce lien")
+            elif line.id in mirror_line_ids:
+                blockers[line] = _("elle est liée à une ligne de commande de vente inter-société : supprimez d'abord ce lien")
+        return blockers
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_purchase_or_done(self):
+        # Le standard interdit de supprimer une ligne d'un BC confirmé. Le rapprochement facture/BC en mode
+        # remplacement doit pouvoir remplacer des lignes jamais facturées : il passe ce contexte (le garde-fou
+        # sur les lignes facturées, en facturation directe ou inter-société, reste appliqué par unlink()).
+        if self.env.context.get('bill_po_reconcile_replace'):
+            return
+        return super()._unlink_except_purchase_or_done()
+
+    def unlink(self):
+        blockers = self._get_unlink_blockers()
+        if blockers:
+            details = "\n".join("- %s : %s" % (line.display_name, reason) for line, reason in blockers.items())
+            raise ValidationError(_("Suppression impossible de ligne(s) de bon de commande :\n%s", details))
+        return super().unlink()
 
     @api.depends('reselling_price_unit', 'product_qty')
     def _compute_reselling_subtotal(self):

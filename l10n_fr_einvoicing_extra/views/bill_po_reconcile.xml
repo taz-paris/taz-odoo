@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="bill_po_reconcile_wizard_form" model="ir.ui.view">
+        <field name="name">bill.po.reconcile.wizard.form</field>
+        <field name="model">bill.po.reconcile.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Rapprochement facture / bon de commande">
+                <field name="move_id" invisible="1" />
+                <field name="currency_id" invisible="1" />
+                <field name="allowed_order_ids" invisible="1" />
+                <field name="new_order" invisible="1" />
+                <field name="needs_link_type" invisible="1" />
+                <field name="button_key" invisible="1" />
+                <group>
+                    <group>
+                        <!-- Le projet est le premier champ à saisir : sans lui, aucun autre champ ne s'affiche -->
+                        <field name="partner_id" readonly="1" options="{'no_open': True}" />
+                        <field name="project_ids" widget="many2many_tags" options="{'no_create': True}" />
+                        <field name="order_ids" widget="many2many_tags" options="{'no_create': True}"
+                               domain="[('id', 'in', allowed_order_ids)]" invisible="not project_ids" />
+                    </group>
+                    <group invisible="not project_ids">
+                        <div colspan="2">
+                            <button name="action_new_order" type="object" string="+ Nouveau BC"
+                                    class="btn-secondary" invisible="new_order" />
+                            <span invisible="not new_order">BC à créer
+                                <button name="action_cancel_new_order" type="object" string="Annuler"
+                                        class="btn-link" />
+                            </span>
+                        </div>
+                        <field name="mode" widget="radio" options="{'horizontal': true}" />
+                    </group>
+                </group>
+                <div invisible="project_ids or not suggestion_ids">
+                    <div class="alert alert-warning" role="alert">
+                        Aucun projet n'est connu pour cette facture. Cochez les BC concernés (plusieurs BC possibles
+                        s'ils sont sur le même projet) puis validez, ou saisissez un projet ci-dessus.
+                    </div>
+                    <field name="suggestion_ids" nolabel="1">
+                        <list editable="bottom" create="0" delete="0">
+                            <field name="selected" />
+                            <field name="project_id" />
+                            <field name="order_id" />
+                            <field name="amount_open" />
+                            <field name="reasons" />
+                        </list>
+                    </field>
+                    <button name="action_apply_suggestions" type="object" string="Choisir les BC cochés"
+                            class="btn-primary" />
+                </div>
+                <div invisible="not project_ids">
+                    <group invisible="not allowed_envelope_line_ids">
+                        <field name="allowed_envelope_line_ids" invisible="1" />
+                        <field name="envelope_line_id" options="{'no_create': True, 'no_open': True}"
+                               domain="[('id', 'in', allowed_envelope_line_ids)]" />
+                        <field name="envelope_message" nolabel="1" colspan="2" invisible="not envelope_line_id" />
+                    </group>
+                    <group invisible="not needs_link_type">
+                        <field name="link_type" widget="radio" />
+                    </group>
+                    <field name="invoice_line_ids" class="d-none">
+                        <list>
+                            <field name="move_line_id" force_save="1" />
+                            <field name="selected" />
+                            <field name="name" force_save="1" />
+                            <field name="quantity" force_save="1" />
+                            <field name="price_unit" force_save="1" />
+                            <field name="price_subtotal" force_save="1" />
+                            <field name="linked" force_save="1" />
+                        </list>
+                    </field>
+                    <field name="po_line_ids" widget="bill_po_reconcile_panel" nolabel="1">
+                        <list>
+                            <field name="purchase_line_id" force_save="1" />
+                            <field name="analytic_ok" force_save="1" />
+                            <field name="amount_invoiced" force_save="1" />
+                            <field name="price_unit" force_save="1" />
+                            <field name="selectable" force_save="1" />
+                            <field name="selected" />
+                            <field name="order_id" force_save="1" />
+                            <field name="name" force_save="1" />
+                            <field name="product_qty" force_save="1" />
+                            <field name="price_subtotal" force_save="1" />
+                            <field name="state" force_save="1" />
+                            <field name="is_mirror" force_save="1" />
+                            <field name="amount_open" force_save="1" />
+                            <field name="qty_open" force_save="1" />
+                            <field name="qty_consumed" />
+                        </list>
+                    </field>
+                    <field name="message" nolabel="1" />
+                </div>
+                <footer>
+                    <button name="action_associate" type="object" string="Créer le BC" class="btn-primary"
+                            invisible="button_key != 'create' or not is_valid" />
+                    <button name="action_associate" type="object" string="Remplacer &amp; rattacher" class="btn-primary"
+                            invisible="button_key != 'replace' or not is_valid" />
+                    <button name="action_associate" type="object" string="Scinder &amp; rattacher" class="btn-primary"
+                            invisible="button_key != 'split' or not is_valid" />
+                    <button name="action_associate" type="object" string="Associer" class="btn-primary"
+                            invisible="button_key != 'associate' or not is_valid" />
+                    <button name="action_associate" type="object" string="Rattacher" class="btn-primary"
+                            invisible="button_key != 'attach' or not is_valid" />
+                    <field name="is_valid" invisible="1" />
+                    <button string="Annuler" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Le wizard remplace « Purchase Matching » (et donc « Add to PO », qui n'existe que dans cet écran) -->
+    <record id="view_move_form_bill_po_reconcile" model="ir.ui.view">
+        <field name="name">account.move.form.bill.po.reconcile</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="purchase.view_move_form_inherit_purchase" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_purchase_matching']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_purchase_matching']" position="after">
+                <button class="oe_stat_button" name="action_open_bill_po_reconcile" type="object"
+                        groups="purchase.group_purchase_user" icon="fa-bullseye"
+                        invisible="not partner_id or move_type not in ('in_invoice', 'in_refund')">
+                    <div class="o_field_statinfo">
+                        <span class="o_stat_text">Rapprochement BC</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>
