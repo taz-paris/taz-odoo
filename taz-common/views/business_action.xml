@@ -120,13 +120,15 @@
             <field name="model">taz.business_action</field>
             <field name="arch" type="xml">
                 <search string="Actions commerciales">
+                    <field name="owner_id" string="Affectée à / Participant interne" filter_domain="['|', ('owner_id', 'ilike', self), ('user_ids', 'ilike', self)]"/>
                     <field name="partner_id" string="Contact"/>
+                    <field name="parent_partner_id" string="Entreprise"/>
                     <field name="parent_partner_industry_id" string="Compte (ex BD)"/>
                     <filter string="Mes actions commerciales (porteur ou participant)" name="assigned_to_me" domain="['|', ('owner_id', '=', uid), ('user_ids', 'in', uid)]" help="Actions commerciales qui m'ont été assignées"/>
                     <separator/>
-                    <filter string="Actions avec échéance &gt;= 01/M-6" name="m_6" domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-5, day=1)).strftime('%Y-%m-%d')))]"/>
-                    <filter string="Actions avec échéance &gt;= 01/M-2" name="m_2" domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')))]"/>
-                    <filter string="Actions avec échéance sous 30 jours" name="j30" domain="[('date_deadline','&lt;=', ((context_today() + relativedelta(days=30)).strftime('%Y-%m-%d')))]"/>
+                    <filter string="Échéance : 6 derniers mois (mois courant inclus)" name="m_6" domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-5, day=1)).strftime('%Y-%m-%d')))]"/>
+                    <filter string="Échéance : 2 derniers mois (mois courant inclus)" name="m_2" domain="[('date_deadline','&gt;=', ((context_today() + relativedelta(months=-1, day=1)).strftime('%Y-%m-%d')))]"/>
+                    <filter string="Échéance : d'ici 30 jours (retards inclus)" name="j30" domain="[('date_deadline','&lt;=', ((context_today() + relativedelta(days=30)).strftime('%Y-%m-%d')))]"/>
                     <filter name="filter_deadline_date" date="date_deadline"/>
                     <separator/>
                     <filter name="no_report" string="Action au statut Fait et sans URL vers le CR" domain="[('state', '=', 'done'), ('report_url', '=', False)]"/>
@@ -137,8 +139,18 @@
                     <filter name="not_tracked" string="Comptes à opportunités" domain="[('business_priority', '=', 'not_tracked')]"/>
                     <separator/>
                     <filter name="state_not_done_not_cancelled" string="Non terminées ni annulées" domain="[('state', '!=', 'done'), ('state', '!=', 'cancelled')]"/>
+                    <separator/>
+                    <filter name="state_todo" string="À faire" domain="[('state', '=', 'todo')]"/>
+                    <filter name="state_planned" string="Planifié" domain="[('state', '=', 'planned')]"/>
+                    <filter name="state_wait" string="À replanifier" domain="[('state', '=', 'wait')]"/>
+                    <filter name="state_done" string="Fait" domain="[('state', '=', 'done')]"/>
+                    <separator/>
+                    <filter name="late" string="En retard (à faire, échéance dépassée)" domain="[('state', '=', 'todo'), ('date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
                     <group expand="0" string="Group By">
                         <filter string="Statut" name="group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Affectée à" name="group_owner" context="{'group_by': 'owner_id'}"/>
+                        <filter string="Type" name="group_action_type" context="{'group_by': 'action_type'}"/>
+                        <filter string="Échéance (mois)" name="group_deadline_month" context="{'group_by': 'date_deadline:month'}"/>
                         <separator/>
                         <filter string="Contact" name="group_partner" context="{'group_by': 'partner_id'}"/>
                         <filter string="Entreprise" name="group_parent_partner" context="{'group_by': 'parent_partner_id'}"/>
