@@ -16,6 +16,7 @@
 		'agreement_purchase',
 		'agreement_sale',
 		'base_view_inheritance_extension',
+		'brevo_connector',
 		'dashboard_global',
 		'date_range',
 		'event_registration_light',
