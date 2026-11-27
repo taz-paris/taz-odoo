@@ -3,7 +3,8 @@ import datetime
 from markupsafe import Markup
 
 from odoo import api, fields, models, tools, _
-from odoo.exceptions import ValidationError
+
+from odoo.addons.base.models.ir_cron import _intervalTypes
 
 from .brevo import ClientRestBrevo
 
@@ -14,8 +15,6 @@ _logger = logging.getLogger(__name__)
 ##########                SET PARAMETERS                ##########
 ##################################################################
 
-BREVO_CATCHUP_MAX_DAYS = 90  # l'API Brevo refuse une période de plus de 90 jours
-BREVO_CRON_CATCHUP_DAYS = 3  # fenêtre relue chaque nuit par le cron : couvre la veille, avec une marge si un passage a été manqué
 FALLBACK_TRACE_DAYS = 30  # sans Message-ID, on rattache l'événement au dernier envoi des 30 jours précédents
 
 # Nom de l'événement dans le webhook Brevo => type interne
@@ -68,17 +67,42 @@ class brevoMailingTrace(models.Model):
             )
 
     @api.model
-    def _brevo_catchup(self, days):
-        """Relit via l'API Brevo les événements des `days` derniers jours (aujourd'hui inclus) et les traite.
+    def _cron_brevo_catchup(self):
+        """Cron journalier : relit via l'API Brevo les événements depuis le jour du dernier passage réussi du cron (inclus)
+        jusqu'à aujourd'hui, pour rattraper ceux que le webhook n'a pas reçus (TazForce arrêté, erreur de traitement...).
+        Au premier passage, seule la journée en cours est relue (pas de reprise d'historique).
+        """
+        if not self.env['ir.config_parameter'].sudo().get_param("brevo_api_key"):
+            _logger.info("Rattrapage Brevo automatique non lancé : le paramètre système brevo_api_key n'est pas valorisé")
+            return
+        cron = self.env['ir.cron'].sudo().browse(self.env.context.get('cron_id')) or self.env.ref('brevo_connector.brevo_catchup_scheduler')
+        end_date = fields.Date.context_today(self)
+        start_date = self._brevo_cron_last_success_date(cron) or end_date
+        # date du cron dans le futur (base restaurée, horloge corrigée...) : on relit au moins la journée en cours
+        self._brevo_catchup(min(start_date, end_date), end_date)
 
-        Les événements déjà traités (par le webhook ou un précédent rattrapage) sont ignorés.
+    @api.model
+    def _brevo_cron_last_success_date(self, cron):
+        """Jour du dernier passage réussi du cron, False s'il n'a jamais tourné.
+
+        Odoo met à jour la date de dernière exécution (lastcall) même quand un passage échoue. Après un ou plusieurs
+        échecs (failure_count > 0), le dernier passage réussi est donc celui qui précède le premier échec
+        (first_failure_date) d'un intervalle du cron. Ces deux champs sont remis à zéro par Odoo au premier succès.
+        """
+        if cron.failure_count and cron.first_failure_date:
+            last_success = cron.first_failure_date - _intervalTypes[cron.interval_type](cron.interval_number)
+        else:
+            last_success = cron.lastcall
+        return last_success and fields.Datetime.context_timestamp(self, last_success).date()
+
+    @api.model
+    def _brevo_catchup(self, start_date, end_date):
+        """Relit via l'API Brevo les événements du `start_date` au `end_date` inclus et les traite.
+
+        Les événements déjà traités (par le webhook ou un précédent passage) sont ignorés.
         Renvoie le nombre d'événements par résultat : {'processed': x, 'ignored': y, 'not_found': z}.
         """
-        if days < 1 or days > BREVO_CATCHUP_MAX_DAYS:
-            raise ValidationError(_("Le rattrapage Brevo porte sur 1 à %s jours.", BREVO_CATCHUP_MAX_DAYS))
         client = ClientRestBrevo(self.env)
-        end_date = fields.Date.context_today(self)
-        start_date = end_date - datetime.timedelta(days=days - 1)
         counters = {'processed': 0, 'ignored': 0, 'not_found': 0}
         for api_event, event_type in BREVO_API_EVENTS.items():
             for event in client.get_transactional_events(api_event, start_date, end_date):
@@ -92,16 +116,6 @@ class brevoMailingTrace(models.Model):
                 counters[result] += 1
         _logger.info("Rattrapage Brevo du %s au %s : %s", start_date, end_date, counters)
         return counters
-
-    @api.model
-    def _cron_brevo_catchup(self):
-        """Cron journalier : relit les événements Brevo des derniers jours (BREVO_CRON_CATCHUP_DAYS) pour rattraper ceux
-        que le webhook n'a pas reçus (TazForce arrêté, erreur de traitement...). Pour une panne plus longue, utiliser
-        l'assistant « Rattrapage Brevo »."""
-        if not self.env['ir.config_parameter'].sudo().get_param("brevo_api_key"):
-            _logger.info("Rattrapage Brevo automatique non lancé : le paramètre système brevo_api_key n'est pas valorisé")
-            return
-        self._brevo_catchup(BREVO_CRON_CATCHUP_DAYS)
 
     # ===================================================================
     # TRAITEMENT D'UN ÉVÉNEMENT
@@ -144,14 +158,13 @@ class brevoMailingTrace(models.Model):
     def _brevo_find_trace(self, email_normalized, message_id=False, event_date=False):
         """Retrouve l'envoi concerné : d'abord par Message-ID, sinon le dernier envoi à cette adresse dans les 30 jours
         précédant l'événement."""
-        Trace = self.sudo()
         if message_id:
             message_id = message_id.strip().strip('<>')
-            trace = Trace.search([('message_id', 'in', [message_id, '<%s>' % message_id])], order='id desc', limit=1)
+            trace = self.search([('message_id', 'in', [message_id, '<%s>' % message_id])], order='id desc', limit=1)
             if trace:
                 return trace
         reference_date = event_date or fields.Datetime.now()
-        return Trace.search([
+        return self.search([
             ('trace_type', '=', 'mail'),
             ('email', '=', email_normalized),
             ('trace_status', 'in', ('sent', 'open', 'reply', 'bounce')),
@@ -163,12 +176,12 @@ class brevoMailingTrace(models.Model):
         """Applique un bounce sur cet envoi en réutilisant le traitement standard d'Odoo des bounces reçus par email
         (mail.thread._routing_handle_bounce, complété par mass_mailing)."""
         self.ensure_one()
-        bounced_message = self.env['mail.message'].sudo()
+        bounced_message = self.env['mail.message']
         if self.message_id:
             bounced_message = bounced_message.search([('message_id', '=', self.message_id)], limit=1)
         message_dict = {
             'bounced_email': email_normalized,
-            'bounced_partner': self.env['res.partner'].sudo().search([('email_normalized', '=', email_normalized)]),
+            'bounced_partner': self.env['res.partner'].search([('email_normalized', '=', email_normalized)]),
             'bounced_msg_ids': [self.message_id] if self.message_id else [],
             'bounced_message': bounced_message,
             'body': reason or _("Bounce signalé par Brevo"),
@@ -177,15 +190,15 @@ class brevoMailingTrace(models.Model):
             'to': email_normalized,
             'message_id': self.message_id or '',
         }
-        self.env['mail.thread'].sudo()._routing_handle_bounce(False, message_dict)
+        self.env['mail.thread']._routing_handle_bounce(False, message_dict)
         if self.trace_status != 'bounce':
             # sans Message-ID, le traitement standard ne retrouve pas l'envoi
-            self.sudo().set_bounced(bounce_message=reason or _("Bounce signalé par Brevo"))
+            self.set_bounced(bounce_message=reason or _("Bounce signalé par Brevo"))
 
     @api.model
     def _brevo_blacklist(self, email_normalized, event_type, reason=False):
         """Met l'adresse en liste noire avec le motif Brevo. Renvoie False si elle y était déjà."""
-        blacklist = self.env['mail.blacklist'].sudo()
+        blacklist = self.env['mail.blacklist']
         if blacklist.search([('email', '=', email_normalized)], limit=1):
             return False
         messages = {

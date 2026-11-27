@@ -15,7 +15,7 @@ class BrevoWebhookController(http.Controller):
 
         Le jeton de l'URL doit être égal au paramètre système brevo_webhook_token : sinon l'appel est refusé (403).
         Une fois le jeton vérifié, on répond toujours 200, même en cas d'erreur de traitement : Brevo ne relance pas
-        un appel qui a reçu une erreur, et l'événement reste récupérable avec l'assistant « Rattrapage Brevo ».
+        un appel qui a reçu une erreur, et l'événement est récupéré par le cron de rattrapage Brevo.
         """
         expected_token = request.env['ir.config_parameter'].sudo().get_param('brevo_webhook_token')
         if not expected_token or not hmac.compare_digest(token, expected_token):
@@ -31,6 +31,6 @@ class BrevoWebhookController(http.Controller):
         try:
             request.env['mailing.trace'].sudo()._brevo_process_webhook_payload(payload)
         except Exception:
-            _logger.exception("Webhook Brevo : erreur lors du traitement de %s (à récupérer avec le Rattrapage Brevo)", payload)
+            _logger.exception("Webhook Brevo : erreur lors du traitement de %s (récupéré par le cron de rattrapage Brevo)", payload)
             request.env.cr.rollback()
         return request.make_response("OK", status=200)

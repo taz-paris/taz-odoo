@@ -1,6 +1,9 @@
 import json
 from unittest import mock
 
+import pytz
+from dateutil.relativedelta import relativedelta
+
 from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tests.common import HttpCase, TransactionCase, tagged
@@ -126,19 +129,43 @@ class TestBrevoEvents(BrevoConnectorCommon):
 @tagged("post_install", "-at_install")
 class TestBrevoCatchup(BrevoConnectorCommon):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.cron = cls.env.ref('brevo_connector.brevo_catchup_scheduler')
+        cls.today = fields.Date.context_today(cls.env['mailing.trace'])
+
     def _mock_response(self, events):
         response = mock.Mock(status_code=200)
         response.json.return_value = {'events': events}
         return response
 
+    def _run_cron(self):
+        """Lance le cron avec un appel API simulé (aucun événement) et renvoie la période demandée à Brevo."""
+        self.env['ir.config_parameter'].sudo().set_param('brevo_api_key', "cle-de-test")
+        with mock.patch('odoo.addons.brevo_connector.models.brevo.requests.get', return_value=self._mock_response([])) as mocked_get:
+            self.env['mailing.trace']._cron_brevo_catchup()
+        params = mocked_get.call_args.kwargs['params']
+        return params['startDate'], params['endDate']
+
+    def _days_ago(self, days):
+        return fields.Date.subtract(self.today, days=days).isoformat()
+
+    def _set_cron_dates(self, lastcall, failure_count=0, first_failure_date=False):
+        """Positionne les dates du cron à midi heure de l'utilisateur, `lastcall` et `first_failure_date` en jours."""
+        def at_noon(days):
+            local = fields.Datetime.context_timestamp(self.cron, fields.Datetime.now()).replace(hour=12, minute=0, second=0, microsecond=0)
+            return (local - relativedelta(days=days)).astimezone(pytz.UTC).replace(tzinfo=None)
+        self.cron.write({
+            'lastcall': at_noon(lastcall) if lastcall is not False else False,
+            'failure_count': failure_count,
+            'first_failure_date': at_noon(first_failure_date) if first_failure_date is not False else False,
+        })
+
     def test_catchup_requires_api_key(self):
         self.env['ir.config_parameter'].sudo().set_param('brevo_api_key', False)
         with self.assertRaises(ValidationError):
-            self.env['mailing.trace']._brevo_catchup(7)
-
-    def test_catchup_limits(self):
-        with self.assertRaises(ValidationError):
-            self.env['wizard_brevo_catchup'].create({'days': 91})
+            self.env['mailing.trace']._brevo_catchup(self.today, self.today)
 
     def test_catchup(self):
         """Le rattrapage interroge l'API pour chaque type d'événement et applique la même logique que le webhook."""
@@ -155,12 +182,22 @@ class TestBrevoCatchup(BrevoConnectorCommon):
             return self._mock_response([])
 
         with mock.patch('odoo.addons.brevo_connector.models.brevo.requests.get', side_effect=fake_get) as mocked_get:
-            counters = self.env['mailing.trace']._brevo_catchup(7)
+            counters = self.env['mailing.trace']._brevo_catchup(self.today, self.today)
         self.assertEqual(mocked_get.call_count, 6)
         # le hard bounce est traité ; le spam arrive sur une adresse déjà en liste noire
         self.assertEqual(counters, {'processed': 1, 'ignored': 1, 'not_found': 0})
         self.assertEqual(self.trace.trace_status, 'bounce')
         self.assertTrue(self._is_blacklisted())
+
+    def test_catchup_api_error(self):
+        self.env['ir.config_parameter'].sudo().set_param('brevo_api_key', "cle-de-test")
+        response = mock.Mock(status_code=401, text="Key not found")
+        with mock.patch('odoo.addons.brevo_connector.models.brevo.requests.get', return_value=response):
+            with self.assertRaises(ValidationError):
+                self.env['mailing.trace']._brevo_catchup(self.today, self.today)
+
+    def test_cron_is_installed(self):
+        self.assertEqual((self.cron.interval_number, self.cron.interval_type), (1, 'days'))
 
     def test_cron_without_api_key(self):
         """Sans clé API, le cron ne fait rien et ne plante pas (cron en échec chaque nuit sinon)."""
@@ -169,26 +206,37 @@ class TestBrevoCatchup(BrevoConnectorCommon):
             self.env['mailing.trace']._cron_brevo_catchup()
         mocked_get.assert_not_called()
 
-    def test_cron_reads_last_days(self):
-        """Le cron relit les 3 derniers jours, aujourd'hui inclus."""
+    def test_cron_reads_since_last_run(self):
+        """Le cron relit depuis le jour de son dernier passage (inclus) jusqu'à aujourd'hui : un arrêt de TazForce
+        de plusieurs jours est rattrapé."""
+        self._set_cron_dates(lastcall=5)
+        self.assertEqual(self._run_cron(), (self._days_ago(5), self._days_ago(0)))
+
+    def test_cron_after_failures(self):
+        """Odoo avance la date de dernière exécution même en cas d'échec : après des échecs, le cron repart du passage
+        réussi qui précède le premier échec."""
+        self._set_cron_dates(lastcall=1, failure_count=3, first_failure_date=3)
+        self.assertEqual(self._run_cron(), (self._days_ago(4), self._days_ago(0)))
+
+    def test_cron_after_failures_uses_cron_interval(self):
+        """Après des échecs, on recule de la fréquence du cron, pas d'un jour fixe : ici toutes les 6 heures, le passage
+        réussi précédant un premier échec à midi a eu lieu à 6h le même jour."""
+        self.cron.write({'interval_number': 6, 'interval_type': 'hours'})
+        self._set_cron_dates(lastcall=1, failure_count=2, first_failure_date=3)
+        self.assertEqual(self._run_cron(), (self._days_ago(3), self._days_ago(0)))
+
+    def test_cron_first_run(self):
+        """Premier passage : pas de reprise d'historique, seule la journée en cours est relue."""
+        self._set_cron_dates(lastcall=False)
+        self.assertEqual(self._run_cron(), (self._days_ago(0), self._days_ago(0)))
+
+    def test_cron_scheduled_run(self):
+        """Lancé par le planificateur, le cron retrouve son propre enregistrement via le contexte (cron_id)."""
+        self._set_cron_dates(lastcall=2)
         self.env['ir.config_parameter'].sudo().set_param('brevo_api_key', "cle-de-test")
         with mock.patch('odoo.addons.brevo_connector.models.brevo.requests.get', return_value=self._mock_response([])) as mocked_get:
-            self.env['mailing.trace']._cron_brevo_catchup()
-        today = fields.Date.context_today(self.env['mailing.trace'])
-        params = mocked_get.call_args.kwargs['params']
-        self.assertEqual(params['endDate'], today.isoformat())
-        self.assertEqual(params['startDate'], fields.Date.subtract(today, days=2).isoformat())
-
-    def test_cron_is_installed(self):
-        cron = self.env.ref('brevo_connector.brevo_catchup_scheduler')
-        self.assertEqual((cron.interval_number, cron.interval_type), (1, 'days'))
-
-    def test_catchup_api_error(self):
-        self.env['ir.config_parameter'].sudo().set_param('brevo_api_key', "cle-de-test")
-        response = mock.Mock(status_code=401, text="Key not found")
-        with mock.patch('odoo.addons.brevo_connector.models.brevo.requests.get', return_value=response):
-            with self.assertRaises(ValidationError):
-                self.env['mailing.trace']._brevo_catchup(7)
+            self.env['mailing.trace'].with_context(cron_id=self.cron.id)._cron_brevo_catchup()
+        self.assertEqual(mocked_get.call_args.kwargs['params']['startDate'], self._days_ago(2))
 
 
 @tagged("post_install", "-at_install")
